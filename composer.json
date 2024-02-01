@@ -1,0 +1,29 @@
+{
+    "name": "namu/wirechat",
+    "description": "A livewire messagging application",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Namu\\WireChat\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Namu Makwembo"
+        }
+    ],
+    "extra": {
+        "laravel": {
+          "providers": [
+            "Namu\\WireChat\\src\\WireChatServiceProvider"
+          ]
+        }
+      },
+    "require": {
+        "php": "^8.1",
+        "livewire/livewire": "^3.2.3"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+  
+}
