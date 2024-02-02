@@ -507,17 +507,9 @@
 
                 if (totalFiles > this.MAXFILES) {
 
-                  console.log('Exceeded');
-                  console.log(this.MAXFILES);
                   files = Array.from(files).slice(0, this.MAXFILES - count);
 
-                    alert('File limit exceeded , allowed '+ this.MAXFILES);
-                    //return null;
-                    {{--         
-                     window.$wireui.notify({
-                     title:'File limit exceeded , allowed '+ this.MAXFILES,
-                     icon: 'error'
-                    }); --}}
+                  return  $dispatch('notify',{type:'warning',message:'File limit exceeded , allowed '+ this.MAXFILES});
                 }
         
                
@@ -532,18 +524,10 @@
         
                 if (invalidFiles.length > 0) {
         
-                
                     const errorMessages = invalidFiles.map((file) => {
                         if (file.size > maxSize) {
-                            //WIREUI error
 
-                            alert(`File size exceeds the maximum limit (9MB): ${file.name}`);
-                           {{-- return window.$wireui.notify({
-                                title: 'Error: File size exceeds the max limit (9MB)', icon: 'error'
-                            }); --}}
-                         // //  return `File size exceeds the maximum limit (9MB): ${file.name}`;
-
-                         return ;
+                        return  $dispatch('notify',{type:'warning',message:`File size exceeds the maximum limit (9MB): ${file.name}`});
                         } else {
 
                             
@@ -554,8 +538,7 @@
                         //          icon: 'error'
                         //     });
 
-                        $dispatch('notify',{type:'warning',message:'File type is not allowed'});
-                       // alert('File type is not allowed')
+                        return  $dispatch('notify',{type:'warning',message:'File type is not allowed'});
                         }
                     });
         
