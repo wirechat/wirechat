@@ -1,26 +1,4 @@
-<div 
-
-x-init="
-
-
-
-Echo.private('users.{{auth()->user()->id}}')
-.notification((notification) => {
-
-    if(
-        notification['type']=='App\\Notifications\\MessageSentNotification'
-   
-    )
-    {
-
-        $wire.$refresh();
-    }
- 
-});
-
-"
-
-class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3">
+<div class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3">
 
 
     <header class="px-3 z-10 bg-white sticky top-0 w-full py-2 ">
@@ -88,7 +66,9 @@ class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3">
             <li class="py-3 {{request()?->chat==$conversation?->id?'bg-gray-100':''}} hover:bg-gray-50 rounded-2xl transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2">
                 
                 <a href="#" class="shrink-0">
-                    <x-wirechat::avatar wire:ignore  src="https://ui-avatars.com/api/?name={{$receiver->name}}"  class="w-12 h-12" />
+                    <x-wirechat::avatar wire:ignore 
+                     {{-- src="https://ui-avatars.com/api/?name={{$receiver->name}}"  --}}
+                      class="w-12 h-12" />
                 </a>
                 <aside class="grid grid-cols-12 w-full">
 

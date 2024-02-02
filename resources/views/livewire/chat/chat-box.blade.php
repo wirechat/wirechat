@@ -117,31 +117,24 @@
             @foreach ($loadedMessages as $key=> $message)
 
  
-        
-
             @php
             $belongsToAuth= $message->sender_id==auth()->id();
             $attachment= $message->attachment??null;
-            $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body);
+            $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
+
+            // keep track of previous message
+            // The ($key -1 ) will get the previous message from loaded
+            // messages since $key is directly linked to $message
+
+            if ($key > 0){
+            $previousMessage = $loadedMessages->get($key - 1) ;
+            }
+
+            // Get the next message
+            $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
             @endphp
 
             <div @class([ 'max-w-[85%] md:max-w-[78%]     ' , 'ml-auto'=>$belongsToAuth])>
-
-                @php
-
-                // keep track of previous message
-                // The ($key -1 ) will get the previous message from loaded
-                // messages since $key is directly linked to $message
-
-                if ($key > 0){
-                $previousMessage = $loadedMessages->get($key - 1) ;
-                }
-
-                // Get the next message
-                $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
-                @endphp
-
-
                     {{-- Body section --}}
                     <div class="flex gap-1 md:gap-4 group transition-transform">
 
@@ -304,19 +297,12 @@
             @endforeach
 
         </main>
+       
+            <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
+            <div class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-2 items-center  w-full max-w-[95%] mx-auto">
 
-
-        {{--------------------}}
-        {{--Send Message -----}}
-        {{--------------------}}
-
-        <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
-
-            <div
-                class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-2 items-center  w-full max-w-[95%] mx-auto">
-
+                {{-- Image preview section --}}
                 @if (count($photos)>0)
-
                 <section
                     class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
                     style=" scrollbar-width: none; -ms-overflow-style: none;">
@@ -342,8 +328,8 @@
 
                     @endforeach
 
-                    {{-- TODO @if "( count($photos)< $MAXFILES )" to hide upload button when maz files exceeded --}}
-                        <div>
+                      {{-- TODO @if "( count($photos)< $MAXFILES )" to hide upload button when maz files exceeded --}}
+                    <div>
                         {{-- Trigger image upload --}}
                         <label class="relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
                             <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
@@ -359,68 +345,90 @@
 
                             </span>
                         </label>
-            </div>
+                    </div>
 
-            </section>
+                </section>
+               @endif
 
-            @endif
+               <div class="p-px py-1 w-full col-span-12">
+
+                    <div class="flex justify-between items-center">
+                        <h6 class="text-sm">Replying to: <span class="font-bold">{{$receiver->name}}</span> </h6>
+                        <button>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                              </svg> 
+                        </button>
+                    </div>
+
+                    {{-- Message being replies to  --}}
+                    <p class="truncate text-sm text-gray-500 max-w-md">
+                        Eligendi dolores fugit esse deleniti obcaecati ullamco aliquip quia eius quia deleniti sed
+                        Eligendi dolores fugit esse deleniti obcaecati ullamco aliquip quia eius quia deleniti sed
+
+                    </p>
 
 
-            {{-- Emoji icon --}}
-            <span class="col-span-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-7 h-7">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
-                </svg>
-            </span>
+               </div>
 
-            <form wire:submit='sendMessage' method="POST" autocapitalize="off" @class(['col-span-11 md:col-span-9 ','md:col-span-11'=>count($this->photos)>0])>
-                @csrf
-                <input type="hidden" autocomplete="false" style="display: none">
-                <div class="grid grid-cols-12">
-                    <input autocomplete="off" wire:model='body' id="sendMessage" autofocus type="text" name="message"
-                        placeholder="Message" maxlength="1700"
-                        class="col-span-10  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
+                {{-- Emoji icon --}}
+                <span class="col-span-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-7 h-7">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                    </svg>
+                </span>
 
-                    <button type="submit" class="col-span-2 text-blue-500 font-bold text-right">Send</button>
+                <form wire:submit='sendMessage' method="POST" autocapitalize="off" @class(['col-span-11 md:col-span-9 ','md:col-span-11'=>count($this->photos)>0])>
+                    @csrf
+                    <input type="hidden" autocomplete="false" style="display: none">
+                    <div class="grid grid-cols-12">
+                        <input autocomplete="off" wire:model='body' id="sendMessage" autofocus type="text" name="message"
+                            placeholder="Message" maxlength="1700"
+                            class="col-span-10  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
 
-                </div>
-            </form>
+                        <button type="submit" class="col-span-2 text-blue-500 font-bold text-right">Send</button>
 
-            {{-- Actions --}}
-            <div  @class(['col-span-2 ml-auto  hidden md:flex items-center gap-3 ','hidden md:hidden'=>count($this->photos)>0])>
+                    </div>
+                </form>
 
-                <label class="cursor-pointer">
+                {{-- Actions --}}
+                <div  @class(['col-span-2 ml-auto  hidden md:flex items-center gap-3 ','hidden md:hidden'=>count($this->photos)>0])>
+
                     {{-- upload Image --}}
-                    {{-- Trigger image upload --}}
-                    <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
-                        wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only" style="display: none">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
-                        stroke="currentColor" class="w-7 h-7">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                    </svg>
+                    <label class="cursor-pointer">
+                    
+                        {{-- Trigger image upload --}}
+                        <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
+                            wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only" style="display: none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
 
-                </label>
+                    </label>
 
 
-                {{-- Heart --}}
-                <button wire:click='sendLike()'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
-                        stroke="currentColor" class="w-7 h-7">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
+                    {{--send Like --}}
+                    <button wire:click='sendLike()'>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
 
-                </button>
+                    </button>
+                </div>
             </div>
-    </div>
-    @error('body') <p> {{$message}} </p> @enderror
+          @error('body') <p> {{$message}} </p> @enderror
 
     </footer>
 
 </div>
+
+
 
 @script
 <script>
@@ -429,6 +437,7 @@
                 isUploading: false,
                 MAXFILES: 5,
                 MAXFILESIZE: 11 * 1024 * 1024,
+                allowedFileTypes: ['image/png', 'image/jpeg', 'image/jpg'],
                 progress: 0,
                 wireModel: 'photos',
     
@@ -489,20 +498,18 @@
             validateFiles(files,count) {
         
                 const maxSize = 9 * 1024 * 1024; // 7MB in bytes
-                const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-                //const maxFiles=3;
+               // const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
                 var totalFiles=count + files.length;
         
         
-                {{-- make sure max file not exceeded  --}}
-        
+                 //make sure max file not exceeded  
                 // Make sure max file count is not exceeded
 
                 if (totalFiles > this.MAXFILES) {
 
                   console.log('Exceeded');
                   console.log(this.MAXFILES);
-                    files = Array.from(files).slice(0, this.MAXFILES - count);
+                  files = Array.from(files).slice(0, this.MAXFILES - count);
 
                     alert('File limit exceeded , allowed '+ this.MAXFILES);
                     //return null;
@@ -515,12 +522,12 @@
         
                
                 const invalidFiles = Array.from(files).filter((file) => {
-                    return file.size > maxSize || !allowedTypes.includes(file.type);
+                    return file.size > maxSize || !this.allowedFileTypes.includes(file.type);
                 });
                 
                 //filter valid file 
                 const validFiles = Array.from(files).filter((file) => {
-                    return file.size <= maxSize && allowedTypes.includes(file.type);
+                    return file.size <= maxSize && this.allowedFileTypes.includes(file.type);
                 });
         
                 if (invalidFiles.length > 0) {
@@ -541,11 +548,14 @@
 
                             
                              //WIREUI error
-                          return  window.$wireui.notify({
-                                title: 'File type is not allowed:',
-                                description:'Only PNG, JPEG, and JPG files are accepted.',
-                                 icon: 'error'
-                            });
+                        //   return  window.$wireui.notify({
+                        //         title: 'File type is not allowed:',
+                        //         description:'Only PNG, JPEG, and JPG files are accepted.',
+                        //          icon: 'error'
+                        //     });
+
+                        $dispatch('notify',{type:'warning',message:'File type is not allowed'});
+                       // alert('File type is not allowed')
                         }
                     });
         
