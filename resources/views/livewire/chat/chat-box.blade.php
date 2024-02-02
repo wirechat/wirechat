@@ -23,11 +23,11 @@
  " @scroll-bottom.window="
 
   {{-- onDOMContentLoaded = (event) => {  $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight)} --}}
- setTimeout(() => {
-     $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);
- }, 100);  
-" class=" w-full overflow-hidden  h-full ">
-{{-- todo: add rounded corners to attachment --}}
+    setTimeout(() => {
+        $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);
+    }, 100);  
+    " class=" w-full overflow-hidden  h-full ">
+    {{-- todo: add rounded corners to attachment --}}
     <div class="  border-r   flex flex-col overflow-y-hidden grow  h-full">
         {{--------------}}
         {{-----Header---}}
@@ -145,38 +145,32 @@
 
                             ])>
 
-                                <div x-data="{ open: false }">
-                                    {{-- reply --}}
-                            <button x-ref="button" @click="open = ! open" class="hover:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" class="w-4 h-4 text-gray-600/80 ">
+                      
+                            <button wire:click="setReply('{{$message->id}}')" class="hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
+                                    class="w-4 h-4 text-gray-600/80 ">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                                  </svg>
-                                  
+                                </svg>
                             </button>
-
-                                    <div x-show="open" x-anchor="$refs.button">
-                                        Dropdown content
-                                    </div>
-                                </div>
-
+                              
                         
                             <x-wirechat::dropdown align="{{$belongsToAuth?'right':'left'}}" width="48">
                                 <x-slot name="trigger">
                                        {{-- Dots --}}
-                            <button class="hover:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots h-3 w-3 text-gray-700" viewBox="0 0 16 16">
-                                    <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
-                                  </svg>
-                            </button>
-                                </x-slot>
-                                <x-slot name="content">
-                                    <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
-        
-                                        <x-wirechat::dropdown-link>
-                                            Unsend
-                                        </x-wirechat::dropdown-link>
-                                    </button>
-                                </x-slot>
+                                <button class="hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots h-3 w-3 text-gray-700" viewBox="0 0 16 16">
+                                        <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+                                    </svg>
+                                </button>
+                                    </x-slot>
+                                    <x-slot name="content">
+                                        <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
+            
+                                            <x-wirechat::dropdown-link>
+                                                Unsend
+                                            </x-wirechat::dropdown-link>
+                                        </button>
+                                    </x-slot>
                             </x-wirechat::dropdown>
         
                          
@@ -350,26 +344,28 @@
                 </section>
                @endif
 
-               <div class="p-px py-1 w-full col-span-12">
+               {{-- Replying to  --}}
+               @if ($replyMessage !=null)   
+                <section class="p-px py-1 w-full col-span-12">
 
-                    <div class="flex justify-between items-center">
-                        <h6 class="text-sm">Replying to: <span class="font-bold">{{$receiver->name}}</span> </h6>
-                        <button>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                              </svg> 
-                        </button>
-                    </div>
+                        <div class="flex justify-between items-center">
+                            <h6 class="text-sm">Replying to  
+                            <span class="font-bold">
+                                {{$replyMessage->sender_id== $receiver->id? $receiver->name:" Yourself"}}
+                            </span> </h6>
+                            <button  wire:click="removeReply()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg> 
+                            </button>
+                        </div>
 
-                    {{-- Message being replies to  --}}
-                    <p class="truncate text-sm text-gray-500 max-w-md">
-                        Eligendi dolores fugit esse deleniti obcaecati ullamco aliquip quia eius quia deleniti sed
-                        Eligendi dolores fugit esse deleniti obcaecati ullamco aliquip quia eius quia deleniti sed
-
-                    </p>
-
-
-               </div>
+                        {{-- Message being replies to  --}}
+                        <p class="truncate text-sm text-gray-500 max-w-md">
+                          {{$replyMessage->body!=''?$replyMessage->body:($replyMessage->hasAttachment()?'Attachment':'')}}
+                        </p>
+                </section>
+               @endif
 
                 {{-- Emoji icon --}}
                 <span class="col-span-1">

@@ -33,6 +33,35 @@ class ChatBox extends Component
 
 
 
+
+ 
+    public $replyMessage=null;
+
+    /** 
+     * Todo: Authorize the property
+     * Todo: or lock it 
+     * todo:Check if user can reply to this message 
+     *  */
+    function setReply(Message $message)  {
+
+         #check if user belongs to message
+         abort_unless($message->sender_id == auth()->id() || $message->receiver_id == auth()->id(),403);
+
+
+        //Set owner as Id we are replying to 
+        $this->replyMessage= $message;
+
+    }
+
+    function removeReply( )  {
+
+    
+        $this->replyMessage= null;
+
+    }
+
+
+
     /**
      * livewire method
      ** This is avoid replacing temporary files on next selection
