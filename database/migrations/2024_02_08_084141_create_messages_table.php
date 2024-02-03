@@ -8,6 +8,9 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Todo:Create reply functionality 
+     * Todo:create Tooltip to actions in chat body
+     * Todo:create trait for User
      */
     public function up(): void
     {
@@ -22,6 +25,10 @@ return new class extends Migration
 
             $table->unsignedBigInteger('receiver_id')->nullable();// or uuid()
             $table->foreign('receiver_id')->references('id')->on('users')->nullOnDelete();
+
+            //Add reply
+            $table->unsignedBigInteger('reply_id')->nullable();// or uuid()
+            $table->foreign('reply_id')->references('id')->on(config('wirechat.messages_table'))->nullOnDelete();
 
             //Attachment foreign key 
 

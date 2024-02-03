@@ -20,7 +20,8 @@ class Message extends Model
         'read_at',
         'receiver_deleted_at',
         'sender_deleted_at',
-        'attachment_id'
+        'attachment_id',
+        'reply_id'
     ];
 
 
@@ -65,8 +66,37 @@ class Message extends Model
          return $this->read_at != null;
     }
 
+  
+
     function belongsToAuth() : bool {
         
         return $this->sender_id==auth()->id();
     }
+
+
+
+    // Relationship for the parent message
+    public function parent()
+    {
+        return $this->belongsTo(Message::class, 'reply_id');
+    }
+
+    // Relationship for the reply
+    public function reply()
+    {
+        return $this->hasOne(Message::class, 'reply_id');
+    }
+
+    // Method to check if the message has a reply
+    public function hasReply(): bool
+    {
+        return $this->reply()->exists();
+    }
+
+      // Method to check if the message has a parent
+      public function hasParent(): bool
+      {
+          return $this->parent()->exists();
+      }
+
 }

@@ -41,21 +41,19 @@ class ChatBox extends Component
      * Todo: Authorize the property
      * Todo: or lock it 
      * todo:Check if user can reply to this message 
+     * Set replyMessage as Message Model
      *  */
-    function setReply(Message $message)  {
-
+     public function setReply(Message $message)  {
          #check if user belongs to message
          abort_unless($message->sender_id == auth()->id() || $message->receiver_id == auth()->id(),403);
-
 
         //Set owner as Id we are replying to 
         $this->replyMessage= $message;
 
     }
 
-    function removeReply( )  {
+    public function removeReply( )  {
 
-    
         $this->replyMessage= null;
 
     }
@@ -142,6 +140,7 @@ class ChatBox extends Component
 
                 #create message
                 $message = Message::create([
+                    'reply_id'=>$this->replyMessage?->id,
                     'conversation_id' => $this->conversation->id,
                     'attachment_id' => $attachment->id,
                     'sender_id' => auth()->id(),
@@ -179,6 +178,7 @@ class ChatBox extends Component
         if ($this->body != null) {
 
             $createdMessage = Message::create([
+                'reply_id'=>$this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
                 'sender_id' => auth()->id(),
                 'receiver_id' => $this->receiver->id,

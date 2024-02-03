@@ -106,7 +106,7 @@
 
 
         " id="conversation"
-            class="flex flex-col  gap-2   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto " style="contain: content">
+            class="flex flex-col  gap-2 gap-y-4   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto " style="contain: content">
 
             {{-- Define previous message outside the loop --}}
             @php
@@ -134,9 +134,32 @@
             $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
             @endphp
 
-            <div @class([ 'max-w-[85%] md:max-w-[78%]     ' , 'ml-auto'=>$belongsToAuth])>
+            <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
+
+                        {{-- Show parent message --}}
+                        @if ($belongsToAuth && $message->hasParent())
+                        <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
+
+                            <h6 class="text-xs text-gray-500 px-2 ">You replied to 
+                                {{$message->parent->sender_id== $receiver->id? $receiver->name:" Yourself"}}
+                            </h6>
+    
+                            <div class="border-r-4 px-1 ml-auto">
+                                <p class=" bg-gray-100 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
+                                    {{$message->parent?->body}}
+                                </p>
+                            </div>
+                          
+    
+                        </div>
+                        @endif
+
+                   
+            
                     {{-- Body section --}}
-                    <div class="flex gap-1 md:gap-4 group transition-transform">
+                    <div 
+                     @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
+
 
                         {{-- Actions --}}
                         <div @class([
@@ -145,7 +168,6 @@
 
                             ])>
 
-                      
                             <button wire:click="setReply('{{$message->id}}')" class="hover:scale-110 transition-transform">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
                                     class="w-4 h-4 text-gray-600/80 ">
@@ -185,7 +207,8 @@
                         </div>
 
                         {{-- Message body --}}
-                        <div class=" flex flex-col gap-2" >
+                        <div class=" flex flex-col  gap-2" >
+                     
 
                             {{-- Attachment section --}}
                             @if ($attachment)
@@ -232,11 +255,10 @@
                              </p>
                                 
                             @endif
-                      
 
                             @if ($message->body && !$isEmoji)
                             {{-- message body --}}
-                            <div @class(['flex flex-wrap text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
+                            <div @class(['flex flex-wrap  max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
                                 flex-col text-black bg-[#f6f6f8fb]', ' bg-blue-500/80 text-white'=> $belongsToAuth,
 
                                 //first message on RIGHT
