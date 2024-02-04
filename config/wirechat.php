@@ -26,10 +26,18 @@ return [
      * FEATURES
      **/
 
-     'allow_attachments'=>true,
+    
 
      //This string is a comma-separated list of unique file type specifiers  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
      'allowed_attachments'=>['image/png','image/jpeg', 'image/jpg'],
 
-     'allow_user_search'=>true
+     'allow_user_search'=>true,
+
+     'attachments' => [
+        'allow_attachments'=>true,
+        'folder' => 'attachments',
+        'allowed_images' => (array) ['png','jpg','jpeg','gif'],
+        'allowed_files' => (array) ['zip','rar','txt'],
+        'max_upload_size' => 150, // MB
+    ],
 ];

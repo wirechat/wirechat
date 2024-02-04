@@ -135,6 +135,7 @@ class ChatBox extends Component
                     'file_path' => $path,
                     'file_name' => basename($path),
                     'mime_type' => $photo->getMimeType(),
+                    'url'=>url($path)
                 ]);
 
 
@@ -207,7 +208,8 @@ class ChatBox extends Component
     }
 
 
-    function sendLike()
+    /** Send Like as  message */
+    public function sendLike()
     {
 
 

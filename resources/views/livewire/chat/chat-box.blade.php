@@ -20,7 +20,7 @@
         }
      
     }); --}}
- " @scroll-bottom.window="
+  " @scroll-bottom.window="
 
   {{-- onDOMContentLoaded = (event) => {  $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight)} --}}
     setTimeout(() => {
@@ -92,10 +92,10 @@
          if(scrollTop<=0){
             @this.dispatch('loadMore');
          }
-        
-        " @update-height.window="
+         
+         " @update-height.window="
   
-        await $nextTick();
+          await $nextTick();
                 newHeight=$el.scrollHeight;
 
                 oldHeight= height;
@@ -146,7 +146,8 @@
     
                             <div class="border-r-4 px-1 ml-auto">
                                 <p class=" bg-gray-100 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
-                                    {{$message->parent?->body}}
+                                    {{$message->parent->body!=''?$message->parent->body:($message->parent->hasAttachment()?'Attachment':'')}}
+
                                 </p>
                             </div>
                           
@@ -175,7 +176,6 @@
                                 </svg>
                             </button>
                               
-                        
                             <x-wirechat::dropdown align="{{$belongsToAuth?'right':'left'}}" width="48">
                                 <x-slot name="trigger">
                                        {{-- Dots --}}
@@ -193,9 +193,7 @@
                                             </x-wirechat::dropdown-link>
                                         </button>
                                     </x-slot>
-                            </x-wirechat::dropdown>
-        
-                         
+                            </x-wirechat::dropdown> 
 
                         </div>
 
@@ -209,7 +207,6 @@
                         {{-- Message body --}}
                         <div class=" flex flex-col  gap-2" >
                      
-
                             {{-- Attachment section --}}
                             @if ($attachment)
                                 <img @class([
@@ -314,7 +311,7 @@
 
         </main>
        
-            <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
+        <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
             <div class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-2 items-center  w-full max-w-[95%] mx-auto">
 
                 {{-- Image preview section --}}
@@ -442,7 +439,7 @@
             </div>
           @error('body') <p> {{$message}} </p> @enderror
 
-    </footer>
+        </footer>
 
 </div>
 
@@ -455,7 +452,7 @@
                 isUploading: false,
                 MAXFILES: 5,
                 MAXFILESIZE: 11 * 1024 * 1024,
-                allowedFileTypes: ['image/png', 'image/jpeg', 'image/jpg'],
+                allowedFileTypes: ['png', 'peg', 'jpg'],
                 progress: 0,
                 wireModel: 'photos',
     
@@ -531,13 +528,29 @@
                 }
         
                
+                // const invalidFiles = Array.from(files).filter((file) => {
+                //     console.log(''file.type);
+                //     return file.size > maxSize || !this.allowedFileTypes.includes(file.type);
+                // });
+
                 const invalidFiles = Array.from(files).filter((file) => {
-                    return file.size > maxSize || !this.allowedFileTypes.includes(file.type);
-                });
+
+                    const fileType = file.type.split('/')[1].toLowerCase(); // Get the file extension from the MIME type
+                    const isInvalid = file.size > maxSize || ! (this.allowedFileTypes.includes(fileType));
+
+                     console.log('File Name:', file.name);
+                     console.log('File Type:', fileType);
+                     console.log('Is Invalid:', isInvalid);
+                     console.log('includes', this.allowedFileTypes.includes(fileType));
+
+
+                    return isInvalid;
+                        });
                 
                 //filter valid file 
                 const validFiles = Array.from(files).filter((file) => {
-                    return file.size <= maxSize && this.allowedFileTypes.includes(file.type);
+                    const fileType = file.type.split('/')[1].toLowerCase();
+                    return file.size <= maxSize && this.allowedFileTypes.includes(fileType);
                 });
         
                 if (invalidFiles.length > 0) {
