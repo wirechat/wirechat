@@ -432,13 +432,13 @@
                             placeholder="Message" maxlength="1700"
                             class="w-auto grow  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
 
-                        <button :class="{'hidden':!body?.trim()?.length}" type="submit" id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
+                        <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->photos)>0))}" type="submit" id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
                     </div>
 
 
                     {{-- Actions --}}
-                    <div :class="{'hidden md:hidden':body?.trim()?.length}"  @class(['w-[15%] justify-end  w-full  flex items-center gap-2 ','hidden md:hidden'=>count($this->photos)>0])>
+                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->photos)>0) }"  @class(['w-[15%] justify-end  w-full  flex items-center gap-2 hidden md:hidden'])>
 
                         {{-- upload Image --}}
                         <label class="cursor-pointer">
@@ -471,6 +471,8 @@
           @error('body') <p> {{$message}} </p> @enderror
 
         </footer>
+
+        
 
 </div>
 
