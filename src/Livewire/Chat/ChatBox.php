@@ -114,6 +114,7 @@ class ChatBox extends Component
 
         //dd( $this->body);
 
+
         if ($this->photos == null) {
 
             $this->validate(['body' => 'required|string']);

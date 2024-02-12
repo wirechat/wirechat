@@ -468,11 +468,10 @@
                 </form>
 
             </div>
-          @error('body') <p> {{$message}} </p> @enderror
 
         </footer>
 
-        
+
 
 </div>
 
