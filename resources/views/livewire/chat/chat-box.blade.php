@@ -416,12 +416,17 @@
                     </svg>
                 </span> --}}
 
-                <form x-data="{'body':@entangle('body')}" @submit.prevent='$wire.sendMessage' method="POST" autocapitalize="off" @class([' flex w-full col-span-12 gap-2'])>
+                <form  
+                    x-data="{'body':@entangle('body')}" 
+
+                    @submit.prevent="((body && body.trim().length > 0) || ($wire.photos && $wire.photos.length > 0)) ? $wire.sendMessage() : null"
+                    method="POST" autocapitalize="off" @class([' flex w-full col-span-12 gap-2'])>
                     @csrf
                     <input type="hidden" autocomplete="false" style="display: none">
 
-                    <div  :class="{'w-full':body?.trim()?.length}" @class(['flex grow gap-2 col-span-10  sm:px-2  w-full','col-span-12'=>count($this->photos)>0])>
+                    <div  @class(['flex  gap-2  sm:px-2  w-full'])>
                         <input
+
                             @focus-input-field.window="$el.focus()"
                             autocomplete="off" 
                             x-model='body' 
@@ -430,7 +435,7 @@
                             type="text" 
                             name="message"
                             placeholder="Message" maxlength="1700"
-                            class="w-auto grow  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
+                            class="w-full flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
 
                         <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->photos)>0))}" type="submit" id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
@@ -438,7 +443,7 @@
 
 
                     {{-- Actions --}}
-                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->photos)>0) }"  @class(['w-[15%] justify-end  w-full  flex items-center gap-2 hidden md:hidden'])>
+                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->photos)>0) }"  @class(['w-[15%] justify-end flex items-center gap-2 hidden md:hidden'])>
 
                         {{-- upload Image --}}
                         <label class="cursor-pointer">
@@ -484,7 +489,7 @@
                 isUploading: false,
                 MAXFILES: 5,
                 MAXFILESIZE: 11 * 1024 * 1024,
-                allowedFileTypes: ['png', 'peg', 'jpg'],
+                allowedFileTypes: ['png', 'jpeg', 'jpg'],
                 progress: 0,
                 wireModel: 'photos',
     

@@ -112,14 +112,10 @@ class ChatBox extends Component
     function sendMessage()
     {
 
-        //dd( $this->body);
-
-
+        /* If photos is empty then conitnue to validate body , since photos can be submited without body */
         if ($this->photos == null) {
-
             $this->validate(['body' => 'required|string']);
         }
-
 
         if ($this->photos != null) {
 
