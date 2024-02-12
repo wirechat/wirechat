@@ -312,7 +312,7 @@
         </main>
        
         <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
-            <div class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-2 items-center  w-full max-w-[95%] mx-auto">
+            <div class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[95%] mx-auto">
 
                 {{-- Image preview section --}}
                 @if (count($photos)>0)
@@ -387,55 +387,65 @@
                @endif
 
                 {{-- Emoji icon --}}
-                <span class="col-span-1">
+                {{-- <span class="col-span-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-7 h-7">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
                     </svg>
-                </span>
+                </span> --}}
 
-                <form wire:submit='sendMessage' method="POST" autocapitalize="off" @class(['col-span-11 md:col-span-9 ','md:col-span-11'=>count($this->photos)>0])>
+                <form x-data="{'body':@entangle('body')}" @submit.prevent='$wire.sendMessage' method="POST" autocapitalize="off" @class(['grid grid-cols-12 w-full col-span-12 gap-2'])>
                     @csrf
                     <input type="hidden" autocomplete="false" style="display: none">
-                    <div class="grid grid-cols-12">
-                        <input autocomplete="off" wire:model='body' id="sendMessage" autofocus type="text" name="message"
+
+                    <div  :class="{'col-span-12':body?.trim()?.length}" @class(['grid grid-cols-12 col-span-11 sm:px-2  w-full','col-span-12'=>count($this->photos)>0])>
+                        <input
+                            @focus-input-field.window="$el.focus()"
+                            autocomplete="off" 
+                            x-model='body' 
+                            id="inputField"  
+                            autofocus 
+                            type="text" 
+                            name="message"
                             placeholder="Message" maxlength="1700"
                             class="col-span-10  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
 
-                        <button type="submit" class="col-span-2 text-blue-500 font-bold text-right">Send</button>
+                        <button  type="submit" id="sendMessageButton" class="col-span-2 text-blue-500 font-bold text-right">Send</button>
 
+                    </div>
+
+
+                    {{-- Actions --}}
+                    <div :class="{'hidden md:hidden':body?.trim()?.length}"  @class(['col-span-1  w-full  hidden md:flex items-center gap-2 ','hidden md:hidden'=>count($this->photos)>0])>
+
+                        {{-- upload Image --}}
+                        <label class="cursor-pointer">
+                        
+                            {{-- Trigger image upload --}}
+                            <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
+                                wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only" style="display: none">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
+                                stroke="currentColor" class="w-7 h-7">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+
+                        </label>
+
+
+                        {{--send Like --}}
+                        <button wire:click='sendLike()'>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                                stroke="currentColor" class="w-7 h-7">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+
+                        </button>
                     </div>
                 </form>
 
-                {{-- Actions --}}
-                <div  @class(['col-span-2 ml-auto  hidden md:flex items-center gap-3 ','hidden md:hidden'=>count($this->photos)>0])>
-
-                    {{-- upload Image --}}
-                    <label class="cursor-pointer">
-                    
-                        {{-- Trigger image upload --}}
-                        <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
-                            wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only" style="display: none">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
-                            stroke="currentColor" class="w-7 h-7">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                        </svg>
-
-                    </label>
-
-
-                    {{--send Like --}}
-                    <button wire:click='sendLike()'>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
-                            stroke="currentColor" class="w-7 h-7">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
-
-                    </button>
-                </div>
             </div>
           @error('body') <p> {{$message}} </p> @enderror
 

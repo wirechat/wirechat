@@ -50,9 +50,12 @@ class ChatBox extends Component
         //Set owner as Id we are replying to 
         $this->replyMessage= $message;
 
+        #dispatch event to focus input field 
+        $this->dispatch('focus-input-field');
+
     }
 
-    public function removeReply( )  {
+    public function removeReply()  {
 
         $this->replyMessage= null;
 
@@ -205,6 +208,9 @@ class ChatBox extends Component
 
         #scroll to bottom
         $this->dispatch('scroll-bottom');
+
+        #remove reply just incase it is present 
+        $this->removeReply();
     }
 
 
