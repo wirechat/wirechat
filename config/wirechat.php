@@ -22,6 +22,10 @@ return [
     'user_model' => \App\Models\User::class,
 
 
+    /* Home route */
+     'home_route'=>"/",
+
+
     /**
      * FEATURES
      **/
@@ -40,4 +44,5 @@ return [
         'allowed_files' => (array) ['zip','rar','txt'],
         'max_upload_size' => 150, // MB
     ],
+
 ];

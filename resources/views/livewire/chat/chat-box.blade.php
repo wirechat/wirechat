@@ -26,7 +26,8 @@
     setTimeout(() => {
         $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);
     }, 100);  
-    " class=" w-full overflow-hidden  h-full ">
+    " class=" w-full overflow-hidden  h-full "
+    >
     {{-- todo: add rounded corners to attachment --}}
     <div class="  border-r   flex flex-col overflow-y-hidden grow  h-full">
         {{--------------}}
