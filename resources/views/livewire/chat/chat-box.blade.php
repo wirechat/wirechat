@@ -24,11 +24,28 @@
      
     }); --}}
   " @scroll-bottom.window="
-
-  {{-- onDOMContentLoaded = (event) => {  $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight)} --}}
+    
     setTimeout(() => {
-        $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);
-    });  
+
+        $nextTick(()=> { 
+
+                {{--  overflow-y: hidden; is used to hide the vertical scrollbar initially. --}}
+                conversationElement.style.overflowY='hidden';
+
+            {{-- scroll the element down --}}
+            conversationElement.scrollTop = conversationElement.scrollHeight;
+
+               {{-- After updating the chat height, overflowY is set back to 'auto', 
+                 which allows the browser to determine whether to display the scrollbar 
+                 based on the content height.  --}}
+                 conversationElement.style.overflowY='auto';
+        });
+
+         
+       
+    }); 
+
+  
     " class=" w-full overflow-hidden  h-full "
     >
     {{-- todo: add rounded corners to attachment --}}
@@ -399,11 +416,11 @@
                     </svg>
                 </span> --}}
 
-                <form x-data="{'body':@entangle('body')}" @submit.prevent='$wire.sendMessage' method="POST" autocapitalize="off" @class(['grid grid-cols-12 w-full col-span-12 gap-2'])>
+                <form x-data="{'body':@entangle('body')}" @submit.prevent='$wire.sendMessage' method="POST" autocapitalize="off" @class([' flex w-full col-span-12 gap-2'])>
                     @csrf
                     <input type="hidden" autocomplete="false" style="display: none">
 
-                    <div  :class="{'col-span-12':body?.trim()?.length}" @class(['grid grid-cols-12 col-span-11 sm:px-2  w-full','col-span-12'=>count($this->photos)>0])>
+                    <div  :class="{'w-full':body?.trim()?.length}" @class(['flex grow gap-2 col-span-10  sm:px-2  w-full','col-span-12'=>count($this->photos)>0])>
                         <input
                             @focus-input-field.window="$el.focus()"
                             autocomplete="off" 
@@ -413,15 +430,15 @@
                             type="text" 
                             name="message"
                             placeholder="Message" maxlength="1700"
-                            class="col-span-10  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
+                            class="w-auto grow  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
 
-                        <button  type="submit" id="sendMessageButton" class="col-span-2 text-blue-500 font-bold text-right">Send</button>
+                        <button :class="{'hidden':!body?.trim()?.length}" type="submit" id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
                     </div>
 
 
                     {{-- Actions --}}
-                    <div :class="{'hidden md:hidden':body?.trim()?.length}"  @class(['col-span-1  w-full  hidden md:flex items-center gap-2 ','hidden md:hidden'=>count($this->photos)>0])>
+                    <div :class="{'hidden md:hidden':body?.trim()?.length}"  @class(['w-[15%] justify-end  w-full  flex items-center gap-2 ','hidden md:hidden'=>count($this->photos)>0])>
 
                         {{-- upload Image --}}
                         <label class="cursor-pointer">
@@ -439,7 +456,7 @@
 
 
                         {{--send Like --}}
-                        <button wire:click='sendLike()'>
+                        <button wire:click='sendLike()' type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                                 stroke="currentColor" class="w-7 h-7">
                                 <path stroke-linecap="round" stroke-linejoin="round"
