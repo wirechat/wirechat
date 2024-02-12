@@ -6,7 +6,10 @@
  setTimeout(() => {
     height=conversationElement.scrollHeight;
     $nextTick(()=> conversationElement.scrollTop= height);
+    $wire.dispatch('focus-input-field');
 }, 150);
+
+
     {{-- Echo.private('users.{{auth()->user()->id}}')
     .notification((notification) => {
 
@@ -25,7 +28,7 @@
   {{-- onDOMContentLoaded = (event) => {  $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight)} --}}
     setTimeout(() => {
         $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);
-    }, 100);  
+    });  
     " class=" w-full overflow-hidden  h-full "
     >
     {{-- todo: add rounded corners to attachment --}}
