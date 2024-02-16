@@ -73,7 +73,7 @@
                         {{-- name--}}
                         <div class="flex justify-between mb-1 w-full items-center">
                             <h6 class="truncate   font-normal  text-gray-900">
-                                {{$receiver->name}}
+                                {{$receiver->wireChatDisplayName()}}
                             </h6>
 
                         </div>
