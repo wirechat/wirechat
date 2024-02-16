@@ -77,7 +77,11 @@ $auth->hasConversationWith($user); // bool
 $user->getFavorites(Listings::class);
 
 //if you're using other guards too you can retrieve as follows
-$organisation->getFavorites(Customers::class);
+$user = User::find(1);
+
+//To get user conversations
+$user->conversations()->get();
+
 $admin->getFavorites(Conversation::class);
 
 //you can also perform additional queries 
@@ -86,40 +90,17 @@ $favoritedPosts= $user->getFavorites(Post::class)->paginate(10);
 $favoritedPosts= $user->getFavorites(Post::class)->where('title','your post title')->get();
 
 ```
-
-#### `\Namu\LaravelFavoriteable\Traits\Favoriteable`
-
-```php
-$post->getfavoriters(); //default: \App\Models\User
  
-//you may as well filter favoriter Models 
-$tickets->getFavoriters(Admin::class); 
-$courses->getFavoriters(Teacher::class)->get();
-
-//you can also perform additional queries 
-$FavoriterUsers= $post->getFavoriters()->get();
-$FavoriterUsers= $post->getFavoriters()->paginate(10);
-$FavoriterUsers= $post->getFavoriters()->where('city','Berlin')->get();
-
-```
-
 
 ### Aggregations
 Here you can retrieve items from the pivot table to we can get the count()
 
 ```php
 // retrieve all Favorites
-$user->favoriteObjects()->count();
+$user->unReadMessagesCount(); //
 
 // Filter by type
 $admin->favoriteObjects()->whereType(Post::class)->count();
-
-
-// All post favoriters 
-$post->favoriterObjects()->count(); 
-
-//filter by type
-$post->favoriters(Post::class)->count()
 
 
 ```
