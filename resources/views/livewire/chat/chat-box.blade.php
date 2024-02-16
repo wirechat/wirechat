@@ -67,14 +67,14 @@
 
                 {{--wirechat::Avatar --}}
                 <div class=" shrink-0 ">
-                    <a href="#">
+                    <a  class="flex items-center gap-2 "  href="{{$receiver->wireChatProfileUrl()??'#'}}"  >
                         <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore class="h-8 w-8 lg:w-10 lg:h-10 " />
+                            <h6 class="font-bold truncate"> {{$receiver->email}} </h6>
+
                     </a>
 
                 </div>
-                <a href="#">
-                    <h6 class="font-bold truncate"> {{$receiver->email}} </h6>
-                </a>
+           
 
                 {{-- Actions --}}
                 <div class="flex gap-2 items-center ml-auto">

@@ -21,13 +21,15 @@ trait Chatable
 
     public function wireChatCoverUrl():?string
     {
-      
+      return null;
+    }
+
+    /* used as redirect to user's profile page*/
+   public function usersRoute() :?string {
+
       return null;
       
     }
-
-
-
 
 
  }

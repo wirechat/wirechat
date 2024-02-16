@@ -60,7 +60,7 @@
             {{-- Chat list item --}}
             <li class="py-3 {{request()?->chat==$conversation?->id?'bg-gray-100':''}} hover:bg-gray-50 rounded-2xl transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2">
                 
-                <a href="#" class="shrink-0">
+                <a href="{{route('wirechat.chat',$conversation->id)}}" class="shrink-0">
                     <x-wirechat::avatar
                      src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore 
                       class="w-12 h-12" />
