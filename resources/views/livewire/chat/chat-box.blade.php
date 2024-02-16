@@ -222,7 +222,7 @@
                         <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,
                             'invisible'=> ($message?->sender_id === $nextMessage?->sender_id)
                             ])>
-                            <x-wirechat::avatar  class="h-7 w-7" src="https://ui-avatars.com/api/?background=random&color=fff&name={{$message->user->name}}" />
+                            <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" class="h-7 w-7" />
                         </div>
 
                         {{-- Message body --}}
