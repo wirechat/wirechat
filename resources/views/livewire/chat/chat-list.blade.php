@@ -28,9 +28,9 @@
                 Archived
             </button>
 
-            <button class="font-semibold flex justify-center pb-2 text-gray-500">
+            {{-- <button class="font-semibold flex justify-center pb-2 text-gray-500">
                 Requests
-            </button>
+            </button> --}}
           
         </section>
 

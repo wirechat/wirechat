@@ -29,7 +29,7 @@
 
         $nextTick(()=> { 
 
-                {{--  overflow-y: hidden; is used to hide the vertical scrollbar initially. --}}
+                {{--overflow-y: hidden; is used to hide the vertical scrollbar initially. --}}
                 conversationElement.style.overflowY='hidden';
 
             {{-- scroll the element down --}}
@@ -68,7 +68,7 @@
                 {{--wirechat::Avatar --}}
                 <div class=" shrink-0 ">
                     <a href="#">
-                        <x-wirechat::avatar wire:ignore class="h-8 w-8 lg:w-10 lg:h-10 " />
+                        <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore class="h-8 w-8 lg:w-10 lg:h-10 " />
                     </a>
 
                 </div>
