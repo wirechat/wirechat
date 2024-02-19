@@ -117,7 +117,6 @@
            "
           @update-height.window="
 
-                 await $nextTick();
                         newHeight=$el.scrollHeight;
 
                         oldHeight= height;
@@ -134,29 +133,28 @@
 
             {{-- Define previous message outside the loop --}}
             @php
-            $previousMessage=null;
+              $previousMessage=null;
             @endphp
 
             <!--Message-->
             @foreach ($loadedMessages as $key=> $message)
 
-
             @php
-            $belongsToAuth= $message->sender_id==auth()->id();
-            $attachment= $message->attachment??null;
-            $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
+                $belongsToAuth= $message->sender_id==auth()->id();
+                $attachment= $message->attachment??null;
+                $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
 
-            // keep track of previous message
-            // The ($key -1 ) will get the previous message from loaded
-            // messages since $key is directly linked to $message
+                // keep track of previous message
+                // The ($key -1 ) will get the previous message from loaded
+                // messages since $key is directly linked to $message
 
-            if ($key > 0){
-            $previousMessage = $loadedMessages->get($key - 1) ;
-            }
+                if ($key > 0){
+                $previousMessage = $loadedMessages->get($key - 1) ;
+                }
 
-            // Get the next message
-            $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
-                @endphp
+                // Get the next message
+                $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
+            @endphp
 
                 <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
 
@@ -427,21 +425,22 @@
                     x-data="{
                         'body':@entangle('body'),
                          insertNewLine: function (textarea) {
-                            // Get the current cursor position
+
+                            {{-- Get the current cursor position --}}
                             var startPos = textarea.selectionStart;
                             var endPos = textarea.selectionEnd;
                         
-                            // Insert a line break character at the cursor position
+                            {{-- Insert a line break character at the cursor position --}}
                             var text = textarea.value;
                             var newText = text.substring(0, startPos) + '\n' + text.substring(endPos, text.length);
                         
-                            // Update the textarea value and cursor position
+                            {{-- Update the textarea value and cursor position --}}
                             textarea.value = newText;
                             textarea.selectionStart = startPos + 1; // Set cursor position after the inserted newline
                             textarea.selectionEnd = startPos + 1;
 
-                          //update height of element smoothly
-                          textarea.style.height = 'auto';textarea.style.height = textarea.scrollHeight + 'px';
+                            {{-- update height of element smoothly --}}
+                            textarea.style.height = 'auto';textarea.style.height = textarea.scrollHeight + 'px';
 
                         }
                         
