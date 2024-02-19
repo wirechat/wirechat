@@ -1,8 +1,7 @@
 <div x-data="{
     height:0,
     conversationElement: document.getElementById('conversation'),
- }" 
- x-init="
+ }" x-init="
  setTimeout(() => {
     height=conversationElement.scrollHeight;
     $nextTick(()=> conversationElement.scrollTop= height);
@@ -46,8 +45,7 @@
     }); 
 
   
-    " class=" w-full overflow-hidden  h-full "
-    >
+    " class=" w-full overflow-hidden  h-full ">
     {{-- todo: add rounded corners to attachment --}}
     <div class="  border-r   flex flex-col overflow-y-hidden grow  h-full">
         {{--------------}}
@@ -67,25 +65,26 @@
 
                 {{--wirechat::Avatar --}}
                 <div class=" shrink-0 ">
-                    <a  class="flex items-center gap-2 "  href="{{$receiver->wireChatProfileUrl()??'#'}}"  >
-                        <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore class="h-8 w-8 lg:w-10 lg:h-10 " />
-                            <h6 class="font-bold truncate">  {{$receiver->wireChatDisplayName()??'user'}} </h6>
+                    <a class="flex items-center gap-2 " href="{{$receiver->wireChatProfileUrl()??'#'}}">
+                        <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore
+                            class="h-8 w-8 lg:w-10 lg:h-10 " />
+                        <h6 class="font-bold truncate"> {{$receiver->wireChatDisplayName()??'user'}} </h6>
 
                     </a>
 
                 </div>
-           
+
 
                 {{-- Actions --}}
                 <div class="flex gap-2 items-center ml-auto">
                     <x-wirechat::dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex px-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
-                                stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                               </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.9" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
                             </button>
                         </x-slot>
                         <x-slot name="content">
@@ -107,27 +106,31 @@
         {{--------------}}
         {{---Messages---}}
         {{--------------}}
-        <main @scroll="
-         scrollTop= $el.scrollTop;
-         console.log(scrollTop);
-         if(scrollTop<=0){
-            @this.dispatch('loadMore');
-         }
-         
-         " @update-height.window="
-  
-          await $nextTick();
-                newHeight=$el.scrollHeight;
+        <main 
+            @scroll="
+            scrollTop= $el.scrollTop;
+            console.log(scrollTop);
+            if(scrollTop<=0){
+                @this.dispatch('loadMore');
+            }
+            
+           "
+          @update-height.window="
 
-                oldHeight= height;
+                 await $nextTick();
+                        newHeight=$el.scrollHeight;
 
-                $el.scrollTop=newHeight-oldHeight;
+                        oldHeight= height;
 
-                height=newHeight;
+                        $el.scrollTop=newHeight-oldHeight;
+
+                        height=newHeight;
 
 
-        " id="conversation"
-            class="flex flex-col  gap-2 gap-y-4   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto " style="contain: content">
+          " 
+          id="conversation"
+            class="flex flex-col  gap-2 gap-y-4   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
+            style="contain: content">
 
             {{-- Define previous message outside the loop --}}
             @php
@@ -137,7 +140,7 @@
             <!--Message-->
             @foreach ($loadedMessages as $key=> $message)
 
- 
+
             @php
             $belongsToAuth= $message->sender_id==auth()->id();
             $attachment= $message->attachment??null;
@@ -153,68 +156,71 @@
 
             // Get the next message
             $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
-            @endphp
+                @endphp
 
-            <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
+                <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
 
-                        {{-- Show parent message --}}
-                        @if ($belongsToAuth && $message->hasParent())
-                        <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
+                    {{-- Show parent/reply message --}}
+                    @if ($belongsToAuth && $message->hasParent())
+                    <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
 
-                            <h6 class="text-xs text-gray-500 px-2 ">You replied to 
-                                {{$message->parent->sender_id== $receiver->id? $receiver->name:" Yourself"}}
-                            </h6>
-    
-                            <div class="border-r-4 px-1 ml-auto">
-                                <p class=" bg-gray-100 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
-                                    {{$message->parent->body!=''?$message->parent->body:($message->parent->hasAttachment()?'Attachment':'')}}
+                        <h6 class="text-xs text-gray-500 px-2 ">You replied to
+                            {{$message->parent->sender_id== $receiver->id? $receiver->name:" Yourself"}}
+                        </h6>
 
-                                </p>
-                            </div>
-                          
-    
+                        <div class="border-r-4 px-1 ml-auto">
+                            <p class=" bg-gray-100 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
+                                {{$message->parent->body!=''?$message->parent->body:($message->parent->hasAttachment()?'Attachment':'')}}
+
+                            </p>
                         </div>
-                        @endif
 
-                   
-            
+
+                    </div>
+                    @endif
+
+
+
                     {{-- Body section --}}
-                    <div 
-                     @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
+                    <div @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
 
 
                         {{-- Actions --}}
-                        <div @class([
-                            'my-auto flex invisible items-center gap-2 group-hover:visible',
-                            'order-1'=> !$belongsToAuth,
+                        <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>
+                            !$belongsToAuth,
 
                             ])>
 
-                            <button wire:click="setReply('{{$message->id}}')" class="hover:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
-                                    class="w-4 h-4 text-gray-600/80 ">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                            <button wire:click="setReply('{{$message->id}}')"
+                                class="hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.7" stroke="currentColor" class="w-4 h-4 text-gray-600/80 ">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                                 </svg>
                             </button>
-                              
+
                             <x-wirechat::dropdown align="{{$belongsToAuth?'right':'left'}}" width="48">
                                 <x-slot name="trigger">
-                                       {{-- Dots --}}
-                                <button class="hover:scale-110 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots h-3 w-3 text-gray-700" viewBox="0 0 16 16">
-                                        <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
-                                    </svg>
-                                </button>
-                                    </x-slot>
-                                    <x-slot name="content">
-                                        <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
-            
-                                            <x-wirechat::dropdown-link>
-                                                Unsend
-                                            </x-wirechat::dropdown-link>
-                                        </button>
-                                    </x-slot>
-                            </x-wirechat::dropdown> 
+                                    {{-- Dots --}}
+                                    <button class="hover:scale-110 transition-transform">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-three-dots h-3 w-3 text-gray-700"
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
+                                        </svg>
+                                    </button>
+                                </x-slot>
+                                <x-slot name="content">
+                                    <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
+
+                                        <x-wirechat::dropdown-link>
+                                            Unsend
+                                        </x-wirechat::dropdown-link>
+                                    </button>
+                                </x-slot>
+                            </x-wirechat::dropdown>
 
                         </div>
 
@@ -226,73 +232,71 @@
                         </div>
 
                         {{-- Message body --}}
-                        <div class=" flex flex-col  gap-2" >
-                     
+                        <div class=" flex flex-col  gap-2">
+
                             {{-- Attachment section --}}
                             @if ($attachment)
-                                <img @class([
-                                    'max-w-max  h-[200px] min-h-[200px] bg-gray-200/60   object-scale-down  grow-0 shrink  overflow-hidden  rounded-3xl',
-                                        //first message on RIGHT
-                                        'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&
-                                    $message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
+                            <img @class([ 'max-w-max  h-[200px] min-h-[200px] bg-gray-200/60   object-scale-down  grow-0 shrink  overflow-hidden  rounded-3xl', 'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&
+                            $message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
 
-                                    //middle message on RIGHT
-                                    'rounded-r-md'=>$previousMessage?->sender_id==$message->sender_id && $belongsToAuth,
+                            //middle message on RIGHT
+                            'rounded-r-md'=>$previousMessage?->sender_id==$message->sender_id && $belongsToAuth,
 
-                                    //Standalone message RIGHT
-                                    'rounded-br-xl rounded-r-xl'=>($previousMessage?->sender_id!=$message?->sender_id &&
-                                    $nextMessage?->sender_id!=$message?->sender_id) && $belongsToAuth,
+                            //Standalone message RIGHT
+                            'rounded-br-xl rounded-r-xl'=>($previousMessage?->sender_id!=$message?->sender_id &&
+                            $nextMessage?->sender_id!=$message?->sender_id) && $belongsToAuth,
 
 
-                                    //last Message on RIGHT
-                                    'rounded-br-2xl '=>$previousMessage?->sender_id!==$nextMessage?->sender_id &&$belongsToAuth,
+                            //last Message on RIGHT
+                            'rounded-br-2xl '=>$previousMessage?->sender_id!==$nextMessage?->sender_id &&$belongsToAuth,
 
-                                    //**LEFT
+                            //**LEFT
 
-                                    //first message on LEFT
-                                    'rounded-bl-md rounded-tl-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&$message?->sender_id!=$previousMessage?->sender_id) && !$belongsToAuth,
+                            //first message on LEFT
+                            'rounded-bl-md rounded-tl-2xl'=>($message?->sender_id==$nextMessage?->sender_id
+                            &&$message?->sender_id!=$previousMessage?->sender_id) && !$belongsToAuth,
 
-                                    //middle message on LEFT
-                                    'rounded-l-md'=>$previousMessage?->sender_id==$message->sender_id && !$belongsToAuth,
+                            //middle message on LEFT
+                            'rounded-l-md'=>$previousMessage?->sender_id==$message->sender_id && !$belongsToAuth,
 
-                                    //Standalone message LEFT
-                                    'rounded-bl-xl rounded-l-xl '=>($previousMessage?->sender_id!=$message?->sender_id &&$nextMessage?->sender_id!=$message?->sender_id) && !$belongsToAuth,
+                            //Standalone message LEFT
+                            'rounded-bl-xl rounded-l-xl '=>($previousMessage?->sender_id!=$message?->sender_id
+                            &&$nextMessage?->sender_id!=$message?->sender_id) && !$belongsToAuth,
 
-                                    //last message on LEFT
-                                    'rounded-bl-2xl'=>($message?->sender_id!=$nextMessage?->sender_id ) && !$belongsToAuth,
+                            //last message on LEFT
+                            'rounded-bl-2xl'=>($message?->sender_id!=$nextMessage?->sender_id ) && !$belongsToAuth,
 
 
-                                ])
-                                loading="lazy" src="{{ url('storage/' . $attachment?->file_path) }}" alt="attachment">
+                            ])
+                            loading="lazy" src="{{ url('storage/' . $attachment?->file_path) }}" alt="attachment">
                             @endif
 
                             @if ($isEmoji)
 
-                             <p class="text-5xl">
+                            <p class="text-5xl">
                                 {{$message->body}}
-                             </p>
-                                
+                            </p>
+
                             @endif
 
                             @if ($message->body && !$isEmoji)
                             {{-- message body --}}
-                            <div @class(['flex flex-wrap  max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
-                                flex-col text-black bg-[#f6f6f8fb]', ' bg-blue-500/80 text-white'=> $belongsToAuth,
+                            <div @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl
+                                p-2.5 flex flex-col text-black bg-[#f6f6f8fb]', ' bg-blue-500/80 text-white'=>
+                                $belongsToAuth,
 
                                 //first message on RIGHT
-                                'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&
-                                $message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
+                                'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&$message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
 
                                 //middle message on RIGHT
                                 'rounded-r-md'=>$previousMessage?->sender_id==$message->sender_id && $belongsToAuth,
 
                                 //Standalone message RIGHT
-                                'rounded-br-xl rounded-r-xl'=>($previousMessage?->sender_id!=$message?->sender_id &&
-                                $nextMessage?->sender_id!=$message?->sender_id) && $belongsToAuth,
-
+                                'rounded-br-xl rounded-r-xl'=>($previousMessage?->sender_id!=$message?->sender_id &&$nextMessage?->sender_id!=$message?->sender_id) && $belongsToAuth,
 
                                 //last Message on RIGHT
-                                'rounded-br-2xl '=>$previousMessage?->sender_id!==$nextMessage?->sender_id &&$belongsToAuth,
+                                'rounded-br-2xl '=>$previousMessage?->sender_id!==$nextMessage?->sender_id
+                                &&$belongsToAuth,
 
                                 //**LEFT
 
@@ -303,7 +307,7 @@
                                 'rounded-l-md'=>$previousMessage?->sender_id==$message->sender_id && !$belongsToAuth,
 
                                 //Standalone message LEFT
-                                'rounded-bl-xl rounded-l-xl '=>($previousMessage?->sender_id!=$message?->sender_id &&$nextMessage?->sender_id!=$message?->sender_id) && !$belongsToAuth,
+                                'rounded-bl-xl rounded-l-xl '=>($previousMessage?->sender_id!=$message?->sender_id&&$nextMessage?->sender_id!=$message?->sender_id) && !$belongsToAuth,
 
                                 //last message on LEFT
                                 'rounded-bl-2xl'=>($message?->sender_id!=$nextMessage?->sender_id ) && !$belongsToAuth,
@@ -326,18 +330,19 @@
 
 
 
-            </div>
+                </div>
 
-            @endforeach
+                @endforeach
 
         </main>
-       
+
         <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
-            <div class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[95%] mx-auto">
+            <div
+                class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[95%] mx-auto">
 
                 {{-- Image preview section --}}
                 @if (count($photos)>0)
-                <section
+                 <section
                     class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
                     style=" scrollbar-width: none; -ms-overflow-style: none;">
 
@@ -362,10 +367,11 @@
 
                     @endforeach
 
-                      {{-- TODO @if "( count($photos)< $MAXFILES )" to hide upload button when maz files exceeded --}}
-                    <div>
+                    {{-- TODO @if "( count($photos)< $MAXFILES )" to hide upload button when maz files exceeded --}}
+                        <div>
                         {{-- Trigger image upload --}}
-                        <label class="relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
+                        <label
+                            class="relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
                             <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
                                 wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only">
                             <span class="  m-auto">
@@ -379,33 +385,35 @@
 
                             </span>
                         </label>
-                    </div>
+                  </div>
 
-                </section>
-               @endif
+                 </section>
+                @endif
 
-               {{-- Replying to  --}}
-               @if ($replyMessage !=null)   
+                {{-- Replying to --}}
+                @if ($replyMessage !=null)
                 <section class="p-px py-1 w-full col-span-12">
 
-                        <div class="flex justify-between items-center">
-                            <h6 class="text-sm">Replying to  
+                    <div class="flex justify-between items-center">
+                        <h6 class="text-sm">Replying to
                             <span class="font-bold">
                                 {{$replyMessage->sender_id== $receiver->id? $receiver->name:" Yourself"}}
-                            </span> </h6>
-                            <button  wire:click="removeReply()">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg> 
-                            </button>
-                        </div>
+                            </span>
+                        </h6>
+                        <button wire:click="removeReply()">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
 
-                        {{-- Message being replies to  --}}
-                        <p class="truncate text-sm text-gray-500 max-w-md">
-                          {{$replyMessage->body!=''?$replyMessage->body:($replyMessage->hasAttachment()?'Attachment':'')}}
-                        </p>
+                    {{-- Message being replies to --}}
+                    <p class="truncate text-sm text-gray-500 max-w-md">
+                        {{$replyMessage->body!=''?$replyMessage->body:($replyMessage->hasAttachment()?'Attachment':'')}}
+                    </p>
                 </section>
-               @endif
+                @endif
 
                 {{-- Emoji icon --}}
                 {{-- <span class="col-span-1">
@@ -416,41 +424,34 @@
                     </svg>
                 </span> --}}
 
-                <form  
-                    x-data="{'body':@entangle('body')}" 
-
+                <form x-data="{'body':@entangle('body')}"
                     @submit.prevent="((body && body.trim().length > 0) || ($wire.photos && $wire.photos.length > 0)) ? $wire.sendMessage() : null"
                     method="POST" autocapitalize="off" @class([' flex w-full col-span-12 gap-2'])>
                     @csrf
                     <input type="hidden" autocomplete="false" style="display: none">
 
-                    <div  @class(['flex  gap-2  sm:px-2  w-full'])>
-                        <input
-
-                            @focus-input-field.window="$el.focus()"
-                            autocomplete="off" 
-                            x-model='body' 
-                            id="inputField"  
-                            autofocus 
-                            type="text" 
-                            name="message"
-                            placeholder="Message" maxlength="1700"
+                    <div @class(['flex gap-2 sm:px-2 w-full'])>
+                        <input @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' id="inputField"
+                            autofocus type="text" name="message" placeholder="Message" maxlength="1700"
                             class="w-full flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
 
-                        <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->photos)>0))}" type="submit" id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
+                        <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->photos)>0))}" type="submit"
+                            id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
                     </div>
 
 
                     {{-- Actions --}}
-                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->photos)>0) }"  @class(['w-[15%] justify-end flex items-center gap-2 hidden md:hidden'])>
+                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->photos)>0) }"
+                        @class(['w-[15%] justify-end flex items-center gap-2 hidden md:hidden'])>
 
                         {{-- upload Image --}}
                         <label class="cursor-pointer">
-                        
+
                             {{-- Trigger image upload --}}
                             <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
-                                wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only" style="display: none">
+                                wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only"
+                                style="display: none">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
                                 stroke="currentColor" class="w-7 h-7">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -474,7 +475,7 @@
 
             </div>
 
-        </footer>
+       </footer>
 
 
 

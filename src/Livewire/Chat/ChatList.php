@@ -14,6 +14,14 @@ class ChatList extends Component{
         
     }
     protected $listeners=['refresh'=>'$refresh'];
+    public $selectedConversationId;
+
+
+    function mount()  {
+
+      $this->selectedConversationId= request()->chat;
+      
+    }
 
 
 

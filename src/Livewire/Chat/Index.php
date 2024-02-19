@@ -7,7 +7,12 @@ use Livewire\Component;
 
 class Index extends Component{
 
-
+/**
+ * todo:Make sure user is authenticaed for all methods 
+ * todo:2 make sure user belongs to conversation
+ * todo:2 find a way to user protected methods and locked properties 
+ * todo:3 devide code in chatbox into @includes in order to make code clean
+ */
 
 
     function test()  {
