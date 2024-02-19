@@ -315,10 +315,9 @@
                                 ])
                                 >
 
-                                <p
-                                    class="  whitespace-normal truncate text-sm md:text-base  tracking-wide lg:tracking-normal ">
+                                <pre  class="  whitespace-pre-line tracking-normal    text-sm md:text-base  lg:tracking-normal " style="font-family: inherit;">
                                     {{$message->body}}
-                                </p>
+                                  </pre>
 
                             </div>
                             @endif
@@ -459,7 +458,7 @@
                         autofocus type="text" name="message" placeholder="Message" maxlength="1700"
                         rows="1"
                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
-                        @keydown.shift.enter.prevent="insertNewLine($el) "
+                        @keydown.shift.enter.prevent="insertNewLine($el)"
                         {{-- @keydown.enter.prevent prevents the default behavior of Enter key press only if Shift is not held down. --}}
                         @keydown.enter.prevent=""
                         @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.photos && $wire.photos.length > 0)) ? $wire.sendMessage() : null)"
