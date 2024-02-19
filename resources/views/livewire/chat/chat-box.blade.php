@@ -431,9 +431,11 @@
                     <input type="hidden" autocomplete="false" style="display: none">
 
                     <div @class(['flex gap-2 sm:px-2 w-full'])>
-                        <input @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' id="inputField"
+                        <textarea @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' id="inputField"
                             autofocus type="text" name="message" placeholder="Message" maxlength="1700"
-                            class="w-full flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />
+                            rows="1"
+                            @input=" $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
+                            class="w-full resize-none flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " ></textarea>
 
                         <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->photos)>0))}" type="submit"
                             id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
