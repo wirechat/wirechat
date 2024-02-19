@@ -117,6 +117,7 @@
            "
           @update-height.window="
 
+                 //await $nextTick();
                         newHeight=$el.scrollHeight;
 
                         oldHeight= height;
@@ -184,8 +185,7 @@
 
 
                         {{-- Actions --}}
-                        <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>
-                            !$belongsToAuth,
+                        <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>!$belongsToAuth,
 
                             ])>
 

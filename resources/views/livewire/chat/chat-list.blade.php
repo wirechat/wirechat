@@ -58,7 +58,11 @@
             @endphp
 
             {{-- Chat list item --}}
-            <li class="py-3 {{$selectedConversationId==$conversation?->id?'bg-gray-100':''}} hover:bg-gray-50 rounded-2xl transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2">
+            <li  
+            @class([
+                'py-3 hover:bg-gray-50 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
+                'bg-gray-50 border-r-4 border-blue-500/20'=>$selectedConversationId==$conversation?->id,
+                      ])>
                 
                 <a href="{{route('wirechat.chat',$conversation->id)}}" class="shrink-0">
                     <x-wirechat::avatar
