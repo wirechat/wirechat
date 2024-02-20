@@ -1,7 +1,7 @@
-<div class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3">
+<div class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3  ">
 
 
-    <header class="px-3 z-10 bg-white sticky top-0 w-full py-2 ">
+    <header class="px-3 z-10 bg-white sticky top-0 w-full py-2  ">
 
         {{-- Title/name and Icon --}}
         <section class=" justify-between flex items-center pb-2">
@@ -19,14 +19,14 @@
         </section>
 
         {{-- Filters --}}
-        <section class="  gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2 bg-white">
+        <section class="gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2 bg-white">
 
             <button class="font-semibold flex justify-center text-black border-b-2 border-black pb-2">
                  All
             </button>
-            <button class="font-semibold flex justify-center pb-2 text-gray-500">
+            {{-- <button class="font-semibold flex justify-center pb-2 text-gray-500">
                 Archived
-            </button>
+            </button> --}}
 
             {{-- <button class="font-semibold flex justify-center pb-2 text-gray-500">
                 Requests
@@ -34,16 +34,16 @@
           
         </section>
 
-        <section class="py-2">
+        <section class="py-2 ">
 
-        <input type="text" placeholder="Search"
+        <input type="search" placeholder="Search"
         class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
 
         </section>
     </header>
 
 
-    <main class=" overflow-y-scroll overflow-hidden grow  h-full relative " style="contain:content">
+    <main class="  overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
 
         @if ($conversations!=null)
         {{-- chatlist  --}}
@@ -76,7 +76,7 @@
 
                         {{-- name--}}
                         <div class="flex justify-between mb-1 w-full items-center">
-                            <h6 class="truncate   font-normal  text-gray-900">
+                            <h6 class="truncate   font-bold  text-gray-900">
                                 {{$receiver->wireChatDisplayName()}}
                             </h6>
 
@@ -94,7 +94,7 @@
                             @endif
                            
 
-                             <p class="  truncate text-xs font-[100]">
+                             <p class="  truncate text-sm font-[100]">
                                 {{$lastMessage->body!=''?$lastMessage->body:($lastMessage->hasAttachment()?'📎 Attachment':'')}}
                              </p>
 

@@ -13,12 +13,14 @@ use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithPagination;
 use Namu\WireChat\Models\Attachment;
 
 class ChatBox extends Component
 {
 
     use WithFileUploads;
+    use WithPagination;
 
     public Conversation $conversation;
 
@@ -26,7 +28,8 @@ class ChatBox extends Component
     public $body;
 
     public $loadedMessages;
-    public $paginate_var = 20;
+    public int $paginate_var = 10;
+    public bool $canLoadMore;
 
 
     public $photos = [];
@@ -253,7 +256,6 @@ class ChatBox extends Component
 
         #increment
         $this->paginate_var += 10;
-
         #call loadMessage
         $this->loadMessages();
 
@@ -265,15 +267,20 @@ class ChatBox extends Component
     function loadMessages()
     {
 
+
         #get count
         $count = Message::where('conversation_id', $this->conversation->id)->count();
 
         #skip and query
-
         $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
             ->skip($count - $this->paginate_var)
             ->take($this->paginate_var)
             ->get();
+
+       // Calculate whether more messages can be loaded
+        $this->canLoadMore = $count > count($this->loadedMessages);
+
+
 
         return $this->loadedMessages;
     }

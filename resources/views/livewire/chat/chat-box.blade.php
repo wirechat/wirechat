@@ -1,12 +1,12 @@
 <div x-data="{
     height:0,
     conversationElement: document.getElementById('conversation'),
- }" x-init="
- setTimeout(() => {
-    height=conversationElement.scrollHeight;
-    $nextTick(()=> conversationElement.scrollTop= height);
-    $wire.dispatch('focus-input-field');
-}, 150);
+    }" x-init="
+    setTimeout(() => {
+        height=conversationElement.scrollHeight;
+        $nextTick(()=> conversationElement.scrollTop= height);
+        $wire.dispatch('focus-input-field');
+    }, 150);
 
 
     {{-- Echo.private('users.{{auth()->user()->id}}')
@@ -22,7 +22,7 @@
         }
      
     }); --}}
-  " @scroll-bottom.window="
+    " @scroll-bottom.window="
     
     setTimeout(() => {
 
@@ -52,286 +52,11 @@
         {{-----Header---}}
         {{--------------}}
 
-        <header class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-white border-b">
-
-            <div class="  flex  w-full items-center   px-2   lg:px-4 gap-2 md:gap-5 ">
-                {{-- Return --}}
-                <a href="{{route('wirechat')}}" class=" shrink-0 lg:hidden  dark:text-white" id="chatReturn">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                </a>
-
-                {{--wirechat::Avatar --}}
-                <div class=" shrink-0 ">
-                    <a class="flex items-center gap-2 " href="{{$receiver->wireChatProfileUrl()??'#'}}">
-                        <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore
-                            class="h-8 w-8 lg:w-10 lg:h-10 " />
-                        <h6 class="font-bold truncate"> {{$receiver->wireChatDisplayName()??'user'}} </h6>
-
-                    </a>
-
-                </div>
-
-
-                {{-- Actions --}}
-                <div class="flex gap-2 items-center ml-auto">
-                    <x-wirechat::dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="inline-flex px-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.9" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                </svg>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
-
-                                <x-wirechat::dropdown-link>
-                                    Delete
-                                </x-wirechat::dropdown-link>
-                            </button>
-                        </x-slot>
-                    </x-wirechat::dropdown>
-
-                </div>
-
-            </div>
-
-        </header>
-
+      @include('wirechat::livewire.chat.Includes.chatbox-header')
         {{--------------}}
         {{---Messages---}}
         {{--------------}}
-        <main 
-            @scroll="
-            scrollTop= $el.scrollTop;
-            console.log(scrollTop);
-            if(scrollTop<=0){
-                @this.dispatch('loadMore');
-            }
-            
-           "
-          @update-height.window="
-
-                 //await $nextTick();
-                        newHeight=$el.scrollHeight;
-
-                        oldHeight= height;
-
-                        $el.scrollTop=newHeight-oldHeight;
-
-                        height=newHeight;
-
-
-          " 
-          id="conversation"
-            class="flex flex-col  gap-2 gap-y-4   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
-            style="contain: content">
-
-            {{-- Define previous message outside the loop --}}
-            @php
-              $previousMessage=null;
-            @endphp
-
-            <!--Message-->
-            @foreach ($loadedMessages as $key=> $message)
-
-            @php
-                $belongsToAuth= $message->sender_id==auth()->id();
-                $attachment= $message->attachment??null;
-                $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
-
-                // keep track of previous message
-                // The ($key -1 ) will get the previous message from loaded
-                // messages since $key is directly linked to $message
-
-                if ($key > 0){
-                $previousMessage = $loadedMessages->get($key - 1) ;
-                }
-
-                // Get the next message
-                $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
-            @endphp
-
-                <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
-
-                    {{-- Show parent/reply message --}}
-                    @if ($belongsToAuth && $message->hasParent())
-                    <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
-
-                        <h6 class="text-xs text-gray-500 px-2 ">You replied to
-                            {{$message->parent->sender_id== $receiver->id? $receiver->name:" Yourself"}}
-                        </h6>
-
-                        <div class="border-r-4 px-1 ml-auto">
-                            <p class=" bg-gray-100 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
-                                {{$message->parent->body!=''?$message->parent->body:($message->parent->hasAttachment()?'Attachment':'')}}
-
-                            </p>
-                        </div>
-
-
-                    </div>
-                    @endif
-
-
-
-                    {{-- Body section --}}
-                    <div @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
-
-
-                        {{-- Actions --}}
-                        <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>!$belongsToAuth,
-
-                            ])>
-
-                            <button wire:click="setReply('{{$message->id}}')"
-                                class="hover:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.7" stroke="currentColor" class="w-4 h-4 text-gray-600/80 ">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                                </svg>
-                            </button>
-
-                            <x-wirechat::dropdown align="{{$belongsToAuth?'right':'left'}}" width="48">
-                                <x-slot name="trigger">
-                                    {{-- Dots --}}
-                                    <button class="hover:scale-110 transition-transform">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor" class="bi bi-three-dots h-3 w-3 text-gray-700"
-                                            viewBox="0 0 16 16">
-                                            <path
-                                                d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
-                                        </svg>
-                                    </button>
-                                </x-slot>
-                                <x-slot name="content">
-                                    <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
-
-                                        <x-wirechat::dropdown-link>
-                                            Unsend
-                                        </x-wirechat::dropdown-link>
-                                    </button>
-                                </x-slot>
-                            </x-wirechat::dropdown>
-
-                        </div>
-
-                        {{-- Avatar --}}
-                        <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,
-                            'invisible'=> ($message?->sender_id === $nextMessage?->sender_id)
-                            ])>
-                            <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" class="h-7 w-7" />
-                        </div>
-
-                        {{-- Message body --}}
-                        <div class=" flex flex-col  gap-2">
-
-                            {{-- Attachment section --}}
-                            @if ($attachment)
-                            <img @class([ 'max-w-max  h-[200px] min-h-[200px] bg-gray-200/60   object-scale-down  grow-0 shrink  overflow-hidden  rounded-3xl', 'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&
-                            $message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
-
-                            //middle message on RIGHT
-                            'rounded-r-md'=>$previousMessage?->sender_id==$message->sender_id && $belongsToAuth,
-
-                            //Standalone message RIGHT
-                            'rounded-br-xl rounded-r-xl'=>($previousMessage?->sender_id!=$message?->sender_id &&
-                            $nextMessage?->sender_id!=$message?->sender_id) && $belongsToAuth,
-
-
-                            //last Message on RIGHT
-                            'rounded-br-2xl '=>$previousMessage?->sender_id!==$nextMessage?->sender_id &&$belongsToAuth,
-
-                            //**LEFT
-
-                            //first message on LEFT
-                            'rounded-bl-md rounded-tl-2xl'=>($message?->sender_id==$nextMessage?->sender_id
-                            &&$message?->sender_id!=$previousMessage?->sender_id) && !$belongsToAuth,
-
-                            //middle message on LEFT
-                            'rounded-l-md'=>$previousMessage?->sender_id==$message->sender_id && !$belongsToAuth,
-
-                            //Standalone message LEFT
-                            'rounded-bl-xl rounded-l-xl '=>($previousMessage?->sender_id!=$message?->sender_id
-                            &&$nextMessage?->sender_id!=$message?->sender_id) && !$belongsToAuth,
-
-                            //last message on LEFT
-                            'rounded-bl-2xl'=>($message?->sender_id!=$nextMessage?->sender_id ) && !$belongsToAuth,
-
-
-                            ])
-                            loading="lazy" src="{{ url('storage/' . $attachment?->file_path) }}" alt="attachment">
-                            @endif
-
-                            @if ($isEmoji)
-
-                            <p class="text-5xl">
-                                {{$message->body}}
-                            </p>
-
-                            @endif
-
-                            @if ($message->body && !$isEmoji)
-                            {{-- message body --}}
-                            <div @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl
-                                p-2.5 flex flex-col text-black bg-[#f6f6f8fb]', ' bg-blue-500/80 text-white'=>
-                                $belongsToAuth,
-
-                                //first message on RIGHT
-                                'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&$message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
-
-                                //middle message on RIGHT
-                                'rounded-r-md'=>$previousMessage?->sender_id==$message->sender_id && $belongsToAuth,
-
-                                //Standalone message RIGHT
-                                'rounded-br-xl rounded-r-xl'=>($previousMessage?->sender_id!=$message?->sender_id &&$nextMessage?->sender_id!=$message?->sender_id) && $belongsToAuth,
-
-                                //last Message on RIGHT
-                                'rounded-br-2xl '=>$previousMessage?->sender_id!==$nextMessage?->sender_id
-                                &&$belongsToAuth,
-
-                                //**LEFT
-
-                                //first message on LEFT
-                                'rounded-bl-md rounded-tl-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&$message?->sender_id!=$previousMessage?->sender_id) && !$belongsToAuth,
-
-                                //middle message on LEFT
-                                'rounded-l-md'=>$previousMessage?->sender_id==$message->sender_id && !$belongsToAuth,
-
-                                //Standalone message LEFT
-                                'rounded-bl-xl rounded-l-xl '=>($previousMessage?->sender_id!=$message?->sender_id&&$nextMessage?->sender_id!=$message?->sender_id) && !$belongsToAuth,
-
-                                //last message on LEFT
-                                'rounded-bl-2xl'=>($message?->sender_id!=$nextMessage?->sender_id ) && !$belongsToAuth,
-
-                                ])
-                                >
-
-                                <pre  class="  whitespace-pre-line tracking-normal    text-sm md:text-base  lg:tracking-normal " style="font-family: inherit;">
-                                    {{$message->body}}
-                                  </pre>
-
-                            </div>
-                            @endif
-                        </div>
-
-                    </div>
-
-
-
-
-
-                </div>
-
-                @endforeach
-
-        </main>
+    @include('wirechat::livewire.chat.Includes.chatbox-main')
 
         <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
             <div
@@ -504,150 +229,148 @@
 
        </footer>
 
-
-
-</div>
+    </div>
 
 
 
-@script
-<script>
-    Alpine.data('fileUploadComponent', () => ({
-                isDropping: false,
-                isUploading: false,
-                MAXFILES: 5,
-                MAXFILESIZE: 11 * 1024 * 1024,
-                allowedFileTypes: ['png', 'jpeg', 'jpg'],
-                progress: 0,
-                wireModel: 'photos',
-    
-            handleFileSelect(event,count) {
+        @script
+        <script>
+            Alpine.data('fileUploadComponent', () => ({
+                        isDropping: false,
+                        isUploading: false,
+                        MAXFILES: 5,
+                        MAXFILESIZE: 11 * 1024 * 1024,
+                        allowedFileTypes: ['png', 'jpeg', 'jpg'],
+                        progress: 0,
+                        wireModel: 'photos',
+            
+                    handleFileSelect(event,count) {
+                        
                 
-        
-                if (event.target.files.length) {
-                    const files = event.target.files;
-                    this.validateFiles(files,count)
-                        .then((validFiles) => {
-                            if (validFiles.length > 0) {
-                                this.uploadFiles(validFiles);
-                            } else {
-                                console.log('No valid files to upload');
-                            }
-                        })
-                        .catch((error) => {
-                            console.log('Validation error:', error);
-                        });
-                }
-            },
-            uploadFiles(files) {
-                
-                const $this = this;
-                this.isUploading = true;
-                const promises = [];
-                
-                    const promise = new Promise((resolve, reject) => {
-                        $wire.uploadMultiple(this.wireModel,files, function (success) {
-                            resolve(success);
-                        }, function (error) {
-                            console.log('Validation error:', error);
-                            reject(error);
-                        }, function (event) {
-                            $this.progress = event.detail.progress;
-                        });
-                    });
-           
-                promises.push(promise);
-                    
-                
-                Promise.all(promises)
-                    .then((results) => {
-                        console.log('Upload complete');
-                        $this.isUploading = false;
-                        $this.progress = 0;
-                    })
-                    .catch((error) => {
-                        console.log('Upload error:', error);
-                        $this.isUploading = false;
-                        $this.progress = 0;
-                    });
-            },
-            removeUpload(filename) {
-                $wire.removeUpload(this.wireModel, filename);
-            },
-
-            validateFiles(files,count) {
-        
-                const maxSize = 9 * 1024 * 1024; // 7MB in bytes
-               // const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-                var totalFiles=count + files.length;
-        
-        
-                 //make sure max file not exceeded  
-                // Make sure max file count is not exceeded
-
-                if (totalFiles > this.MAXFILES) {
-
-                  files = Array.from(files).slice(0, this.MAXFILES - count);
-
-                  return  $dispatch('notify',{type:'warning',message:'File limit exceeded , allowed '+ this.MAXFILES});
-                }
-        
-               
-                // const invalidFiles = Array.from(files).filter((file) => {
-                //     console.log(''file.type);
-                //     return file.size > maxSize || !this.allowedFileTypes.includes(file.type);
-                // });
-
-                const invalidFiles = Array.from(files).filter((file) => {
-
-                    const fileType = file.type.split('/')[1].toLowerCase(); // Get the file extension from the MIME type
-                    const isInvalid = file.size > maxSize || ! (this.allowedFileTypes.includes(fileType));
-
-                     console.log('File Name:', file.name);
-                     console.log('File Type:', fileType);
-                     console.log('Is Invalid:', isInvalid);
-                     console.log('includes', this.allowedFileTypes.includes(fileType));
-
-
-                    return isInvalid;
-                        });
-                
-                //filter valid file 
-                const validFiles = Array.from(files).filter((file) => {
-                    const fileType = file.type.split('/')[1].toLowerCase();
-                    return file.size <= maxSize && this.allowedFileTypes.includes(fileType);
-                });
-        
-                if (invalidFiles.length > 0) {
-        
-                    const errorMessages = invalidFiles.map((file) => {
-                        if (file.size > maxSize) {
-
-                        return  $dispatch('notify',{type:'warning',message:`File size exceeds the maximum limit (9MB): ${file.name}`});
-                        } else {
-
-                            
-                             //WIREUI error
-                        //   return  window.$wireui.notify({
-                        //         title: 'File type is not allowed:',
-                        //         description:'Only PNG, JPEG, and JPG files are accepted.',
-                        //          icon: 'error'
-                        //     });
-
-                        return  $dispatch('notify',{type:'warning',message:'File type is not allowed'});
+                        if (event.target.files.length) {
+                            const files = event.target.files;
+                            this.validateFiles(files,count)
+                                .then((validFiles) => {
+                                    if (validFiles.length > 0) {
+                                        this.uploadFiles(validFiles);
+                                    } else {
+                                        console.log('No valid files to upload');
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.log('Validation error:', error);
+                                });
                         }
-                    });
-        
-                    
-                    console.log('Validation errors:', errorMessages);
-                    // Returning an empty array since there are no valid files
-                    // return Promise.resolve([]);
-                }
-                return Promise.resolve(validFiles);
-            }
-            }))
+                    },
+                    uploadFiles(files) {
+                        
+                        const $this = this;
+                        this.isUploading = true;
+                        const promises = [];
+                        
+                            const promise = new Promise((resolve, reject) => {
+                                $wire.uploadMultiple(this.wireModel,files, function (success) {
+                                    resolve(success);
+                                }, function (error) {
+                                    console.log('Validation error:', error);
+                                    reject(error);
+                                }, function (event) {
+                                    $this.progress = event.detail.progress;
+                                });
+                            });
+                
+                        promises.push(promise);
+                            
+                        
+                        Promise.all(promises)
+                            .then((results) => {
+                                console.log('Upload complete');
+                                $this.isUploading = false;
+                                $this.progress = 0;
+                            })
+                            .catch((error) => {
+                                console.log('Upload error:', error);
+                                $this.isUploading = false;
+                                $this.progress = 0;
+                            });
+                    },
+                    removeUpload(filename) {
+                        $wire.removeUpload(this.wireModel, filename);
+                    },
 
-</script>
-@endscript
+                    validateFiles(files,count) {
+                
+                        const maxSize = 9 * 1024 * 1024; // 7MB in bytes
+                    // const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                        var totalFiles=count + files.length;
+                
+                
+                        //make sure max file not exceeded  
+                        // Make sure max file count is not exceeded
+
+                        if (totalFiles > this.MAXFILES) {
+
+                        files = Array.from(files).slice(0, this.MAXFILES - count);
+
+                        return  $dispatch('notify',{type:'warning',message:'File limit exceeded , allowed '+ this.MAXFILES});
+                        }
+                
+                    
+                        // const invalidFiles = Array.from(files).filter((file) => {
+                        //     console.log(''file.type);
+                        //     return file.size > maxSize || !this.allowedFileTypes.includes(file.type);
+                        // });
+
+                        const invalidFiles = Array.from(files).filter((file) => {
+
+                            const fileType = file.type.split('/')[1].toLowerCase(); // Get the file extension from the MIME type
+                            const isInvalid = file.size > maxSize || ! (this.allowedFileTypes.includes(fileType));
+
+                            console.log('File Name:', file.name);
+                            console.log('File Type:', fileType);
+                            console.log('Is Invalid:', isInvalid);
+                            console.log('includes', this.allowedFileTypes.includes(fileType));
+
+
+                            return isInvalid;
+                                });
+                        
+                        //filter valid file 
+                        const validFiles = Array.from(files).filter((file) => {
+                            const fileType = file.type.split('/')[1].toLowerCase();
+                            return file.size <= maxSize && this.allowedFileTypes.includes(fileType);
+                        });
+                
+                        if (invalidFiles.length > 0) {
+                
+                            const errorMessages = invalidFiles.map((file) => {
+                                if (file.size > maxSize) {
+
+                                return  $dispatch('notify',{type:'warning',message:`File size exceeds the maximum limit (9MB): ${file.name}`});
+                                } else {
+
+                                    
+                                    //WIREUI error
+                                //   return  window.$wireui.notify({
+                                //         title: 'File type is not allowed:',
+                                //         description:'Only PNG, JPEG, and JPG files are accepted.',
+                                //          icon: 'error'
+                                //     });
+
+                                return  $dispatch('notify',{type:'warning',message:'File type is not allowed'});
+                                }
+                            });
+                
+                            
+                            console.log('Validation errors:', errorMessages);
+                            // Returning an empty array since there are no valid files
+                            // return Promise.resolve([]);
+                        }
+                        return Promise.resolve(validFiles);
+                    }
+                    }))
+
+        </script>
+        @endscript
 
 </div>
