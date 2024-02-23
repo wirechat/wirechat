@@ -9,24 +9,16 @@ use Namu\WireChat\Models\Message;
 
 class Chat extends Component{
 
-
-
-
-   
   public $chat;
 
   public $conversation;
 
 
-
   function mount()  {
-
 
     $this->conversation= Conversation::findOrFail($this->chat);
 
-
     #mark messages belonging to receiver as read
-
     Message::where('conversation_id',$this->conversation->id)
              ->where('receiver_id',auth()->id())
              ->whereNull('read_at')

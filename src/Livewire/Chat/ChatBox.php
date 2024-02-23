@@ -36,13 +36,8 @@ class ChatBox extends Component
 
 
     //Theme 
-
     public string $authMessageBodyColor;
-
-
-
-
- 
+    
     public $replyMessage=null;
 
     /** 
@@ -66,10 +61,7 @@ class ChatBox extends Component
     public function removeReply()  {
 
         $this->replyMessage= null;
-
     }
-
-
 
     /**
      * livewire method
@@ -280,6 +272,7 @@ class ChatBox extends Component
 
         #skip and query
         $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
+            ->with('parent')
             ->skip($count - $this->paginate_var)
             ->take($this->paginate_var)
             ->get();
@@ -293,7 +286,7 @@ class ChatBox extends Component
     }
 
     /* to generate color auth message background color */
-   protected function getAuthMessageBodyColor() : string {
+   public function getAuthMessageBodyColor() : string {
 
       $color= config('wirechat.theme','blue');
 
@@ -304,19 +297,17 @@ class ChatBox extends Component
 
     function mount()
     {
+
         abort_unless(auth()->check(),401);
 
          #check if user belongs to conversation
         $belongsToConversation = auth()->user()->conversations()
                     ->where('id', $this->conversation->id)
                     ->exists();
+                    
         abort_unless($belongsToConversation, 403);
 
-        #mark messages belonging to receiver as read
-        Message::where('conversation_id', $this->conversation->id)
-            ->where('receiver_id', auth()->id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+
 
         $this->receiver = $this->conversation->getReceiver();
 

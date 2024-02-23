@@ -37,7 +37,7 @@ return [
 
      'allow_user_search'=>true,
 
-     'theme'=>'blue', // can be from any colors : gree, red, 
+     'theme'=>'red', // can be from any colors : gree, red, 
 
 
      'attachments' => [

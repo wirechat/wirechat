@@ -46,6 +46,7 @@
     {{-- Define previous message outside the loop --}}
     @php
     $previousMessage=null;
+    
     @endphp
 
     <!--Message-->
@@ -53,6 +54,7 @@
 
     @php
     $belongsToAuth= $message->sender_id==auth()->id();
+    $parent =$message->parent??null;
     $attachment= $message->attachment??null;
     $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
 
@@ -71,17 +73,16 @@
         <div  @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
 
             {{-- Show parent/reply message --}}
-            @if ($belongsToAuth && $message->hasParent())
+            @if ($belongsToAuth && $parent!=null)
             <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
 
                 <h6 class="text-xs text-gray-500 px-2 ">You replied to
-                    {{$message->parent->sender_id== $receiver->id? $receiver->name:" Yourself"}}
+                    {{$parent?->sender_id== $receiver?->id? $receiver->name:" Yourself"}}
                 </h6>
 
                 <div class="border-r-4 px-1 ml-auto">
                     <p class=" bg-gray-100 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
-                        {{$message->parent->body!=''?$message->parent->body:($message->parent->hasAttachment()?'Attachment':'')}}
-
+                        {{$parent?->body!=''?$parent?->body:($parent->hasAttachment()?'Attachment':'')}}
                     </p>
                 </div>
 
@@ -94,10 +95,8 @@
             {{-- Body section --}}
             <div @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
 
-
                 {{-- Actions --}}
-                <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>
-                    !$belongsToAuth,
+                <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>!$belongsToAuth,
 
                     ])>
 
@@ -194,7 +193,7 @@
                     {{-- message body --}}
                     <div  
                       @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
-                        flex-col text-black bg-[#f6f6f8fb]','bg-blue-500/80 text-white'=> $belongsToAuth,
+                        flex-col text-black bg-[#f6f6f8fb]',' bg-blue-500/80 text-white'=> $belongsToAuth,
 
                         //first message on RIGHT 
                         'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id

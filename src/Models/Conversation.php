@@ -49,7 +49,7 @@ class Conversation extends Model
    public function scopeWhereNotDeleted($query) 
      {
         $userId=auth()->id();
-
+        
         return $query->where(function ($query) use ($userId){
 
             #where message is not deleted
@@ -72,7 +72,6 @@ class Conversation extends Model
         });
         
     }
-
 
 
   public  function isLastMessageReadByUser():bool {

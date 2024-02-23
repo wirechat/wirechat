@@ -1,4 +1,9 @@
-<div class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3  ">
+<div
+ class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3  ">
+
+ @php
+     $authId=auth()->id();
+ @endphp
 
 
     <header class="px-3 z-10 bg-white sticky top-0 w-full py-2  ">
@@ -24,9 +29,9 @@
             <button class="font-semibold flex gap-2 justify-center text-black border-b-2 border-black pb-2">
                  All
 
-                 @if (auth()->user()->unReadMessagesCount()>0)
+                 @if ($unReadMessagesCount>0)
                  <span class="rounded-full text-xs p-1 px-2 scale-95  tracking-wide font-bold bg-blue-500 text-white ">
-                     {{auth()->user()->unReadMessagesCount()}}
+                     {{$unReadMessagesCount}}
                  </span>
                  @endif
 
@@ -95,7 +100,7 @@
                         <div class="flex gap-x-2 items-center">
                             
                             {{-- Only show if AUTH is onwer of message --}}
-                            @if ($lastMessage->sender_id==auth()->id())
+                            @if ($lastMessage->sender_id==$authId)
                                 <span class="font-bold text-xs">
                                     You:
                                 </span>
@@ -105,9 +110,9 @@
                              <p 
                              @class([
                                 'truncate text-sm   gap-2 items-center',
-                                'font-semibold text-black' => !$lastMessage?->isRead() && $lastMessage?->sender_id != auth()->id(),
-                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id != auth()->id(),
-                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id == auth()->id(),
+                                'font-semibold text-black' => !$lastMessage?->isRead() && $lastMessage?->sender_id != $authId,
+                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id != $authId,
+                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id == $authId,
                             ])
                              >
                                 {{$lastMessage->body!=''?$lastMessage->body:($lastMessage->hasAttachment()?'📎 Attachment':'')}}
@@ -123,7 +128,7 @@
 
                     {{-- Read status --}}
                     {{-- Only show if AUTH is NOT onwer of message --}}
-                    <div class="{{ $lastMessage != null && $lastMessage->sender_id != auth()->id() &&  !$lastMessage->isRead()?'visible':'invisible'}} col-span-2 flex flex-col text-center my-auto">
+                    <div class="{{ $lastMessage != null && $lastMessage->sender_id != $authId &&  !$lastMessage->isRead()?'visible':'invisible'}} col-span-2 flex flex-col text-center my-auto">
 
                         {{-- Dots icon --}}
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
