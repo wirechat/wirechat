@@ -102,7 +102,14 @@
                             @endif
                            
 
-                             <p class="  truncate text-sm font-[100]">
+                             <p 
+                             @class([
+                                'truncate text-sm   gap-2 items-center',
+                                'font-semibold text-black' => !$lastMessage?->isRead() && $lastMessage?->sender_id != auth()->id(),
+                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id != auth()->id(),
+                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id == auth()->id(),
+                            ])
+                             >
                                 {{$lastMessage->body!=''?$lastMessage->body:($lastMessage->hasAttachment()?'📎 Attachment':'')}}
                              </p>
 
