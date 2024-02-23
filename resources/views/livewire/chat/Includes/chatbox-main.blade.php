@@ -28,7 +28,7 @@
     style="contain: content">
 
 
-    <div x-cloak wire:loading.class.remove='hidden'  class="hidden w-full flex items-center py-2 ">
+    {{-- <div x-cloak wire:loading.flex wire:target="loadMore()"  class="hidden w-full  items-center py-2 ">
         <div  class="mx-auto ">
             <svg aria-hidden="true" class="w-5 h-5 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
                 viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,7 +40,7 @@
                     fill="currentFill" />
             </svg>
         </div>
-    </div>
+    </div> --}}
 
 
     {{-- Define previous message outside the loop --}}
@@ -68,7 +68,7 @@
     $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
         @endphp
 
-        <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
+        <div  @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
 
             {{-- Show parent/reply message --}}
             @if ($belongsToAuth && $message->hasParent())
@@ -186,15 +186,17 @@
                         {{$message->body}}
                     </p>
 
+
+                    
                     @endif
 
                     @if ($message->body && !$isEmoji)
                     {{-- message body --}}
-                    <div @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
-                        flex-col text-black bg-[#f6f6f8fb]', ' bg-blue-500/80 text-white'=>
-                        $belongsToAuth,
+                    <div  
+                      @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
+                        flex-col text-black bg-[#f6f6f8fb]','bg-blue-500/80 text-white'=> $belongsToAuth,
 
-                        //first message on RIGHT
+                        //first message on RIGHT 
                         'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id
                         &&$message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
 

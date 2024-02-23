@@ -35,6 +35,11 @@ class ChatBox extends Component
     public $photos = [];
 
 
+    //Theme 
+
+    public string $authMessageBodyColor;
+
+
 
 
  
@@ -114,6 +119,8 @@ class ChatBox extends Component
 
     function sendMessage()
     {
+
+        abort_unless(auth()->check(),401);
 
         /* If photos is empty then conitnue to validate body , since photos can be submited without body */
         if ($this->photos == null) {
@@ -285,10 +292,35 @@ class ChatBox extends Component
         return $this->loadedMessages;
     }
 
+    /* to generate color auth message background color */
+   protected function getAuthMessageBodyColor() : string {
+
+      $color= config('wirechat.theme','blue');
+
+      return 'bg-'.$color.'-500';
+
+        
+    }
+
     function mount()
     {
+        abort_unless(auth()->check(),401);
+
+         #check if user belongs to conversation
+        $belongsToConversation = auth()->user()->conversations()
+                    ->where('id', $this->conversation->id)
+                    ->exists();
+        abort_unless($belongsToConversation, 403);
+
+        #mark messages belonging to receiver as read
+        Message::where('conversation_id', $this->conversation->id)
+            ->where('receiver_id', auth()->id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
 
         $this->receiver = $this->conversation->getReceiver();
+
+        $this->authMessageBodyColor = $this->getAuthMessageBodyColor();
 
         $this->loadMessages();
     }

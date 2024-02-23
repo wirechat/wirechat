@@ -37,6 +37,9 @@ return [
 
      'allow_user_search'=>true,
 
+     'theme'=>'blue', // can be from any colors : gree, red, 
+
+
      'attachments' => [
         'allow_attachments'=>true,
         'folder' => 'attachments',

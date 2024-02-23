@@ -21,8 +21,15 @@
         {{-- Filters --}}
         <section class="gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2 bg-white">
 
-            <button class="font-semibold flex justify-center text-black border-b-2 border-black pb-2">
+            <button class="font-semibold flex gap-2 justify-center text-black border-b-2 border-black pb-2">
                  All
+
+                 @if (auth()->user()->unReadMessagesCount()>0)
+                 <span class="rounded-full text-xs p-1 px-2 scale-95  tracking-wide font-bold bg-blue-500 text-white ">
+                     {{auth()->user()->unReadMessagesCount()}}
+                 </span>
+                 @endif
+
             </button>
             {{-- <button class="font-semibold flex justify-center pb-2 text-gray-500">
                 Archived
@@ -58,6 +65,7 @@
             @endphp
 
             {{-- Chat list item --}}
+
             <li  
             @class([
                 'py-3 hover:bg-gray-50 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
