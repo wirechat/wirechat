@@ -42,9 +42,10 @@ return [
 
      'attachments' => [
         'allow_attachments'=>true,
-        'folder' => 'attachments',
-        'allowed_images' => (array) ['png','jpg','jpeg','gif'],
-        'allowed_files' => (array) ['zip','rar','txt'],
+        'storage_folder' => 'attachments',
+        'storage_disk' => 'public',
+        'image_mimes' => (array) ['png','jpg','jpeg','gif'],
+        'file_mimes' => (array) ['zip','rar','txt'],
         'max_upload_size' => 150, // MB
     ],
 

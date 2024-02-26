@@ -2,7 +2,7 @@
  class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3  ">
 
  @php
-     $authId=auth()->id();
+     $authId=$authUser->id;
  @endphp
 
 
@@ -57,8 +57,9 @@
 
     <main class="  overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
 
-        @if ($conversations!=null)
+        @if (count($conversations)>0)
         {{-- chatlist  --}}
+        
         <ul class="p-2 grid w-full spacey-y-2">
 
 
@@ -147,7 +148,9 @@
         </ul>
         @else
 
-        no conversations 
+        <div class="w-full flex items-center h-full justify-center">
+            <h6 class=" font-bold text-gray-700">No conversations yet  </h6>
+        </div>
             
         @endif
     </main>

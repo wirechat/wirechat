@@ -38,15 +38,13 @@ class ChatList extends Component{
 
       return 'bg-'.$color.'-500/20';
 
-        
     }
 
-
-
   public function render()
-  {
-       $conversations = auth()->user()->load('conversations')->conversations()->latest('updated_at')->get();
-       return view('wirechat::livewire.chat.chat-list',['conversations'=>$conversations,'unReadMessagesCount'=>auth()->user()->unReadMessagesCount()]);
+  {       
+       $user= auth()->user()->load('conversations');
+       $conversations = $user->conversations()->latest('updated_at')->get();
+       return view('wirechat::livewire.chat.chat-list',['conversations'=>$conversations,'unReadMessagesCount'=>$user->unReadMessagesCount(),'authUser'=>$user]);
   }
 
 

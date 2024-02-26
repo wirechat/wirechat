@@ -1,3 +1,5 @@
+{{-- Import helper function to use in chatbox --}}
+@use('Namu\WireChat\Helpers\helper')
 <div x-data="{
     height:0,
     conversationElement: document.getElementById('conversation'),
@@ -56,7 +58,7 @@
         {{--------------}}
         {{---Messages---}}
         {{--------------}}
-    @include('wirechat::livewire.chat.Includes.chatbox-main')
+      @include('wirechat::livewire.chat.Includes.chatbox-main')
 
         <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
             <div
@@ -175,6 +177,7 @@
                     @csrf
                     <input type="hidden" autocomplete="false" style="display: none">
 
+                    {{-- Input --}}
                     <div @class(['flex gap-2 sm:px-2 w-full'])>
                         <textarea 
                         @focus-input-field.window="$el.focus()" 
@@ -192,7 +195,6 @@
 
                     </div>
 
-
                     {{-- Actions --}}
                     <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->photos)>0) }"
                         @class(['w-[15%] justify-end flex items-center gap-2 hidden md:hidden'])>
@@ -202,7 +204,7 @@
 
                             {{-- Trigger image upload --}}
                             <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
-                                wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only"
+                                wire:model.live='photos' --}} accept="{{Helper::formattedImageMimesForAcceptAttribute()}}" class="sr-only"
                                 style="display: none">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
                                 stroke="currentColor" class="w-7 h-7">
@@ -240,7 +242,7 @@
                         isUploading: false,
                         MAXFILES: 5,
                         MAXFILESIZE: 11 * 1024 * 1024,
-                        allowedFileTypes: ['png', 'jpeg', 'jpg'],
+                        allowedFileTypes: @json(config('wirechat.attachments.image_mimes')),
                         progress: 0,
                         wireModel: 'photos',
             
