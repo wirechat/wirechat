@@ -50,18 +50,24 @@
         <section class="py-2 ">
                 <input type="search" wire:model.live.debounce='searchQuery' placeholder="Search"
                 class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
-
         </section>
     </header>
 
 
     <main class="  overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
+    
+       
 
-         
+        <div x-cloak 
+            wire:loading.delay.shorter.class.remove="hidden" 
+            wire:target="searchQuery" class="hidden transition-all duration-300 ">
+        <x-wirechat::loading-spin/>
+        </div>
+    
         @if (count($conversations)>0)
         {{-- chatlist  --}}
         
-        <ul class="p-2 grid w-full spacey-y-2">
+        <ul wire:loading.delay.shorter.remove  wire:target="searchQuery"  class="p-2 grid w-full spacey-y-2">
 
             @foreach ($conversations as $conversation)
                 
