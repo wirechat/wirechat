@@ -247,10 +247,9 @@ class ChatBox extends Component
 
 
 
-    #[On('loadMore')]
+   // #[On('loadMore')]
     function loadMore()
     {
-
         //dd('reached');
 
         #increment

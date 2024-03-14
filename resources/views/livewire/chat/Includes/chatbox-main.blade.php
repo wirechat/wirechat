@@ -8,7 +8,7 @@
     
     if((scrollTop<=0) && canLoadMore){
         await $nextTick();
-        @this.dispatch('loadMore');
+        $wire.loadMore();
     }
 
     " @update-height.window="
@@ -41,6 +41,12 @@
             </svg>
         </div>
     </div> --}}
+
+    <div x-cloak 
+            wire:loading.delay.class.remove="invisible"
+            wire:target="loadMore" class="invisible transition-all duration-300 ">
+              <x-wirechat::loading-spin/>
+    </div>
 
 
     {{-- Define previous message outside the loop --}}
