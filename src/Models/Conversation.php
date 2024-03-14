@@ -25,10 +25,25 @@ class Conversation extends Model
     }
 
 
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id','id');
+    }
+
+    /**
+     * Define a relationship to fetch the receiver user.
+     */
+    public function receiver()
+    {
+            return $this->belongsTo(User::class, 'receiver_id','id');
+
+    }
+
 
     public function messages()
     {
         return $this->hasMany(Message::class);
+        
     }
 
     public function getReceiver()

@@ -46,10 +46,10 @@
           
         </section>
 
+        {{-- Search input --}}
         <section class="py-2 ">
-
-        <input type="search" placeholder="Search"
-        class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
+                <input type="search" wire:model.live.debounce='searchQuery' placeholder="Search"
+                class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
 
         </section>
     </header>
@@ -57,11 +57,11 @@
 
     <main class="  overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
 
+         
         @if (count($conversations)>0)
         {{-- chatlist  --}}
         
         <ul class="p-2 grid w-full spacey-y-2">
-
 
             @foreach ($conversations as $conversation)
                 
@@ -72,7 +72,7 @@
 
             {{-- Chat list item --}}
 
-            <li  
+            <li  wire:key="conversation-{{$conversation->id}}"
             @class([
                 'py-3 hover:bg-gray-50 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
                 'bg-gray-50 border-r-4 border-blue-500/20'=>$selectedConversationId==$conversation?->id,
