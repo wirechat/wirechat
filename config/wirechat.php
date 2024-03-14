@@ -45,7 +45,7 @@ return [
         'allow_attachments'=>true,
         'storage_folder' => 'attachments',
         'storage_disk' => 'public',
-        'image_mimes' => (array) ['png','jpg','jpeg','gif'],
+        'image_mimes' => (array) ['png','jpg','jpeg','gif','pdf','zip'],
         'file_mimes' => (array) ['zip','rar','txt'],
         'max_upload_size' => 150, // MB
     ],
