@@ -35,11 +35,11 @@ return [
      //This string is a comma-separated list of unique file type specifiers  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
      'allowed_attachments'=>['image/png','image/jpeg', 'image/jpg'],
 
-     'allow_user_search'=>true,
 
      'theme'=>'red', // can be from any colors : gree, red, 
 
-     'searchable_fields'=>['name'],   //['email','profession']etc
+     'user_search_allowed'=>true,
+     'user_searchable_fields'=>['name'],   //['email','profession']etc
 
      'attachments' => [
         'allow_attachments'=>true,

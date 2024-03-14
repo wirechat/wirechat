@@ -68,7 +68,7 @@ trait Chatable
     public function getWireSearchableFields(): ?array
     {
         // Define the fields specified as searchable in the configuration
-        $fieldsToCheck = config('wirechat.searchable_fields');
+        $fieldsToCheck = config('wirechat.user_searchable_fields');
 
         // Get the table name associated with the model
         $tableName = $this->getTable();
