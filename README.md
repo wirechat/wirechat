@@ -1,11 +1,19 @@
 
 
-This is a highly customizable one - one Laravel messaging application made with Livewire v3, it is used to provide a convinient way to allows users to communicate with eachother in the application 
+This is a highly customizable one to one Laravel messaging application made with Livewire v3, it is used to provide a convinient way to allows users to communicate with eachother in the application 
+
+## Prerequisites
+
+Before we start, make sure you have the following installed:
+
+* PHP version 8.1 or later
+* Laravel version 10.47 or later
+* Livewire version 3.2.3 or later
 
 
 ## Installing
 
-Intall package via composer 
+Install package via composer 
 
 ```shell
 composer require namu/wirechat

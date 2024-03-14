@@ -39,6 +39,7 @@ return [
 
      'theme'=>'red', // can be from any colors : gree, red, 
 
+     'searchable_fields'=>['name'],   //['email','profession']etc
 
      'attachments' => [
         'allow_attachments'=>true,

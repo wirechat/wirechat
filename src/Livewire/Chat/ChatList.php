@@ -2,10 +2,14 @@
 
 namespace Namu\WireChat\Livewire\Chat;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Namu\WireChat\Models\Conversation;
+
+use function PHPUnit\Framework\isEmpty;
 
 class ChatList extends Component
 {
@@ -23,11 +27,6 @@ class ChatList extends Component
   public $selectedConversationId;
 
 
-  function mount()
-  {
-
-    $this->selectedConversationId = request()->chat;
-  }
 
   public static function getUnReadMessageDotColor(): string
   {
@@ -45,25 +44,44 @@ class ChatList extends Component
     return 'bg-' . $color . '-500/20';
   }
 
+
+
+
+  function mount()
+  {
+    
+    abort_unless(auth()->check(),401);
+    $this->selectedConversationId = request()->chat;
+
+  }
+
+
+
   public function render()
   {
+
+    #get user searcable fiels
+    $searchableFields =auth()->user()->getWireSearchableFields();
+
+   // dd(empty($fields));
     #Load the authenticated user with their conversations and related sender and receiver models
     $user = auth()->user()->load('conversations.sender', 'conversations.receiver');
 
     #Query conversations where the authenticated user is either the sender or receiver
-    $conversations = Conversation::where(function ($query) {
+    $conversations = Conversation::where(function ($query)  {
       $query->where('receiver_id', auth()->id())
         ->orWhere('sender_id', auth()->id());
     })
       #Filter conversations based on sender or receiver name matching the search query
-      ->where(function ($query) {
-        $query->whereHas('sender', function ($subquery) {
+      ->where(function ($query)use($searchableFields)  {
+        
+        $query->whereHas('sender', function ($subquery) use($searchableFields) {
           $subquery->where('id', '<>', auth()->id())
-            ->where('name', 'LIKE', '%' . $this->searchQuery . '%');
+            ->whereAny($searchableFields, 'LIKE', '%' . $this->searchQuery . '%');
         })
-          ->orWhereHas('receiver', function ($subquery) {
+          ->orWhereHas('receiver', function ($subquery)use($searchableFields) {
             $subquery->where('id', '<>', auth()->id())
-              ->where('name', 'LIKE', '%' . $this->searchQuery . '%');
+              ->whereAny($searchableFields, 'LIKE', '%' . $this->searchQuery . '%');
           });
       })
       #Order conversations by the latest updated_at timestamp

@@ -21,7 +21,8 @@
       },
     "require": {
         "php": "^8.1",
-        "livewire/livewire": "^3.2.3"
+        "livewire/livewire": "^3.2.3",
+        "laravel/framework": "^10.47"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
