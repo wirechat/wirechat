@@ -47,10 +47,13 @@
         </section>
 
         {{-- Search input --}}
+        @if (config('wirechat.user_search_allowed',false)==true)
         <section class="py-2 ">
-                <input type="search" wire:model.live.debounce='searchQuery' placeholder="Search"
-                class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
-        </section>
+            <input type="search" wire:model.live.debounce='searchQuery' placeholder="Search"
+            class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
+         </section>
+        @endif
+      
     </header>
 
 
@@ -58,11 +61,13 @@
     
        
 
+        @if (config('wirechat.user_search_allowed',false)==true)
         <div x-cloak 
             wire:loading.delay.shorter.class.remove="hidden" 
             wire:target="searchQuery" class="hidden transition-all duration-300 ">
         <x-wirechat::loading-spin/>
         </div>
+        @endif
     
         @if (count($conversations)>0)
         {{-- chatlist  --}}
