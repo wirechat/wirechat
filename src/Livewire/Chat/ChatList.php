@@ -9,8 +9,6 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Namu\WireChat\Models\Conversation;
 
-use function PHPUnit\Framework\isEmpty;
-
 class ChatList extends Component
 {
 
@@ -49,7 +47,7 @@ class ChatList extends Component
 
   function mount()
   {
-    
+
     abort_unless(auth()->check(),401);
     $this->selectedConversationId = request()->chat;
 

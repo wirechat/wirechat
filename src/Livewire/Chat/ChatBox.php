@@ -245,8 +245,7 @@ class ChatBox extends Component
         $this->dispatch('scroll-bottom');
     }
 
-
-
+    
    // #[On('loadMore')]
     function loadMore()
     {

@@ -1,4 +1,15 @@
 <div
+x-init=" 
+setTimeout(()=>{
+    conversationElement = document.getElementById('conversation-'+{{$selectedConversationId}});
+
+    // Scroll to the conversation element
+    if (conversationElement) {
+    conversationElement.scrollIntoView({behavior:'smooth'});
+    }
+},200);
+   
+        "
  class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3  ">
 
  @php
@@ -83,7 +94,7 @@
 
             {{-- Chat list item --}}
 
-            <li  wire:key="conversation-{{$conversation->id}}"
+            <li    id="conversation-{{$conversation->id}}"  wire:key="conversation-{{$conversation->id}}"
             @class([
                 'py-3 hover:bg-gray-50 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
                 'bg-gray-50 border-r-4 border-blue-500/20'=>$selectedConversationId==$conversation?->id,
