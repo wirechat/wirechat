@@ -187,6 +187,11 @@
                    </div>
                    @endif
 
+                    @if (str()->startsWith($attachment->mime_type, 'video/'))
+
+                    <x-wirechat::video source="{{url('storage/' . $attachment?->file_path) }}" />
+                   @endif
+
 
                     {{-- Make sure mime type is image before renderiing  --}}
                    @if (str()->startsWith($attachment->mime_type, 'image/'))
