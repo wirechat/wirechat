@@ -68,7 +68,7 @@ class ChatBox extends Component
      ** This is avoid replacing temporary files on next selection
      * We override the function in WithFileUploads Trait
      */
-    function _finishUpload($name, $tmpPath, $isMultiple)
+     function _finishUpload($name, $tmpPath, $isMultiple)
     {
         $this->cleanupOldUploads();
 
@@ -136,6 +136,7 @@ class ChatBox extends Component
                 $attachment = Attachment::create([
                     'file_path' => $path,
                     'file_name' => basename($path),
+                    'original_name' => $photo->getClientOriginalName(),
                     'mime_type' => $photo->getMimeType(),
                     'url'=>url($path)
                 ]);

@@ -9,7 +9,7 @@ class Attachment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['file_path', 'file_name', 'mime_type','url'];
+    protected $fillable = ['file_path', 'file_name', 'mime_type','url','original_name'];
 
 
     public function __construct(array $attributes = [])
