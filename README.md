@@ -77,28 +77,57 @@ $auth->hasConversationWith($user); // bool
 ```
 
 
-### Retrieving Data
+### Attachments
 
-#### `\Namu\LaravelFavoriteable\Traits\Favoriter`
+
+
+Wirechat offers a convienient way to add attachements to messages , you can exchange both media as in images and videos including documents such as pdf, zip etc when sending messsages
+
+#### Media Attachments
+
+Media represents videos , images, gifs etc .In order to allow media attachments you need to set the allow_attachments =true in wirechat config .
+
 
 ```php
-$user->getFavorites(Listings::class);
+  ...
+  'attachments' => [
+        'storage_folder' => 'attachments',
+        'storage_disk' => 'public',
 
-//if you're using other guards too you can retrieve as follows
-$user = User::find(1);
+        //Media config
+        'allow_media_attachments'=>true,
+        'media_mimes' => (array) ['png','jpg','jpeg','gif','.mov','.mp4'],
+        'media_max_upload_size' => 12288, // 12MB
 
-//To get user conversations
-$user->conversations()->get();
+        //Files config
+        'allow_file_attachments'=>true,
+        'file_mimes' => (array) ['zip','rar','txt','pdf'],
+        'file_max_upload_size' => 12288, //12 MB
 
-$admin->getFavorites(Conversation::class);
-
-//you can also perform additional queries 
-$favoritedPosts= $user->getFavorites(Post::class)->get();
-$favoritedPosts= $user->getFavorites(Post::class)->paginate(10);
-$favoritedPosts= $user->getFavorites(Post::class)->where('title','your post title')->get();
-
+    ],
 ```
+
+#### Filtering attachments 
  
+You can filter the attachments types by adding the extentions in the array 
+
+for example if we want to allow only add images upload in media then add only image extentions exclusively ,if you want to allow both videos and images then add add images and video extentions in the `media_mimes=[]` array
+
+This is the same for filtering Files in the `file_mimes=[]`
+
+you also need to allow these extensions   in the livewire config `preview_mimes` in order to allow preview while uploading 
+
+
+#### max_upload_size
+
+Wirechat is able to validate attachments on both on client side before they hit the server  and on server side ,  the `max_upload_size` represents maximum file upload size for each individual attachment represented in kilobytes 
+
+Note: In the Livewire config file the `temporary_file_upload.rules` is set to `max:12288 //12MB ` by default if you wish to  set max_upload_size greater that this , make sure you increase it in the livewire config file as well
+
+Lastly the `post_max_size` in the `php.ini` superseeds any configuration in livewire config and wirechat config as well , so make sure you adjust the upload size accordinly in order to allow larger file uploads 
+
+
+
 
 ### Aggregations
 Here you can retrieve items from the pivot table to we can get the count()
