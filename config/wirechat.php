@@ -42,12 +42,19 @@ return [
      'user_searchable_fields'=>['name'],   //['email','profession']etc
 
      'attachments' => [
-        'allow_attachments'=>true,
         'storage_folder' => 'attachments',
         'storage_disk' => 'public',
-        'image_mimes' => (array) ['png','jpg','jpeg','gif','pdf','zip'],
-        'file_mimes' => (array) ['zip','rar','txt'],
-        'max_upload_size' => 150, // MB
+        'max_uploads' => 10,  
+
+        //Media config
+        'allow_media_attachments'=>true,
+        'media_mimes' => (array) ['png','jpg','jpeg','gif','mov','mp4'],
+        'media_max_upload_size' => 12288, // 12MB
+
+        //Files config
+        'allow_file_attachments'=>true,
+        'file_mimes' => (array) ['zip','rar','txt','pdf'],
+        'file_max_upload_size' => 12288, //12 MB
     ],
 
 ];

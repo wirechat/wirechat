@@ -15,8 +15,8 @@ class Helper {
      * @param array $fileExtensions The array of file extensions to format.
      * @return string The formatted string for the 'accept' attribute.
      */
-    public static function formattedImageMimesForAcceptAttribute(): string {
-        $fileExtensions= config('wirechat.attachments.image_mimes');
+    public static function formattedMediaMimesForAcceptAttribute(): string {
+        $fileExtensions= config('wirechat.attachments.media_mimes');
         return '.' . implode(',.', $fileExtensions);
     }
 }

@@ -32,7 +32,7 @@ class ChatBox extends Component
     public bool $canLoadMore;
 
 
-    public $photos = [];
+    public $media = [];
 
 
     //Theme 
@@ -114,16 +114,16 @@ class ChatBox extends Component
 
         abort_unless(auth()->check(),401);
 
-        /* If photos is empty then conitnue to validate body , since photos can be submited without body */
-        if ($this->photos == null) {
+        /* If media is empty then conitnue to validate body , since media can be submited without body */
+        if ($this->media == null) {
             $this->validate(['body' => 'required|string']);
         }
 
-        if ($this->photos != null) {
+        if ($this->media != null) {
 
 
             $createdMessages = [];
-            foreach ($this->photos as $key => $photo) {
+            foreach ($this->media as $key => $photo) {
 
                 /**
                  * todo: Add url to table
@@ -202,7 +202,7 @@ class ChatBox extends Component
             #dispatch event 'refresh ' to chatlist 
             $this->dispatch('refresh')->to(ChatList::class);
         }
-        $this->reset('photos');
+        $this->reset('media');
 
         #scroll to bottom
         $this->dispatch('scroll-bottom');

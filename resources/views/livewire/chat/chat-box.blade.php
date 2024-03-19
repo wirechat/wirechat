@@ -60,19 +60,19 @@
         {{--------------}}
       @include('wirechat::livewire.chat.Includes.chatbox-main')
 
-        <footer x-data="fileUploadComponent" class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
+        <footer  class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
             <div
                 class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[95%] mx-auto">
 
                 {{-- Image preview section --}}
-                @if (count($photos)>0)
-                 <section
+                @if (count($media)>0)
+                 <section   x-data="attachments('media')"
                     class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
                     style=" scrollbar-width: none; -ms-overflow-style: none;">
 
                     {{-- Loop through media for preview --}}
 
-                    @foreach ($photos as $key=> $image)
+                    @foreach ($media as $key=> $image)
 
                     <div class="relative">
                         {{-- Delete image --}}
@@ -91,13 +91,13 @@
 
                     @endforeach
 
-                    {{-- TODO @if "( count($photos)< $MAXFILES )" to hide upload button when maz files exceeded --}}
-                        <div>
+                    {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
+                    <div>
                         {{-- Trigger image upload --}}
                         <label
                             class="relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
-                            <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
-                                wire:model.live='photos' --}} accept=".jpg,.png,.jpeg" class="sr-only">
+                            <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple {{--
+                                wire:model.live='media' --}} accept=".jpg,.png,.jpeg" class="sr-only">
                             <span class="  m-auto">
 
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -109,7 +109,7 @@
 
                             </span>
                         </label>
-                  </div>
+                    </div>
 
                  </section>
                 @endif
@@ -172,7 +172,7 @@
                         }
                         
                     }"
-                    @submit.prevent="((body && body?.trim().length > 0) || ($wire.photos && $wire.photos.length > 0)) ? $wire.sendMessage() : null"
+                    @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null"
                     method="POST" autocapitalize="off" @class([' flex w-full col-span-12 gap-2'])>
                     @csrf
                     <input type="hidden" autocomplete="false" style="display: none">
@@ -188,23 +188,23 @@
                         @keydown.shift.enter.prevent="insertNewLine($el)"
                         {{-- @keydown.enter.prevent prevents the default behavior of Enter key press only if Shift is not held down. --}}
                         @keydown.enter.prevent=""
-                        @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.photos && $wire.photos.length > 0)) ? $wire.sendMessage() : null)"
+                        @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
                         class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " ></textarea>
-                        <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->photos)>0))}" type="submit"
+                        <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->media)>0))}" type="submit"
                             id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
                     </div>
 
                     {{-- Actions --}}
-                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->photos)>0) }"
+                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->media)>0) }"
                         @class(['w-[15%] justify-end flex items-center gap-2 hidden md:hidden'])>
 
                         {{-- upload Image --}}
-                        <label class="cursor-pointer">
+                        <label x-data="attachments('media')" class="cursor-pointer">
 
                             {{-- Trigger image upload --}}
-                            <input @change="handleFileSelect(event, {{count($photos)}})" type="file" multiple {{--
-                                wire:model.live='photos' --}} accept="{{Helper::formattedImageMimesForAcceptAttribute()}}" class="sr-only"
+                            <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple {{--
+                                wire:model.live='media' --}} accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only"
                                 style="display: none">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
                                 stroke="currentColor" class="w-7 h-7">
@@ -237,15 +237,16 @@
 
         @script
         <script>
-            Alpine.data('fileUploadComponent', () => ({
+            Alpine.data('attachments', (type="media") => ({
                         isDropping: false,
+                        type:type,
                         isUploading: false,
-                        MAXFILES: 5,
-                        MAXFILESIZE: 11 * 1024 * 1024,
-                        allowedFileTypes: @json(config('wirechat.attachments.image_mimes')),
+                        MAXFILES:  @json(config('wirechat.attachments.max_uploads',5)),
+                        maxSize:  @json(config('wirechat.attachments.media_max_upload_size',12288)) * 1024,
+                        allowedFileTypes: type=='media'? @json(config('wirechat.attachments.media_mimes')):@json(config('wirechat.attachments.file_mimes')),
                         progress: 0,
-                        wireModel: 'photos',
-            
+                        wireModel:type=='media'? 'media':'files',
+
                     handleFileSelect(event,count) {
                         
                 
@@ -302,14 +303,12 @@
 
                     validateFiles(files,count) {
                 
-                        const maxSize = 9 * 1024 * 1024; // 7MB in bytes
                     // const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
                         var totalFiles=count + files.length;
                 
                 
                         //make sure max file not exceeded  
                         // Make sure max file count is not exceeded
-
                         if (totalFiles > this.MAXFILES) {
 
                         files = Array.from(files).slice(0, this.MAXFILES - count);
@@ -326,8 +325,9 @@
                         const invalidFiles = Array.from(files).filter((file) => {
 
                             const fileType = file.type.split('/')[1].toLowerCase(); // Get the file extension from the MIME type
-                            const isInvalid = file.size > maxSize || ! (this.allowedFileTypes.includes(fileType));
-
+                            const isInvalid = file.size > this.maxSize || ! (this.allowedFileTypes.includes(fileType));
+                            
+                            console.log('maxSize ', this.maxSize);
                             console.log('File Name:', file.name);
                             console.log('File Type:', fileType);
                             console.log('Is Invalid:', isInvalid);
@@ -340,13 +340,13 @@
                         //filter valid file 
                         const validFiles = Array.from(files).filter((file) => {
                             const fileType = file.type.split('/')[1].toLowerCase();
-                            return file.size <= maxSize && this.allowedFileTypes.includes(fileType);
+                            return file.size <= this.maxSize && this.allowedFileTypes.includes(fileType);
                         });
                 
                         if (invalidFiles.length > 0) {
                 
                             const errorMessages = invalidFiles.map((file) => {
-                                if (file.size > maxSize) {
+                                if (file.size > this.maxSize) {
 
                                 return  $dispatch('notify',{type:'warning',message:`File size exceeds the maximum limit (9MB): ${file.name}`});
                                 } else {

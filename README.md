@@ -95,7 +95,7 @@ Media represents videos , images, gifs etc .In order to allow media attachments 
 
         //Media config
         'allow_media_attachments'=>true,
-        'media_mimes' => (array) ['png','jpg','jpeg','gif','.mov','.mp4'],
+        'media_mimes' => (array) ['png','jpg','jpeg','gif','mov','mp4'],
         'media_max_upload_size' => 12288, // 12MB
 
         //Files config
