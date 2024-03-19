@@ -130,7 +130,7 @@ class ChatBox extends Component
                  */
 
                 #save photo to disk 
-                $path =  $photo->store('photos', 'public');
+                $path =  $photo->store(config('wirechat.attachments.storage_folder','attachments'), config('wirechat.attachments.storage_disk'));
 
                 #create attachment
                 $attachment = Attachment::create([
@@ -154,9 +154,7 @@ class ChatBox extends Component
 
                 #append message to createdMessages
                 $createdMessages[] = $message;
-
-
-
+                
 
                 #update the conversation model - for sorting in chatlist
                 $this->conversation->updated_at = now();

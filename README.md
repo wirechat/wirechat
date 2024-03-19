@@ -81,12 +81,11 @@ $auth->hasConversationWith($user); // bool
 
 
 
-Wirechat offers a convienient way to add attachements to messages , you can exchange both media as in images and videos including documents such as pdf, zip etc when sending messsages
+Wirechat offers a convienient way to add attachments to messages , you can exchange both media as in images and videos including documents such as pdf, zip etc when sending messsages
 
 #### Media Attachments
 
-Media represents videos , images, gifs etc .In order to allow media attachments you need to set the allow_attachments =true in wirechat config .
-
+Media represents videos , images, gifs etc .In order to allow media attachments you need to set the allow_media_attachments & allow_file_attachments to true in wirechat config
 
 ```php
   ...
@@ -125,8 +124,6 @@ Wirechat is able to validate attachments on both on client side before they hit 
 Note: In the Livewire config file the `temporary_file_upload.rules` is set to `max:12288 //12MB ` by default if you wish to  set max_upload_size greater that this , make sure you increase it in the livewire config file as well
 
 Lastly the `post_max_size` in the `php.ini` superseeds any configuration in livewire config and wirechat config as well , so make sure you adjust the upload size accordinly in order to allow larger file uploads 
-
-
 
 
 ### Aggregations
