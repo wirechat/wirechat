@@ -49,24 +49,25 @@
   
     " class=" w-full overflow-hidden  h-full ">
     {{-- todo: add rounded corners to attachment --}}
-    <div class="  border-r   flex flex-col overflow-y-hidden grow  h-full">
+    <div class="  border-r   flex flex-col  grow  h-full">
         {{--------------}}
         {{-----Header---}}
         {{--------------}}
 
-      @include('wirechat::livewire.chat.Includes.chatbox-header')
+        @include('wirechat::livewire.chat.Includes.chatbox-header')
         {{--------------}}
         {{---Messages---}}
         {{--------------}}
-      @include('wirechat::livewire.chat.Includes.chatbox-main')
+        @include('wirechat::livewire.chat.Includes.chatbox-main')
 
-        <footer  class="shrink-0 z-10 bg-white dark:bg-inherit   py-2 overflow-x-hidden">
+        <footer class="shrink-0 z-10 bg-white dark:bg-inherit py-2 overflow-y-visible relative  ">
+
             <div
-                class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[95%] mx-auto">
+                class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[97%] mx-auto">
 
-                {{-- Image preview section --}}
+                {{-- Media preview section --}}
                 @if (count($media)>0)
-                 <section   x-data="attachments('media')"
+                <section x-data="attachments('media')"
                     class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
                     style=" scrollbar-width: none; -ms-overflow-style: none;">
 
@@ -92,13 +93,13 @@
                     @endforeach
 
                     {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
-                    <div>
-                        {{-- Trigger image upload --}}
+
+                        {{-- Add more media --}}
                         <label
-                            class="relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
-                            <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple {{--
-                                wire:model.live='media' --}} accept=".jpg,.png,.jpeg" class="sr-only">
-                            <span class="  m-auto">
+                            class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
+                            <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple
+                                accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only ">
+                            <span class="  m-auto  ">
 
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                     class="w-7 h-7 text-gray-600">
@@ -109,47 +110,106 @@
 
                             </span>
                         </label>
-                    </div>
 
-                 </section>
-                @endif
+            </section>
+            @endif
+            {{---------------------------}}
+            {{-- Files preview section --}}
+            @if (count($files)>0)
+            <section x-data="attachments('files')"
+                class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
+                style=" scrollbar-width: none; -ms-overflow-style: none;">
 
-                {{-- Replying to --}}
-                @if ($replyMessage !=null)
-                <section class="p-px py-1 w-full col-span-12">
+                {{-- Loop through files for preview --}}
+                @foreach ($files as $key=> $file)
+                <div class="relative">
+                    {{-- Delete file button--}}
+                    <button class="absolute -top-2 -right-2  z-10" @click="removeUpload('{{$file->getFilename()}}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            <path
+                                d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                        </svg>
+                    </button>
 
-                    <div class="flex justify-between items-center">
-                        <h6 class="text-sm">Replying to
-                            <span class="font-bold">
-                                {{$replyMessage->sender_id== $receiver->id? $receiver->name:" Yourself"}}
-                            </span>
-                        </h6>
-                        <button wire:click="removeReply()">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    {{-- File details --}}
+                    <div class="flex items-center group overflow-hidden border rounded-xl">
+                        <span class=" p-2">
+                            {{-- document svg:HI --}}
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-8 h-8 text-gray-500">
+                                <path
+                                    d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+                                <path
+                                    d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
                             </svg>
-                        </button>
+                        </span>
+
+                        <p class="mt-auto  p-2 text-gray-600 text-sm">
+                            {{$file->getClientOriginalName()}}
+                        </p>
                     </div>
+                </div>
 
-                    {{-- Message being replies to --}}
-                    <p class="truncate text-sm text-gray-500 max-w-md">
-                        {{$replyMessage->body!=''?$replyMessage->body:($replyMessage->hasAttachment()?'Attachment':'')}}
-                    </p>
-                </section>
-                @endif
+                @endforeach
 
-                {{-- Emoji icon --}}
-                {{-- <span class="col-span-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-7 h-7">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
-                    </svg>
-                </span> --}}
+                {{--Add more files --}}
+                {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
 
-                <form 
-                    x-data="{
+                <label
+                    class="cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
+                    <input @change="handleFileSelect(event, {{count($files)}})" type="file" multiple
+                        accept="{{Helper::formattedFileMimesForAcceptAttribute()}}" class="sr-only" hidden>
+                    <span class="  m-auto">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                            <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                          </svg>
+                          
+
+                    </span>
+                </label>
+
+
+    </section>
+    @endif
+
+    {{-- Replying to --}}
+    @if ($replyMessage !=null)
+    <section class="p-px py-1 w-full col-span-12">
+
+        <div class="flex justify-between items-center">
+            <h6 class="text-sm">Replying to
+                <span class="font-bold">
+                    {{$replyMessage->sender_id== $receiver->id? $receiver->name:" Yourself"}}
+                </span>
+            </h6>
+            <button wire:click="removeReply()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        {{-- Message being replies to --}}
+        <p class="truncate text-sm text-gray-500 max-w-md">
+            {{$replyMessage->body!=''?$replyMessage->body:($replyMessage->hasAttachment()?'Attachment':'')}}
+        </p>
+    </section>
+    @endif
+
+    {{-- Emoji icon --}}
+    {{-- <span class="col-span-1">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="w-7 h-7">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+        </svg>
+    </span> --}}
+
+    <form x-data="{
                         'body':@entangle('body'),
                          insertNewLine: function (textarea) {
 
@@ -172,72 +232,135 @@
                         }
                         
                     }"
-                    @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null"
-                    method="POST" autocapitalize="off" @class([' flex w-full col-span-12 gap-2'])>
-                    @csrf
-                    <input type="hidden" autocomplete="false" style="display: none">
+        @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null"
+        method="POST" autocapitalize="off" @class(['flex w-full col-span-12 gap-2'])>
+        @csrf
+        <input type="hidden" autocomplete="false" style="display: none">
 
-                    {{-- Input --}}
-                    <div @class(['flex gap-2 sm:px-2 w-full'])>
-                        <textarea 
-                        @focus-input-field.window="$el.focus()" 
-                        autocomplete="off" x-model='body' id="inputField"
-                        autofocus type="text" name="message" placeholder="Message" maxlength="1700"
-                        rows="1"
-                        @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
-                        @keydown.shift.enter.prevent="insertNewLine($el)"
-                        {{-- @keydown.enter.prevent prevents the default behavior of Enter key press only if Shift is not held down. --}}
-                        @keydown.enter.prevent=""
-                        @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
-                        class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " ></textarea>
-                        <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->media)>0))}" type="submit"
-                            id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
-                    </div>
+        @if ((count($this->media)== 0) &&(count($this->files)==0))
+        <x-wirechat::popover>
 
-                    {{-- Actions --}}
-                    <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->media)>0) }"
-                        @class(['w-[15%] justify-end flex items-center gap-2 hidden md:hidden'])>
+            <x-slot name="trigger">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-7 h-7">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+            </x-slot>
 
-                        {{-- upload Image --}}
-                        <label x-data="attachments('media')" class="cursor-pointer">
+            {{-- content --}}
+            <div class="grid gap-2 w-full ">
 
-                            {{-- Trigger image upload --}}
-                            <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple {{--
-                                wire:model.live='media' --}} accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only"
-                                style="display: none">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
-                                stroke="currentColor" class="w-7 h-7">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                {{-- Upload Files --}}
+                <label x-data="attachments('files')" class="cursor-pointer">
+                    <input @change="handleFileSelect(event, {{count($files)}})" type="file" multiple
+                        accept="{{Helper::formattedFileMimesForAcceptAttribute()}}" class="sr-only"
+                        style="display: none">
+
+                    <div class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 cursor-pointer">
+
+                        <span class="">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-folder-fill w-6 h-6 text-blue-400" viewBox="0 0 16 16">
+                                <path
+                                    d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3m-8.322.12q.322-.119.684-.12h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981z" />
                             </svg>
+                        </span>
 
-                        </label>
-
-
-                        {{--send Like --}}
-                        <button wire:click='sendLike()' type="button">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
-                                stroke="currentColor" class="w-7 h-7">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                            </svg>
-
-                        </button>
+                        <span class="">
+                            File
+                        </span>
                     </div>
-                </form>
+                </label>
+
+                {{-- Upload Media --}}
+                <label x-data="attachments('media')" class="cursor-pointer">
+
+                    {{-- Trigger image upload --}}
+                    <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple
+                        accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only"
+                        style="display: none">
+
+                    <div class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 cursor-pointer">
+
+                        <span class="">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6 text-blue-500">
+                                <path fill-rule="evenodd"
+                                    d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </span>
+
+                        <span class="">
+                            Photos & Videos
+                        </span>
+                    </div>
+                </label>
 
             </div>
-
-       </footer>
-
-    </div>
+        </x-wirechat::popover>
+        @endif
 
 
+        {{-- Input --}}
+        <div @class(['flex gap-2 sm:px-2 w-full'])>
+            <textarea @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' id="inputField"
+                autofocus type="text" name="message" placeholder="Message" maxlength="1700" rows="1"
+                @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
+                @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the default
+                behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
+                @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
+                class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   "></textarea>
+            <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->media)>0))}" type="submit"
+                id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
-        @script
-        <script>
-            Alpine.data('attachments', (type="media") => ({
+        </div>
+
+        {{-- Actions --}}
+        <div :class="{'hidden md:hidden':(body?.trim()?.length) || @json(count($this->media)>0) }" @class(['w-[15%]
+            justify-end flex items-center gap-2 hidden md:hidden'])>
+
+            {{-- upload Image --}}
+            <label x-data="attachments('media')" hidden class="cursor-pointer">
+
+                {{-- Trigger image upload --}}
+                <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple {{--
+                    wire:model.live='media' --}} accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}"
+                    class="sr-only" style="display: none">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.9"
+                    stroke="currentColor" class="w-7 h-7">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+
+            </label>
+
+
+            {{--send Like --}}
+            <button wire:click='sendLike()' type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                    stroke="currentColor" class="w-7 h-7">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+
+            </button>
+        </div>
+    </form>
+
+</div>
+
+</footer>
+
+</div>
+
+
+
+@script
+<script>
+    Alpine.data('attachments', (type="media") => ({
                         isDropping: false,
                         type:type,
                         isUploading: false,
@@ -372,7 +495,7 @@
                     }
                     }))
 
-        </script>
-        @endscript
+</script>
+@endscript
 
 </div>

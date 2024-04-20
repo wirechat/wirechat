@@ -102,9 +102,7 @@
             <div @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
 
                 {{-- Actions --}}
-                <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>!$belongsToAuth,
-
-                    ])>
+                <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>!$belongsToAuth])>
 
                     <button wire:click="setReply('{{$message->id}}')" class="hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
@@ -114,6 +112,8 @@
                         </svg>
                     </button>
 
+
+     
                     <x-wirechat::dropdown align="{{$belongsToAuth?'right':'left'}}" width="48">
                         <x-slot name="trigger">
                             {{-- Dots --}}
@@ -149,7 +149,6 @@
 
                     {{-- Attachment section --}}
                     @if ($attachment)
-
 
                     {{-- Attachemnt is Application/* --}}
                     {{-- Only show if mime type is --}}
@@ -247,8 +246,7 @@
 
                     @if ($message->body && !$isEmoji)
                     {{-- message body --}}
-                    <div  
-                      @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
+                    <div @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
                         flex-col text-black bg-[#f6f6f8fb]',' bg-blue-500/80 text-white'=> $belongsToAuth,
 
                         //first message on RIGHT 

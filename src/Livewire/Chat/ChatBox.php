@@ -33,6 +33,8 @@ class ChatBox extends Component
 
 
     public $media = [];
+    public $files = [];
+
 
 
     //Theme 
