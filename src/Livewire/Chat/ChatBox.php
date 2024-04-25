@@ -2,10 +2,6 @@
 
 namespace Namu\WireChat\Livewire\Chat;
 
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Collection;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\On;
 use Livewire\Component;
 //use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -67,7 +63,7 @@ class ChatBox extends Component
 
     /**
      * livewire method
-     ** This is avoid replacing temporary files on next selection
+     ** This is avoid replacing temporary files on add more files
      * We override the function in WithFileUploads Trait
      */
      function _finishUpload($name, $tmpPath, $isMultiple)
@@ -117,29 +113,34 @@ class ChatBox extends Component
         abort_unless(auth()->check(),401);
 
         /* If media is empty then conitnue to validate body , since media can be submited without body */
-        if ($this->media == null) {
+        // Combine media and files arrays
+        $attachments = array_merge($this->media, $this->files);
+
+        // If combined files array is empty, continue to validate body
+        if (empty($attachments)) {
             $this->validate(['body' => 'required|string']);
         }
 
-        if ($this->media != null) {
+        if ($attachments) {
 
+            //Combine media and files thne perform loop together
 
             $createdMessages = [];
-            foreach ($this->media as $key => $photo) {
+            foreach ($attachments as $key => $attachment) {
 
                 /**
                  * todo: Add url to table
                  */
 
                 #save photo to disk 
-                $path =  $photo->store(config('wirechat.attachments.storage_folder','attachments'), config('wirechat.attachments.storage_disk'));
+                $path =  $attachment->store(config('wirechat.attachments.storage_folder','attachments'), config('wirechat.attachments.storage_disk'));
 
                 #create attachment
-                $attachment = Attachment::create([
+                $createdAttachment = Attachment::create([
                     'file_path' => $path,
                     'file_name' => basename($path),
-                    'original_name' => $photo->getClientOriginalName(),
-                    'mime_type' => $photo->getMimeType(),
+                    'original_name' => $attachment->getClientOriginalName(),
+                    'mime_type' => $attachment->getMimeType(),
                     'url'=>url($path)
                 ]);
 
@@ -148,7 +149,7 @@ class ChatBox extends Component
                 $message = Message::create([
                     'reply_id'=>$this->replyMessage?->id,
                     'conversation_id' => $this->conversation->id,
-                    'attachment_id' => $attachment->id,
+                    'attachment_id' => $createdAttachment->id,
                     'sender_id' => auth()->id(),
                     'receiver_id' => $this->receiver->id,
                     // 'body'=>$this->body
@@ -166,16 +167,11 @@ class ChatBox extends Component
                 $this->dispatch('refresh')->to(ChatList::class);
             }
 
-
             #push the message
             $this->loadedMessages = $this->loadedMessages->concat($createdMessages);
 
             #scroll to bottom
             $this->dispatch('scroll-bottom');
-            //  dd($this->loadedMessages);
-
-
-
         }
 
 
@@ -204,7 +200,7 @@ class ChatBox extends Component
             #dispatch event 'refresh ' to chatlist 
             $this->dispatch('refresh')->to(ChatList::class);
         }
-        $this->reset('media');
+        $this->reset('media','files','body');
 
         #scroll to bottom
         $this->dispatch('scroll-bottom');
@@ -264,7 +260,6 @@ class ChatBox extends Component
 
     function loadMessages()
     {
-
 
         #get count
         $count = Message::where('conversation_id', $this->conversation->id)->count();
