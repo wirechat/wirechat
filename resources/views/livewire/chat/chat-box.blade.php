@@ -49,7 +49,7 @@
   
     " class=" w-full overflow-hidden  h-full ">
     {{-- todo: add rounded corners to attachment --}}
-    <div class="  border-r   flex flex-col  grow  h-full">
+    <div class="   flex flex-col  grow  dark:bg-gray-800  h-full">
         {{--------------}}
         {{-----Header---}}
         {{--------------}}
@@ -60,10 +60,10 @@
         {{--------------}}
         @include('wirechat::livewire.chat.Includes.chatbox-main')
 
-        <footer class="shrink-0 z-10 bg-white dark:bg-inherit py-2 overflow-y-visible relative  ">
+        <footer class="shrink-0 z-10 bg-white dark:bg-gray-800 py-2 overflow-y-visible relative  ">
 
             <div
-                class="  border px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[97%] mx-auto">
+                class="  border dark:border-gray-700 px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[97%] mx-auto">
 
                 {{-- Media preview section --}}
                 @if (count($media)>0)
@@ -77,7 +77,7 @@
 
                     <div class="relative">
                         {{-- Delete image --}}
-                        <button class="absolute -top-2 -right-2  z-10"
+                        <button class="absolute -top-2 -right-2  z-10 dark:text-gray-50"
                             @click="removeUpload('{{ $image->getFilename()}}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-x-circle" viewBox="0 0 16 16">
@@ -96,13 +96,13 @@
 
                         {{-- Add more media --}}
                         <label
-                            class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
+                            class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
                             <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple
                                 accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only ">
                             <span class="  m-auto  ">
 
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                    class="w-7 h-7 text-gray-600">
+                                    class="w-7 h-7 text-gray-600 dark:text-gray-100">
                                     <path fill-rule="evenodd"
                                         d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
                                         clip-rule="evenodd" />
@@ -126,7 +126,7 @@
                     {{-- Delete file button--}}
                     <button class="absolute -top-2 -right-2  z-10" @click="removeUpload('{{$file->getFilename()}}')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-x-circle" viewBox="0 0 16 16">
+                            class="bi bi-x-circle dark:text-white dark:hover:text-red-500 hover:text-red-500 transition-colors" viewBox="0 0 16 16">
                             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
                             <path
                                 d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
@@ -134,11 +134,11 @@
                     </button>
 
                     {{-- File details --}}
-                    <div class="flex items-center group overflow-hidden border rounded-xl">
+                    <div class="flex items-center group overflow-hidden border dark:border-gray-600 rounded-xl">
                         <span class=" p-2">
                             {{-- document svg:HI --}}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                class="w-8 h-8 text-gray-500">
+                                class="w-8 h-8 text-gray-500 dark:text-gray-100">
                                 <path
                                     d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
                                 <path
@@ -146,7 +146,7 @@
                             </svg>
                         </span>
 
-                        <p class="mt-auto  p-2 text-gray-600 text-sm">
+                        <p class="mt-auto  p-2 text-gray-600 dark:text-gray-100 text-sm">
                             {{$file->getClientOriginalName()}}
                         </p>
                     </div>
@@ -158,12 +158,12 @@
                 {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
 
                 <label
-                    class="cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 flex text-center justify-center border border-gray-50">
+                    class="cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors   flex text-center justify-center border dark:border-gray-800 border-gray-50">
                     <input @change="handleFileSelect(event, {{count($files)}})" type="file" multiple
                         accept="{{Helper::formattedFileMimesForAcceptAttribute()}}" class="sr-only" hidden>
                     <span class="  m-auto">
 
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 dark:text-gray-50">
                             <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
                           </svg>
                           
@@ -179,7 +179,7 @@
     @if ($replyMessage !=null)
     <section class="p-px py-1 w-full col-span-12">
 
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center dark:text-white">
             <h6 class="text-sm">Replying to
                 <span class="font-bold">
                     {{$replyMessage->sender_id== $receiver->id? $receiver->name:" Yourself"}}
@@ -194,7 +194,7 @@
         </div>
 
         {{-- Message being replies to --}}
-        <p class="truncate text-sm text-gray-500 max-w-md">
+        <p class="truncate text-sm text-gray-500 dark:text-gray-200 max-w-md">
             {{$replyMessage->body!=''?$replyMessage->body:($replyMessage->hasAttachment()?'Attachment':'')}}
         </p>
     </section>
@@ -243,7 +243,7 @@
 
             <x-slot name="trigger">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-7 h-7">
+                    stroke="currentColor" class="w-7 h-7 dark:text-white/90">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
@@ -258,7 +258,7 @@
                         accept="{{Helper::formattedFileMimesForAcceptAttribute()}}" class="sr-only"
                         style="display: none">
 
-                    <div class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 cursor-pointer">
+                    <div class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
 
                         <span class="">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -268,7 +268,7 @@
                             </svg>
                         </span>
 
-                        <span class="">
+                        <span class=" dark:text-white">
                             File
                         </span>
                     </div>
@@ -282,7 +282,7 @@
                         accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only"
                         style="display: none">
 
-                    <div class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 cursor-pointer">
+                    <div class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
 
                         <span class="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -293,7 +293,7 @@
                             </svg>
                         </span>
 
-                        <span class="">
+                        <span class=" dark:text-white">
                             Photos & Videos
                         </span>
                     </div>
@@ -312,7 +312,7 @@
                 @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the default
                 behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                 @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
-                class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   "></textarea>
+                class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white dark:bg-gray-700  focus:outline-none   "></textarea>
             <button :class="{'hidden': !((body?.trim()?.length)|| @js(count($this->media)>0))}" type="submit"
                 id="sendMessageButton" class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
 
@@ -339,12 +339,20 @@
 
 
             {{--send Like --}}
-            <button wire:click='sendLike()' type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
-                    stroke="currentColor" class="w-7 h-7">
+            <button wire:click='sendLike()' type="button " class="group">
+                <span class=" group-hover:hidden transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"  
+                    stroke="currentColor" class="w-7 h-7 dark:text-white stroke-[1.8] dark:stroke-[1.3]">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                 </svg>
+                </span>
+              
+            <span class="hidden group-hover:block transition " x-bounce>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 w-7 h-7   text-red-500">
+                    <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                  </svg>
+                </span>
 
             </button>
         </div>

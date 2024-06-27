@@ -1,4 +1,4 @@
-<header class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-white border-b">
+<header class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-white dark:bg-gray-800 dark:border-gray-700 border-b">
 
     <div class="  flex  w-full items-center   px-2   lg:px-4 gap-2 md:gap-5 ">
         {{-- Return --}}
@@ -14,7 +14,7 @@
             <a class="flex items-center gap-2 " href="{{$receiver->wireChatProfileUrl()??'#'}}">
                 <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore
                     class="h-8 w-8 lg:w-10 lg:h-10 " />
-                <h6 class="font-bold text-lg text-gray-800 truncate"> {{$receiver->wireChatDisplayName()??'user'}} </h6>
+                <h6 class="font-bold text-lg text-gray-800 dark:text-white truncate"> {{$receiver->wireChatDisplayName()??'user'}} </h6>
             </a>
         </div>
 
@@ -25,7 +25,7 @@
                 <x-slot name="trigger">
                     <button class="inline-flex px-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.9" stroke="currentColor" class="w-6 h-6">
+                            stroke="currentColor" class="w-6 h-6 dark:text-white stroke-[1.9] dark:stroke-[1.3]">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>

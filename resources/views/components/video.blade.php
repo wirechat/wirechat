@@ -7,7 +7,7 @@
 
 
 <div x-data="{playing:false,muted:false}"
-    class="relative "
+    class="relative border border-gray-50 dark:border-gray-700"
     @click.outside="$refs.player.pause()"
     x-intersect:leave="$refs.player.pause()"
 >

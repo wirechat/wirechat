@@ -87,7 +87,7 @@
                 </h6>
 
                 <div class="border-r-4 px-1 ml-auto">
-                    <p class=" bg-gray-100 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
+                    <p class=" bg-gray-100 dark:text-white dark:bg-gray-600 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
                         {{$parent?->body!=''?$parent?->body:($parent->hasAttachment()?'Attachment':'')}}
                     </p>
                 </div>
@@ -106,7 +106,7 @@
 
                     <button wire:click="setReply('{{$message->id}}')" class="hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
-                            stroke="currentColor" class="w-4 h-4 text-gray-600/80 ">
+                            stroke="currentColor" class="w-4 h-4 text-gray-600/80 dark:text-white">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                         </svg>
@@ -119,7 +119,7 @@
                             {{-- Dots --}}
                             <button class="hover:scale-110 transition-transform">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-three-dots h-3 w-3 text-gray-700" viewBox="0 0 16 16">
+                                    class="bi bi-three-dots h-3 w-3 text-gray-700 dark:text-white" viewBox="0 0 16 16">
                                     <path
                                         d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
                                 </svg>
@@ -153,7 +153,7 @@
                     {{-- Attachemnt is Application/* --}}
                     {{-- Only show if mime type is --}}
                     @if (str()->startsWith($attachment->mime_type, 'application/'))
-                   <div class="flex items-center group overflow-hidden border rounded-xl">
+                   <div class="flex items-center group overflow-hidden border dark:border-gray-700 rounded-xl">
                     <span class=" p-2">
                         {{-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-pdf-fill w-11 h-11 text-gray-600" viewBox="0 0 16 16">
                             <path d="M5.523 10.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.035.012a.3.3 0 0 1-.026-.044c-.056-.11-.054-.216.04-.36.106-.165.319-.354.647-.548m2.455-1.647q-.178.037-.356.078a21 21 0 0 0 .5-1.05 12 12 0 0 0 .51.858q-.326.048-.654.114m2.525.939a4 4 0 0 1-.435-.41q.344.007.612.054c.317.057.466.147.518.209a.1.1 0 0 1 .026.064.44.44 0 0 1-.06.2.3.3 0 0 1-.094.124.1.1 0 0 1-.069.015c-.09-.003-.258-.066-.498-.256M8.278 4.97c-.04.244-.108.524-.2.829a5 5 0 0 1-.089-.346c-.076-.353-.087-.63-.046-.822.038-.177.11-.248.196-.283a.5.5 0 0 1 .145-.04c.013.03.028.092.032.198q.008.183-.038.465z"/>
@@ -169,14 +169,14 @@
                           
                           
                     </span>
-                    <p class="mt-auto  p-2 text-gray-600 text-sm">
+                    <p class="mt-auto  p-2 text-gray-600 dark:text-gray-100 text-sm">
                         {{$attachment->original_name}}
                     </p>
 
 
-                    <button class="px-3 bg-gray-50 group-hover:bg-gray-100 transition-colors ease-in-out hover:text-blue-500  p-1 mt-auto   h-full">
+                    <button class="px-3 bg-gray-50 dark:bg-gray-800 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors ease-in-out dark:hover:text-blue-500  hover:text-blue-500  dark:text-white  p-1 mt-auto   h-full">
                         <a download="{{$attachment->original_name}}" href="{{url('storage/' . $attachment?->file_path)}}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download w-5 h-5" viewBox="0 0 16 16">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download w-5 h-5 " viewBox="0 0 16 16">
                             <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
                             <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
                           </svg>
@@ -187,7 +187,6 @@
                    @endif
 
                     @if (str()->startsWith($attachment->mime_type, 'video/'))
-
                     <x-wirechat::video source="{{url('storage/' . $attachment?->file_path) }}" />
                    @endif
 
@@ -196,7 +195,7 @@
                    @if (str()->startsWith($attachment->mime_type, 'image/'))
 
                     <img @class([ 'max-w-max  h-[200px] min-h-[200px] bg-gray-200/60   object-scale-down  grow-0 shrink  overflow-hidden  rounded-3xl'
-                        , 'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&
+                        ,'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id &&
                     $message?->sender_id!=$previousMessage?->sender_id) && $belongsToAuth,
 
                     //middle message on RIGHT
@@ -236,7 +235,7 @@
 
                     @if ($isEmoji)
 
-                    <p class="text-5xl">
+                    <p class="text-5xl dark:text-white">
                         {{$message->body}}
                     </p>
 
@@ -246,7 +245,7 @@
 
                     @if ($message->body && !$isEmoji)
                     {{-- message body --}}
-                    <div @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex
+                    <div @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex
                         flex-col text-black bg-[#f6f6f8fb]',' bg-blue-500/80 text-white'=> $belongsToAuth,
 
                         //first message on RIGHT 
@@ -284,7 +283,7 @@
                         ])
                         >
 
-                        <pre class="  whitespace-pre-line tracking-normal    text-sm md:text-base  lg:tracking-normal "
+                        <pre class="  whitespace-pre-line tracking-normal    text-sm md:text-base dark:text-white  lg:tracking-normal "
                             style="font-family: inherit;">
                         {{$message->body}}
                       </pre>

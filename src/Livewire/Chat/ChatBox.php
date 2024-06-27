@@ -12,6 +12,8 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Namu\WireChat\Models\Attachment;
 
+use function Laravel\Prompts\alert;
+
 class ChatBox extends Component
 {
 
@@ -29,6 +31,8 @@ class ChatBox extends Component
 
 
     public $media = [];
+
+
     public $files = [];
 
 
@@ -121,7 +125,32 @@ class ChatBox extends Component
             $this->validate(['body' => 'required|string']);
         }
 
-        if ($attachments) {
+        if (count($attachments)!=0 ) {
+          //  dd("alert('message')");
+
+
+
+
+
+            //Validation 
+            //Files 
+           try {
+           // $this->js("alert('message')");
+
+            $this->validate([ 
+                'files' => 'min:3|max:288|nullable',
+                'files.*' => 'file|mimes:pdf,zip,docx',
+                'media' => 'file|min:3|nullable',
+
+            ]);
+
+           } catch (\Illuminate\Validation\ValidationException $th) {
+
+            dd($th->errors()['files']);
+            return $this->dispatch('notify',type:'warning',message:'File limit exceeded , allowed ');
+           // $this->dispatch('notify',"{type:'warning',message:'File limit exceeded , allowed '}");
+           }
+
 
             //Combine media and files thne perform loop together
 

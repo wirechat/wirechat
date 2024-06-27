@@ -32,8 +32,8 @@ class Chat extends Component{
   {
 
       return <<<'BLADE'
-              <div class="w-full h-[calc(100vh_-_0.0rem)]  flex  bg-white  rounded-lg" >
-                  <div class=" hidden lg:flex   relative w-full h-full md:w-[320px] xl:w-[400px] border-r shrink-0 overflow-y-auto  ">
+              <div class="w-full h-[calc(100vh_-_0.0rem)]  flex  bg-white dark:bg-gray-800  rounded-lg" >
+                  <div class=" hidden lg:flex   relative w-full h-full md:w-[320px] xl:w-[400px]  shrink-0 overflow-y-auto  ">
 
                       @livewire('chat-list')
                   </div>

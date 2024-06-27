@@ -10,24 +10,24 @@ setTimeout(()=>{
 },200);
    
         "
- class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3  ">
+ class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3 border-r dark:border-gray-700  ">
 
  @php
      $authId=$authUser->id;
  @endphp
 
 
-    <header class="px-3 z-10 bg-white sticky top-0 w-full py-2  ">
+    <header class="px-3 z-10 bg-white dark:bg-gray-800 sticky top-0 w-full py-2  ">
 
         {{-- Title/name and Icon --}}
         <section class=" justify-between flex items-center pb-2">
 
             <div class="flex items-center gap-2 truncate">
-                 <h3 class=" text-2xl font-bold">Chat</h2>
+                 <h3 class=" text-2xl font-bold dark:text-white">Chat</h2>
             </div>
 
              <a href="{{config('wirechat.home_route')}}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-octagon-fill w-7 h-7 text-gray-500  transition-colors duration-300 hover:text-gray-900" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-octagon-fill w-7 h-7 text-gray-500   transition-colors duration-300 dark:hover:text-gray-400 hover:text-gray-900" viewBox="0 0 16 16">
                     <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
                 </svg>
             </a>
@@ -35,9 +35,9 @@ setTimeout(()=>{
         </section>
 
         {{-- Filters --}}
-        <section class="gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2 bg-white">
+        <section class="gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2 bg-white dark:bg-gray-800">
 
-            <button class="font-semibold flex gap-2 justify-center text-black border-b-2 border-black pb-2">
+            <button class="font-semibold flex gap-2 justify-center text-black dark:text-white dark:border-gray-700  border-b-2 border-black pb-2">
                  All
 
                  @if ($unReadMessagesCount>0)
@@ -68,7 +68,7 @@ setTimeout(()=>{
     </header>
 
 
-    <main class="  overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
+    <main class="   overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
     
        
 
@@ -96,9 +96,9 @@ setTimeout(()=>{
 
             <li    id="conversation-{{$conversation->id}}"  wire:key="conversation-{{$conversation->id}}"
             @class([
-                'py-3 hover:bg-gray-50 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
-                'bg-gray-50 border-r-4 border-blue-500/20'=>$selectedConversationId==$conversation?->id,
-                      ])>
+                'py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
+                'bg-gray-50 dark:bg-gray-700   border-r-4 border-blue-500/20'=>$selectedConversationId==$conversation?->id,
+                 ])>
                 
                 <a href="{{route('wirechat.chat',$conversation->id)}}" class="shrink-0">
                     <x-wirechat::avatar
@@ -108,11 +108,11 @@ setTimeout(()=>{
                 <aside class="grid grid-cols-12 w-full">
 
 
-                    <a wire:navigate href="{{route('wirechat.chat',$conversation->id)}}" class="col-span-10 border-b pb-2 border-gray-200 relative overflow-hidden truncate leading-5 w-full flex-nowrap p-1">
+                    <a wire:navigate href="{{route('wirechat.chat',$conversation->id)}}" class="col-span-10 border-b pb-2 border-gray-200 dark:border-gray-600 relative overflow-hidden truncate leading-5 w-full flex-nowrap p-1">
 
                         {{-- name--}}
                         <div class="flex justify-between mb-1 w-full items-center">
-                            <h6 class="truncate   font-bold  text-gray-900">
+                            <h6 class="truncate   font-bold  text-gray-900 dark:text-white">
                                 {{$receiver->wireChatDisplayName()}}
                             </h6>
 
@@ -124,7 +124,7 @@ setTimeout(()=>{
                             
                             {{-- Only show if AUTH is onwer of message --}}
                             @if ($lastMessage->sender_id==$authId)
-                                <span class="font-bold text-xs">
+                                <span class="font-bold text-xs dark:text-white dark:font-normal">
                                     You:
                                 </span>
                             @endif
@@ -132,7 +132,7 @@ setTimeout(()=>{
 
                              <p 
                              @class([
-                                'truncate text-sm   gap-2 items-center',
+                                'truncate text-sm dark:text-white  gap-2 items-center',
                                 'font-semibold text-black' => !$lastMessage?->isRead() && $lastMessage?->sender_id != $authId,
                                 'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id != $authId,
                                 'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id == $authId,
@@ -141,7 +141,7 @@ setTimeout(()=>{
                                 {{$lastMessage->body!=''?$lastMessage->body:($lastMessage->hasAttachment()?'📎 Attachment':'')}}
                              </p>
 
-                             <span class="font-medium px-1 text-xs shrink-0  text-gray-800   ">{{$lastMessage->created_at->shortAbsoluteDiffForHumans()}}</span>
+                             <span class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{$lastMessage->created_at->shortAbsoluteDiffForHumans()}}</span>
 
 
                         </div>
@@ -171,7 +171,7 @@ setTimeout(()=>{
         @else
 
         <div class="w-full flex items-center h-full justify-center">
-            <h6 class=" font-bold text-gray-700">No conversations yet  </h6>
+            <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet  </h6>
         </div>
             
         @endif
