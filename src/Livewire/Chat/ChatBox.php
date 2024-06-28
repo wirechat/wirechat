@@ -10,6 +10,7 @@ use Namu\WireChat\Models\Message;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
+use Namu\WireChat\Helpers\Helper;
 use Namu\WireChat\Models\Attachment;
 
 use function Laravel\Prompts\alert;
@@ -113,12 +114,15 @@ class ChatBox extends Component
 
     function sendMessage()
     {
-
         abort_unless(auth()->check(),401);
 
         /* If media is empty then conitnue to validate body , since media can be submited without body */
         // Combine media and files arrays
+        //dd($this->media);
+
         $attachments = array_merge($this->media, $this->files);
+
+    //    dd(config('wirechat.file_mimes'));
 
         // If combined files array is empty, continue to validate body
         if (empty($attachments)) {
@@ -126,29 +130,35 @@ class ChatBox extends Component
         }
 
         if (count($attachments)!=0 ) {
-          //  dd("alert('message')");
 
+           //Validation 
+           //Files 
+           // Retrieve the configuration values
+           $maxUploads = config('wirechat.attachments.max_uploads'); 
+           //Files
+           $fileMimes = implode(',',config('wirechat.attachments.file_mimes'));
+           $fileMaxUploadSize = config('wirechat.attachments.file_max_upload_size'); 
 
+            //Files
+           $mediaMimes = implode(',',config('wirechat.attachments.media_mimes'));
+           $mediaMaxUploadSize = config('wirechat.attachments.media_max_upload_size'); 
+        
+          //  dd($fileMimes);
 
-
-
-            //Validation 
-            //Files 
            try {
-           // $this->js("alert('message')");
-
+           //$this->js("alert('message')");
             $this->validate([ 
-                'files' => 'min:3|max:288|nullable',
-                'files.*' => 'file|mimes:pdf,zip,docx',
-                'media' => 'file|min:3|nullable',
+                "files" => "max:$maxUploads|nullable",
+                "files.*" => "mimes:$fileMimes|max:$fileMaxUploadSize",
+                "media" => "max:$maxUploads|nullable",
+                "media.*" => "image|max:$mediaMaxUploadSize",
 
             ]);
 
            } catch (\Illuminate\Validation\ValidationException $th) {
 
-            dd($th->errors()['files']);
-            return $this->dispatch('notify',type:'warning',message:'File limit exceeded , allowed ');
-           // $this->dispatch('notify',"{type:'warning',message:'File limit exceeded , allowed '}");
+
+            return $this->dispatch('notify',type:'warning',message:$th->getMessage());
            }
 
 
@@ -172,6 +182,9 @@ class ChatBox extends Component
                     'mime_type' => $attachment->getMimeType(),
                     'url'=>url($path)
                 ]);
+
+
+                
 
 
                 #create message
@@ -233,6 +246,7 @@ class ChatBox extends Component
 
         #scroll to bottom
         $this->dispatch('scroll-bottom');
+
 
         #remove reply just incase it is present 
         $this->removeReply();
@@ -309,7 +323,7 @@ class ChatBox extends Component
     }
 
     /* to generate color auth message background color */
-   public function getAuthMessageBodyColor() : string {
+    public function getAuthMessageBodyColor() : string {
 
       $color= config('wirechat.theme','blue');
 

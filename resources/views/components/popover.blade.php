@@ -39,7 +39,7 @@ x-init="
 "
 class="relative overflow-visible">
 
-<button x-ref="popoverButton" @click="popoverOpen=!popoverOpen" class="flex items-center justify-center w-10 h-10 bg-white dark:bg-gray-800 border rounded-full shadow-sm cursor-pointer hover:bg-neutral-100 dark:hover:bg-gray-600 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-white dark:border-gray-700 border-neutral-200/70">
+<button type="button" x-ref="popoverButton" @click="popoverOpen=!popoverOpen" class="flex items-center justify-center w-10 h-10 bg-white dark:bg-gray-800 border rounded-full shadow-sm cursor-pointer hover:bg-neutral-100 dark:hover:bg-gray-600 focus-visible:ring-gray-400 focus-visible:ring-2 focus-visible:outline-none active:bg-white dark:border-gray-700 border-neutral-200/70">
      {{$trigger}}
 </button>
 
