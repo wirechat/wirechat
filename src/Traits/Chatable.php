@@ -2,9 +2,11 @@
 
 namespace Namu\WireChat\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Models\Conversation;
+use Namu\WireChat\Models\Message;
 
 /**
  * Trait Chatable
@@ -25,6 +27,48 @@ trait Chatable
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class, 'sender_id')->orWhere('receiver_id', $this->id);
+    }
+
+
+    public function createConversationWith(Model $user,?string $message=null)
+    {
+
+      $userId= $user->id;
+      $authenticatedUserId = $this->id;
+
+
+      # Check if conversation already exists
+      $existingConversation = Conversation::where(function ($query) use ($authenticatedUserId, $userId) {
+                $query->where('sender_id', $authenticatedUserId)
+                    ->where('receiver_id', $userId);
+                })
+            ->orWhere(function ($query) use ($authenticatedUserId, $userId) {
+                $query->where('sender_id', $userId)
+                    ->where('receiver_id', $authenticatedUserId);
+            })->first();
+      #if conversation does not exists then create a new one
+      if (!$existingConversation) {
+        # Create new conversation
+       $existingConversation= Conversation::updateOrCreate([
+            'sender_id' => $authenticatedUserId,
+            'receiver_id' => $userId,
+        ]);
+
+      }
+
+      if((!empty($message)|| $message!=null) && $existingConversation!= null){
+
+       $createdMessage= Message::create([
+            'sender_id'=>$authenticatedUserId,
+            'receiver_id'=>$userId,
+            'conversation_id'=>$existingConversation->id,
+            'body'=>$message
+
+        ]);
+       // dd($createdMessage);
+      }
+  
+
     }
     
     /**

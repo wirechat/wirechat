@@ -1,0 +1,81 @@
+{
+    "name": "orchestra/workbench",
+    "description": "Workbench Companion for Laravel Packages Development",
+    "type": "library",
+    "keywords": ["laravel", "laravel-packages", "testing", "dev"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mior Muhammad Zaki",
+            "email": "crynobone@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Orchestra\\Workbench\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Orchestra\\Workbench\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "require": {
+        "php": "^8.1",
+        "composer-runtime-api": "^2.2",
+        "fakerphp/faker": "^1.21",
+        "laravel/framework": "^10.38.1",
+        "laravel/tinker": "^2.8.2",
+        "nunomaduro/collision": "^6.4 || ^7.10",
+        "orchestra/canvas": "^8.11.4",
+        "orchestra/testbench-core": "^8.24",
+        "spatie/laravel-ray": "^1.32.4",
+        "symfony/polyfill-php83": "^1.28",
+        "symfony/yaml": "^6.2"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.4",
+        "mockery/mockery": "^1.5.1",
+        "phpstan/phpstan": "^1.11",
+        "phpunit/phpunit": "^10.1",
+        "symfony/process": "^6.2"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.5.x-dev"
+        }
+    },
+    "suggest": {
+        "ext-pcntl": "Required to use all features of the console signal trapping."
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "@php vendor/bin/pint",
+            "@php vendor/bin/phpstan analyse"
+        ],
+        "test": "@php vendor/bin/phpunit",
+        "ci": [
+            "@composer audit",
+            "@prepare",
+            "@lint",
+            "@test"
+        ]
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}

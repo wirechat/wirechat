@@ -1,0 +1,82 @@
+{
+    "name": "laravel/dusk",
+    "description": "Laravel Dusk provides simple end-to-end testing and browser automation.",
+    "keywords": [
+        "laravel",
+        "testing",
+        "webdriver"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Taylor Otwell",
+            "email": "taylor@laravel.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "ext-zip": "*",
+        "guzzlehttp/guzzle": "^7.5",
+        "illuminate/console": "^10.0|^11.0",
+        "illuminate/support": "^10.0|^11.0",
+        "php-webdriver/webdriver": "^1.9.0",
+        "symfony/console": "^6.2|^7.0",
+        "symfony/finder": "^6.2|^7.0",
+        "symfony/process": "^6.2|^7.0",
+        "vlucas/phpdotenv": "^5.2"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^8.19|^9.0",
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^10.1|^11.0",
+        "psy/psysh": "^0.11.12|^0.12"
+    },
+    "suggest": {
+        "ext-pcntl": "Used to gracefully terminate Dusk when tests are running."
+    },
+    "autoload": {
+        "psr-4": {
+            "Laravel\\Dusk\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Laravel\\Dusk\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Laravel\\Dusk\\DuskServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "@php vendor/bin/phpstan analyse"
+        ],
+        "test": [
+            "@build",
+            "@php vendor/bin/testbench serve",
+            "@php vendor/bin/phpunit"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -42,8 +42,7 @@
                  conversationElement.style.overflowY='auto';
         });
 
-         
-       
+
     }); 
 
   

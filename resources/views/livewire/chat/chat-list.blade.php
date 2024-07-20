@@ -23,7 +23,7 @@ setTimeout(()=>{
         <section class=" justify-between flex items-center pb-2">
 
             <div class="flex items-center gap-2 truncate">
-                 <h3 class=" text-2xl font-bold dark:text-white">Chat</h2>
+                 <h3 class=" text-2xl font-bold dark:text-white">Chats</h2>
             </div>
 
              <a href="{{config('wirechat.home_route')}}">
@@ -37,7 +37,7 @@ setTimeout(()=>{
         {{-- Filters --}}
         <section class="gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2 bg-white dark:bg-gray-800">
 
-            <button class="font-semibold flex gap-2 justify-center text-black dark:text-white dark:border-gray-700  border-b-2 border-black pb-2">
+            {{-- <button class="font-semibold flex gap-2 justify-center text-black dark:text-white dark:border-gray-700  border-b-2 border-black pb-2">
                  All
 
                  @if ($unReadMessagesCount>0)
@@ -46,7 +46,7 @@ setTimeout(()=>{
                  </span>
                  @endif
 
-            </button>
+            </button> --}}
             {{-- <button class="font-semibold flex justify-center pb-2 text-gray-500">
                 Archived
             </button> --}}
@@ -60,7 +60,7 @@ setTimeout(()=>{
         {{-- Search input --}}
         @if (config('wirechat.user_search_allowed',false)==true)
         <section class="py-2 ">
-            <input type="search" wire:model.live.debounce='searchQuery' placeholder="Search"
+            <input id="user-search" type="search" wire:model.live.debounce='searchQuery' placeholder="Search"
             class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
          </section>
         @endif
@@ -94,7 +94,7 @@ setTimeout(()=>{
 
             {{-- Chat list item --}}
 
-            <li    id="conversation-{{$conversation->id}}"  wire:key="conversation-{{$conversation->id}}"
+            <li  id="conversation-{{$conversation->id}}"  wire:key="conversation-{{$conversation->id}}"
             @class([
                 'py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
                 'bg-gray-50 dark:bg-gray-700   border-r-4 border-blue-500/20'=>$selectedConversationId==$conversation?->id,

@@ -15,19 +15,25 @@ class Conversation extends Model
         'sender_id'
     ];
 
+    protected $userModel;
+
     
 
     public function __construct(array $attributes = [])
     {
         $this->table = \config('wirechat.conversations_table');
 
+        //Set up the user model 
+        $this->userModel = config('wirechat.user_model');
+
+      //  dd($this->userModel);
         parent::__construct($attributes);
     }
 
 
     public function sender()
     {
-        return $this->belongsTo(User::class, 'sender_id','id');
+        return $this->belongsTo($this->userModel, 'sender_id','id');
     }
 
     /**
@@ -35,7 +41,7 @@ class Conversation extends Model
      */
     public function receiver()
     {
-            return $this->belongsTo(User::class, 'receiver_id','id');
+            return $this->belongsTo($this->userModel, 'receiver_id','id');
 
     }
 
@@ -51,11 +57,11 @@ class Conversation extends Model
         
         if ($this->sender_id === auth()->id()) {
 
-            return User::firstWhere('id',$this->receiver_id);
+            return  $this->userModel::firstWhere('id',$this->receiver_id);
 
         } else {
 
-            return User::firstWhere('id',$this->sender_id);
+            return  $this->userModel::firstWhere('id',$this->sender_id);
         }
     }
 

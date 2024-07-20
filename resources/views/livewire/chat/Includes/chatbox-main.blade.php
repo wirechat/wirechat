@@ -235,7 +235,7 @@
 
                     @if ($isEmoji)
 
-                    <p class="text-5xl dark:text-white">
+                    <p class="text-5xl dark:text-white ">
                         {{$message->body}}
                     </p>
 
@@ -245,7 +245,7 @@
 
                     @if ($message->body && !$isEmoji)
                     {{-- message body --}}
-                    <div @class(['flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex
+                    <div @class(['flex transition ease-in flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex
                         flex-col text-black bg-[#f6f6f8fb]',' bg-blue-500/80 text-white'=> $belongsToAuth,
 
                         //first message on RIGHT 

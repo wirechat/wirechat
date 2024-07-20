@@ -7,6 +7,14 @@
             "Namu\\WireChat\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Namu\\WireChat\\Tests\\": "tests",
+            "Namu\\WireChat\\Workbench\\App\\": "workbench/app/",
+            "Namu\\WireChat\\Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Namu\\WireChat\\Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
     "authors": [
         {
             "name": "Namu Makwembo"
@@ -14,17 +22,44 @@
     ],
     "extra": {
         "laravel": {
-          "providers": [
-            "Namu\\WireChat\\src\\WireChatServiceProvider"
-          ]
+            "providers": [
+                "Namu\\WireChat\\src\\WireChatServiceProvider"
+            ]
         }
-      },
+    },
     "require": {
         "php": "^8.1",
         "livewire/livewire": "^3.2.3",
         "laravel/framework": "^10.47"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
-  
+    "prefer-stable": true,
+    "require-dev": {
+        "orchestra/testbench": "^8.24",
+        "pestphp/pest": "^2.34",
+        "pestphp/pest-plugin-laravel": "^2.4",
+        "laravel/dusk": "^8.2"
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "@php vendor/bin/phpstan analyse"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
 }
