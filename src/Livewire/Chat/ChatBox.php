@@ -21,7 +21,7 @@ class ChatBox extends Component
     use WithFileUploads;
     use WithPagination;
 
-    public Conversation $conversation;
+    public $conversation;
 
     public $receiver;
     public $body;
@@ -122,7 +122,7 @@ class ChatBox extends Component
 
         $attachments = array_merge($this->media, $this->files);
 
-    //    dd(config('wirechat.file_mimes'));
+     //    dd(config('wirechat.file_mimes'));
 
         // If combined files array is empty, continue to validate body
         if (empty($attachments)) {
@@ -183,8 +183,6 @@ class ChatBox extends Component
                     'url'=>url($path)
                 ]);
 
-
-                
 
 
                 #create message
@@ -332,19 +330,25 @@ class ChatBox extends Component
         
     }
 
-    function mount()
-    {
-
+    public function mount()
+    {       
+        //check auth 
         abort_unless(auth()->check(),401);
 
+        //assign converstion
+        $this->conversation= Conversation::find($this->conversation);
+
+
+        //Abort if not made 
+        abort_unless($this->conversation,404);
+
+        
          #check if user belongs to conversation
         $belongsToConversation = auth()->user()->conversations()
                     ->where('id', $this->conversation->id)
                     ->exists();
                     
         abort_unless($belongsToConversation, 403);
-
-
 
         $this->receiver = $this->conversation->getReceiver();
 

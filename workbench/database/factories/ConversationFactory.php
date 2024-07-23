@@ -3,12 +3,13 @@
 namespace Namu\WireChat\Workbench\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Namu\WireChat\Models\Attachment;
+use Namu\WireChat\Models\Conversation;
+use Namu\WireChat\Workbench\App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Attachment>
  */
-class AttachmentFactory extends Factory
+class ConversationFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,15 +17,12 @@ class AttachmentFactory extends Factory
      * @return array<string, mixed>
      */
 
-    protected $model = Attachment::class;
+    protected $model = Conversation::class;
     public function definition(): array
     {
         return [
-        'file_path' => '/fake/path',
-        'file_name' => 'file.png',
-        'original_name' => 'file',
-        'mime_type' => "image/png",
-        'url'=>'test.example.com/attachments/file.pgn'
+        'sender_id' => User::factory(),
+        'receiver_id' => User::factory(),
         ];
     }
 }

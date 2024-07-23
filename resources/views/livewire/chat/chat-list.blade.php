@@ -171,7 +171,7 @@ setTimeout(()=>{
         @else
 
         <div class="w-full flex items-center h-full justify-center">
-            <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet  </h6>
+            <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet</h6>
         </div>
             
         @endif

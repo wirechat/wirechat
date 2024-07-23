@@ -30,6 +30,16 @@ class Conversation extends Model
         parent::__construct($attributes);
     }
 
+       /** 
+     * since you have a non-standard namespace; 
+     * the resolver cannot guess the correct namespace for your Factory class.
+     * so we exlicilty tell it the correct namespace
+     */
+    protected static function newFactory()
+    {
+        return \Namu\WireChat\Workbench\Database\Factories\ConversationFactory::new();
+    }
+
 
     public function sender()
     {
@@ -54,6 +64,8 @@ class Conversation extends Model
 
     public function getReceiver()
     {
+
+
         
         if ($this->sender_id === auth()->id()) {
 

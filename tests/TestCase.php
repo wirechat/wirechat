@@ -3,6 +3,8 @@
 namespace Namu\WireChat\Tests;
 
 use Illuminate\Config\Repository;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Livewire\LivewireServiceProvider;
 use Namu\WireChat\WireChatServiceProvider;
@@ -12,6 +14,7 @@ use function Orchestra\Testbench\workbench_path;
 
  class TestCase extends \Orchestra\Testbench\TestCase
 {
+
     protected function getPackageProviders($app): array
     {
         return [

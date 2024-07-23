@@ -29,7 +29,11 @@ trait Chatable
         return $this->hasMany(Conversation::class, 'sender_id')->orWhere('receiver_id', $this->id);
     }
 
-
+    /**
+     * Creates a conversation with another user
+     *
+     * @return Conversation|null
+     */
     public function createConversationWith(Model $user,?string $message=null)
     {
 
@@ -67,9 +71,55 @@ trait Chatable
         ]);
        // dd($createdMessage);
       }
+
+
+      return $existingConversation;
   
 
     }
+
+
+    /**
+     * Creates a conversation if one doesnt not already exists
+     * And sends the attached message 
+     * @return Message|null
+     */
+
+     function sendMessageTo(Model $user,string $message)  {
+
+        //Get or create new conversation
+        $conversation=  $this->createConversationWith($user);
+
+
+
+
+        if ($conversation!=null) {
+            //dd($this->id,$user->id);
+       // dd($conversation);
+            
+            //create message
+            $createdMessage = Message::create([
+                'conversation_id' => $conversation->id,
+                'sender_id' => $this->id,
+                'receiver_id' => $user->id,
+                'body' => $message
+            ]);
+           // dd($createdMessage);
+
+            /** 
+             * update conversation :we use this in to show the conversation
+             *  with the latest message at the top of the chatlist  */
+            $conversation->updated_at=now();
+            $conversation->save();
+
+            return $createdMessage;
+
+        }
+
+        //make sure user belong to conversation
+        
+     }
+
     
     /**
      * Returns the URL for the cover image to be used as an avatar.
