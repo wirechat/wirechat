@@ -40,7 +40,7 @@ class Chat extends Component{
                   
                   <main class="  grid  w-full  grow  h-full relative overflow-y-auto"  style="contain:content">
                     
-                    @livewire('chat-box',['conversation'=>$conversation])
+                    @livewire('chat-box',['conversation'=>$conversation->id])
 
 
 

@@ -8,8 +8,8 @@ use Namu\WireChat\Livewire\Chat\Index;
 Route::middleware(['auth','web'])->group(function (){
 
 
-Route::get('/chat',Index::class)->name('wirechat');
-Route::get('/chat/{chat}',Chat::class)->name('wirechat.chat');
+Route::get('/chats',Index::class)->name('wirechat');
+Route::get('/chats/{chat}',Chat::class)->name('wirechat.chat');
     
 
 });

@@ -38,7 +38,8 @@
         "orchestra/testbench": "^8.24",
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin-laravel": "^2.4",
-        "laravel/dusk": "^8.2"
+        "laravel/dusk": "^8.2",
+        "orchestra/testbench-dusk": "^8.26"
     },
     "scripts": {
         "post-autoload-dump": [

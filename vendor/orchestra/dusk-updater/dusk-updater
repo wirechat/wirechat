@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+require $_composer_autoload_path ?? __DIR__.'/vendor/autoload.php';
+
+$app = new Symfony\Component\Console\Application('Dusk Updater');
+
+$app->setVersion(Composer\InstalledVersions::getPrettyVersion('orchestra/dusk-updater'));
+
+$app->add(new Orchestra\DuskUpdater\DetectCommand());
+$app->add(new Orchestra\DuskUpdater\UpdateCommand());
+
+$app->run();

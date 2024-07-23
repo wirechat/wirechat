@@ -332,17 +332,21 @@ class ChatBox extends Component
 
     public function mount()
     {       
-        //check auth 
+        //auth 
         abort_unless(auth()->check(),401);
 
+      //  dd($this->conversation);
+
+        
         //assign converstion
-        $this->conversation= Conversation::find($this->conversation);
+        $this->conversation= Conversation::where('id',$this->conversation)->first();
 
 
         //Abort if not made 
         abort_unless($this->conversation,404);
 
-        
+
+        //dd( $this->conversation);
          #check if user belongs to conversation
         $belongsToConversation = auth()->user()->conversations()
                     ->where('id', $this->conversation->id)

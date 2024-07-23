@@ -3,7 +3,7 @@
     {{$attributes->merge([
         'class'=>"shrink-0 inline-flex items-center justify-center 
                   overflow-hidden rounded-full border border-gray-200
-                  dark:border-secondary-500  text-base "])
+                  dark:border-gray-500  text-base "])
                   ->class($story?'bg-gradient-to-r  p-[2px] ring-2 ring-white from-purple-400 via-pink-500 to-red-500 rounded-full':' ')
                   }}>
  

@@ -1,0 +1,15 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "native_function_invocation": {
+            "include": ["@compiler_optimized"],
+            "scope": "namespaced",
+            "strict": true
+        },
+        "no_superfluous_phpdoc_tags": true,
+        "php_unit_method_casing": false,
+        "nullable_type_declaration_for_default_null_value": {
+            "use_nullable_type_declaration": true
+        }
+    }
+}
