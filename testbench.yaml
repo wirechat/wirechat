@@ -7,6 +7,8 @@ migrations:
 seeders:
   - Workbench\Database\Seeders\DatabaseSeeder
 
+#laravel: "./skeleton"
+
 workbench:
   start: '/'
   install: true
@@ -15,7 +17,7 @@ workbench:
     api: false
     commands: false
     components: false
-    views: false
+    views: true
   build: []
   assets: []
   sync: []

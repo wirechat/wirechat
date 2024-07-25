@@ -1,0 +1,3 @@
+<testsuite name="Feature">
+    <directory suffix="Test.php">./tests/Browser</directory>
+</testsuite>

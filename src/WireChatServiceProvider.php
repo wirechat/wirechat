@@ -8,7 +8,7 @@ use Livewire\Livewire;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\ChatBox;
 use Namu\WireChat\Livewire\Chat\ChatList;
-use Namu\WireChat\Livewire\Chat\Index;
+use Namu\WireChat\Livewire\Chat\Chats;
 
 class WireChatServiceProvider extends ServiceProvider 
 {
@@ -37,7 +37,7 @@ class WireChatServiceProvider extends ServiceProvider
 
         Livewire::component('chat-box', ChatBox::class);
 
-        Livewire::component('chat-index', Index::class);
+        Livewire::component('chats', Chats::class);
 
     }
 

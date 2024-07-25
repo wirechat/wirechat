@@ -1,5 +1,6 @@
 <?php
 
+use Namu\WireChat\Tests\DuskTestCase;
 use Namu\WireChat\Tests\TestCase;
 
 /*
@@ -12,8 +13,8 @@ use Namu\WireChat\Tests\TestCase;
 | need to change it using the "uses()" function to bind a different classes or traits.
 |
 */
-
- uses(TestCase::class)->in(__DIR__ );
+    uses(TestCase::class)->in('Feature');
+    uses(DuskTestCase::class)->in('Browser');
 
 
 

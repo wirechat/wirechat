@@ -1,7 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Route;
+use Namu\WireChat\Livewire\Chat\Chat;
+use Namu\WireChat\Livewire\Chat\Chats;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,3 +18,22 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+
+
+// Route::middleware(['auth'])->group(function (){
+
+
+// Route::get('/chats',Chats::class)->name('wirechat');
+// Route::get('/chats/{chat}',Chat::class)->name('wirechat.chat');
+    
+
+// });
+Route::middleware('guest')->get('/login',function(){
+
+
+return "login page";
+
+})->name("login");
+

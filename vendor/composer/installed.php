@@ -3,7 +3,7 @@
         'name' => 'namu/wirechat',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'af4042895d0c6b05ad962dea60907f57671dd1eb',
+        'reference' => '612bfb310cc42883b3c374566cec2dfe4c6db155',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -556,7 +556,7 @@
         'namu/wirechat' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'af4042895d0c6b05ad962dea60907f57671dd1eb',
+            'reference' => '612bfb310cc42883b3c374566cec2dfe4c6db155',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
