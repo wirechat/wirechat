@@ -4,6 +4,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Namu\WireChat\Livewire\Chat\ChatBox;
+use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
@@ -241,6 +242,23 @@ describe('Sending messages ', function () {
 
           $messageExists = Attachment::all();
           expect(count($messageExists))->toBe(1);
+    });
+
+    test('dispatched event is listened to in chatlist after message is created', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+       //assert no message yet
+       $chatListComponet= Livewire::actingAs($auth)->test(ChatList::class)->assertDontSee("new message");
+        
+       //send message
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+            ->set("body","new message")
+            ->call("sendMessage");
+
+        //assert message created
+        $chatListComponet->dispatch("refresh")->assertSee("new message");
 
     });
 
@@ -255,4 +273,4 @@ describe('Sending messages ', function () {
 
 
 
-})->only();
+});

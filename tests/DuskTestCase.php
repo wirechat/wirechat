@@ -110,10 +110,10 @@ use function Orchestra\Testbench\workbench_path;
 *
 * @return string
 */
-protected function getBasePath()
-{
-    // Adjust this path depending on where your override is located.
-    return __DIR__.'/../vendor/orchestra/testbench-dusk/laravel'; 
-}
+// protected function getBasePath()
+// {
+//     // Adjust this path depending on where your override is located.
+//     return __DIR__.'/../vendor/orchestra/testbench-dusk/laravel'; 
+// }
 
 }

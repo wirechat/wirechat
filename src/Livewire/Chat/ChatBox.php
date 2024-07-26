@@ -10,10 +10,8 @@ use Namu\WireChat\Models\Message;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
-use Namu\WireChat\Helpers\Helper;
 use Namu\WireChat\Models\Attachment;
 
-use function Laravel\Prompts\alert;
 
 class ChatBox extends Component
 {
