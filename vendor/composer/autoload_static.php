@@ -112,6 +112,7 @@ class ComposerStaticInitbc5a3425e03d17ea88e9af6ce2861c9b
             'Spatie\\Ray\\' => 11,
             'Spatie\\Macroable\\' => 17,
             'Spatie\\LaravelRay\\' => 18,
+            'Spatie\\LaravelPackageTools\\' => 27,
             'Spatie\\Backtrace\\' => 17,
         ),
         'R' => 
@@ -218,6 +219,7 @@ class ComposerStaticInitbc5a3425e03d17ea88e9af6ce2861c9b
         array (
             'Cron\\' => 5,
             'Composer\\Semver\\' => 16,
+            'Christophrumpel\\MissingLivewireAssertions\\' => 42,
             'Carbon\\Doctrine\\' => 16,
             'Carbon\\' => 7,
         ),
@@ -397,6 +399,10 @@ class ComposerStaticInitbc5a3425e03d17ea88e9af6ce2861c9b
         'Spatie\\LaravelRay\\' => 
         array (
             0 => __DIR__ . '/..' . '/spatie/laravel-ray/src',
+        ),
+        'Spatie\\LaravelPackageTools\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/spatie/laravel-package-tools/src',
         ),
         'Spatie\\Backtrace\\' => 
         array (
@@ -668,6 +674,10 @@ class ComposerStaticInitbc5a3425e03d17ea88e9af6ce2861c9b
         'Composer\\Semver\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/semver/src',
+        ),
+        'Christophrumpel\\MissingLivewireAssertions\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/christophrumpel/missing-livewire-assertions/src',
         ),
         'Carbon\\Doctrine\\' => 
         array (

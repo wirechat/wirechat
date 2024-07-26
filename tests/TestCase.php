@@ -2,11 +2,13 @@
 
 namespace Namu\WireChat\Tests;
 
+use Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithViews;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\View;
 use Livewire\LivewireServiceProvider;
 use Namu\WireChat\WireChatServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
@@ -18,23 +20,28 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
     //use InteractsWithViews; 
     use WithWorkbench;
+
+
     protected function getPackageProviders($app): array
     {
         return [
             LivewireServiceProvider::class,
             WireChatServiceProvider::class,
+            MissingLivewireAssertionsServiceProvider::class
         ];
     }
 
     protected function defineEnvironment($app) 
     {
         // Setup default database to use sqlite :memory:
+
+        View::addLocation('../resources/views');
         tap($app['config'], function (Repository $config) { 
 
             $config->set('app.debug', true);
             $config->set('app.env', 'testing');
 
-            $config->set('view.paths', [__DIR__.'/views', resource_path('views')]);
+           // $config->set('view.paths', [__DIR__.'/views', resource_path('views')]);
 
             $config->set('database.default', 'testbench'); 
             $config->set('database.connections.testbench', [ 

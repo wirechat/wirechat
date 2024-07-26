@@ -60,8 +60,8 @@ setTimeout(()=>{
         {{-- Search input --}}
         @if (config('wirechat.user_search_allowed',false)==true)
         <section class="py-2 ">
-            <input id="user-search" type="search" wire:model.live.debounce='searchQuery' placeholder="Search"
-            class=" border-0 outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
+            <input id="user-search" type="search" wire:model.live.debounce='search' placeholder="Search"
+            class=" border-0 dark:bg-gray-700 dark:text-white outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
          </section>
         @endif
       
@@ -75,7 +75,7 @@ setTimeout(()=>{
         @if (config('wirechat.user_search_allowed',false)==true)
         <div x-cloak 
             wire:loading.delay.shorter.class.remove="hidden" 
-            wire:target="searchQuery" class="hidden transition-all duration-300 ">
+            wire:target="search" class="hidden transition-all duration-300 ">
         <x-wirechat::loading-spin/>
         </div>
         @endif
@@ -83,7 +83,7 @@ setTimeout(()=>{
         @if (count($conversations)>0)
         {{-- chatlist  --}}
         
-        <ul wire:loading.delay.shorter.remove  wire:target="searchQuery"  class="p-2 grid w-full spacey-y-2">
+        <ul wire:loading.delay.shorter.remove  wire:target="search"  class="p-2 grid w-full spacey-y-2">
 
             @foreach ($conversations as $conversation)
                 

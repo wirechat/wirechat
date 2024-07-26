@@ -14,11 +14,23 @@ class Chat extends Component{
   public $conversation;
 
 
+
   function mount()  {
+
+
+    ///make sure user is authenticated
+    abort_unless(auth()->check(),401);
 
     $this->conversation= Conversation::findOrFail($this->chat);
 
-    #mark messages belonging to receiver as read
+
+    ///check if auth belongs to conversaiton
+    $belongsToConversation = auth()->user()->conversations()
+          ->where('id', $this->conversation->id)
+          ->exists();
+          abort_unless($belongsToConversation, 403);
+
+    ///mark messages belonging to receiver as read
     Message::where('conversation_id',$this->conversation->id)
              ->where('receiver_id',auth()->id())
              ->whereNull('read_at')

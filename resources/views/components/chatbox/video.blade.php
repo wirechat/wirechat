@@ -6,11 +6,10 @@
 ])
 
 
-<div x-data="{playing:false,muted:false}"
-    class="relative border border-gray-50 dark:border-gray-700"
-    @click.outside="$refs.player.pause()"
-    x-intersect:leave="$refs.player.pause()"
->
+  <div x-data="{playing:false,muted:false}"
+      class="relative border border-gray-50 dark:border-gray-700"
+      @click.outside="$refs.player.pause()"
+      x-intersect:leave="$refs.player.pause()">
 
 
         <video x-ref="player" @play="playing=true" @pause="playing=false"

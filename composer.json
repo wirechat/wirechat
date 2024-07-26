@@ -30,7 +30,8 @@
     "require": {
         "php": "^8.1",
         "livewire/livewire": "^3.2.3",
-        "laravel/framework": "^10.47"
+        "laravel/framework": "^10.47",
+        "christophrumpel/missing-livewire-assertions": "^2.8"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

@@ -29,6 +29,7 @@ trait Chatable
         return $this->hasMany(Conversation::class, 'sender_id')->orWhere('receiver_id', $this->id);
     }
 
+ 
     /**
      * Creates a conversation with another user
      *
@@ -151,6 +152,23 @@ trait Chatable
         return $this->name ?? 'user';
     }
 
+
+  /**
+     * Get unread messages count.
+     *
+     * @param Conversation|null $conversation
+     * @return int
+     */
+    public function getUnReadCount(Conversation $conversation = null): int
+    {
+        $query = $this->hasMany(Message::class, 'receiver_id')->where('read_at', null);
+
+        if ($conversation) {
+            $query->where('conversation_id', $conversation->id);
+        }
+
+        return $query->count();
+    }
 
 
    /**

@@ -38,7 +38,7 @@ return [
 
      'theme'=>'red', // can be from any colors : gree, red, 
 
-     'user_search_allowed'=>false, //bool
+     'user_search_allowed'=>true, //bool
      'user_searchable_fields'=>['name'],   //['email','profession']etc
 
      'attachments' => [

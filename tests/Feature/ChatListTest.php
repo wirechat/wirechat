@@ -202,3 +202,58 @@ describe('Chatlist', function () {
     });
 
 });
+
+
+describe('Search', function () {
+
+
+
+    it('it shows all conversations items when search query is null', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'John']);
+        $user2 = User::factory()->create(['name' => 'Mary']);
+
+
+        //create conversation with user1
+        $auth->createConversationWith($user1);
+
+        //create conversation with user2
+        $auth->createConversationWith($user2);
+
+
+        Livewire::actingAs($auth)->test(ChatList::class, ['search' => null])
+            ->assertSee('John')
+            ->assertSee('Mary')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 2;
+            });
+    });
+
+
+    it('can filter conversations when search query is filled', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'John']);
+        $user2 = User::factory()->create(['name' => 'Mary']);
+
+
+        //create conversation with user1
+        $auth->createConversationWith($user1);
+
+        //create conversation with user2
+        $auth->createConversationWith($user2);
+
+
+        Livewire::actingAs($auth)->test(ChatList::class,)
+            ->set('search','Jo')
+            ->assertSee('John')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 1;
+            });
+    });
+
+
+});

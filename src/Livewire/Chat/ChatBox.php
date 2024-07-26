@@ -255,7 +255,6 @@ class ChatBox extends Component
     public function sendLike()
     {
 
-
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
             'attachment_id' => null,
@@ -275,14 +274,9 @@ class ChatBox extends Component
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(ChatList::class);
 
-
-
-
-
         #scroll to bottom
         $this->dispatch('scroll-bottom');
     }
-
     
    // #[On('loadMore')]
     function loadMore()
@@ -335,9 +329,6 @@ class ChatBox extends Component
         //auth 
         abort_unless(auth()->check(),401);
 
-      //  dd($this->conversation);
-
-        
         //assign converstion
         $this->conversation= Conversation::where('id',$this->conversation)->first();
 

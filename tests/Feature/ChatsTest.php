@@ -20,7 +20,7 @@ it('it redirecdts to login page if guest user tries to access chats page ', func
 });
 
 
-test('authenticaed user can access chatbox ', function () {
+test('authenticaed user can access chats page ', function () {
     $auth = User::factory()->create();
     $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
  

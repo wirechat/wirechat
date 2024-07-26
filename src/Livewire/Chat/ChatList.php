@@ -13,7 +13,7 @@ class ChatList extends Component
 {
 
 
-  public $searchQuery;
+  public $search;
 
 
   // function searchUsers()
@@ -75,11 +75,11 @@ class ChatList extends Component
         
         $query->whereHas('sender', function ($subquery) use($searchableFields) {
           $subquery->where('id', '<>', auth()->id())
-            ->whereAny($searchableFields, 'LIKE', '%' . $this->searchQuery . '%');
+            ->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
         })
           ->orWhereHas('receiver', function ($subquery)use($searchableFields) {
             $subquery->where('id', '<>', auth()->id())
-              ->whereAny($searchableFields, 'LIKE', '%' . $this->searchQuery . '%');
+              ->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
           });
       })
       #Order conversations by the latest updated_at timestamp
@@ -90,7 +90,7 @@ class ChatList extends Component
     #Pass data to the view
     return view('wirechat::livewire.chat.chat-list', [
       'conversations' => $conversations, // Pass filtered conversations
-      'unReadMessagesCount' => $user->unReadMessagesCount(), // Get unread messages count for the authenticated user
+      'unReadMessagesCount' => $user->getUnReadCount(), // Get unread messages count for the authenticated user
       'authUser' => $user // Pass authenticated user data
     ]);
   }
