@@ -77,9 +77,9 @@ describe('Box presence test: ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
             ->assertSee('How are you')
             ->assertSee('i am good thanks');
-
     });
-    
+
+
     
     
 
@@ -263,14 +263,80 @@ describe('Sending messages ', function () {
     });
 
 
+    
 
 
 
-   
 
-
-   
+});
 
 
 
+describe('Sending reply', function () {
+
+
+    //reply messages 
+
+    test('it returns abort(403) when user does not belong to conversation when setting reply', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //send message
+        $auth->sendMessageTo($receiver, message: 'How are you');
+
+        //create random message not belonging to auth user
+        $randomMessage = Message::factory()->create();
+
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+       $request->call("setReply",$randomMessage)
+            ->assertStatus(403);
+    });
+
+    test('it can set reply message when setReply is called', function () {
+        $auth = User::factory()->create();
+        
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+
+        //send messages
+        $message= $auth->sendMessageTo($receiver, message: 'How are you');
+
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+            ->call("setReply",$message)
+            ->assertSet("replyMessage",$message);
+    });
+
+    test('it dispatches "focus-input-field" when reply is set', function () {
+        $auth = User::factory()->create();
+        
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+
+        //send messages
+        $message= $auth->sendMessageTo($receiver, message: 'How are you');
+
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+            ->call("setReply",$message)
+            ->assertDispatched('focus-input-field');
+    });
+    
+    test('it can remove reply message when removeReply is called ', function () {
+        $auth = User::factory()->create();
+        
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+
+        //send messages
+        $message= $auth->sendMessageTo($receiver, message: 'How are you');
+
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+            ->call("removeReply")
+            ->assertSet("replyMessage",null);
+    });
 });
