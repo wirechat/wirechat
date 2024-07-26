@@ -16,11 +16,11 @@ class ChatList extends Component
   public $searchQuery;
 
 
-  function searchUsers()
-  {
+  // function searchUsers()
+  // {
 
-    dd(' Here we are');
-  }
+  //   dd(' Here we are');
+  // }
   protected $listeners = ['refresh' => '$refresh'];
   public $selectedConversationId;
 

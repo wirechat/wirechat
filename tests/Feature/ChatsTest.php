@@ -46,5 +46,14 @@ test('it doest not render livewire ChatBox component', function () {
      $response ->assertDontSeeLivewire(ChatBox::class);
     
 });
+
+
+test('it shows label "Send private photos and messages" ', function () {
+    $auth = User::factory()->create();
+    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
+ 
+     $response ->assertSee("Send private  photos and messages");
+    
+});
  
 

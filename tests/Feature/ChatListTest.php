@@ -86,7 +86,10 @@ describe('Chatlist', function () {
 
         Livewire::actingAs($auth)->test(ChatList::class)
             ->assertSee('iam user 1')
-            ->assertSee('iam user 2');
+            ->assertSee('iam user 2')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 2;
+            });
     });
 
 
@@ -123,12 +126,31 @@ describe('Chatlist', function () {
 
         // dd($conversations,$messages);
 
-
         Livewire::actingAs($auth)->test(ChatList::class)
             ->assertSee('I am good') //see message
-            // ->assertSee('How are you doing')//see message
-
             ->assertDontSee('You:'); //assert not visible
+    });
+
+    it('shows unread message count "2" if message does not belong to user', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        //create conversation with user1
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        //here we delay the create messsage so that we can NOT have both messages with the same timestamp
+        //now let's send message to auth 
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+
+
+
+        // dd($conversations,$messages);
+
+        Livewire::actingAs($auth)->test(ChatList::class)
+            ->assertSee('2'); //
     });
 
     it('shows date/time message was created', function () {
