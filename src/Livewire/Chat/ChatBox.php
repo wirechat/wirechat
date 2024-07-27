@@ -110,6 +110,21 @@ class ChatBox extends Component
     }
 
 
+    /**
+     * Delete conversation  */
+
+     function deleteConversation() {
+
+        #delete conversation 
+        auth()->user()->deleteConversation($this->conversation);
+
+        #redirect to chats page 
+        $this->redirectRoute("wirechat");
+
+     }
+
+    /**
+     * Send a message  */
     function sendMessage()
     {
         abort_unless(auth()->check(),401);
@@ -249,6 +264,16 @@ class ChatBox extends Component
     }
 
 
+    
+    //used to broadcast message sent to receiver
+    protected function broadcast()  {
+
+      //send broadcast message
+
+
+        
+    }
+
     /** Send Like as  message */
     public function sendLike()
     {
@@ -295,10 +320,15 @@ class ChatBox extends Component
     {
 
         #get count
-        $count = Message::where('conversation_id', $this->conversation->id)->count();
+        $count = Message::where('conversation_id', $this->conversation->id)->where(function ($query) {
+            $query->whereNotDeleted();
+        })->count();
 
         #skip and query
         $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
+                ->where(function ($query) {
+                    $query->whereNotDeleted();
+                })
             ->with('parent')
             ->skip($count - $this->paginate_var)
             ->take($this->paginate_var)
@@ -352,6 +382,8 @@ class ChatBox extends Component
 
     public function render()
     {
+        $conversation=Conversation::first();
+     
         return view('wirechat::livewire.chat.chat-box');
     }
 }

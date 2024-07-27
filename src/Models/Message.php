@@ -110,4 +110,23 @@ class Message extends Model
           return $this->parent()->exists();
       }
 
+
+         /**
+     * ------------------
+     *
+     * @param $query
+     * -------------
+     */
+    public function scopeWhereNotDeleted($query)
+    {
+        $userId = auth()->id();
+
+        return $query->where(function ($subQuery) use ($userId) {
+            $subQuery->where('sender_id', $userId)->whereNull('sender_deleted_at');
+        })
+            ->orWhere(function ($subQuery) use ($userId) {
+                $subQuery->where('receiver_id', $userId)->whereNull('receiver_deleted_at');
+            });
+    }
+
 }

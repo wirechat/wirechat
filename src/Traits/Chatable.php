@@ -26,7 +26,8 @@ trait Chatable
      */
     public function conversations(): HasMany
     {
-        return $this->hasMany(Conversation::class, 'sender_id')->orWhere('receiver_id', $this->id);
+        return $this->hasMany(Conversation::class, 'sender_id')->orWhere('receiver_id', $this->id)
+                        ->whereNotDeleted();//we add scope here not deleted
     }
 
  
@@ -153,7 +154,7 @@ trait Chatable
     }
 
 
-  /**
+    /**
      * Get unread messages count.
      *
      * @param Conversation|null $conversation
@@ -170,6 +171,78 @@ trait Chatable
         return $query->count();
     }
 
+
+    /**
+     * Check if the user belongs to a conversation.
+     */
+    public function belongsToConversation(Conversation $conversation): bool
+    {
+        $conversationId = $conversation instanceof Conversation ? $conversation->id : $conversation;
+
+        return $this->conversations()
+            ->where('id', $conversationId)
+            ->exists();
+    }
+    public function deleteConversation(Conversation $conversation)
+    {
+
+        $userId = $this->id;
+
+        //Stop if user does not belong to conversation
+        if (! $this->belongsToConversation($conversation)) {
+            return null;
+        }
+
+        // Update the messages based on the current user
+        $conversation->messages()->each(function ($message) use ($userId) {
+            if ($message->sender_id === $userId) {
+                $message->update(['sender_deleted_at' => now()]);
+            } elseif ($message->receiver_id === $userId) {
+                $message->update(['receiver_deleted_at' => now()]);
+            }
+        });
+
+        // Delete the conversation and messages if all messages from the other user are also deleted
+        if ($conversation->messages()
+            ->where(function ($query) use ($userId) {
+                $query->where('sender_id', $userId)
+                    ->orWhere('receiver_id', $userId);
+            })
+            ->where(function ($query) {
+                $query->whereNull('sender_deleted_at')
+                    ->orWhereNull('receiver_deleted_at');
+            })
+            ->doesntExist()
+        ) {
+
+            // $conversation->messages()->delete();
+            $conversation->forceDelete();
+        }
+    }
+
+
+    /**
+     * Check if the user has a conversation with another user.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function hasConversationWith(Model $user): bool
+    {
+        return $this->conversations()
+            ->where(function ($query) use ($user) {
+                $query->where('sender_id', $this->id)
+                    ->where('receiver_id', $user->id);
+            })
+            ->orWhere(function ($query) use ($user) {
+                $query->where('sender_id', $user->id)
+                    ->where('receiver_id', $this->id);
+            })
+            ->exists();
+    }
+
+
+    
 
    /**
      * Retrieve the searchable fields defined in configuration

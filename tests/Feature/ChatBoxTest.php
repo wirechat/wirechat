@@ -340,3 +340,237 @@ describe('Sending reply', function () {
             ->assertSet("replyMessage",null);
     });
 });
+
+describe('Deleting Conversation', function () {
+
+
+    test('it redirects to wirechat route after deleting conversation', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+        $auth->sendMessageTo($receiver, message: '3');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '4');
+        $receiver->sendMessageTo($auth, message: '5');
+        $receiver->sendMessageTo($auth, message: '5');
+
+
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+
+       $request
+         ->call("deleteConversation")
+         ->assertStatus(200)
+         ->assertRedirect(route("wirechat"));
+    });
+
+    test('user can no longer access deleted conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3');
+        $receiver->sendMessageTo($auth, message: '4');
+
+
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+       $request->call("deleteConversation");
+
+       //assert conversation will be null
+       expect($auth->conversations()->first())->toBe(null);
+
+
+       //also assert that user receives 403 forbidden
+       $this->get(route("wirechat.chat",$conversation->id))->assertStatus(403);
+
+    });
+
+    test('user can regain access to deleted conversation if receiver/other user send a new message', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3');
+        $receiver->sendMessageTo($auth, message: '4');
+
+
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+       $request->call("deleteConversation");
+
+
+       //let receiver send a new message
+       $receiver->sendMessageTo($auth, message: '5');
+
+       //assert conversation will be null
+       expect($auth->conversations()->first())->not->toBe(null);
+
+
+       //also assert that user receives 403 forbidden
+       $this->actingAs($auth)->get(route("wirechat.chat",$conversation->id))->assertStatus(200);
+
+    });
+
+    test('user can regain access to deleted conversation if they send a new message after deleting conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3');
+        $receiver->sendMessageTo($auth, message: '4');
+
+
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+       $request->call("deleteConversation");
+
+
+       //let auth send a new message to conversation after deleting
+       $auth->sendMessageTo($receiver, message: '5');
+
+       //assert conversation will be null
+       expect($auth->conversations()->first())->not->toBe(null);
+
+       //also assert that user receives 403 forbidden
+       $this->actingAs($auth)->get(route("wirechat.chat",$conversation->id))->assertStatus(200);
+
+    });
+
+    test('deleted convesation should be available in database if only one user has deleted it', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3');
+        $receiver->sendMessageTo($auth, message: '4');
+
+
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+       $request->call("deleteConversation");
+
+       $conversation = Conversation::find($conversation->id);
+       expect($conversation)->not->toBe(null);
+
+    });
+
+    test('user shold not be able to see previous messages present when conversation was deleted if they send a new message, but should be able to see new ones ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
+
+        //begin
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+       $request->call("deleteConversation");
+
+
+       //send new message in order to gain access to converstion
+       $auth->sendMessageTo($receiver, message: '5 message');
+
+       //open conversation again
+       $request2= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+
+       //assert user can't see previous messages
+       $request2
+       ->assertDontSee("1 message")
+       ->assertDontSee("2 message")
+       ->assertDontSee("3 message")
+       ->assertDontSee("4 message");
+
+       //assert user can see new messages
+       $request2
+       ->assertSee("5 message");
+
+
+    });
+
+    test('receiver in the conversation should be able to see all messages even when auth/other user deletes conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
+
+       ///reqeust for $auth to delete conversation
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+          ->call("deleteConversation");
+
+       //send after deleting conversation
+       $auth->sendMessageTo($receiver, message: '5 message');
+
+       ///request for $receiver to access conversation
+       $request= Livewire::actingAs($receiver)->test(ChatBox::class,['conversation' => $conversation->id]);
+
+    
+       //assert receiver can see previous messages
+       $request
+       ->assertSee("1 message")
+       ->assertSee("2 message")
+       ->assertSee("3 message")
+       ->assertSee("4 message");
+
+       //assert user can see new messages
+       $request
+       ->assertSee("5 message");
+
+
+    });
+
+
+
+})->only();

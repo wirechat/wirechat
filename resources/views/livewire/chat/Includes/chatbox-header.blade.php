@@ -42,7 +42,7 @@
                     </button>
                 </x-slot>
                 <x-slot name="content">
-                    <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
+                    <button wire:click="deleteConversation" wire:confirm="are you sure" class="w-full text-start">
 
                         <x-wirechat::dropdown-link>
                             Delete

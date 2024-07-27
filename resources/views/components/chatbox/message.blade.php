@@ -8,7 +8,10 @@
 
 
 <div @class(['flex transition ease-in flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex
-flex-col text-black bg-[#f6f6f8fb]',' bg-blue-500/80 text-white'=> $belongsToAuth,
+flex-col text-black  bg-[#f6f6f8fb]',
+'bg-blue-500/80 text-white'=> $belongsToAuth,
+'dark:bg-gray-700 dark:text-white'=> !$belongsToAuth,
+
 
 //first message on RIGHT 
 'rounded-br-md rounded-tr-2xl'=>($message?->sender_id==$nextMessage?->sender_id

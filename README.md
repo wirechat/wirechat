@@ -62,22 +62,37 @@ class User extends Authenticatable
 
 $user = User::find(1);
 $auth = auth()->user();
+$conversation =Conversation::first();
+
+//get conversations 
+$conversations = $auth->conversations();
+
+///send a message to another user ,Note: if no conversation is available yet between the two users , one will be created 
+$auth->sendMessageTo($user,'message'); //returns created $message model
 
 
+//Create a conversation :Note if a conversation already exists , it will return the existing conversation
+$auth->createConversationWith($user,'message');// returns $conversation model 
 
-$auth->sendMessageTo($user,'message');
 
-$auth->createConversationWith($user,'message');
+//Check if user belongs to a conversation
+$auth->belongsToConversation($conversation);//bool
 
-$auth->deleteConversationWith($user);
 
+//Check if the user has a conversation with another user.
 $auth->hasConversationWith($user); // bool
+
+
+///Deleting conversation :note this will only delete or hide messages from the user who deleted the conversation 
+//messages will be retained with the other user , the conversation will only permanenlty be deleted if the other 
+//user also deleted the conversation 
+$auth->deleteConversationWith($user);
 
 
 ```
 
 
-### Attachments
+### Attachtments
 
 
 
@@ -130,8 +145,12 @@ Lastly the `post_max_size` in the `php.ini` superseeds any configuration in live
 Here you can retrieve items from the pivot table to we can get the count()
 
 ```php
-// retrieve all Favorites
-$user->unReadMessagesCount(); //
+// get unread messages count for that user in all their conversations
+$user->getUnReadCount(); 
+
+//Pass a Conversation model in order to get unread messages count for that user in the conversation
+$conversation = $user->conversations()->first();
+$user->getUnReadCount($conversation); 
 
 // Filter by type
 $admin->favoriteObjects()->whereType(Post::class)->count();
