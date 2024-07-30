@@ -1,8 +1,11 @@
 <?php
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
+use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Livewire\Chat\ChatBox;
 use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Models\Attachment;
@@ -134,7 +137,27 @@ describe('Sending messages ', function () {
     });
 
 
-    //heart
+    test('it broadcasts event "MessageCreated" when message is sent', function () {
+        Event::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+        ->set("body",'New message')
+        ->call("sendMessage");
+
+        $message = Message::first();
+
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
+                return $event->message->id === $message->id;
+        });
+    });
+
+
+    //sending like
     test('it renders heart(❤️) to chatbox when it sendLike is called', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name'=>'John']);
@@ -169,6 +192,25 @@ describe('Sending messages ', function () {
             ->assertDispatched('refresh')
             ->assertDispatched('scroll-bottom');
     });
+
+    test('it broadcasts event "MessageCreated" when sendLike is called', function () {
+        Event::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
+                return $event->message->id === $message->id;
+        });
+    });
+
 
     //attchements
 
@@ -262,13 +304,8 @@ describe('Sending messages ', function () {
 
     });
 
-
-    
-
-
-
-
 });
+
 
 
 
@@ -339,6 +376,8 @@ describe('Sending reply', function () {
             ->call("removeReply")
             ->assertSet("replyMessage",null);
     });
+
+ 
 });
 
 describe('Deleting Conversation', function () {
@@ -573,4 +612,4 @@ describe('Deleting Conversation', function () {
 
 
 
-})->only();
+});

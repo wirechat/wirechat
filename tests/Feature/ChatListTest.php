@@ -37,7 +37,7 @@ it('doesnt shows search field if search is disabled in wirechat.config:tesiting 
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(ChatList::class)
-        ->assertDontSee('Search');
+                      ->assertDontSee('Search');
 });
 
 
@@ -57,7 +57,7 @@ it('shows search field if search is enabled in wirechat.config:tesiting Search p
 describe('Chatlist', function () {
 
 
-    it('it shows label "No conversations yet" items when user does not have chats', function () {
+    it('shows label "No conversations yet" items when user does not have chats', function () {
 
         $auth = User::factory()->create();
 
@@ -69,7 +69,7 @@ describe('Chatlist', function () {
     });
 
 
-    it('it shows conversations items when user has chats', function () {
+    it('loads conversations items when user has them', function () {
 
         $auth = User::factory()->create();
 
@@ -92,6 +92,31 @@ describe('Chatlist', function () {
             });
     });
 
+
+    it('does not load deleted conversations by user', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+        $user2 = User::factory()->create(['name' => 'iam user 2']);
+
+
+        //create conversation with user1
+        $auth->createConversationWith($user1);
+
+        //create conversation with user2
+        $conversationToBeDeleted=   $auth->createConversationWith($user2);
+
+        //!now delete conversation with user 2
+        $auth->deleteConversation($conversationToBeDeleted);
+
+        Livewire::actingAs($auth)->test(ChatList::class)
+            ->assertSee('iam user 1')
+            ->assertDontSee('iam user 2')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 1;
+            });
+    });
 
 
     it('it shows last message and lable "you:" if it exists in chatlist', function () {
@@ -207,7 +232,6 @@ describe('Chatlist', function () {
 describe('Search', function () {
 
 
-
     it('it shows all conversations items when search query is null', function () {
 
         $auth = User::factory()->create();
@@ -231,7 +255,6 @@ describe('Search', function () {
             });
     });
 
-
     it('can filter conversations when search query is filled', function () {
 
         $auth = User::factory()->create();
@@ -254,6 +277,5 @@ describe('Search', function () {
                 return count($conversations) == 1;
             });
     });
-
 
 });

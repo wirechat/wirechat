@@ -21,8 +21,18 @@ class ChatList extends Component
 
   //   dd(' Here we are');
   // }
-  protected $listeners = ['refresh' => '$refresh'];
+  //protected $listeners = ['refresh' => '$refresh'];
   public $selectedConversationId;
+
+
+  public function getListeners()
+  {
+      return [
+        'refresh' => '$refresh',
+        "echo-private:wirechat.".auth()->id().",.Namu\\WireChat\\Events\\MessageCreated" => '$refresh',
+      ];
+  }
+
 
 
 

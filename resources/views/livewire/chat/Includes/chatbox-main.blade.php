@@ -140,8 +140,9 @@
                     <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" class="h-7 w-7" />
                 </div>
 
+
                 {{-- Message body --}}
-                <div class=" flex flex-col  gap-2">
+                <div class="flex flex-col gap-2 max-w-[95%] w-full">
 
                     {{------------------------}}
                     {{-- Attachment section --}}

@@ -11,17 +11,11 @@
     }, 150);
 
 
-    {{-- Echo.private('users.{{auth()->user()->id}}')
-    .notification((notification) => {
+    {{-- Echo.private('conversation.6')
+    .listen('.Namu\\WireChat\\Events\\MessageCreated',(e) => {
 
-        if(
-            notification['type']=='App\\Notifications\\MessageSentNotification' &&
-            notification['conversation_id']=={{$conversation->id}}
-        )
-        {
+            alert(notification);
 
-            $wire.listenBroadcastedMessage(notification);
-        }
      
     }); --}}
     " @scroll-bottom.window="
