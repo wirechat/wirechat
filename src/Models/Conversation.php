@@ -107,8 +107,7 @@ class Conversation extends Model
     }
 
 
-  public  function isLastMessageReadByUser():bool {
-
+    public  function isLastMessageReadByUser():bool {
 
         $user=Auth()->User();
         $lastMessage= $this->messages()->latest()->first();

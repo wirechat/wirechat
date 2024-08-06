@@ -65,7 +65,7 @@ $auth = auth()->user();
 $conversation =Conversation::first();
 
 //get conversations 
-$conversations = $auth->conversations();
+$conversations = $auth->conversations()->get();
 
 ///send a message to another user ,Note: if no conversation is available yet between the two users , one will be created 
 $auth->sendMessageTo($user,'message'); //returns created $message model
@@ -96,7 +96,7 @@ $auth->deleteConversationWith($user);
 
 
 
-Wirechat offers a convienient way to add attachments to messages , you can exchange both media as in images and videos including documents such as pdf, zip etc when sending messsages
+Wirechat offers a way to add attachments to messages , you can exchange both media as in images and videos including documents such as pdf, zip etc when sending messsages
 
 #### Media Attachments
 
@@ -146,14 +146,11 @@ Here you can retrieve items from the pivot table to we can get the count()
 
 ```php
 // get unread messages count for that user in all their conversations
-$user->getUnReadCount(); 
+$user->getUnReadCount(); //int
 
 //Pass a Conversation model in order to get unread messages count for that user in the conversation
 $conversation = $user->conversations()->first();
-$user->getUnReadCount($conversation); 
-
-// Filter by type
-$admin->favoriteObjects()->whereType(Post::class)->count();
+$user->getUnReadCount($conversation); //int
 
 
 ```
@@ -161,11 +158,12 @@ $admin->favoriteObjects()->whereType(Post::class)->count();
 Using withCount() attribute:
 
 ```php
-//For Favoriter
-$users = User::withCount('favorites')->get();
+//Conversations
+$conversations = Conversation::withCount('messages')->get();
 
-foreach($users as $user) {
-    echo $user->favorites_count;
+
+foreach($conversations as $conversation) {
+    echo $conversation->messages_count;
 }
 
 
@@ -178,6 +176,7 @@ foreach($posts as $post) {
 ```
 
 
+
 ### N+1 Issue
 
 
@@ -186,19 +185,19 @@ To optimize query performance and avoid N+1 issues, use eager loading. Specify t
 
 ```php
 
-// Favoriter
-$users = User::with('favorites')->get();
+//get conversations with messages
+$user = auth()->user();
+$conversations = $user->conversations()
+                      ->with('messages')->get();
 
-foreach($users as $user) {
-    $user->hasFavorited($post);
-}
-
-
-// Favoriteable
-$posts = Post::with('favorites')->get();
-
-foreach($posts as $post) {
-    $post->isFavoritedBy($user);
-}
 
 ```
+
+
+### Events
+
+The MessageCreated Event is only broadcasted to others i.e The other user in the conversation. which means the user who created the message will not receive the broadcasted event
+
+| **Event**                               | **Description**                             |
+| ----------------------------------------| ------------------------------------------- |
+| `Namu\WireChat\Events\MessageCreated`   | Triggered when a message is created/sent |

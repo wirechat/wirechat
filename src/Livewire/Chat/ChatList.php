@@ -92,10 +92,13 @@ class ChatList extends Component
               ->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
           });
       })
+    //  ->withCount('messages')
       #Order conversations by the latest updated_at timestamp
       ->latest('updated_at')
       #Retrieve the conversations
       ->get();
+
+     // dd($conversations);
 
     #Pass data to the view
     return view('wirechat::livewire.chat.chat-list', [
