@@ -15,8 +15,8 @@
     x-transition:leave-start="translate-y-0"
     x-transition:leave-end="-translate-y-10"
     x-init="
-        // this.message= $event.detail.message;
-       // setTimeout(()=>{ bannerVisible = true }, bannerVisibleAfter);
+       {{-- this.message= $event.detail.message;
+        setTimeout(()=>{ bannerVisible = true }, bannerVisibleAfter); --}}
     "
     @notify.window="
         message= $event.detail.message;

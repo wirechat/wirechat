@@ -1,8 +1,6 @@
-<main 
-    x-data="{
+<main x-data="{
         canLoadMore:@entangle('canLoadMore')
-    }"
-    @scroll="
+    }" @scroll="
     scrollTop= $el.scrollTop;
 
     
@@ -28,8 +26,8 @@
     style="contain: content">
 
 
-    {{-- <div x-cloak wire:loading.flex wire:target="loadMore()"  class="hidden w-full  items-center py-2 ">
-        <div  class="mx-auto ">
+    {{-- <div x-cloak wire:loading.flex wire:target="loadMore()" class="hidden w-full  items-center py-2 ">
+        <div class="mx-auto ">
             <svg aria-hidden="true" class="w-5 h-5 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
                 viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -42,17 +40,16 @@
         </div>
     </div> --}}
 
-    <div x-cloak 
-            wire:loading.delay.class.remove="invisible"
-            wire:target="loadMore" class="invisible transition-all duration-300 ">
-              <x-wirechat::loading-spin/>
+    <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore"
+        class="invisible transition-all duration-300 ">
+        <x-wirechat::loading-spin />
     </div>
 
 
     {{-- Define previous message outside the loop --}}
     @php
     $previousMessage=null;
-    
+
     @endphp
 
     <!--Message-->
@@ -76,7 +73,7 @@
     $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
         @endphp
 
-        <div  @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
+        <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
 
             {{-- Show parent/reply message --}}
             @if ($belongsToAuth && $parent!=null)
@@ -87,7 +84,8 @@
                 </h6>
 
                 <div class="border-r-4 px-1 ml-auto">
-                    <p class=" bg-gray-100 dark:text-white dark:bg-gray-600 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
+                    <p
+                        class=" bg-gray-100 dark:text-white dark:bg-gray-600 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
                         {{$parent?->body!=''?$parent?->body:($parent->hasAttachment()?'Attachment':'')}}
                     </p>
                 </div>
@@ -102,7 +100,8 @@
             <div @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
 
                 {{-- Actions --}}
-                <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>!$belongsToAuth])>
+                <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>
+                    !$belongsToAuth])>
 
                     <button wire:click="setReply('{{$message->id}}')" class="hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
@@ -136,7 +135,8 @@
                 </div>
 
                 {{--Message user Avatar --}}
-                <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,'invisible'=> ($message?->sender_id === $nextMessage?->sender_id) ])>
+                <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,'invisible'=> ($message?->sender_id
+                    === $nextMessage?->sender_id) ])>
                     <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" class="h-7 w-7" />
                 </div>
 
@@ -150,33 +150,30 @@
 
                     @if ($attachment)
 
-                        {{-- Attachemnt is Application/ --}}
-                        @if (str()->startsWith($attachment->mime_type, 'application/'))
-                         <x-wirechat::chatbox.file :attachment="$attachment"/>
-                        @endif
+                    {{-- Attachemnt is Application/ --}}
+                    @if (str()->startsWith($attachment->mime_type, 'application/'))
+                    <x-wirechat::chatbox.file :attachment="$attachment" />
+                    @endif
 
-                        {{-- Attachemnt is Video/ --}}
-                        @if (str()->startsWith($attachment->mime_type, 'video/'))
-                         <x-wirechat::chatbox.video source="{{url('storage/' . $attachment?->file_path) }}" />
-                        @endif
+                    {{-- Attachemnt is Video/ --}}
+                    @if (str()->startsWith($attachment->mime_type, 'video/'))
+                    <x-wirechat::chatbox.video height="max-h-[400px]" :cover="false"
+                        source="{{url('storage/' . $attachment?->file_path) }}" />
+                    @endif
 
-                        {{-- Attachemnt is image/ --}}
-                        @if (str()->startsWith($attachment->mime_type, 'image/'))
-                         <x-wirechat::chatbox.image 
-                                    :previousMessage="$previousMessage"
-                                    :message="$message"
-                                    :nextMessage="$nextMessage"
-                                    :belongsToAuth="$belongsToAuth"
-                                    :attachment="$attachment"/>
-                            
-                        @endif
+                    {{-- Attachemnt is image/ --}}
+                    @if (str()->startsWith($attachment->mime_type, 'image/'))
+                    <x-wirechat::chatbox.image :previousMessage="$previousMessage" :message="$message"
+                        :nextMessage="$nextMessage" :belongsToAuth="$belongsToAuth" :attachment="$attachment" />
+
+                    @endif
                     @endif
 
                     {{-- if message is emoji then don't show the styled messagebody layout --}}
                     @if ($isEmoji)
-                        <p class="text-5xl dark:text-white ">
-                            {{$message->body}}
-                        </p>
+                    <p class="text-5xl dark:text-white ">
+                        {{$message->body}}
+                    </p>
                     @endif
 
                     {{------------------------}}
@@ -185,14 +182,10 @@
                     {{------------------------}}
 
                     @if ($message->body && !$isEmoji)
-                    <x-wirechat::chatbox.message 
-                        :previousMessage="$previousMessage"
-                        :message="$message"
-                        :nextMessage="$nextMessage"
-                        :belongsToAuth="$belongsToAuth"
-                        :attachment="$attachment"/>
+                    <x-wirechat::chatbox.message :previousMessage="$previousMessage" :message="$message"
+                        :nextMessage="$nextMessage" :belongsToAuth="$belongsToAuth" :attachment="$attachment" />
                     @endif
-                
+
                 </div>
 
             </div>

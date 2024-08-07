@@ -66,12 +66,13 @@
 
                     {{-- Loop through media for preview --}}
 
-                    @foreach ($media as $key=> $image)
+                    @foreach ($media as $key=> $mediaItem)
 
-                    <div class="relative">
+                    @if (str()->startsWith($mediaItem->getMimeType(), 'image/'))
+                    <div class="relative h-24 sm:h-36 aspect-[4/3] ">
                         {{-- Delete image --}}
                         <button class="absolute -top-2 -right-2  z-10 dark:text-gray-50"
-                            @click="removeUpload('{{ $image->getFilename()}}')">
+                            @click="removeUpload('{{ $mediaItem->getFilename()}}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-x-circle" viewBox="0 0 16 16">
                                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
@@ -79,16 +80,35 @@
                                     d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
                             </svg>
                         </button>
-                        <img class="w-14 h-14 rounded-lg object-cover" src="{{$image->temporaryUrl()}}" alt="image">
+                        <img class="h-full w-full  rounded-lg object-cover" src="{{$mediaItem->temporaryUrl()}}" alt="mediaItem">
 
                     </div>
+                    @endif
+                   
+                      {{-- Attachemnt is Video/ --}}
+                      @if (str()->startsWith($mediaItem->getMimeType(), 'video/'))
+                      <div class="relative h-24 sm:h-36 ">
+                        <button class="absolute -top-2 -right-2  z-10 dark:text-gray-50"
+                            @click="removeUpload('{{ $mediaItem->getFilename()}}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-x-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                <path
+                                    d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                            </svg>
+                        </button>
+                        <x-wirechat::chatbox.video height="h-24 sm:h-36" :showToggleSound="false"  :source="$mediaItem->temporaryUrl()" />
+                      </div>
+
+                      @endif
+
 
                     @endforeach
 
                     {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}} {{--
                         Add more media --}} <label
                         class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
-                        <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple
+                        <input @change="handleFileSelect(event,{{count($media)}})" type="file" multiple
                             accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only ">
                         <span class="  m-auto  ">
 
@@ -151,7 +171,7 @@
                     {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
                         <label
                         class="cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors   flex text-center justify-center border dark:border-gray-800 border-gray-50">
-                        <input @change="handleFileSelect(event, {{count($files)}})" type="file" multiple
+                        <input @change="handleFileSelect(event,{{count($files)}})" type="file" multiple
                             accept="{{Helper::formattedFileMimesForAcceptAttribute()}}" class="sr-only" hidden>
                         <span class="  m-auto">
 
@@ -465,7 +485,11 @@
                         const validFiles = Array.from(files).filter((file) => {
                             const fileType = file.type.split('/')[1].toLowerCase();
                             return file.size <= this.maxSize && this.allowedFileTypes.includes(fileType);
+
+                            console.log(file);
+                            console.log(this.allowedFileTypes);
                         });
+                   
                 
                         if (invalidFiles.length > 0) {
                 
@@ -473,6 +497,7 @@
                                 if (file.size > this.maxSize) {
 
                                 return  $dispatch('notify',{type:'warning',message:`File size exceeds the maximum limit (9MB): ${file.name}`});
+                               
                                 } else {
 
                                     
@@ -486,12 +511,17 @@
                                 return  $dispatch('notify',{type:'warning',message:'File type is not allowed'});
                                 }
                             });
+
+                            
                 
                             
                             console.log('Validation errors:', errorMessages);
                             // Returning an empty array since there are no valid files
                             // return Promise.resolve([]);
                         }
+
+
+                  
                         return Promise.resolve(validFiles);
                     }
                     }))

@@ -94,7 +94,7 @@ class ChatBox extends Component
         app('livewire')->updateProperty($this, $name, $files);
     }
 
-
+    
     function listenBroadcastedMessage($event)
     {
 
@@ -179,18 +179,17 @@ class ChatBox extends Component
         if (count($attachments) != 0) {
 
             //Validation 
-            //Files 
-            // Retrieve the configuration values
+
+            // Retrieve maxUploads count
             $maxUploads = config('wirechat.attachments.max_uploads');
+
             //Files
             $fileMimes = implode(',', config('wirechat.attachments.file_mimes'));
             $fileMaxUploadSize = config('wirechat.attachments.file_max_upload_size');
 
-            //Files
+            //media
             $mediaMimes = implode(',', config('wirechat.attachments.media_mimes'));
             $mediaMaxUploadSize = config('wirechat.attachments.media_max_upload_size');
-
-            //  dd($fileMimes);
 
             try {
                 //$this->js("alert('message')");
@@ -198,7 +197,7 @@ class ChatBox extends Component
                     "files" => "max:$maxUploads|nullable",
                     "files.*" => "mimes:$fileMimes|max:$fileMaxUploadSize",
                     "media" => "max:$maxUploads|nullable",
-                    "media.*" => "image|max:$mediaMaxUploadSize",
+                    "media.*" => "max:$mediaMaxUploadSize|mimes:$mediaMimes",
 
                 ]);
             } catch (\Illuminate\Validation\ValidationException $th) {
@@ -218,7 +217,7 @@ class ChatBox extends Component
                  */
 
                 #save photo to disk 
-                $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk'));
+                $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk','public'));
 
                 #create attachment
                 $createdAttachment = Attachment::create([

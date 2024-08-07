@@ -28,7 +28,7 @@ class WireChatServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../config/wirechat.php' => config_path('wirechat.php'),
-        ]);
+        ],'wirechat-config');
     
 
     }
