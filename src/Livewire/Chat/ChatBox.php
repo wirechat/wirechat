@@ -120,6 +120,7 @@ class ChatBox extends Component
         ];
     }
 
+    //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
 
@@ -146,7 +147,6 @@ class ChatBox extends Component
 
     /**
      * Delete conversation  */
-
     function deleteConversation()
     {
 
@@ -297,6 +297,31 @@ class ChatBox extends Component
 
         #remove reply just incase it is present 
         $this->removeReply();
+    }
+
+    /**
+     * UnSend/Delete a message  */
+    function unSendMessage(Message $message){
+
+
+        #make sure user is authenticated
+        abort_unless(auth()->check(), 401);
+
+        #make sure user owns message
+        abort_unless($message->sender_id==auth()->id(), 403);
+
+
+        #remove message from collection
+
+        $this->loadedMessages= $this->loadedMessages->reject(function ($loadedMessage) use ($message) {
+            return $loadedMessage->id == $message->id;
+        });
+
+       // dd($this->loadedMessages);
+
+        #delete message from database
+        $message->delete();
+
     }
 
   

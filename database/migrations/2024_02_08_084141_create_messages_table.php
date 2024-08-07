@@ -31,7 +31,6 @@ return new class extends Migration
             $table->foreign('reply_id')->references('id')->on(config('wirechat.messages_table'))->nullOnDelete();
 
             //Attachment foreign key 
-
             $table->unsignedBigInteger('attachment_id')->nullable();
             $table->foreign('attachment_id')->references('id')->on(config('wirechat.attachments_table'))->nullOnDelete();
 

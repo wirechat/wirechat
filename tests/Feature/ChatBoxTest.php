@@ -613,3 +613,42 @@ describe('Deleting Conversation', function () {
 
 
 });
+
+describe('Unsending Message', function () {
+
+
+    test('message can be unsent', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: 'message-1');
+        $authMessage= $auth->sendMessageTo($receiver, message: 'message-2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $receiver->sendMessageTo($auth, message: 'message-4');
+
+
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+
+       ///assert that message is visibible before unsending
+       $request->assertSee('message-2');
+
+       //call unsendMessage
+       $request->call("unSendMessage",$authMessage->id);
+
+       ///assert message no longer visible
+       $request->assertDontSee('message-2');
+
+    });
+
+
+
+
+
+})->only();

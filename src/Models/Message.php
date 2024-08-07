@@ -46,6 +46,21 @@ class Message extends Model
     }
 
 
+    protected static function booted()
+    {
+
+        //listen to 
+        static::deleted(function ($message) {
+
+           $message->attachment?->delete();
+
+           //todo:also delete from storage
+
+        });
+
+    }
+
+
     /* relationship */
 
     public function conversation()

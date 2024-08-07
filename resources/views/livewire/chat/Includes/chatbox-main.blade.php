@@ -56,30 +56,30 @@
     @foreach ($loadedMessages as $key=> $message)
 
     @php
-    $belongsToAuth= $message->sender_id==auth()->id();
-    $parent =$message->parent??null;
-    $attachment= $message->attachment??null;
-    $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
+        $belongsToAuth= $message->sender_id==auth()->id();
+        $parent =$message->parent??null;
+        $attachment= $message->attachment??null;
+        $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
 
-    // keep track of previous message
-    // The ($key -1 ) will get the previous message from loaded
-    // messages since $key is directly linked to $message
+        // keep track of previous message
+        // The ($key -1 ) will get the previous message from loaded
+        // messages since $key is directly linked to $message
 
-    if ($key > 0){
-    $previousMessage = $loadedMessages->get($key - 1) ;
-    }
+        if ($key > 0){
+        $previousMessage = $loadedMessages->get($key - 1) ;
+        }
 
-    // Get the next message
-    $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
-        @endphp
+        // Get the next message
+        $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
+    @endphp
 
-        <div @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2 ' , 'ml-auto '=>$belongsToAuth])>
+        <div wire:key="message-{{$key}}" @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ' , 'ml-auto'=>$belongsToAuth])>
 
             {{-- Show parent/reply message --}}
             @if ($belongsToAuth && $parent!=null)
             <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
 
-                <h6 class="text-xs text-gray-500 px-2 ">You replied to
+                <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">You replied to
                     {{$parent?->sender_id== $receiver?->id? $receiver->name:" Yourself"}}
                 </h6>
 
@@ -97,11 +97,10 @@
 
 
             {{-- Body section --}}
-            <div @class(['flex gap-1 md:gap-4 group transition-transform',' justify-end'=>$belongsToAuth])>
+            <div @class(['flex gap-1 md:gap-4 group transition-transform ',' justify-end'=>$belongsToAuth])>
 
                 {{-- Actions --}}
-                <div @class([ 'my-auto flex invisible items-center gap-2 group-hover:visible' , 'order-1'=>
-                    !$belongsToAuth])>
+                <div @class([ 'my-auto flex invisible w-auto  items-center gap-2 group-hover:visible' , 'order-1'=>!$belongsToAuth])>
 
                     <button wire:click="setReply('{{$message->id}}')" class="hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
@@ -123,7 +122,7 @@
                             </button>
                         </x-slot>
                         <x-slot name="content">
-                            <button wire:click="delete" wire:confirm="are you sure" class="w-full text-start">
+                            <button wire:click="unSendMessage('{{$message->id}}')" wire:confirm="are you sure" class="w-full text-start">
 
                                 <x-wirechat::dropdown-link>
                                     Unsend
@@ -142,7 +141,7 @@
 
 
                 {{-- Message body --}}
-                <div class="flex flex-col gap-2 max-w-[95%] w-full">
+                <div class="flex flex-col gap-2 max-w-[95%] ">
 
                     {{------------------------}}
                     {{-- Attachment section --}}
