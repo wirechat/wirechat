@@ -5,6 +5,7 @@ namespace Namu\WireChat\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Message extends Model
 {
@@ -52,9 +53,19 @@ class Message extends Model
         //listen to 
         static::deleted(function ($message) {
 
+
+        if($message->attachment?->exists()){
+
+           //delete attachment
            $message->attachment?->delete();
 
            //todo:also delete from storage
+           if(file_exists(Storage::disk(config('wirechat.attachments.storage_disk','public'))->exists($message->attachment->file_path)))
+            {
+                // 1. possibility
+                Storage::disk(config('wirechat.attachments.storage_disk','public'))->delete($message->attachment->file_path);
+            }
+        }
 
         });
 

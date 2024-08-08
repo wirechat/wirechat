@@ -4,6 +4,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Livewire\Chat\ChatBox;
@@ -617,7 +618,36 @@ describe('Deleting Conversation', function () {
 describe('Unsending Message', function () {
 
 
-    test('message can be unsent', function () {
+    test('user cannot delete message that does not belong to them ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: 'message-1');
+      $auth->sendMessageTo($receiver, message: 'message-2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $otherUserMessage=  $receiver->sendMessageTo($auth, message: 'message-4');
+
+        //run
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+       ->call("unSendMessage",$otherUserMessage->id)
+       ->assertStatus(403);
+
+       $messageAvailable = Message::find($otherUserMessage->id);
+
+       ///assert message no longer visible
+       expect($messageAvailable)->not->toBe(null);
+
+    });
+
+
+    test('unsent message is removed from blade', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name'=>'John']);
@@ -647,6 +677,93 @@ describe('Unsending Message', function () {
 
     });
 
+    test('unsent message is removed database', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+
+
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: 'message-1');
+        $authMessage= $auth->sendMessageTo($receiver, message: 'message-2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $receiver->sendMessageTo($auth, message: 'message-4');
+
+        //run
+        Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+       ->call("unSendMessage",$authMessage->id) ;
+
+       $messageAvailable = Message::find($authMessage->id);
+
+       ///assert message no longer visible
+       expect($messageAvailable)->toBe(null);
+
+    });
+
+    test('it deletes attachment from database when message is deleted ', function () {
+
+        Storage::fake(config('wirechat.attachments.storage_disk','public'));
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        $file[] = UploadedFile::fake()->image('photo.png');
+
+        //run
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+        //add attachment
+        ->set("media",$file)
+        ->call("sendMessage");
+
+        ///lets make sure atttachemnt is present in database
+
+        expect(count(Attachment::all()))->toBe(1);
+
+        //Now lets unsend message
+        //here assuming that the message ID is 1 since it is the first one
+        $request->call("unSendMessage",1);
+
+
+       ///assert attachment no longer avaible in database
+       expect(count(Attachment::all()))->toBe(0);
+
+    });
+
+    test('it deletes attachment file from folder when message is deleted ', function () {
+
+        Storage::fake(config('wirechat.attachments.storage_disk','public'));
+
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+
+        $file[] = UploadedFile::fake()->image('photo.png');
+
+        //run
+       $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id])
+        //add attachment
+        ->set("media",$file)
+        ->call("sendMessage");
+
+        $attachmentModel = Attachment::first();
+        $messageModel = Message::first();
+
+
+        //Now lets unsend message
+        //here assuming that the message ID is 1 since it is the first one
+        $request->call("unSendMessage",$messageModel->id);
+
+
+        Storage::disk(config('wirechat.attachments.storage_disk','public'))->assertMissing($attachmentModel->file_name);
+
+ 
+    });
 
 
 
