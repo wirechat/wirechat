@@ -57,6 +57,9 @@ class Chat extends Component{
 
 
                   </main>
+
+                 
+              
               </div>
       BLADE;
   }

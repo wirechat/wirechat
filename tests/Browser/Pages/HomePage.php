@@ -1,6 +1,7 @@
 <?php
 
-namespace Tests\Browser\Pages;
+
+namespace Namu\WireChat\Tests\Browser\Pages;
 
 use Laravel\Dusk\Browser;
 

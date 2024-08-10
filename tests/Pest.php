@@ -18,7 +18,6 @@ use Namu\WireChat\Tests\TestCase;
     uses(DuskTestCase::class)->in('Browser');
 
 
-
 /*
 |--------------------------------------------------------------------------
 | Expectations

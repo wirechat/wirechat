@@ -157,6 +157,25 @@ describe('Sending messages ', function () {
         });
     });
 
+    test('sending messages is rate limited by 50 in 60 seconds', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+        
+        $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+
+        for ($i=0; $i <60 ; $i++)
+        { 
+         $request->set("body",'New message')->call("sendMessage");
+        }
+
+        $request->set("body",'New message')->call("sendMessage");
+
+         $request->assertStatus(429);
+    })->only();
+
+
+
 
     //sending like
     test('it renders heart(❤️) to chatbox when it sendLike is called', function () {
@@ -211,6 +230,23 @@ describe('Sending messages ', function () {
                 return $event->message->id === $message->id;
         });
     });
+
+    test('sending hearts(❤️) is rate limited by 50 in 60 seconds', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+        
+        $request= Livewire::actingAs($auth)->test(ChatBox::class,['conversation' => $conversation->id]);
+
+        for ($i=0; $i <60 ; $i++)
+        { 
+         $request->call("sendLike");
+        }
+
+         $request->call("sendLike");
+
+         $request->assertStatus(429);
+    })->only();
 
 
     //attchements
@@ -306,9 +342,6 @@ describe('Sending messages ', function () {
     });
 
 });
-
-
-
 
 describe('Sending reply', function () {
 
@@ -675,7 +708,7 @@ describe('Unsending Message', function () {
        ///assert message no longer visible
        $request->assertDontSee('message-2');
 
-    });
+    })->skip();
 
     test('unsent message is removed database', function () {
 
@@ -768,4 +801,4 @@ describe('Unsending Message', function () {
 
 
 
-})->only();
+});

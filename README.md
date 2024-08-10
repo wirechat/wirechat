@@ -30,6 +30,12 @@ php artisan vendor:publish --tag=wirechat-migration
  php artisan vendor:publish --tag=wirechat-config
 ```
 
+3. Create storage symlink
+```
+ php artisan storage:link
+```
+
+
 
 
 ## Usage

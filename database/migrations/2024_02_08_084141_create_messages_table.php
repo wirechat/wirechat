@@ -8,9 +8,6 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * Todo:Create reply functionality 
-     * Todo:create Tooltip to actions in chat body
-     * Todo:create trait for User
      */
     public function up(): void
     {

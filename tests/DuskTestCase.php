@@ -12,7 +12,7 @@ use Namu\WireChat\WireChatServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use PHPUnit\Framework\Attributes\BeforeClass;
-
+use Illuminate\Support\Facades\View;
 use function Orchestra\Testbench\workbench_path;
 
  abstract class DuskTestCase extends  \Orchestra\Testbench\Dusk\TestCase
@@ -20,7 +20,7 @@ use function Orchestra\Testbench\workbench_path;
 
 {
     use WithWorkbench; 
-   // use CreatesApplication;
+  //  use CreatesApplication;
 
     /**
      * Prepare for Dusk test execution.
@@ -56,9 +56,8 @@ use function Orchestra\Testbench\workbench_path;
     protected function getPackageProviders($app)
     {
         return [
-
             LivewireServiceProvider::class,
-            WireChatServiceProvider::class,
+            WireChatServiceProvider::class
         ];
     }
 
@@ -67,9 +66,9 @@ use function Orchestra\Testbench\workbench_path;
         parent::setUp();
         //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
 
-        $this->loadMigrationsFrom(
-            workbench_path('database/migrations')
-        );
+        // $this->loadMigrationsFrom(
+        //     workbench_path('database/migrations')
+        // );
         $this->withoutVite();
       //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
         //here we add a new ile in the name of the mixture of the berir d 
@@ -78,6 +77,7 @@ use function Orchestra\Testbench\workbench_path;
     }
     protected function getEnvironmentSetUp($app)
     {
+        View ::addLocation('../resources/views');
         tap($app['session'], function ($session) {
             $session->put('_token', str()->random(40));
         });
@@ -101,15 +101,15 @@ use function Orchestra\Testbench\workbench_path;
         });
     }
 
-/**
-* Make sure all integration tests use the same Laravel "skeleton" files.
-* This avoids duplicate classes during migrations.
-*
-* Overrides \Orchestra\Testbench\Dusk\TestCase::getBasePath
-*       and \Orchestra\Testbench\Concerns\CreatesApplication::getBasePath
-*
-* @return string
-*/
+// /**
+// * Make sure all integration tests use the same Laravel "skeleton" files.
+// * This avoids duplicate classes during migrations.
+// *
+// * Overrides \Orchestra\Testbench\Dusk\TestCase::getBasePath
+// *       and \Orchestra\Testbench\Concerns\CreatesApplication::getBasePath
+// *
+// * @return string
+// */
 // protected function getBasePath()
 // {
 //     // Adjust this path depending on where your override is located.

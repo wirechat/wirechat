@@ -3,6 +3,7 @@
 namespace Namu\WireChat\Livewire\Chat;
 
 use App\Notifications\TestNotification;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 //use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -157,18 +158,34 @@ class ChatBox extends Component
         $this->redirectRoute("wirechat");
     }
 
+    protected function rateLimit(){
+
+
+        if (RateLimiter::tooManyAttempts('send-message:'.auth()->id(), $perMinute = 60)) {
+
+            return abort(429,'Too many attempts!, Please slow down');
+         }
+          
+         RateLimiter::increment('send-message:'.auth()->id());
+    }
+
     /**
      * Send a message  */
     function sendMessage()
     {
         abort_unless(auth()->check(), 401);
 
+
+        #rate limit 
+        $this->rateLimit();
+
+         
+
         /* If media is empty then conitnue to validate body , since media can be submited without body */
         // Combine media and files arrays
         //dd($this->media);
 
         $attachments = array_merge($this->media, $this->files);
-
         //    dd(config('wirechat.file_mimes'));
 
         // If combined files array is empty, continue to validate body
@@ -342,6 +359,10 @@ class ChatBox extends Component
     /** Send Like as  message */
     public function sendLike()
     {
+
+
+        #rate limit 
+        $this->rateLimit();
 
         $message = Message::create([
             'conversation_id' => $this->conversation->id,

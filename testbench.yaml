@@ -1,8 +1,8 @@
 providers:
-  # - Workbench\App\Providers\WorkbenchServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
 
 migrations:
-  - workbench/database/migrations
+  - workbench\database\migrations
 
 seeders:
   - Workbench\Database\Seeders\DatabaseSeeder
