@@ -22,6 +22,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     use WithWorkbench;
 
 
+
     protected function getPackageProviders($app): array
     {
         return [
@@ -69,6 +70,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             workbench_path('database/migrations')
         );
         $this->withoutVite();
+
+    //    $this->artisan('migrate:rollback')->run();
       //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
         //here we add a new ile in the name of the mixture of the berir d 
         // $this->loadMigrationsFrom(__DIR__.'/migrations');

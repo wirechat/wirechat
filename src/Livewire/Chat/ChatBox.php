@@ -53,7 +53,10 @@ class ChatBox extends Component
     public function setReply(Message $message)
     {
         #check if user belongs to message
-        abort_unless($message->sender_id == auth()->id() || $message->receiver_id == auth()->id(), 403);
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+
+        #abort if message does not belong to this conversation or is not owned by any participant
+        abort_unless($message->conversation_id==$this->conversation->id,403);
 
         //Set owner as Id we are replying to 
         $this->replyMessage = $message;
@@ -252,8 +255,7 @@ class ChatBox extends Component
                     'reply_id' => $this->replyMessage?->id,
                     'conversation_id' => $this->conversation->id,
                     'attachment_id' => $createdAttachment->id,
-                    'sender_id' => auth()->id(),
-                    'receiver_id' => $this->receiver->id,
+                    'user_id' => auth()->id()
                     // 'body'=>$this->body
                 ]);
 
@@ -285,8 +287,7 @@ class ChatBox extends Component
             $createdMessage = Message::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
-                'sender_id' => auth()->id(),
-                'receiver_id' => $this->receiver->id,
+                'user_id' => auth()->id(),
                 'body' => $this->body
             ]);
 
@@ -367,8 +368,7 @@ class ChatBox extends Component
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
             'attachment_id' => null,
-            'sender_id' => auth()->id(),
-            'receiver_id' => $this->receiver->id,
+            'user_id' => auth()->id(),
             'body' => '❤️'
         ]);
 
@@ -412,13 +412,13 @@ class ChatBox extends Component
 
         #get count
         $count = Message::where('conversation_id', $this->conversation->id)->where(function ($query) {
-            $query->whereNotDeleted();
+          //  $query->whereNotDeleted();
         })->count();
 
         #skip and query
         $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
             ->where(function ($query) {
-                $query->whereNotDeleted();
+              //  $query->whereNotDeleted();
             })
             ->with('parent')
             ->skip($count - $this->paginate_var)
@@ -456,10 +456,10 @@ class ChatBox extends Component
 
 
         //dd( $this->conversation);
-        #check if user belongs to conversation
-        $belongsToConversation = auth()->user()->conversations()
-            ->where('id', $this->conversation->id)
-            ->exists();
+        // Check if the user belongs to the conversation
+        $belongsToConversation = $this->conversation->participants()
+        ->where('user_id', auth()->id())
+        ->exists();
 
         abort_unless($belongsToConversation, 403);
 

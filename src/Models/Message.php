@@ -15,8 +15,7 @@ class Message extends Model
 
     protected $fillable=[
         'body',
-        'sender_id',
-        'receiver_id',
+        'user_id',
         'conversation_id',
         'read_at',
         'receiver_deleted_at',
@@ -27,11 +26,14 @@ class Message extends Model
 
 
     protected $dates=['read_at','receiver_deleted_at','sender_deleted_at'];
-
+    protected $userModel;
 
     public function __construct(array $attributes = [])
     {
         $this->table = \config('wirechat.messages_table');
+
+       
+        $this->userModel = app(config('wirechat.user_model'));
 
         parent::__construct($attributes);
     }
@@ -87,7 +89,7 @@ class Message extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'sender_id');
+        return $this->belongsTo($this->userModel::class, 'user_id');
     }
 
     public function hasAttachment()
@@ -104,13 +106,10 @@ class Message extends Model
     }
 
   
-
     function belongsToAuth() : bool {
         
         return $this->sender_id==auth()->id();
     }
-
-
 
     // Relationship for the parent message
     public function parent()
@@ -137,7 +136,7 @@ class Message extends Model
       }
 
 
-         /**
+    /**
      * ------------------
      *
      * @param $query

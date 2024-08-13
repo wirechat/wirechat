@@ -123,7 +123,7 @@ setTimeout(()=>{
                         <div class="flex gap-x-2 items-center">
                             
                             {{-- Only show if AUTH is onwer of message --}}
-                            @if ($lastMessage->sender_id==$authId)
+                            @if ($lastMessage->user_id==$authId)
                                 <span class="font-bold text-xs dark:text-white dark:font-normal">
                                     You:
                                 </span>

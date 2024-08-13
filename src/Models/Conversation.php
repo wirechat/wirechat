@@ -5,28 +5,33 @@ namespace Namu\WireChat\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Namu\WireChat\Enums\ConversationType;
 
 class Conversation extends Model
 {
     use HasFactory;
 
     protected $fillable=[
-        'receiver_id',
-        'sender_id'
+        'type',
+        'user_id'
     ];
 
     protected $userModel;
 
-    
+
+    protected $casts=[
+        'type'=>ConversationType::class
+    ];
+
 
     public function __construct(array $attributes = [])
     {
         $this->table = \config('wirechat.conversations_table');
 
-        //Set up the user model 
-        $this->userModel = config('wirechat.user_model');
 
-      //  dd($this->userModel);
+        $this->userModel = app(config('wirechat.user_model'));
+
         parent::__construct($attributes);
     }
 
@@ -41,18 +46,33 @@ class Conversation extends Model
     }
 
 
-    public function sender()
+
+    /**
+     * Get the user that owns the Conversation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo|null
+     */
+    public function owner(): BelongsTo|null
     {
-        return $this->belongsTo($this->userModel, 'sender_id','id');
+        return $this->belongsTo($this->userModel, 'user_id','id');
     }
 
     /**
-     * Define a relationship to fetch the receiver user.
+     * Define a relationship to fetch participants for this conversation.
      */
-    public function receiver()
+    public function participants()
     {
-            return $this->belongsTo($this->userModel, 'receiver_id','id');
+        return $this->hasMany(Participant::class, 'conversation_id', 'id');
+    }
 
+    public function isPrivate():bool
+    {
+        return $this->type==ConversationType::PRIVATE->value;
+    }
+
+    public function isGroup():bool
+    {
+        return $this->type=='group';
     }
 
 
@@ -64,18 +84,24 @@ class Conversation extends Model
 
     public function getReceiver()
     {
-
-
-        
-        if ($this->sender_id === auth()->id()) {
-
-            return  $this->userModel::firstWhere('id',$this->receiver_id);
-
-        } else {
-
-            return  $this->userModel::firstWhere('id',$this->sender_id);
+        // Check if the conversation is private
+        if ($this->type != ConversationType::PRIVATE) {
+            return null;
         }
+    
+        // Get the participant who is not the authenticated user
+        $receiverParticipant = $this->participants()
+            ->where('user_id', '!=', auth()->id())
+            ->first();
+    
+        if ($receiverParticipant) {
+            // Return the associated User model via the participant's user relationship
+            return $receiverParticipant->user;
+        }
+    
+        return null;
     }
+    
 
 
 
@@ -117,8 +143,6 @@ class Conversation extends Model
         }
         
     }
-
-
 
 
    public  function unreadMessagesCount() : int {

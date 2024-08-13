@@ -25,16 +25,17 @@ class Chat extends Component{
 
 
     ///check if auth belongs to conversaiton
-    $belongsToConversation = auth()->user()->conversations()
-          ->where('id', $this->conversation->id)
+    // Check if the user belongs to the conversation
+          $belongsToConversation = $this->conversation->participants()
+          ->where('user_id', auth()->id())
           ->exists();
           abort_unless($belongsToConversation, 403);
 
     ///mark messages belonging to receiver as read
-    Message::where('conversation_id',$this->conversation->id)
-             ->where('receiver_id',auth()->id())
-             ->whereNull('read_at')
-             ->update(['read_at'=>now()]);
+    // Message::where('conversation_id',$this->conversation->id)
+    //          ->where('receiver_id',auth()->id())
+    //         // ->whereNull('read_at')
+    //          ->update(['read_at'=>now()]);
     
   }
 

@@ -5,6 +5,7 @@ namespace Namu\WireChat\Traits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Schema;
+use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 
@@ -22,62 +23,64 @@ trait Chatable
     /**
      * Establishes a relationship between the user and conversations.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function conversations(): HasMany
+    public function conversations()
     {
-        return $this->hasMany(Conversation::class, 'sender_id')->orWhere('receiver_id', $this->id)
-                        ->whereNotDeleted();//we add scope here not deleted
+        return $this->belongsToMany(Conversation::class, config('wirechat.participants_table','wirechat_participants'), 'user_id', 'conversation_id')
+                    ->withPivot('conversation_id'); // Load the conversation_id from the pivot table
+                  //  ->wherePivot('deleted_at', null); // Assuming soft deletes on participants
+                   // ->whereNotDeleted(); // Apply your custom scope
     }
 
- 
+
     /**
-     * Creates a conversation with another user
+     * Creates a private conversation with another user and adds participants
      *
+     * @param Model $user The user to create a conversation with
+     * @param string|null $message The initial message (optional)
      * @return Conversation|null
      */
-    public function createConversationWith(Model $user,?string $message=null)
+    public function createConversationWith(Model $user, ?string $message = null)
     {
+        $userId = $user->id;
+        $authenticatedUserId = $this->id;
 
-      $userId= $user->id;
-      $authenticatedUserId = $this->id;
-
-
-      # Check if conversation already exists
-      $existingConversation = Conversation::where(function ($query) use ($authenticatedUserId, $userId) {
-                $query->where('sender_id', $authenticatedUserId)
-                    ->where('receiver_id', $userId);
-                })
-            ->orWhere(function ($query) use ($authenticatedUserId, $userId) {
-                $query->where('sender_id', $userId)
-                    ->where('receiver_id', $authenticatedUserId);
-            })->first();
-      #if conversation does not exists then create a new one
-      if (!$existingConversation) {
-        # Create new conversation
-       $existingConversation= Conversation::updateOrCreate([
-            'sender_id' => $authenticatedUserId,
-            'receiver_id' => $userId,
-        ]);
-
-      }
-
-      if((!empty($message)|| $message!=null) && $existingConversation!= null){
-
-       $createdMessage= Message::create([
-            'sender_id'=>$authenticatedUserId,
-            'receiver_id'=>$userId,
-            'conversation_id'=>$existingConversation->id,
-            'body'=>$message
-
-        ]);
-       // dd($createdMessage);
-      }
+        # Check if a private conversation already exists with these two participants
+        $existingConversation = Conversation::where('type',ConversationType::PRIVATE)
+        ->whereHas('participants', function ($query) use ($authenticatedUserId, $userId) {
+            $query->select('conversation_id')
+                  ->whereIn('user_id', [$authenticatedUserId, $userId])
+                  ->groupBy('conversation_id')
+                  ->havingRaw('COUNT(DISTINCT user_id) = 2');
+        })
+        ->first();    
 
 
-      return $existingConversation;
-  
+        # If the conversation does not exist, create a new one
+        if (!$existingConversation) {
+            $existingConversation = Conversation::create([
+                'type' => ConversationType::PRIVATE,
+                'user_id' => $authenticatedUserId, // Assuming the authenticated user is the creator
+            ]);
 
+            # Add participants
+            $existingConversation->participants()->createMany([
+                ['user_id' => $authenticatedUserId],
+                ['user_id' => $userId],
+            ]);
+        }
+
+        # Create the initial message if provided
+        if (!empty($message) && $existingConversation != null) {
+            $createdMessage = Message::create([
+                'user_id' => $authenticatedUserId,
+                'conversation_id' => $existingConversation->id,
+                'body' => $message
+            ]);
+        }
+
+        return $existingConversation;
     }
 
 
@@ -87,42 +90,35 @@ trait Chatable
      * @return Message|null
      */
 
-     function sendMessageTo(Model $user,string $message)  {
+    function sendMessageTo(Model $user, string $message)
+    {
 
-        //Get or create new conversation
-        $conversation=  $this->createConversationWith($user);
+        //Create or get converstion with user 
+        $conversation = $this->createConversationWith($user);
 
-
-
-
-        if ($conversation!=null) {
-            //dd($this->id,$user->id);
-       // dd($conversation);
-            
+        if ($conversation != null) {
             //create message
             $createdMessage = Message::create([
                 'conversation_id' => $conversation->id,
-                'sender_id' => $this->id,
-                'receiver_id' => $user->id,
+                'user_id' => $this->id,
                 'body' => $message
             ]);
-           // dd($createdMessage);
+            // dd($createdMessage);
 
             /** 
              * update conversation :we use this in to show the conversation
              *  with the latest message at the top of the chatlist  */
-            $conversation->updated_at=now();
+            $conversation->updated_at = now();
             $conversation->save();
 
             return $createdMessage;
-
         }
 
         //make sure user belong to conversation
-        
-     }
 
-    
+    }
+
+
     /**
      * Returns the URL for the cover image to be used as an avatar.
      *
@@ -162,13 +158,15 @@ trait Chatable
      */
     public function getUnReadCount(Conversation $conversation = null): int
     {
-        $query = $this->hasMany(Message::class, 'receiver_id')->where('read_at', null);
+        // $query = $this->hasMany(Message::class, 'receiver_id')->where('read_at', null);
 
-        if ($conversation) {
-            $query->where('conversation_id', $conversation->id);
-        }
+        // if ($conversation) {
+        //     $query->where('conversation_id', $conversation->id);
+        // }
 
-        return $query->count();
+        // return $query->count();
+
+        return 0;
     }
 
 
@@ -177,11 +175,10 @@ trait Chatable
      */
     public function belongsToConversation(Conversation $conversation): bool
     {
-        $conversationId = $conversation instanceof Conversation ? $conversation->id : $conversation;
 
-        return $this->conversations()
-            ->where('id', $conversationId)
-            ->exists();
+        return $conversation->participants()
+        ->where('user_id', auth()->id())
+        ->exists();
     }
     public function deleteConversation(Conversation $conversation)
     {
@@ -222,29 +219,32 @@ trait Chatable
 
 
     /**
-     * Check if the user has a conversation with another user.
+     * Check if the user has a private conversation with another user.
      *
-     * @param User $user
+     * @param Model $user
      * @return bool
      */
     public function hasConversationWith(Model $user): bool
     {
-        return $this->conversations()
-            ->where(function ($query) use ($user) {
-                $query->where('sender_id', $this->id)
-                    ->where('receiver_id', $user->id);
-            })
-            ->orWhere(function ($query) use ($user) {
-                $query->where('sender_id', $user->id)
-                    ->where('receiver_id', $this->id);
+        $authenticatedUserId = $this->id;
+        $userId = $user->id;
+
+        return Conversation::where('type', 'private')
+            ->whereHas('participants', function ($query) use ($authenticatedUserId, $userId) {
+                $query->select('conversation_id')
+                    ->whereIn('user_id', [$authenticatedUserId, $userId])
+                    ->groupBy('conversation_id')
+                    ->havingRaw('COUNT(DISTINCT user_id) = 2');
             })
             ->exists();
     }
 
 
-    
 
-   /**
+
+
+
+    /**
      * Retrieve the searchable fields defined in configuration
      * and check if they exist in the database table schema.
      *
@@ -266,5 +266,4 @@ trait Chatable
 
         return $searchableFields ?: null;
     }
-
 }

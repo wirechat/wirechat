@@ -15,6 +15,8 @@ return [
     'messages_table' => 'wire_messages',
 
 
+    'participants_table' => 'wire_participants',
+
     /* Table name for attachments */
     'attachments_table' => 'wire_attachments',
 

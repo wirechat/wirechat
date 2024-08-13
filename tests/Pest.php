@@ -2,7 +2,7 @@
 
 use Namu\WireChat\Tests\DuskTestCase;
 use Namu\WireChat\Tests\TestCase;
-
+use Illuminate\Foundation\Testing\RefreshDatabase;
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -13,7 +13,7 @@ use Namu\WireChat\Tests\TestCase;
 | need to change it using the "uses()" function to bind a different classes or traits.
 |
 */
-    uses(TestCase::class)->in('Feature');
+    uses(TestCase::class,RefreshDatabase::class)->in('Feature');
     uses(TestCase::class)->in('Unit');
     uses(DuskTestCase::class)->in('Browser');
 

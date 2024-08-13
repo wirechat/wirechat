@@ -64,47 +64,41 @@ class ChatList extends Component
   }
 
 
+public function render()
+{
+    // Get user searchable fields
+    $searchableFields = auth()->user()->getWireSearchableFields();
 
-  public function render()
-  {
+    // Load the authenticated user with their conversations and related participants
+    $user = auth()->user()->load('conversations.participants');
 
-    #get user searcable fiels
-    $searchableFields =auth()->user()->getWireSearchableFields();
-
-   // dd(empty($fields));
-    #Load the authenticated user with their conversations and related sender and receiver models
-    $user = auth()->user()->load('conversations.sender', 'conversations.receiver');
-
-    #Query conversations where the authenticated user is either the sender or receiver
-    $conversations = Conversation::where(function ($query)  {
-      $query->where('receiver_id', auth()->id())
-        ->orWhere('sender_id', auth()->id());
+    // Query conversations where the authenticated user is a participant
+    $conversations = Conversation::whereHas('participants', function ($query) {
+        $query->where('user_id', auth()->id());
     })
-      #Filter conversations based on sender or receiver name matching the search query
-      ->where(function ($query)use($searchableFields)  {
-        
-        $query->whereHas('sender', function ($subquery) use($searchableFields) {
-          $subquery->where('id', '<>', auth()->id())
-            ->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
-        })
-          ->orWhereHas('receiver', function ($subquery)use($searchableFields) {
-            $subquery->where('id', '<>', auth()->id())
+    // Filter conversations based on participant names matching the search query
+    ->where(function ($query) use ($searchableFields) {
+        $query->whereHas('participants', function ($subquery) use ($searchableFields) {
+            $subquery->whereHas('user',function ($subquery) use ($searchableFields){
+
+              $subquery ->where('user_id', '<>', auth()->id())
               ->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
-          });
-      })
-    //  ->withCount('messages')
-      #Order conversations by the latest updated_at timestamp
-      ->latest('updated_at')
-      #Retrieve the conversations
-      ->get();
 
-     // dd($conversations);
+            })
+           ;
+        });
+    })
+    // Order conversations by the latest updated_at timestamp
+    ->latest('updated_at')
+    // Retrieve the conversations
+    ->get();
 
-    #Pass data to the view
+    // Pass data to the view
     return view('wirechat::livewire.chat.chat-list', [
-      'conversations' => $conversations, // Pass filtered conversations
-      'unReadMessagesCount' => $user->getUnReadCount(), // Get unread messages count for the authenticated user
-      'authUser' => $user // Pass authenticated user data
+        'conversations' => $conversations, // Pass filtered conversations
+        'unReadMessagesCount' => $user->getUnReadCount(), // Get unread messages count for the authenticated user
+        'authUser' => $user // Pass authenticated user data
     ]);
-  }
+}
+
 }

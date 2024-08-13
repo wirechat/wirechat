@@ -56,7 +56,7 @@
     @foreach ($loadedMessages as $key=> $message)
 
     @php
-        $belongsToAuth= $message->sender_id==auth()->id();
+        $belongsToAuth= $message->user_id==auth()->id();
         $parent =$message->parent??null;
         $attachment= $message->attachment??null;
         $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');

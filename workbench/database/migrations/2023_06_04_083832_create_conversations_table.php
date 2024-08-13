@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create(config('wirechat.conversations_table'), function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('sender_id');// or uuid()
-            $table->foreign('sender_id')->references('id')->on('users');
-
-            $table->unsignedBigInteger('receiver_id');// or uuid()
-            $table->foreign('receiver_id')->references('id')->on('users');
-
+            $table->enum('type', ['private', 'group'])->default('private'); // Single for 1-1, Group for group chats
+        
+            // Use user_id to track the user who created the conversation (relevant for groups/rooms)
+            $table->unsignedBigInteger('user_id')
+                  ->nullable()
+                  ->comment('The user who created the conversation (relevant for groups/rooms)'); 
+            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
             $table->softDeletes();
+        
             $table->timestamps();
         });
     }

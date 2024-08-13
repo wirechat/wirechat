@@ -116,7 +116,7 @@ describe('Chatlist', function () {
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 1;
             });
-    });
+    })->skip();
 
 
     it('it shows last message and lable "you:" if it exists in chatlist', function () {

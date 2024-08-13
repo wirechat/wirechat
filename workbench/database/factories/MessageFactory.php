@@ -22,10 +22,8 @@ class MessageFactory extends Factory
     public function definition(): array
     {
         return [
-        'sender_id' => User::factory(),
-        'receiver_id' => User::factory(),
-        'conversation_id' => Conversation::factory(),
-
+        'user_id' => User::factory(),
+        'conversation_id' => Conversation::factory()
         ];
     }
 }
