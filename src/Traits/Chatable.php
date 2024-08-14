@@ -149,7 +149,6 @@ trait Chatable
         return $this->name ?? 'user';
     }
 
-
     /**
      * Get unread messages count.
      *
@@ -175,11 +174,11 @@ trait Chatable
      */
     public function belongsToConversation(Conversation $conversation): bool
     {
-
         return $conversation->participants()
-        ->where('user_id', auth()->id())
+        ->where('user_id', $this->id)
         ->exists();
     }
+    
     public function deleteConversation(Conversation $conversation)
     {
 
@@ -229,7 +228,7 @@ trait Chatable
         $authenticatedUserId = $this->id;
         $userId = $user->id;
 
-        return Conversation::where('type', 'private')
+        return Conversation::where('type',ConversationType::PRIVATE)
             ->whereHas('participants', function ($query) use ($authenticatedUserId, $userId) {
                 $query->select('conversation_id')
                     ->whereIn('user_id', [$authenticatedUserId, $userId])
