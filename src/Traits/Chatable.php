@@ -73,7 +73,7 @@ trait Chatable
 
         # Create the initial message if provided
         if (!empty($message) && $existingConversation != null) {
-            $createdMessage = Message::create([
+             Message::create([
                 'user_id' => $authenticatedUserId,
                 'conversation_id' => $existingConversation->id,
                 'body' => $message

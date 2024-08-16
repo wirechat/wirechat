@@ -80,7 +80,7 @@
             <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
 
                 <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">You replied to
-                    {{$parent?->sender_id== $receiver?->id? $receiver->name:" Yourself"}}
+                    {{$parent?->user_id== $receiver?->id? $receiver->name:" Yourself"}}
                 </h6>
 
                 <div class="border-r-4 px-1 ml-auto">
@@ -134,8 +134,7 @@
                 </div>
 
                 {{--Message user Avatar --}}
-                <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,'invisible'=> ($message?->sender_id
-                    === $nextMessage?->sender_id) ])>
+                <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,'invisible'=> ($message?->user_id === $nextMessage?->user_id) ])>
                     <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" class="h-7 w-7" />
                 </div>
 

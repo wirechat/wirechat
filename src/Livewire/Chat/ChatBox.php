@@ -44,6 +44,16 @@ class ChatBox extends Component
 
     public $replyMessage = null;
 
+
+
+    public function getListeners()
+    {
+        return [
+            "echo-private:conversation.{$this->conversation->id},.Namu\\WireChat\\Events\\MessageCreated" => 'appendNewMessage',
+        ];
+    }
+
+
     /** 
      * Todo: Authorize the property
      * Todo: or lock it 
@@ -107,7 +117,6 @@ class ChatBox extends Component
         $newMessage = Message::find($event['message_id']);
 
 
-
         #push message
         $this->loadedMessages->push($newMessage);
 
@@ -117,13 +126,7 @@ class ChatBox extends Component
     }
 
 
-    public function getListeners()
-    {
-        return [
-            "echo-private:conversation.{$this->conversation->id},.Namu\\WireChat\\Events\\MessageCreated" => 'appendNewMessage',
-        ];
-    }
-
+  
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
@@ -348,10 +351,13 @@ class ChatBox extends Component
     protected function dispatchMessageCreatedEvent(Message $message)
     {
 
-        //send broadcast message only to others 
-        //we add try catch to avoid runtime error when broadcasting services are not connected
+        // send broadcast message only to others 
+        // we add try catch to avoid runtime error when broadcasting services are not connected
+        // todo create a job to broadcast multiple messages
         try {
-            broadcast(new MessageCreated($message))->toOthers();
+
+            broadcast(new MessageCreated($message,$this->receiver))->toOthers();
+
         } catch (\Throwable $th) {
             //throw $th;
         }
