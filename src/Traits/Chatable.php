@@ -150,23 +150,26 @@ trait Chatable
     }
 
     /**
-     * Get unread messages count.
+     * Get unread messages count.for user excluding user owned messages
      *
      * @param Conversation|null $conversation
      * @return int
      */
-    public function getUnReadCount(Conversation $conversation = null): int
+    public function getUnreadCount(Conversation $conversation = null): int
     {
-        // $query = $this->hasMany(Message::class, 'receiver_id')->where('read_at', null);
+        $query = Message::whereDoesntHave('reads', function ($q) {
+            $q->where('readable_id', $this->id)
+              ->where('readable_type', get_class($this));
+        })->where('user_id',"!=",$this->id);
 
-        // if ($conversation) {
-        //     $query->where('conversation_id', $conversation->id);
-        // }
 
-        // return $query->count();
+        if ($conversation) {
+            $query->where('conversation_id', $conversation->id);
+        }
 
-        return 0;
+        return $query->count();
     }
+
 
 
     /**
@@ -265,4 +268,14 @@ trait Chatable
 
         return $searchableFields ?: null;
     }
+
+
+    /**
+     * Get all of the reads for the model (polymorphic).
+     */
+    // public function reads(): MorphMany
+    // {
+    //     return $this->morphMany(Read::class, 'readable');
+    // }
+
 }

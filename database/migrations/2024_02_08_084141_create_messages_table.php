@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(config('wirechat.messages_table','wire_messages'), function (Blueprint $table) {
+        Schema::create(config('wirechat.messages_table','wirechat_messages'), function (Blueprint $table) {
           $table->id();
 
         $table->unsignedBigInteger('conversation_id')->nullable();
@@ -48,6 +48,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists(config('wirechat.messages_table','wire_messages'));
+        Schema::dropIfExists(config('wirechat.messages_table','wirechat_messages'));
     }
 };

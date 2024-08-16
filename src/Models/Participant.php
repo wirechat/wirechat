@@ -24,7 +24,7 @@ class Participant extends Model
       //  dd($this->table);
 
         //Set up the user model 
-        $this->userModel =app(config('wirechat.user_model'));
+        $this->userModel =app(config('wirechat.user_model',\App\Models\User::class));
 
       //  dd($this->userModel);
         parent::__construct($attributes);

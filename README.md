@@ -151,12 +151,12 @@ Lastly the `post_max_size` in the `php.ini` superseeds any configuration in live
 Here you can retrieve items from the pivot table to we can get the count()
 
 ```php
-// get unread messages count for that user in all their conversations
-$user->getUnReadCount(); //int
+//Get All unread messages count (This includes all user conversations)
+$user->getUnreadCount(); //int
 
-//Pass a Conversation model in order to get unread messages count for that user in the conversation
+//Get count for specific conversation
 $conversation = $user->conversations()->first();
-$user->getUnReadCount($conversation); //int
+$user->getUnreadCount($conversation); //int
 
 
 ```

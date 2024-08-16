@@ -5,6 +5,8 @@ namespace Namu\WireChat\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 
 class Message extends Model
@@ -33,7 +35,7 @@ class Message extends Model
         $this->table = \config('wirechat.messages_table');
 
        
-        $this->userModel = app(config('wirechat.user_model'));
+        $this->userModel =app(config('wirechat.user_model',\App\Models\User::class));
 
         parent::__construct($attributes);
     }
@@ -74,6 +76,9 @@ class Message extends Model
     }
 
 
+  
+
+
     /* relationship */
 
     public function conversation()
@@ -87,6 +92,9 @@ class Message extends Model
         return $this->belongsTo(Attachment::class);
     }
 
+
+
+
     public function user()
     {
         return $this->belongsTo($this->userModel::class, 'user_id');
@@ -99,10 +107,33 @@ class Message extends Model
 
 
 
-    public function isRead():bool
-    {
+    // public function isRead():bool
+    // {
 
-         return $this->read_at != null;
+    //      return $this->read_at != null;
+    // }
+
+        /**
+     * Get all of the reads for the message.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reads(): HasMany
+    {
+        return $this->hasMany(Read::class,'message_id');
+    }
+    /**
+     * Check if the message has been read by a specific user.
+     *
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    public function readBy($user): bool
+    {
+        return $this->reads()
+            ->where('readable_id', $user->id)
+            ->where('readable_type', get_class($user))
+            ->exists();
     }
 
   
@@ -142,16 +173,16 @@ class Message extends Model
      * @param $query
      * -------------
      */
-    public function scopeWhereNotDeleted($query)
-    {
-        $userId = auth()->id();
+    // public function scopeWhereNotDeleted($query)
+    // {
+    //     $userId = auth()->id();
 
-        return $query->where(function ($subQuery) use ($userId) {
-            $subQuery->where('sender_id', $userId)->whereNull('sender_deleted_at');
-        })
-            ->orWhere(function ($subQuery) use ($userId) {
-                $subQuery->where('receiver_id', $userId)->whereNull('receiver_deleted_at');
-            });
-    }
+    //     return $query->where(function ($subQuery) use ($userId) {
+    //         $subQuery->where('sender_id', $userId)->whereNull('sender_deleted_at');
+    //     })
+    //         ->orWhere(function ($subQuery) use ($userId) {
+    //             $subQuery->where('receiver_id', $userId)->whereNull('receiver_deleted_at');
+    //         });
+    // }
 
 }

@@ -37,7 +37,6 @@ describe('Getting conversations',function(){
     
 });
 
-
 describe('createConversationWith() ',function(){
 
 
@@ -58,8 +57,6 @@ describe('createConversationWith() ',function(){
         expect($conversation)->not->toBe(null);
 
     });
-
-
 
     it('creates 2 participants for conversation when created', function () {
 
@@ -144,8 +141,6 @@ describe('createConversationWith() ',function(){
 
 
 });
-
-
 
 describe('sendMessageTo() ',function(){
 
@@ -264,7 +259,6 @@ describe('sendMessageTo() ',function(){
 
 });
 
-
 describe('belongsToConversation() ',function(){
 
 
@@ -333,6 +327,100 @@ describe('hasConversationWith() ',function(){
         //assert
         expect($receiver->hasConversationWith($auth))->toBe(true);
 
+
+    });
+
+});
+
+describe('getUnreadCount()',function(){
+
+
+
+    it('returns correct number of unreadMessages if Conversation model is passed', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        //Authenticate $auth
+        $this->actingAs($auth);
+
+        //Create conversation
+        $conversation = Conversation::factory() ->withParticipants([$auth,$receiver])->create();
+
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+        $auth->sendMessageTo($receiver, message: '3');
+
+
+        //send message to auth
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '4');
+        $receiver->sendMessageTo($auth, message: '5');
+
+
+        //Assert number of unread messages for $auth
+        expect($auth->getUnreadCount($conversation))->toBe(2);
+
+
+ 
+
+    });
+
+    it('returns all unread count if Conversation model is not passed', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        //Authenticate $auth
+        $this->actingAs($auth);
+
+        #create first conversation and receiver messages
+        Conversation::factory()->withParticipants([$auth,$receiver])->create();
+        $receiver->sendMessageTo($auth, message: '1');
+        $receiver->sendMessageTo($auth, message: '1');
+
+        #create new conversation and receive messages
+        $receiver2 = User::factory()->create();
+        Conversation::factory()->withParticipants([$auth,$receiver2])->create();
+        $receiver2->sendMessageTo($auth, message: 'new 1');
+        $receiver2->sendMessageTo($auth, message: 'new 2');
+        $receiver2->sendMessageTo($auth, message: 'new 3');
+
+
+        //Assert number of total unread  count for $auth
+        expect($auth->getUnreadCount())->toBe(5);
+
+
+    });
+
+
+    it('it returns a numeric value', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        //Authenticate $auth
+        $this->actingAs($auth);
+
+        //Create conversation
+        $conversation = Conversation::factory() ->withParticipants([$auth,$receiver])->create();
+
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+        $auth->sendMessageTo($receiver, message: '3');
+
+
+        //send message to auth
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '4');
+        $receiver->sendMessageTo($auth, message: '5');
+
+        //Assert number of unread messages for $auth
+        expect($auth->getUnreadCount($conversation))->toBeNumeric();
 
     });
 

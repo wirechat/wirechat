@@ -31,6 +31,9 @@ class Chat extends Component{
           ->exists();
           abort_unless($belongsToConversation, 403);
 
+      
+    //Mark as read 
+    $this->conversation->markAsRead();
     ///mark messages belonging to receiver as read
     // Message::where('conversation_id',$this->conversation->id)
     //          ->where('receiver_id',auth()->id())

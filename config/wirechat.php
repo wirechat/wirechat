@@ -3,21 +3,13 @@
 
 return [
  
-    /*
-     * Table name for conversations.
+     /*
+     * Tables names
      */
     'conversations_table' => 'wire_conversations',
-
-
-     /*
-     * Table name for messages.
-     */
     'messages_table' => 'wire_messages',
-
-
+    'reads_table' => 'wirechat_reads',
     'participants_table' => 'wire_participants',
-
-    /* Table name for attachments */
     'attachments_table' => 'wire_attachments',
 
     /* Model class name for Users */

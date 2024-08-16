@@ -133,9 +133,9 @@ setTimeout(()=>{
                              <p 
                              @class([
                                 'truncate text-sm dark:text-white  gap-2 items-center',
-                                'font-semibold text-black' => !$lastMessage?->isRead() && $lastMessage?->sender_id != $authId,
-                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id != $authId,
-                                'font-normal text-gray-600' => $lastMessage?->isRead() && $lastMessage?->sender_id == $authId,
+                                'font-semibold text-black' => !$lastMessage?->readBy(auth()?->user()) && $lastMessage?->user_id != $authId,
+                                'font-normal text-gray-600' => $lastMessage?->readBy(auth()?->user()) && $lastMessage?->user_id != $authId,
+                                'font-normal text-gray-600' => $lastMessage?->readBy(auth()?->user()) && $lastMessage?->user_id == $authId,
                             ])
                              >
                                 {{$lastMessage->body!=''?$lastMessage->body:($lastMessage->hasAttachment()?'📎 Attachment':'')}}
@@ -151,7 +151,7 @@ setTimeout(()=>{
 
                     {{-- Read status --}}
                     {{-- Only show if AUTH is NOT onwer of message --}}
-                    <div class="{{ $lastMessage != null && $lastMessage->sender_id != $authId &&  !$lastMessage->isRead()?'visible':'invisible'}} col-span-2 flex flex-col text-center my-auto">
+                    <div class="{{ $lastMessage != null && $lastMessage->user_id != $authId &&  !$lastMessage->readBy(auth()?->user())?'visible':'invisible'}} col-span-2 flex flex-col text-center my-auto">
 
                         {{-- Dots icon --}}
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
