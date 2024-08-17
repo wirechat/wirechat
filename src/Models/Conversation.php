@@ -65,6 +65,19 @@ class Conversation extends Model
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
 
+    // Conversation model
+    public function users()
+    {
+       // dd(User::class);
+        return $this->belongsToMany(
+            $this->userModel::class,  // User model
+            config('wirechat.participants_table', 'wirechat_participants'), // Pivot table
+            'conversation_id',  // Foreign key on the pivot table (Participant)
+            'user_id'           // Foreign key on the pivot table (Participant)
+        );
+    }
+
+
     public function isPrivate(): bool
     {
         return $this->type == ConversationType::PRIVATE->value;

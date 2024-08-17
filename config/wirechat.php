@@ -16,6 +16,11 @@ return [
     'user_model' => \App\Models\User::class,
 
 
+    /* define queue for broadcasting message events*/
+
+    'queue'=>'default',
+
+
     /* Home route */
      'home_route'=>"/",
 

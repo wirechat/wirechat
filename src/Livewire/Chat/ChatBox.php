@@ -13,6 +13,7 @@ use Namu\WireChat\Models\Message;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Models\Attachment;
 
 
@@ -356,8 +357,10 @@ class ChatBox extends Component
         // todo create a job to broadcast multiple messages
         try {
 
-            broadcast(new MessageCreated($message,$this->receiver))->toOthers();
-
+            //!remove the receiver from the messageCreated and add it to the job instead 
+            //!also do not forget to exlude auth user or message owner from particpants 
+           
+            BroadcastMessage::dispatch($this->conversation,$message);
         } catch (\Throwable $th) {
             //throw $th;
         }

@@ -24,7 +24,8 @@ class MessageCreated implements ShouldBroadcast
         $this->message = $message;
         $this->receiver = $receiver;
 
-
+        //Exclude the current user from receiving the broadcast.
+       // $this->dontBroadcastToCurrentUser();
 
     }
 
