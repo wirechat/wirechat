@@ -29,7 +29,7 @@ use function Orchestra\Testbench\workbench_path;
     public static function prepare(): void
     {
         // if (! static::runningInSail()) {
-            static::startChromeDriver();
+           // static::startChromeDriver();
         // }
     }
 
@@ -66,9 +66,9 @@ use function Orchestra\Testbench\workbench_path;
         parent::setUp();
         //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
 
-        // $this->loadMigrationsFrom(
-        //     workbench_path('database/migrations')
-        // );
+        $this->loadMigrationsFrom(
+            workbench_path('database/migrations')
+        );
         $this->withoutVite();
       //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
         //here we add a new ile in the name of the mixture of the berir d 
@@ -101,19 +101,19 @@ use function Orchestra\Testbench\workbench_path;
         });
     }
 
-// /**
-// * Make sure all integration tests use the same Laravel "skeleton" files.
-// * This avoids duplicate classes during migrations.
-// *
-// * Overrides \Orchestra\Testbench\Dusk\TestCase::getBasePath
-// *       and \Orchestra\Testbench\Concerns\CreatesApplication::getBasePath
-// *
-// * @return string
-// */
+/**
+* Make sure all integration tests use the same Laravel "skeleton" files.
+* This avoids duplicate classes during migrations.
+*
+* Overrides \Orchestra\Testbench\Dusk\TestCase::getBasePath
+*       and \Orchestra\Testbench\Concerns\CreatesApplication::getBasePath
+*
+* @return string
+*/
 // protected function getBasePath()
 // {
 //     // Adjust this path depending on where your override is located.
 //     return __DIR__.'/../vendor/orchestra/testbench-dusk/laravel'; 
 // }
 
-}
+ }

@@ -4,9 +4,11 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Livewire\Chat\ChatBox;
 use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Models\Attachment;
@@ -53,7 +55,6 @@ test('returns 403(Forbidden) if user doesnt not bleong to conversation', functio
 
 
 describe('Box presence test: ', function () {
-
 
 
     test('it shows receiver name when conversation is loaded in chatbox', function () {
@@ -142,9 +143,9 @@ describe('Sending messages ', function () {
     });
 
 
-    test('it broadcasts event "MessageCreated" when message is sent', function () {
+    test('it pushes job "BroadcastMessage" when message is sent', function () {
         Event::fake();
-
+        Queue::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
@@ -158,8 +159,30 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
-            return $event->message->id === $message->id;
+        Queue::assertPushed(BroadcastMessage::class, function ($event) use ($conversation,$message) {
+            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
+        });
+    });
+
+
+    test('it broadcasts event "MessageCreated" when message is sent', function () {
+        Event::fake();
+     //   Queue::fake();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set("body", 'New message')
+            ->call("sendMessage");
+
+        $message = Message::first();
+
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$receiver) {
+            return $event->message->id === $message->id && $event->receiver->id === $receiver->id;
         });
     });
 
@@ -181,8 +204,6 @@ describe('Sending messages ', function () {
 
         $request->assertStatus(429);
     });
-
-
 
 
     //sending like
@@ -227,8 +248,31 @@ describe('Sending messages ', function () {
             ->assertDispatched('scroll-bottom');
     });
 
+
+    test('it pushes job "BroadcastMessage" when sendLike is called', function () {
+        Event::fake();
+        Queue::fake();
+     
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        Queue::assertPushed(BroadcastMessage::class, function ($event) use ($conversation,$message) {
+            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
+        });
+    });
+
     test('it broadcasts event "MessageCreated" when sendLike is called', function () {
         Event::fake();
+       // Queue::fake();
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -242,8 +286,9 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
-            return $event->message->id === $message->id;
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$receiver) {
+            return $event->message->id === $message->id && $event->receiver->id === $receiver->id;
+
         });
     });
 
@@ -273,9 +318,7 @@ describe('Sending messages ', function () {
     test('it saves image to databse when created & clears files properties when done', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
 
         $file[] = UploadedFile::fake()->image('photo.png');
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -363,6 +406,8 @@ describe('Sending messages ', function () {
         //assert message created
         $chatListComponet->dispatch("refresh")->assertSee("new message");
     });
+
+
 });
 
 describe('Sending reply', function () {

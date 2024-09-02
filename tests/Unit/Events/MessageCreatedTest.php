@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Event;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Workbench\App\Models\User;
 
@@ -11,11 +12,13 @@ describe("broadcastWith() Data verifiction ", function () {
     test('message data is present', function () {
 
         Event::fake();
-        $user = User::factory()->create();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
 
         $message = Message::factory()->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
 
             $broadcastMessage = (array) $event->broadcastWith();
@@ -32,9 +35,13 @@ describe("broadcastWith() Data verifiction ", function () {
     test('message id is present', function () {
 
         Event::fake();
+$auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
 
             $broadcastMessage = (array) $event->broadcastWith();
@@ -47,9 +54,13 @@ describe("broadcastWith() Data verifiction ", function () {
     test('conversation id is present', function () {
 
         Event::fake();
+$auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['conversation_id'])->toBe($message->conversation_id);
@@ -60,9 +71,13 @@ describe("broadcastWith() Data verifiction ", function () {
     test('sender id is present', function () {
 
         Event::fake();
+$auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['sender_id'])->toBe($message->sender_id);
@@ -73,8 +88,13 @@ describe("broadcastWith() Data verifiction ", function () {
     test('receiver_id is present', function () {
 
         Event::fake();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
-        broadcast(new MessageCreated($message))->toOthers();
+
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['receiver_id'])->toBe($message->receiver_id);
@@ -85,9 +105,13 @@ describe("broadcastWith() Data verifiction ", function () {
     test('body id is present', function () {
 
         Event::fake();
+$auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['body'])->toBe($message->body);
@@ -97,8 +121,13 @@ describe("broadcastWith() Data verifiction ", function () {
 
     test('attachment_id is present', function () {
         Event::fake();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
-        broadcast(new MessageCreated($message))->toOthers();
+
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['attachment_id'])->toBe($message->attachment_id);
@@ -108,8 +137,13 @@ describe("broadcastWith() Data verifiction ", function () {
     
     test('reply_id is present', function () {
         Event::fake();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
-        broadcast(new MessageCreated($message))->toOthers();
+
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['reply_id'])->toBe($message->reply_id);
@@ -119,8 +153,13 @@ describe("broadcastWith() Data verifiction ", function () {
 
     test('read_at is present', function () {
         Event::fake();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
         $message = Message::factory()->create();
-        broadcast(new MessageCreated($message))->toOthers();
+
+        broadcast(new MessageCreated($message ,$receiver))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['read_at'])->toBe($message->read_at);

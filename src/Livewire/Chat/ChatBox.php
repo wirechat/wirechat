@@ -117,6 +117,8 @@ class ChatBox extends Component
         $this->dispatch('scroll-bottom');
         $newMessage = Message::find($event['message_id']);
 
+       
+
 
         #push message
         $this->loadedMessages->push($newMessage);
@@ -139,6 +141,11 @@ class ChatBox extends Component
             $this->dispatch('scroll-bottom');
 
             $newMessage = Message::find($event['message']['id']);
+
+             //Make sure message does not belong to auth
+            if ($newMessage->user_id==auth()?->id()) {
+            return null;
+            }
 
             #push message
             $this->loadedMessages->push($newMessage);
@@ -359,10 +366,10 @@ class ChatBox extends Component
 
             //!remove the receiver from the messageCreated and add it to the job instead 
             //!also do not forget to exlude auth user or message owner from particpants 
-           
+
             BroadcastMessage::dispatch($this->conversation,$message);
         } catch (\Throwable $th) {
-            //throw $th;
+            throw $th;
         }
     }
 
