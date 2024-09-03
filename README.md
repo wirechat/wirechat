@@ -35,6 +35,12 @@ php artisan vendor:publish --tag=wirechat-migration
  php artisan storage:link
 ```
 
+### Building Tailwind CSS for production
+To purge the classes used by the package, add the following lines to your purge array in tailwind.config.js:
+```
+   './wirechat/resources/views/**/*.blade.php',
+   './wirechat/src/Livewire/*.php',
+```
 
 
 

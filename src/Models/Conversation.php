@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\ConversationType;
 
 class Conversation extends Model
@@ -78,14 +79,34 @@ class Conversation extends Model
     }
 
 
+    /**
+     * Add a new user to the conversation.
+     *
+     * @param Model $user
+     * @return void
+     */
+    public function addUser(Model $user)
+    {
+        // Check if the user is already in the conversation
+        abort_if($this->users()->where('user_id', $user->id)->exists(), 422, 'User is already in the conversation.');
+    
+        // If the conversation is private, ensure it doesn't exceed two users
+        abort_unless($this->isPrivate() && $this->users()->count() < 2, 422, 'Private conversations cannot have more than two users.');
+    
+        // Attach the user to the conversation
+        $this->users()->attach($user->id);
+    }
+    
+
+
     public function isPrivate(): bool
     {
-        return $this->type == ConversationType::PRIVATE->value;
+        return $this->type == ConversationType::PRIVATE;
     }
 
     public function isGroup(): bool
     {
-        return $this->type == 'group';
+        return $this->type == ConversationType::GROUP;
     }
 
 

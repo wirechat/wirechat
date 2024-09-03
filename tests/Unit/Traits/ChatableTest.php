@@ -79,6 +79,7 @@ describe('createConversationWith() ',function(){
 
     });
 
+
     test('The created conversation must be PRIVATE', function () {
 
         $auth = User::factory()->create();
