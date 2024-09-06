@@ -70,11 +70,11 @@ test('returns 403(Forbidden) if user doesnt not bleong to conversation', functio
     
 });
 
-test('it marks unread messages as read when conversation is open ', function () {
+test('it marks messages as read when conversation is open ', function () {
     $auth = User::factory()->create();
 
     $receiver = User::factory()->create(['name'=>'John']);
-    $conversation = Conversation::factory()->create(['sender_id'=>$auth->id,'receiver_id'=>$receiver->id]);
+    $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
 
 
     //send messages to auth
@@ -93,7 +93,7 @@ test('it marks unread messages as read when conversation is open ', function () 
     expect($auth->getUnReadCount())->toBe(0);
 
     
-})->skip();
+});
 
 
 
