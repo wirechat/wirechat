@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
+use Namu\WireChat\Models\Participant;
 
 /**
  * Trait Chatable
@@ -27,35 +28,41 @@ trait Chatable
      */
     public function conversations()
     {
-        return $this->belongsToMany(Conversation::class, config('wirechat.participants_table','wirechat_participants'), 'user_id', 'conversation_id')
-                    ->withPivot('conversation_id'); // Load the conversation_id from the pivot table
-                  //  ->wherePivot('deleted_at', null); // Assuming soft deletes on participants
-                   // ->whereNotDeleted(); // Apply your custom scope
+        return $this->morphToMany(
+            Conversation::class, // The related model
+            'participantable',   // The polymorphic field (participantable_id & participantable_type)
+            config('wirechat.participants_table', 'wirechat_participants'), // The participants table
+            'participantable_id', // The foreign key on the participants table for the User model
+            'conversation_id'     // The foreign key for the Conversation model
+        )->withPivot('conversation_id'); // Optionally load conversation_id from the pivot table
     }
-
-
+    
     /**
-     * Creates a private conversation with another user and adds participants
+     * Creates a private conversation with another participant and adds participants.
      *
-     * @param Model $user The user to create a conversation with
+     * @param Model $participant The participant to create a conversation with
      * @param string|null $message The initial message (optional)
      * @return Conversation|null
      */
-    public function createConversationWith(Model $user, ?string $message = null)
+    public function createConversationWith(Model $participant, ?string $message = null)
     {
-        $userId = $user->id;
+        $participantId = $participant->id;
+        $participantType = get_class($participant);
+
+
         $authenticatedUserId = $this->id;
+        $authenticatedUserType = get_class($this);
 
         # Check if a private conversation already exists with these two participants
-        $existingConversation = Conversation::where('type',ConversationType::PRIVATE)
-        ->whereHas('participants', function ($query) use ($authenticatedUserId, $userId) {
-            $query->select('conversation_id')
-                  ->whereIn('user_id', [$authenticatedUserId, $userId])
-                  ->groupBy('conversation_id')
-                  ->havingRaw('COUNT(DISTINCT user_id) = 2');
-        })
-        ->first();    
-
+        $existingConversation = Conversation::where('type', ConversationType::PRIVATE)
+            ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
+               
+                $query->select('conversation_id')
+                    ->whereIn('participantable_id', [$authenticatedUserId, $participantId])
+                    ->whereIn('participantable_type', [$authenticatedUserType, $participantType])
+                    ->groupBy('conversation_id')
+                    ->havingRaw('COUNT(DISTINCT participantable_id) = 2');
+            })->first();
 
         # If the conversation does not exist, create a new one
         if (!$existingConversation) {
@@ -65,15 +72,28 @@ trait Chatable
             ]);
 
             # Add participants
-            $existingConversation->participants()->createMany([
-                ['user_id' => $authenticatedUserId],
-                ['user_id' => $userId],
+           
+             # Add participants using create
+            // dd($authenticatedUserType);
+            Participant::create([
+                'conversation_id' => $existingConversation->id,
+                'participantable_id' => $authenticatedUserId,
+                'participantable_type' => $authenticatedUserType, // explicitly set type
             ]);
+            
+            Participant::create([
+                'conversation_id' => $existingConversation->id,
+                'participantable_id' => $participantId,
+                'participantable_type' => $participantType, // explicitly set type
+            ]);
+     //   dd($existingConversation->participants()->get());
+            
         }
+
 
         # Create the initial message if provided
         if (!empty($message) && $existingConversation != null) {
-             Message::create([
+            Message::create([
                 'user_id' => $authenticatedUserId,
                 'conversation_id' => $existingConversation->id,
                 'body' => $message
@@ -178,7 +198,8 @@ trait Chatable
     public function belongsToConversation(Conversation $conversation): bool
     {
         return $conversation->participants()
-        ->where('user_id', $this->id)
+        ->where('participantable_id',$this->id)
+        ->where('participantable_type',get_class($this))
         ->exists();
     }
     
@@ -228,17 +249,19 @@ trait Chatable
      */
     public function hasConversationWith(Model $user): bool
     {
-        $authenticatedUserId = $this->id;
-        $userId = $user->id;
+        $authenticatedUser= $this;
+        $user = $user;
 
-        return Conversation::where('type',ConversationType::PRIVATE)
-            ->whereHas('participants', function ($query) use ($authenticatedUserId, $userId) {
+
+       return     Conversation::where('type', ConversationType::PRIVATE)
+            ->whereHas('participants', function ($query) use ($authenticatedUser, $user) {
+               
                 $query->select('conversation_id')
-                    ->whereIn('user_id', [$authenticatedUserId, $userId])
+                    ->whereIn('participantable_id', [$authenticatedUser->id, $user->id])
+                    ->whereIn('participantable_type', [get_class($authenticatedUser), get_class($user)])
                     ->groupBy('conversation_id')
-                    ->havingRaw('COUNT(DISTINCT user_id) = 2');
-            })
-            ->exists();
+                    ->havingRaw('COUNT(DISTINCT participantable_id) = 2');
+            })->exists();
     }
 
 

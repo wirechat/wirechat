@@ -16,6 +16,7 @@ class Conversation extends Model
     protected $fillable = [
         'type',
         'user_id'
+
     ];
 
     protected $userModel;
@@ -65,6 +66,10 @@ class Conversation extends Model
     {
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
+    // public function participants()
+    // {
+    //     return $this->morphMany(Participant::class,'participantable');
+    // }
 
     // Conversation model
     public function users()
@@ -85,17 +90,40 @@ class Conversation extends Model
      * @param Model $user
      * @return void
      */
-    public function addUser(Model $user)
+    /**
+     * Add a new participant to the conversation.
+     *
+     * @param Model $participant
+     * @return void
+     */
+    public function addParticipant(Model $participant)
     {
-        // Check if the user is already in the conversation
-        abort_if($this->users()->where('user_id', $user->id)->exists(), 422, 'User is already in the conversation.');
-    
-        // If the conversation is private, ensure it doesn't exceed two users
-        abort_unless($this->isPrivate() && $this->users()->count() < 2, 422, 'Private conversations cannot have more than two users.');
-    
-        // Attach the user to the conversation
-        $this->users()->attach($user->id);
+        // Check if the participant is already in the conversation
+        abort_if(
+            $this->participants()
+                ->where('participantable_id', $participant->id)
+                ->where('participantable_type', get_class($participant))
+                ->exists(),
+            422, 
+            'Participant is already in the conversation.'
+        );
+
+        // If the conversation is private, ensure it doesn't exceed two participants
+        if ($this->isPrivate()) {
+            abort_if(
+                $this->participants()->count() >= 2,
+                422, 
+                'Private conversations cannot have more than two participants.'
+            );
+        }
+
+        // Attach the participant to the conversation
+        $this->participants()->create([
+            'participantable_id' => $participant->id,
+            'participantable_type' => get_class($participant),
+        ]);
     }
+    
     
 
 
@@ -124,12 +152,13 @@ class Conversation extends Model
 
         // Get the participant who is not the authenticated user
         $receiverParticipant = $this->participants()
-            ->where('user_id', '!=', auth()->id())
+            ->where('participantable_id','!=', auth()->id())
+            ->where('participantable_type', get_class(auth()->user()))
             ->first();
 
         if ($receiverParticipant) {
-            // Return the associated User model via the participant's user relationship
-            return $receiverParticipant->user;
+            // Return the associated  model via the participant's relationship
+            return $receiverParticipant->participantable;
         }
 
         return null;

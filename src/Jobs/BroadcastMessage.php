@@ -32,14 +32,15 @@ class BroadcastMessage implements ShouldQueue
      */
     public function handle(): void
     {   
-        $userModel = app(config('wirechat.user_model', \App\Models\User::class));
-
-        //Get conversation users
-        $participants = $this->conversation->users()->where($userModel->getTable().".id",'!=',$this->auth->id)->get();
+        //Get conversation participants except auth
+        $participants = $this->conversation->participants()
+                                                    ->where('participantable_id','!=',$this->auth->id)
+                                                    ->where('participantable_type',get_class($this->auth))
+                                                    ->get();
 
         //loop through users 
         foreach ($participants as $key => $participant) {
-            broadcast(new MessageCreated($this->message,$participant))->toOthers();
+            broadcast(new MessageCreated($this->message,$participant->participantable))->toOthers();
         }
 
     }

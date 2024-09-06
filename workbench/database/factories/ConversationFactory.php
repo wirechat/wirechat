@@ -33,7 +33,7 @@ class ConversationFactory extends Factory
 
             foreach ($models as $key => $model) {
 
-            Participant::factory()->create(['conversation_id'=>$conversation->id,'user_id'=>$model->id]);
+            Participant::factory()->create(['conversation_id'=>$conversation->id,'participantable_id'=>$model->id,'participantable_type'=>get_class($model)]);
 
             }
         });

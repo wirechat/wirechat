@@ -18,7 +18,10 @@ describe('Getting conversations',function(){
         //assert conversation belongs to user
         foreach ($conversations as $key => $conversation) {
 
-           $conversationExists=  $conversation->participants()->where('user_id',$auth->id)->exists();
+           $conversationExists=  $conversation->participants()
+                                            ->where('participantable_id',$auth->id)
+                                            ->where('participantable_type',get_class($auth))
+                                            ->exists();
            expect($conversationExists)->toBe(true);
         }
     });
@@ -67,14 +70,40 @@ describe('createConversationWith() ',function(){
         //create conversation
         $conversation = $auth->createConversationWith($receiver);
 
+        // Eager load the participants relationship
+
+
+        $conversation= Conversation::find($conversation->id);
+
         //check database
         expect(count($conversation->participants))->toBe(2);
-         
+
+    });
+
+    it('saved correct type and id in participants model', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        //create conversation
+        $conversation = $auth->createConversationWith($receiver);
+
+        // Eager load the participants relationship
+
+        $conversation= Conversation::find($conversation->id);
+
         //assert partipant $auth
-         expect( $conversation->participants()->where('user_id',$auth->id)->exists())->toBe(true);
+         expect( $conversation->participants()
+                              ->where('participantable_id',$auth->id)
+                              ->where('participantable_type',get_class($auth))
+                              ->exists())->toBe(true);
 
         //assert partipant $receiver
-        expect( $conversation->participants()->where('user_id',$receiver->id)->exists())->toBe(true);
+        expect( $conversation->participants() 
+                             ->where('participantable_id',$auth->id)
+                             ->where('participantable_type',get_class($auth))
+                             ->exists())->toBe(true);
 
 
     });

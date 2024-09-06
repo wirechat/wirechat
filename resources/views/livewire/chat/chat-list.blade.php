@@ -89,6 +89,7 @@ setTimeout(()=>{
                 
             @php
                 $receiver= $conversation->getReceiver();
+
                 $lastMessage=$conversation->messages()->latest()->first();
             @endphp
 

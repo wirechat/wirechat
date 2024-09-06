@@ -27,7 +27,8 @@ class Chat extends Component{
     ///check if auth belongs to conversaiton
     // Check if the user belongs to the conversation
           $belongsToConversation = $this->conversation->participants()
-          ->where('user_id', auth()->id())
+          ->where('participantable_id', auth()->id())
+          ->where('participantable_type', get_class(auth()->user()))
           ->exists();
           abort_unless($belongsToConversation, 403);
 

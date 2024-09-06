@@ -13,7 +13,8 @@ class Participant extends Model
 
     protected $fillable=[
         'conversation_id',
-        'user_id'
+        'participantable_id',
+        'participantable_type'
     ];
 
 
@@ -38,6 +39,15 @@ class Participant extends Model
     protected static function newFactory()
     {
         return \Namu\WireChat\Workbench\Database\Factories\ParticipantFactory::new();
+    }
+
+
+    /**
+     * Polymorphic relation to the participantable model.
+     */
+    public function participantable()
+    {
+        return $this->morphTo();
     }
 
 

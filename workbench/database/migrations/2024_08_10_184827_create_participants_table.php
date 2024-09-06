@@ -16,8 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('conversation_id');
             $table->foreign('conversation_id')->references('id')->on(config('wirechat.conversations_table'))->cascadeOnDelete();
     
-            $table->unsignedBigInteger('user_id'); // Reference to the user
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->string('participantable_id'); // Change to string to support UUIDs
+            $table->string('participantable_type');
     
             $table->timestamps();
     

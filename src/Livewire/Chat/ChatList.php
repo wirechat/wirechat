@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Models\Conversation;
 
 class ChatList extends Component
@@ -27,9 +28,10 @@ class ChatList extends Component
 
   public function getListeners()
   {
+    //dd(MorphTypeHelper::deslash(get_class(auth()->user())));
       return [
         'refresh' => '$refresh',
-        "echo-private:wirechat.".auth()->id().",.Namu\\WireChat\\Events\\MessageCreated" => '$refresh',
+        "echo-private:participant.".MorphTypeHelper::deslash(get_class(auth()->user())).".".auth()->id().",.Namu\\WireChat\\Events\\MessageCreated" => '$refresh',
       ];
   }
 
@@ -74,25 +76,26 @@ public function render()
 
     // Query conversations where the authenticated user is a participant
     $conversations = Conversation::whereHas('participants', function ($query) {
-        $query->where('user_id', auth()->id());
+        $query->where('participantable_id', auth()->id())
+              ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
     })
     // Filter conversations based on participant names matching the search query
     ->where(function ($query) use ($searchableFields) {
         $query->whereHas('participants', function ($subquery) use ($searchableFields) {
-            $subquery->whereHas('user',function ($subquery) use ($searchableFields){
+            // Exclude the authenticated user
+            $subquery->where('participantable_id', '<>', auth()->id())
+                    // Dynamically search the participantable fields
+                     ->where('participantable_id', '<>', auth()->id())
+                     ->whereHas('participantable', function ($subquery2) use ($searchableFields) {
+                          $subquery2->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
+        });
 
-              $subquery ->where('user_id', '<>', auth()->id())
-              ->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
-
-            })
-           ;
         });
     })
     // Order conversations by the latest updated_at timestamp
     ->latest('updated_at')
     // Retrieve the conversations
     ->get();
-
     // Pass data to the view
     return view('wirechat::livewire.chat.chat-list', [
         'conversations' => $conversations, // Pass filtered conversations

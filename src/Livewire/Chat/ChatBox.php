@@ -127,8 +127,6 @@ class ChatBox extends Component
         $newMessage->read_at = now();
         $newMessage->save();
     }
-
-
   
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
@@ -158,7 +156,6 @@ class ChatBox extends Component
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
         }
     }
-
 
     /**
      * Delete conversation  */
@@ -354,7 +351,6 @@ class ChatBox extends Component
     }
 
   
-
     //used to broadcast message sent to receiver
     protected function dispatchMessageCreatedEvent(Message $message)
     {
@@ -474,7 +470,8 @@ class ChatBox extends Component
         //dd( $this->conversation);
         // Check if the user belongs to the conversation
         $belongsToConversation = $this->conversation->participants()
-        ->where('user_id', auth()->id())
+        ->where('participantable_id', auth()->id())
+              ->where('participantable_type', get_class(auth()->user()))
         ->exists();
 
         abort_unless($belongsToConversation, 403);
