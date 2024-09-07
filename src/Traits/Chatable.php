@@ -94,7 +94,8 @@ trait Chatable
         # Create the initial message if provided
         if (!empty($message) && $existingConversation != null) {
             Message::create([
-                'user_id' => $authenticatedUserId,
+                'sendable_id' => $authenticatedUserId,
+                'sendable_type' => $authenticatedUserType,
                 'conversation_id' => $existingConversation->id,
                 'body' => $message
             ]);
@@ -120,7 +121,8 @@ trait Chatable
             //create message
             $createdMessage = Message::create([
                 'conversation_id' => $conversation->id,
-                'user_id' => $this->id,
+                'sendable_type' => get_class($this), // Polymorphic sender type
+                'sendable_id' =>$this->id, // Polymorphic sender ID
                 'body' => $message
             ]);
             // dd($createdMessage);
@@ -178,10 +180,9 @@ trait Chatable
     public function getUnreadCount(Conversation $conversation = null): int
     {
         $query = Message::whereDoesntHave('reads', function ($q) {
-            $q->where('readable_id', $this->id)
-              ->where('readable_type', get_class($this));
-        })->where('user_id',"!=",$this->id);
-
+               $q->where('readable_id', $this->id)
+                 ->where('readable_type', get_class($this));
+             })->where('sendable_id','!=', $this->id)->where('sendable_type', get_class($this));
 
         if ($conversation) {
             $query->where('conversation_id', $conversation->id);

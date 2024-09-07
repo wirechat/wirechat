@@ -70,15 +70,14 @@ class User extends Authenticatable
 
     public function wireChatDisplayName() : ?string 
     {
-
         return $this->name??'user';
-        
     }
+
 
      /* UnRead Messages Count */
-     public function unReadMessagesCount() : int {
+    //  public function unReadMessagesCount() : int {
 
-        return $this->hasMany(Message::class,'receiver_id')->where('read_at',null)->count();
+    //     return $this->hasMany(Message::class,'receiver_id')->where('read_at',null)->count();
        
-    }
+    // }
 }

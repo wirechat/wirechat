@@ -56,7 +56,7 @@
     @foreach ($loadedMessages as $key=> $message)
 
     @php
-        $belongsToAuth= $message->user_id==auth()->id();
+        $belongsToAuth= $message->belongsToAuth();
         $parent =$message->parent??null;
         $attachment= $message->attachment??null;
         $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
@@ -134,7 +134,7 @@
                 </div>
 
                 {{--Message user Avatar --}}
-                <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,'invisible'=> ($message?->user_id === $nextMessage?->user_id) ])>
+                <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,'invisible'=> ($message?->sendable_id == $nextMessage?->sendable_id && $message?->sendable_type == $nextMessage?->sendable_type) ])>                       
                     <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" class="h-7 w-7" />
                 </div>
 

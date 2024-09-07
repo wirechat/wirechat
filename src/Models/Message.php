@@ -17,7 +17,8 @@ class Message extends Model
 
     protected $fillable=[
         'body',
-        'user_id',
+        'sendable_type', // Now includes sendable_type for polymorphism
+        'sendable_id',   // Now includes sendable_id for polymorphis
         'conversation_id',
         'read_at',
         'receiver_deleted_at',
@@ -40,6 +41,25 @@ class Message extends Model
         parent::__construct($attributes);
     }
 
+     /* relationship */
+
+     public function conversation()
+     {
+         return $this->belongsTo(Conversation::class);
+     }
+
+
+    /* Polymorphic relationship for the sender */
+    public function sendable()
+    {
+        return $this->morphTo();
+    }
+    
+ 
+     public function user()
+     {
+         return $this->belongsTo($this->userModel::class, 'user_id');
+     }
          /** 
      * since you have a non-standard namespace; 
      * the resolver cannot guess the correct namespace for your Factory class.
@@ -75,17 +95,7 @@ class Message extends Model
 
     }
 
-
   
-
-
-    /* relationship */
-
-    public function conversation()
-    {
-        return $this->belongsTo(Conversation::class);
-    }
-
 
     public function attachment()
     {
@@ -94,17 +104,10 @@ class Message extends Model
 
 
 
-
-    public function user()
-    {
-        return $this->belongsTo($this->userModel::class, 'user_id');
-    }
-
     public function hasAttachment()
     {
         return $this->attachment()->exists();
     }
-
 
 
     // public function isRead():bool
@@ -122,6 +125,20 @@ class Message extends Model
     {
         return $this->hasMany(Read::class,'message_id');
     }
+
+    public function markAsRead()
+    {
+
+        $authUser = auth()->user();
+        // Create a read record if it doesn't already exist
+        $this->reads()->firstOrCreate([
+                'readable_id' => $authUser->id,
+                'readable_type' => get_class($authUser),
+            ], [
+                'read_at' => now(),
+            ]);
+
+    }
     /**
      * Check if the message has been read by a specific user.
      *
@@ -137,10 +154,12 @@ class Message extends Model
     }
 
   
-    function belongsToAuth() : bool {
-        
-        return $this->sender_id==auth()->id();
+    public function belongsToAuth(): bool
+    {
+        $user = auth()->user();
+        return $this->sendable_type === get_class($user) && $this->sendable_id == $user->id;
     }
+
 
     // Relationship for the parent message
     public function parent()

@@ -21,9 +21,30 @@ class MessageFactory extends Factory
     protected $model = Message::class;
     public function definition(): array
     {
+        // Create a User instance for the sendable entity
+        $user = User::factory()->create();
+
         return [
-        'user_id' => User::factory(),
-        'conversation_id' => Conversation::factory()
+            'conversation_id' => Conversation::factory(),
+            'sendable_id' => $user->id,
+            'sendable_type' => $user->getMorphClass(), // Get the morph class of the user
+            'body' => $this->faker->text, // Add a body for completeness
+            'reply_id' => null,
+            'attachment_id' => null,
         ];
+    }
+
+
+
+    public function sender($sender): Factory
+    {
+        return $this->state(function (array $attributes) use ($sender) {
+            return [
+                'sendable_id' => $sender->id,
+                'sendable_type' => $sender->getMorphClass()
+            ];
+        });
+    
+    
     }
 }

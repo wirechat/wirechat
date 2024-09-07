@@ -204,14 +204,14 @@ class Conversation extends Model
         // Get all messages in the conversation that are not already read by the authenticated user
         $messages = $this->messages()->whereDoesntHave('reads', function ($query) use ($authUserId) {
             $query->where('readable_id', $authUserId)
-                ->where('readable_type', get_class(auth()->user()));
+                  ->where('readable_type', get_class(auth()->user()));
         })->get();
 
         foreach ($messages as $message) {
             // Create a read record if it doesn't already exist
             $message->reads()->firstOrCreate([
-                'readable_id' => $authUserId,
-                'readable_type' => get_class(auth()->user()),
+                'readable_id' => $authUserId, 
+                'readable_type'=>get_class(auth()->user())
             ], [
                 'read_at' => now(),
             ]);
@@ -228,7 +228,8 @@ class Conversation extends Model
     public function getUnreadCountFor(Model $model): int
     {
         return $this->messages()
-                    ->where('user_id', '!=', $model->id)
+                    ->where('sendable_id', '!=', $model->id)
+                    ->where('sendable_type', get_class($model))
                     ->whereDoesntHave('reads', function ($query) use ($model) {
                         $query->where('readable_id', $model->id)
                             ->where('readable_type', get_class($this));

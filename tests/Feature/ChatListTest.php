@@ -188,11 +188,10 @@ describe('Chatlist', function () {
        $conversation=  $auth->createConversationWith($user1);
 
         //manually create message so that we can adjust the time to 3 weeks ago
-
        Message::create([
         'conversation_id' => $conversation->id,
-        'sender_id' => $auth->id,
-        'receiver_id' => $user1->id,
+        'sendable_type' => get_class($auth),  
+        'sendable_id' =>$auth->id, 
         'body' => "How are you doing"
         ]);
 
@@ -215,8 +214,8 @@ describe('Chatlist', function () {
         //manually create message so we can attach attachment id
        Message::create([
         'conversation_id' => $conversation->id,
-        'sender_id' => $auth->id,
-        'receiver_id' => $user1->id,
+        'sendable_type' => get_class($auth),  
+        'sendable_id' =>$auth->id, 
         'attachment_id'=>$createdAttachment->id
         ]);
 

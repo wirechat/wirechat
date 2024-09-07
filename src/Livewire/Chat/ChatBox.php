@@ -141,17 +141,17 @@ class ChatBox extends Component
             $newMessage = Message::find($event['message']['id']);
 
              //Make sure message does not belong to auth
-            if ($newMessage->user_id==auth()?->id()) {
-            return null;
+           // Make sure message does not belong to auth
+            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type === get_class(auth()->user())) {
+                return null;
             }
+
 
             #push message
             $this->loadedMessages->push($newMessage);
 
             #mark as read
-            $newMessage->read_at = now();
-            $newMessage->save();
-
+            $newMessage->markAsRead();
             #broadcast 
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
         }
@@ -257,15 +257,15 @@ class ChatBox extends Component
                 ]);
 
 
-
-                #create message
                 $message = Message::create([
                     'reply_id' => $this->replyMessage?->id,
                     'conversation_id' => $this->conversation->id,
-                    'attachment_id' => $createdAttachment->id,
-                    'user_id' => auth()->id()
-                    // 'body'=>$this->body
+                    'attachment_id' => $createdAttachment?->id, // Ensure that $createdAttachment is nullable if not always present
+                    'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
+                    'sendable_id' => auth()->id(), // Polymorphic sender ID
+                    // 'body' => $this->body, // Add body if required
                 ]);
+                
 
                 #append message to createdMessages
                 $createdMessages[] = $message;
@@ -295,7 +295,8 @@ class ChatBox extends Component
             $createdMessage = Message::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
-                'user_id' => auth()->id(),
+                'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
+                'sendable_id' => auth()->id(), // Polymorphic sender ID
                 'body' => $this->body
             ]);
 
@@ -380,7 +381,8 @@ class ChatBox extends Component
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
             'attachment_id' => null,
-            'user_id' => auth()->id(),
+            'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
+            'sendable_id' => auth()->id(), // Polymorphic sender ID
             'body' => '❤️'
         ]);
 

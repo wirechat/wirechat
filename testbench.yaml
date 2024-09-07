@@ -1,5 +1,5 @@
 providers:
- # - Workbench\App\Providers\WorkbenchServiceProvider
+ #- Workbench\App\Providers\WorkbenchServiceProvider
 
 migrations:
   - workbench\database\migrations
@@ -10,13 +10,13 @@ seeders:
 #laravel: "./skeleton"
 
 workbench:
-  start: '/'
+  start: '/http://127.0.0.1:8001'
   install: true
   discovers:
     web: true
     api: false
     commands: false
-    components: false
+    components: true
     views: true
   build: []
   assets: []

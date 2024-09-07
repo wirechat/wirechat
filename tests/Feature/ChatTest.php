@@ -5,6 +5,7 @@ use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Workbench\App\Models\User;
 
+
 it('redirects to login page if guest user tries to access chats page ', function () {
     $auth = User::factory()->create();
 
@@ -14,7 +15,6 @@ it('redirects to login page if guest user tries to access chats page ', function
     $response->assertStatus(302);
     $response->assertRedirect(route('login')); // assuming 'login' is the route name for your login page
 });
-
 
 test('authenticaed user can access chats page ', function () {
     $auth = User::factory()->create();
@@ -26,9 +26,6 @@ test('authenticaed user can access chats page ', function () {
     
 });
 
-
-
-
 test('it renders livewire ChatList component', function () {
     $auth = User::factory()->create();
 
@@ -38,7 +35,6 @@ test('it renders livewire ChatList component', function () {
    ->assertSeeLivewire(ChatList::class);
     
 });
-
 
 test('it renders livewire ChatBox component', function () {
     $auth = User::factory()->create();
@@ -76,23 +72,19 @@ test('it marks messages as read when conversation is open ', function () {
     $receiver = User::factory()->create(['name'=>'John']);
     $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
 
-
     //send messages to auth
     $receiver->sendMessageTo($auth, message: 'how is it going');
     $receiver->sendMessageTo($auth, message: 'i am good thanks');
 
-
-    ///confirm unread cound is 2 before user opens the chat
+    //confirm unread cound is 2 before user opens the chat
     expect($auth->getUnReadCount())->toBe(2);
 
     //visit page 
     $this->actingAs($auth)->get(route("wirechat.chat",$conversation->id));
 
-
-    ///noq assert that unread cound is now 0 
+    //noq assert that unread cound is now 0 
     expect($auth->getUnReadCount())->toBe(0);
 
-    
 });
 
 
