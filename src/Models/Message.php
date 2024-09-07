@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class Message extends Model
@@ -76,8 +77,6 @@ class Message extends Model
 
         //listen to 
         static::deleted(function ($message) {
-
-
         if($message->attachment?->exists()){
 
            //delete attachment
@@ -90,6 +89,13 @@ class Message extends Model
                 Storage::disk(config('wirechat.attachments.storage_disk','public'))->delete($message->attachment->file_path);
             }
         }
+
+         // Delete reads
+         // Use a DB transaction to ensure atomicity
+         DB::transaction(function () use ($message) {
+            // Delete associated reads (polymorphic readable relation)
+            $message->reads()->delete();
+         });
 
         });
 
@@ -109,14 +115,8 @@ class Message extends Model
         return $this->attachment()->exists();
     }
 
-
-    // public function isRead():bool
-    // {
-
-    //      return $this->read_at != null;
-    // }
-
-        /**
+ 
+    /**
      * Get all of the reads for the message.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

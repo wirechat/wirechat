@@ -24,7 +24,7 @@ class AttachmentFactory extends Factory
         'file_name' => 'file.png',
         'original_name' => 'file',
         'mime_type' => "image/png",
-        'url'=>'test.example.com/attachments/file.pgn'
+        'url'=>'test.example.com/attachments/file.png'
         ];
     }
 }
