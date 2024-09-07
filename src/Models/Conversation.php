@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\ConversationType;
 
@@ -35,6 +36,25 @@ class Conversation extends Model
         $this->userModel = app(config('wirechat.user_model', \App\Models\User::class));
 
         parent::__construct($attributes);
+    }
+
+    protected static function booted()
+    {
+
+        //DELETED
+        static::deleted(function ($conversation) {
+
+         // Use a DB transaction to ensure atomicity
+         DB::transaction(function () use ($conversation) {
+            // Delete associated participants 
+            $conversation->participants()->delete();
+
+            // Delete associated messages 
+            $conversation->messages()->delete();
+         });
+
+        });
+
     }
 
     /** 
@@ -72,16 +92,16 @@ class Conversation extends Model
     // }
 
     // Conversation model
-    public function users()
-    {
-       // dd(User::class);
-        return $this->belongsToMany(
-            $this->userModel::class,  // User model
-            config('wirechat.participants_table', 'wirechat_participants'), // Pivot table
-            'conversation_id',  // Foreign key on the pivot table (Participant)
-            'user_id'           // Foreign key on the pivot table (Participant)
-        );
-    }
+    // public function users()
+    // {
+    //    // dd(User::class);
+    //     return $this->belongsToMany(
+    //         $this->userModel::class,  // User model
+    //         config('wirechat.participants_table', 'wirechat_participants'), // Pivot table
+    //         'conversation_id',  // Foreign key on the pivot table (Participant)
+    //         'user_id'           // Foreign key on the pivot table (Participant)
+    //     );
+    // }
 
 
     /**
