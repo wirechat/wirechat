@@ -143,6 +143,9 @@ use Namu\WireChat\Workbench\App\Models\User;
 
     });
 
+
+    describe('Delete Permanently',function(){
+
     it('deletes reads when message is deleted ', function () {
         $auth = User::factory()->create();
         $message = Message::factory()->sender($auth)->create();
@@ -171,5 +174,172 @@ use Namu\WireChat\Workbench\App\Models\User;
 
     });
 
+    it('deletes actions when message is deleted ', function () {
+        
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //send to receiver
+        $auth->sendMessageTo($receiver,'hello-1');
+        $message1=  $auth->sendMessageTo($receiver,'hello-2');
+        $auth->sendMessageTo($receiver,'hello-3');
+
+        //authenticate
+        $this->actingAs($auth);
+
+        //send to auth
+        $receiver->sendMessageTo($auth,'hello-4');
+        $receiver->sendMessageTo($auth,'hello-5');
+        $receiver->sendMessageTo($auth,'hello-6');
+
+        //assert count is 6
+        expect($conversation->messages()->count())->toBe(6);
+
+
+        //delete messages
+        $message1->deleteForMe();
+
+
+        //assert actions
+
+        expect($message1->actions()->count())->toBe(1);
+
+
+        //Permantly Delete message
+        $message1->delete();
+
+        //assert count
+        expect($message1->actions()->count())->toBe(0);
+
+
+    })->only();
+});
+
+
+   describe('DeleteForMe',function(){
+
+
+    it('load all messages if not deleted', function () {
+        $auth = User::factory()->create();
+        $this->actingAs($auth);
+
+        $receiver = User::factory()->create();
+
+        //send to receiver
+
+        $auth->sendMessageTo($receiver,'hello-1');
+        $auth->sendMessageTo($receiver,'hello-2');
+        $auth->sendMessageTo($receiver,'hello-3');
+
+
+        //send to auth
+        $receiver->sendMessageTo($auth,'hello-4');
+        $receiver->sendMessageTo($auth,'hello-5');
+        $message=  $receiver->sendMessageTo($auth,'hello-6');
+
+        //assert count
+        $messages= Message::where('conversation_id',$message->conversation_id)->get();
+
+       /// dd($messages);
+        expect($messages->count())->toBe(6);
+
+    });
+
+
+    it('aborts if user is not authenticated before deletingForMe', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //send to receiver
+        $auth->sendMessageTo($receiver,'hello-1');
+        $message1=  $auth->sendMessageTo($receiver,'hello-2');
+        $auth->sendMessageTo($receiver,'hello-3');
+ 
+        //send to auth
+        $receiver->sendMessageTo($auth,'hello-4');
+        $receiver->sendMessageTo($auth,'hello-5');
+
+        //delete messages
+          $message1->deleteForMe();
+
+
+         //assert new count
+         expect($conversation->messages()->count())->toBe(6);
+
+    })->throws(Exception::class);
+
+
+    it('aborts if user does not belong to conversation  before deletingForMe', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //send to receiver
+        $auth->sendMessageTo($receiver,'hello-1');
+        $message1=  $auth->sendMessageTo($receiver,'hello-2');
+        $auth->sendMessageTo($receiver,'hello-3');
+ 
+        //send to auth
+        $receiver->sendMessageTo($auth,'hello-4');
+        $receiver->sendMessageTo($auth,'hello-5');
+
+        //authenticate random user
+        $randomUser=  User::factory()->create();;
+        $this->actingAs($randomUser);
+        
+        //delete messages
+        $message1->deleteForMe();
+
+
+         //assert new count
+         expect($conversation->messages()->count())->toBe(6);
+
+    })->throws(Exception::class);
+
+    
+    it('deletes and does not load deleted messages(for me)', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //send to receiver
+        $auth->sendMessageTo($receiver,'hello-1');
+        $message1=  $auth->sendMessageTo($receiver,'hello-2');
+        $auth->sendMessageTo($receiver,'hello-3');
+
+        //authenticate
+        $this->actingAs($auth);
+
+        //send to auth
+        $receiver->sendMessageTo($auth,'hello-4');
+        $receiver->sendMessageTo($auth,'hello-5');
+        $message2= $receiver->sendMessageTo($auth,'hello-6');
+
+        //assert count is 6
+        expect($conversation->messages()->count())->toBe(6);
+
+
+        //delete messages
+        $message1->deleteForMe();
+        $message2->deleteForMe();
+
+         //assert new count
+         expect($conversation->messages()->count())->toBe(4);
+
+    });
+
+
+
+    })->only();
 
  

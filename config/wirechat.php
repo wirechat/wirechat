@@ -11,6 +11,12 @@ return [
     'reads_table' => 'wirechat_reads',
     'participants_table' => 'wire_participants',
     'attachments_table' => 'wire_attachments',
+    'actions_table' => 'wire_actions',
+
+
+    'table_prefix' => 'wire_', //default wire_
+
+
 
     /* Model class name for Users */
     'user_model' => \App\Models\User::class,

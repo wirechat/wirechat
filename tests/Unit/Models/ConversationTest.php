@@ -146,7 +146,13 @@ describe('getUnreadCountFor()',function(){
 
 });
 
-describe('deleting()',function(){
+
+describe('deleting',function(){
+
+
+});
+
+describe('deleting permanently()',function(){
 
     it('deletes all it\'s participants when conversation is deleted', function () {
 
@@ -197,7 +203,6 @@ describe('deleting()',function(){
         expect($conversation->messages()->count())->toBe(0);
 
     });
-
 });
 
 

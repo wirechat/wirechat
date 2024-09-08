@@ -3,6 +3,7 @@
 namespace Namu\WireChat\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -55,6 +56,14 @@ class Conversation extends Model
 
         });
 
+        //SCOPES
+        // static::addGlobalScope('withoutDeleted', function (Builder $builder) {
+        //     $builder->whereDoesntHave('deletes', function ($q) {
+        //         $q->where('deleter_id', auth()->id())
+        //           ->where('deleter_type', get_class(auth()->user()));
+        //     });
+        // });
+
     }
 
     /** 
@@ -67,18 +76,6 @@ class Conversation extends Model
         return \Namu\WireChat\Workbench\Database\Factories\ConversationFactory::new();
     }
 
-
-
-    /**
-     * Get the user that owns the Conversation
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo|null
-     */
-    // public function owner(): BelongsTo|null
-    // {
-    //     return $this->belongsTo($this->userModel, 'user_id','id');
-    // }
-
     /**
      * Define a relationship to fetch participants for this conversation.
      */
@@ -86,24 +83,7 @@ class Conversation extends Model
     {
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
-    // public function participants()
-    // {
-    //     return $this->morphMany(Participant::class,'participantable');
-    // }
-
-    // Conversation model
-    // public function users()
-    // {
-    //    // dd(User::class);
-    //     return $this->belongsToMany(
-    //         $this->userModel::class,  // User model
-    //         config('wirechat.participants_table', 'wirechat_participants'), // Pivot table
-    //         'conversation_id',  // Foreign key on the pivot table (Participant)
-    //         'user_id'           // Foreign key on the pivot table (Participant)
-    //     );
-    // }
-
-
+    
     /**
      * Add a new user to the conversation.
      *
@@ -277,6 +257,42 @@ class Conversation extends Model
     //                                 ->whereNull('read_at')->count();
 
     //     }
+
+
+
+    /**
+     * Deletes 
+     */
+
+     // Relationship to the Delete model (a message can have many deletions by different users)
+    //  public function deletes()
+    // {
+    //     return $this->morphMany(Delete::class, 'deletable');
+    // }
+
+    // Scope to exclude deleted conversations (default)
+    public function scopeWithoutDeleted($query)
+    {
+        return $query->whereDoesntHave('deletes', function ($q) {
+            $q->where('deleter_id', auth()->id())
+              ->where('deleter_type', get_class(auth()->user()));
+        });
+    }
+
+    // Scope to include all conversations, even deleted ones
+    public function scopeWithDeleted($query)
+    {
+        return $query->with('deletes');
+    }
+
+    // Scope to retrieve only deleted conversations
+    public function scopeOnlyDeleted($query)
+    {
+        return $query->whereHas('deletes', function ($q) {
+            $q->where('deleter_id', auth()->id())
+              ->where('deleter_type', get_class(auth()->user()));
+        });
+    }
 
 
 
