@@ -69,19 +69,25 @@ class Message extends Model
     }
 
 
-    protected static function booted()
+    protected static function boot()
     {
+        parent::boot();
 
-        // scope 
+        //Add scope if authenticated
         static::addGlobalScope('excludeDeleted', function (Builder $builder) {
+        if (auth()->check()) {
+
             $builder->whereDoesntHave('actions', function ($q) {
                 $q->where('actor_id', auth()->id())
                     ->where('actor_type', get_class(auth()->user()))
                     ->where('type', Actions::DELETE);
             });
+      }
+
         });
 
-        // listen to 
+
+        // listen to deleted
         static::deleted(function ($message) {
 
 

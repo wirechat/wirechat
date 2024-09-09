@@ -140,12 +140,11 @@ class ChatBox extends Component
 
             $newMessage = Message::find($event['message']['id']);
 
-             //Make sure message does not belong to auth
-           // Make sure message does not belong to auth
+            //Make sure message does not belong to auth
+            // Make sure message does not belong to auth
             if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type === get_class(auth()->user())) {
                 return null;
             }
-
 
             #push message
             $this->loadedMessages->push($newMessage);
@@ -161,7 +160,6 @@ class ChatBox extends Component
      * Delete conversation  */
     function deleteConversation()
     {
-
         #delete conversation 
         auth()->user()->deleteConversation($this->conversation);
 
@@ -169,7 +167,7 @@ class ChatBox extends Component
         $this->redirectRoute("wirechat");
     }
 
-    protected function rateLimit(){
+     protected function rateLimit(){
 
 
         if (RateLimiter::tooManyAttempts('send-message:'.auth()->id(), $perMinute = 60)) {
@@ -186,11 +184,8 @@ class ChatBox extends Component
     {
         abort_unless(auth()->check(), 401);
 
-
         #rate limit 
         $this->rateLimit();
-
-         
 
         /* If media is empty then conitnue to validate body , since media can be submited without body */
         // Combine media and files arrays
@@ -399,8 +394,6 @@ class ChatBox extends Component
 
         #scroll to bottom
         $this->dispatch('scroll-bottom');
-
-
 
         #dispatch event 
         $this->dispatchMessageCreatedEvent($message);

@@ -11,7 +11,7 @@ class Participant extends Model
 
     protected $userModel;
 
-    protected $fillable=[
+    protected $fillable = [
         'conversation_id',
         'participantable_id',
         'participantable_type'
@@ -20,14 +20,14 @@ class Participant extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = config('wirechat.participants_table','wirechat_participants');
+        $this->table = config('wirechat.participants_table', 'wirechat_participants');
 
-      //  dd($this->table);
+        //  dd($this->table);
 
         //Set up the user model 
-        $this->userModel =app(config('wirechat.user_model',\App\Models\User::class));
+        $this->userModel = app(config('wirechat.user_model', \App\Models\User::class));
 
-      //  dd($this->userModel);
+        //  dd($this->userModel);
         parent::__construct($attributes);
     }
 
@@ -50,23 +50,19 @@ class Participant extends Model
         return $this->morphTo();
     }
 
-
-
     /**
      * Define a relationship to fetch the conversation.
      */
-      public function conversation()
-      {
-          return $this->belongsTo(Conversation::class);
-      }
+    public function conversation()
+    {
+        return $this->belongsTo(Conversation::class);
+    }
 
     /**
      * Define a relationship to fetch the user of this model.
      */
-      public function user()
-      {
-          return $this->belongsTo($this->userModel::class);
-      }
-  
-
+    public function user()
+    {
+        return $this->belongsTo($this->userModel::class);
+    }
 }

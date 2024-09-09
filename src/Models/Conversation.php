@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
 
 class Conversation extends Model
@@ -39,9 +40,20 @@ class Conversation extends Model
         parent::__construct($attributes);
     }
 
-    protected static function booted()
+    protected static function boot()
     {
+        parent::boot();
 
+          //Add scope if authenticated
+          static::addGlobalScope('excludeDeleted', function (Builder $builder) {
+            if (auth()->check()) {
+                $builder->whereDoesntHave('actions', function ($q) {
+                    $q->where('actor_id', auth()->id())
+                      ->where('actor_type', get_class(auth()->user()))
+                      ->where('type', Actions::DELETE);
+                });
+            }
+        });
         //DELETED
         static::deleted(function ($conversation) {
 
@@ -56,13 +68,8 @@ class Conversation extends Model
 
         });
 
-        //SCOPES
-        // static::addGlobalScope('withoutDeleted', function (Builder $builder) {
-        //     $builder->whereDoesntHave('deletes', function ($q) {
-        //         $q->where('deleter_id', auth()->id())
-        //           ->where('deleter_type', get_class(auth()->user()));
-        //     });
-        // });
+      
+    
 
     }
 
@@ -83,13 +90,7 @@ class Conversation extends Model
     {
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
-    
-    /**
-     * Add a new user to the conversation.
-     *
-     * @param Model $user
-     * @return void
-     */
+
     /**
      * Add a new participant to the conversation.
      *
@@ -125,7 +126,6 @@ class Conversation extends Model
     }
     
     
-
 
     public function isPrivate(): bool
     {
@@ -293,6 +293,48 @@ class Conversation extends Model
               ->where('deleter_type', get_class(auth()->user()));
         });
     }
+
+
+
+    /**
+     * ----------------------------------------
+     * ----------------------------------------
+     * Actions 
+     * A message can have many actions by different users)
+     * --------------------------------------------
+     */
+
+     public function actions()
+     {
+        return $this->morphMany(Action::class, 'actionable', 'actionable_type', 'actionable_id', 'id');
+     }
+ 
+     /**
+      * Delete for me 
+      * This will delete the message only for the auth user meaning other participants will be able to see it
+      */
+     public function deleteForMe()
+     {
+         abort_unless(auth()->check(), 401);
+ 
+         //make sure auth belongs to conversation for this message
+         abort_unless(auth()->user()->belongsToConversation($this), 403);
+
+
+         //Trigger Delete messages forMe
+         $this->messages()->each(function($message){
+            $message->deleteForMe();
+         });
+ 
+         //Delete conversation forMe
+         $this->actions()->create([
+             'actor_id' => auth()->id(),
+             'actor_type' => get_class(auth()->user()),
+             'type' => Actions::DELETE
+         ]);
+
+
+     }
 
 
 

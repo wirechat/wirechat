@@ -1,7 +1,10 @@
 <?php
 
+use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Conversation;
+use Namu\WireChat\Models\Message;
 use Namu\WireChat\Workbench\App\Models\User;
 
 describe('MarkAsRead()',function(){
@@ -147,10 +150,127 @@ describe('getUnreadCountFor()',function(){
 });
 
 
-describe('deleting',function(){
+describe('deleting for me',function(){
 
 
-});
+    it('load all conversations if not deleted', function () {
+        $auth = User::factory()->create();
+
+        //Authenticate
+        $this->actingAs($auth);
+
+        $receiver = User::factory()->create();
+
+        //send to receiver
+        $auth->sendMessageTo($receiver,'hello-1');
+        $auth->sendMessageTo(User::factory()->create(),'hello-2');
+        $auth->sendMessageTo(User::factory()->create(),'hello-3');
+
+        //assert count
+
+       /// dd($messages);
+        expect($auth->conversations->count())->toBe(3);
+
+    });
+
+
+    it('aborts if user is not authenticated before deletingForMe', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver,'hello');
+ 
+        //delete messages
+        $conversation->deleteForMe();
+
+         //assert new count
+         expect($conversation->count())->toBe(1);
+
+    })->throws(Exception::class);
+
+
+
+    it('aborts if user does not belong to conversation before deletingForMe', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver,'hello');
+ 
+        //Authenticate
+        $this->actingAs(User::factory()->create());
+
+        //delete messages
+        $conversation->deleteForMe();
+
+         //assert new count
+         expect($conversation->count())->toBe(1);
+
+    })->throws(Exception::class);
+
+
+    it('deletes and does not load deleted conversations(for me)', function () {
+        
+        //Dusk to 
+        
+        $auth = User::factory()->create();
+
+
+        //Send to receiver
+        $conversation1=  $auth->sendMessageTo(User::factory()->create(),'hello-1')->conversation;
+        $conversation2=  $auth->sendMessageTo(User::factory()->create(),'hello-2')->conversation;
+        $conversation3=  $auth->sendMessageTo(User::factory()->create(),'hello-3')->conversation;
+
+        //Assert Count
+        expect($auth->conversations->count())->toBe(3);
+
+        //Authenticate
+        //$auth->refresh();
+        
+        $this->actingAs($auth);
+
+        //Delete Conversation
+        $conversation3->deleteForMe();
+
+        //conversations
+        expect($auth->conversations()->count())->toBe(2);
+
+    });
+
+
+    it('triggers delete messages for me when conversation is deleted', function () {
+        
+        //Dusk to 
+        
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+
+        //Send to receiver
+        $auth->sendMessageTo($receiver,'hello-1');
+        $auth->sendMessageTo($receiver,'hello-2');
+        $auth->sendMessageTo($receiver,'hello-3');
+        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+
+        //Assert Count
+        expect($conversation->messages()->count())->toBe(4);
+
+        //Authenticate
+        //$auth->refresh();
+        
+        $this->actingAs($auth);
+
+        //Delete Conversation
+        $conversation->deleteForMe();
+
+        $this->actingAs($auth);
+
+        expect($conversation->messages()->count())->toBe(0);
+
+    });
+
+})->only();
 
 describe('deleting permanently()',function(){
 
