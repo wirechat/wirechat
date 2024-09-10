@@ -45,16 +45,21 @@ class Conversation extends Model
         parent::boot();
 
           //Add scope if authenticated
-          static::addGlobalScope('excludeDeleted', function (Builder $builder) {
+          //This scope ensures that you're only pulling conversations that
+          // still have at least one message not marked as deleted by the user.
+          static::addGlobalScope('excludeDeletedForMe', function (Builder $query) {
             if (auth()->check()) {
-                $builder->whereDoesntHave('actions', function ($q) {
-                    $q->where('actor_id', auth()->id())
-                      ->where('actor_type', get_class(auth()->user()))
-                      ->where('type', Actions::DELETE);
+                $query->whereHas('messages', function ($q) {
+                    $q->whereDoesntHave('actions', function ($q) {
+                        $q->where('actor_id', auth()->id())
+                          ->where('actor_type', get_class(auth()->user()))
+                          ->where('type', Actions::DELETE);
+                    });
                 });
             }
         });
-        //DELETED
+
+        //DELETED event
         static::deleted(function ($conversation) {
 
          // Use a DB transaction to ensure atomicity
@@ -69,7 +74,6 @@ class Conversation extends Model
         });
 
       
-    
 
     }
 
@@ -311,7 +315,7 @@ class Conversation extends Model
  
      /**
       * Delete for me 
-      * This will delete the message only for the auth user meaning other participants will be able to see it
+      * This will trigger DeleteForMe for all the current messages 
       */
      public function deleteForMe()
      {
@@ -326,12 +330,6 @@ class Conversation extends Model
             $message->deleteForMe();
          });
  
-         //Delete conversation forMe
-         $this->actions()->create([
-             'actor_id' => auth()->id(),
-             'actor_type' => get_class(auth()->user()),
-             'type' => Actions::DELETE
-         ]);
 
 
      }

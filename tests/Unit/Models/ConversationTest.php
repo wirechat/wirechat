@@ -237,7 +237,7 @@ describe('deleting for me',function(){
 
     });
 
-
+    
     it('triggers delete messages for me when conversation is deleted', function () {
         
         //Dusk to 
@@ -270,7 +270,7 @@ describe('deleting for me',function(){
 
     });
 
-})->only();
+});
 
 describe('deleting permanently()',function(){
 
