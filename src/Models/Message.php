@@ -75,15 +75,14 @@ class Message extends Model
 
         //Add scope if authenticated
         static::addGlobalScope('excludeDeleted', function (Builder $builder) {
-        if (auth()->check()) {
+            if (auth()->check()) {
 
-            $builder->whereDoesntHave('actions', function ($q) {
-                $q->where('actor_id', auth()->id())
-                    ->where('actor_type', get_class(auth()->user()))
-                    ->where('type', Actions::DELETE);
-            });
-      }
-
+                $builder->whereDoesntHave('actions', function ($q) {
+                    $q->where('actor_id', auth()->id())
+                        ->where('actor_type', get_class(auth()->user()))
+                        ->where('type', Actions::DELETE);
+                });
+            }
         });
 
 
@@ -218,20 +217,21 @@ class Message extends Model
     }
 
     /**
-     * Delete for me 
+     * Delete for 
+     * @param Model $user
      * This will delete the message only for the auth user meaning other participants will be able to see it
      */
-    public function deleteForMe()
+    public function deleteFor(Model $user)
     {
-        abort_unless(auth()->check(), 401);
+        //abort_unless(auth()->check(), 401);
 
         //make sure auth belongs to conversation for this message
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+        abort_unless($user->belongsToConversation($this->conversation), 403);
 
         // Try to create an action
         $this->actions()->create([
-            'actor_id' => auth()->id(),
-            'actor_type' => get_class(auth()->user()),
+            'actor_id' => $user->id,
+            'actor_type' => get_class($user),
             'type' => Actions::DELETE,
         ]);
     }

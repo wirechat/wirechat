@@ -213,7 +213,7 @@ trait Chatable
         if (! $this->belongsToConversation($conversation)) {
             return null;
         }
-
+        
         // Update the messages based on the current user
         $conversation->messages()->each(function ($message) use ($userId) {
             if ($message->sender_id === $userId) {

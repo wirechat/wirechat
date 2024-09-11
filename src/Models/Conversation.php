@@ -22,9 +22,6 @@ class Conversation extends Model
 
     ];
 
-    protected $userModel;
-
-
     protected $casts = [
         'type' => ConversationType::class
     ];
@@ -34,9 +31,6 @@ class Conversation extends Model
     {
         $this->table = \config('wirechat.conversations_table');
 
-
-        $this->userModel = app(config('wirechat.user_model', \App\Models\User::class));
-
         parent::__construct($attributes);
     }
 
@@ -44,16 +38,15 @@ class Conversation extends Model
     {
         parent::boot();
 
-          //Add scope if authenticated
-          //This scope ensures that you're only pulling conversations that
-          // still have at least one message not marked as deleted by the user.
-          static::addGlobalScope('excludeDeletedForMe', function (Builder $query) {
+        // Add scope if authenticated
+        // This scope ensures that you're only pulling conversations where
+        // not all messages are deleted by the user.
+        static::addGlobalScope('excludeDeleted', function (Builder $query) {
             if (auth()->check()) {
                 $query->whereHas('messages', function ($q) {
-                    $q->whereDoesntHave('actions', function ($q) {
-                        $q->where('actor_id', auth()->id())
-                          ->where('actor_type', get_class(auth()->user()))
-                          ->where('type', Actions::DELETE);
+                    $q->whereDoesntHave('reads', function ($q) {
+                        $q->where('readable_id', auth()->id())
+                            ->where('readable_type', get_class(auth()->user()));
                     });
                 });
             }
@@ -62,19 +55,18 @@ class Conversation extends Model
         //DELETED event
         static::deleted(function ($conversation) {
 
-         // Use a DB transaction to ensure atomicity
-         DB::transaction(function () use ($conversation) {
-            // Delete associated participants 
-            $conversation->participants()->delete();
+            // Use a DB transaction to ensure atomicity
+            DB::transaction(function () use ($conversation) {
+                // Delete associated participants 
+                $conversation->participants()->delete();
 
-            // Delete associated messages 
-            $conversation->messages()->delete();
-         });
+                // Delete associated messages 
+                $conversation->messages()->delete();
 
+                //Delete actions 
+                $conversation->actions()->delete();
+            });
         });
-
-      
-
     }
 
     /** 
@@ -109,7 +101,7 @@ class Conversation extends Model
                 ->where('participantable_id', $participant->id)
                 ->where('participantable_type', get_class($participant))
                 ->exists(),
-            422, 
+            422,
             'Participant is already in the conversation.'
         );
 
@@ -117,7 +109,7 @@ class Conversation extends Model
         if ($this->isPrivate()) {
             abort_if(
                 $this->participants()->count() >= 2,
-                422, 
+                422,
                 'Private conversations cannot have more than two participants.'
             );
         }
@@ -128,8 +120,7 @@ class Conversation extends Model
             'participantable_type' => get_class($participant),
         ]);
     }
-    
-    
+
 
     public function isPrivate(): bool
     {
@@ -156,7 +147,7 @@ class Conversation extends Model
 
         // Get the participant who is not the authenticated user
         $receiverParticipant = $this->participants()
-            ->where('participantable_id','!=', auth()->id())
+            ->where('participantable_id', '!=', auth()->id())
             ->where('participantable_type', get_class(auth()->user()))
             ->first();
 
@@ -167,8 +158,6 @@ class Conversation extends Model
 
         return null;
     }
-
-
 
 
     public function scopeWhereNotDeleted($query)
@@ -208,14 +197,14 @@ class Conversation extends Model
         // Get all messages in the conversation that are not already read by the authenticated user
         $messages = $this->messages()->whereDoesntHave('reads', function ($query) use ($authUserId) {
             $query->where('readable_id', $authUserId)
-                  ->where('readable_type', get_class(auth()->user()));
+                ->where('readable_type', get_class(auth()->user()));
         })->get();
 
         foreach ($messages as $message) {
             // Create a read record if it doesn't already exist
             $message->reads()->firstOrCreate([
-                'readable_id' => $authUserId, 
-                'readable_type'=>get_class(auth()->user())
+                'readable_id' => $authUserId,
+                'readable_type' => get_class(auth()->user())
             ], [
                 'read_at' => now(),
             ]);
@@ -232,73 +221,14 @@ class Conversation extends Model
     public function getUnreadCountFor(Model $model): int
     {
         return $this->messages()
-                    ->where('sendable_id', '!=', $model->id)
-                    ->where('sendable_type', get_class($model))
-                    ->whereDoesntHave('reads', function ($query) use ($model) {
-                        $query->where('readable_id', $model->id)
-                            ->where('readable_type', get_class($this));
-                    })
-                    ->count();
+            ->where('sendable_id', '!=', $model->id)
+            ->where('sendable_type', get_class($model))
+            ->whereDoesntHave('reads', function ($query) use ($model) {
+                $query->where('readable_id', $model->id)
+                    ->where('readable_type', get_class($model));
+                  })->count();
     }
-
-    // public  function isLastMessageReadByUser():bool {
-
-    //     $user=Auth()->User();
-    //     $lastMessage= $this->messages()->latest()->first();
-
-    //     if($lastMessage){
-    //         return  $lastMessage->read_at !==null && $lastMessage->sender_id == $user->id;
-    //     }
-
-    // }
-
-
-    //    public  function unreadMessagesCount() : int {
-
-
-    //     return $unreadMessages= Message::where('conversation_id','=',$this->id)
-    //                                 ->where('receiver_id',auth()->user()->id)
-    //                                 ->whereNull('read_at')->count();
-
-    //     }
-
-
-
-    /**
-     * Deletes 
-     */
-
-     // Relationship to the Delete model (a message can have many deletions by different users)
-    //  public function deletes()
-    // {
-    //     return $this->morphMany(Delete::class, 'deletable');
-    // }
-
-    // Scope to exclude deleted conversations (default)
-    public function scopeWithoutDeleted($query)
-    {
-        return $query->whereDoesntHave('deletes', function ($q) {
-            $q->where('deleter_id', auth()->id())
-              ->where('deleter_type', get_class(auth()->user()));
-        });
-    }
-
-    // Scope to include all conversations, even deleted ones
-    public function scopeWithDeleted($query)
-    {
-        return $query->with('deletes');
-    }
-
-    // Scope to retrieve only deleted conversations
-    public function scopeOnlyDeleted($query)
-    {
-        return $query->whereHas('deletes', function ($q) {
-            $q->where('deleter_id', auth()->id())
-              ->where('deleter_type', get_class(auth()->user()));
-        });
-    }
-
-
+    
 
     /**
      * ----------------------------------------
@@ -308,32 +238,61 @@ class Conversation extends Model
      * --------------------------------------------
      */
 
-     public function actions()
-     {
+
+    public function actions()
+    {
         return $this->morphMany(Action::class, 'actionable', 'actionable_type', 'actionable_id', 'id');
-     }
- 
-     /**
-      * Delete for me 
-      * This will trigger DeleteForMe for all the current messages 
-      */
-     public function deleteForMe()
-     {
-         abort_unless(auth()->check(), 401);
- 
-         //make sure auth belongs to conversation for this message
-         abort_unless(auth()->user()->belongsToConversation($this), 403);
+    }
 
+    /**
+     * Delete all messages for the given participant and check if the conversation can be deleted.
+     * @param Model $participant The participant whose messages are to be deleted.
+     * @return void|null Returns null if the other participant cannot be found in a private conversation.
+     */
+    public function deleteFor(Model $participant)
+    {
+        // Ensure the participant belongs to the conversation
+        abort_unless($participant->belongsToConversation($this), 403, 'Does not belong to conversation');
 
-         //Trigger Delete messages forMe
-         $this->messages()->each(function($message){
-            $message->deleteForMe();
-         });
- 
+        // Trigger deletion of all messages for the specified participant
+        $this->messages()->each(function ($message) use ($participant) {
+            $message->deleteFor($participant);
+        });
 
+        // Check if the conversation is private
+        if ($this->isPrivate()) {
+            // Retrieve the other participant in the private conversation
+            $otherParticipant = $this->participants
+                ->where('participantable_id', '!=', $participant->id)
+                ->where('participantable_type', $participant->getMorphClass())
+                ->first()?->participantable;
 
-     }
+            // Return null if the other participant cannot be found
+            if (!$otherParticipant) {
+                return null;
+            }
 
+            // If both participants have deleted all their messages, delete the conversation permanently
+            if ($this->hasBeenDeletedBy($participant) && $this->hasBeenDeletedBy($otherParticipant)) {
+                $this->delete();
+            }
+        }
+    }
 
-
+    /**
+     * Check if a given user has deleted all messages in the conversation using the deleteForMe
+     */
+    public function hasBeenDeletedBy(Model $user)
+    {
+        return !$this->messages()
+            // Remove global scope for "excludeDeleted"
+            ->withoutGlobalScope('excludeDeleted')
+            ->whereDoesntHave('actions', function ($q) use ($user) {
+                $q->where('actor_id', $user->id)
+                    ->where('actor_type', get_class($user))
+                    ->where('type', Actions::DELETE);
+            })
+            ->where('conversation_id', $this->id)
+            ->exists();
+    }
 }

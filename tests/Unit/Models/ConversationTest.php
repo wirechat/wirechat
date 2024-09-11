@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Action;
@@ -30,12 +31,11 @@ describe('MarkAsRead()',function(){
         $this->actingAs($auth);
 
         //Create conversation
-        $conversation = Conversation::factory() ->withParticipants([$auth,$receiver])->create();
-
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
-        $auth->sendMessageTo($receiver, message: '2');
+        $conversation=  $auth->sendMessageTo($receiver, message: '2')->conversation;
+
 
         //send message to auth
         //receiver -> auth 
@@ -129,10 +129,8 @@ describe('getUnreadCountFor()',function(){
         $this->actingAs($auth);
 
         //Create conversation
-        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
-
         //auth -> receiver
-        $auth->sendMessageTo($receiver, message: '1');
+       $conversation = $auth->sendMessageTo($receiver, message: '1')->conversation;
         $auth->sendMessageTo($receiver, message: '2');
         $auth->sendMessageTo($receiver, message: '3');
 
@@ -143,6 +141,7 @@ describe('getUnreadCountFor()',function(){
         $receiver->sendMessageTo($auth, message: '7');
 
         //Assert number of unread messages for $auth
+
         expect($conversation->getUnreadCountFor($auth))->toBe(4);
 
     });
@@ -150,7 +149,7 @@ describe('getUnreadCountFor()',function(){
 });
 
 
-describe('deleting for me',function(){
+describe('deleting for',function(){
 
 
     it('load all conversations if not deleted', function () {
@@ -174,20 +173,6 @@ describe('deleting for me',function(){
     });
 
 
-    it('aborts if user is not authenticated before deletingForMe', function () {
-        $auth = User::factory()->create();
-
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver,'hello');
- 
-        //delete messages
-        $conversation->deleteForMe();
-
-         //assert new count
-         expect($conversation->count())->toBe(1);
-
-    })->throws(Exception::class);
 
 
 
@@ -198,10 +183,10 @@ describe('deleting for me',function(){
         $conversation = $auth->createConversationWith($receiver,'hello');
  
         //Authenticate
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($auth);
 
         //delete messages
-        $conversation->deleteForMe();
+        $conversation->deleteFor(User::factory()->create());
 
          //assert new count
          expect($conversation->count())->toBe(1);
@@ -212,14 +197,12 @@ describe('deleting for me',function(){
     it('deletes and does not load deleted conversations(for me)', function () {
         
         //Dusk to 
-        
         $auth = User::factory()->create();
-
 
         //Send to receiver
         $conversation1=  $auth->sendMessageTo(User::factory()->create(),'hello-1')->conversation;
         $conversation2=  $auth->sendMessageTo(User::factory()->create(),'hello-2')->conversation;
-        $conversation3=  $auth->sendMessageTo(User::factory()->create(),'hello-3')->conversation;
+        $conversation3=  $auth->sendMessageTo(User::factory()->create(['name'=>'john']),'hello-3')->conversation;
 
         //Assert Count
         expect($auth->conversations->count())->toBe(3);
@@ -230,7 +213,7 @@ describe('deleting for me',function(){
         $this->actingAs($auth);
 
         //Delete Conversation
-        $conversation3->deleteForMe();
+        $conversation3->deleteFor($auth);
 
         //conversations
         expect($auth->conversations()->count())->toBe(2);
@@ -262,11 +245,83 @@ describe('deleting for me',function(){
         $this->actingAs($auth);
 
         //Delete Conversation
-        $conversation->deleteForMe();
+        $conversation->deleteFor($auth);
 
         $this->actingAs($auth);
 
         expect($conversation->messages()->count())->toBe(0);
+
+    });
+
+    test('other user can still access the converstion if other user deletes it ', function () {
+        
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        //Send to receiver
+        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+
+        //Authenticate and delete 1
+        $this->actingAs($auth);
+        $conversation->deleteFor($auth);
+        expect($auth->conversations->count())->toBe(0);
+
+
+        //Authenticate and delete 2
+         $this->actingAs($receiver);
+        expect($receiver->conversations->count())->toBe(1);
+
+    });
+
+
+    test('it shows conversation again if new message is send to conversation after deleting', function () {
+        
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        //Send to receiver
+        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+
+        //Authenticate and delete 1
+        $this->actingAs($auth);
+        $conversation->deleteFor($auth);
+
+        //assert
+        expect($auth->conversations()->count())->toBe(0);
+
+
+        //send message to $auth
+        $receiver->sendMessageTo($auth,'hello-5');
+
+        //assert again
+        expect($auth->conversations()->count())->toBe(1);
+
+    });
+
+    it('completely deletes the conversation if both users in a private conversation has deleted conversation(All messages)', function () {
+        
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        //Send to receiver
+        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+
+        //Authenticate and delete 1
+        $this->actingAs($auth);
+        $conversation->deleteFor($auth);
+
+         $this->flushSession();
+
+
+        //Authenticate and delete 2
+         $this->actingAs($receiver);
+        $conversation->deleteFor($receiver);
+
+        expect(Conversation::find($conversation->id))->toBe(null);
 
     });
 

@@ -160,6 +160,9 @@ class ChatBox extends Component
      * Delete conversation  */
     function deleteConversation()
     {
+        abort_unless(auth()->check(),401);
+
+        
         #delete conversation 
         auth()->user()->deleteConversation($this->conversation);
 
