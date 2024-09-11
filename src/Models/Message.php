@@ -77,12 +77,14 @@ class Message extends Model
         static::addGlobalScope('excludeDeleted', function (Builder $builder) {
             if (auth()->check()) {
 
-                $builder->whereDoesntHave('actions', function ($q) {
-                    $q->where('actor_id', auth()->id())
+            return    $builder->whereDoesntHave('actions', function ($q) {
+                return    $q->where('actor_id', auth()->id())
                         ->where('actor_type', get_class(auth()->user()))
                         ->where('type', Actions::DELETE);
                 });
             }
+
+            return $builder;
         });
 
 
@@ -158,16 +160,32 @@ class Message extends Model
     /**
      * Check if the message has been read by a specific user.
      *
-     * @param \App\Models\User $user
+     * @param Model $user
      * @return bool
      */
-    public function readBy($user): bool
+    public function readBy(Model $user): bool
     {
         return $this->reads()
             ->where('readable_id', $user->id)
             ->where('readable_type', get_class($user))
             ->exists();
     }
+
+     /**
+     * Check if the message is owned by user
+     *
+     * @return bool
+     */
+    public function ownedBy($user): bool
+    {
+        if (!$user || !($user instanceof \Illuminate\Database\Eloquent\Model)) {
+            return false;
+        }
+    
+        return $this->sendable_type === get_class($user) && $this->sendable_id == $user->id;
+    }
+    
+
 
 
     public function belongsToAuth(): bool
@@ -218,12 +236,14 @@ class Message extends Model
 
     /**
      * Delete for 
-     * @param Model $user
      * This will delete the message only for the auth user meaning other participants will be able to see it
      */
-    public function deleteFor(Model $user)
+    public function deleteFor($user)
     {
-        //abort_unless(auth()->check(), 401);
+        if (!$user || !($user instanceof \Illuminate\Database\Eloquent\Model)) {
+            return false;
+        }
+    
 
         //make sure auth belongs to conversation for this message
         abort_unless($user->belongsToConversation($this->conversation), 403);

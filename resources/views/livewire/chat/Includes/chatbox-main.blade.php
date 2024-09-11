@@ -122,12 +122,22 @@
                             </button>
                         </x-slot>
                         <x-slot name="content">
-                            <button wire:click="unSendMessage('{{$message->id}}')" wire:confirm="are you sure" class="w-full text-start">
 
+                            @if ($message->ownedBy(auth()->user()))
+                            <button wire:click="deleteForEveryone('{{$message->id}}')" wire:confirm="are you sure" class="w-full text-start">
                                 <x-wirechat::dropdown-link>
-                                    Unsend
+                                    Delete for everyone
                                 </x-wirechat::dropdown-link>
                             </button>
+                            @endif
+
+
+                            <button wire:click="deleteForMe('{{$message->id}}')" wire:confirm="are you sure" class="w-full text-start">
+                                <x-wirechat::dropdown-link>
+                                    Delete for me
+                                </x-wirechat::dropdown-link>
+                            </button>
+
                         </x-slot>
                     </x-wirechat::dropdown>
 

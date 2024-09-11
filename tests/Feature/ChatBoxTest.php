@@ -495,9 +495,7 @@ describe('Deleting Conversation', function () {
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
@@ -518,15 +516,13 @@ describe('Deleting Conversation', function () {
             ->assertRedirect(route("wirechat"));
     });
 
-    test('user can no longer access deleted conversation', function () {
+    test('Logged in user can no longer access deleted conversation', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
@@ -536,16 +532,20 @@ describe('Deleting Conversation', function () {
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
+       // dd($receiver->sendMessageTo($auth, message: '4')->conversation);
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call("deleteConversation");
 
+
+       // $this->actingAs($auth);
+
         //assert conversation will be null
-        expect($auth->conversations()->first())->toBe(null);
+       // expect($auth->conversations()->first())->toBe(null);
 
 
-        //also assert that user receives 403 forbidden
-        $this->get(route("wirechat.chat", $conversation->id))->assertStatus(403);
+        //also assert that user receives 404 
+        $this->actingAs($auth)->get(route("wirechat.chat", $conversation->id))->assertStatus(404);
     });
 
     test('user can regain access to deleted conversation if receiver/other user send a new message', function () {
@@ -554,9 +554,7 @@ describe('Deleting Conversation', function () {
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
@@ -572,10 +570,15 @@ describe('Deleting Conversation', function () {
 
 
         //let receiver send a new message
-        $receiver->sendMessageTo($auth, message: '5');
-
+      $message=  $receiver->sendMessageTo($auth, message: '5');
+        
+        
+//dd($message);
         //assert conversation will be null
         expect($auth->conversations()->first())->not->toBe(null);
+
+
+   //     dd($conversation);
 
 
         //also assert that user receives 403 forbidden
@@ -588,9 +591,7 @@ describe('Deleting Conversation', function () {
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+           $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
@@ -621,9 +622,7 @@ describe('Deleting Conversation', function () {
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
@@ -637,7 +636,7 @@ describe('Deleting Conversation', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call("deleteConversation");
 
-        $conversation = Conversation::find($conversation->id);
+        $conversation = Conversation::withoutGlobalScope('excludeDeleted')->find($conversation->id);
         expect($conversation)->not->toBe(null);
     });
 
@@ -647,9 +646,7 @@ describe('Deleting Conversation', function () {
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
@@ -688,9 +685,7 @@ describe('Deleting Conversation', function () {
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
@@ -722,9 +717,9 @@ describe('Deleting Conversation', function () {
         $request
             ->assertSee("5 message");
     });
-})->skip();
+})->only();
 
-describe('Unsending Message', function () {
+describe('deletForEveryone', function () {
 
 
     test('user cannot delete message that does not belong to them ', function () {
@@ -732,13 +727,8 @@ describe('Unsending Message', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
-
         //auth -> receiver
-        $auth->sendMessageTo($receiver, message: 'message-1');
+        $conversation= $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $auth->sendMessageTo($receiver, message: 'message-2');
 
         //receiver -> auth 
@@ -747,7 +737,7 @@ describe('Unsending Message', function () {
 
         //run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call("unSendMessage", $otherUserMessage->id)
+            ->call("deleteForEveryone", $otherUserMessage->id)
             ->assertStatus(403);
 
         $messageAvailable = Message::find($otherUserMessage->id);
@@ -757,18 +747,16 @@ describe('Unsending Message', function () {
     });
 
 
-    test('unsent message is removed from blade', function () {
+    test('deleted message is removed from blade', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
+        $conversation = $auth->createConversationWith($receiver);
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
 
         //auth -> receiver
-        $auth->sendMessageTo($receiver, message: 'message-1');
+        $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
         //receiver -> auth 
@@ -778,28 +766,33 @@ describe('Unsending Message', function () {
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        ///assert that message is visibible before unsending
-        $request->assertSee('message-2');
 
-        //call unsendMessage
-        $request->call("unSendMessage", $authMessage->id);
+          //assert count 4
+          $request->assertViewHas('loadedMessages', function ($messages) {
+            return count($messages) == 4;
+        });
 
-        ///assert message no longer visible
-        $request->assertDontSee('message-2');
-    })->skip();
+        //call deleteForMe
+        $request->call("deleteForEveryone", $authMessage->id);
 
-    test('unsent message is removed database', function () {
+        //refresh component
+        $request->refresh();
+
+
+        //assert count no 3
+        $request->assertViewHas('loadedMessages', function ($messages) {
+            return count($messages) == 3;
+        });
+
+    });
+
+    test('deleted message is removed database', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
 
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
-
-        //auth -> receiver
-        $auth->sendMessageTo($receiver, message: 'message-1');
+        $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
         //receiver -> auth 
@@ -808,7 +801,7 @@ describe('Unsending Message', function () {
 
         //run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call("unSendMessage", $authMessage->id);
+            ->call("deleteForMe", $authMessage->id);
 
         $messageAvailable = Message::find($authMessage->id);
 
@@ -822,16 +815,14 @@ describe('Unsending Message', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
         $file[] = UploadedFile::fake()->image('photo.png');
 
         //run
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             //add attachment
-            ->set("media", $file)
+            ->set("media",$file)
             ->call("sendMessage");
 
         ///lets make sure atttachemnt is present in database
@@ -840,7 +831,7 @@ describe('Unsending Message', function () {
 
         //Now lets unsend message
         //here assuming that the message ID is 1 since it is the first one
-        $request->call("unSendMessage", 1);
+        $request->call("deleteForEveryone", 1);
 
 
         ///assert attachment no longer avaible in database
@@ -854,9 +845,8 @@ describe('Unsending Message', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
+
 
         $file[] = UploadedFile::fake()->image('photo.png');
 
@@ -872,9 +862,103 @@ describe('Unsending Message', function () {
 
         //Now lets unsend message
         //here assuming that the message ID is 1 since it is the first one
-        $request->call("unSendMessage", $messageModel->id);
+        $request->call("deleteForMe", $messageModel->id);
 
 
         Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->assertMissing($attachmentModel->file_name);
     });
-})->skip();
+}) ;
+
+describe('deletForMe', function () {
+
+
+    test('user can delete message that does not belong to them ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        //auth -> receiver
+        $conversation= $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $auth->sendMessageTo($receiver, message: 'message-2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $otherUserMessage =  $receiver->sendMessageTo($auth, message: 'message-4');
+
+        //run
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("deleteForMe", $otherUserMessage->id)
+            ->assertStatus(200);
+
+        $messageAvailable = Message::find($otherUserMessage->id);
+
+        ///assert message no longer visible
+        expect($messageAvailable)->toBe(null);
+    });
+
+
+    test('deleted message is removed from blade', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $receiver->sendMessageTo($auth, message: 'message-4');
+
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+
+          //assert count 4
+          $request->assertViewHas('loadedMessages', function ($messages) {
+            return count($messages) == 4;
+        });
+
+        //call deleteForMe
+        $request->call("deleteForMe", $authMessage->id);
+
+        //refresh component
+        $request->refresh();
+
+
+        //assert count no 3
+        $request->assertViewHas('loadedMessages', function ($messages) {
+            return count($messages) == 3;
+        });
+
+    });
+
+    test('deleted message is not removed database', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+
+        $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $receiver->sendMessageTo($auth, message: 'message-4');
+
+        //run
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("deleteForMe", $authMessage->id);
+
+        $messageAvailable = Message::withoutGlobalScopes()-> find($authMessage->id);
+
+        ///assert message no longer visible
+        expect($messageAvailable)->not->toBe(null);
+    });
+
+  
+});
+

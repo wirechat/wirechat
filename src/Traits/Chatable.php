@@ -54,7 +54,7 @@ trait Chatable
         $authenticatedUserType = get_class($this);
 
         # Check if a private conversation already exists with these two participants
-        $existingConversation = Conversation::where('type', ConversationType::PRIVATE)
+        $existingConversation = Conversation::withoutGlobalScope('excludeDeleted')->where('type', ConversationType::PRIVATE)
             ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
                
                 $query->select('conversation_id')
@@ -254,8 +254,8 @@ trait Chatable
         $user = $user;
 
 
-       return     Conversation::where('type', ConversationType::PRIVATE)
-            ->whereHas('participants', function ($query) use ($authenticatedUser, $user) {
+       return     Conversation::withoutGlobalScope('excludeDeleted')->where('type', ConversationType::PRIVATE)
+                 ->whereHas('participants', function ($query) use ($authenticatedUser, $user) {
                
                 $query->select('conversation_id')
                     ->whereIn('participantable_id', [$authenticatedUser->id, $user->id])

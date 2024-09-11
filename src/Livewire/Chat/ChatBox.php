@@ -4,6 +4,7 @@ namespace Namu\WireChat\Livewire\Chat;
 
 use App\Notifications\TestNotification;
 use Illuminate\Support\Facades\RateLimiter;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 //use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -23,6 +24,7 @@ class ChatBox extends Component
     use WithFileUploads;
     use WithPagination;
 
+    #[Locked] 
     public $conversation;
 
     public $receiver;
@@ -33,11 +35,10 @@ class ChatBox extends Component
     public bool $canLoadMore;
 
 
-    public $media = [];
+    public array $media = [];
 
 
-    public $files = [];
-
+    public array $files = [];
 
 
     //Theme 
@@ -164,7 +165,7 @@ class ChatBox extends Component
 
         
         #delete conversation 
-        auth()->user()->deleteConversation($this->conversation);
+        $this->conversation->deleteFor(auth()->user());
 
         #redirect to chats page 
         $this->redirectRoute("wirechat");
@@ -185,6 +186,7 @@ class ChatBox extends Component
      * Send a message  */
     function sendMessage()
     {
+
         abort_unless(auth()->check(), 401);
 
         #rate limit 
@@ -192,7 +194,6 @@ class ChatBox extends Component
 
         /* If media is empty then conitnue to validate body , since media can be submited without body */
         // Combine media and files arrays
-        //dd($this->media);
 
         $attachments = array_merge($this->media, $this->files);
         //    dd(config('wirechat.file_mimes'));
@@ -325,29 +326,61 @@ class ChatBox extends Component
     }
 
     /**
-     * UnSend/Delete a message  */
-    function unSendMessage(Message $message){
+     * Delete for me means any participant of the conversation  can delete the message
+     * and this will hide the message from them but other participants can still access/see it 
+     **/
+    function deleteForMe(Message $message){
 
 
         #make sure user is authenticated
         abort_unless(auth()->check(), 401);
 
         #make sure user owns message
-        abort_unless($message->sender_id==auth()->id(), 403);
+        // abort_unless($message->ownedBy(auth()->user()), 403);
 
+        //make sure user belongs to conversation from the message
+        //We are checking the $message->conversation for extra security because the param might be tempered with 
+        abort_unless(auth()->user()->belongsToConversation($message->conversation),403);
 
         #remove message from collection
-
         $this->loadedMessages= $this->loadedMessages->reject(function ($loadedMessage) use ($message) {
             return $loadedMessage->id == $message->id;
         });
 
-       // dd($this->loadedMessages);
+        #delete For $user
+        $message->deleteFor(auth()->user());
+
+    }
+
+
+    /**
+     * Delete for eveyone means only owner of messages &  participant of the conversation  can delete the message
+     * and this will completely delete the message from the database 
+     **/
+    function deleteForEveryone(Message $message){
+
+
+        #make sure user is authenticated
+        abort_unless(auth()->check(), 401);
+
+        #make sure user owns message
+        abort_unless($message->ownedBy(auth()->user()), 403);
+
+        //make sure user belongs to conversation from the message
+        //We are checking the $message->conversation for extra security because the param might be tempered with 
+        abort_unless(auth()->user()->belongsToConversation($message->conversation),403);
+
+        #remove message from collection
+        $this->loadedMessages= $this->loadedMessages->reject(function ($loadedMessage) use ($message) {
+            return $loadedMessage->id == $message->id;
+        });
+
 
         #delete message from database
         $message->delete();
 
     }
+
 
   
     //used to broadcast message sent to receiver
@@ -455,17 +488,18 @@ class ChatBox extends Component
     public function mount()
     {
         //auth 
+
         abort_unless(auth()->check(), 401);
 
         //assign converstion
         $this->conversation = Conversation::where('id', $this->conversation)->first();
+        //dd($this->conversation);
 
 
         //Abort if not made 
         abort_unless($this->conversation, 404);
 
 
-        //dd( $this->conversation);
         // Check if the user belongs to the conversation
         $belongsToConversation = $this->conversation->participants()
         ->where('participantable_id', auth()->id())

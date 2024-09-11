@@ -38,18 +38,25 @@ class Conversation extends Model
     {
         parent::boot();
 
-        // Add scope if authenticated
-        // This scope ensures that you're only pulling conversations where
-        // not all messages are deleted by the user.
+     // Add scope if authenticated
+    // This scope ensures that conversations without messages are excluded and
+    // only conversations with at least one message not deleted by the auth user are returned.
         static::addGlobalScope('excludeDeleted', function (Builder $query) {
             if (auth()->check()) {
-                $query->whereHas('messages', function ($q) {
-                    $q->whereDoesntHave('reads', function ($q) {
-                        $q->where('readable_id', auth()->id())
-                            ->where('readable_type', get_class(auth()->user()));
-                    });
+               // Log::info('logged in');
+            return    $query->whereHas('messages', function ($q) {
+                    // Only include messages that haven't been marked as deleted by the authenticated user
+                  return  $q->whereDoesntHave('actions', function ($actionQuery) {
+                        $actionQuery->where('actor_id', auth()->id())
+                            ->where('actor_type', get_class(auth()->user()))
+                            ->where('type', Actions::DELETE);
+                    })->orWhereDoesntHave('actions');
                 });
             }
+
+            info('not logged in');
+
+            return $query;
         });
 
         //DELETED event
