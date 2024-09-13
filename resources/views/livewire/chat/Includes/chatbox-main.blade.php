@@ -82,7 +82,7 @@
             <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
 
                 <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">You replied to
-                    {{$parent?->user_id== $receiver?->id? $receiver->name:" Yourself"}}
+                    {{$parent?->ownedBy($receiver)? $receiver->name:" Yourself"}}
                 </h6>
 
                 <div class="border-r-4 px-1 ml-auto">

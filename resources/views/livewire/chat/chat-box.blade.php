@@ -197,7 +197,7 @@
                     <div class="flex justify-between items-center dark:text-white">
                         <h6 class="text-sm">Replying to
                             <span class="font-bold">
-                                {{$replyMessage->sender_id== $receiver->id? $receiver->name:" Yourself"}}
+                                {{$replyMessage?->ownedBy($receiver)? $receiver->name:" Yourself"}}
                             </span>
                         </h6>
                         <button wire:click="removeReply()">
