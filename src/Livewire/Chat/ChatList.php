@@ -96,6 +96,9 @@ public function render()
     ->latest('updated_at')
     // Retrieve the conversations
     ->get();
+
+
+   // dd($conversations->first()->messages);
     // Pass data to the view
     return view('wirechat::livewire.chat.chat-list', [
         'conversations' => $conversations, // Pass filtered conversations

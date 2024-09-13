@@ -53,25 +53,27 @@
     @endphp
 
     <!--Message-->
+    @if ($loadedMessages)
+        
     @foreach ($loadedMessages as $key=> $message)
 
-    @php
-        $belongsToAuth= $message->belongsToAuth();
-        $parent =$message->parent??null;
-        $attachment= $message->attachment??null;
-        $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
+        @php
+            $belongsToAuth= $message->belongsToAuth();
+            $parent =$message->parent??null;
+            $attachment= $message->attachment??null;
+            $isEmoji =mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body??'');
 
-        // keep track of previous message
-        // The ($key -1 ) will get the previous message from loaded
-        // messages since $key is directly linked to $message
+            // keep track of previous message
+            // The ($key -1 ) will get the previous message from loaded
+            // messages since $key is directly linked to $message
 
-        if ($key > 0){
-        $previousMessage = $loadedMessages->get($key - 1) ;
-        }
+            if ($key > 0){
+            $previousMessage = $loadedMessages->get($key - 1) ;
+            }
 
-        // Get the next message
-        $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
-    @endphp
+            // Get the next message
+            $nextMessage = ($key < $loadedMessages->count() - 1) ? $loadedMessages->get($key + 1) : null;
+        @endphp
 
         <div wire:key="message-{{$key}}" @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ' , 'ml-auto'=>$belongsToAuth])>
 
@@ -199,6 +201,7 @@
             </div>
         </div>
 
-        @endforeach
+    @endforeach
+    @endif
 
 </main>

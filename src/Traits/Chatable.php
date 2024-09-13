@@ -9,6 +9,7 @@ use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
+use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 /**
  * Trait Chatable
@@ -54,7 +55,7 @@ trait Chatable
         $authenticatedUserType = get_class($this);
 
         # Check if a private conversation already exists with these two participants
-        $existingConversation = Conversation::withoutGlobalScope('excludeDeleted')->where('type', ConversationType::PRIVATE)
+        $existingConversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE)
             ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
                
                 $query->select('conversation_id')
@@ -254,7 +255,7 @@ trait Chatable
         $user = $user;
 
 
-       return     Conversation::withoutGlobalScope('excludeDeleted')->where('type', ConversationType::PRIVATE)
+       return     Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE)
                  ->whereHas('participants', function ($query) use ($authenticatedUser, $user) {
                
                 $query->select('conversation_id')

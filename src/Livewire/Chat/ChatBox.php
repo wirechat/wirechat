@@ -16,7 +16,7 @@ use Livewire\WithPagination;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Models\Attachment;
-
+use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 class ChatBox extends Component
 {
@@ -170,6 +170,19 @@ class ChatBox extends Component
         #redirect to chats page 
         $this->redirectRoute("wirechat");
     }
+
+      /**
+     * clearChat  */
+    // function clearChat()
+    // {
+    //     abort_unless(auth()->check(),401);
+
+    //     #delete conversation 
+    //     $this->conversation->clearFor(auth()->user());
+
+    //     #clear the blade of chats
+    //     $this->reset('loadedMessages');
+    // }
 
      protected function rateLimit(){
 
@@ -492,8 +505,10 @@ class ChatBox extends Component
         abort_unless(auth()->check(), 401);
 
         //assign converstion
-        $this->conversation = Conversation::where('id', $this->conversation)->first();
-        //dd($this->conversation);
+
+
+        $this->conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('id', $this->conversation)->first();
+     //    dd($this->conversation);
 
 
         //Abort if not made 

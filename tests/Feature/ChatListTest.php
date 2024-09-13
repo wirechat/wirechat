@@ -78,10 +78,10 @@ describe('Chatlist', function () {
 
 
         //create conversation with user1
-        $auth->createConversationWith($user1);
+        $auth->createConversationWith($user1,'hello');
 
         //create conversation with user2
-        $auth->createConversationWith($user2);
+        $auth->createConversationWith($user2,'new message');
 
 
         Livewire::actingAs($auth)->test(ChatList::class)
@@ -89,6 +89,30 @@ describe('Chatlist', function () {
             ->assertSee('iam user 2')
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 2;
+            });
+    });
+
+
+    it('does not load blank conversations(where not even deleted messages exists)', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+        $user2 = User::factory()->create(['name' => 'iam user 2']);
+
+
+        //create BLANK conversation with user1
+        $auth->createConversationWith($user1);
+
+        //create conversation with user2
+        $auth->createConversationWith($user2,'new message');
+
+
+        Livewire::actingAs($auth)->test(ChatList::class)
+            ->assertDontSee('iam user 1') //Blank conversation should not load
+            ->assertSee('iam user 2')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 1;
             });
     });
 
@@ -102,10 +126,10 @@ describe('Chatlist', function () {
 
 
         //create conversation with user1
-        $auth->createConversationWith($user1);
+        $auth->createConversationWith($user1,'nothing');
 
         //create conversation with user2
-        $conversationToBeDeleted=   $auth->createConversationWith($user2);
+        $conversationToBeDeleted=   $auth->createConversationWith($user2,'nothing 2');
 
         //!now delete conversation with user 2
         $auth->deleteConversation($conversationToBeDeleted);
@@ -116,7 +140,7 @@ describe('Chatlist', function () {
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 1;
             });
-    })->skip();
+    });
 
 
     it('it shows last message and lable "you:" if it exists in chatlist', function () {
@@ -240,10 +264,10 @@ describe('Search', function () {
 
 
         //create conversation with user1
-        $auth->createConversationWith($user1);
+        $auth->createConversationWith($user1,'hello');
 
         //create conversation with user2
-        $auth->createConversationWith($user2);
+        $auth->createConversationWith($user2,'how are you doing');
 
 
         Livewire::actingAs($auth)->test(ChatList::class, ['search' => null])
@@ -263,14 +287,14 @@ describe('Search', function () {
 
 
         //create conversation with user1
-        $auth->createConversationWith($user1);
+        $auth->createConversationWith($user1,'hello');
 
         //create conversation with user2
-        $auth->createConversationWith($user2);
+        $auth->createConversationWith($user2,'how are you doing');
 
 
-        Livewire::actingAs($auth)->test(ChatList::class,)
-            ->set('search','Jo')
+        Livewire::actingAs($auth)->test(ChatList::class)
+            ->set('search','John')
             ->assertSee('John')
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 1;

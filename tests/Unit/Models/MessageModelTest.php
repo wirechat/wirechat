@@ -200,7 +200,7 @@ use Namu\WireChat\Workbench\App\Models\User;
 
 
         //delete messages
-        $message1->deleteForMe();
+        $message1->deleteFor($auth);
 
 
         //assert actions
@@ -215,7 +215,7 @@ use Namu\WireChat\Workbench\App\Models\User;
         expect($message1->actions()->count())->toBe(0);
 
 
-    })->only();
+    });
 });
 
 
@@ -305,7 +305,7 @@ use Namu\WireChat\Workbench\App\Models\User;
     })->throws(Exception::class);
 
     
-    it('deletes and does not load deleted messages(for me)', function () {
+    it('deletes and does not load deleted messages(for $auth)', function () {
         $auth = User::factory()->create();
 
         $receiver = User::factory()->create();
@@ -330,8 +330,8 @@ use Namu\WireChat\Workbench\App\Models\User;
 
 
         //delete messages
-        $message1->deleteForMe();
-        $message2->deleteForMe();
+        $message1->deleteFor($auth);
+        $message2->deleteFor($auth);
 
          //assert new count
          expect($conversation->messages()->count())->toBe(4);
@@ -339,7 +339,7 @@ use Namu\WireChat\Workbench\App\Models\User;
     });
 
 
-
-    })->only();
+    
+    });
 
  

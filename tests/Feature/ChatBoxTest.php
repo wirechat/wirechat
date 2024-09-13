@@ -11,9 +11,11 @@ use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Livewire\Chat\ChatBox;
 use Namu\WireChat\Livewire\Chat\ChatList;
+use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
+use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 use Namu\WireChat\Workbench\App\Models\User;
 
 
@@ -516,7 +518,7 @@ describe('Deleting Conversation', function () {
             ->assertRedirect(route("wirechat"));
     });
 
-    test('Logged in user can no longer access deleted conversation', function () {
+    test('Logged in user can still access deleted conversation in chat route or chatbox', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -532,20 +534,16 @@ describe('Deleting Conversation', function () {
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
-       // dd($receiver->sendMessageTo($auth, message: '4')->conversation);
+      //    dd($receiver->sendMessageTo($auth, message: '4')->conversation->id,$conversation->id);
 
-        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
-        $request->call("deleteConversation");
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                                            ->call("deleteConversation");
 
+        //assert chatbox
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertStatus(200);
 
-       // $this->actingAs($auth);
-
-        //assert conversation will be null
-       // expect($auth->conversations()->first())->toBe(null);
-
-
-        //also assert that user receives 404 
-        $this->actingAs($auth)->get(route("wirechat.chat", $conversation->id))->assertStatus(404);
+        //assert chat route
+        $this->actingAs($auth)->get(route("wirechat.chat", $conversation->id))->assertStatus(200);
     });
 
     test('user can regain access to deleted conversation if receiver/other user send a new message', function () {
@@ -573,7 +571,7 @@ describe('Deleting Conversation', function () {
       $message=  $receiver->sendMessageTo($auth, message: '5');
         
         
-//dd($message);
+   //dd($message);
         //assert conversation will be null
         expect($auth->conversations()->first())->not->toBe(null);
 
@@ -624,6 +622,11 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
+        //$conversation->deleteFor($auth);
+
+      //  $conversation = Conversation::all();
+       //dd($conversation);
+
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
@@ -636,9 +639,9 @@ describe('Deleting Conversation', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call("deleteConversation");
 
-        $conversation = Conversation::withoutGlobalScope('excludeDeleted')->find($conversation->id);
+        $conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->find($conversation->id);
         expect($conversation)->not->toBe(null);
-    });
+    }) ;
 
     test('user shold not be able to see previous messages present when conversation was deleted if they send a new message, but should be able to see new ones ', function () {
 
@@ -714,12 +717,93 @@ describe('Deleting Conversation', function () {
             ->assertSee("4 message");
 
         //assert user can see new messages
-        $request
-            ->assertSee("5 message");
+        $request->assertSee("5 message");
     });
-})->only();
+}) ;
 
-describe('deletForEveryone', function () {
+// describe('Clearing Conversation', function () {
+
+//     test('it removed messages from view when user clears chat', function () {
+//         $auth = User::factory()->create();
+//         $receiver = User::factory()->create(['name' => 'John']);
+
+
+//         $conversation = $auth->createConversationWith($receiver);
+
+//         //auth -> receiver
+//         $auth->sendMessageTo($receiver, message: 'message-1');
+//         $auth->sendMessageTo($receiver, message: 'message-2');
+//         $auth->sendMessageTo($receiver, message: 'message-3');
+
+//         //receiver -> auth 
+//         $receiver->sendMessageTo($auth, message: 'message-4');
+//         $receiver->sendMessageTo($auth, message: 'message-5');
+//         $receiver->sendMessageTo($auth, message: 'message-5');
+
+
+//         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+//         $request
+//             ->call("clearChat")
+//             ->assertViewHas('loadedMessages', 0);
+//     });
+
+//     test('it stays in coversation after clearing chat', function () {
+//         $auth = User::factory()->create();
+//         $receiver = User::factory()->create(['name' => 'John']);
+
+
+//         $conversation = $auth->createConversationWith($receiver);
+
+//         //auth -> receiver
+//         $auth->sendMessageTo($receiver, message: '1');
+//         $auth->sendMessageTo($receiver, message: '2');
+//         $auth->sendMessageTo($receiver, message: '3');
+
+//         //receiver -> auth 
+//         $receiver->sendMessageTo($auth, message: '4');
+//         $receiver->sendMessageTo($auth, message: '5');
+//         $receiver->sendMessageTo($auth, message: '5');
+
+
+//         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+//         $request
+//             ->call("clearChat")
+//             ->assertOk()
+//             ->assertNoRedirect();
+//     });
+
+//     test('user can still open conversatoin after clearing it ', function () {
+//         $auth = User::factory()->create();
+//         $receiver = User::factory()->create(['name' => 'John']);
+
+
+//         $conversation = $auth->createConversationWith($receiver);
+
+//         //auth -> receiver
+//         $auth->sendMessageTo($receiver, message: '1');
+//         $auth->sendMessageTo($receiver, message: '2');
+//         $auth->sendMessageTo($receiver, message: '3');
+
+//         //receiver -> auth 
+//         $receiver->sendMessageTo($auth, message: '4');
+//         $receiver->sendMessageTo($auth, message: '5');
+//         $receiver->sendMessageTo($auth, message: '5');
+
+
+//         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+//         $request
+//             ->call("clearChat");
+
+//         //assert 
+//         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
+//     });
+
+// })->only();
+
+describe('deleteMessage ForEveryone', function () {
 
 
     test('user cannot delete message that does not belong to them ', function () {

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 class Conversation extends Model
 {
@@ -38,27 +39,29 @@ class Conversation extends Model
     {
         parent::boot();
 
-     // Add scope if authenticated
-    // This scope ensures that conversations without messages are excluded and
-    // only conversations with at least one message not deleted by the auth user are returned.
-        static::addGlobalScope('excludeDeleted', function (Builder $query) {
-            if (auth()->check()) {
-               // Log::info('logged in');
-            return    $query->whereHas('messages', function ($q) {
-                    // Only include messages that haven't been marked as deleted by the authenticated user
-                  return  $q->whereDoesntHave('actions', function ($actionQuery) {
-                        $actionQuery->where('actor_id', auth()->id())
-                            ->where('actor_type', get_class(auth()->user()))
-                            ->where('type', Actions::DELETE);
-                    })->orWhereDoesntHave('actions');
-                });
-            }
+        // Add scope if authenticated
+        // This scope ensures that conversations without messages are excluded and
+        // only conversations with at least one message not deleted by the auth user are returned.
+         // Add scope if authenticated
+        //  static::addGlobalScope('withoutDeleted', function (Builder $builder) {
+        //     $user = auth()->user(); // Get the authenticated user
 
-            info('not logged in');
+        //     // Apply the scope only if the user is authenticated
+        //     if ($user) {
+        //        // dd($user);
+        //         $builder->whereHas('messages', function ($q) use ($user) {
+        //           //  $q->withoutGlobalScope('excludeDeleted')
+        //                 $q->whereDoesntHave('actions', function ($q) use ($user) {
+        //                     $q->where('actor_id', $user->id)
+        //                         ->where('actor_type', get_class($user)) // Safe since $user is not null
+        //                         ->where('type', Actions::DELETE);
+        //                 });
+        //         });
+        //     }
+        // });
 
-            return $query;
-        });
 
+        static::addGlobalScope(new WithoutClearedScope());
         //DELETED event
         static::deleted(function ($conversation) {
 
@@ -233,9 +236,9 @@ class Conversation extends Model
             ->whereDoesntHave('reads', function ($query) use ($model) {
                 $query->where('readable_id', $model->id)
                     ->where('readable_type', get_class($model));
-                  })->count();
+            })->count();
     }
-    
+
 
     /**
      * ----------------------------------------
@@ -262,7 +265,7 @@ class Conversation extends Model
         abort_unless($participant->belongsToConversation($this), 403, 'Does not belong to conversation');
 
         // Trigger deletion of all messages for the specified participant
-        $this->messages()->each(function ($message) use ($participant) {
+        $this->messages()?->each(function ($message) use ($participant) {
             $message->deleteFor($participant);
         });
 
@@ -281,6 +284,7 @@ class Conversation extends Model
 
             // If both participants have deleted all their messages, delete the conversation permanently
             if ($this->hasBeenDeletedBy($participant) && $this->hasBeenDeletedBy($otherParticipant)) {
+               // dd("deleted");
                 $this->delete();
             }
         }
