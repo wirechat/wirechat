@@ -13,11 +13,11 @@
 
 {{-- We use style here to make it easy for dynamic and safe injection --}}
 @style([
-'background-color:'. $primaryColor .'' => $belongsToAuth,
+'background-color:'. $primaryColor .'' => $belongsToAuth==true
 ])
 
 @class([
-    'flex transition ease-in flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
+    'flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
 
     // Background color for messages sent by the authenticated user
     'text-white' => $belongsToAuth,//set backg
