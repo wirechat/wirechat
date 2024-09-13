@@ -1,3 +1,4 @@
+@use('Namu\WireChat\Facades\WireChat')
 <div
 x-init=" 
 setTimeout(()=>{
@@ -14,9 +15,9 @@ setTimeout(()=>{
 
  @php
      $authId=$authUser->id;
+     $primaryColor =  WireChat::getColor()
 
  @endphp
-
 
     <header class="px-3 z-10 bg-white dark:bg-gray-800 sticky top-0 w-full py-2  ">
 
@@ -97,9 +98,14 @@ setTimeout(()=>{
             {{-- Chat list item --}}
 
             <li  id="conversation-{{$conversation->id}}"  wire:key="conversation-{{$conversation->id}}"
+
+                {{-- We use style here to make it easy for dynamic and safe injection --}}
+                @style([
+                    'border-color:'. $primaryColor .'20' => $selectedConversationId==$conversation?->id,
+                    ])
             @class([
                 'py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
-                'bg-gray-50 dark:bg-gray-700   border-r-4 border-blue-500/20'=>$selectedConversationId==$conversation?->id,
+                'bg-gray-50 dark:bg-gray-700   border-r-4'=>$selectedConversationId==$conversation?->id,
                  ])>
                 
                 <a href="{{route('wirechat.chat',$conversation->id)}}" class="shrink-0">

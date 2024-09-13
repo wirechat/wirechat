@@ -9,6 +9,7 @@ use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\ChatBox;
 use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Livewire\Chat\Chats;
+use Namu\WireChat\Services\WireChatService;
 use Namu\WireChat\View\Components\ChatBox\Image;
 
 class WireChatServiceProvider extends ServiceProvider 
@@ -51,6 +52,11 @@ class WireChatServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../config/wirechat.php', 'wirechat'
         );
+
+        //register facades
+        $this->app->singleton('wirechat', function ($app) {
+            return new WireChatService();
+        });
     
         
     }

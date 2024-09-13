@@ -26,6 +26,12 @@ return [
 
     'queue'=>'default',
 
+    /**
+     * This is the theme color that will be used in the chat
+     * Default : #3b82f6 //blue-500
+     *  */
+    'color'=>'#0369a1',
+
 
     /* Home route */
      'home_route'=>"/",
@@ -35,8 +41,6 @@ return [
      * FEATURES
      **/
 
-    
-
      //This string is a comma-separated list of unique file type specifiers  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
      'allowed_attachments'=>['image/png','image/jpeg', 'image/jpg'],
 
@@ -44,7 +48,7 @@ return [
      'theme'=>'red', // can be from any colors : gree, red, 
 
      'user_search_allowed'=>true, //bool
-     'user_searchable_fields'=>['name'],   //['email','profession']etc
+     'user_searchable_fields'=>['name','email'],   //['email','profession']etc
 
      'attachments' => [
         'storage_folder' => 'attachments',

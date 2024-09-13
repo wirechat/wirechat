@@ -1,15 +1,26 @@
+@use('Namu\WireChat\Facades\WireChat')
+
 @props([
     'previousMessage' => $previousMessage,
     'message' => $message,
     'nextMessage' => $nextMessage,
     'belongsToAuth' => $belongsToAuth,
+    'primaryColor'=> WireChat::getColor()
+
 ])
 
-<div @class([
+<div
+
+{{-- We use style here to make it easy for dynamic and safe injection --}}
+@style([
+'background-color:'. $primaryColor .'' => $belongsToAuth,
+])
+
+@class([
     'flex transition ease-in flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-    
+
     // Background color for messages sent by the authenticated user
-    'bg-blue-500/80 text-white' => $belongsToAuth,
+    'text-white' => $belongsToAuth,//set backg
     'dark:bg-gray-700 dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
@@ -80,6 +91,7 @@
 
 ])>
 
+{{-- @dd($primaryColor) --}}
 <pre class="whitespace-pre-line tracking-normal text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
     {{$message->body}}
