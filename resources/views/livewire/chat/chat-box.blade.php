@@ -3,11 +3,15 @@
 <div x-data="{
     height:0,
     conversationElement: document.getElementById('conversation'),
-    }" x-init="
+    initializing:true
+    }" 
+    
+    x-init="
     setTimeout(() => {
         height=conversationElement.scrollHeight;
         $nextTick(()=> conversationElement.scrollTop= height);
         $wire.dispatch('focus-input-field');
+        initializing=false;
     }, 150);
 
 
@@ -51,8 +55,12 @@
         {{--------------}}
         {{---Messages---}}
         {{--------------}}
+        
         @include('wirechat::livewire.chat.Includes.chatbox-main')
 
+
+        
+    
         <footer class="shrink-0 z-10 bg-white dark:bg-gray-800 py-2 overflow-y-visible relative  ">
 
             <div

@@ -28,20 +28,7 @@ use function Orchestra\Testbench\workbench_path;
 
 
 
-    /**
-    * Make sure all integration tests use the same Laravel "skeleton" files.
-    * This avoids duplicate classes during migrations.
-    *
-    * Overrides \Orchestra\Testbench\Dusk\TestCase::getBasePath
-    *       and \Orchestra\Testbench\Concerns\CreatesApplication::getBasePath
-    *
-    * @return string
-    */
-    protected function getBasePath()
-    {
-        // Adjust this path depending on where your override is located.
-        return __DIR__.'/../vendor/orchestra/testbench-dusk/laravel'; 
-    }
+  
     // /**
     //  * Prepare for Dusk test execution.
     //  */
@@ -56,23 +43,23 @@ use function Orchestra\Testbench\workbench_path;
     // /**
     //  * Create the RemoteWebDriver instance.
     //  */
-    // protected function driver(): RemoteWebDriver
-    // {
-    //     $options = (new ChromeOptions)->addArguments(collect([ '--start-maximized',
-    //     ])->unless($this->hasHeadlessDisabled(), function (Collection $items) {
-    //         return $items->merge([
-    //             '--disable-gpu',
-    //             //'--headless=new',
-    //         ]);
-    //     })->all());
+    protected function driver(): RemoteWebDriver
+    {
+        $options = (new ChromeOptions)->addArguments(collect([ '--start-maximized',
+        ])->unless($this->hasHeadlessDisabled(), function (Collection $items) {
+            return $items->merge([
+                '--disable-gpu',
+                //'--headless=new',
+            ]);
+        })->all());
 
-    //     return RemoteWebDriver::create(
-    //         $_ENV['DUSK_DRIVER_URL'] ?? 'http://localhost:9515',
-    //         DesiredCapabilities::chrome()->setCapability(
-    //             ChromeOptions::CAPABILITY, $options
-    //         )
-    //     );
-    // }
+        return RemoteWebDriver::create(
+            $_ENV['DUSK_DRIVER_URL'] ?? 'http://localhost:9515',
+            DesiredCapabilities::chrome()->setCapability(
+                ChromeOptions::CAPABILITY, $options
+            )
+        );
+    }
     // protected function getPackageProviders($app)
     // {
     //     return [

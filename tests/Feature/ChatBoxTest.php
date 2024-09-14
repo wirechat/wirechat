@@ -454,6 +454,21 @@ describe('Sending reply', function () {
             ->assertSet("replyMessage", $message);
     });
 
+    test('it shows "replying to yourself" when auth is replying to own message ', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = $auth->createConversationWith($receiver);
+
+
+        //send messages
+        $message = $auth->sendMessageTo($receiver, message: 'How are you');
+
+       // dd($conversation->id,$message->conversation_id);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("setReply", $message->id)
+            ->call('$refresh')->assertSee("Replying to Yourself", $escaped = false);
+    })->skip();
     test('it dispatches "focus-input-field" when reply is set', function () {
         $auth = User::factory()->create();
 
@@ -469,6 +484,8 @@ describe('Sending reply', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call("setReply", $message)
             ->assertDispatched('focus-input-field');
+
+      
     });
 
     test('it can remove reply message when removeReply is called ', function () {

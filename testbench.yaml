@@ -1,5 +1,7 @@
 providers:
- #- Workbench\App\Providers\WorkbenchServiceProvider
+  - Namu\WireChat\Workbench\App\Providers\WorkbenchServiceProvider
+  - Namu\WireChat\WireChatServiceProvider
+  - Livewire\LivewireServiceProvider
 
 migrations:
   - workbench\database\migrations
@@ -10,7 +12,7 @@ seeders:
 #laravel: "./skeleton"
 
 workbench:
-  start: '/http://127.0.0.1:8001'
+  start: '/'
   install: true
   discovers:
     web: true

@@ -73,6 +73,7 @@ class ChatBox extends Component
         //Set owner as Id we are replying to 
         $this->replyMessage = $message;
 
+
         #dispatch event to focus input field 
         $this->dispatch('focus-input-field');
     }
@@ -418,6 +419,7 @@ class ChatBox extends Component
     public function sendLike()
     {
 
+        //sleep(2);
 
         #rate limit 
         $this->rateLimit();
@@ -465,6 +467,7 @@ class ChatBox extends Component
 
     function loadMessages()
     {
+
 
         #get count
         $count = Message::where('conversation_id', $this->conversation->id)->where(function ($query) {
@@ -532,6 +535,7 @@ class ChatBox extends Component
 
     public function render()
     {
+       // sleep(3);
         $conversation = Conversation::first();
 
         return view('wirechat::livewire.chat.chat-box');

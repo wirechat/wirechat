@@ -1,6 +1,6 @@
 <?php
 
-namespace Workbench\App\Providers;
+namespace Namu\WireChat\Workbench\App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 

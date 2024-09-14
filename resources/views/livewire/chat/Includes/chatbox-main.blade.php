@@ -23,7 +23,9 @@
 
     " id="conversation"
     class="flex flex-col  gap-2 gap-y-4   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
-    style="contain: content">
+    style="contain: content"
+    :class="{'invisible': initializing, 'visible': !initializing}"
+    >
 
 
     {{-- <div x-cloak wire:loading.flex wire:target="loadMore()" class="hidden w-full  items-center py-2 ">
