@@ -19,30 +19,55 @@ Install package via composer
 composer require namu/wirechat
 ```
 
-### Configuration & Migrations
 
 1. publish the Migration file 
 ```
 php artisan vendor:publish --tag=wirechat-migration
 ```
-2. Optionally, publish the configuration file if you want to change any defaults:
+2. Run the migrations:
 ```
- php artisan vendor:publish --tag=wirechat-config
+php artisan migrate
 ```
 
-3. Create storage symlink
+4. Create storage symlink
 ```
  php artisan storage:link
 ```
 
+
 ### Building Tailwind CSS for production
 To purge the classes used by the package, add the following lines to your purge array in tailwind.config.js:
+
 ```
    './wirechat/resources/views/**/*.blade.php',
    './wirechat/src/Livewire/*.php',
 ```
 
+## WebSockets and Queue Setup
 
+Wirechat leverages WebSockets to broadcast messages in real-time to conversations and their participants.
+
+#### Step 1: Enable Broadcasting
+
+By default, broadcasting is disabled in new Laravel installations. To enable it, run the following Artisan command:
+
+```bash
+php artisan install:broadcasting
+```
+
+This command sets up the necessary broadcasting configurations for your application.
+
+#### Step 2: Set Up Broadcasting and Queues
+Ensure both broadcasting and your queue workers are properly configured. You can follow the [Laravel Broadcasting Documentation](https://laravel.com/docs/11.x/broadcasting) for detailed setup instructions, including integrating Laravel Echo for real-time updates.
+
+#### Step 3: Start Your Queue Worker
+Once broadcasting is configured, you'll need to start your queue worker to handle message broadcasting and other queued tasks. Run the following command:
+
+```bash
+php artisan queue:work
+```
+
+Make sure your queue workers are running continuously to handle queued events, ensuring proper message broadcasting in real-time.
 
 ## Usage
 
@@ -103,56 +128,6 @@ $auth->deleteConversationWith($user);
 
 ```
 
-
-### Attachtments
-
-
-
-Wirechat offers a way to add attachments to messages , you can exchange both media as in images and videos including documents such as pdf, zip etc when sending messsages
-
-#### Media Attachments
-
-Media represents videos , images, gifs etc .In order to allow media attachments you need to set the allow_media_attachments & allow_file_attachments to true in wirechat config
-
-```php
-  ...
-  'attachments' => [
-        'storage_folder' => 'attachments',
-        'storage_disk' => 'public',
-
-        //Media config
-        'allow_media_attachments'=>true,
-        'media_mimes' => (array) ['png','jpg','jpeg','gif','mov','mp4'],
-        'media_max_upload_size' => 12288, // 12MB
-
-        //Files config
-        'allow_file_attachments'=>true,
-        'file_mimes' => (array) ['zip','rar','txt','pdf'],
-        'file_max_upload_size' => 12288, //12 MB
-
-    ],
-```
-
-#### Filtering attachments 
- 
-You can filter the attachments types by adding the extentions in the array 
-
-for example if we want to allow only add images upload in media then add only image extentions exclusively ,if you want to allow both videos and images then add add images and video extentions in the `media_mimes=[]` array
-
-This is the same for filtering Files in the `file_mimes=[]`
-
-you also need to allow these extensions   in the livewire config `preview_mimes` in order to allow preview while uploading 
-
-
-#### max_upload_size
-
-Wirechat is able to validate attachments on both on client side before they hit the server  and on server side ,  the `max_upload_size` represents maximum file upload size for each individual attachment represented in kilobytes 
-
-Note: In the Livewire config file the `temporary_file_upload.rules` is set to `max:12288 //12MB ` by default if you wish to  set max_upload_size greater that this , make sure you increase it in the livewire config file as well
-
-Lastly the `post_max_size` in the `php.ini` superseeds any configuration in livewire config and wirechat config as well , so make sure you adjust the upload size accordinly in order to allow larger file uploads 
-
-
 ### Aggregations
 Here you can retrieve items from the pivot table to we can get the count()
 
@@ -179,12 +154,6 @@ foreach($conversations as $conversation) {
 }
 
 
-// For Favoriteable
-$posts = Post::withCount('favoriters')->get();
-
-foreach($posts as $post) {
-    echo $post->favoriters_count;
-}
 ```
 
 
@@ -213,3 +182,79 @@ The MessageCreated Event is only broadcasted to others i.e The other user in the
 | **Event**                               | **Description**                             |
 | ----------------------------------------| ------------------------------------------- |
 | `Namu\WireChat\Events\MessageCreated`   | Triggered when a message is created/sent |
+
+
+
+
+
+## Configurations
+The Wirechat configuration file is located at `config/wirechat.php`, where you can modify its properties.
+
+To publish the config run the vendor:publish command:
+```
+ php artisan vendor:publish --tag=wirechat-config
+```
+
+#### Queue
+Defines the queue for broadcasting message events.
+
+```php
+'queue' => 'default',
+```
+
+#### Color
+The theme color used in the chat interface. 
+
+- **Default:** `#3b82f6` (blue-500)
+
+```php
+'color' => '#f43f5e',
+```
+
+#### Home Route
+The route to redirect users when the exit button is clicked in the chat.
+
+```php
+'home_route' => '/',
+```
+
+#### Search
+Controls the user search functionality within the chat.
+
+- **user_search_allowed**: Boolean to enable or disable the search bar.
+- **user_searchable_fields**: Fields that can be searched (e.g., name, email).
+
+```php
+'user_search_allowed' => true,
+'user_searchable_fields' => ['name', 'email'],
+```
+
+#### Attachments
+Configuration for handling attachments in the chat.
+
+- **storage_folder**: Folder where attachments will be saved.
+- **storage_disk**: The disk where uploaded files are stored (e.g., `public`).
+- **max_uploads**: Maximum number of files allowed per request.
+
+```php
+'attachments' => [
+    'storage_folder' => 'attachments',
+    'storage_disk' => 'public',
+    'max_uploads' => 10,
+    
+    // Media Configuration
+    'allow_media_attachments' => true,
+    'media_mimes' => ['png', 'jpg', 'jpeg', 'gif', 'mov', 'mp4'],
+    'media_max_upload_size' => 12288, // 12MB
+
+    // File Configuration
+    'allow_file_attachments' => true,
+    'file_mimes' => ['zip', 'rar', 'txt', 'pdf'],
+    'file_max_upload_size' => 12288, // 12MB
+],
+```
+
+**Note:** For the `media_mimes`, `file_mimes`, and `max_upload_size` settings, ensure you also update the corresponding validations in the Livewire configuration file to match the settings in Wirechat.
+
+Additionally, the `post_max_size` setting in `php.ini` overrides any configuration in both the Livewire and Wirechat config files. Be sure to adjust `post_max_size` accordingly to support larger file uploads.
+

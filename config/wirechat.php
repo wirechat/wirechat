@@ -22,38 +22,42 @@ return [
     'user_model' => \App\Models\User::class,
 
 
-    /* define queue for broadcasting message events*/
+    /**
+     * Broadcasting:
+     * define queue for broadcasting message events*/
 
     'queue'=>'default',
 
     /**
+     * Color:
      * This is the theme color that will be used in the chat
      * Default : #3b82f6 //blue-500
      *  */
     'color'=>'#f43f5e',
 
 
-    /* Home route */
+    /**
+     * Home route:
+     * This is the route to redirect to when exit button is clicked in the chat
+     * */
      'home_route'=>"/",
 
 
     /**
-     * FEATURES
+     * Search:
+     * Show the bar to search for users 
      **/
-
-     //This string is a comma-separated list of unique file type specifiers  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
-     'allowed_attachments'=>['image/png','image/jpeg', 'image/jpg'],
-
-
-     'theme'=>'red', // can be from any colors : gree, red, 
-
+    
      'user_search_allowed'=>true, //bool
      'user_searchable_fields'=>['name','email'],   //['email','profession']etc
 
+    /**
+     * Attachments
+     **/
      'attachments' => [
-        'storage_folder' => 'attachments',
-        'storage_disk' => 'public',
-        'max_uploads' => 10,  
+        'storage_folder' => 'attachments', //folder name for attachments to be saved
+        'storage_disk' => 'public',//The disk on which to store uploaded files
+        'max_uploads' => 10,  // Maximum number of files to be uploaded for each request
 
         //Media config
         'allow_media_attachments'=>true,
