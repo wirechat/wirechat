@@ -818,7 +818,7 @@ describe('Deleting Conversation', function () {
 //         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
 //     });
 
-// })->only();
+// });
 
 describe('deleteMessage ForEveryone', function () {
 
@@ -968,6 +968,31 @@ describe('deleteMessage ForEveryone', function () {
 
         Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->assertMissing($attachmentModel->file_name);
     });
+
+    test('it disptaches refresh event and removes deleted message from chatlist', function () {
+
+        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = $auth->createConversationWith($receiver,'This is message');
+
+
+       $CHATLIST=  Livewire::actingAs($auth)->test(ChatList::class)->refresh()->assertSeeText('This is message');
+
+
+        //run
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            //add attachment
+            ->call("deleteForEveryone",1)
+            ->assertDispatched('refresh');
+
+        //assert 
+        $CHATLIST->dispatch('refresh')->assertDontSee('This is message');
+
+
+    }) ;
 }) ;
 
 describe('deletForMe', function () {
@@ -1059,6 +1084,31 @@ describe('deletForMe', function () {
         ///assert message no longer visible
         expect($messageAvailable)->not->toBe(null);
     });
+
+    test('it disptaches refresh event and removes deleted message from chatlist', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver,'This is message');
+
+
+        $CHATLIST=  Livewire::actingAs($auth)->test(ChatList::class)->refresh()->assertSeeText('This is message');
+ 
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        //call deleteForMe
+        $request->call("deleteForMe",'1')
+        ->assertDispatched('refresh');
+
+           //assert 
+           $CHATLIST->dispatch('refresh')->assertDontSee('This is message');
+
+
+
+    });
+
 
   
 });

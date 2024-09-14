@@ -50,13 +50,6 @@
 
                     </button>
 
-                    <button wire:click="clearChat" wire:confirm="are you sure" class="w-full text-start">
-
-                        <x-wirechat::dropdown-link>
-                            Clear Chat
-                        </x-wirechat::dropdown-link>
-                        
-                    </button>
                 </x-slot>
             </x-wirechat::dropdown>
 

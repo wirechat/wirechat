@@ -361,6 +361,10 @@ class ChatBox extends Component
             return $loadedMessage->id == $message->id;
         });
 
+        #dispatch event 'refresh ' to chatlist 
+        $this->dispatch('refresh')->to(ChatList::class);
+
+
         #delete For $user
         $message->deleteFor(auth()->user());
 
@@ -389,6 +393,9 @@ class ChatBox extends Component
             return $loadedMessage->id == $message->id;
         });
 
+        #dispatch event 'refresh ' to chatlist 
+        $this->dispatch('refresh')->to(ChatList::class);
+
 
         #delete message from database
         $message->delete();
@@ -396,7 +403,6 @@ class ChatBox extends Component
     }
 
 
-  
     //used to broadcast message sent to receiver
     protected function dispatchMessageCreatedEvent(Message $message)
     {

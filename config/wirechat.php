@@ -30,7 +30,7 @@ return [
      * This is the theme color that will be used in the chat
      * Default : #3b82f6 //blue-500
      *  */
-    'color'=>'#0369a1',
+    'color'=>'#f43f5e',
 
 
     /* Home route */
