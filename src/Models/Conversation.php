@@ -71,7 +71,7 @@ class Conversation extends Model
                 $conversation->participants()->delete();
 
                 // Delete associated messages 
-                $conversation->messages()->delete();
+                $conversation->messages()->forceDelete();
 
                 //Delete actions 
                 $conversation->actions()->delete();

@@ -359,7 +359,7 @@ class ChatBox extends Component
         #remove message from collection
         $this->loadedMessages= $this->loadedMessages->reject(function ($loadedMessage) use ($message) {
             return $loadedMessage->id == $message->id;
-        });
+        })->values();//reindex collection
 
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(ChatList::class);

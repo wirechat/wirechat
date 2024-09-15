@@ -59,6 +59,7 @@
         
     @foreach ($loadedMessages as $key=> $message)
 
+  
         @php
             $belongsToAuth= $message->belongsToAuth();
             $parent =$message->parent??null;
@@ -81,21 +82,23 @@
 
             {{-- Show parent/reply message --}}
             @if ($parent!=null)
-            <div class="  max-w-fit  flex flex-col gap-y-2  ">
 
-                <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
-                    {{$message?->ownedBy(auth()->user())?'You ':$message->sendable?->wireChatDisplayName()??'User'}} replied to  {{$parent?->ownedBy($receiver)?($message?->ownedBy($receiver)?'Themself': $receiver->wireChatDisplayName()):($message?->ownedBy(auth()->user())?'Yourself':" You")}}
-                </h6>
+                <div @class(['  max-w-fit   flex flex-col gap-y-2', 'ml-auto' => $belongsToAuth,'ml-9 sm:ml-10'=>!$belongsToAuth]) >
 
-                <div @class(['px-1 dark:border-gray-500 overflow-hidden ', ' border-r-4 ml-auto' => $belongsToAuth,' border-l-4 mr-auto ' => !$belongsToAuth]) >
-                    <p
-                        class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1  rounded-full max-w-fit   px-3 py-1 ">
-                        {{$parent?->body!=''?$parent?->body:($parent->hasAttachment()?'Attachment':'')}}
-                    </p>
+                    <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
+                        {{$message?->ownedBy(auth()->user())?'You ':$message->sendable?->wireChatDisplayName()??'User'}} replied to  {{$parent?->ownedBy($receiver)?($message?->ownedBy($receiver)?'Themself': $receiver->wireChatDisplayName()):($message?->ownedBy(auth()->user())?'Yourself':" You")}}
+                    </h6>
+    
+                    <div @class(['px-1 dark:border-gray-500 overflow-hidden ', ' border-r-4 ml-auto' => $belongsToAuth,' border-l-4 mr-auto ' => !$belongsToAuth]) >
+                        <p
+                            class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm sm:text-base  rounded-full max-w-fit   px-3 py-1 ">
+                            {{$parent?->body!=''?$parent?->body:($parent->hasAttachment()?'Attachment':'')}}
+                        </p>
+                    </div>
+    
+    
                 </div>
 
-
-            </div>
             @endif
 
 
@@ -148,10 +151,17 @@
                 </div>
 
                 {{--Message user Avatar --}}
-                <div @class([ 'shrink-0 mt-auto -mb-2 ' , 'hidden'=> $belongsToAuth,'invisible'=> ($message?->sendable_id == $nextMessage?->sendable_id && $message?->sendable_type == $nextMessage?->sendable_type) ])>                       
-                    <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" class="h-7 w-7" />
-                </div>
-
+                {{--Hide avatar if message belongs to auth --}}
+                @if (!$belongsToAuth)
+                    <div @class([
+                        'shrink-0 mt-auto -mb-2',
+                        // Hide avatar if the next message is from the same user
+                        'invisible' => ($nextMessage && $message->sendable_id == $nextMessage->sendable_id && $message->sendable_type == $nextMessage->sendable_type)
+                    ])>                       
+                        <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl() ?? null}}" class="h-7 w-7" />
+                    </div>
+                @endif
+             
 
                 {{-- Message body --}}
                 <div class="flex flex-col gap-2 max-w-[95%] ">
