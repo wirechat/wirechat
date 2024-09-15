@@ -1,6 +1,5 @@
 
-
-This is a highly customizable one to one Laravel messaging application made with Livewire v3, it is used to provide a convinient way to allows users to communicate with eachother in the application 
+This is a Laravel Private & Group  messaging application made with Livewire v3, it is used to provide a convinient way to allows users to communicate with eachother in the application 
 
 ## Prerequisites
 
