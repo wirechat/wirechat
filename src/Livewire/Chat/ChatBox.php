@@ -27,6 +27,9 @@ class ChatBox extends Component
     #[Locked] 
     public $conversation;
 
+    #[Locked] 
+    public  $TYPE;
+
     public $receiver;
     public $body;
 
@@ -533,9 +536,13 @@ class ChatBox extends Component
         $this->conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('id', $this->conversation)->first();
      //    dd($this->conversation);
 
+        
 
         //Abort if not made 
         abort_unless($this->conversation, 404);
+
+        //set converstion type
+        $TYPE= $this->conversation->type;
 
 
         // Check if the user belongs to the conversation
