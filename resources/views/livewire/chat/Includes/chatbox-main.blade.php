@@ -80,16 +80,16 @@
         <div wire:key="message-{{$key}}" @class([ 'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ' , 'ml-auto'=>$belongsToAuth])>
 
             {{-- Show parent/reply message --}}
-            @if ($belongsToAuth && $parent!=null)
-            <div class="  w-full  flex flex-col gap-y-2    overflow-hidden  ">
+            @if ($parent!=null)
+            <div class="  max-w-fit  flex flex-col gap-y-2  ">
 
-                <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">You replied to
-                    {{$parent?->ownedBy($receiver)? $receiver->name:" Yourself"}}
+                <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
+                    {{$message?->ownedBy(auth()->user())?'You ':$message->sendable?->wireChatDisplayName()??'User'}} replied to  {{$parent?->ownedBy($receiver)?($message?->ownedBy($receiver)?'Themself': $receiver->wireChatDisplayName()):($message?->ownedBy(auth()->user())?'Yourself':" You")}}
                 </h6>
 
-                <div class="border-r-4 px-1 ml-auto">
+                <div @class(['px-1 dark:border-gray-500 overflow-hidden ', ' border-r-4 ml-auto' => $belongsToAuth,' border-l-4 mr-auto ' => !$belongsToAuth]) >
                     <p
-                        class=" bg-gray-100 dark:text-white dark:bg-gray-600 text-black truncate rounded-full max-w-fit  text-sm px-3 py-1.5 ">
+                        class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1  rounded-full max-w-fit   px-3 py-1 ">
                         {{$parent?->body!=''?$parent?->body:($parent->hasAttachment()?'Attachment':'')}}
                     </p>
                 </div>

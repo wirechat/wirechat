@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create(config('wirechat.messages_table','wirechat_messages'), function (Blueprint $table) {
-          $table->id();
+        
+        $table->id();
 
         $table->unsignedBigInteger('conversation_id')->nullable();
         $table->foreign('conversation_id')->references('id')->on(config('wirechat.conversations_table'))->cascadeOnDelete();
@@ -28,6 +29,8 @@ return new class extends Migration
         $table->foreign('attachment_id')->references('id')->on(config('wirechat.attachments_table'))->nullOnDelete();
 
         $table->text('body')->nullable();
+
+        $table->softDeletes();
 
         $table->timestamps();
         });

@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Enums\Actions;
 
 class Message extends Model
 {
-    use HasFactory;
+    use HasFactory; use SoftDeletes;
 
 
 
@@ -198,7 +199,7 @@ class Message extends Model
     // Relationship for the parent message
     public function parent()
     {
-        return $this->belongsTo(Message::class, 'reply_id');
+        return $this->belongsTo(Message::class, 'reply_id')->withoutGlobalScope('excludeDeleted')->withTrashed();
     }
 
     // Relationship for the reply

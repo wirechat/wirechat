@@ -20,9 +20,9 @@ return new class extends Migration
           $table->unsignedBigInteger('conversation_id')->nullable();
           $table->foreign('conversation_id')->references('id')->on(config('wirechat.conversations_table'))->cascadeOnDelete();
   
-         // Polymorphic sender (sendable type and ID)
-         $table->string('sendable_id'); // ID of the sender
-         $table->string('sendable_type'); // Model type of the sender
+          // Polymorphic sender (sendable type and ID)
+          $table->string('sendable_id'); // ID of the sender
+          $table->string('sendable_type'); // Model type of the sender
 
           $table->unsignedBigInteger('reply_id')->nullable();
           $table->foreign('reply_id')->references('id')->on(config('wirechat.messages_table'))->nullOnDelete();
@@ -31,6 +31,8 @@ return new class extends Migration
           $table->foreign('attachment_id')->references('id')->on(config('wirechat.attachments_table'))->nullOnDelete();
   
           $table->text('body')->nullable();
+
+          $table->softDeletes();
   
           $table->timestamps();
           });

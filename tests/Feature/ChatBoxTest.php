@@ -992,7 +992,43 @@ describe('deleteMessage ForEveryone', function () {
         $CHATLIST->dispatch('refresh')->assertDontSee('This is message');
 
 
-    }) ;
+    });
+
+    test('it will delete actual message but still show parent message when deleted ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver,'This is message');
+
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+
+        //send reply 
+        $request->call('setReply',1)->set('body', 'This is reply')->call('sendMessage');
+
+
+        $request->refresh();
+        
+        //assert messsage visible
+        $request->assertSee('This is reply');
+
+
+        $request->refresh();
+
+        //call deleteForMe
+        $request->call("deleteForEveryone",'1');
+
+
+        //now assert still see 'This is message' message
+        $request->assertSee('This is message');
+
+
+
+    })->only();
+
+
 }) ;
 
 describe('deletForMe', function () {
@@ -1108,6 +1144,39 @@ describe('deletForMe', function () {
 
 
     });
+
+    test('it will delete actual message but still show parent message when deleted ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver,'This is message');
+
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+
+        //send reply 
+        $request->call('setReply',1)->set('body', 'This is reply')->call('sendMessage');
+
+
+        $request->refresh();
+
+        //assert messsage visible
+        $request->assertSee('This is reply');
+
+
+        //call deleteForMe
+        $request->call("deleteForMe",'1') ->assertDispatched('refresh');
+
+
+        //now assert still see 'This is message' message
+        $request->assertSee('This is message');
+
+
+
+    })->only();
+
 
 
   

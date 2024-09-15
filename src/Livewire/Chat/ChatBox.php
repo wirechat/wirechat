@@ -374,6 +374,7 @@ class ChatBox extends Component
     /**
      * Delete for eveyone means only owner of messages &  participant of the conversation  can delete the message
      * and this will completely delete the message from the database 
+     * Unless it has a foreign key child or parent :then it i will be soft deleted
      **/
     function deleteForEveryone(Message $message){
 
@@ -397,8 +398,21 @@ class ChatBox extends Component
         $this->dispatch('refresh')->to(ChatList::class);
 
 
-        #delete message from database
-        $message->delete();
+        //if message has reply then only soft delete it 
+        if ($message->hasReply()) {
+        
+            #delete message from database
+            $message->delete();
+        }
+        else {
+
+        #else Force delete message from database
+        $message->forceDelete();
+
+        }
+
+
+       
 
     }
 
