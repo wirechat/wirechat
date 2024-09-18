@@ -28,11 +28,120 @@ setTimeout(()=>{
                  <h3 class=" text-2xl font-bold dark:text-white">Chats</h2>
             </div>
 
-             <a href="{{config('wirechat.home_route')}}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-octagon-fill w-7 h-7 text-gray-500   transition-colors duration-300 dark:hover:text-gray-400 hover:text-gray-900" viewBox="0 0 16 16">
-                    <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
-                </svg>
-            </a>
+
+            <div class="flex gap-3">
+                {{-- todo:reserved for future updates --}}
+                {{-- <div x-data="{ modalOpen: false }"
+                    @keydown.escape.window="modalOpen = false"
+                    class="relative z-50 w-auto h-auto">
+
+                    <button  @click="modalOpen=true">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=" w-7 h-7 dark:stroke-[1.3] dark:text-white">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                          </svg>
+                          
+                    </button>
+    
+                    <template x-teleport="body">
+                        <div x-show="modalOpen" class="fixed top-0 left-0 z-[99] flex items-center justify-center w-screen h-screen" x-cloak>
+                            <div x-show="modalOpen" 
+                                x-transition:enter="ease-out duration-300"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="ease-in duration-300"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                @click="modalOpen=false" class="absolute inset-0 w-full h-full bg-black bg-opacity-40"></div>
+                            <div x-show="modalOpen"
+                                x-trap.inert.noscroll="modalOpen"
+                                x-transition:enter="ease-out duration-300"
+                                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                x-transition:leave="ease-in duration-200"
+                                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                class="relative w-full h-96   overflow-auto bg-white dark:bg-gray-800 dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
+                                
+                                <header class=" sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
+                                    <div class="flex justify-between items-center justify-between pb-2">
+                                        <h3 class="text-lg font-semibold">Send Message</h3>
+                                        <button @click="modalOpen=false" class="p-2  text-gray-600 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
+                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>  
+                                        </button>
+                                    </div>
+                                    <section class="flex flex-wrap items-center border-y dark:border-gray-700">
+                                        <p>
+                                         To:
+                                        </p>
+                                         <input type="search" wire:model.live.debounce='searchUsers' placeholder="Search"
+                                         class=" border-0 w-auto dark:bg-gray-800 outline-none  focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
+                                      </section>
+ 
+                                </header>
+                             
+                                <div class="relative w-full">
+                                     <button
+
+                                       @style([
+                                        'color:'. $primaryColor,
+                                        ])
+                                     
+                                       class="flex items-center gap-3 my-4 rounded-lg  w-full p-2">
+                                        <span class="p-1 bg-gray-100  rounded-full ">
+                              
+                                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class=" w-5 h-5">
+                                                <path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM15.75 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM2.25 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM6.31 15.117A6.745 6.745 0 0 1 12 12a6.745 6.745 0 0 1 6.709 7.498.75.75 0 0 1-.372.568A12.696 12.696 0 0 1 12 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 0 1-.372-.568 6.787 6.787 0 0 1 1.019-4.38Z" clip-rule="evenodd" />
+                                                <path d="M5.082 14.254a8.287 8.287 0 0 0-1.308 5.135 9.687 9.687 0 0 1-1.764-.44l-.115-.04a.563.563 0 0 1-.373-.487l-.01-.121a3.75 3.75 0 0 1 3.57-4.047ZM20.226 19.389a8.287 8.287 0 0 0-1.308-5.135 3.75 3.75 0 0 1 3.57 4.047l-.01.121a.563.563 0 0 1-.373.486l-.115.04c-.567.2-1.156.349-1.764.441Z" />
+                                              </svg>
+
+                                        </span>
+
+                                        <p>
+                                            New group 
+                                        </p>
+                                     </button>
+
+                                     <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5>
+                                     
+                                     <section class="my-4">
+                                        @if ($this->users)
+
+                                        <ul class="overflow-auto flex flex-col">
+
+                                            @foreach ($users as $user)
+                                            <li class="flex cursor-pointer group gap-2 items-center p-2">
+
+                                                <x-wirechat::avatar    class="w-5 h-5" />
+
+                                                <p class="group-hover:underline transition-all">{{$user->wireChatDisplayName()}}</p>
+
+                                            </li>
+                                                
+                                            @endforeach
+                                           
+                                          
+                                        </ul>
+
+                                        @endif
+
+                                     </section>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div> --}}
+
+              
+
+                <a href="{{config('wirechat.home_route','/')}}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-octagon-fill w-7 h-7 text-gray-500   transition-colors duration-300 dark:hover:text-gray-400 hover:text-gray-900" viewBox="0 0 16 16">
+                        <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
+                    </svg>
+                </a>
+            
+            </div>
+
+             
 
         </section>
 
@@ -109,9 +218,7 @@ setTimeout(()=>{
                  ])>
                 
                 <a href="{{route('wirechat.chat',$conversation->id)}}" class="shrink-0">
-                    <x-wirechat::avatar
-                     src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore 
-                      class="w-12 h-12" />
+                    <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore  class="w-12 h-12" />
                 </a>
                 <aside class="grid grid-cols-12 w-full">
 

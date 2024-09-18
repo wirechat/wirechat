@@ -5,10 +5,10 @@ namespace Namu\WireChat;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use Namu\WireChat\Livewire\Chat\View;
 use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\ChatBox;
 use Namu\WireChat\Livewire\Chat\ChatList;
-use Namu\WireChat\Livewire\Chat\Chats;
+use Namu\WireChat\Livewire\Chat\Index;
 use Namu\WireChat\Services\WireChatService;
 use Namu\WireChat\View\Components\ChatBox\Image;
 
@@ -37,11 +37,11 @@ class WireChatServiceProvider extends ServiceProvider
 
     //custom methods for livewire components
     protected function loadLivewireComponents()  {
-        Livewire::component('chat', Chat::class);
+        Livewire::component('view', View::class);
         Livewire::component('chat-list', ChatList::class);
 
-        Livewire::component('chat-box', ChatBox::class);
-        Livewire::component('chats', Chats::class);
+        Livewire::component('chat', Chat::class);
+        Livewire::component('index', Index::class);
 
     }
 

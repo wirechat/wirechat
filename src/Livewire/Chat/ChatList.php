@@ -15,6 +15,10 @@ class ChatList extends Component
 
 
   public $search;
+  public $searchUsers;
+  public $users;
+
+
 
 
   // function searchUsers()
@@ -54,6 +58,23 @@ class ChatList extends Component
     return 'bg-' . $color . '-500/20';
   }
 
+
+
+
+  // Todo:reserved for future updates
+  ///** 
+  //  * Search For users to create conversations with
+  //  */
+  // function updatedSearchUsers()  {
+
+
+  //   $searchableFields=['name','email'];
+
+  //   $this->users = User::limit(20)->whereAny($searchableFields, 'LIKE', '%' . $this->searchUsers . '%')->get();
+
+
+    
+  // }
 
 
 

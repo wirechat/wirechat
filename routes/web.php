@@ -1,16 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\Chats;
+use Namu\WireChat\Livewire\Chat\View;
+use Namu\WireChat\Livewire\Chat\Index;
 
 
 
 Route::middleware(['auth','web'])->group(function (){
 
 
-Route::get('/chats',Chats::class)->name('wirechat');
-Route::get('/chats/{chat}',Chat::class)->name('wirechat.chat');
+Route::get('/chats',Index::class)->name('wirechat');
+Route::get('/chats/{chat}',View::class)->name('wirechat.chat');
     
 });
 

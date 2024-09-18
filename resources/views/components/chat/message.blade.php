@@ -52,9 +52,7 @@
 
     // Last Message on RIGHT
     'rounded-br-2xl' => (
-        $previousMessage?->sendable_id !== $nextMessage?->sendable_id
-        && $previousMessage?->sendable_type !== $nextMessage?->sendable_type
-        && $belongsToAuth
+        $previousMessage?->sendable_id != $nextMessage?->sendable_id && $previousMessage?->sendable_type == $nextMessage?->sendable_type && $belongsToAuth
     ),
 
     // First message on LEFT
@@ -85,7 +83,7 @@
     // Last message on LEFT
     'rounded-bl-2xl' => (
         $message->sendable_id != $nextMessage?->sendable_id
-        && $message->sendable_type != $nextMessage?->sendable_type
+        && $message->sendable_type == $nextMessage?->sendable_type
         && !$belongsToAuth
     ),
 

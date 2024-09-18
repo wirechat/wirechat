@@ -141,7 +141,7 @@ trait Chatable
 
     }
 
-
+ 
     /**
      * Returns the URL for the cover image to be used as an avatar.
      *

@@ -7,64 +7,60 @@
     }" 
     
     x-init="
-    setTimeout(() => {
-        height=conversationElement.scrollHeight;
-        $nextTick(()=> conversationElement.scrollTop= height);
-        $wire.dispatch('focus-input-field');
-        initializing=false;
-    }, 150);
+        setTimeout(() => {
+            height=conversationElement.scrollHeight;
+            $nextTick(()=> conversationElement.scrollTop= height);
+            $wire.dispatch('focus-input-field');
+            initializing=false;
+        }, 150);
 
+    " 
+    @scroll-bottom.window="
+        
+        setTimeout(() => {
 
-    {{-- Echo.private('conversation.6')
-    .listen('.Namu\\WireChat\\Events\\MessageCreated',(e) => {
-
-            alert(notification);
-
-     
-    }); --}}
-    " @scroll-bottom.window="
-    
-    setTimeout(() => {
-
-        $nextTick(()=> { 
+            $nextTick(()=> { 
 
                 {{--overflow-y: hidden; is used to hide the vertical scrollbar initially. --}}
                 conversationElement.style.overflowY='hidden';
 
-            {{-- scroll the element down --}}
-            conversationElement.scrollTop = conversationElement.scrollHeight;
+                {{-- scroll the element down --}}
+                conversationElement.scrollTop = conversationElement.scrollHeight;
 
-               {{-- After updating the chat height, overflowY is set back to 'auto', 
-                 which allows the browser to determine whether to display the scrollbar 
-                 based on the content height.  --}}
-                 conversationElement.style.overflowY='auto';
-        });
+                {{-- After updating the chat height, overflowY is set back to 'auto', 
+                    which allows the browser to determine whether to display the scrollbar 
+                    based on the content height.  --}}
+                conversationElement.style.overflowY='auto';
+            });
 
 
-    }); 
+        }); 
 
   
-    " class=" w-full overflow-hidden  h-full ">
+    " 
+    class=" w-full overflow-hidden  h-full ">
     {{-- todo: add rounded corners to attachment --}}
     <div class="   flex flex-col  grow  dark:bg-gray-800  h-full">
         {{--------------}}
-        {{-----Header---}}
+        {{----Header----}}
         {{--------------}}
 
-        @include('wirechat::livewire.chat.Includes.chatbox-header')
+        <x-wirechat::chat.header :receiver="$receiver"/>
+
+
         {{--------------}}
-        {{---Messages---}}
+        {{---Body-------}}
         {{--------------}}
+        <x-wirechat::chat.body :loadedMessages="$loadedMessages" :receiver="$receiver" />
         
-        @include('wirechat::livewire.chat.Includes.chatbox-main')
 
-
-        
     
+        {{--------------}}
+        {{---Footer-----}}
+        {{--------------}}
         <footer class="shrink-0 z-10 bg-white dark:bg-gray-800 py-2 overflow-y-visible relative  ">
 
-            <div
-                class="  border dark:border-gray-700 px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[97%] mx-auto">
+            <div class="  border dark:border-gray-700 px-3 py-1.5 rounded-3xl grid grid-cols-12 gap-3 items-center  w-full max-w-[97%] mx-auto">
 
                 {{-- Media preview section --}}
                 @if (count($media)>0)
@@ -105,7 +101,7 @@
                                     d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
                             </svg>
                         </button>
-                        <x-wirechat::chatbox.video height="h-24 sm:h-36 " :cover="false" :showToggleSound="false"  :source="$mediaItem->temporaryUrl()" />
+                        <x-wirechat::chat.video height="h-24 sm:h-36 " :cover="false" :showToggleSound="false"  :source="$mediaItem->temporaryUrl()" />
                       </div>
 
                       @endif
@@ -395,8 +391,7 @@
                         progress: 0,
                         wireModel:type,
 
-                    handleFileSelect(event,count) {
-                        
+                    handleFileSelect(event,count) { 
                 
                         if (event.target.files.length) {
                             const files = event.target.files;
@@ -415,8 +410,8 @@
                     },
                     uploadFiles(files) {
 
-                       console.log("type is "+  this.wireModel);
-                       console.log("allowedFileTypes"+  this.allowedFileTypes);
+                    //    console.log("type is "+  this.wireModel);
+                    //    console.log("allowedFileTypes"+  this.allowedFileTypes);
 
                         
                         const $this = this;
@@ -439,7 +434,7 @@
                         
                         Promise.all(promises)
                             .then((results) => {
-                                console.log('Upload complete');
+                             //   console.log('Upload complete');
                                 $this.isUploading = false;
                                 $this.progress = 0;
                             })
@@ -468,22 +463,18 @@
                         return  $dispatch('notify',{type:'warning',message:'File limit exceeded , allowed '+ this.MAXFILES});
                         }
                 
-                    
-                        // const invalidFiles = Array.from(files).filter((file) => {
-                        //     console.log(''file.type);
-                        //     return file.size > maxSize || !this.allowedFileTypes.includes(file.type);
-                        // });
+        
 
                         const invalidFiles = Array.from(files).filter((file) => {
 
                             const fileType = file.type.split('/')[1].toLowerCase(); // Get the file extension from the MIME type
                             const isInvalid = file.size > this.maxSize || ! (this.allowedFileTypes.includes(fileType));
                             
-                            console.log('maxSize ', this.maxSize);
-                            console.log('File Name:', file.name);
-                            console.log('File Type:', fileType);
-                            console.log('Is Invalid:', isInvalid);
-                            console.log('includes', this.allowedFileTypes.includes(fileType));
+                            // console.log('maxSize ', this.maxSize);
+                            // console.log('File Name:', file.name);
+                            // console.log('File Type:', fileType);
+                            // console.log('Is Invalid:', isInvalid);
+                            // console.log('includes', this.allowedFileTypes.includes(fileType));
 
 
                             return isInvalid;
@@ -508,13 +499,6 @@
                                
                                 } else {
 
-                                    
-                                    //WIREUI error
-                                //   return  window.$wireui.notify({
-                                //         title: 'File type is not allowed:',
-                                //         description:'Only PNG, JPEG, and JPG files are accepted.',
-                                //          icon: 'error'
-                                //     });
 
                                 return  $dispatch('notify',{type:'warning',message:'File type is not allowed'});
                                 }
@@ -525,7 +509,6 @@
                             
                             console.log('Validation errors:', errorMessages);
                             // Returning an empty array since there are no valid files
-                            // return Promise.resolve([]);
                         }
 
 

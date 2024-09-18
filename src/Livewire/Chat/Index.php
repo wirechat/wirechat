@@ -5,7 +5,7 @@ namespace Namu\WireChat\Livewire\Chat;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class Chats extends Component{
+class Index extends Component{
 
 /**
  * todo:Make sure user is authenticaed for all methods 

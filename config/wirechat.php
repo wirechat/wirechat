@@ -33,14 +33,14 @@ return [
      * This is the theme color that will be used in the chat
      * Default : #3b82f6 //blue-500
      *  */
-    'color'=>'#f43f5e',
+    'color'=>'#60a5fa',
 
 
     /**
      * Home route:
      * This is the route to redirect to when exit button is clicked in the chat
      * */
-     'home_route'=>"/",
+     'home_route'=>"/dashboard",
 
 
     /**
