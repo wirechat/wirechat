@@ -42,7 +42,7 @@ To purge the classes used by the package, add the following lines to your purge 
    './wirechat/src/Livewire/*.php',
 ```
 
-## WebSockets and Queue Setup
+### WebSockets and Queue Setup
 
 Wirechat leverages WebSockets to broadcast messages in real-time to conversations and their participants.
 
@@ -89,7 +89,55 @@ class User extends Authenticatable
 
 ```
 
- 
+### Trait Customization
+
+Wirechat provides the ability to customize certain user attributes, such as avatar URLs, profile links, and display names.
+
+#### Example: Customizing the User Model
+
+To enable these customizations, ensure that your `User` model uses the `Chatable` trait. Then, you can override the following methods based on your application's database fields.
+
+```php
+use App\Traits\Chatable;
+
+class User extends Model
+{
+    use Chatable;
+
+    /**
+     * Returns the URL for the user's cover image (used as an avatar).
+     * Customize this based on your avatar field.
+     *
+     * @return string|null
+     */
+    public function wireChatCoverUrl(): ?string
+    {
+        return $this->avatar_url ?? null;  // Adjust 'avatar_url' to your field
+    }
+
+    /**
+     * Returns the URL for the user's profile page.
+     * Customize this based on your routing or profile setup.
+     *
+     * @return string|null
+     */
+    public function wireChatProfileUrl(): ?string
+    {
+        return route('profile', ['id' => $this->id]);  // Adjust 'profile' route as needed
+    }
+
+    /**
+     * Returns the display name for the user.
+     * Customize this based on your display name field.
+     *
+     * @return string|null
+     */
+    public function wireChatDisplayName(): ?string
+    {
+        return $this->name ?? 'user';  // Adjust 'name' field if needed
+    }
+}
+```
 
 ### API
 
@@ -173,7 +221,6 @@ $conversations = $user->conversations()
 
 ```
 
-
 ### Events
 
 The MessageCreated Event is only broadcasted to others i.e The other user in the conversation. which means the user who created the message will not receive the broadcasted event
@@ -181,8 +228,6 @@ The MessageCreated Event is only broadcasted to others i.e The other user in the
 | **Event**                               | **Description**                             |
 | ----------------------------------------| ------------------------------------------- |
 | `Namu\WireChat\Events\MessageCreated`   | Triggered when a message is created/sent |
-
-
 
 
 

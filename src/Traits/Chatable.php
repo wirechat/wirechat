@@ -141,35 +141,37 @@ trait Chatable
 
     }
 
- 
-    /**
-     * Returns the URL for the cover image to be used as an avatar.
+   /**
+     * Returns the URL for the user's cover image (used as an avatar).
+     * Customize this based on your avatar field.
      *
      * @return string|null
      */
     public function wireChatCoverUrl(): ?string
     {
-        return null;
+        return $this->avatar_url ?? null;  // Adjust 'avatar_url' to your field
     }
 
     /**
      * Returns the URL for the user's profile page.
+     * Customize this based on your routing or profile setup.
      *
      * @return string|null
      */
     public function wireChatProfileUrl(): ?string
     {
-        return null;
+        return route('profile', ['id' => $this->id]);  // Adjust 'profile' route as needed
     }
 
     /**
      * Returns the display name for the user.
+     * Customize this based on your display name field.
      *
      * @return string|null
      */
     public function wireChatDisplayName(): ?string
     {
-        return $this->name ?? 'user';
+        return $this->name ?? 'user';  // Adjust 'name' field if needed
     }
 
     /**
@@ -205,42 +207,42 @@ trait Chatable
         ->exists();
     }
     
-    public function deleteConversation(Conversation $conversation)
-    {
+    // public function deleteConversation(Conversation $conversation)
+    // {
 
-        $userId = $this->id;
+    //     $userId = $this->id;
 
-        //Stop if user does not belong to conversation
-        if (! $this->belongsToConversation($conversation)) {
-            return null;
-        }
+    //     //Stop if user does not belong to conversation
+    //     if (! $this->belongsToConversation($conversation)) {
+    //         return null;
+    //     }
         
-        // Update the messages based on the current user
-        $conversation->messages()->each(function ($message) use ($userId) {
-            if ($message->sender_id === $userId) {
-                $message->update(['sender_deleted_at' => now()]);
-            } elseif ($message->receiver_id === $userId) {
-                $message->update(['receiver_deleted_at' => now()]);
-            }
-        });
+    //     // Update the messages based on the current user
+    //     $conversation->messages()->each(function ($message) use ($userId) {
+    //         if ($message->sender_id === $userId) {
+    //             $message->update(['sender_deleted_at' => now()]);
+    //         } elseif ($message->receiver_id === $userId) {
+    //             $message->update(['receiver_deleted_at' => now()]);
+    //         }
+    //     });
 
-        // Delete the conversation and messages if all messages from the other user are also deleted
-        if ($conversation->messages()
-            ->where(function ($query) use ($userId) {
-                $query->where('sender_id', $userId)
-                    ->orWhere('receiver_id', $userId);
-            })
-            ->where(function ($query) {
-                $query->whereNull('sender_deleted_at')
-                    ->orWhereNull('receiver_deleted_at');
-            })
-            ->doesntExist()
-        ) {
+    //     // Delete the conversation and messages if all messages from the other user are also deleted
+    //     if ($conversation->messages()
+    //         ->where(function ($query) use ($userId) {
+    //             $query->where('sender_id', $userId)
+    //                 ->orWhere('receiver_id', $userId);
+    //         })
+    //         ->where(function ($query) {
+    //             $query->whereNull('sender_deleted_at')
+    //                 ->orWhereNull('receiver_deleted_at');
+    //         })
+    //         ->doesntExist()
+    //     ) {
 
-            // $conversation->messages()->delete();
-            $conversation->forceDelete();
-        }
-    }
+    //         // $conversation->messages()->delete();
+    //         $conversation->forceDelete();
+    //     }
+    // }
 
 
     /**
