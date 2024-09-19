@@ -105,34 +105,34 @@ class User extends Model
     use Chatable;
 
     /**
-     * Returns the URL for the user's cover image (used as an avatar).
+     * Accessor Returns the URL for the user's cover image (used as an avatar).
      * Customize this based on your avatar field.
      *
      * @return string|null
      */
-    public function wireChatCoverUrl(): ?string
+    public function getCoverUrlAttribute(): ?string
     {
         return $this->avatar_url ?? null;  // Adjust 'avatar_url' to your field
     }
 
     /**
-     * Returns the URL for the user's profile page.
+     * Accessor Returns the URL for the user's profile page.
      * Customize this based on your routing or profile setup.
      *
      * @return string|null
      */
-    public function wireChatProfileUrl(): ?string
+    public function getProfileUrlAttribute(): ?string
     {
         return route('profile', ['id' => $this->id]);  // Adjust 'profile' route as needed
     }
 
     /**
-     * Returns the display name for the user.
+     * Accessor Returns the display name for the user.
      * Customize this based on your display name field.
      *
      * @return string|null
      */
-    public function wireChatDisplayName(): ?string
+    public function getDisplayNameAttribute(): ?string
     {
         return $this->name ?? 'user';  // Adjust 'name' field if needed
     }

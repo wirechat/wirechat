@@ -58,9 +58,12 @@ class User extends Authenticatable
     }
 
 
-    public function wireChatCoverUrl(): ?string
+    public function getCoverUrlAttribute(): ?string
     {
-        return $this->avatar_url;
+
+      //  return $this->avatar_url;
+
+      return null;
     }
 
     public function wireChatProfileUrl(): ?string
@@ -68,11 +71,13 @@ class User extends Authenticatable
        return null;
     } 
 
-    public function wireChatDisplayName() : ?string 
+    
+    public function getDisplayNameAttribute() : ?string 
     {
-        return $this->name??'user';
-    }
 
+        return $this->name??'user';
+        
+    }
 
      /* UnRead Messages Count */
     //  public function unReadMessagesCount() : int {

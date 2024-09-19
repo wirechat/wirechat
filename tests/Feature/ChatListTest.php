@@ -37,7 +37,7 @@ it('doesnt shows search field if search is disabled in wirechat.config:tesiting 
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(ChatList::class)
-                      ->assertDontSee('Search');
+                      ->assertDontSee('Search my conversations');
 });
 
 

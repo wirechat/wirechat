@@ -91,7 +91,7 @@ $previousMessage=null;
             <div @class(['  max-w-fit   flex flex-col gap-y-2', 'ml-auto' => $belongsToAuth,'ml-9 sm:ml-10'=>!$belongsToAuth]) >
 
                 <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
-                    {{$message?->ownedBy(auth()->user())?'You ':$message->sendable?->wireChatDisplayName()??'User'}} replied to  {{$parent?->ownedBy($receiver)?($message?->ownedBy($receiver)?'Themself': $receiver->wireChatDisplayName()):($message?->ownedBy(auth()->user())?'Yourself':" You")}}
+                    {{$message?->ownedBy(auth()->user())?'You ':$message->sendable?->display_name??'User'}} replied to  {{$parent?->ownedBy($receiver)?($message?->ownedBy($receiver)?'Themself': $receiver->display_name):($message?->ownedBy(auth()->user())?'Yourself':" You")}}
                 </h6>
 
                 <div @class(['px-1 dark:border-gray-500 overflow-hidden ', ' border-r-4 ml-auto' => $belongsToAuth,' border-l-4 mr-auto ' => !$belongsToAuth]) >
@@ -166,7 +166,7 @@ $previousMessage=null;
                     // Hide avatar if the next message is from the same user
                     'invisible' => ($nextMessage && $message->sendable_id == $nextMessage->sendable_id && $message->sendable_type == $nextMessage->sendable_type)
                 ])>                       
-                    <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl() ?? null}}" class="h-7 w-7" />
+                    <x-wirechat::avatar src="{{$receiver->cover_url ?? null}}" class="h-7 w-7" />
                 </div>
             @endif
          

@@ -83,8 +83,7 @@
     // Last message on LEFT
     'rounded-bl-2xl' => (
         $message->sendable_id != $nextMessage?->sendable_id
-        && $message->sendable_type == $nextMessage?->sendable_type
-        && !$belongsToAuth
+        && $message->sendable_type == $nextMessage?->sendable_type && !$belongsToAuth
     ),
 
 ])>

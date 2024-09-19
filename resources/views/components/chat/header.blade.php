@@ -14,10 +14,10 @@
 
         {{--Receiver wirechat::Avatar --}}
         <div class="shrink-0">
-            <a class="flex items-center gap-2 " href="{{$receiver?->wireChatProfileUrl()??'#'}}">
-                <x-wirechat::avatar src="{{$receiver?->wireChatCoverUrl()??null}}" wire:ignore
+            <a class="flex items-center gap-2 " href="{{$receiver?->profile_url??'#'}}">
+                <x-wirechat::avatar src="{{$receiver?->cover_url??null}}" wire:ignore
                     class="h-8 w-8 lg:w-10 lg:h-10 " />
-                <h6 class="font-bold text-lg text-gray-800 dark:text-white truncate"> {{$receiver?->wireChatDisplayName()??'user'}} </h6>
+                <h6 class="font-bold text-lg text-gray-800 dark:text-white truncate"> {{$receiver?->display_name??'user'}} </h6>
             </a>
         </div>
 

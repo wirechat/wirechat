@@ -1026,7 +1026,7 @@ describe('deleteMessage ForEveryone', function () {
 
        
 
-    })->only();
+    });
 
 
 }) ;
@@ -1175,7 +1175,7 @@ describe('deletForMe', function () {
 
 
 
-    })->only();
+    });
 
 
 

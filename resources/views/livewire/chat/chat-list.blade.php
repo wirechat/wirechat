@@ -119,7 +119,7 @@ setTimeout(()=>{
 
                                                 <x-wirechat::avatar    class="w-5 h-5" />
 
-                                                <p class="group-hover:underline transition-all">{{$user->wireChatDisplayName()}}</p>
+                                                <p class="group-hover:underline transition-all">{{$user->display_name}}</p>
 
                                             </li>
                                                 
@@ -226,9 +226,10 @@ setTimeout(()=>{
                 'py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
                 'bg-gray-50 dark:bg-gray-700   border-r-4'=>$selectedConversationId==$conversation?->id,
                  ])>
-                
+
+
                 <a href="{{route('wirechat.chat',$conversation->id)}}" class="shrink-0">
-                    <x-wirechat::avatar src="{{$receiver->wireChatCoverUrl()??null}}" wire:ignore  class="w-12 h-12" />
+                    <x-wirechat::avatar src="{{$receiver->cover_url??null}}" wire:ignore  class="w-12 h-12" />
                 </a>
                 <aside class="grid grid-cols-12 w-full">
 
@@ -238,7 +239,7 @@ setTimeout(()=>{
                         {{-- name--}}
                         <div class="flex justify-between mb-1 w-full items-center">
                             <h6 class="truncate   font-bold  text-gray-900 dark:text-white">
-                                {{$receiver->wireChatDisplayName()}}
+                                {{$receiver->display_name}}
                             </h6>
 
                         </div>
