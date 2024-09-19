@@ -149,7 +149,7 @@ trait Chatable
      */
     public function wireChatCoverUrl(): ?string
     {
-        return $this->avatar_url ?? null;  // Adjust 'avatar_url' to your field
+        return  null;  // Adjust 'avatar_url' to your field
     }
 
     /**
