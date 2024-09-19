@@ -4,9 +4,11 @@ namespace Namu\WireChat\Livewire\Chat;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Models\Conversation;
 
@@ -60,21 +62,53 @@ class ChatList extends Component
 
 
 
+  /** 
+   * Search For users to create conversations with
+   */
+  public function updatedSearchUsers()  {
 
-  // Todo:reserved for future updates
-  ///** 
-  //  * Search For users to create conversations with
-  //  */
-  // function updatedSearchUsers()  {
+    //Make sure it's not empty
+    if (blank($this->searchUsers)) {
+
+      $this->users=null;
+
+    }
+
+    else {
+      
+      $this->users = auth()->user()->searchUsers($this->searchUsers);
+
+    }
+    
+    
+  }
 
 
-  //   $searchableFields=['name','email'];
+  function createConversation($id,string $class)  {
 
-  //   $this->users = User::limit(20)->whereAny($searchableFields, 'LIKE', '%' . $this->searchUsers . '%')->get();
+
+
+      $model = app($class);
+
+      $model = $model::find($id);
+
 
 
     
-  // }
+
+
+    if ($model) {
+      $createdConversation=  auth()->user()->createConversationWith($model);
+
+
+      return redirect()->route('wirechat.chat', [$createdConversation->id]);
+        
+    }
+
+
+
+    
+  }
 
 
 
@@ -90,7 +124,7 @@ class ChatList extends Component
 public function render()
 {
     // Get user searchable fields
-    $searchableFields = auth()->user()->getWireSearchableFields();
+    $searchableFields = WireChat::searchableFields();
 
     // Load the authenticated user with their conversations and related participants
     $user = auth()->user()->load('conversations.participants');

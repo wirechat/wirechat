@@ -53,8 +53,6 @@
         {{--------------}}
         <x-wirechat::chat.body :loadedMessages="$loadedMessages" :receiver="$receiver" />
         
-
-    
         {{--------------}}
         {{---Footer-----}}
         {{--------------}}

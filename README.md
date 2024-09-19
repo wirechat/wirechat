@@ -99,7 +99,7 @@ To enable these customizations, ensure that your `User` model uses the `Chatable
 
 ```php
 use App\Traits\Chatable;
-
+use Illuminate\Database\Eloquent\Collection;
 class User extends Model
 {
     use Chatable;
@@ -136,6 +136,28 @@ class User extends Model
     {
         return $this->name ?? 'user';  // Adjust 'name' field if needed
     }
+
+
+    /**
+     * Search for users when creating a conversation.
+     * You can customize the search logic,such as limiting results to friends 
+     * or excluding users who have disabled receiving messages.
+     * @param string $query The search term to find matching users.
+     * @return  \Illuminate\Database\Eloquent\Collection
+     */
+    public function searchUsers(string $query): ?Collection
+    {
+        // Retrieve the fields that are searchable for users.
+        $searchableFields = WireChat::searchableFields();
+
+        // Perform the search by matching the query against any of the searchable fields.
+        return $this::whereAny($searchableFields, 'LIKE', '%' . $query . '%')
+                        ->where('id', '!=', $this->id) // Exclude the authenticated user
+                        ->limit(20)
+                        ->get();
+
+    }
+
 }
 ```
 

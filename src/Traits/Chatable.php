@@ -2,10 +2,12 @@
 
 namespace Namu\WireChat\Traits;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
@@ -270,6 +272,38 @@ trait Chatable
 
 
 
+    /**
+     * Search for users when creating a conversation.
+     * This method can be overridden and customized to apply additional filtering logic.
+     *
+     * @param string $query The search input to match against user fields.
+     * @return Collection|null A collection of users matching the query, or null if no matches are found.
+     */
+    public function searchUsers(string $query): ?Collection
+    {
+        // Retrieve the fields that are searchable for users.
+        $searchableFields = WireChat::searchableFields();
+
+        // Get the user model from the config, defaulting to the App\Models\User class.
+        $userModel = app(config('wirechat.user_model', \App\Models\User::class));
+
+        // If the search query or user model is empty, return null.
+        if (blank($query) || !$userModel) {
+            return null;
+        }
+
+        // Perform the search by matching the query against any of the searchable fields.
+        // Limit the results to 20 users.
+        return $userModel::where(function($queryBuilder) use ($searchableFields, $query) {
+            foreach ($searchableFields as $field) {
+                $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
+            }
+        })
+        ->where('id', '!=', $this->id) // Exclude the authenticated user
+        ->limit(20)
+        ->get();
+
+    }
 
 
 

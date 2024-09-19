@@ -22,22 +22,25 @@ setTimeout(()=>{
     <header class="px-3 z-10 bg-white dark:bg-gray-800 sticky top-0 w-full py-2  ">
 
         {{-- Title/name and Icon --}}
-        <section class=" justify-between flex items-center pb-2">
+        <section class=" justify-between flex items-center  pb-2">
 
-            <div class="flex items-center gap-2 truncate">
+            <div class="flex items-center gap-2 truncate ">
                  <h3 class=" text-2xl font-bold dark:text-white">Chats</h2>
             </div>
 
 
-            <div class="flex gap-3">
+            <div class="flex gap-x-3 items-center  ">
                 {{-- todo:reserved for future updates --}}
-                {{-- <div x-data="{ modalOpen: false }"
+                <div x-data="{ modalOpen: false }"
                     @keydown.escape.window="modalOpen = false"
-                    class="relative z-50 w-auto h-auto">
+                    class="relative z-50 flex  max-h-fit">
 
-                    <button  @click="modalOpen=true">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=" w-7 h-7 dark:stroke-[1.3] dark:text-white">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    {{-- open  new message modal --}}
+                    <button  class="my-auto"   @click="modalOpen=true">
+               
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7 dark:stroke-[1.3] dark:text-white">
+                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
                           </svg>
                           
                     </button>
@@ -60,27 +63,30 @@ setTimeout(()=>{
                                 x-transition:leave="ease-in duration-200"
                                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                class="relative w-full h-96   overflow-auto bg-white dark:bg-gray-800 dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
+                                class="relative w-full h-96  border  dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800 dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
                                 
                                 <header class=" sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
                                     <div class="flex justify-between items-center justify-between pb-2">
-                                        <h3 class="text-lg font-semibold">Send Message</h3>
+                                        <h3 class="text-lg font-semibold">Send message</h3>
                                         <button @click="modalOpen=false" class="p-2  text-gray-600 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
                                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>  
                                         </button>
+
+                                        
                                     </div>
-                                    <section class="flex flex-wrap items-center border-y dark:border-gray-700">
+                                    <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
                                         <p>
                                          To:
                                         </p>
                                          <input type="search" wire:model.live.debounce='searchUsers' placeholder="Search"
-                                         class=" border-0 w-auto dark:bg-gray-800 outline-none  focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
-                                      </section>
+                                         class=" border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
+
+                                        </section>
  
                                 </header>
                              
                                 <div class="relative w-full">
-                                     <button
+                                     {{-- <button
 
                                        @style([
                                         'color:'. $primaryColor,
@@ -99,17 +105,17 @@ setTimeout(()=>{
                                         <p>
                                             New group 
                                         </p>
-                                     </button>
+                                     </button> --}}
 
-                                     <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5>
+                                     {{-- <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5> --}}
                                      
                                      <section class="my-4">
-                                        @if ($this->users)
+                                        @if ($users)
 
                                         <ul class="overflow-auto flex flex-col">
 
-                                            @foreach ($users as $user)
-                                            <li class="flex cursor-pointer group gap-2 items-center p-2">
+                                            @foreach ($users as $key=> $user)
+                                            <li wire:key="user-{{$key}}" wire:click="createConversation('{{$user->id}}',{{json_encode(get_class($user))}})" class="flex cursor-pointer group gap-2 items-center p-2">
 
                                                 <x-wirechat::avatar    class="w-5 h-5" />
 
@@ -122,6 +128,10 @@ setTimeout(()=>{
                                           
                                         </ul>
 
+                                        @else
+
+                                        No accounts found
+
                                         @endif
 
                                      </section>
@@ -129,12 +139,12 @@ setTimeout(()=>{
                             </div>
                         </div>
                     </template>
-                </div> --}}
+                </div>
 
               
 
                 <a href="{{config('wirechat.home_route','/')}}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-octagon-fill w-7 h-7 text-gray-500   transition-colors duration-300 dark:hover:text-gray-400 hover:text-gray-900" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor" class="bi bi-x-octagon-fill w-6 h-6 text-gray-500 transition-colors duration-300 dark:hover:text-gray-400 hover:text-gray-900" viewBox="0 0 16 16">
                         <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
                     </svg>
                 </a>
@@ -171,7 +181,7 @@ setTimeout(()=>{
         {{-- Search input --}}
         @if (config('wirechat.user_search_allowed',false)==true)
         <section class="py-2 ">
-            <input id="user-search" type="search" wire:model.live.debounce='search' placeholder="Search"
+            <input id="user-search" type="search" wire:model.live.debounce='search' placeholder="Search my conversations"
             class=" border-0 dark:bg-gray-700 dark:text-white outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
          </section>
         @endif
