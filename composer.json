@@ -9,8 +9,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Namu\\WireChat\\Tests\\": "tests",
-            "Namu\\WireChat\\Workbench\\App\\": "workbench/app/",
+            "Namu\\WireChat\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
             "Namu\\WireChat\\Workbench\\Database\\Factories\\": "workbench/database/factories/",
             "Namu\\WireChat\\Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         }
@@ -40,7 +40,9 @@
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin-laravel": "^2.4",
         "laravel/dusk": "^8.2",
-        "orchestra/testbench-dusk": "^8.26"
+        "orchestra/testbench-dusk": "^8.26",
+        "orchestra/testbench-browser-kit": "^8.6",
+        "joshhanley/livewire-dusk-testbench": "^3.0@beta"
     },
     "scripts": {
         "post-autoload-dump": [

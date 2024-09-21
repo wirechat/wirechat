@@ -28,14 +28,9 @@ class Message extends Model
 
 
     //  protected $dates=['read_at','receiver_deleted_at','sender_deleted_at'];
-    protected $userModel;
-
     public function __construct(array $attributes = [])
     {
         $this->table = \config('wirechat.messages_table');
-
-
-        $this->userModel = app(config('wirechat.user_model', \App\Models\User::class));
 
         parent::__construct($attributes);
     }
@@ -55,10 +50,6 @@ class Message extends Model
     }
 
 
-    public function user()
-    {
-        return $this->belongsTo($this->userModel::class, 'user_id');
-    }
     /** 
      * since you have a non-standard namespace; 
      * the resolver cannot guess the correct namespace for your Factory class.

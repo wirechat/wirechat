@@ -123,6 +123,7 @@ class ChatList extends Component
 
 public function render()
 {
+
     // Get user searchable fields
     $searchableFields = WireChat::searchableFields();
 
@@ -151,6 +152,9 @@ public function render()
     ->latest('updated_at')
     // Retrieve the conversations
     ->get();
+
+ // dd('here');
+
 
 
    // dd($conversations->first()->messages);

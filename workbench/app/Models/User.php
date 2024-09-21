@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Workbench\App\Models;
+namespace Workbench\App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -57,11 +57,8 @@ class User extends Authenticatable
         return \Namu\WireChat\Workbench\Database\Factories\UserFactory::new();
     }
 
-
     public function getCoverUrlAttribute(): ?string
     {
-
-      //  return $this->avatar_url;
 
       return null;
     }
@@ -78,6 +75,7 @@ class User extends Authenticatable
         return $this->name??'user';
         
     }
+
 
      /* UnRead Messages Count */
     //  public function unReadMessagesCount() : int {

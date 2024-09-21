@@ -38,17 +38,20 @@ return [
 
     /**
      * Home route:
-     * This is the route to redirect to when exit button is clicked in the chat
-     * */
-     'home_route'=>"/dashboard",
+     * This is the route to redirect to when exit button is clicked in the chat*/
+     'redirect_route'=>"/dashboard",
+
+    /**
+     * New Chat Model
+     * Show the modal to create create a new conversation inside  */
+     'allow_new_chat_modal'=>true,//bool
 
 
     /**
      * Search:
-     * Show the bar to search for users 
-     **/
-    
-     'user_search_allowed'=>true, //bool
+     * Show the bar to search for participants existing for users */
+     'allow_chats_search'=>true, //bool
+
      'user_searchable_fields'=>['name','email'],   //['email','profession']etc
 
     /**

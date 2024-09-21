@@ -9,8 +9,6 @@ class Participant extends Model
 {
     use HasFactory;
 
-    protected $userModel;
-
     protected $fillable = [
         'conversation_id',
         'participantable_id',
@@ -21,11 +19,6 @@ class Participant extends Model
     public function __construct(array $attributes = [])
     {
         $this->table = config('wirechat.participants_table', 'wirechat_participants');
-
-        //  dd($this->table);
-
-        //Set up the user model 
-        $this->userModel = app(config('wirechat.user_model', \App\Models\User::class));
 
         //  dd($this->userModel);
         parent::__construct($attributes);
@@ -61,8 +54,9 @@ class Participant extends Model
     /**
      * Define a relationship to fetch the user of this model.
      */
-    public function user()
-    {
-        return $this->belongsTo($this->userModel::class);
-    }
+    // public function user()
+    // {
+    //     return $this->belongsTo($this->userModel::class);
+    // }
+
 }

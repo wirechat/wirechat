@@ -6,7 +6,7 @@ use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\Workbench\App\Models\User;
+use Workbench\App\Models\User;
 
 
 ///Auth checks 
@@ -33,7 +33,7 @@ it('has "chats label set in chatlist"', function () {
 
 it('doesnt shows search field if search is disabled in wirechat.config:tesiting Search placeholder', function () {
 
-    Config::set("wirechat.user_search_allowed", false);
+    Config::set("wirechat.allow_chats_search", false);
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(ChatList::class)
@@ -44,7 +44,7 @@ it('doesnt shows search field if search is disabled in wirechat.config:tesiting 
 
 it('shows search field if search is enabled in wirechat.config:tesiting Search placeholder', function () {
 
-    Config::set("wirechat.user_search_allowed", true);
+    Config::set("wirechat.allow_chats_search", true);
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(ChatList::class)

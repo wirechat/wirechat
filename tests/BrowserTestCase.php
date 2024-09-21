@@ -6,6 +6,9 @@ use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithContainer;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Livewire\LivewireServiceProvider;
@@ -14,40 +17,39 @@ use Orchestra\Testbench\Concerns\WithWorkbench;
 use Illuminate\Support\Facades\View;
 
 use Laravel\Dusk\DuskServiceProvider;
+use LivewireDuskTestbench\TestCase;
 use Namu\WireChat\Tests\CreatesApplication as TestsCreatesApplication;
+use Orchestra\Testbench\Bootstrap\LoadEnvironmentVariables;
 
 use function Orchestra\Testbench\workbench_path;
 use Orchestra\Testbench\BrowserKit\TestCase as BrowserBaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
-use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
 
-use Orchestra\Testbench\Concerns\CreatesApplication;
 
-//abstract class DuskTestCase extends  \Orchestra\Testbench\Dusk\TestCase
+abstract class  BrowserTestCase extends TestCase
 //abstract class DuskTestCase extends  BaseTestCase
-abstract class DuskTestCase extends  BrowserBaseTestCase
+//abstract class DuskTestCase extends  BrowserBaseTestCase
 {
     use WithWorkbench; 
-  //  use CreatesApplication;
+    use DatabaseMigrations;
     //use CreatesApplication;
-    use RefreshDatabase; 
     use InteractsWithContainer;
     protected static $baseServeHost = '127.0.0.1';
     protected static $baseServePort = 8001;
 
 
-  public $baseUrl = 'http://127.0.0.1';
+  public $baseUrl = 'http://127.0.0.1:8001';
   
     // /**
     //  * Prepare for Dusk test execution.
     //  */
-    #[BeforeClass]
-    public static function prepare(): void
-    {
-        // if (! static::runningInSail()) {
-           // static::startChromeDriver();
-        // }
-    }
+    // #[BeforeClass]
+    // public static function prepare(): void
+    // {
+    //     // if (! static::runningInSail()) {
+    //       //  static::startChromeDriver();
+    //     // }
+    // }
 
     // /**
     //  * Create the RemoteWebDriver instance.
@@ -58,7 +60,7 @@ abstract class DuskTestCase extends  BrowserBaseTestCase
         ])->unless($this->hasHeadlessDisabled(), function (Collection $items) {
             return $items->merge([
                 '--disable-gpu',
-                //'--headless=new',
+                '--headless=new',
             ]);
         })->all());
 
@@ -70,6 +72,7 @@ abstract class DuskTestCase extends  BrowserBaseTestCase
     }
 
     
+    
     protected function getPackageProviders($app)
     {
         return [
@@ -80,28 +83,33 @@ abstract class DuskTestCase extends  BrowserBaseTestCase
         ];
     }
 
-    protected function setUp(): void
-    {
-        parent::setUp();
 
-        // $this->loadMigrationsFrom(
-        //     workbench_path('database/migrations')
-        // );
+    public function setUp(): void
+    {
+
+        $this->loadMigrationsFrom(
+            workbench_path('database/migrations')
+        );
         //\Orchestra\Testbench\Dusk\Options::withUI();
         $this->withoutVite();
      //   $this->loadRoutesFrom(workbench_path('routes/web.php'));
         //here we add a new ile in the name of the mixture of the berir d 
         // $this->loadMigrationsFrom(__DIR__.'/migrations');
         // $this->loadMigrationsFrom(dirname(__DIR__).'/migrations');
+
+        parent::setUp();
+
     }
     
     protected function getEnvironmentSetUp($app)
     {
+       // $this->withFactories( workbench_path('database/factories'));
+
 
        // $this->overrideApplicationProviders($app);
        //$this->overrideApplicationAliases($app);
-       $this->overrideApplicationBindings($app);
-
+   //    $app->useEnvironmentPath(__DIR__.'/../vendor/orchestra/testbench-dusk/laravel/.env.example');
+      // $app->bootstrapWith([LoadEnvironmentVariables::class]);
         View ::addLocation('../resources/views');
         tap($app['session'], function ($session) {
             $session->put('_token', str()->random(40));
@@ -134,20 +142,6 @@ abstract class DuskTestCase extends  BrowserBaseTestCase
         });
     }
 
-    /**
-    * Make sure all integration tests use the same Laravel "skeleton" files.
-    * This avoids duplicate classes during migrations.
-    *
-    * Overrides \Orchestra\Testbench\Dusk\TestCase::getBasePath
-    *       and \Orchestra\Testbench\Concerns\CreatesApplication::getBasePath
-    *
-    * @return string
-    */
-    protected function getBasePath()
-    {
-        // Adjust this path depending on where your override is located.
-        return __DIR__.'/../vendor/orchestra/testbench-dusk/laravel'; 
-    }
-
+ 
 
  }

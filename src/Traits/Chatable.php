@@ -219,43 +219,6 @@ trait Chatable
         $conversation->deleteFor($this);
         
     }
-    // public function deleteConversation(Conversation $conversation)
-    // {
-
-    //     $userId = $this->id;
-
-    //     //Stop if user does not belong to conversation
-    //     if (! $this->belongsToConversation($conversation)) {
-    //         return null;
-    //     }
-        
-    //     // Update the messages based on the current user
-    //     $conversation->messages()->each(function ($message) use ($userId) {
-    //         if ($message->sender_id === $userId) {
-    //             $message->update(['sender_deleted_at' => now()]);
-    //         } elseif ($message->receiver_id === $userId) {
-    //             $message->update(['receiver_deleted_at' => now()]);
-    //         }
-    //     });
-
-    //     // Delete the conversation and messages if all messages from the other user are also deleted
-    //     if ($conversation->messages()
-    //         ->where(function ($query) use ($userId) {
-    //             $query->where('sender_id', $userId)
-    //                 ->orWhere('receiver_id', $userId);
-    //         })
-    //         ->where(function ($query) {
-    //             $query->whereNull('sender_deleted_at')
-    //                 ->orWhereNull('receiver_deleted_at');
-    //         })
-    //         ->doesntExist()
-    //     ) {
-
-    //         // $conversation->messages()->delete();
-    //         $conversation->forceDelete();
-    //     }
-    // }
-
 
     /**
      * Check if the user has a private conversation with another user.
