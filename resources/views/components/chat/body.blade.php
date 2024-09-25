@@ -96,7 +96,7 @@ $previousMessage=null;
 
                 <div @class(['px-1 dark:border-gray-500 overflow-hidden ', ' border-r-4 ml-auto' => $belongsToAuth,' border-l-4 mr-auto ' => !$belongsToAuth]) >
                     <p
-                        class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm sm:text-base  rounded-full max-w-fit   px-3 py-1 ">
+                        class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm  rounded-full max-w-fit   px-3 py-1 ">
                         {{$parent?->body!=''?$parent?->body:($parent->hasAttachment()?'Attachment':'')}}
                     </p>
                 </div>

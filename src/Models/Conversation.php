@@ -274,7 +274,7 @@ class Conversation extends Model
             // Retrieve the other participant in the private conversation
             $otherParticipant = $this->participants
                 ->where('participantable_id', '!=', $participant->id)
-                ->where('participantable_type', $participant->getMorphClass())
+                ->where('participantable_type',get_class($participant))
                 ->first()?->participantable;
 
             // Return null if the other participant cannot be found

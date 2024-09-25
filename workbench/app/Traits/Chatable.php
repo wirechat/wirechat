@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Traits;
+namespace  Workbench\App\Traits;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -24,11 +24,6 @@ use Namu\WireChat\Models\Scopes\WithoutClearedScope;
  */
 trait Chatable
 {
-
-    // public function __construct()
-    // {
-    //     dd('Chatable trait loaded');
-    // }
     /**
      * Establishes a relationship between the user and conversations.
      *

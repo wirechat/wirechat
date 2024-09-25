@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create(config('wirechat.attachments_table'), function (Blueprint $table) {
             $table->id();
             $table->string('file_path');

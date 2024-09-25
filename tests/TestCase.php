@@ -52,7 +52,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             ]); 
 
         //set up user model 
-          $config->set('wirechat.user_model', \Namu\WireChat\Workbench\App\Models\User::class); 
+          $config->set('wirechat.user_model', \Workbench\App\Models\User::class); 
             
             // Setup queue database connections.
             $config->set('queue.batching.database', 'testbench'); 

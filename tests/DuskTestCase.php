@@ -2,152 +2,147 @@
 
 namespace Namu\WireChat\Tests;
 
+use Carbon\Carbon;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Illuminate\Foundation\Testing\Concerns\InteractsWithContainer;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Collection;
+use Laravel\Dusk\Browser;
+use Illuminate\Config\Repository;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithViews;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Namu\WireChat\WireChatServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
-use Illuminate\Support\Facades\View;
-
-use Laravel\Dusk\DuskServiceProvider;
-use Namu\WireChat\Tests\CreatesApplication as TestsCreatesApplication;
-
 use function Orchestra\Testbench\workbench_path;
-use Orchestra\Testbench\BrowserKit\TestCase as BrowserBaseTestCase;
-use PHPUnit\Framework\Attributes\BeforeClass;
-use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
-
 use Orchestra\Testbench\Concerns\CreatesApplication;
+use Orchestra\Testbench\Dusk\Options;
+use Orchestra\Workbench\WorkbenchServiceProvider;
+use Workbench\App\Providers\WorkbenchServiceProvider as ProvidersWorkbenchServiceProvider;
 
-//abstract class DuskTestCase extends  \Orchestra\Testbench\Dusk\TestCase
-//abstract class DuskTestCase extends  BaseTestCase
-abstract class DuskTestCase extends  BrowserBaseTestCase
+use Laravel\BrowserKitTesting\TestCase as BrowserKitTesting ;
+use Livewire\Features\SupportTesting\DuskBrowserMacros;
+use LivewireDuskTestbench\TestCase;
+use Orchestra\Testbench\Attributes\WithMigration;
+use PDO;
+use PHPUnit\Framework\Attributes\BeforeClass;
+
+
+//#[WithMigration] 
+abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
 {
     use WithWorkbench; 
-  //  use CreatesApplication;
-    //use CreatesApplication;
-    use RefreshDatabase; 
-    use InteractsWithContainer;
-    protected static $baseServeHost = '127.0.0.1';
-    protected static $baseServePort = 8001;
-
-
-  public $baseUrl = 'http://127.0.0.1';
-  
-    // /**
-    //  * Prepare for Dusk test execution.
-    //  */
-    #[BeforeClass]
-    public static function prepare(): void
-    {
-        // if (! static::runningInSail()) {
-           // static::startChromeDriver();
-        // }
-    }
-
-    // /**
-    //  * Create the RemoteWebDriver instance.
-    //  */
-    protected function driver(): RemoteWebDriver
-    {
-        $options = (new ChromeOptions)->addArguments(collect([ '--start-maximized',
-        ])->unless($this->hasHeadlessDisabled(), function (Collection $items) {
-            return $items->merge([
-                '--disable-gpu',
-                //'--headless=new',
-            ]);
-        })->all());
-
-        return RemoteWebDriver::create( 'http://localhost:9515',
-            DesiredCapabilities::chrome()->setCapability(
-                ChromeOptions::CAPABILITY, $options
-            )
-        );
-    }
-
     
-    protected function getPackageProviders($app)
+    use DatabaseMigrations;
+    use InteractsWithViews;
+    use BrowserFunctions;
+    public $baseUrl = 'http://127.0.0.1:8001';
+
+
+     /**
+     * Automatically enables package discoveries.
+     *
+     * @var bool
+     */
+    protected $enablesPackageDiscoveries = true; 
+
+    public array $packageProviders = [
+        WireChatServiceProvider::class,
+        LivewireServiceProvider::class,
+    ];
+
+    public function viewsDirectory(): string
+{
+    // Resolves to 'tests/Browser/views'
+    return __DIR__.'./Browser/views';
+}
+    // protected function getPackageProviders($app)
+    // {
+    //     return [
+    //        // ServiceProvider::class,
+    //         WireChatServiceProvider::class,
+    //         LivewireServiceProvider::class,
+    //     ];
+    // }
+
+ 
+
+
+    protected function defineEnvironment($app) 
     {
-        return [
-          //  ServiceProvider::class,
-            LivewireServiceProvider::class,
-            WireChatServiceProvider::class,
-            DuskServiceProvider::class
-        ];
-    }
+        // Setup default database to use sqlite :memory:
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+        View::addLocation(workbench_path('resources/views'));
+        tap($app['config'], function (Repository $config) { 
 
-        // $this->loadMigrationsFrom(
-        //     workbench_path('database/migrations')
-        // );
-        //\Orchestra\Testbench\Dusk\Options::withUI();
-        $this->withoutVite();
-     //   $this->loadRoutesFrom(workbench_path('routes/web.php'));
-        //here we add a new ile in the name of the mixture of the berir d 
-        // $this->loadMigrationsFrom(__DIR__.'/migrations');
-        // $this->loadMigrationsFrom(dirname(__DIR__).'/migrations');
-    }
-    
-    protected function getEnvironmentSetUp($app)
-    {
+            $config->set('app.debug', true);
 
-       // $this->overrideApplicationProviders($app);
-       //$this->overrideApplicationAliases($app);
-       $this->overrideApplicationBindings($app);
+            date_default_timezone_set('UTC'); // Set the timezone for this test
 
-        View ::addLocation('../resources/views');
-        tap($app['session'], function ($session) {
-            $session->put('_token', str()->random(40));
-        });
+            // Set the timezone
+            $config->set('app.timezone', 'UTC'); // Change 'UTC' to your desired timezone if necessary
 
-        tap($app['config'], function ($config) {
+
             $config->set('app.env', 'testing');
 
-            $config->set('app.debug', true);
+            $config->set('view.paths', [__DIR__.'/Browser/views', resource_path('views')]);
+
+            $config->set('database.default', 'testbench'); 
+            $config->set('database.connections.testbench', [ 
+                'driver'   => 'sqlite', 
+                'database' => workbench_path('database/database.sqlite') , 
+            //  'database' => ':memory:' , 
+
+                'prefix'   => '', 
+                'options'  => [
+                    PDO::ATTR_PERSISTENT => true,
+                    // Add more PDO options here if needed
+                ],
+            ]); 
+
+         //Livewire
+        $config->set('livewire', require __DIR__.'/../workbench/config/livewire.php');
+
+         //Load wherechat config 
+         //Use of require: Use require to load the PHP config file (wirechat.php).
+         $config->set('wirechat', require __DIR__.'/../config/wirechat.php');
+         
             
-            //update wirechat userModel
-            $config->set('app.debug', true);
 
-
-            $config->set('view.paths', [__DIR__.'/views', resource_path('views')]);
-
-            $config->set('app.key', 'base64:Hupx3yAySikrM2/edkZQNQHslgDWYfiBfCuSThJ5SK8=');
-
-            $config->set('database.default', 'testbench');
-
-            $config->set('database.default', 'sqlite');
-            $config->set('database.connections.testbench', [
-                'driver' => 'sqlite',
-                'database' => ':memory:',
-                'prefix' => '',
-            ]);
-                      // Setup queue database connections.
-                      $config->set('queue.batching.database', 'testbench'); 
-                      $config->set('queue.failed.database', 'testbench');
         });
     }
 
-    /**
-    * Make sure all integration tests use the same Laravel "skeleton" files.
-    * This avoids duplicate classes during migrations.
-    *
-    * Overrides \Orchestra\Testbench\Dusk\TestCase::getBasePath
-    *       and \Orchestra\Testbench\Concerns\CreatesApplication::getBasePath
-    *
-    * @return string
-    */
-    protected function getBasePath()
+    // public function setUp(): void
+    // {
+    //     parent::setUp();
+    //     //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
+
+    //    //$this->artisan('migrate:rollback')->run();
+    //    Carbon::setTestNow(null);
+    //     $this->loadMigrationsFrom(
+    //         workbench_path('database/migrations')
+    //     );
+
+    // //    $this->artisan('migrate:rollback')->run();
+    //   //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
+    //     //here we add a new ile in the name of the mixture of the berir d 
+    //     // $this->loadMigrationsFrom(__DIR__.'/migrations');
+    //     // $this->loadMigrationsFrom(dirname(__DIR__).'/migrations');
+    // }
+
+ 
+    protected function defineRoutes($router) 
     {
-        // Adjust this path depending on where your override is located.
-        return __DIR__.'/../vendor/orchestra/testbench-dusk/laravel'; 
+        // Define routes.
+        $router->get('/', fn() => 'Laravel');
     }
 
+ 
 
- }
+
+
+}

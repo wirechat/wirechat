@@ -503,9 +503,15 @@ class Chat extends Component
               //  $query->whereNotDeleted();
             })
             ->with('parent')
+            ->orderBy('created_at', 'asc') 
             ->skip($count - $this->paginate_var)
             ->take($this->paginate_var)
             ->get();
+            
+
+
+         //  dd(    $this->loadedMessages);
+        
 
         // Calculate whether more messages can be loaded
         $this->canLoadMore = $count > count($this->loadedMessages);
@@ -532,11 +538,13 @@ class Chat extends Component
 
         //assign converstion
 
+        info(['conversation count before getting'=> Conversation::withoutGlobalScopes()->count()]);
+
 
         $this->conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('id', $this->conversation)->first();
-     //    dd($this->conversation);
 
         
+       // dd($this->conversation);
 
         //Abort if not made 
         abort_unless($this->conversation, 404);
@@ -544,12 +552,18 @@ class Chat extends Component
         //set converstion type
         $TYPE= $this->conversation->type;
 
+        info(['conversation count'=> Conversation::withoutGlobalScopes()->count()]);
 
         // Check if the user belongs to the conversation
-        $belongsToConversation = $this->conversation->participants()
-        ->where('participantable_id', auth()->id())
-              ->where('participantable_type', get_class(auth()->user()))
-        ->exists();
+        $belongsToConversation = auth()->user()->belongsToConversation($this->conversation);
+        //   info(['conversation count'=> Conversation::withoutGlobalScopes()->count()]);
+        //  dd(auth()->user()->conversations->first()->id);
+
+        // info([ 
+        //     'conversation id'=>auth()->user()->conversations->first()->id,
+        //     '$belongsToConversation'=>$belongsToConversation,
+        //     '$this->conversation->participant'=> $this->conversation->participants
+        // ]);
 
         abort_unless($belongsToConversation, 403);
 

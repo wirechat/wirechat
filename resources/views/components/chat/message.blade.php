@@ -94,4 +94,23 @@
     {{$message->body}}
 </pre>
 
+{{-- Display the created time based on different conditions --}}
+<span
+@class(['text-[11px] ml-auto text-gray-700',     'text-gray-100' => $belongsToAuth])>
+    @php
+        $createdAt = $message->created_at;
+
+        if ($createdAt->isToday()) {
+            // If the message was created today, show only the time (e.g., 1:00 AM)
+            echo $createdAt->format('g:i A');
+        }elseif ($createdAt->isCurrentWeek()) {
+            // If the message was created within this week, show day of the week + time (e.g., Wed 12:00 AM)
+            echo $createdAt->format('D g:i A');
+        } else {
+            // If the message was created more than a week ago, show the full date (e.g., 12/05/24)
+            echo $createdAt->format('m/d/y');
+        }
+    @endphp
+</span>
+
 </div>

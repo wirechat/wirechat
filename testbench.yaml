@@ -1,6 +1,6 @@
 providers:
-  - Workbench\App\Providers\WorkbenchServiceProvider
   - Namu\WireChat\WireChatServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
   - Livewire\LivewireServiceProvider
 
 migrations:
@@ -14,21 +14,19 @@ seeders:
 workbench:
   start: '/'
   install: true
-  user: test@example.com
+  purge:
   discovers:
     web: true
-    api: false
+    api: true
     commands: true
     components: true
-    views: false
+    views: true
   build: [
-    - asset-publish,
-    - create-sqlite-db,
-    - migrate:refresh
+    #  - drop-sqlite-db
+    #  - create-sqlite-db
+     - migrate:refresh
 
   ]
   assets: []
   sync: [
-    - from: ./public/
-      to: public/vendor/nova
   ]

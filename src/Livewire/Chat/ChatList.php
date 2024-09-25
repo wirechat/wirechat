@@ -67,6 +67,7 @@ class ChatList extends Component
    */
   public function updatedSearchUsers()  {
 
+
     //Make sure it's not empty
     if (blank($this->searchUsers)) {
 
@@ -79,6 +80,8 @@ class ChatList extends Component
       $this->users = auth()->user()->searchUsers($this->searchUsers);
 
     }
+
+
     
     
   }
@@ -115,6 +118,7 @@ class ChatList extends Component
   function mount()
   {
 
+
     abort_unless(auth()->check(),401);
     $this->selectedConversationId = request()->chat;
 
@@ -126,6 +130,10 @@ public function render()
 
     // Get user searchable fields
     $searchableFields = WireChat::searchableFields();
+
+    //dd($searchableFields);
+
+   /// dump(auth()->user());
 
     // Load the authenticated user with their conversations and related participants
     $user = auth()->user()->load('conversations.participants');
@@ -156,6 +164,7 @@ public function render()
  // dd('here');
 
 
+    // dd(['conversations'=>$conversations->count()]);
 
    // dd($conversations->first()->messages);
     // Pass data to the view

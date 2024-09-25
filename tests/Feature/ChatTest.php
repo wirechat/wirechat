@@ -16,7 +16,7 @@ use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
-use Namu\WireChat\Workbench\App\Models\User;
+use Workbench\App\Models\User;
 
 
 ///Auth checks 
@@ -90,6 +90,33 @@ describe('Box presence test: ', function () {
             ->assertSee('How are you')
             ->assertSee('i am good thanks');
     });
+
+
+
+    test('it shows message time', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+
+        //send messages
+        $auth->sendMessageTo($receiver, message: 'How are you');
+
+         Message::create([
+            'conversation_id' => $conversation->id,
+            'sendable_type' => get_class($auth), // Polymorphic sender type
+            'sendable_id' =>$auth->id, // Polymorphic sender ID
+            'body' => 'How are you',
+            'created_at'=>now()->subDay()
+        ]);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Yesterday');
+    })->only();
+
 });
 
 

@@ -49,7 +49,6 @@ class Message extends Model
         return $this->morphTo();
     }
 
-
     /** 
      * since you have a non-standard namespace; 
      * the resolver cannot guess the correct namespace for your Factory class.
@@ -59,7 +58,6 @@ class Message extends Model
     {
         return \Namu\WireChat\Workbench\Database\Factories\MessageFactory::new();
     }
-
 
     protected static function boot()
     {
@@ -79,10 +77,8 @@ class Message extends Model
             return $builder;
         });
 
-
         // listen to deleted
         static::deleted(function ($message) {
-
 
             if ($message->attachment?->exists()) {
 
@@ -112,20 +108,15 @@ class Message extends Model
         });
     }
 
-
-
     public function attachment()
     {
         return $this->belongsTo(Attachment::class);
     }
 
-
-
     public function hasAttachment()
     {
         return $this->attachment()->exists();
     }
-
 
     /**
      * Get all of the reads for the message.

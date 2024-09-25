@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+     //   dd(config('wirechat.conversations_table'));
         Schema::create(config('wirechat.conversations_table'), function (Blueprint $table) {
             $table->id();
             $table->enum('type', ['private', 'group'])->default('private'); // Single for 1-1, Group for group chats
