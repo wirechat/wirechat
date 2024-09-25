@@ -232,7 +232,7 @@ setTimeout(()=>{
 
 
                 <a href="{{route('wirechat.chat',$conversation->id)}}" class="shrink-0">
-                    <x-wirechat::avatar src="{{$receiver->cover_url??null}}" wire:ignore  class="w-12 h-12" />
+                    <x-wirechat::avatar src="{{$receiver?->cover_url??null}}" wire:ignore  class="w-12 h-12" />
                 </a>
                 <aside class="grid grid-cols-12 w-full">
 
@@ -240,10 +240,15 @@ setTimeout(()=>{
                     <a wire:navigate href="{{route('wirechat.chat',$conversation->id)}}" class="col-span-10 border-b pb-2 border-gray-200 dark:border-gray-600 relative overflow-hidden truncate leading-5 w-full flex-nowrap p-1">
 
                         {{-- name--}}
-                        <div class="flex justify-between mb-1 w-full items-center">
+                        <div class="flex gap-1 mb-1 w-full items-center">
                             <h6 class="truncate   font-bold  text-gray-900 dark:text-white">
-                                {{$receiver->display_name}}
+                                {{$receiver?->display_name}}
                             </h6>
+
+                            @if ($conversation->isSelfChat())
+                            <span class="font-bold">(You)</span>
+                                
+                            @endif
 
                         </div>
 

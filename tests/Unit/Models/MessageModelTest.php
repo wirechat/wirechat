@@ -4,7 +4,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\Workbench\App\Models\User;
+use Workbench\App\Models\User;
 
 
 

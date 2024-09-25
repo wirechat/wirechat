@@ -3,7 +3,7 @@
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Workbench\App\Models\User;
+use Workbench\App\Models\User;
 
 
 it('redirects to login page if guest user tries to access chats page ', function () {

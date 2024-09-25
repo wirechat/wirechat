@@ -4,7 +4,7 @@ use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Workbench\App\Models\User;
+use Workbench\App\Models\User;
 
 describe('Getting conversations',function(){
 

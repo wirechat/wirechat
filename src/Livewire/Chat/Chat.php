@@ -2,6 +2,7 @@
 
 namespace Namu\WireChat\Livewire\Chat;
 
+use App\Models\User;
 use App\Notifications\TestNotification;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Locked;
@@ -542,28 +543,15 @@ class Chat extends Component
 
 
         $this->conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('id', $this->conversation)->first();
-
-        
-       // dd($this->conversation);
-
         //Abort if not made 
         abort_unless($this->conversation, 404);
 
         //set converstion type
         $TYPE= $this->conversation->type;
 
-        info(['conversation count'=> Conversation::withoutGlobalScopes()->count()]);
-
-        // Check if the user belongs to the conversation
+     
         $belongsToConversation = auth()->user()->belongsToConversation($this->conversation);
-        //   info(['conversation count'=> Conversation::withoutGlobalScopes()->count()]);
-        //  dd(auth()->user()->conversations->first()->id);
-
-        // info([ 
-        //     'conversation id'=>auth()->user()->conversations->first()->id,
-        //     '$belongsToConversation'=>$belongsToConversation,
-        //     '$this->conversation->participant'=> $this->conversation->participants
-        // ]);
+ 
 
         abort_unless($belongsToConversation, 403);
 

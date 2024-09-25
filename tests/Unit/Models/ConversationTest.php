@@ -6,7 +6,7 @@ use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\Workbench\App\Models\User;
+use Workbench\App\Models\User;
 
 describe('MarkAsRead()',function(){
 

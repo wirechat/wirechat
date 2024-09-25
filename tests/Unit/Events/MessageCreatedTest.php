@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Event;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\Workbench\App\Models\User;
+use Workbench\App\Models\User;
 
 describe("broadcastWith() Data verifiction ", function () {
 

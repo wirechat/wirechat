@@ -103,8 +103,12 @@ class ChatList extends Component
     if ($model) {
       $createdConversation=  auth()->user()->createConversationWith($model);
 
+      if ($createdConversation) {
+        return redirect()->route('wirechat.chat', [$createdConversation->id]);
 
-      return redirect()->route('wirechat.chat', [$createdConversation->id]);
+      }
+
+
         
     }
 
@@ -147,10 +151,7 @@ public function render()
     ->where(function ($query) use ($searchableFields) {
         $query->whereHas('participants', function ($subquery) use ($searchableFields) {
             // Exclude the authenticated user
-            $subquery->where('participantable_id', '<>', auth()->id())
-                    // Dynamically search the participantable fields
-                     ->where('participantable_id', '<>', auth()->id())
-                     ->whereHas('participantable', function ($subquery2) use ($searchableFields) {
+            $subquery ->whereHas('participantable', function ($subquery2) use ($searchableFields) {
                           $subquery2->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
         });
 
@@ -164,7 +165,7 @@ public function render()
  // dd('here');
 
 
-    // dd(['conversations'=>$conversations->count()]);
+   //  dd(['conversations'=>$conversations]);
 
    // dd($conversations->first()->messages);
     // Pass data to the view

@@ -42,7 +42,7 @@ class Conversation extends Model
         // Add scope if authenticated
         // This scope ensures that conversations without messages are excluded and
         // only conversations with at least one message not deleted by the auth user are returned.
-         // Add scope if authenticated
+        // Add scope if authenticated
         //  static::addGlobalScope('withoutDeleted', function (Builder $builder) {
         //     $user = auth()->user(); // Get the authenticated user
 
@@ -155,6 +155,12 @@ class Conversation extends Model
             return null;
         }
 
+
+        // Ensure there are exactly two participants
+        if ($this->participants()->count() !== 2) {
+            return null; // Or handle the error appropriately
+        }
+
         // Get the participant who is not the authenticated user
         $receiverParticipant = $this->participants()
             ->where('participantable_id', '!=', auth()->id())
@@ -163,7 +169,18 @@ class Conversation extends Model
 
         if ($receiverParticipant) {
             // Return the associated  model via the participant's relationship
-            return $receiverParticipant->participantable;
+            return $receiverParticipant?->participantable;
+        }
+
+        if (!$receiverParticipant) {
+
+            //check the number of times the user appears as participant 
+            $authReceiver = $this->participants
+                ->where('participantable_id', auth()->id())
+                ->where('participantable_type', get_class(auth()->user()))
+                ->first();
+
+            return $authReceiver?->participantable;
         }
 
         return null;
@@ -274,7 +291,7 @@ class Conversation extends Model
             // Retrieve the other participant in the private conversation
             $otherParticipant = $this->participants
                 ->where('participantable_id', '!=', $participant->id)
-                ->where('participantable_type',get_class($participant))
+                ->where('participantable_type', get_class($participant))
                 ->first()?->participantable;
 
             // Return null if the other participant cannot be found
@@ -284,16 +301,38 @@ class Conversation extends Model
 
             // If both participants have deleted all their messages, delete the conversation permanently
             if ($this->hasBeenDeletedBy($participant) && $this->hasBeenDeletedBy($otherParticipant)) {
-               // dd("deleted");
+                // dd("deleted");
                 $this->delete();
             }
         }
     }
 
+   /**
+    * 
+    * Check if conversatino is owned by user themselves
+    */
+    public function isSelfChat(): bool
+    {
+        // Ensure the conversation is private and has exactly two participants
+        if ($this->type === ConversationType::PRIVATE && $this->participants()->count() === 2) {
+
+            // Check if both participants are the authenticated user
+            $sameUserParticipants = $this->participants()
+                ->where('participantable_id', auth()->id())
+                ->where('participantable_type', get_class(auth()->user()))
+                ->count();
+
+            // Return true if both participants are the same user
+            return $sameUserParticipants === 2;
+        }
+
+        return false;
+    }
+
     /**
      * Check if a given user has deleted all messages in the conversation using the deleteForMe
      */
-    public function hasBeenDeletedBy(Model $user)
+    public function hasBeenDeletedBy(Model $user): bool
     {
         return !$this->messages()
             // Remove global scope for "excludeDeleted"

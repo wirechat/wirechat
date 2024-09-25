@@ -44,7 +44,7 @@ trait Chatable
             'conversation_id'     // The foreign key for the Conversation model
         )->withPivot('conversation_id'); // Optionally load conversation_id from the pivot table
     }
-    
+
     /**
      * Creates a private conversation with another participant and adds participants.
      *
@@ -52,51 +52,67 @@ trait Chatable
      * @param string|null $message The initial message (optional)
      * @return Conversation|null
      */
+
     public function createConversationWith(Model $participant, ?string $message = null)
     {
         $participantId = $participant->id;
         $participantType = get_class($participant);
 
-
         $authenticatedUserId = $this->id;
         $authenticatedUserType = get_class($this);
 
-        # Check if a private conversation already exists with these two participants
-        $existingConversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE)
-            ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
-               
+        // Check if this is a self-conversation (both participants are the authenticated user)
+        $selfConversationCheck = $participantId === $authenticatedUserId && $participantType === $authenticatedUserType;
+
+        // Define the base query for finding conversations
+        $existingConversationQuery = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE);
+
+        // If it's a self-conversation, adjust the query to check for two identical participants
+        if ($selfConversationCheck) {
+            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType) {
+                $query->select('conversation_id')
+                    ->where('participantable_id', $authenticatedUserId)
+                    ->where('participantable_type', $authenticatedUserType)
+                    ->groupBy('conversation_id')
+                    ->havingRaw('COUNT(*) = 2'); // Ensuring two participants in the conversation
+            });
+        } else {
+            // If it's a conversation between two different participants, adjust the query accordingly
+            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
                 $query->select('conversation_id')
                     ->whereIn('participantable_id', [$authenticatedUserId, $participantId])
                     ->whereIn('participantable_type', [$authenticatedUserType, $participantType])
                     ->groupBy('conversation_id')
-                    ->havingRaw('COUNT(DISTINCT participantable_id) = 2');
-            })->first();
-
-        # If the conversation does not exist, create a new one
-        if (!$existingConversation) {
-            $existingConversation = Conversation::create([
-                'type' => ConversationType::PRIVATE,
-                'user_id' => $authenticatedUserId, // Assuming the authenticated user is the creator
-            ]);
-
-            # Add participants
-           
-             # Add participants using create
-            // dd($authenticatedUserType);
-            Participant::create([
-                'conversation_id' => $existingConversation->id,
-                'participantable_id' => $authenticatedUserId,
-                'participantable_type' => $authenticatedUserType, // explicitly set type
-            ]);
-            
-            Participant::create([
-                'conversation_id' => $existingConversation->id,
-                'participantable_id' => $participantId,
-                'participantable_type' => $participantType, // explicitly set type
-            ]);
-     //   dd($existingConversation->participants()->get());
-            
+                    ->havingRaw('COUNT(DISTINCT participantable_id) = 2'); // Ensure both participants are different
+            });
         }
+
+        // Execute the query and get the first matching conversation
+        $existingConversation = $existingConversationQuery->first();
+
+        // If a conversation is found, return it
+        if ($existingConversation) {
+            return $existingConversation;
+        }
+
+        // Otherwise, create a new conversation
+        $existingConversation = Conversation::create([
+            'type' => ConversationType::PRIVATE,
+            'user_id' => $authenticatedUserId,
+        ]);
+
+        // Add the participants
+        Participant::create([
+            'conversation_id' => $existingConversation->id,
+            'participantable_id' => $authenticatedUserId,
+            'participantable_type' => $authenticatedUserType,
+        ]);
+
+        Participant::create([
+            'conversation_id' => $existingConversation->id,
+            'participantable_id' => $participantId,
+            'participantable_type' => $participantType,
+        ]);
 
 
         # Create the initial message if provided
@@ -111,6 +127,7 @@ trait Chatable
 
         return $existingConversation;
     }
+
 
 
     /**
@@ -130,7 +147,7 @@ trait Chatable
             $createdMessage = Message::create([
                 'conversation_id' => $conversation->id,
                 'sendable_type' => get_class($this), // Polymorphic sender type
-                'sendable_id' =>$this->id, // Polymorphic sender ID
+                'sendable_id' => $this->id, // Polymorphic sender ID
                 'body' => $message
             ]);
             // dd($createdMessage);
@@ -148,7 +165,7 @@ trait Chatable
 
     }
 
-   /**
+    /**
      * Accessor Returns the URL for the user's cover image (used as an avatar).
      * Customize this based on your avatar field.
      *
@@ -190,9 +207,9 @@ trait Chatable
     public function getUnreadCount(Conversation $conversation = null): int
     {
         $query = Message::whereDoesntHave('reads', function ($q) {
-               $q->where('readable_id', $this->id)
-                 ->where('readable_type', get_class($this));
-             })->where('sendable_id','!=', $this->id)->where('sendable_type', get_class($this));
+            $q->where('readable_id', $this->id)
+                ->where('readable_type', get_class($this));
+        })->where('sendable_id', '!=', $this->id)->where('sendable_type', get_class($this));
 
         if ($conversation) {
             $query->where('conversation_id', $conversation->id);
@@ -209,20 +226,20 @@ trait Chatable
     public function belongsToConversation(Conversation $conversation): bool
     {
         return $conversation->participants()
-        ->where('participantable_id',$this->id)
-        ->where('participantable_type',get_class($this))
-        ->exists();
+            ->where('participantable_id', $this->id)
+            ->where('participantable_type', get_class($this))
+            ->exists();
     }
-    
+
     /**
      * Delete a conversation
      */
-   public function deleteConversation(Conversation $conversation) {
+    public function deleteConversation(Conversation $conversation)
+    {
 
 
         //use already created methods inside conversation model 
         $conversation->deleteFor($this);
-        
     }
 
     /**
@@ -233,19 +250,55 @@ trait Chatable
      */
     public function hasConversationWith(Model $user): bool
     {
-        $authenticatedUser= $this;
-        $user = $user;
 
+        $participantId = $user->id;
+        $participantType = get_class($user);
 
-       return     Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE)
-                 ->whereHas('participants', function ($query) use ($authenticatedUser, $user) {
-               
+        $authenticatedUserId = $this->id;
+        $authenticatedUserType = get_class($this);
+
+        // Check if this is a self-conversation (both participants are the authenticated user)
+        $selfConversationCheck = $participantId === $authenticatedUserId && $participantType === $authenticatedUserType;
+
+        // Define the base query for finding conversations
+        $existingConversationQuery = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE);
+
+        // If it's a self-conversation, adjust the query to check for two identical participants
+        if ($selfConversationCheck) {
+            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType) {
                 $query->select('conversation_id')
-                    ->whereIn('participantable_id', [$authenticatedUser->id, $user->id])
-                    ->whereIn('participantable_type', [get_class($authenticatedUser), get_class($user)])
+                    ->where('participantable_id', $authenticatedUserId)
+                    ->where('participantable_type', $authenticatedUserType)
                     ->groupBy('conversation_id')
-                    ->havingRaw('COUNT(DISTINCT participantable_id) = 2');
-            })->exists();
+                    ->havingRaw('COUNT(*) = 2'); // Ensuring two participants in the conversation
+            });
+        } else {
+            // If it's a conversation between two different participants, adjust the query accordingly
+            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
+                $query->select('conversation_id')
+                    ->whereIn('participantable_id', [$authenticatedUserId, $participantId])
+                    ->whereIn('participantable_type', [$authenticatedUserType, $participantType])
+                    ->groupBy('conversation_id')
+                    ->havingRaw('COUNT(DISTINCT participantable_id) = 2'); // Ensure both participants are different
+            });
+        }
+
+        // Execute the query and get the first matching conversation
+        return $existingConversationQuery->exists();
+
+        // $authenticatedUser = $this;
+        // $user = $user;
+
+
+        // return   Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE)
+        //     ->whereHas('participants', function ($query) use ($authenticatedUser, $user) {
+
+        //         $query->select('conversation_id')
+        //             ->whereIn('participantable_id', [$authenticatedUser->id, $user->id])
+        //             ->whereIn('participantable_type', [get_class($authenticatedUser), get_class($user)])
+        //             ->groupBy('conversation_id')
+        //             ->havingRaw('COUNT(DISTINCT participantable_id) = 2');
+        //     })->exists();
     }
 
 
@@ -272,15 +325,14 @@ trait Chatable
 
         // Perform the search by matching the query against any of the searchable fields.
         // Limit the results to 20 users.
-        return $userModel::where(function($queryBuilder) use ($searchableFields, $query) {
+        return $userModel::where(function ($queryBuilder) use ($searchableFields, $query) {
             foreach ($searchableFields as $field) {
                 $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
             }
         })
-        ->where('id', '!=', $this->id) // Exclude the authenticated user
-        ->limit(20)
-        ->get();
-
+            //  ->where('id', '!=', $this->id) // Exclude the authenticated user
+            ->limit(20)
+            ->get();
     }
 
 

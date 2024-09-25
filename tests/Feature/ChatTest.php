@@ -115,7 +115,7 @@ describe('Box presence test: ', function () {
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSee('Yesterday');
-    })->only();
+    });
 
 });
 
