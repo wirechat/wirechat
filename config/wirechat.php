@@ -22,6 +22,8 @@ return [
     'user_model' => \App\Models\User::class,
 
 
+
+
     /**
      * Broadcasting:
      * define queue for broadcasting message events*/

@@ -425,6 +425,12 @@ class Chat extends Component
     protected function dispatchMessageCreatedEvent(Message $message)
     {
 
+        //Dont dispatch if it is a selfConversation
+        if ($this->conversation->isSelfConversation(auth()->user())) {
+
+            return null;
+        }
+
         // send broadcast message only to others 
         // we add try catch to avoid runtime error when broadcasting services are not connected
         // todo create a job to broadcast multiple messages

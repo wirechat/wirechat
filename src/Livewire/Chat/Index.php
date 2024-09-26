@@ -3,6 +3,7 @@
 namespace Namu\WireChat\Livewire\Chat;
 
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class Index extends Component{
@@ -13,17 +14,12 @@ class Index extends Component{
  * todo:2 find a way to user protected methods and locked properties 
  * todo:3 devide code in chatbox into @includes in order to make code clean
  */
-
-
- function mount()  {
-
-  //dd("reached here");
-  
- }
+ 
 
 
 
   #[Layout('wirechat::layouts.app')] 
+  #[Title('Chats')] 
   public function render()
   {
       return <<<'BLADE'

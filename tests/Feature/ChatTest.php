@@ -215,6 +215,26 @@ describe('Sending messages ', function () {
         });
     });
 
+
+
+
+    test('it does not broadcasts event "MessageCreated" if it is SelfConversation', function () {
+        Event::fake();
+     //   Queue::fake();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = $auth->createConversationWith($auth);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set("body", 'New message')
+            ->call("sendMessage");
+
+        $message = Message::first();
+
+        Event::assertNotDispatched(MessageCreated::class);
+    })->only();
+
     test('sending messages is rate limited by 50 in 60 seconds', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);

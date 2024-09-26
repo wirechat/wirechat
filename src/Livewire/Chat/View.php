@@ -3,6 +3,7 @@
 namespace Namu\WireChat\Livewire\Chat;
 
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
@@ -51,6 +52,7 @@ class View extends Component{
 
 
   #[Layout('wirechat::layouts.app')] 
+  #[Title('Chats')] 
   public function render()
   {
 

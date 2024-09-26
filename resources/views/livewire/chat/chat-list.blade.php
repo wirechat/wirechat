@@ -42,12 +42,14 @@ setTimeout(()=>{
                     {{-- open  new message modal --}}
                     <button id="open-new-chat-modal-button" class="my-auto"   @click="modalOpen=true">
                
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7 dark:stroke-[1.3] dark:text-white">
-                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                          {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 dark:stroke-[1.3] dark:text-white">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
                           </svg>
-                          
-                    </button>
+                           --}}
+ 
+                           <svg  class="w-7 h-7 text-gray-700 hover:text-gray-900 dark:hover:text-gray-200 stroke-[0.4] dark:stroke-[1] dark:text-white" fill="currentColor" width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14,9H13V8a1,1,0,0,0-2,0V9H10a1,1,0,0,0,0,2h1v1a1,1,0,0,0,2,0V11h1a1,1,0,0,0,0-2Zm5-7H5A3,3,0,0,0,2,5V15a3,3,0,0,0,3,3H16.59l3.7,3.71A1,1,0,0,0,21,22a.84.84,0,0,0,.38-.08A1,1,0,0,0,22,21V5A3,3,0,0,0,19,2Zm1,16.59-2.29-2.3A1,1,0,0,0,17,16H5a1,1,0,0,1-1-1V5A1,1,0,0,1,5,4H19a1,1,0,0,1,1,1Z"/></svg>
+                  
+                        </button>
     
                     <template x-teleport="body">
                         <div id="new-chat-modal" x-show="modalOpen" class="fixed top-0 left-0 z-[99] flex items-center justify-center w-screen h-screen" x-cloak>
@@ -184,10 +186,23 @@ setTimeout(()=>{
   
         {{-- Search input --}}
         @if (config('wirechat.allow_chats_search',false)==true)
-        <section class="py-2 ">
-            <input id="chats-search-field" name="chats_search" type="search" wire:model.live.debounce='search' placeholder="Search my conversations"
-            class=" border-0 dark:bg-gray-700 dark:text-white outline-none w-full focus:outline-none bg-gray-100 rounded-lg focus:ring-0 hover:ring-0">
-         </section>
+        <section class="p  ">
+
+            <div class="px-2 rounded-lg dark:bg-gray-700 bg-gray-100  grid grid-cols-12 items-center">
+
+
+            <label for="chats-search-field" class="col-span-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                  </svg>
+                  
+                </label>
+
+            <input id="chats-search-field" name="chats_search" type="search" wire:model.live.debounce='search' placeholder="Search"
+            class=" col-span-11 border-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
+        </div>
+       
+        </section>
         @endif
       
     </header>
