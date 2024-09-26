@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Namu\WireChat\Models\Conversation;
-use Workbench\App\Traits\Chatable;
+use Namu\WireChat\Traits\Chatable;
 
 class User extends Authenticatable
 {

@@ -96,7 +96,7 @@
 
 {{-- Display the created time based on different conditions --}}
 <span
-@class(['text-[11px] ml-auto text-gray-700',     'text-gray-100' => $belongsToAuth])>
+@class(['text-[11px] ml-auto ',  'text-gray-700' => !$belongsToAuth,'text-gray-100' => $belongsToAuth])>
     @php
         $createdAt = $message->created_at;
 

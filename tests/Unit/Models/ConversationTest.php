@@ -325,6 +325,24 @@ describe('deleting for',function(){
 
     });
 
+
+    it('completely deletes the conversation if conversation is self conversation with initiator(User)', function () {
+        
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        //Send to self
+        $conversation=  $auth->sendMessageTo($auth,'hello-4')->conversation;
+
+        //Authenticate and delete 1
+        $conversation->deleteFor($auth);
+
+        expect(Conversation::withoutGlobalScopes()-> where('id', $conversation->id)->first())->toBe(null);
+
+    })->only();
+
 });
 
 describe('deleting permanently()',function(){

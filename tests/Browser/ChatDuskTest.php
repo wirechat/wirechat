@@ -36,10 +36,7 @@ class ChatDuskTest extends DuskTestCase
             public $conversation = 2;
         };
 
-
-        //dd($auth->belongsToConversation($conversation));
-        info(['count: ChatDuskTest'=> Conversation::withoutGlobalScopes()->count()]);
-
+ 
         Livewire::actingAs($auth)->visit($component)->assertSee('receiver');
 
 
@@ -125,5 +122,32 @@ class ChatDuskTest extends DuskTestCase
     
  
      }
+
+
+           /** @test */
+           public function it_shows_suffix_you_in_user_name_if_user_has_self_conversation()
+           {
+          
+               $auth = User::factory()->create(['name' => 'Test']);
+
+               //create conversation with user1
+              $conversation=  $auth->createConversationWith($auth,'hello');
+
+
+               $component = new class extends Chat {
+                public $conversation = 2;
+            };
+    
+     
+           $request=  Livewire::actingAs($auth)->visit($component);
+     
+          
+              //Assert both conversations visible before typing
+              $request
+              ->assertSee('Test (You)');
+   
+                   
+           }
+   
         
 }

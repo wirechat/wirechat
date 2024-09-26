@@ -286,19 +286,7 @@ trait Chatable
         // Execute the query and get the first matching conversation
         return $existingConversationQuery->exists();
 
-        // $authenticatedUser = $this;
-        // $user = $user;
-
-
-        // return   Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE)
-        //     ->whereHas('participants', function ($query) use ($authenticatedUser, $user) {
-
-        //         $query->select('conversation_id')
-        //             ->whereIn('participantable_id', [$authenticatedUser->id, $user->id])
-        //             ->whereIn('participantable_type', [get_class($authenticatedUser), get_class($user)])
-        //             ->groupBy('conversation_id')
-        //             ->havingRaw('COUNT(DISTINCT participantable_id) = 2');
-        //     })->exists();
+      
     }
 
 

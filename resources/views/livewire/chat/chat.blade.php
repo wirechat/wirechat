@@ -45,7 +45,7 @@
         {{----Header----}}
         {{--------------}}
 
-        <x-wirechat::chat.header :receiver="$receiver"/>
+        <x-wirechat::chat.header :receiver="$receiver" :conversation="$conversation" />
 
 
         {{--------------}}

@@ -288,6 +288,16 @@ class Conversation extends Model
 
         // Check if the conversation is private
         if ($this->isPrivate()) {
+
+            //check if conversatin is Self conversation 
+            //Then force delete it 
+            if ($this->isSelfConversation($participant)) {
+
+                $this->forceDelete();
+
+            }
+            else {
+                
             // Retrieve the other participant in the private conversation
             $otherParticipant = $this->participants
                 ->where('participantable_id', '!=', $participant->id)
@@ -302,8 +312,10 @@ class Conversation extends Model
             // If both participants have deleted all their messages, delete the conversation permanently
             if ($this->hasBeenDeletedBy($participant) && $this->hasBeenDeletedBy($otherParticipant)) {
                 // dd("deleted");
-                $this->delete();
+                $this->forceDelete();
             }
+        }
+
         }
     }
 
@@ -311,15 +323,22 @@ class Conversation extends Model
     * 
     * Check if conversatino is owned by user themselves
     */
-    public function isSelfChat(): bool
+    public function isSelfConversation(Model $participant=null): bool
     {
+
+
+        if ($participant==null) {
+
+            $participant= auth()->user();
+        }
+
         // Ensure the conversation is private and has exactly two participants
         if ($this->type === ConversationType::PRIVATE && $this->participants()->count() === 2) {
 
             // Check if both participants are the authenticated user
             $sameUserParticipants = $this->participants()
-                ->where('participantable_id', auth()->id())
-                ->where('participantable_type', get_class(auth()->user()))
+                ->where('participantable_id', $participant->id)
+                ->where('participantable_type', get_class($participant))
                 ->count();
 
             // Return true if both participants are the same user

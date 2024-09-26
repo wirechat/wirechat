@@ -101,8 +101,8 @@ describe('createConversationWith() ',function(){
 
         //assert partipant $receiver
         expect( $conversation->participants() 
-                             ->where('participantable_id',$auth->id)
-                             ->where('participantable_type',get_class($auth))
+                             ->where('participantable_id',$receiver->id)
+                             ->where('participantable_type',get_class($receiver))
                              ->exists())->toBe(true);
 
 
@@ -168,9 +168,57 @@ describe('createConversationWith() ',function(){
     });
 
 
+    it('user can create conversation with themselves', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        //create conversation
+        $conversation = $auth->createConversationWith($auth,message:'Hello');
 
 
-});
+       // Eager load the participants relationship
+
+       $conversation= Conversation::find($conversation->id);
+
+       $participants = $conversation->participants;
+
+       expect(count($participants))->toBe(2);
+
+       
+       foreach ($participants as $key => $participant) {
+
+        expect($participant->participantable_id)->toBe("$auth->id");
+        expect($participant->participantable_type)->toBe(get_class($auth));
+
+       }
+
+
+    });
+
+
+    it('it does not create duplicate conversation is conversation already exists between same user', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        //create conversation
+        $conversation = $auth->createConversationWith($auth,message:'Hello');
+        $conversation = $auth->createConversationWith($auth);
+        $conversation = $auth->createConversationWith($auth);
+
+
+       // Eager load the participants relationship
+        expect(count(Conversation::all()))->toBe(1);
+ 
+
+
+    });
+
+
+
+
+})->only();
 
 describe('sendMessageTo() ',function(){
 

@@ -1,4 +1,9 @@
-@props(['receiver'=>$receiver])
+@props(
+[
+'receiver'=>$receiver,
+'conversation'=>$conversation]
+
+)
 
 
 <header class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-white dark:bg-gray-800 dark:border-gray-700 border-b">
@@ -17,7 +22,7 @@
             <a class="flex items-center gap-2 " href="{{$receiver?->profile_url??'#'}}">
                 <x-wirechat::avatar src="{{$receiver?->cover_url??null}}" wire:ignore
                     class="h-8 w-8 lg:w-10 lg:h-10 " />
-                <h6 class="font-bold text-lg text-gray-800 dark:text-white truncate"> {{$receiver?->display_name??'user'}} </h6>
+                <h6 class="font-bold text-lg text-gray-800 dark:text-white truncate"> {{$receiver?->display_name}}  @if ($conversation->isSelfConversation()) (You) @endif  </h6>
             </a>
         </div>
 

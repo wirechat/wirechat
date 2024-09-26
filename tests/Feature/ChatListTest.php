@@ -93,6 +93,23 @@ describe('Chatlist', function () {
     });
 
 
+
+    it('shows suffix (You) if user has a self conversation', function () {
+
+        $auth = User::factory()->create(['name' => 'Test']);
+
+        //create conversation with user1
+        $auth->createConversationWith($auth,'hello');
+
+
+        Livewire::actingAs($auth)->test(ChatList::class)
+            ->assertSee('(You)')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 1;
+            });
+    })->only();
+
+
     it('does not load blank conversations(where not even deleted messages exists)', function () {
 
         $auth = User::factory()->create();

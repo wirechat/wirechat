@@ -232,6 +232,28 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
         }
 
 
+            /** @test */
+            public function it_shows_suffix_you_if_user_has_self_conversation()
+            {
+           
+                $auth = User::factory()->create(['name' => 'Test']);
+
+                //create conversation with user1
+                $auth->createConversationWith($auth,'hello');
+
+               $request= Livewire::actingAs($auth)
+                    ->visit(ChatList::class);
+           
+               //Assert both conversations visible before typing
+               $request
+               ->assertSee('Test')
+               ->assertSee('(You)');
+    
+                    
+            }
+    
+
+
 }
 // describe("Interaction", function () {
 

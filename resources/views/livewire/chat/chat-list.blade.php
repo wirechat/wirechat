@@ -245,7 +245,7 @@ setTimeout(()=>{
                                 {{$receiver?->display_name}}
                             </h6>
 
-                            @if ($conversation->isSelfChat())
+                            @if ($conversation->isSelfConversation())
                             <span class="font-bold">(You)</span>
                                 
                             @endif
