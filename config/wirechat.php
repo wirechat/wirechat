@@ -22,8 +22,6 @@ return [
     'user_model' => \App\Models\User::class,
 
 
-
-
     /**
      * Broadcasting:
      * define queue for broadcasting message events*/
@@ -43,21 +41,20 @@ return [
      * This is the route to redirect to when exit button is clicked in the chat*/
      'redirect_route'=>"/dashboard",
 
-    /**
-     * New Chat Model
-     * Show the modal to create create a new conversation inside  */
-     'allow_new_chat_modal'=>true,//bool
 
-
-    /**
-     * Search:
-     * Show the bar to search for participants existing for users */
-     'allow_chats_search'=>true, //bool
+     /**
+     * Features:
+     * You can configure the feature you want to allow for wirechat */
+     'allow_new_chat_modal'=>true,     //bool -Show the modal to create create a new conversation inside 
+     'allow_chats_search'=>true,       //bool -Show the search bar to existing conversations
+     'allow_media_attachments'=>true, //bool -Allow participants to share media in conversatoin (images, vidoes, gifs, etc)
+     'allow_file_attachments'=>true,  //bool -Allow participants to share files in conversatoin (documents, zip , pdf, etc)
+     
 
      'user_searchable_fields'=>['name','email'],   //['email','profession']etc
 
     /**
-     * Attachments
+     * Attachments:
      **/
      'attachments' => [
         'storage_folder' => 'attachments', //folder name for attachments to be saved
@@ -65,12 +62,10 @@ return [
         'max_uploads' => 10,  // Maximum number of files to be uploaded for each request
 
         //Media config
-        'allow_media_attachments'=>true,
         'media_mimes' => (array) ['png','jpg','jpeg','gif','mov','mp4'],
         'media_max_upload_size' => 12288, // 12MB
 
         //Files config
-        'allow_file_attachments'=>true,
         'file_mimes' => (array) ['zip','rar','txt','pdf'],
         'file_max_upload_size' => 12288, //12 MB
     ],

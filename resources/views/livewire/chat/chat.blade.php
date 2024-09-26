@@ -255,11 +255,14 @@
                     <input type="hidden" autocomplete="false" style="display: none">
 
 
-                    @if ((count($this->media)== 0) &&(count($this->files)==0))
+                    {{-- Show  upload pop if media or file are empty --}}
+                    {{-- Also only show  upload popup if allowed in configuration  --}}
+
+                    @if ((count($this->media)== 0) &&(count($this->files)==0) && (config('wirechat.allow_file_attachments',true) ||  config('wirechat.allow_media_attachments',true)))
                     <x-wirechat::popover>
 
                         <x-slot name="trigger">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            <svg dusk="upload-trigger-button" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-7 h-7 dark:text-white/90">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -270,8 +273,10 @@
                         <div class="grid gap-2 w-full ">
 
                             {{-- Upload Files --}}
+                            @if (config('wirechat.allow_file_attachments',true))
+                                
                             <label x-data="attachments('files')" class="cursor-pointer">
-                                <input @change="handleFileSelect(event, {{count($files)}})" type="file" multiple
+                                <input dusk="file-upload-input" @change="handleFileSelect(event, {{count($files)}})" type="file" multiple
                                     accept="{{Helper::formattedFileMimesForAcceptAttribute()}}" class="sr-only"
                                     style="display: none">
 
@@ -292,12 +297,15 @@
                                     </span>
                                 </div>
                             </label>
+                            @endif
+
 
                             {{-- Upload Media --}}
+                            @if (config('wirechat.allow_media_attachments',true))
                             <label x-data="attachments('media')" class="cursor-pointer">
 
                                 {{-- Trigger image upload --}}
-                                <input @change="handleFileSelect(event, {{count($media)}})" type="file" multiple
+                                <input dusk="media-upload-input" @change="handleFileSelect(event, {{count($media)}})" type="file" multiple
                                     accept="{{Helper::formattedMediaMimesForAcceptAttribute()}}" class="sr-only"
                                     style="display: none">
 
@@ -318,6 +326,8 @@
                                     </span>
                                 </div>
                             </label>
+                            @endif
+
 
                         </div>
                     </x-wirechat::popover>
