@@ -22,7 +22,7 @@
             <a class="flex items-center gap-2 " href="{{$receiver?->profile_url??'#'}}">
                 <x-wirechat::avatar src="{{$receiver?->cover_url??null}}" wire:ignore
                     class="h-8 w-8 lg:w-10 lg:h-10 " />
-                <h6 class="font-bold text-lg text-gray-800 dark:text-white truncate"> {{$receiver?->display_name}}  @if ($conversation->isSelfConversation()) (You) @endif  </h6>
+                <h6 class="font-bold text-base text-gray-800 dark:text-white truncate"> {{$receiver?->display_name}}  @if ($conversation->isSelfConversation()) (You) @endif  </h6>
             </a>
         </div>
 
@@ -31,9 +31,9 @@
         <div class="flex gap-2 items-center ml-auto">
             <x-wirechat::dropdown align="right" width="48">
                 <x-slot name="trigger">
-                    <button class="inline-flex px-0">
+                    <button class="inline-flex px-0 text-gray-700 dark:text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" class="w-6 h-6 dark:text-white stroke-[1.9] dark:stroke-[1.3]">
+                            stroke="currentColor" class="w-6 h-6 text-gray-600 dark:text-white/90 stroke-[1.4] dark:stroke-[1.3]">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>

@@ -225,7 +225,7 @@
 
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor"
-                                class="bi bi-emoji-grin w-8 h-8 dark:text-gray-300 stoke-[1.5] dark:stroke-[1]">
+                                class="bi bi-emoji-grin w-8 h-8 text-gray-700 dark:text-gray-300 stoke-[1.3] dark:stroke-[1]">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
                             </svg>
@@ -306,7 +306,7 @@
                                         </svg> --}}
                                         <svg dusk="upload-trigger-button" xmlns="http://www.w3.org/2000/svg"
                                             width="16" height="16" fill="currentColor"
-                                            class="bi bi-plus-lg w-6 h-6 dark:text-white/90" viewBox="0 0 16 16">
+                                            class="bi bi-plus-lg w-6 h-6 text-gray-600 dark:text-white/90" viewBox="0 0 16 16">
                                             <path fill-rule="evenodd"
                                                 d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
                                         </svg>
@@ -442,7 +442,7 @@
                                 <span class=" group-hover:hidden transition">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor"
-                                        class="w-7 h-7 dark:text-white stroke-[1.8] dark:stroke-[1.3]">
+                                        class="w-7 h-7 text-gray-600 dark:text-white/90 stroke-[1.2] dark:stroke-[1.3]">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                     </svg>
