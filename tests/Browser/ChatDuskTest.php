@@ -151,11 +151,11 @@ class ChatDuskTest extends DuskTestCase
      */
 
 
-      /** @test */
+    /** @test */
     public function it_doesnt_show_upload_trigger_if_attachments_not_enabled()
     {
-        Config::set('wirechat.allow_media_attachments',false);
-        Config::set('wirechat.allow_file_attachments',false);
+        Config::set('wirechat.allow_media_attachments', false);
+        Config::set('wirechat.allow_file_attachments', false);
 
 
         $auth = User::factory()->create(['name' => 'Test']);
@@ -171,39 +171,15 @@ class ChatDuskTest extends DuskTestCase
         $request =  Livewire::actingAs($auth)->visit($component);
 
         //Assert both conversations visible before typing
-        $request ->assertNotPresent("@upload-trigger-button");
-
+        $request->assertNotPresent("@upload-trigger-button");
     }
 
-        /** @test */
-        public function it_shows_upload_trigger_if_any_one_of_attachments_is_enabled()
-        {
-            Config::set('wirechat.allow_media_attachments',true);
-            Config::set('wirechat.allow_file_attachments',false);
-    
-           
-            $auth = User::factory()->create(['name' => 'Test']);
-    
-            //create conversation with user1
-            $conversation =  $auth->createConversationWith($auth, 'hello');
-    
-            $component = new class extends Chat {
-                public $conversation = 2;
-            };
-    
-    
-            $request =  Livewire::actingAs($auth)->visit($component);
-    
-            //Assert both conversations visible before typing
-            $request ->assertPresent("@upload-trigger-button");
-    
-        }
-
-
-        /** @test */
-    public function it_shows_file_upload_input_if_enabled()
+    /** @test */
+    public function it_shows_upload_trigger_if_any_one_of_attachments_is_enabled()
     {
-        Config::set('wirechat.allow_file_attachments',true);
+        Config::set('wirechat.allow_media_attachments', true);
+        Config::set('wirechat.allow_file_attachments', false);
+
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -218,15 +194,34 @@ class ChatDuskTest extends DuskTestCase
         $request =  Livewire::actingAs($auth)->visit($component);
 
         //Assert both conversations visible before typing
-        $request ->click("@upload-trigger-button")->assertPresent("@file-upload-input");
+        $request->assertPresent("@upload-trigger-button");
+    }
+
+    /** @test */
+    public function it_shows_file_upload_input_if_enabled()
+    {
+        Config::set('wirechat.allow_file_attachments', true);
+
+        $auth = User::factory()->create(['name' => 'Test']);
+
+        //create conversation with user1
+        $conversation =  $auth->createConversationWith($auth, 'hello');
+
+        $component = new class extends Chat {
+            public $conversation = 2;
+        };
 
 
+        $request =  Livewire::actingAs($auth)->visit($component);
+
+        //Assert both conversations visible before typing
+        $request->click("@upload-trigger-button")->assertPresent("@file-upload-input");
     }
 
     /** @test */
     public function it_shows_media_upload_input_if_enabled()
     {
-        Config::set('wirechat.allow_media_attachments',true);
+        Config::set('wirechat.allow_media_attachments', true);
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -241,10 +236,48 @@ class ChatDuskTest extends DuskTestCase
         $request =  Livewire::actingAs($auth)->visit($component);
 
         //Assert both conversations visible before typing
-        $request ->click("@upload-trigger-button")->assertPresent("@media-upload-input");
-
-
+        $request->click("@upload-trigger-button")->assertPresent("@media-upload-input");
     }
+
+    public function it_shows_emoji_trigger()
+    {
+
+        $auth = User::factory()->create(['name' => 'Test']);
+
+        //create conversation with user1
+        $conversation =  $auth->createConversationWith($auth, 'hello');
+
+        $component = new class extends Chat {
+            public $conversation = 2;
+        };
+
+
+        $request =  Livewire::actingAs($auth)->visit($component);
+
+        //Assert both conversations visible before typing
+        $request->assertPresent("@emoji-trigger-button");
+    }
+
+
+    public function it_shows_emoji_picker_when_button_is_clicked()
+    {
+       
+        $auth = User::factory()->create(['name' => 'Test']);
+
+        //create conversation with user1
+        $conversation =  $auth->createConversationWith($auth, 'hello');
+
+        $component = new class extends Chat {
+            public $conversation = 2;
+        };
+
+
+        $request =  Livewire::actingAs($auth)->visit($component);
+
+        //Assert both conversations visible before typing
+        $request->assertClicked("@emoji-trigger-button")->assertPresent("@emoji-picker");
+    }
+
 
 
 }

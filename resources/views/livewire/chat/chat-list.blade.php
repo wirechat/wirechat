@@ -19,7 +19,7 @@ setTimeout(()=>{
 
  @endphp
 
-    <header class="px-3 z-10 bg-white dark:bg-gray-800 sticky top-0 w-full py-2  ">
+    <header class="px-3 z-10  sticky top-0 w-full py-2  ">
 
    
         {{-- Title/name and Icon --}}
@@ -162,7 +162,7 @@ setTimeout(()=>{
         </section>
 
         {{-- Filters --}}
-        <section class="gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2 bg-white dark:bg-gray-800">
+        <section class="gap-3 grid grid-cols-3 items-center mt-1 overflow-x-scroll p-2">
 
             {{-- <button class="font-semibold flex gap-2 justify-center text-black dark:text-white dark:border-gray-700  border-b-2 border-black pb-2">
                  All

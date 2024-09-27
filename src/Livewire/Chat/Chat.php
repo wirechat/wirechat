@@ -205,6 +205,10 @@ class Chat extends Component
     function sendMessage()
     {
 
+
+
+        //dd($this->body);
+
         abort_unless(auth()->check(), 401);
 
         #rate limit 

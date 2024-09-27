@@ -23,7 +23,7 @@ class Index extends Component{
   public function render()
   {
       return <<<'BLADE'
-              <div class="w-full h-[calc(100vh_-_0.0rem)] flex bg-white dark:bg-gray-800    rounded-lg" >
+              <div class="w-full h-[calc(100vh_-_0.0rem)] flex  rounded-lg" >
                   <div class="relative  w-full h-full md:w-[320px] xl:w-[400px] shrink-0 overflow-y-auto  ">
                     @livewire('chat-list')
                   </div>
