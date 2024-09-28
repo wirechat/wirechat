@@ -20,10 +20,6 @@ class Read extends Model
     public function __construct(array $attributes = [])
     {
         $this->table = WireChat::formatTableName('reads');
-
-        //Set up the user model 
-       // $this->userModel =app(config('wirechat.user_model',\App\Models\User::class));
-
         parent::__construct($attributes);
     }
 
