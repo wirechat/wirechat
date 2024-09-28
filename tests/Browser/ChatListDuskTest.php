@@ -4,12 +4,13 @@ use Illuminate\Support\Facades\Config;
 use Laravel\Dusk\Browser;
 use Livewire\Component;
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Chat\ChatList;
+use Namu\WireChat\Livewire\Chat\Chatlist;
+use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Tests\DuskTestCase;
 use Workbench\App\Models\User;
 
  
-class ChatListDuskTest extends DuskTestCase
+class ChatlistDuskTest extends DuskTestCase
 {
 
 /** @test */
@@ -20,7 +21,7 @@ public function it_shows_chats_title()
 
     $this->withoutExceptionHandling();
 
-    Livewire::actingAs($auth)->visit(ChatList::class)->assertSee('Chats');
+    Livewire::actingAs($auth)->visit(Chatlist::class)->assertSee('Chats');
 
 }
 
@@ -29,7 +30,7 @@ public function it_shows_redirect_button()
 {
     $auth = User::factory()->create();
 
-    Livewire::actingAs($auth)->visit(ChatList::class) ->assertVisible('#redirect-button');
+    Livewire::actingAs($auth)->visit(Chatlist::class) ->assertVisible('#redirect-button');
 }
 
 /** @test */
@@ -39,7 +40,7 @@ public function it_shows_search_field_if_enabled_in_config()
     $auth = User::factory()->create();
 
     Livewire::actingAs($auth)
-        ->visit(ChatList::class)
+        ->visit(Chatlist::class)
         ->assertVisible('#chats-search-field');
 }
 
@@ -50,7 +51,7 @@ public function it_does_not_show_search_field_if_not_enabled_in_config()
     $auth = User::factory()->create();
 
     Livewire::actingAs($auth)
-        ->visit(ChatList::class)
+        ->visit(Chatlist::class)
         ->assertNotPresent('#chats-search-field');
 }
 
@@ -61,7 +62,7 @@ public function it_shows_new_chat_modal_button_if_enabled_in_config()
     $auth = User::factory()->create();
 
     Livewire::actingAs($auth)
-        ->visit(ChatList::class)
+        ->visit(Chatlist::class)
         
         ->assertVisible('#open-new-chat-modal-button');
 }
@@ -74,8 +75,54 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
     $auth = User::factory()->create();
 
     Livewire::actingAs($auth)
-        ->visit(ChatList::class)
+        ->visit(Chatlist::class)
         ->assertNotPresent('#open-new-chat-modal-button');
+        
+}
+
+
+
+/** @test */
+public function it_shows_loadMoreButton_if_user_can_loadMore()
+{
+    Config::set("wirechat.allow_new_chat_modal", false);
+    $auth = User::factory()->create();
+
+    for ($i=0; $i < 12; $i++) { 
+
+        $user= Conversation::factory()->create();
+
+        $auth->createConversationWith($user,'hello');
+
+
+    }
+
+    Livewire::actingAs($auth)
+        ->visit(Chatlist::class)
+        ->assertPresent('@loadMoreButton')
+        ->assertSee('Load more');
+        
+}
+
+
+/** @test */
+public function it_does_not_show_loadMoreButton_if_user_cannot_loadMore()
+{
+
+    $auth = User::factory()->create();
+
+    for ($i=0; $i < 10; $i++) { 
+
+        $user= Conversation::factory()->create();
+
+        $auth->createConversationWith($user,'hello');
+
+
+    }
+
+    Livewire::actingAs($auth)
+        ->visit(Chatlist::class)
+        ->assertNotPresent('@loadMoreButton');
         
 }
 
@@ -103,7 +150,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
     $auth->createConversationWith($user2, 'new message');
 
     $request= Livewire::actingAs($auth)
-         ->visit(ChatList::class);
+         ->visit(Chatlist::class);
 
     //Assert both conversations visible before typing
     $request->assertSee('iam user 1')->assertSee('iam user 2');
@@ -139,7 +186,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
      $auth->createConversationWith($user2, 'new message');
  
      $request= Livewire::actingAs($auth)
-          ->visit(ChatList::class);
+          ->visit(Chatlist::class);
  
      //Assert both conversations visible before typing
      $request->assertSee('iam user 1')->assertSee('iam user 2');
@@ -174,7 +221,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
        $auth->createConversationWith($user2, 'new message');
    
        $request= Livewire::actingAs($auth)
-            ->visit(ChatList::class);
+            ->visit(Chatlist::class);
    
        //Assert both conversations visible before typing
        $request->assertSee('iam user 1')->assertSee('iam user 2');
@@ -214,7 +261,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
            $auth->createConversationWith($user2, 'new message');
        
            $request= Livewire::actingAs($auth)
-                ->visit(ChatList::class);
+                ->visit(Chatlist::class);
        
            //Assert both conversations visible before typing
            $request->assertSee('iam user 1')->assertSee('iam user 2');
@@ -242,7 +289,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
                 $auth->createConversationWith($auth,'hello');
 
                $request= Livewire::actingAs($auth)
-                    ->visit(ChatList::class);
+                    ->visit(Chatlist::class);
            
                //Assert both conversations visible before typing
                $request
@@ -275,7 +322,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
 //         $auth->createConversationWith($user2, 'new message');
 
 
-//         $request =Livewire::actingAs($auth)->visit(ChatList::class)
+//         $request =Livewire::actingAs($auth)->visit(Chatlist::class)
 //                         ->visit('/chats');
         
 //         //Assert both conversations visible before typing
@@ -307,7 +354,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
 //         $auth->createConversationWith($user2, 'new message');
 
 
-//         $request =Livewire::actingAs($auth)->visit(ChatList::class)
+//         $request =Livewire::actingAs($auth)->visit(Chatlist::class)
 //                         ->visit('/chats')->click("#chats-search-field");
         
 //         //Assert both conversations visible before typing
@@ -339,7 +386,7 @@ public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config(
 
 //         $this->withoutExceptionHandling();
 
-//         $request =Livewire::actingAs($auth)->visit(ChatList::class)
+//         $request =Livewire::actingAs($auth)->visit(Chatlist::class)
 //             ->visit('/chats')
 //             ->see('iam user 1')
 //             ->click("iam user 1")

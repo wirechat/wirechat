@@ -218,7 +218,7 @@ describe('createConversationWith() ',function(){
 
 
 
-})->only();
+});
 
 describe('sendMessageTo() ',function(){
 

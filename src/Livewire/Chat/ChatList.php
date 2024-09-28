@@ -12,7 +12,7 @@ use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Models\Conversation;
 
-class ChatList extends Component
+class Chatlist extends Component
 {
 
 
@@ -186,7 +186,7 @@ class ChatList extends Component
 
     // dd($conversations->first()->messages);
     // Pass data to the view
-    return view('wirechat::livewire.chat.chat-list', [
+    return view('wirechat::livewire.chat.chatlist', [
       //'conversations'=>$conversations,
       //'unReadMessagesCount' => $user->getUnReadCount(), // Get unread messages count for the authenticated user
       'authUser' => $user // Pass authenticated user data

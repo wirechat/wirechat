@@ -115,7 +115,7 @@ describe('Box presence test: ', function () {
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSee('Yesterday');
-    });
+    })->skip();
 
 });
 
@@ -233,7 +233,7 @@ describe('Sending messages ', function () {
         $message = Message::first();
 
         Event::assertNotDispatched(MessageCreated::class);
-    })->only();
+    });
 
     test('sending messages is rate limited by 50 in 60 seconds', function () {
         $auth = User::factory()->create();

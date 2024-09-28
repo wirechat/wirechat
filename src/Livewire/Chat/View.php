@@ -22,8 +22,7 @@ class View extends Component{
 
     ///make sure user is authenticated
     abort_unless(auth()->check(),401);
-    $conversations = auth()->user()->conversations;
-
+    
     //We remove deleted conversation incase the user decides to visit the delted conversation 
     $this->conversation= Conversation::with('participants.participantable')->withoutGlobalScope(WithoutClearedScope::class)->where('id',$this->chat)->firstOrFail();
     
@@ -39,11 +38,6 @@ class View extends Component{
     //Mark as read 
     $this->conversation->markAsRead();
 
-    //    mark messages belonging to receiver as read
-    //    Message::where('conversation_id',$this->conversation->id)
-    //->  where('receiver_id',auth()->id())
-    //->  whereNull('read_at')
-    //->  update(['read_at'=>now()]);
     
   }
 
@@ -57,7 +51,7 @@ class View extends Component{
               <div class="w-full h-[calc(100vh_-_0.0rem)]  flex rounded-lg" >
                   <div class=" hidden lg:flex   relative w-full h-full md:w-[320px] xl:w-[400px]  shrink-0 overflow-y-auto  ">
 
-                      @livewire('chat-list')
+                      @livewire('chatlist')
                   </div>
                   
                   <main class="  grid  w-full  grow  h-full relative overflow-y-auto"  style="contain:content">

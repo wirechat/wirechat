@@ -1,7 +1,7 @@
 <?php
 
 use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\ChatList;
+use Namu\WireChat\Livewire\Chat\Chatlist;
 use Namu\WireChat\Models\Conversation;
 use Workbench\App\Models\User;
 
@@ -32,7 +32,7 @@ test('it renders livewire ChatList component', function () {
     $conversation =  Conversation::factory()->withParticipants([$auth])->create();
    // dd($conversation);
    $this->actingAs($auth)->get(route("wirechat.chat",$conversation->id))
-   ->assertSeeLivewire(ChatList::class);
+   ->assertSeeLivewire(Chatlist::class);
     
 });
 

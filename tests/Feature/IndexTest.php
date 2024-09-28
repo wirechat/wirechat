@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Namu\WireChat\Livewire\Chat\ChatBox;
-use Namu\WireChat\Livewire\Chat\ChatList;
+use Namu\WireChat\Livewire\Chat\Chatlist;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
@@ -34,7 +34,7 @@ test('it renders livewire ChatList component', function () {
     $auth = User::factory()->create();
     $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
  
-     $response ->assertSeeLivewire(ChatList::class);
+     $response ->assertSeeLivewire(Chatlist::class);
     
 });
 
