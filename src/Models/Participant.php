@@ -4,6 +4,7 @@ namespace Namu\WireChat\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Namu\WireChat\Facades\WireChat;
 
 class Participant extends Model
 {
@@ -18,9 +19,9 @@ class Participant extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = config('wirechat.participants_table', 'wirechat_participants');
+        $this->table = WireChat::formatTableName('participants');
 
-        //  dd($this->userModel);
+
         parent::__construct($attributes);
     }
 

@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Models\Conversation;
 
 return new class extends Migration
 {
@@ -11,10 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(config('wirechat.participants_table','wirechat_participants'), function (Blueprint $table) {
+        
+        Schema::create(WireChat::formatTableName('participants'), function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('conversation_id');
-            $table->foreign('conversation_id')->references('id')->on(config('wirechat.conversations_table'))->cascadeOnDelete();
+            $table->foreign('conversation_id')->references('id')->on((new Conversation())->getTable())->cascadeOnDelete();
     
             $table->string('participantable_id');
             $table->string('participantable_type');
@@ -29,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists(config('wirechat.participants_table','wirechat_participants'));
+        Schema::dropIfExists(WireChat::formatTableName('participants'));
     }
 };

@@ -4,6 +4,7 @@ namespace Namu\WireChat\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Namu\WireChat\Facades\WireChat;
 
 class Read extends Model
 {
@@ -18,7 +19,7 @@ class Read extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = config('wirechat.reads_table','wirechat_reads');
+        $this->table = WireChat::formatTableName('reads');
 
         //Set up the user model 
        // $this->userModel =app(config('wirechat.user_model',\App\Models\User::class));

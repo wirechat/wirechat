@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Namu\WireChat\Facades\WireChat;
 
 return new class extends Migration
 {
@@ -11,7 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(config('wirechat.attachments_table'), function (Blueprint $table) {
+
+        Schema::create(WireChat::formatTableName('attachments'), function (Blueprint $table) {
             $table->id();
             $table->string('file_path');
             $table->string('file_name');
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists(config('wirechat.attachments_table'));
+        Schema::dropIfExists(WireChat::formatTableName('attachments'));
     }
 };

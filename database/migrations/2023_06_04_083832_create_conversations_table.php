@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Namu\WireChat\Facades\WireChat;
 
 return new class extends Migration
 {
@@ -11,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(config('wirechat.conversations_table'), function (Blueprint $table) {
+        Schema::create(WireChat::formatTableName('conversations'), function (Blueprint $table) {
             $table->id();
             $table->enum('type', ['private', 'group'])->default('private'); // Single for 1-1, Group for group chats
         
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists(config('wirechat.conversations_table'));
+        Schema::dropIfExists(config('wirechat.table_prefix').'conversations');
     }
 };

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Enums\Actions;
+use Namu\WireChat\Facades\WireChat;
 
 class Message extends Model
 {
@@ -30,7 +31,7 @@ class Message extends Model
     //  protected $dates=['read_at','receiver_deleted_at','sender_deleted_at'];
     public function __construct(array $attributes = [])
     {
-        $this->table = \config('wirechat.messages_table');
+        $this->table =WireChat::formatTableName('messages');
 
         parent::__construct($attributes);
     }

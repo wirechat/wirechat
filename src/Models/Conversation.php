@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 class Conversation extends Model
@@ -30,7 +31,7 @@ class Conversation extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = \config('wirechat.conversations_table');
+        $this->table = WireChat::formatTableName('conversations');
 
         parent::__construct($attributes);
     }

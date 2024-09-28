@@ -4,6 +4,7 @@ namespace Namu\WireChat\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Namu\WireChat\Facades\WireChat;
 
 class Attachment extends Model
 {
@@ -14,7 +15,7 @@ class Attachment extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = \config('wirechat.attachments_table');
+        $this->table = WireChat::formatTableName('attachments');
 
         parent::__construct($attributes);
     }

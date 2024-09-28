@@ -4,17 +4,9 @@
 return [
  
      /*
-     * Tables names
+     * Tables prefix
      */
-    'conversations_table' => 'wire_conversations',
-    'messages_table' => 'wire_messages',
-    'reads_table' => 'wirechat_reads',
-    'participants_table' => 'wire_participants',
-    'attachments_table' => 'wire_attachments',
-    'actions_table' => 'wire_actions',
-
-
-    'table_prefix' => 'wire_', //default wire_
+    'table_prefix' => 'wire_',
 
 
 
