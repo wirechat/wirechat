@@ -170,7 +170,6 @@ $previousMessage=null;
                 </div>
             @endif
          
-
             {{-- Message body --}}
             <div class="flex flex-col gap-2 max-w-[95%] ">
 

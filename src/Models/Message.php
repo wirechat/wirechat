@@ -140,6 +140,7 @@ class Message extends Model
             'read_at' => now(),
         ]);
     }
+    
     /**
      * Check if the message has been read by a specific user.
      *
@@ -148,11 +149,22 @@ class Message extends Model
      */
     public function readBy(Model $user): bool
     {
-        return $this->reads()
-            ->where('readable_id', $user->id)
-            ->where('readable_type', get_class($user))
-            ->exists();
+        // Check if the reads relationship is loaded
+        if ($this->relationLoaded('reads')) {
+            // Use the loaded reads collection
+            return $this->reads->contains(function ($read) use ($user) {
+                return $read->readable_id === $user->id && 
+                    $read->readable_type === get_class($user);
+            });
+        } else {
+            // If not loaded, fallback to querying the database
+            return $this->reads()
+                ->where('readable_id', $user->id)
+                ->where('readable_type', get_class($user))
+                ->exists();
+        }
     }
+
 
      /**
      * Check if the message is owned by user

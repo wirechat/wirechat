@@ -58,7 +58,7 @@ setTimeout(()=>{
                         <path d="M14,9H13V8a1,1,0,0,0-2,0V9H10a1,1,0,0,0,0,2h1v1a1,1,0,0,0,2,0V11h1a1,1,0,0,0,0-2Zm5-7H5A3,3,0,0,0,2,5V15a3,3,0,0,0,3,3H16.59l3.7,3.71A1,1,0,0,0,21,22a.84.84,0,0,0,.38-.08A1,1,0,0,0,22,21V5A3,3,0,0,0,19,2Zm1,16.59-2.29-2.3A1,1,0,0,0,17,16H5a1,1,0,0,1-1-1V5A1,1,0,0,1,5,4H19a1,1,0,0,1,1,1Z"/>
                       </svg> --}}
 
-                      <svg class="w-8 h-8 -mb-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"  xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor"><path d="M12.875 5C9.225 5 7.4 5 6.242 6.103a4 4 0 0 0-.139.139C5 7.4 5 9.225 5 12.875V17c0 .943 0 1.414.293 1.707S6.057 19 7 19h4.125c3.65 0 5.475 0 6.633-1.103a4 4 0 0 0 .139-.139C19 16.6 19 14.775 19 11.125"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 10h6m-6 4h3m7-6V2m-3 3h6"/></g></svg>
+                      <svg class="w-8 h-8 -mb-1 text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"  xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor"><path d="M12.875 5C9.225 5 7.4 5 6.242 6.103a4 4 0 0 0-.139.139C5 7.4 5 9.225 5 12.875V17c0 .943 0 1.414.293 1.707S6.057 19 7 19h4.125c3.65 0 5.475 0 6.633-1.103a4 4 0 0 0 .139-.139C19 16.6 19 14.775 19 11.125"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 10h6m-6 4h3m7-6V2m-3 3h6"/></g></svg>
 
                       {{-- <svg class="w-7 h-7 text-gray-500 stroke-[0.4]  hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300" stroke-width="0.2"  xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="current" viewBox="0 0 24 24"><path d="M16 2H8C4.691 2 2 4.691 2 8v13a1 1 0 0 0 1 1h13c3.309 0 6-2.691 6-6V8c0-3.309-2.691-6-6-6zm4 14c0 2.206-1.794 4-4 4H4V8c0-2.206 1.794-4 4-4h8c2.206 0 4 1.794 4 4v8z"></path><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4z"></path></svg>
                        --}}
@@ -211,21 +211,19 @@ setTimeout(()=>{
   
         {{-- Search input --}}
         @if (config('wirechat.allow_chats_search',false)==true)
-        <section class="p  ">
+        <section>
 
             <div class="px-2 rounded-lg dark:bg-gray-700 bg-gray-100  grid grid-cols-12 items-center">
-
 
             <label for="chats-search-field" class="col-span-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 w-5 h-5 dark:text-gray-300">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                  </svg>
-                  
-                </label>
+                </svg>  
+            </label>
 
             <input id="chats-search-field" name="chats_search" type="search" wire:model.live.debounce='search' placeholder="Search"
-            class=" col-span-11 border-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
-        </div>
+             class=" col-span-11 border-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
+           </div>
        
         </section>
         @endif
@@ -233,7 +231,25 @@ setTimeout(()=>{
     </header>
 
 
-    <main class="   overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
+    <main 
+
+    x-data="{
+        canLoadMore:@entangle('canLoadMore')
+    }" 
+
+    {{-- Detect when scrolled to the bottom --}}
+    @scroll="
+    scrollTop = $el.scrollTop;
+    scrollHeight = $el.scrollHeight;
+    clientHeight = $el.clientHeight;
+    
+    if (scrollTop + clientHeight >= scrollHeight && canLoadMore) {
+        await $nextTick();
+        $wire.loadMore();
+    }
+    "
+    
+    class="   overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
     
     
         @if (config('wirechat.allow_chats_search',false)==true)
@@ -254,7 +270,11 @@ setTimeout(()=>{
             @php
                 $receiver= $conversation->getReceiver();
 
-                $lastMessage=$conversation->messages()->latest()->first();
+                $lastMessage=$conversation->lastMessage;
+                $isReadByAuth=$lastMessage?->readBy(auth()?->user());
+
+
+
             @endphp
 
             {{-- Chat list item --}}
@@ -307,9 +327,9 @@ setTimeout(()=>{
                              <p 
                              @class([
                                 'truncate text-sm dark:text-white  gap-2 items-center',
-                                'font-semibold text-black' => !$lastMessage?->readBy(auth()?->user()) && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type== get_class($authUser),
-                                'font-normal text-gray-600' => $lastMessage?->readBy(auth()?->user()) && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type== get_class($authUser),
-                                'font-normal text-gray-600' => $lastMessage?->readBy(auth()?->user()) && $lastMessage?->sendable_id == $authUser?->id && $lastMessage?->sendable_type== get_class($authUser),
+                                'font-semibold text-black' => !$isReadByAuth && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type== get_class($authUser),
+                                'font-normal text-gray-600' => $isReadByAuth && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type== get_class($authUser),
+                                'font-normal text-gray-600' => $isReadByAuth && $lastMessage?->sendable_id == $authUser?->id && $lastMessage?->sendable_type== get_class($authUser),
                             ])
                              >
                                 {{$lastMessage->body!=''?$lastMessage->body:($lastMessage->hasAttachment()?'📎 Attachment':'')}}

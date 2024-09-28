@@ -341,7 +341,7 @@ describe('deleting for',function(){
 
         expect(Conversation::withoutGlobalScopes()-> where('id', $conversation->id)->first())->toBe(null);
 
-    })->only();
+    });
 
 });
 

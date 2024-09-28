@@ -219,12 +219,21 @@ trait Chatable
     }
 
 
-
     /**
      * Check if the user belongs to a conversation.
      */
     public function belongsToConversation(Conversation $conversation): bool
     {
+        // Check if participants are already loaded
+        if ($conversation->relationLoaded('participants')) {
+            // If loaded, simply check the existing collection
+            return $conversation->participants->contains(function ($participant) {
+                return $participant->participantable_id == $this->id &&
+                    $participant->participantable_type == get_class($this);
+            });
+        }
+
+        // If not loaded, perform the query
         return $conversation->participants()
             ->where('participantable_id', $this->id)
             ->where('participantable_type', get_class($this))

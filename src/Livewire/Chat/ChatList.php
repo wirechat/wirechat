@@ -21,6 +21,10 @@ class ChatList extends Component
   public $users;
 
 
+  public $conversations = [];
+  public bool $canLoadMore=true;
+  public $page=1;
+
 
 
   // function searchUsers()
@@ -35,86 +39,114 @@ class ChatList extends Component
   public function getListeners()
   {
     //dd(MorphTypeHelper::deslash(get_class(auth()->user())));
-      return [
-        'refresh' => '$refresh',
-        "echo-private:participant.".MorphTypeHelper::deslash(get_class(auth()->user())).".".auth()->id().",.Namu\\WireChat\\Events\\MessageCreated" => '$refresh',
-      ];
+    return [
+      'refresh' => '$refresh',
+      "echo-private:participant." . MorphTypeHelper::deslash(get_class(auth()->user())) . "." . auth()->id() . ",.Namu\\WireChat\\Events\\MessageCreated" => '$refresh',
+    ];
   }
-
-
-
-
-  public static function getUnReadMessageDotColor(): string
-  {
-
-    $color = config('wirechat.theme', 'blue');
-
-    return  'text-' . $color . '-500';
-  }
-
-  public static function getUnReadMessageBadgeColor(): string
-  {
-
-    $color = config('wirechat.theme', 'blue');
-
-    return 'bg-' . $color . '-500/20';
-  }
-
 
 
   /** 
    * Search For users to create conversations with
    */
-  public function updatedSearchUsers()  {
+  public function updatedSearchUsers()
+  {
 
 
     //Make sure it's not empty
     if (blank($this->searchUsers)) {
 
-      $this->users=null;
+      $this->users = null;
+    } else {
 
-    }
-
-    else {
-      
       $this->users = auth()->user()->searchUsers($this->searchUsers);
-
     }
-
-
-    
-    
   }
 
 
-  function createConversation($id,string $class)  {
+
+  /**
+   * loadmore conversation
+   */
+
+   public function loadMore()
+   {
+
+    //Check if no more conversations
+    if (!$this->canLoadMore) {
+      return null;
+
+    }
+       // Load the next page
+       $this->page++;
+
+   }
+   
+
+   protected function loadConversations()
+   {
+       $searchableFields = WireChat::searchableFields();
+
+
+         // Clear previous results if there is a new search term
+    if ($this->search) {
+        $this->conversations = []; // Clear previous results when a new search is made
+    }
+       
+       // Start the query with eager loading
+       $additionalConversations = Conversation::with([
+           'participants.participantable',    // Eager load participants and the related participantable model
+           'lastMessage.reads'                // Eager load reads for each message to prevent individual checks
+       ])->whereHas('participants', function ($query) {
+           $query->where('participantable_id', auth()->id())
+                 ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
+       })
+       ->when($this->search, function ($query) use ($searchableFields) {
+           $query->where(function ($query) use ($searchableFields) {
+               $query->whereHas('participants', function ($subquery) use ($searchableFields) {
+                   // Exclude the authenticated user
+                   $subquery->whereHas('participantable', function ($subquery2) use ($searchableFields) {
+                       $subquery2->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
+                   });
+               });
+           });
+       })
+       ->latest('updated_at')
+       ->paginate(10, ['*'], 'page', $this->page); // Load the next page of conversations
+   
+       // Check if cannot load more
+       if (!$additionalConversations->hasMorePages()) {
+           $this->canLoadMore = false;
+       }
+   
+       // Append the new conversations to the existing list
+       $this->conversations = array_merge($this->conversations, $additionalConversations->items());
+   }
+   
+   
+
+
+  public  function createConversation($id, string $class)
+  {
 
 
 
-      $model = app($class);
+    $model = app($class);
 
-      $model = $model::find($id);
+    $model = $model::find($id);
 
 
 
-    
+
 
 
     if ($model) {
-      $createdConversation=  auth()->user()->createConversationWith($model);
+      $createdConversation =  auth()->user()->createConversationWith($model);
 
       if ($createdConversation) {
         return redirect()->route('wirechat.chat', [$createdConversation->id]);
-
       }
-
-
-        
     }
-
-
-
-    
   }
 
 
@@ -123,57 +155,41 @@ class ChatList extends Component
   {
 
 
-    abort_unless(auth()->check(),401);
+    abort_unless(auth()->check(), 401);
     $this->selectedConversationId = request()->chat;
+
 
   }
 
 
-public function render()
-{
+  public function render()
+  {
 
     // Get user searchable fields
     $searchableFields = WireChat::searchableFields();
 
     //dd($searchableFields);
 
-   /// dump(auth()->user());
+    /// dump(auth()->user());
 
     // Load the authenticated user with their conversations and related participants
-    $user = auth()->user()->load('conversations.participants');
+    $user = auth()->user();
 
     // Query conversations where the authenticated user is a participant
-    $conversations = Conversation::whereHas('participants', function ($query) {
-        $query->where('participantable_id', auth()->id())
-              ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
-    })
-    // Filter conversations based on participant names matching the search query
-    ->where(function ($query) use ($searchableFields) {
-        $query->whereHas('participants', function ($subquery) use ($searchableFields) {
-            // Exclude the authenticated user
-            $subquery ->whereHas('participantable', function ($subquery2) use ($searchableFields) {
-                          $subquery2->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
-        });
+   // $conversations = $this->loadConversations();
 
-        });
-    })
-    // Order conversations by the latest updated_at timestamp
-    ->latest('updated_at')
-    // Retrieve the conversations
-    ->get();
+    // dd('here');
 
- // dd('here');
+    $this->loadConversations();
 
+  //    dd(['conversations'=>$conversations]);
 
-   //  dd(['conversations'=>$conversations]);
-
-   // dd($conversations->first()->messages);
+    // dd($conversations->first()->messages);
     // Pass data to the view
     return view('wirechat::livewire.chat.chat-list', [
-        'conversations' => $conversations, // Pass filtered conversations
-        'unReadMessagesCount' => $user->getUnReadCount(), // Get unread messages count for the authenticated user
-        'authUser' => $user // Pass authenticated user data
+      //'conversations'=>$conversations,
+      //'unReadMessagesCount' => $user->getUnReadCount(), // Get unread messages count for the authenticated user
+      'authUser' => $user // Pass authenticated user data
     ]);
-}
-
+  }
 }

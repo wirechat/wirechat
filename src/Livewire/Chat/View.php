@@ -25,7 +25,7 @@ class View extends Component{
     $conversations = auth()->user()->conversations;
 
     //We remove deleted conversation incase the user decides to visit the delted conversation 
-    $this->conversation= Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('id',$this->chat)->firstOrFail();
+    $this->conversation= Conversation::with('participants.participantable')->withoutGlobalScope(WithoutClearedScope::class)->where('id',$this->chat)->firstOrFail();
     
     //dd($this->conversation);
    //dd( $this->conversation->hasBeenDeletedBy(auth()->user()));
@@ -33,11 +33,8 @@ class View extends Component{
 
     ///check if auth belongs to conversaiton
     // Check if the user belongs to the conversation
-          $belongsToConversation = $this->conversation->participants()
-          ->where('participantable_id', auth()->id())
-          ->where('participantable_type', get_class(auth()->user()))
-          ->exists();
-          abort_unless($belongsToConversation, 403);
+
+    abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
     //Mark as read 
     $this->conversation->markAsRead();

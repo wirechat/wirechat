@@ -148,43 +148,43 @@ class Conversation extends Model
         return $this->hasMany(Message::class);
     }
 
+        public function lastMessage()
+    {
+        return $this->hasOne(Message::class)->latestOfMany();
+    }
     public function getReceiver()
     {
         // Check if the conversation is private
         if ($this->type != ConversationType::PRIVATE) {
             return null;
         }
-
-
+    
+        // Ensure participants are already loaded (use the loaded relationship, not fresh queries)
+        $participants = $this->participants;
+    
         // Ensure there are exactly two participants
-        if ($this->participants()->count() !== 2) {
-            return null; // Or handle the error appropriately
+        if ($participants->count() !== 2) {
+            return null;
         }
-
+    
         // Get the participant who is not the authenticated user
-        $receiverParticipant = $this->participants()
-            ->where('participantable_id', '!=', auth()->id())
+        $receiverParticipant = $participants->where('participantable_id', '!=', auth()->id())
             ->where('participantable_type', get_class(auth()->user()))
             ->first();
-
+    
         if ($receiverParticipant) {
-            // Return the associated  model via the participant's relationship
-            return $receiverParticipant?->participantable;
+            // Return the associated model via the participant's relationship
+            return $receiverParticipant->participantable;
         }
-
-        if (!$receiverParticipant) {
-
-            //check the number of times the user appears as participant 
-            $authReceiver = $this->participants
-                ->where('participantable_id', auth()->id())
-                ->where('participantable_type', get_class(auth()->user()))
-                ->first();
-
-            return $authReceiver?->participantable;
-        }
-
-        return null;
+    
+        // Check the number of times the user appears as participant (fallback case)
+        $authReceiver = $participants->where('participantable_id', auth()->id())
+            ->where('participantable_type', get_class(auth()->user()))
+            ->first();
+    
+        return $authReceiver?->participantable;
     }
+    
 
 
     public function scopeWhereNotDeleted($query)
@@ -319,34 +319,39 @@ class Conversation extends Model
         }
     }
 
-   /**
-    * 
-    * Check if conversatino is owned by user themselves
-    */
-    public function isSelfConversation(Model $participant=null): bool
-    {
+  /**
+ * Check if the conversation is owned by the user themselves
+ */
+public function isSelfConversation(Model $participant = null): bool
+{
+    // Use the authenticated user if no participant is provided
+    $participant = $participant ?? auth()->user();
 
+    $isSelfConversation=false;
 
-        if ($participant==null) {
+    // Ensure the conversation is private and has exactly two participants
+    if ($this->type === ConversationType::PRIVATE) {
+        $participants = $this->participants; // Use the loaded participants
 
-            $participant= auth()->user();
+        if ($participants->count() === 2) {
+            // Check if both participants are the same user
+             $isSelfConversation= $participants->every(function ($p) use ($participant) {
+                  $value= $p->participantable_id == $participant->id && $p->participantable_type == get_class($participant);
+                
+                 // Log::info($value);
+
+                  return $value;
+                });
+
+            
         }
 
-        // Ensure the conversation is private and has exactly two participants
-        if ($this->type === ConversationType::PRIVATE && $this->participants()->count() === 2) {
-
-            // Check if both participants are the authenticated user
-            $sameUserParticipants = $this->participants()
-                ->where('participantable_id', $participant->id)
-                ->where('participantable_type', get_class($participant))
-                ->count();
-
-            // Return true if both participants are the same user
-            return $sameUserParticipants === 2;
-        }
-
-        return false;
+       
     }
+
+    return $isSelfConversation;
+}
+
 
     /**
      * Check if a given user has deleted all messages in the conversation using the deleteForMe

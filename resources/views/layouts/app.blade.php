@@ -20,6 +20,10 @@
             display: none !important;
         }
 
+        /* Define root properties */
+
+     
+
         /* Emoji picker configuration */
         emoji-picker {
             --background: white;

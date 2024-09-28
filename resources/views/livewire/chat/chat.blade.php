@@ -1,5 +1,23 @@
 {{-- Import helper function to use in chatbox --}}
 @use('Namu\WireChat\Helpers\helper')
+@use('Namu\WireChat\Facades\WireChat')
+
+@php
+
+$primaryColor= WireChat::getColor();
+
+@endphp
+
+
+@assets
+
+<style>
+    :root {
+    --primary-color: {{$primaryColor}} 
+   }
+</style>
+@endassets
+
 
     <div x-data="{
         height: 0,
@@ -56,7 +74,7 @@
             <footer class="shrink-0 z-10  py-2 overflow-y-visible relative  ">
 
                 <div
-                    class="  border dark:border-gray-700 px-3 sm:px-4 py-1.5 rounded-3xl flex gap-3 items-center  w-full max-w-[97%] mx-auto">
+                    class="  border dark:border-gray-700 px-3 sm:px-4 py-1.5 rounded-3xl grid gap-3 items-center  w-full max-w-[97%] mx-auto">
 
                     {{-- Media preview section --}}
                     @if (count($media) > 0)
@@ -218,9 +236,64 @@
                         </section>
                     @endif
 
-                    {{-- Emoji icon --}}
-                    <div x-data="{ open: false }" @click.away="open=false" class="w-10 hidden sm:flex  items-center">
-                        <button dusk="emoji-trigger-button" @click="open = ! open" x-ref="emojibutton"
+                  
+
+                    <form x-data="{
+                            'body': @entangle('body'),
+                            insertNewLine: function(textarea) {
+                        
+                                {{-- Get the current cursor position --}}
+                                var startPos = textarea.selectionStart;
+                                var endPos = textarea.selectionEnd;
+                        
+                                {{-- Insert a line break character at the cursor position --}}
+                                var text = textarea.value;
+                                var newText = text.substring(0, startPos) + '\n' + text.substring(endPos, text.length);
+                        
+                                {{-- Update the textarea value and cursor position --}}
+                                textarea.value = newText;
+                                textarea.selectionStart = startPos + 1; // Set cursor position after the inserted newline
+                                textarea.selectionEnd = startPos + 1;
+                        
+                                {{-- update height of element smoothly --}}
+                                textarea.style.height = 'auto';
+                                textarea.style.height = textarea.scrollHeight + 'px';
+                        
+                            }
+                        
+                        }"
+                        x-init="
+                        {{-- Emoji picture click event listener --}}
+                        document.querySelector('emoji-picker')
+                            .addEventListener('emoji-click', event => {
+                                // Get the emoji unicode from the event
+                                const emoji = event.detail['unicode'];
+                                
+                                // Get the current value and cursor position
+                                const inputField = $refs.body;
+                                const inputFieldValue = inputField._x_model.get() ?? '';
+
+                                const startPos = inputField.selectionStart;
+                                const endPos = inputField.selectionEnd;
+
+                                // Insert the emoji at the current cursor position
+                                const newValue = inputFieldValue.substring(0, startPos) + emoji + inputFieldValue.substring(endPos);
+
+                                // Update the value and move cursor after the emoji
+                                inputField._x_model.set(newValue);
+
+
+                                inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
+                            });
+                        "
+                        @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0)) ? $wire.sendMessage() : null"
+                        method="POST" autocapitalize="off" @class(['flex items-center col-span-12 w-full  gap-2'])>
+                        @csrf
+                        <input type="hidden" autocomplete="false" style="display: none">
+                    
+                          {{-- Emoji icon --}}
+                    <div x-data="{ open: false }" @click.away="open=false" class="w-10 hidden sm:flex max-w-fit  items-center">
+                        <button type="button" dusk="emoji-trigger-button" @click="open = ! open" x-ref="emojibutton"
                             class=" rounded-full p-px dark:border-gray-700">
 
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -235,65 +308,9 @@
 
                         </div>
                     </div>
-
-                    <form x-data="{
-                        'body': @entangle('body'),
-                        insertNewLine: function(textarea) {
-                    
-                            {{-- Get the current cursor position --}}
-                            var startPos = textarea.selectionStart;
-                            var endPos = textarea.selectionEnd;
-                    
-                            {{-- Insert a line break character at the cursor position --}}
-                            var text = textarea.value;
-                            var newText = text.substring(0, startPos) + '\n' + text.substring(endPos, text.length);
-                    
-                            {{-- Update the textarea value and cursor position --}}
-                            textarea.value = newText;
-                            textarea.selectionStart = startPos + 1; // Set cursor position after the inserted newline
-                            textarea.selectionEnd = startPos + 1;
-                    
-                            {{-- update height of element smoothly --}}
-                            textarea.style.height = 'auto';
-                            textarea.style.height = textarea.scrollHeight + 'px';
-                    
-                        }
-                    
-                    }"
-                    x-init="
-                     document.querySelector('emoji-picker')
-                        .addEventListener('emoji-click', event => {
-                            // Get the emoji unicode from the event
-                            const emoji = event.detail['unicode'];
-                            
-                            // Get the current value and cursor position
-                            const inputField = $refs.body;
-                            const inputFieldValue = inputField._x_model.get() ?? '';
-
-                            const startPos = inputField.selectionStart;
-                            const endPos = inputField.selectionEnd;
-
-                            // Insert the emoji at the current cursor position
-                            const newValue = inputFieldValue.substring(0, startPos) + emoji + inputFieldValue.substring(endPos);
-
-                            // Update the value and move cursor after the emoji
-                            inputField._x_model.set(newValue);
-
-
-                            inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
-                        });
-                    "
-                        @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0)) ? $wire.sendMessage() : null"
-                        method="POST" autocapitalize="off" @class(['flex items-center w-full  gap-2'])>
-                        @csrf
-                        <input type="hidden" autocomplete="false" style="display: none">
-                    
                         {{-- Show  upload pop if media or file are empty --}}
                         {{-- Also only show  upload popup if allowed in configuration  --}}
-
-                        @if (count($this->media) == 0 &&
-                                count($this->files) == 0 &&
-                                (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
+                        @if (count($this->media) == 0 && count($this->files) == 0 && (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
                             <x-wirechat::popover position="top" popoverOffset="70">
 
                                 <x-slot name="trigger">
@@ -328,10 +345,11 @@
                                             <div
                                                 class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
 
-                                                <span class="">
+                                                <span>
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                         height="16" fill="currentColor"
-                                                        class="bi bi-folder-fill w-6 h-6 text-blue-400"
+                                                        style="color: var(--primary-color);"
+                                                        class="bi bi-folder-fill w-6 h-6"
                                                         viewBox="0 0 16 16">
                                                         <path
                                                             d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3m-8.322.12q.322-.119.684-.12h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981z" />
@@ -362,7 +380,9 @@
 
                                                 <span class="">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                        fill="currentColor" class="w-6 h-6 text-blue-500">
+                                                        fill="currentColor" class="w-6 h-6"
+                                                        style="color: var(--primary-color);"
+                                                        >
                                                         <path fill-rule="evenodd"
                                                             d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
                                                             clip-rule="evenodd" />
@@ -390,7 +410,7 @@
                                 type="text" name="message" placeholder="Message" maxlength="1700" rows="1"
                                 @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
                                 @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
-                             default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
+                               default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                                 @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
                                 class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white dark:bg-gray-700  focus:outline-none   "
                                 x-init="
@@ -429,7 +449,7 @@
 
                         </div>
 
-                        {{-- Actions --}}
+                        {{--input Actions --}}
                         <div :class="{ 'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) ||
                                 @json(count($this->files) > 0) }"
                             @class([
