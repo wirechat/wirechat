@@ -45,17 +45,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function conversations()
-    {
-        return $this->morphToMany(
-            Conversation::class, // The related model
-            'participantable',   // The polymorphic field (participantable_id & participantable_type)
-            config('wirechat.participants_table', 'wirechat_participants'), // The participants table
-            'participantable_id', // The foreign key on the participants table for the User model
-            'conversation_id'     // The foreign key for the Conversation model
-        )->withPivot('conversation_id'); // Optionally load conversation_id from the pivot table
-    }
-    
+ 
     /** 
      * since you have a non-standard namespace; 
      * the resolver cannot guess the correct namespace for your Factory class.

@@ -5,12 +5,14 @@ namespace Namu\WireChat\Traits;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
+use Namu\WireChat\Models\Read;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 /**
@@ -39,7 +41,7 @@ trait Chatable
         return $this->morphToMany(
             Conversation::class, // The related model
             'participantable',   // The polymorphic field (participantable_id & participantable_type)
-            config('wirechat.participants_table', 'wirechat_participants'), // The participants table
+            (new Participant)->getTable(), // The participants table
             'participantable_id', // The foreign key on the participants table for the User model
             'conversation_id'     // The foreign key for the Conversation model
         )->withPivot('conversation_id'); // Optionally load conversation_id from the pivot table
@@ -199,24 +201,28 @@ trait Chatable
     }
 
     /**
-     * Get unread messages count.for user excluding user owned messages
+     * Get unread messages count for the user, across all conversations or within a specific conversation.
      *
      * @param Conversation|null $conversation
      * @return int
      */
     public function getUnreadCount(Conversation $conversation = null): int
     {
-        $query = Message::whereDoesntHave('reads', function ($q) {
-            $q->where('readable_id', $this->id)
-                ->where('readable_type', get_class($this));
-        })->where('sendable_id', '!=', $this->id)->where('sendable_type', get_class($this));
-
+        // If a specific conversation is provided, use the conversation's getUnreadCountFor method
         if ($conversation) {
-            $query->where('conversation_id', $conversation->id);
+            return $conversation->getUnreadCountFor($this);
         }
 
-        return $query->count();
+        // If no conversation is provided, calculate unread messages across all user conversations
+        $totalUnread = 0;
+
+        foreach ($this->conversations as $conv) {
+            $totalUnread += $conv->getUnreadCountFor($this);
+        }
+
+        return $totalUnread;
     }
+
 
 
     /**
@@ -294,8 +300,6 @@ trait Chatable
 
         // Execute the query and get the first matching conversation
         return $existingConversationQuery->exists();
-
-      
     }
 
 
@@ -361,9 +365,9 @@ trait Chatable
     /**
      * Get all of the reads for the model (polymorphic).
      */
-    // public function reads(): MorphMany
-    // {
-    //     return $this->morphMany(Read::class, 'readable');
-    // }
+    public function reads(): MorphMany
+    {
+        return $this->morphMany(Read::class, 'readable');
+    }
 
 }

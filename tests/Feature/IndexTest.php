@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Namu\WireChat\Livewire\Chat\ChatBox;
-use Namu\WireChat\Livewire\Chat\Chatlist;
+use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;

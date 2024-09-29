@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Namu\WireChat\Livewire\Chat\View;
 use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\Chatlist;
+use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Livewire\Chat\Index;
 use Namu\WireChat\Services\WireChatService;
 use Namu\WireChat\View\Components\ChatBox\Image;
@@ -37,11 +37,12 @@ class WireChatServiceProvider extends ServiceProvider
 
     //custom methods for livewire components
     protected function loadLivewireComponents()  {
+        Livewire::component('index', Index::class);
         Livewire::component('view', View::class);
-        Livewire::component('chatlist', Chatlist::class);
 
         Livewire::component('chat', Chat::class);
-        Livewire::component('index', Index::class);
+        Livewire::component('chats', Chats::class);
+
 
     }
 

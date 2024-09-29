@@ -70,8 +70,6 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
     // }
 
  
-
-
     protected function defineEnvironment($app) 
     {
         // Setup default database to use sqlite :memory:
@@ -116,23 +114,24 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
         });
     }
 
-    // public function setUp(): void
-    // {
-    //     parent::setUp();
-    //     //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
+     public function setUp(): void
+    {
+        parent::setUp();
+        //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
 
-    //    //$this->artisan('migrate:rollback')->run();
+       //$this->artisan('migrate:rollback')->run();
     //    Carbon::setTestNow(null);
     //     $this->loadMigrationsFrom(
     //         workbench_path('database/migrations')
     //     );
 
-    // //    $this->artisan('migrate:rollback')->run();
-    //   //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
-    //     //here we add a new ile in the name of the mixture of the berir d 
-    //     // $this->loadMigrationsFrom(__DIR__.'/migrations');
-    //     // $this->loadMigrationsFrom(dirname(__DIR__).'/migrations');
-    // }
+
+    //    $this->artisan('migrate:rollback')->run();
+      //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
+        //here we add a new ile in the name of the mixture of the berir d 
+        // $this->loadMigrationsFrom(__DIR__.'/migrations');
+        // $this->loadMigrationsFrom(dirname(__DIR__).'/migrations');
+    }
 
  
     protected function defineRoutes($router) 

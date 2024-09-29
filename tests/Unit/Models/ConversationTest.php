@@ -10,17 +10,17 @@ use Workbench\App\Models\User;
 
 describe('MarkAsRead()',function(){
 
-    it('aborts with 401 is auth is not authenticated', function () {
+    // it('aborts with 401 is auth is not authenticated', function () {
 
-        $auth = User::factory()->create();
+    //     $auth = User::factory()->create();
 
-        $conversation = Conversation::factory()->withParticipants([$auth])->create();
+    //     $conversation = Conversation::factory()->withParticipants([$auth])->create();
 
 
-        $conversation->markAsRead();
+    //     $conversation->markAsRead();
 
          
-    })->throws(Exception::class);
+    // })->throws(Exception::class);
 
     it('marks messages as read', function () {
 
@@ -130,7 +130,7 @@ describe('getUnreadCountFor()',function(){
 
         //Create conversation
         //auth -> receiver
-       $conversation = $auth->sendMessageTo($receiver, message: '1')->conversation;
+        $conversation = $auth->sendMessageTo($receiver, message: '1')->conversation;
         $auth->sendMessageTo($receiver, message: '2');
         $auth->sendMessageTo($receiver, message: '3');
 
@@ -370,6 +370,36 @@ describe('deleting permanently()',function(){
         expect($conversation->participants()->count())->toBe(0);
 
     });
+
+
+    it('deletes reads when conversation is deleted ', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        $conversation= 
+        $receiver->sendMessageTo($auth,'hello')->conversation;
+        $auth->sendMessageTo($receiver,'how do you do ');
+
+
+
+        //mark as read for $auth
+        $conversation->markAsRead($auth);
+        $conversation->markAsRead($receiver);
+
+
+        //get conversation reads
+         expect($conversation->reads()->count())->toBe(2);
+
+
+        //Delete message
+        $conversation->delete();
+
+        //assert count
+        expect($conversation->reads()->count())->toBe(0);
+
+    });
+
 
     it('deletes all messages when converstion is deleted', function () {
 

@@ -11,7 +11,7 @@ use Livewire\Livewire;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Livewire\Chat\Chat as ChatBox;
-use Namu\WireChat\Livewire\Chat\ChatList;
+use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;

@@ -40,7 +40,7 @@ class Conversation extends Model
     protected static function boot()
     {
         parent::boot();
- 
+
         static::addGlobalScope(new WithoutClearedScope());
         //DELETED event
         static::deleted(function ($conversation) {
@@ -49,6 +49,15 @@ class Conversation extends Model
             DB::transaction(function () use ($conversation) {
                 // Delete associated participants 
                 $conversation->participants()->delete();
+
+
+            // Delete reads
+            // Use a DB transaction to ensure atomicity
+            DB::transaction(function () use ($conversation) {
+                // Delete associated reads (polymorphic readable relation)
+                $conversation->reads()->delete();
+            });
+
 
                 // Delete associated messages 
                 $conversation->messages()->forceDelete();
@@ -128,7 +137,7 @@ class Conversation extends Model
         return $this->hasMany(Message::class);
     }
 
-        public function lastMessage()
+    public function lastMessage()
     {
         return $this->hasOne(Message::class)->latestOfMany();
     }
@@ -138,33 +147,33 @@ class Conversation extends Model
         if ($this->type != ConversationType::PRIVATE) {
             return null;
         }
-    
+
         // Ensure participants are already loaded (use the loaded relationship, not fresh queries)
         $participants = $this->participants;
-    
+
         // Ensure there are exactly two participants
         if ($participants->count() !== 2) {
             return null;
         }
-    
+
         // Get the participant who is not the authenticated user
         $receiverParticipant = $participants->where('participantable_id', '!=', auth()->id())
             ->where('participantable_type', get_class(auth()->user()))
             ->first();
-    
+
         if ($receiverParticipant) {
             // Return the associated model via the participant's relationship
             return $receiverParticipant->participantable;
         }
-    
+
         // Check the number of times the user appears as participant (fallback case)
         $authReceiver = $participants->where('participantable_id', auth()->id())
             ->where('participantable_type', get_class(auth()->user()))
             ->first();
-    
+
         return $authReceiver?->participantable;
     }
-    
+
 
 
     public function scopeWhereNotDeleted($query)
@@ -192,7 +201,7 @@ class Conversation extends Model
 
 
 
-  /**
+    /**
      * ----------------------------------------
      * ----------------------------------------
      * Reads 
@@ -213,22 +222,30 @@ class Conversation extends Model
 
     /**
      * Mark the conversation as read for the current authenticated user.
+     * @param Model $user||null 
+     * If not user is passed ,it will attempt to user auth(),if not avaible then will return null
      */
-    public function markAsRead()
+    public function markAsRead(Model $user=null)
     {
-        $authUser = auth()->user();
+        
+        $user =  $user??auth()->user();
+        if ($user==null) {
+
+            return null;
+            # code...
+        }
         // Update or create a read record for the conversation
         $this->reads()->updateOrCreate(
             [
-                'readable_id' => $authUser->id,
-                'readable_type' => get_class($authUser),
+                'readable_id' => $user->id,
+                'readable_type' => get_class($user),
             ],
             [
                 'read_at' => now(),
             ]
         );
     }
-    
+
     /**
      * Check if the conversation has been fully read by a specific user.
      * This returns true if there are no unread messages after the conversation
@@ -292,37 +309,41 @@ class Conversation extends Model
     // }
 
 
- /**
- * Get unread messages count for the specified user.
- *
- * @param Model $model
- * @return int
- */
-public function getUnreadCountFor(Model $model): int
-{
-    // Get the last time the conversation was marked as read by the user
-    $lastReadAt = $this->reads()
-        ->where('readable_id', $model->id)
-        ->where('readable_type', get_class($model))
-        ->value('read_at');
+    /**
+     * Get unread messages count for the specified user.
+     *
+     * @param Model $model
+     * @return int
+     */
+    public function getUnreadCountFor(Model $model): int
+    {
+        // Get the last time the conversation was marked as read by the user
+        $lastReadAt = $this->reads()
+            ->where('readable_id', $model->id)
+            ->where('readable_type', get_class($model))
+            ->value('read_at');
 
-    // Check if the messages relation is already loaded to avoid duplicate queries
-    if ($this->relationLoaded('messages')) {
-        $messages = $this->messages;
-    } else {
-        $messages = $this->messages();
+        // Check if the messages relation is already loaded to avoid duplicate queries
+        if ($this->relationLoaded('messages')) {
+            $messages = $this->messages;
+        } else {
+            $messages = $this->messages();
+        }
+
+        //exclude messages which user owns 
+        $messages ->where('sendable_id','!=', $model->id)
+        ->where('sendable_type', get_class($model));
+
+        // If the conversation has never been marked as read, return all messages count
+        if (!$lastReadAt) {
+            return $messages->count();
+        }
+
+        // Count the messages that were created after the last read timestamp
+        return $messages
+            ->where('created_at', '>', $lastReadAt)
+            ->count();
     }
-
-    // If the conversation has never been marked as read, return all messages count
-    if (!$lastReadAt) {
-        return $messages->count();
-    }
-
-    // Count the messages that were created after the last read timestamp
-    return $messages
-        ->where('created_at', '>', $lastReadAt)
-        ->count();
-}
 
 
     /**
@@ -362,63 +383,56 @@ public function getUnreadCountFor(Model $model): int
             if ($this->isSelfConversation($participant)) {
 
                 $this->forceDelete();
+            } else {
 
+                // Retrieve the other participant in the private conversation
+                $otherParticipant = $this->participants
+                    ->where('participantable_id', '!=', $participant->id)
+                    ->where('participantable_type', get_class($participant))
+                    ->first()?->participantable;
+
+                // Return null if the other participant cannot be found
+                if (!$otherParticipant) {
+                    return null;
+                }
+
+                // If both participants have deleted all their messages, delete the conversation permanently
+                if ($this->hasBeenDeletedBy($participant) && $this->hasBeenDeletedBy($otherParticipant)) {
+                    // dd("deleted");
+                    $this->forceDelete();
+                }
             }
-            else {
-                
-            // Retrieve the other participant in the private conversation
-            $otherParticipant = $this->participants
-                ->where('participantable_id', '!=', $participant->id)
-                ->where('participantable_type', get_class($participant))
-                ->first()?->participantable;
-
-            // Return null if the other participant cannot be found
-            if (!$otherParticipant) {
-                return null;
-            }
-
-            // If both participants have deleted all their messages, delete the conversation permanently
-            if ($this->hasBeenDeletedBy($participant) && $this->hasBeenDeletedBy($otherParticipant)) {
-                // dd("deleted");
-                $this->forceDelete();
-            }
-        }
-
         }
     }
 
-  /**
- * Check if the conversation is owned by the user themselves
- */
-public function isSelfConversation(Model $participant = null): bool
-{
-    // Use the authenticated user if no participant is provided
-    $participant = $participant ?? auth()->user();
+    /**
+     * Check if the conversation is owned by the user themselves
+     */
+    public function isSelfConversation(Model $participant = null): bool
+    {
+        // Use the authenticated user if no participant is provided
+        $participant = $participant ?? auth()->user();
 
-    $isSelfConversation=false;
+        $isSelfConversation = false;
 
-    // Ensure the conversation is private and has exactly two participants
-    if ($this->type === ConversationType::PRIVATE) {
-        $participants = $this->participants; // Use the loaded participants
+        // Ensure the conversation is private and has exactly two participants
+        if ($this->type === ConversationType::PRIVATE) {
+            $participants = $this->participants; // Use the loaded participants
 
-        if ($participants->count() === 2) {
-            // Check if both participants are the same user
-             $isSelfConversation= $participants->every(function ($p) use ($participant) {
-                  $value= $p->participantable_id == $participant->id && $p->participantable_type == get_class($participant);
-                
-                 // Log::info($value);
+            if ($participants->count() === 2) {
+                // Check if both participants are the same user
+                $isSelfConversation = $participants->every(function ($p) use ($participant) {
+                    $value = $p->participantable_id == $participant->id && $p->participantable_type == get_class($participant);
 
-                  return $value;
+                    // Log::info($value);
+
+                    return $value;
                 });
-
-            
+            }
         }
 
-       
+        return $isSelfConversation;
     }
-
-    return $isSelfConversation;
-}
 
 
     /**

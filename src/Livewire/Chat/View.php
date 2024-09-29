@@ -51,7 +51,7 @@ class View extends Component{
               <div class="w-full h-[calc(100vh_-_0.0rem)]  flex rounded-lg" >
                   <div class=" hidden lg:flex   relative w-full h-full md:w-[320px] xl:w-[400px]  shrink-0 overflow-y-auto  ">
 
-                      @livewire('chatlist')
+                      @livewire('chats')
                   </div>
                   
                   <main class="  grid  w-full  grow  h-full relative overflow-y-auto"  style="contain:content">

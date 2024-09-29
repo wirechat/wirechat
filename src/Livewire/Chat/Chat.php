@@ -297,7 +297,7 @@ class Chat extends Component
                 $this->conversation->save();
 
                 #dispatch event 'refresh ' to chatlist 
-                $this->dispatch('refresh')->to(ChatList::class);
+                $this->dispatch('refresh')->to(Chats::class);
 
                 #broadcast message 
                 $this->dispatchMessageCreatedEvent($message);
@@ -332,7 +332,7 @@ class Chat extends Component
             $this->conversation->save();
 
             #dispatch event 'refresh ' to chatlist 
-            $this->dispatch('refresh')->to(ChatList::class);
+            $this->dispatch('refresh')->to(Chats::class);
 
             #broadcast message  
             $this->dispatchMessageCreatedEvent($createdMessage);
@@ -370,7 +370,7 @@ class Chat extends Component
         })->values();//reindex collection
 
         #dispatch event 'refresh ' to chatlist 
-        $this->dispatch('refresh')->to(ChatList::class);
+        $this->dispatch('refresh')->to(Chats::class);
 
 
         #delete For $user
@@ -403,7 +403,7 @@ class Chat extends Component
         });
 
         #dispatch event 'refresh ' to chatlist 
-        $this->dispatch('refresh')->to(ChatList::class);
+        $this->dispatch('refresh')->to(Chats::class);
 
 
         //if message has reply then only soft delete it 
@@ -475,7 +475,7 @@ class Chat extends Component
         $this->loadedMessages->push($message);
 
         #dispatch event 'refresh ' to chatlist 
-        $this->dispatch('refresh')->to(ChatList::class);
+        $this->dispatch('refresh')->to(Chats::class);
 
         #scroll to bottom
         $this->dispatch('scroll-bottom');

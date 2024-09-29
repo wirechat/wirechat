@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Config;
 use Laravel\Dusk\Browser;
 use Livewire\Component;
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Chat\Chatlist;
+use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Tests\DuskTestCase;
 use Workbench\App\Models\User;

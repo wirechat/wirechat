@@ -92,13 +92,6 @@ class Message extends Model
                 }
             }
 
-            // Delete reads
-            // Use a DB transaction to ensure atomicity
-            DB::transaction(function () use ($message) {
-                // Delete associated reads (polymorphic readable relation)
-                $message->reads()->delete();
-            });
-
 
             // Delete reads
             // Use a DB transaction to ensure atomicity
@@ -124,23 +117,23 @@ class Message extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function reads(): HasMany
-    {
-        return $this->hasMany(Read::class, 'message_id');
-    }
+    // public function reads(): HasMany
+    // {
+    //     return $this->hasMany(Read::class, 'message_id');
+    // }
 
-    public function markAsRead()
-    {
+    // public function markAsRead()
+    // {
 
-        $authUser = auth()->user();
-        // Create a read record if it doesn't already exist
-        $this->reads()->firstOrCreate([
-            'readable_id' => $authUser->id,
-            'readable_type' => get_class($authUser),
-        ], [
-            'read_at' => now(),
-        ]);
-    }
+    //     $authUser = auth()->user();
+    //     // Create a read record if it doesn't already exist
+    //     $this->reads()->firstOrCreate([
+    //         'readable_id' => $authUser->id,
+    //         'readable_type' => get_class($authUser),
+    //     ], [
+    //         'read_at' => now(),
+    //     ]);
+    // }
     
     /**
      * Check if the message has been read by a specific user.
@@ -151,19 +144,13 @@ class Message extends Model
     public function readBy(Model $user): bool
     {
         // Check if the reads relationship is loaded
-        if ($this->relationLoaded('reads')) {
-            // Use the loaded reads collection
-            return $this->reads->contains(function ($read) use ($user) {
-                return $read->readable_id === $user->id && 
-                    $read->readable_type === get_class($user);
-            });
-        } else {
-            // If not loaded, fallback to querying the database
-            return $this->reads()
-                ->where('readable_id', $user->id)
-                ->where('readable_type', get_class($user))
-                ->exists();
-        }
+
+        $read = $user->reads()->where('conversation_id',$this->conversation_id)->first();
+
+
+        return $read?->read_at >$this->created_at;
+
+    
     }
 
 

@@ -124,55 +124,28 @@ use Workbench\App\Models\User;
     });
 
 
-    it('returns reads count', function () {
-        $auth = User::factory()->create();
-        $message = Message::factory()->sender($auth)->create();
+    // it('returns reads count', function () {
+    //     $auth = User::factory()->create();
+    //     $message = Message::factory()->sender($auth)->create();
 
-        for ($i=0; $i < 10; $i++) { 
+    //     for ($i=0; $i < 10; $i++) { 
 
-          $user=  User::factory()->create();
-          $message->reads()->firstOrCreate([
-            'readable_id' => $user->id,
-            'readable_type' => get_class($user),
-        ], [
-            'read_at' => now(),
-        ]);
-        }
+    //       $user=  User::factory()->create();
+    //       $message->reads()->firstOrCreate([
+    //         'readable_id' => $user->id,
+    //         'readable_type' => get_class($user),
+    //     ], [
+    //         'read_at' => now(),
+    //     ]);
+    //     }
 
-        expect($message->reads->count())->toBe(10);
+    //     expect($message->reads->count())->toBe(10);
 
-    });
+    // });
 
 
     describe('Delete Permanently',function(){
 
-    it('deletes reads when message is deleted ', function () {
-        $auth = User::factory()->create();
-        $message = Message::factory()->sender($auth)->create();
-
-        //Create reads 
-        for ($i=0; $i < 10; $i++) { 
-
-          $user=  User::factory()->create();
-          $message->reads()->firstOrCreate([
-            'readable_id' => $user->id,
-            'readable_type' => get_class($user),
-        ], [
-            'read_at' => now(),
-        ]);
-        }
-
-        //verify count before delete 
-        expect($message->reads()->count())->toBe(10);
-
-
-        //Delete message
-        $message->delete();
-
-        //assert count
-        expect($message->reads()->count())->toBe(0);
-
-    });
 
     it('deletes actions when message is deleted ', function () {
         
