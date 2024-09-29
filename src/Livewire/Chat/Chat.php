@@ -156,7 +156,7 @@ class Chat extends Component
             $this->loadedMessages->push($newMessage);
 
             #mark as read
-            $newMessage->markAsRead();
+            $this->conversation->markAsRead();
             #broadcast 
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
         }

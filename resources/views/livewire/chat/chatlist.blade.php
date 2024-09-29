@@ -282,7 +282,7 @@
                         $receiver = $conversation->getReceiver();
 
                         $lastMessage = $conversation->lastMessage;
-                        $isReadByAuth = $lastMessage?->readBy(auth()?->user());
+                        $isReadByAuth = $conversation?->readBy(auth()?->user());
 
                     @endphp
 
@@ -302,9 +302,10 @@
                             <x-wirechat::avatar src="{{ $receiver?->cover_url ?? null }}" wire:ignore
                                 class="w-12 h-12" />
                         </a>
-                        <aside class="grid grid-cols-12 w-full">
+                        <aside class="grid  grid-cols-12 w-full">
 
 
+  
                             <a wire:navigate href="{{ route('wirechat.chat', $conversation->id) }}"
                                 class="col-span-10 border-b pb-2 border-gray-100 dark:border-gray-700 relative overflow-hidden truncate leading-5 w-full flex-nowrap p-1">
 
@@ -350,8 +351,7 @@
                                             {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->hasAttachment() ? '📎 Attachment' : '') }}
                                         </p>
 
-                                        <span
-                                            class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
+                                        <span class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
 
 
                                     </div>
@@ -361,8 +361,10 @@
 
                             {{-- Read status --}}
                             {{-- Only show if AUTH is NOT onwer of message --}}
+
+                            {{-- @dd($isReadByAuth) --}}
                             <div
-                                class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$lastMessage->readBy(auth()?->user()) ? 'visible' : 'invisible' }} col-span-2 flex flex-col text-center my-auto">
+                                class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth ? 'visible' : 'invisible' }} col-span-2 flex flex-col text-center my-auto">
 
                                 {{-- Dots icon --}}
                                 <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16"

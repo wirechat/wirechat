@@ -31,8 +31,11 @@ return [
     /**
      * Home route:
      * This is the route to redirect to when exit button is clicked in the chat*/
-     'redirect_route'=>"/dashboard",
+     'redirect_route'=>"/users",
 
+
+
+     'extendable_trait' => \App\Traits\TestTrait::class,
 
      /**
      * Features:

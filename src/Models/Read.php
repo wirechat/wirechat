@@ -13,7 +13,7 @@ class Read extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['read_at', 'message_id','readable_id','readable_type'];
+    protected $fillable = ['read_at', 'conversation_id','readable_id','readable_type'];
 
 
 
@@ -29,10 +29,11 @@ class Read extends Model
         return $this->morphTo();
     }
 
-    public function message()
+    public function conversation()
     {
-        return $this->belongsTo(Message::class, 'message_id');
+        return $this->belongsTo(Conversation::class, 'conversation_id');
     }
+
     
 
 

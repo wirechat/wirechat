@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\Actions;
@@ -39,29 +40,7 @@ class Conversation extends Model
     protected static function boot()
     {
         parent::boot();
-
-        // Add scope if authenticated
-        // This scope ensures that conversations without messages are excluded and
-        // only conversations with at least one message not deleted by the auth user are returned.
-        // Add scope if authenticated
-        //  static::addGlobalScope('withoutDeleted', function (Builder $builder) {
-        //     $user = auth()->user(); // Get the authenticated user
-
-        //     // Apply the scope only if the user is authenticated
-        //     if ($user) {
-        //        // dd($user);
-        //         $builder->whereHas('messages', function ($q) use ($user) {
-        //           //  $q->withoutGlobalScope('excludeDeleted')
-        //                 $q->whereDoesntHave('actions', function ($q) use ($user) {
-        //                     $q->where('actor_id', $user->id)
-        //                         ->where('actor_type', get_class($user)) // Safe since $user is not null
-        //                         ->where('type', Actions::DELETE);
-        //                 });
-        //         });
-        //     }
-        // });
-
-
+ 
         static::addGlobalScope(new WithoutClearedScope());
         //DELETED event
         static::deleted(function ($conversation) {
@@ -212,50 +191,138 @@ class Conversation extends Model
     }
 
 
+
+  /**
+     * ----------------------------------------
+     * ----------------------------------------
+     * Reads 
+     * Define relationship and methods for conversation reads
+     * --------------------------------------------
+     */
+
+
     /**
-     * Mark all messages in the conversation as read by the authenticated user.
+     * Get all of the reads for the conversation.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reads(): HasMany
+    {
+        return $this->hasMany(Read::class, 'conversation_id');
+    }
+
+    /**
+     * Mark the conversation as read for the current authenticated user.
      */
     public function markAsRead()
     {
-        abort_unless(auth()->check(), 401);
-        $authUserId = auth()->id();
-
-        // Get all messages in the conversation that are not already read by the authenticated user
-        $messages = $this->messages()->whereDoesntHave('reads', function ($query) use ($authUserId) {
-            $query->where('readable_id', $authUserId)
-                ->where('readable_type', get_class(auth()->user()));
-        })->get();
-
-        foreach ($messages as $message) {
-            // Create a read record if it doesn't already exist
-            $message->reads()->firstOrCreate([
-                'readable_id' => $authUserId,
-                'readable_type' => get_class(auth()->user())
-            ], [
+        $authUser = auth()->user();
+        // Update or create a read record for the conversation
+        $this->reads()->updateOrCreate(
+            [
+                'readable_id' => $authUser->id,
+                'readable_type' => get_class($authUser),
+            ],
+            [
                 'read_at' => now(),
-            ]);
-        }
+            ]
+        );
     }
+    
+    /**
+     * Check if the conversation has been fully read by a specific user.
+     * This returns true if there are no unread messages after the conversation
+     * was marked as read by the user.
+     *
+     * @param Model $user
+     * @return bool
+     */
+    public function readBy(Model $user): bool
+    {
+        // Reuse the unread count method and return true if unread count is 0
+        return $this->getUnreadCountFor($user) <= 0;
+    }
+
 
 
     /**
-     * Get unread messages count for the specified user.
+     * Retrieve unread messages in this conversation for a specific user.
      *
-     * @param Model  $model
-     * @return int
+     * @param Model $user
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getUnreadCountFor(Model $model): int
+    public function unreadMessages(Model $user)
     {
+        $lastReadAt = $this->reads()
+            ->where('readable_id', $user->id)
+            ->where('readable_type', get_class($user))
+            ->value('read_at');
+
         return $this->messages()
-            ->where('sendable_id', '!=', $model->id)
-            ->where('sendable_type', get_class($model))
-            ->whereDoesntHave('reads', function ($query) use ($model) {
-                $query->where('readable_id', $model->id)
-                    ->where('readable_type', get_class($model));
-            })->count();
+            ->where('created_at', '>', $lastReadAt)
+            ->get();
     }
+
+
+    // /**
+    //  * Mark all messages in the conversation as read by the authenticated user.
+    //  *
+    //  * @return void
+    //  */
+    // public function markAsRead()
+    // {
+    //     abort_unless(auth()->check(), 401);
+    //     $authUserId = auth()->id();
+
+    //     // Get all messages in the conversation that are not already read by the authenticated user
+    //     $messages = $this->messages()->whereDoesntHave('reads', function ($query) use ($authUserId) {
+    //         $query->where('readable_id', $authUserId)
+    //             ->where('readable_type', get_class(auth()->user()));
+    //     })->get();
+
+    //     foreach ($messages as $message) {
+    //         // Create a read record if it doesn't already exist
+    //         $message->reads()->firstOrCreate([
+    //             'readable_id' => $authUserId,
+    //             'readable_type' => get_class(auth()->user())
+    //         ], [
+    //             'read_at' => now(),
+    //         ]);
+    //     }
+    // }
+
+
+ /**
+ * Get unread messages count for the specified user.
+ *
+ * @param Model $model
+ * @return int
+ */
+public function getUnreadCountFor(Model $model): int
+{
+    // Get the last time the conversation was marked as read by the user
+    $lastReadAt = $this->reads()
+        ->where('readable_id', $model->id)
+        ->where('readable_type', get_class($model))
+        ->value('read_at');
+
+    // Check if the messages relation is already loaded to avoid duplicate queries
+    if ($this->relationLoaded('messages')) {
+        $messages = $this->messages;
+    } else {
+        $messages = $this->messages();
+    }
+
+    // If the conversation has never been marked as read, return all messages count
+    if (!$lastReadAt) {
+        return $messages->count();
+    }
+
+    // Count the messages that were created after the last read timestamp
+    return $messages
+        ->where('created_at', '>', $lastReadAt)
+        ->count();
+}
 
 
     /**
