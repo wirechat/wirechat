@@ -40,6 +40,4 @@
 
         //last message on LEFT
         'rounded-bl-2xl'=>($message?->sender_id!=$nextMessage?->sender_id ) && !$belongsToAuth,
-        ])
-
-loading="lazy" src="{{ url('storage/' . $attachment?->file_path) }}" alt="attachment">
+        ]) loading="lazy" src="{{ url('storage/' . $attachment?->file_path) }}" alt="attachment">

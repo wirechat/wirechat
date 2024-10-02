@@ -21,7 +21,7 @@
 
     // Background color for messages sent by the authenticated user
     'text-white' => $belongsToAuth,//set backg
-    'dark:bg-gray-700 dark:text-white' => !$belongsToAuth,
+    'dark:bg-gray-800 dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
 
@@ -88,7 +88,6 @@
 
 ])>
 
-{{-- @dd($primaryColor) --}}
 <pre class="whitespace-pre-line tracking-normal text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
     {{$message->body}}
@@ -98,18 +97,8 @@
 <span
 @class(['text-[11px] ml-auto ',  'text-gray-700 dark:text-gray-300' => !$belongsToAuth,'text-gray-100' => $belongsToAuth])>
     @php
-        $createdAt = $message->created_at;
-
-        if ($createdAt->isToday()) {
-            // If the message was created today, show only the time (e.g., 1:00 AM)
-            echo $createdAt->format('g:i A');
-        }elseif ($createdAt->isCurrentWeek()) {
-            // If the message was created within this week, show day of the week + time (e.g., Wed 12:00 AM)
-            echo $createdAt->format('D g:i A');
-        } else {
-            // If the message was created more than a week ago, show the full date (e.g., 12/05/24)
-            echo $createdAt->format('m/d/y');
-        }
+        // If the message was created today, show only the time (e.g., 1:00 AM)
+        echo $message->created_at->format('g:i A');
     @endphp
 </span>
 

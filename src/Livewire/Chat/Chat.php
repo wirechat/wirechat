@@ -4,6 +4,7 @@ namespace Namu\WireChat\Livewire\Chat;
 
 use App\Models\User;
 use App\Notifications\TestNotification;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -127,7 +128,7 @@ class Chat extends Component
 
 
         #push message
-        $this->loadedMessages->push($newMessage);
+        $this->pushMessage($newMessage);
 
         #mark as read
         $newMessage->read_at = now();
@@ -153,7 +154,7 @@ class Chat extends Component
             }
 
             #push message
-            $this->loadedMessages->push($newMessage);
+            $this->pushMessage($newMessage);
 
             #mark as read
             $this->conversation->markAsRead();
@@ -324,7 +325,7 @@ class Chat extends Component
             $this->reset('body');
 
             #push the message
-            $this->loadedMessages->push($createdMessage);
+            $this->pushMessage($createdMessage);
 
 
             #update the conversation model - for sorting in chatlist
@@ -357,18 +358,14 @@ class Chat extends Component
         #make sure user is authenticated
         abort_unless(auth()->check(), 401);
 
-        #make sure user owns message
-        // abort_unless($message->ownedBy(auth()->user()), 403);
 
-        //make sure user belongs to conversation from the message
-        //We are checking the $message->conversation for extra security because the param might be tempered with 
+        #make sure user belongs to conversation from the message
+        #We are checking the $message->conversation for extra security because the param might be tempered with 
         abort_unless(auth()->user()->belongsToConversation($message->conversation),403);
 
         #remove message from collection
-        $this->loadedMessages= $this->loadedMessages->reject(function ($loadedMessage) use ($message) {
-            return $loadedMessage->id == $message->id;
-        })->values();//reindex collection
-
+        $this->removeMessage($message);
+  
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
 
@@ -398,9 +395,7 @@ class Chat extends Component
         abort_unless(auth()->user()->belongsToConversation($message->conversation),403);
 
         #remove message from collection
-        $this->loadedMessages= $this->loadedMessages->reject(function ($loadedMessage) use ($message) {
-            return $loadedMessage->id == $message->id;
-        });
+        $this->removeMessage($message);
 
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
@@ -422,6 +417,63 @@ class Chat extends Component
 
        
 
+    }
+
+
+    //Helper method to get group key 
+    private function messageGroupKey(Message $message): string
+      {
+
+        $messageDate = $message->created_at;
+        $groupKey = '';
+            if ($messageDate->isToday()) {
+                $groupKey = 'Today';
+            } elseif ($messageDate->isYesterday()) {
+                $groupKey = 'Yesterday';
+            } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
+                $groupKey = $messageDate->format('l'); // Day name
+            } else {
+                $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
+            }
+
+
+            return $groupKey;
+        
+    }
+
+    //helper to push message to loadedMessages
+    private function pushMessage(Message $message)  {
+
+        $groupKey = $this->messageGroupKey($message);
+        
+        # Check if the group exists, if not, create it
+        if (!$this->loadedMessages->has($groupKey)) {
+            $this->loadedMessages[$groupKey] = collect();
+        }
+
+        # Push the message to the correct group
+        $this->loadedMessages[$groupKey]->push($message);
+
+    }
+
+    //Method to remove method from collection
+    private function removeMessage(Message $message){
+
+        $groupKey= $this->messageGroupKey($message);
+
+        # Remove the message from the correct group
+        if ($this->loadedMessages->has($groupKey)) {
+            $this->loadedMessages[$groupKey] = $this->loadedMessages[$groupKey]->reject(function ($loadedMessage) use ($message) {
+                return $loadedMessage->id == $message->id;
+            })->values();
+
+            # Optionally, remove the group if it's empty
+            if ($this->loadedMessages[$groupKey]->isEmpty()) {
+                $this->loadedMessages->forget($groupKey)->values();
+            }
+
+          //  $this->loadedMessages;
+        }
     }
 
 
@@ -472,7 +524,7 @@ class Chat extends Component
         $this->conversation->save();
 
         #push the message
-        $this->loadedMessages->push($message);
+        $this->pushMessage($message);
 
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
@@ -499,38 +551,95 @@ class Chat extends Component
     }
 
 
-    function loadMessages()
-    {
+    // function loadMessages()
+    // {
 
 
-        #get count
-        $count = Message::where('conversation_id', $this->conversation->id)->where(function ($query) {
-          //  $query->whereNotDeleted();
-        })->count();
+    //     #get count
+    //     $count = Message::where('conversation_id', $this->conversation->id)->where(function ($query) {
+    //       //  $query->whereNotDeleted();
+    //     })->count();
 
-        #skip and query
-        $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
-            ->where(function ($query) {
-              //  $query->whereNotDeleted();
-            })
-            ->with('parent')
-            ->orderBy('created_at', 'asc') 
-            ->skip($count - $this->paginate_var)
-            ->take($this->paginate_var)
-            ->get();
+    //     #skip and query
+    //     $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
+    //         ->where(function ($query) {
+    //           //  $query->whereNotDeleted();
+    //         })
+    //         ->with('parent')
+    //         ->orderBy('created_at', 'asc') 
+    //         ->skip($count - $this->paginate_var)
+    //         ->take($this->paginate_var)
+    //         ->get();
             
-
-
-         //  dd(    $this->loadedMessages);
-        
-
-        // Calculate whether more messages can be loaded
-        $this->canLoadMore = $count > count($this->loadedMessages);
+    //     // Calculate whether more messages can be loaded
+    //     $this->canLoadMore = $count > count($this->loadedMessages);
 
 
 
-        return $this->loadedMessages;
-    }
+    //     return $this->loadedMessages;
+    // }
+
+
+
+// function loadMessages()
+// {
+//     # Get total message count
+//     $count = Message::where('conversation_id', $this->conversation->id)
+//         ->count();
+
+//     # Fetch paginated messages
+//     $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
+//         ->with('parent')
+//         ->orderBy('created_at', 'asc')
+//         ->skip($count - $this->paginate_var)
+//         ->take($this->paginate_var)
+//         ->get()
+//         ->groupBy(function ($message) {
+//             return $this->messageGroupKey($message);
+//         })->values()
+//         ;
+
+//     // Calculate whether more messages can be loaded
+//     $this->canLoadMore = $count > count($this->loadedMessages->flatten());
+
+//     // Group messages by date
+
+//     // dd( count($this->loadedMessages->flatten()));
+//     // $this->loadedMessages = $this->loadedMessages;
+//     // dd($this->loadedMessages);
+
+//     //return $groupedMessages;
+// }
+
+function loadMessages()
+{
+    # Get total message count
+    $count = Message::where('conversation_id', $this->conversation->id)
+        ->count();
+
+    # Fetch paginated messages
+    $messages = Message::where('conversation_id', $this->conversation->id)
+        ->with('parent')
+        ->orderBy('created_at', 'asc')
+        ->skip($count - $this->paginate_var)
+        ->take($this->paginate_var)
+        ->get();  // Fetch messages as Eloquent collection
+
+    # Group the messages
+    $this->loadedMessages = $messages->groupBy(function ($message) {
+        return $this->messageGroupKey($message);  // Grouping by custom logic
+    })->map(function ($group) {
+        return $group->values();  // Ensure groups are standard collections with re-indexed keys
+    });
+
+    // Calculate whether more messages can be loaded
+    $this->canLoadMore = $count > $messages->count();
+
+}
+
+
+
+
 
     /* to generate color auth message background color */
     public function getAuthMessageBodyColor(): string
@@ -567,7 +676,8 @@ class Chat extends Component
 
         $this->receiver = $this->conversation->getReceiver();
 
-        $this->authMessageBodyColor = $this->getAuthMessageBodyColor();
+        //$this->authMessageBodyColor = $this->getAuthMessageBodyColor();
+
 
         $this->loadMessages();
     }
@@ -575,7 +685,7 @@ class Chat extends Component
     public function render()
     {
        // sleep(3);
-        $conversation = Conversation::first();
+       // $conversation = Conversation::first();
 
         return view('wirechat::livewire.chat.chat');
     }

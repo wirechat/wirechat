@@ -23,7 +23,8 @@ $primaryColor= WireChat::getColor();
         height: 0,
         conversationElement: document.getElementById('conversation'),
         initializing: true
-    }" x-init="setTimeout(() => {
+    }" x-init="
+    setTimeout(() => {
         height = conversationElement.scrollHeight;
         $nextTick(() => conversationElement.scrollTop = height);
         $wire.dispatch('focus-input-field');
@@ -78,12 +79,9 @@ $primaryColor= WireChat::getColor();
 
                     {{-- Media preview section --}}
                     @if (count($media) > 0)
-                        <section x-data="attachments('media')"
-                            class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
-                            style=" scrollbar-width: none; -ms-overflow-style: none;">
+                        <section x-data="attachments('media')" class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 " style=" scrollbar-width: none; -ms-overflow-style: none;">
 
                             {{-- Loop through media for preview --}}
-
                             @foreach ($media as $key => $mediaItem)
                                 @if (str()->startsWith($mediaItem->getMimeType(), 'image/'))
                                     <div class="relative h-24 sm:h-36 aspect-[4/3] ">
@@ -123,22 +121,21 @@ $primaryColor= WireChat::getColor();
                                 @endif
                             @endforeach
 
-                            {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}} {{--
-                        Add more media --}} 
-                        <label class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
-                                <input @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
-                                    accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only ">
-                                <span class="  m-auto  ">
+                            {{--TODO @if"( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}} {{-- Add more media --}} 
+                            <label class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
+                                    <input @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
+                                        accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only ">
+                                    <span class="m-auto">
 
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                        class="w-7 h-7 text-gray-600 dark:text-gray-100">
-                                        <path fill-rule="evenodd"
-                                            d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                            class="w-7 h-7 text-gray-600 dark:text-gray-100">
+                                            <path fill-rule="evenodd"
+                                                d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                                                clip-rule="evenodd" />
+                                        </svg>
 
-                                </span>
-                        </label>
+                                    </span>
+                            </label>
 
                         </section>
                     @endif
@@ -214,7 +211,6 @@ $primaryColor= WireChat::getColor();
                     {{-- Replying to --}}
                     @if ($replyMessage != null)
                         <section class="p-px py-1 w-full col-span-12">
-
                             <div class="flex justify-between items-center dark:text-white">
                                 <h6 class="text-sm">Replying to
                                     <span class="font-bold">
@@ -233,6 +229,7 @@ $primaryColor= WireChat::getColor();
                             <p class="truncate text-sm text-gray-500 dark:text-gray-200 max-w-md">
                                 {{ $replyMessage->body != '' ? $replyMessage->body : ($replyMessage->hasAttachment() ? 'Attachment' : '') }}
                             </p>
+
                         </section>
                     @endif
 
@@ -240,8 +237,7 @@ $primaryColor= WireChat::getColor();
 
                     <form x-data="{
                             'body': @entangle('body'),
-                            insertNewLine: function(textarea) {
-                        
+                            insertNewLine: function(textarea) {                      
                                 {{-- Get the current cursor position --}}
                                 var startPos = textarea.selectionStart;
                                 var endPos = textarea.selectionEnd;
@@ -259,8 +255,7 @@ $primaryColor= WireChat::getColor();
                                 textarea.style.height = 'auto';
                                 textarea.style.height = textarea.scrollHeight + 'px';
                         
-                            }
-                        
+                            }                      
                         }"
                         x-init="
                         {{-- Emoji picture click event listener --}}
@@ -289,25 +284,9 @@ $primaryColor= WireChat::getColor();
                         @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0)) ? $wire.sendMessage() : null"
                         method="POST" autocapitalize="off" @class(['flex items-center col-span-12 w-full  gap-2'])>
                         @csrf
+
                         <input type="hidden" autocomplete="false" style="display: none">
                     
-                          {{-- Emoji icon --}}
-                    <div x-data="{ open: false }" @click.away="open=false" class="w-10 hidden sm:flex max-w-fit  items-center">
-                        <button type="button" dusk="emoji-trigger-button" @click="open = ! open" x-ref="emojibutton"
-                            class=" rounded-full p-px dark:border-gray-700">
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                class="bi bi-emoji-grin w-8 h-8 text-gray-700 dark:text-gray-300 stoke-[1.3] dark:stroke-[1]">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
-                            </svg>
-                        </button>
-                        <div x-cloak x-show="open" x-transition x-anchor.top.offset.11="$refs.emojibutton">
-                            <emoji-picker dusk="emoji-picker" class=" rounded-xl"></emoji-picker>
-
-                        </div>
-                    </div>
                         {{-- Show  upload pop if media or file are empty --}}
                         {{-- Also only show  upload popup if allowed in configuration  --}}
                         @if (count($this->media) == 0 && count($this->files) == 0 && (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
@@ -321,12 +300,18 @@ $primaryColor= WireChat::getColor();
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                         </svg> --}}
-                                        <svg dusk="upload-trigger-button" xmlns="http://www.w3.org/2000/svg"
+                                        {{-- <svg dusk="upload-trigger-button" xmlns="http://www.w3.org/2000/svg"
                                             width="16" height="16" fill="currentColor"
                                             class="bi bi-plus-lg w-6 h-6 text-gray-600 dark:text-white/90" viewBox="0 0 16 16">
                                             <path fill-rule="evenodd"
                                                 d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
-                                        </svg>
+                                        </svg> --}}
+
+                                        {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor" class="size-6 w-7 h-7 text-gray-600 dark:text-white/90">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                                          </svg> --}}
+                                          <svg class="size-6 w-7 h-7 text-gray-600 dark:text-white/90" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="ai ai-Attach"><path d="M6 7.91V16a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V6a4 4 0 0 0-4-4v0a4 4 0 0 0-4 4v9.182a2 2 0 0 0 2 2v0a2 2 0 0 0 2-2V8"/></svg>
+                                          
                                     </span>
 
                                 </x-slot>
@@ -401,8 +386,7 @@ $primaryColor= WireChat::getColor();
                             </x-wirechat::popover>
                         @endif
 
-
-                        {{-- Input --}}
+                        {{--TextArea Input --}}
                         <div @class(['flex gap-2 sm:px-2 w-full'])>
                             <textarea 
                             
@@ -412,7 +396,7 @@ $primaryColor= WireChat::getColor();
                                 @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                                 @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
-                                class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white dark:bg-gray-700  focus:outline-none   "
+                                class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-none   "
                                 x-init="
                                         document.querySelector('emoji-picker')
                                             .addEventListener('emoji-click', event => {
@@ -445,20 +429,46 @@ $primaryColor= WireChat::getColor();
                             <button
                                 :class="{ 'hidden': !((body?.trim()?.length) || @js(count($this->media) > 0) || @js(count($this->files) > 0)) }"
                                 type="submit" id="sendMessageButton"
-                                class="hidden w-[10%]  text-blue-500 font-bold text-right">Send</button>
+                                class="hidden  flex items-center justify-end w-[6%] font-bold  text-right">
+
+                                <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="ai ai-Send"><path d="M9.912 12H4L2.023 4.135A.662.662 0 0 1 2 3.995c-.022-.721.772-1.221 1.46-.891L22 12 3.46 20.896c-.68.327-1.464-.159-1.46-.867a.66.66 0 0 1 .033-.186L3.5 15"/></svg>
+                               
+                            </button>
 
                         </div>
 
                         {{--input Actions --}}
-                        <div :class="{ 'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) ||
+                        <div :class="{'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) ||
                                 @json(count($this->files) > 0) }"
                             @class([
                                 'w-[15%] justify-end flex items-center gap-2 hidden md:hidden',
                             ])>
-                            {{-- send Like --}}
-                            <button wire:click='sendLike()' type="button " class="group ml-auto">
 
-                                {{-- outlined heart --}}
+                              {{-- Emoji icon --}}
+                        <div x-data="{ open: false }" @click.away="open=false" class="w-10 hidden sm:flex max-w-fit  items-center">
+                            <button type="button" dusk="emoji-trigger-button" @click="open = ! open" x-ref="emojibutton"
+                                class=" rounded-full p-px dark:border-gray-700">
+
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    class="bi bi-emoji-grin w-8 h-8 text-gray-700 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                                </svg>
+                                {{-- <svg  class="w-8 h-8 text-gray-700 dark:text-gray-300 stroke-[0.5] dark:stroke-[0.5]"  width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" > <path d="M16 13H14C14 14.1046 13.1046 15 12 15C10.8954 15 10 14.1046 10 13H8C8 15.2091 9.79086 17 12 17C14.2091 17 16 15.2091 16 13Z" fill="currentColor" /> <path d="M10 10C10 10.5523 9.55228 11 9 11C8.44772 11 8 10.5523 8 10C8 9.44771 8.44772 9 9 9C9.55228 9 10 9.44771 10 10Z" fill="currentColor" /> <path d="M15 11C15.5523 11 16 10.5523 16 10C16 9.44771 15.5523 9 15 9C14.4477 9 14 9.44771 14 10C14 10.5523 14.4477 11 15 11Z" fill="currentColor" /> <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12Z" fill="currentColor" /> </svg> --}}
+
+                                {{-- <svg class="w-8 h-8 text-gray-700 dark:text-gray-300 stoke-[0.5] dark:stroke-[0.5]"   stroke="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: currentColor;transform: ;msFilter:;"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M14.829 14.828a4.055 4.055 0 0 1-1.272.858 4.002 4.002 0 0 1-4.875-1.45l-1.658 1.119a6.063 6.063 0 0 0 1.621 1.62 5.963 5.963 0 0 0 2.148.903 6.042 6.042 0 0 0 2.415 0 5.972 5.972 0 0 0 2.148-.903c.313-.212.612-.458.886-.731.272-.271.52-.571.734-.889l-1.658-1.119a4.017 4.017 0 0 1-.489.592z"></path><circle cx="8.5" cy="10.5" r="1.5"></circle><circle cx="15.493" cy="10.493" r="1.493"></circle></svg> --}}
+                            </button>
+                            <div x-cloak x-show="open" x-transition x-anchor.top.offset.11="$refs.emojibutton">
+                                <emoji-picker dusk="emoji-picker" class=" rounded-xl"></emoji-picker>
+
+                            </div>
+                        </div>
+
+                            {{-- send Like --}}
+                            {{-- <button wire:click='sendLike()' type="button " class="group ml-auto">
+
+                                <!-- outlined heart -->
                                 <span class=" group-hover:hidden transition">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -467,7 +477,7 @@ $primaryColor= WireChat::getColor();
                                             d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                     </svg>
                                 </span>
-                                {{-- filled heart --}}
+                              <!--  filled heart -->
                                 <span class="hidden group-hover:block transition " x-bounce>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                         class="size-6 w-7 h-7   text-red-500">
@@ -476,8 +486,9 @@ $primaryColor= WireChat::getColor();
                                     </svg>
                                 </span>
 
-                            </button>
+                            </button> --}}
                         </div>
+                        
                     </form>
 
                 </div>
