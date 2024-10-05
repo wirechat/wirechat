@@ -2,34 +2,66 @@
     'loadedMessages' => $loadedMessages,
     'receiver' => $receiver,
 ])
+
+
 <main x-data="{
-    canLoadMore: @entangle('canLoadMore')
+    canLoadMore: @entangle('canLoadMore'),
+    height: 0,
+    previousHeight: 0,
+    updateScrollPosition: function() {
+            // Calculate the difference in height
+
+        newHeight=document.getElementById('conversation').scrollHeight;
+    
+        console.log('old height'+ height);
+        console.log('new height'+ document.getElementById('conversation').scrollHeight);
+        heightDifference = newHeight - height;
+
+        console.log('conversationElement.scrollTop ' + conversationElement.scrollTop );
+        console.log('heightDifference'+ heightDifference);
+
+        $el.scrollTop += heightDifference ;
+        // Update the previous height to the new height
+        height= newHeight;
+
+        }
+
 }"
-    @scroll="
-scrollTop= $el.scrollTop;
 
 
-if((scrollTop<=0) && canLoadMore){
-    await $nextTick();
-    $wire.loadMore();
-}
+x-init="
+    setTimeout(() => {
+        this.height = $el.scrollHeight;
+        console.log('height ' +this.height);
+        $nextTick(() => $el.scrollTop = this.height);
+    },0);
+    "
+
+     @scroll ="
+        scrollTop= $el.scrollTop;
+        if((scrollTop<=0) && canLoadMore){
+
+            $wire.loadMore();
+
+        }
+  "
+  @update-height.window="
+    {{-- 
+        Replaced $nextTick with requestAnimationFrame: This will allow you to update the scroll position immediately after
+        the next DOM repaint without causing any delay or visual glitch. It's a smoother solution than $nextTick for cases
+        where visual glitches need to be minimized.
+    --}}
+    requestAnimationFrame(() => {
+           updateScrollPosition();
+    });
+
 
 "
-    @update-height.window="
 
-    await $nextTick();
-            newHeight=$el.scrollHeight;
-
-            oldHeight= height;
-
-            $el.scrollTop=newHeight- oldHeight;
-
-            height=newHeight;
-
-
-"
     id="conversation"
-    class="flex flex-col relative gap-2 gap-y-4   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
+
+    x-ref="chatbox"
+    class="flex flex-col h-full relative gap-2 gap-y-4  p-2.5  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
     style="contain: content" :class="{ 'invisible': initializing, 'visible': !initializing }">
 
 
@@ -68,7 +100,7 @@ if((scrollTop<=0) && canLoadMore){
 
     
 
-            <div class="sticky top-0 uppercase p-2 rounded-xl text-sm text-center dark:bg-gray-800 dark:text-white/90  w-24 mx-auto ">        {{$key}}</div>
+            <div class="sticky top-0 uppercase p-2 shadow-sm rounded-xl text-sm text-center bg-white dark:bg-gray-800 dark:text-white/90  w-24 mx-auto ">        {{$key}}</div>
 
             @foreach ($messageGroup as $key => $message)
                 {{-- @dd($message) --}}

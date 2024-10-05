@@ -548,7 +548,38 @@ class Chat extends Component
 
         #dispatch event- update height
         $this->dispatch('update-height');
+
+   //     dump('ice');
+
+        
+        
     }
+
+    function loadMessages()
+{
+    # Get total message count
+    $count = Message::where('conversation_id', $this->conversation->id)
+        ->count();
+
+    # Fetch paginated messages
+    $messages = Message::where('conversation_id', $this->conversation->id)
+        ->with('parent')
+        ->orderBy('created_at', 'asc')
+        ->skip($count - $this->paginate_var)
+        ->take($this->paginate_var)
+        ->get();  // Fetch messages as Eloquent collection
+
+         // Calculate whether more messages can be loaded
+    # Group the messages
+    $this->loadedMessages = $messages
+    ->groupBy(fn($message) => $this->messageGroupKey($message))  // Grouping by custom logic
+    ->map->values();  // Re-index each group
+    
+
+    $this->canLoadMore = $count > $messages->count();
+    
+    return  $this->loadedMessages;
+}
 
 
     // function loadMessages()
@@ -611,31 +642,7 @@ class Chat extends Component
 //     //return $groupedMessages;
 // }
 
-function loadMessages()
-{
-    # Get total message count
-    $count = Message::where('conversation_id', $this->conversation->id)
-        ->count();
 
-    # Fetch paginated messages
-    $messages = Message::where('conversation_id', $this->conversation->id)
-        ->with('parent')
-        ->orderBy('created_at', 'asc')
-        ->skip($count - $this->paginate_var)
-        ->take($this->paginate_var)
-        ->get();  // Fetch messages as Eloquent collection
-
-    # Group the messages
-    $this->loadedMessages = $messages->groupBy(function ($message) {
-        return $this->messageGroupKey($message);  // Grouping by custom logic
-    })->map(function ($group) {
-        return $group->values();  // Ensure groups are standard collections with re-indexed keys
-    });
-
-    // Calculate whether more messages can be loaded
-    $this->canLoadMore = $count > $messages->count();
-
-}
 
 
 
