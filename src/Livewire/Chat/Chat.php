@@ -646,17 +646,6 @@ class Chat extends Component
 
 
 
-
-
-    /* to generate color auth message background color */
-    public function getAuthMessageBodyColor(): string
-    {
-
-        $color = config('wirechat.theme', 'blue');
-
-        return 'bg-' . $color . '-500';
-    }
-
     public function mount()
     {
         //auth 

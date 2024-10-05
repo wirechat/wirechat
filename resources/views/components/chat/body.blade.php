@@ -100,7 +100,7 @@ x-init="
 
     
 
-            <div class="sticky top-0 uppercase p-2 shadow-sm rounded-xl text-sm text-center bg-white dark:bg-gray-800 dark:text-white/90  w-24 mx-auto ">        {{$key}}</div>
+            <div class="sticky top-0 uppercase p-2 shadow-sm px-2.5 rounded-xl text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">  {{$key}}</div>
 
             @foreach ($messageGroup as $key => $message)
                 {{-- @dd($message) --}}
