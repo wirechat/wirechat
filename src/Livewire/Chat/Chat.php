@@ -536,11 +536,9 @@ class Chat extends Component
         $this->dispatchMessageCreatedEvent($message);
     }
 
-    // #[On('loadMore')]
+    // load more messages
     function loadMore()
     {
-        //dd('reached');
-
         #increment
         $this->paginate_var += 10;
         #call loadMessage
@@ -548,11 +546,6 @@ class Chat extends Component
 
         #dispatch event- update height
         $this->dispatch('update-height');
-
-   //     dump('ice');
-
-        
-        
     }
 
     function loadMessages()
