@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
@@ -108,12 +109,14 @@ trait Chatable
             'conversation_id' => $existingConversation->id,
             'participantable_id' => $authenticatedUserId,
             'participantable_type' => $authenticatedUserType,
+            'role'=>ParticipantRole::OWNER
         ]);
 
         Participant::create([
             'conversation_id' => $existingConversation->id,
             'participantable_id' => $participantId,
             'participantable_type' => $participantType,
+            'role'=>ParticipantRole::OWNER
         ]);
 
 

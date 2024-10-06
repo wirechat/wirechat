@@ -1,6 +1,7 @@
 <?php
 
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
@@ -42,7 +43,6 @@ describe('Getting conversations',function(){
 
 describe('createConversationWith() ',function(){
 
-
     it('creates & returns created conversation when createConversationWith is called', function () {
 
         $auth = User::factory()->create();
@@ -80,6 +80,34 @@ describe('createConversationWith() ',function(){
 
     });
 
+    it('It saves role as owner for both paritipants', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        //create conversation
+        $conversation = $auth->createConversationWith($receiver);
+
+        // Eager load the participants relationship
+
+
+        $conversation= Conversation::find($conversation->id);
+
+        $bothAreOwners = false;
+
+
+        foreach ($conversation->participants as $key => $value) {
+
+            $bothAreOwners = $value->role == ParticipantRole::OWNER;
+            # code...
+        }
+
+        //check database
+        expect($bothAreOwners)->toBe(true);
+
+    })->only();
+
     it('saved correct type and id in participants model', function () {
 
         $auth = User::factory()->create();
@@ -107,7 +135,6 @@ describe('createConversationWith() ',function(){
 
 
     });
-
 
     test('The created conversation must be PRIVATE', function () {
 
@@ -148,7 +175,6 @@ describe('createConversationWith() ',function(){
 
     });
 
-
     it('it creates message model when a message is passed ', function () {
 
         $auth = User::factory()->create();
@@ -166,7 +192,6 @@ describe('createConversationWith() ',function(){
 
 
     });
-
 
     it('user can create conversation with themselves', function () {
 
@@ -196,7 +221,6 @@ describe('createConversationWith() ',function(){
 
     });
 
-
     it('it does not create duplicate conversation is conversation already exists between same user', function () {
 
         $auth = User::factory()->create();
@@ -214,9 +238,6 @@ describe('createConversationWith() ',function(){
 
 
     });
-
-
-
 
 });
 

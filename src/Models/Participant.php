@@ -4,6 +4,7 @@ namespace Namu\WireChat\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 
 class Participant extends Model
@@ -13,7 +14,13 @@ class Participant extends Model
     protected $fillable = [
         'conversation_id',
         'participantable_id',
-        'participantable_type'
+        'participantable_type',
+        'role'
+    ];
+
+
+    protected $casts=[
+        'role'=>ParticipantRole::class
     ];
 
 

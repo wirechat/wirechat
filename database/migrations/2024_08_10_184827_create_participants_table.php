@@ -18,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('conversation_id');
             $table->foreign('conversation_id')->references('id')->on((new Conversation())->getTable())->cascadeOnDelete();
-    
+            $table->string('role');
             $table->string('participantable_id');
             $table->string('participantable_type');
     
