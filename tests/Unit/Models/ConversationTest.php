@@ -6,6 +6,7 @@ use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
+use Namu\WireChat\Models\Room;
 use Workbench\App\Models\User;
 
 describe('MarkAsRead()',function(){
@@ -397,6 +398,30 @@ describe('deleting permanently()',function(){
 
         //assert count
         expect($conversation->reads()->count())->toBe(0);
+
+    });
+
+
+    it('deletes room when conversation is deleted ', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create();
+
+
+         $conversation= $auth->createGroup();
+         $room = $conversation ->room;
+
+        //get conversation reads
+         expect(Room::find($room->id))->not->toBe(null);
+
+
+        //Delete message
+        $conversation->delete();
+
+        //assert count
+        expect(Room::find($room->id))->toBe(null);
+
+
 
     });
 

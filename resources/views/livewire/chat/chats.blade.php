@@ -1,4 +1,58 @@
 @use('Namu\WireChat\Facades\WireChat')
+
+@php
+
+$primaryColor= WireChat::getColor();
+
+@endphp
+
+@assets
+    <style>
+        :root {
+            --primary-color: {{ $primaryColor }}
+        }
+
+        .custom-scrollbar {
+            overflow-y: auto;
+            /* Make sure the div is scrollable */
+
+            scrollbar-width: 7px;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+                background-color: transparent;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                border-radius: 15px;
+                visibility: hidden;
+                background-color: #d1d5db;
+            }
+
+            /* Show scrollbar on hover */
+            &:hover {
+                &::-webkit-scrollbar-thumb {
+                    visibility: visible;
+                }
+            }
+
+            @media (prefers-color-scheme: dark) {
+                &::-webkit-scrollbar-thumb {
+                    background-color: #374151;
+                }
+            }
+
+            &::-webkit-scrollbar-track {
+                background-color: transparent;
+            }
+
+
+
+        }
+    </style>
+@endassets
+
+
 <div x-init=" setTimeout(() => {
      conversationElement = document.getElementById('conversation-' + {{ $selectedConversationId }});
 
@@ -19,10 +73,8 @@
     <x-wirechat::chats.header :users="$users" />
 
 
-    <main x-data="{canLoadMore: @entangle('canLoadMore')}" 
-        
-        {{-- Detect when scrolled to the bottom --}}
-        @scroll="
+    <main x-data="{ canLoadMore: @entangle('canLoadMore') }" {{-- Detect when scrolled to the bottom --}}
+        @scroll.self.debounce="
         scrollTop = $el.scrollTop;
         scrollHeight = $el.scrollHeight;
         clientHeight = $el.clientHeight;
@@ -32,11 +84,12 @@
             $wire.loadMore();
         }
         "
-        class="   overflow-y-scroll py-2 overflow-hidden grow  h-full relative " style="contain:content">
+         class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">
 
 
         @if (config('wirechat.allow_chats_search', false) == true)
-            <div x-cloak wire:loading.delay.shorter.class.remove="hidden" wire:target="search"class="hidden transition-all duration-300 ">
+            <div x-cloak wire:loading.delay.shorter.class.remove="hidden"
+                wire:target="search"class="hidden transition-all duration-300 ">
                 <x-wirechat::loading-spin />
             </div>
         @endif
@@ -52,11 +105,11 @@
                         $isReadByAuth = $conversation?->readBy(auth()?->user());
 
                     @endphp
-                    
+
                     {{-- Chat list item --}}
                     {{-- We use style here to make it easy for dynamic and safe injection --}}
                     <li id="conversation-{{ $conversation->id }}" wire:key="conversation-{{ $conversation->id }}"
-                     @style([
+                        @style([
                             'border-color:' . $primaryColor . '20' => $selectedConversationId == $conversation?->id,
                         ]) @class([
                             'py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
@@ -72,7 +125,7 @@
                         <aside class="grid  grid-cols-12 w-full">
 
 
-  
+
                             <a wire:navigate href="{{ route('wirechat.chat', $conversation->id) }}"
                                 class="col-span-10 border-b pb-2 border-gray-100 dark:border-gray-700 relative overflow-hidden truncate leading-5 w-full flex-nowrap p-1">
 
@@ -118,7 +171,8 @@
                                             {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->hasAttachment() ? '📎 Attachment' : '') }}
                                         </p>
 
-                                        <span class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
+                                        <span
+                                            class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
 
 
                                     </div>
@@ -132,9 +186,8 @@
                                 class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth ? 'visible' : 'invisible' }} col-span-2 flex flex-col text-center my-auto">
 
                                 {{-- Dots icon --}}
-                                <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16"
-                                    height="16" fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500"
-                                    viewBox="0 0 16 16">
+                                <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                    fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
                                     <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
                                 </svg>
 
@@ -150,15 +203,13 @@
 
             {{-- Load more button --}}
             @if ($canLoadMore)
-            <section class="w-full justify-center flex my-3">
-                <button dusk="loadMoreButton" @click="$wire.loadMore()" class=" text-sm hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
-                    Load more
-                </button>
-            </section>
+                <section class="w-full justify-center flex my-3">
+                    <button dusk="loadMoreButton" @click="$wire.loadMore()"
+                        class=" text-sm hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
+                        Load more
+                    </button>
+                </section>
             @endif
-
-
-
         @else
             <div class="w-full flex items-center h-full justify-center">
                 <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet</h6>

@@ -94,13 +94,9 @@ x-init="
     <!--Message-->
     @if ($loadedMessages)
         {{-- @dd($loadedMessages) --}}
-        @foreach ($loadedMessages as $key => $messageGroup)
-            {{-- @dd($key); --}}
+        @foreach ($loadedMessages as $date => $messageGroup)
 
-
-    
-
-            <div class="sticky top-0 uppercase p-2 shadow-sm px-2.5 rounded-xl text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">  {{$key}}</div>
+        <div class="sticky top-0 uppercase p-2 shadow-sm px-2.5 rounded-xl text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">  {{$date}}</div>
 
             @foreach ($messageGroup as $key => $message)
                 {{-- @dd($message) --}}
@@ -124,16 +120,16 @@ x-init="
 
                 <div wire:key="message-{{ $key }}" @class([
                     'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
-                    'ml-auto' => $belongsToAuth,
-                ])>
+                    'ml-auto' => $belongsToAuth
+                    ])>
 
                     {{-- Show parent/reply message --}}
                     @if ($parent != null)
                         <div @class([
-                            '  max-w-fit   flex flex-col gap-y-2',
-                            'ml-auto' => $belongsToAuth,
-                            'ml-9 sm:ml-10' => !$belongsToAuth,
-                        ])>
+                                'max-w-fit   flex flex-col gap-y-2',
+                                'ml-auto' => $belongsToAuth,
+                                'ml-9 sm:ml-10' => !$belongsToAuth
+                              ])>
 
                             <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
                                 {{ $message?->ownedBy(auth()->user()) ? 'You ' : $message->sendable?->display_name ?? 'User' }}
@@ -173,11 +169,11 @@ x-init="
                             <button wire:click="setReply('{{ $message->id }}')"
                                 class="hover:scale-110 transition-transform">
                                 {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
-                        stroke="currentColor" class="w-4 h-4 text-gray-600/80 dark:text-white">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                    </svg> --}}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                      stroke="currentColor" class="w-4 h-4 text-gray-600/80 dark:text-white">
+                                      <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                                 </svg> --}}
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                     fill="currentColor" class="bi bi-reply-fill w-4 h-4 dark:text-white"
                                     viewBox="0 0 16 16">
                                     <path

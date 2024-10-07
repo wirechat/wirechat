@@ -20,9 +20,7 @@ class Conversation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'type',
-        'user_id'
-
+        'type'
     ];
 
     protected $casts = [
@@ -47,8 +45,9 @@ class Conversation extends Model
 
             // Use a DB transaction to ensure atomicity
             DB::transaction(function () use ($conversation) {
-                // Delete associated participants 
-                $conversation->participants()->delete();
+
+            // Delete associated participants 
+            $conversation->participants()->delete();
 
 
             // Delete reads
@@ -59,11 +58,14 @@ class Conversation extends Model
             });
 
 
-                // Delete associated messages 
-                $conversation->messages()->forceDelete();
+            // Delete associated messages 
+            $conversation->messages()->forceDelete();
 
-                //Delete actions 
-                $conversation->actions()->delete();
+            //Delete actions 
+            $conversation->actions()->delete();
+
+            //Delete actions 
+            $conversation->room()->delete();
             });
         });
     }
@@ -126,10 +128,10 @@ class Conversation extends Model
         return $this->type == ConversationType::PRIVATE;
     }
 
-    public function isGroup(): bool
-    {
-        return $this->type == ConversationType::GROUP;
-    }
+    // public function isGroup(): bool
+    // {
+    //     return $this->type == ConversationType::GROUP;
+    // }
 
 
     public function messages()
@@ -451,4 +453,29 @@ class Conversation extends Model
             ->where('conversation_id', $this->id)
             ->exists();
     }
+
+
+
+    /**
+     * ------------------------------------------
+     *  ROOM CONFIGURATION
+     * 
+     * -------------------------------------------
+     */
+
+    public function room()
+    {
+        return $this->hasOne(Room::class,'conversation_id');
+    }
+
+
+    public function isRoom()
+    {
+        return $this->type === ConversationType::ROOM;
+    }
+
+   
+
+ 
+
 }

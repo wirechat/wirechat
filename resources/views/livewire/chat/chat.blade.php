@@ -9,14 +9,53 @@ $primaryColor= WireChat::getColor();
 @endphp
 
 
-@assets
 
-<style>
-    :root {
-    --primary-color: {{$primaryColor}} 
-   }
-</style>
+@assets
+    <style>
+        :root {
+            --primary-color: {{ $primaryColor }}
+        }
+
+        .custom-scrollbar {
+            overflow-y: auto;
+            /* Make sure the div is scrollable */
+
+            scrollbar-width: 7px;
+
+            &::-webkit-scrollbar {
+                width: 8px;
+                background-color: transparent;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                border-radius: 15px;
+                /* visibility: hidden; */
+                background-color: #d1d5db;
+            }
+
+            /* Show scrollbar on hover */
+            &:hover {
+                &::-webkit-scrollbar-thumb {
+                    /* visibility: visible; */
+                }
+            }
+
+            @media (prefers-color-scheme: dark) {
+                &::-webkit-scrollbar-thumb {
+                    background-color: #374151;
+                }
+            }
+
+            &::-webkit-scrollbar-track {
+                background-color: transparent;
+            }
+
+
+
+        }
+    </style>
 @endassets
+
 
 
     <div x-data="{
@@ -468,7 +507,7 @@ $primaryColor= WireChat::getColor();
                         </div>
 
                             {{-- send Like --}}
-                            {{-- <button wire:click='sendLike()' type="button " class="group ml-auto">
+                            <button wire:click='sendLike()' type="button " class="group ml-auto">
 
                                 <!-- outlined heart -->
                                 <span class=" group-hover:hidden transition">
@@ -488,7 +527,7 @@ $primaryColor= WireChat::getColor();
                                     </svg>
                                 </span>
 
-                            </button> --}}
+                            </button>
                         </div>
                         
                     </form>

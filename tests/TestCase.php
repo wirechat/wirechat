@@ -71,7 +71,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         );
         $this->withoutVite();
 
-    //    $this->artisan('migrate:rollback')->run();
+        $this->artisan('migrate:fresh')->run();
+
       //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
         //here we add a new ile in the name of the mixture of the berir d 
         // $this->loadMigrationsFrom(__DIR__.'/migrations');

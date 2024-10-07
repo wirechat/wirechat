@@ -14,13 +14,7 @@ return new class extends Migration
     {
         Schema::create(WireChat::formatTableName('conversations'), function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['private', 'group'])->default('private'); // Single for 1-1, Group for group chats
-        
-            // Use user_id to track the user who created the conversation (relevant for groups/rooms)
-            $table->unsignedBigInteger('user_id')
-                  ->nullable()
-                  ->comment('The user who created the conversation (relevant for groups/rooms)'); 
-            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+            $table->string('type')->comment('Private is 1-1 and room is group or channel'); 
             $table->softDeletes();
         
             $table->timestamps();

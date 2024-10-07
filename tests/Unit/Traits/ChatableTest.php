@@ -2,9 +2,10 @@
 
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
+use Namu\WireChat\Enums\RoomType;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Participant;
+use Namu\WireChat\Models\Room;
 use Workbench\App\Models\User;
 
 describe('Getting conversations',function(){
@@ -524,3 +525,142 @@ describe('getUnreadCount()',function(){
     });
 
 });
+
+
+
+describe('createGroup',function(){
+
+    it('it creates conversation in database', function () {
+
+        $auth = User::factory()->create();
+        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:fake()->url());
+
+        //assert
+        expect(Conversation::find($conversation))->not->toBe(null);
+
+    });
+
+
+
+    it('it creates room in database', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:fake()->url());
+
+        $room = $conversation->room;
+
+        //assert
+        expect(Room::find($room->id)->id)->toBe($room->id);
+
+
+    });
+
+
+    it('it saves room data if correctly', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:'url');
+
+        $room = $conversation->room;
+
+
+        //assert
+        expect($room->type)->toBe(RoomType::GROUP);
+        expect($room->title)->toBe('New group');
+        expect($room->description)->toBe('description');
+        expect($room->avatar_url)->toBe('url');
+
+
+    });
+
+
+
+    it('creates participant as owner to group', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:'url');
+
+        $participant = $conversation->participants()->first();
+
+
+        //assert
+        expect($participant->participantable_id)->toEqual($auth->id);
+        
+
+
+    });
+
+
+})->only();
+
+
+describe('createChannel',function(){
+
+    it('it creates conversation in database', function () {
+
+        $auth = User::factory()->create();
+        $conversation= $auth->createChannel(title:'New channel',description:'description',avatar_url:fake()->url());
+
+        //assert
+        expect(Conversation::find($conversation))->not->toBe(null);
+
+    });
+
+
+
+    it('it creates room in database', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createChannel(title:'New channel',description:'description',avatar_url:fake()->url());
+
+        $room = $conversation->room;
+
+        //assert
+        expect(Room::find($room->id)->id)->toBe($room->id);
+
+
+    });
+
+
+    it('it saves room data if correctly', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createChannel(title:'New channel',description:'description',avatar_url:'url');
+
+        $room = $conversation->room;
+
+
+        //assert
+        expect($room->type)->toBe(RoomType::CHANNEL);
+        expect($room->title)->toBe('New channel');
+        expect($room->description)->toBe('description');
+        expect($room->avatar_url)->toBe('url');
+
+
+    });
+
+
+
+    it('creates participant as owner to channel', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createChannel(title:'New channel',description:'description',avatar_url:'url');
+
+        $participant = $conversation->participants()->first();
+
+
+        //assert
+        expect($participant->participantable_id)->toEqual($auth->id);
+        
+
+
+    });
+
+
+})->only();

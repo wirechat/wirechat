@@ -39,18 +39,12 @@ class Chat extends Component
     public int $paginate_var = 10;
     public bool $canLoadMore;
 
-
     public array $media = [];
-
-
     public array $files = [];
-
 
     //Theme 
     public string $authMessageBodyColor;
-
     public $replyMessage = null;
-
 
 
     public function getListeners()
@@ -289,6 +283,7 @@ class Chat extends Component
                 ]);
                 
 
+                dd('reached 2');
                 #append message to createdMessages
                 $createdMessages[] = $message;
 
@@ -305,7 +300,11 @@ class Chat extends Component
             }
 
             #push the message
-            $this->loadedMessages = $this->loadedMessages->concat($createdMessages);
+            foreach ($createdMessages as $key => $message) {
+                # code...
+
+                $this->pushMessage($message);
+            }
 
             #scroll to bottom
             $this->dispatch('scroll-bottom');
@@ -322,6 +321,7 @@ class Chat extends Component
                 'body' => $this->body
             ]);
 
+
             $this->reset('body');
 
             #push the message
@@ -337,7 +337,10 @@ class Chat extends Component
 
             #broadcast message  
             $this->dispatchMessageCreatedEvent($createdMessage);
+   
+
         }
+
         $this->reset('media', 'files', 'body');
 
         #scroll to bottom
@@ -346,6 +349,7 @@ class Chat extends Component
 
         #remove reply just incase it is present 
         $this->removeReply();
+
     }
 
     /**
@@ -442,19 +446,17 @@ class Chat extends Component
     }
 
     //helper to push message to loadedMessages
-    private function pushMessage(Message $message)  {
+   // Helper to push message to loadedMessages
+private function pushMessage(Message $message)  {
+    $groupKey = $this->messageGroupKey($message);
 
-        $groupKey = $this->messageGroupKey($message);
-        
-        # Check if the group exists, if not, create it
-        if (!$this->loadedMessages->has($groupKey)) {
-            $this->loadedMessages[$groupKey] = collect();
-        }
+    // Ensure loadedMessages is a Collection
+    $this->loadedMessages = collect($this->loadedMessages);
 
-        # Push the message to the correct group
-        $this->loadedMessages[$groupKey]->push($message);
+    // Use tap to create a new group if it doesn’t exist, then push the message
+    $this->loadedMessages->put($groupKey, $this->loadedMessages->get($groupKey, collect())->push($message));
+}
 
-    }
 
     //Method to remove method from collection
     private function removeMessage(Message $message){
@@ -526,6 +528,8 @@ class Chat extends Component
         #push the message
         $this->pushMessage($message);
 
+        
+
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
 
@@ -534,6 +538,8 @@ class Chat extends Component
 
         #dispatch event 
         $this->dispatchMessageCreatedEvent($message);
+
+
     }
 
     // load more messages
@@ -549,93 +555,29 @@ class Chat extends Component
     }
 
     function loadMessages()
-{
-    # Get total message count
-    $count = Message::where('conversation_id', $this->conversation->id)
-        ->count();
+    {
+        # Get total message count
+        $count = Message::where('conversation_id', $this->conversation->id)->count();
 
-    # Fetch paginated messages
-    $messages = Message::where('conversation_id', $this->conversation->id)
-        ->with('parent')
-        ->orderBy('created_at', 'asc')
-        ->skip($count - $this->paginate_var)
-        ->take($this->paginate_var)
-        ->get();  // Fetch messages as Eloquent collection
+        # Fetch paginated messages
+        $messages = Message::where('conversation_id', $this->conversation->id)
+            ->with('parent')
+            ->orderBy('created_at', 'asc')
+            ->skip($count - $this->paginate_var)
+            ->take($this->paginate_var)
+            ->get();  // Fetch messages as Eloquent collection
 
-         // Calculate whether more messages can be loaded
-    # Group the messages
-    $this->loadedMessages = $messages
-    ->groupBy(fn($message) => $this->messageGroupKey($message))  // Grouping by custom logic
-    ->map->values();  // Re-index each group
-    
+            // Calculate whether more messages can be loaded
+        # Group the messages
+        $this->loadedMessages = $messages
+        ->groupBy(fn($message) => $this->messageGroupKey($message))  // Grouping by custom logic
+        ->map->values();  // Re-index each group
+        
 
-    $this->canLoadMore = $count > $messages->count();
-    
-    return  $this->loadedMessages;
-}
-
-
-    // function loadMessages()
-    // {
-
-
-    //     #get count
-    //     $count = Message::where('conversation_id', $this->conversation->id)->where(function ($query) {
-    //       //  $query->whereNotDeleted();
-    //     })->count();
-
-    //     #skip and query
-    //     $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
-    //         ->where(function ($query) {
-    //           //  $query->whereNotDeleted();
-    //         })
-    //         ->with('parent')
-    //         ->orderBy('created_at', 'asc') 
-    //         ->skip($count - $this->paginate_var)
-    //         ->take($this->paginate_var)
-    //         ->get();
-            
-    //     // Calculate whether more messages can be loaded
-    //     $this->canLoadMore = $count > count($this->loadedMessages);
-
-
-
-    //     return $this->loadedMessages;
-    // }
-
-
-
-// function loadMessages()
-// {
-//     # Get total message count
-//     $count = Message::where('conversation_id', $this->conversation->id)
-//         ->count();
-
-//     # Fetch paginated messages
-//     $this->loadedMessages = Message::where('conversation_id', $this->conversation->id)
-//         ->with('parent')
-//         ->orderBy('created_at', 'asc')
-//         ->skip($count - $this->paginate_var)
-//         ->take($this->paginate_var)
-//         ->get()
-//         ->groupBy(function ($message) {
-//             return $this->messageGroupKey($message);
-//         })->values()
-//         ;
-
-//     // Calculate whether more messages can be loaded
-//     $this->canLoadMore = $count > count($this->loadedMessages->flatten());
-
-//     // Group messages by date
-
-//     // dd( count($this->loadedMessages->flatten()));
-//     // $this->loadedMessages = $this->loadedMessages;
-//     // dd($this->loadedMessages);
-
-//     //return $groupedMessages;
-// }
-
-
+        $this->canLoadMore = $count > $messages->count();
+        
+        return  $this->loadedMessages;
+    }
 
 
 
@@ -673,8 +615,6 @@ class Chat extends Component
 
     public function render()
     {
-       // sleep(3);
-       // $conversation = Conversation::first();
 
         return view('wirechat::livewire.chat.chat');
     }

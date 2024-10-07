@@ -9,11 +9,13 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
+use Namu\WireChat\Enums\RoomType;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Models\Read;
+use Namu\WireChat\Models\Room;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 /**
@@ -100,8 +102,7 @@ trait Chatable
 
         // Otherwise, create a new conversation
         $existingConversation = Conversation::create([
-            'type' => ConversationType::PRIVATE,
-            'user_id' => $authenticatedUserId,
+            'type' => ConversationType::PRIVATE
         ]);
 
         // Add the participants
@@ -136,7 +137,84 @@ trait Chatable
 
 
     /**
-     * Creates a conversation if one doesnt not already exists
+     * Room configuration
+     *
+     */
+
+
+
+     //helper to create rooms 
+
+     protected function createRoom(RoomType $type):Room  {
+        #Otherwise, create a new conversation
+          $conversation = Conversation::create([
+            'type' => ConversationType::ROOM
+        ]);
+
+        #create room 
+       $room= $conversation->room()->create([
+            'type'=>$type
+        ]);
+
+
+        #create participant as owner
+        Participant::create([
+            'conversation_id' => $conversation->id,
+            'participantable_id' => $this->id,
+            'participantable_type' => get_class($this),
+            'role'=>ParticipantRole::OWNER
+        ]);
+
+
+        return $room;
+     }
+
+     /**
+      * Create group
+      */
+     public function createGroup(string $title=null,string $description=null,string $avatar_url=null):Conversation
+     {
+
+        //create rooom
+       $room =  $this->createRoom(RoomType::GROUP);
+
+        //create room 
+        $room->update([
+            'title'=>$title,
+            'description'=>$description,
+            'avatar_url'=>$avatar_url
+        ]);
+
+
+        return $room->conversation;
+     }
+
+
+
+
+      /**
+      * Create group
+      */
+      public function createChannel(string $title=null,string $description=null,string $avatar_url=null):Conversation
+      {
+
+        //create rooom
+       $room =  $this->createRoom(RoomType::CHANNEL);
+
+        //create room 
+       $room->update([
+            'title'=>$title,
+            'description'=>$description,
+            'avatar_url'=>$avatar_url
+        ]);
+
+        return $room->conversation;
+     }
+
+
+
+    /**
+     * Creates a private conversation if one doesnt not already exists
      * And sends the attached message 
      * @return Message|null
      */
