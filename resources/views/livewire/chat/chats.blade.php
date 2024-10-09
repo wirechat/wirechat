@@ -6,7 +6,7 @@ $primaryColor= WireChat::getColor();
 
 @endphp
 
-@assets
+{{-- @assets
     <style>
         :root {
             --primary-color: {{ $primaryColor }}
@@ -51,7 +51,7 @@ $primaryColor= WireChat::getColor();
         }
     </style>
 @endassets
-
+ --}}
 
 <div x-init=" setTimeout(() => {
      conversationElement = document.getElementById('conversation-' + {{ $selectedConversationId }});
@@ -64,13 +64,14 @@ $primaryColor= WireChat::getColor();
     class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3 border-r dark:border-gray-700  ">
 
     @php
+        $authUser=auth()->user();
         $authId = $authUser->id;
         $primaryColor = WireChat::getColor();
 
     @endphp
 
     {{-- Import header --}}
-    <x-wirechat::chats.header :users="$users" />
+    <x-wirechat::chats.header />
 
 
     <main x-data="{ canLoadMore: @entangle('canLoadMore') }" {{-- Detect when scrolled to the bottom --}}
@@ -217,4 +218,7 @@ $primaryColor= WireChat::getColor();
 
         @endif
     </main>
+    
+
+
 </div>

@@ -26,10 +26,10 @@ class Chat extends Component
     use WithFileUploads;
     use WithPagination;
 
-    #[Locked] 
+    #[Locked]
     public $conversation;
 
-    #[Locked] 
+    #[Locked]
     public  $TYPE;
 
     public $receiver;
@@ -67,7 +67,7 @@ class Chat extends Component
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
         #abort if message does not belong to this conversation or is not owned by any participant
-        abort_unless($message->conversation_id==$this->conversation->id,403);
+        abort_unless($message->conversation_id == $this->conversation->id, 403);
 
         //Set owner as Id we are replying to 
         $this->replyMessage = $message;
@@ -110,7 +110,7 @@ class Chat extends Component
         app('livewire')->updateProperty($this, $name, $files);
     }
 
-    
+
     function listenBroadcastedMessage($event)
     {
 
@@ -118,7 +118,7 @@ class Chat extends Component
         $this->dispatch('scroll-bottom');
         $newMessage = Message::find($event['message_id']);
 
-       
+
 
 
         #push message
@@ -128,7 +128,7 @@ class Chat extends Component
         $newMessage->read_at = now();
         $newMessage->save();
     }
-  
+
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
@@ -161,9 +161,9 @@ class Chat extends Component
      * Delete conversation  */
     function deleteConversation()
     {
-        abort_unless(auth()->check(),401);
+        abort_unless(auth()->check(), 401);
 
-        
+
         #delete conversation 
         $this->conversation->deleteFor(auth()->user());
 
@@ -171,7 +171,7 @@ class Chat extends Component
         $this->redirectRoute("wirechat");
     }
 
-      /**
+    /**
      * clearChat  */
     // function clearChat()
     // {
@@ -184,15 +184,16 @@ class Chat extends Component
     //     $this->reset('loadedMessages');
     // }
 
-     protected function rateLimit(){
+    protected function rateLimit()
+    {
 
 
-        if (RateLimiter::tooManyAttempts('send-message:'.auth()->id(), $perMinute = 60)) {
+        if (RateLimiter::tooManyAttempts('send-message:' . auth()->id(), $perMinute = 60)) {
 
-            return abort(429,'Too many attempts!, Please slow down');
-         }
-          
-         RateLimiter::increment('send-message:'.auth()->id());
+            return abort(429, 'Too many attempts!, Please slow down');
+        }
+
+        RateLimiter::increment('send-message:' . auth()->id());
     }
 
     /**
@@ -261,7 +262,7 @@ class Chat extends Component
                  */
 
                 #save photo to disk 
-                $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk','public'));
+                $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
 
                 #create attachment
                 $createdAttachment = Attachment::create([
@@ -281,9 +282,7 @@ class Chat extends Component
                     'sendable_id' => auth()->id(), // Polymorphic sender ID
                     // 'body' => $this->body, // Add body if required
                 ]);
-                
 
-                dd('reached 2');
                 #append message to createdMessages
                 $createdMessages[] = $message;
 
@@ -324,6 +323,7 @@ class Chat extends Component
 
             $this->reset('body');
 
+
             #push the message
             $this->pushMessage($createdMessage);
 
@@ -337,8 +337,6 @@ class Chat extends Component
 
             #broadcast message  
             $this->dispatchMessageCreatedEvent($createdMessage);
-   
-
         }
 
         $this->reset('media', 'files', 'body');
@@ -349,14 +347,14 @@ class Chat extends Component
 
         #remove reply just incase it is present 
         $this->removeReply();
-
     }
 
     /**
      * Delete for me means any participant of the conversation  can delete the message
      * and this will hide the message from them but other participants can still access/see it 
      **/
-    function deleteForMe(Message $message){
+    function deleteForMe(Message $message)
+    {
 
 
         #make sure user is authenticated
@@ -365,18 +363,17 @@ class Chat extends Component
 
         #make sure user belongs to conversation from the message
         #We are checking the $message->conversation for extra security because the param might be tempered with 
-        abort_unless(auth()->user()->belongsToConversation($message->conversation),403);
+        abort_unless(auth()->user()->belongsToConversation($message->conversation), 403);
 
         #remove message from collection
         $this->removeMessage($message);
-  
+
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
 
 
         #delete For $user
         $message->deleteFor(auth()->user());
-
     }
 
 
@@ -385,7 +382,8 @@ class Chat extends Component
      * and this will completely delete the message from the database 
      * Unless it has a foreign key child or parent :then it i will be soft deleted
      **/
-    function deleteForEveryone(Message $message){
+    function deleteForEveryone(Message $message)
+    {
 
 
         #make sure user is authenticated
@@ -396,7 +394,7 @@ class Chat extends Component
 
         //make sure user belongs to conversation from the message
         //We are checking the $message->conversation for extra security because the param might be tempered with 
-        abort_unless(auth()->user()->belongsToConversation($message->conversation),403);
+        abort_unless(auth()->user()->belongsToConversation($message->conversation), 403);
 
         #remove message from collection
         $this->removeMessage($message);
@@ -407,61 +405,55 @@ class Chat extends Component
 
         //if message has reply then only soft delete it 
         if ($message->hasReply()) {
-        
+
             #delete message from database
             $message->delete();
+        } else {
+
+            #else Force delete message from database
+            $message->forceDelete();
         }
-        else {
-
-        #else Force delete message from database
-        $message->forceDelete();
-
-        }
-
-
-       
-
     }
 
 
     //Helper method to get group key 
     private function messageGroupKey(Message $message): string
-      {
+    {
 
         $messageDate = $message->created_at;
         $groupKey = '';
-            if ($messageDate->isToday()) {
-                $groupKey = 'Today';
-            } elseif ($messageDate->isYesterday()) {
-                $groupKey = 'Yesterday';
-            } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
-                $groupKey = $messageDate->format('l'); // Day name
-            } else {
-                $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
-            }
+        if ($messageDate->isToday()) {
+            $groupKey = 'Today';
+        } elseif ($messageDate->isYesterday()) {
+            $groupKey = 'Yesterday';
+        } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
+            $groupKey = $messageDate->format('l'); // Day name
+        } else {
+            $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
+        }
 
 
-            return $groupKey;
-        
+        return $groupKey;
     }
 
     //helper to push message to loadedMessages
-   // Helper to push message to loadedMessages
-private function pushMessage(Message $message)  {
-    $groupKey = $this->messageGroupKey($message);
+    private function pushMessage(Message $message)
+    {
+        $groupKey = $this->messageGroupKey($message);
 
-    // Ensure loadedMessages is a Collection
-    $this->loadedMessages = collect($this->loadedMessages);
+        // Ensure loadedMessages is a Collection
+        $this->loadedMessages = collect($this->loadedMessages);
 
-    // Use tap to create a new group if it doesn’t exist, then push the message
-    $this->loadedMessages->put($groupKey, $this->loadedMessages->get($groupKey, collect())->push($message));
-}
+        // Use tap to create a new group if it doesn’t exist, then push the message
+        $this->loadedMessages->put($groupKey, $this->loadedMessages->get($groupKey, collect())->push($message));
+    }
 
 
     //Method to remove method from collection
-    private function removeMessage(Message $message){
+    private function removeMessage(Message $message)
+    {
 
-        $groupKey= $this->messageGroupKey($message);
+        $groupKey = $this->messageGroupKey($message);
 
         # Remove the message from the correct group
         if ($this->loadedMessages->has($groupKey)) {
@@ -474,7 +466,7 @@ private function pushMessage(Message $message)  {
                 $this->loadedMessages->forget($groupKey)->values();
             }
 
-          //  $this->loadedMessages;
+            //  $this->loadedMessages;
         }
     }
 
@@ -497,7 +489,7 @@ private function pushMessage(Message $message)  {
             //!remove the receiver from the messageCreated and add it to the job instead 
             //!also do not forget to exlude auth user or message owner from particpants 
 
-            BroadcastMessage::dispatch($this->conversation,$message);
+            BroadcastMessage::dispatch($this->conversation, $message);
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -528,7 +520,7 @@ private function pushMessage(Message $message)  {
         #push the message
         $this->pushMessage($message);
 
-        
+
 
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
@@ -538,8 +530,6 @@ private function pushMessage(Message $message)  {
 
         #dispatch event 
         $this->dispatchMessageCreatedEvent($message);
-
-
     }
 
     // load more messages
@@ -567,15 +557,15 @@ private function pushMessage(Message $message)  {
             ->take($this->paginate_var)
             ->get();  // Fetch messages as Eloquent collection
 
-            // Calculate whether more messages can be loaded
+        // Calculate whether more messages can be loaded
         # Group the messages
         $this->loadedMessages = $messages
-        ->groupBy(fn($message) => $this->messageGroupKey($message))  // Grouping by custom logic
-        ->map->values();  // Re-index each group
-        
+            ->groupBy(fn($message) => $this->messageGroupKey($message))  // Grouping by custom logic
+            ->map->values();  // Re-index each group
+
 
         $this->canLoadMore = $count > $messages->count();
-        
+
         return  $this->loadedMessages;
     }
 
@@ -589,7 +579,7 @@ private function pushMessage(Message $message)  {
 
         //assign converstion
 
-        info(['conversation count before getting'=> Conversation::withoutGlobalScopes()->count()]);
+        info(['conversation count before getting' => Conversation::withoutGlobalScopes()->count()]);
 
 
         $this->conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('id', $this->conversation)->first();
@@ -597,11 +587,11 @@ private function pushMessage(Message $message)  {
         abort_unless($this->conversation, 404);
 
         //set converstion type
-        $TYPE= $this->conversation->type;
+        $TYPE = $this->conversation->type;
 
-     
+
         $belongsToConversation = auth()->user()->belongsToConversation($this->conversation);
- 
+
 
         abort_unless($belongsToConversation, 403);
 

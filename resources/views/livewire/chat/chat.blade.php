@@ -690,6 +690,7 @@ $primaryColor= WireChat::getColor();
                 }))
             </script>
         @endscript
-
+        
+    
     </div>
 

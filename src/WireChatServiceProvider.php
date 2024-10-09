@@ -9,6 +9,8 @@ use Namu\WireChat\Livewire\Chat\View;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Livewire\Chat\Index;
+use Namu\WireChat\Livewire\Components\NewChat;
+use Namu\WireChat\Livewire\Modal\Modal;
 use Namu\WireChat\Services\WireChatService;
 use Namu\WireChat\View\Components\ChatBox\Image;
 
@@ -19,6 +21,7 @@ class WireChatServiceProvider extends ServiceProvider
     function boot()  {
 
         $this->loadLivewireComponents();
+
 
         Blade::component('wirechat::chatbox.image', Image::class);
 
@@ -43,6 +46,12 @@ class WireChatServiceProvider extends ServiceProvider
         Livewire::component('chat', Chat::class);
         Livewire::component('chats', Chats::class);
 
+        //wirechat  modal 
+        Livewire::component('wirechat-modal', Modal::class);
+
+        Livewire::component('new-chat', NewChat::class);
+
+
 
     }
 
@@ -59,6 +68,7 @@ class WireChatServiceProvider extends ServiceProvider
             return new WireChatService();
         });
     
+  //      $this->app->register(LivewireModalServiceProvider::class);
         
     }
 
