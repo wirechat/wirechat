@@ -57,6 +57,8 @@ class Chats extends Component
     // Clear previous results if there is a new search term
     if ($this->search) {
       $this->conversations = []; // Clear previous results when a new search is made
+       #also reset page
+       $this->reset(['page','canLoadMore']);
     }
 
     // Start the query with eager loading

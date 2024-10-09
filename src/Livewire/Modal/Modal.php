@@ -7,7 +7,6 @@ use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
-use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
 

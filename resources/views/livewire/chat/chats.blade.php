@@ -6,7 +6,7 @@ $primaryColor= WireChat::getColor();
 
 @endphp
 
-{{-- @assets
+@assets
     <style>
         :root {
             --primary-color: {{ $primaryColor }}
@@ -51,7 +51,7 @@ $primaryColor= WireChat::getColor();
         }
     </style>
 @endassets
- --}}
+
 
 <div x-init=" setTimeout(() => {
      conversationElement = document.getElementById('conversation-' + {{ $selectedConversationId }});
@@ -206,7 +206,7 @@ $primaryColor= WireChat::getColor();
             @if ($canLoadMore)
                 <section class="w-full justify-center flex my-3">
                     <button dusk="loadMoreButton" @click="$wire.loadMore()"
-                        class=" text-sm hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
+                        class=" text-sm dark:text-white hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
                         Load more
                     </button>
                 </section>
