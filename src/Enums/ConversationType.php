@@ -7,6 +7,6 @@ enum ConversationType :string
 {
     
     case PRIVATE = 'private';
-    case ROOM = 'room';
+    case GROUP = 'group';
 
 }

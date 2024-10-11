@@ -68,7 +68,6 @@
         </main>
 
     </div>
-    <x-wirechat::toast />
     @livewireScripts
     @once
     @livewire('wirechat-modal')

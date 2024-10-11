@@ -32,21 +32,24 @@ return [
      * Home route:
      * This is the route to redirect to when exit button is clicked in the chat*/
      'redirect_route'=>"/users",
+    
 
-
-
-     'extendable_trait' => \App\Traits\TestTrait::class,
+    'routes' => [
+        'prefix' => '/chats',
+        'middleware' => ['web', 'auth'],
+    ],
 
      /**
      * Features:
      * You can configure the feature you want to allow for wirechat */
-     'allow_new_chat_modal'=>true,     //bool -Show the modal to create create a new conversation inside 
+     'allow_new_chat_modal'=>true,     //bool -Show the modal to create create a new conversation inside
+     'allow_new_group_modal'=>true,    //allow group creation
      'allow_chats_search'=>true,       //bool -Show the search bar to existing conversations
-     'allow_media_attachments'=>true, //bool -Allow participants to share media in conversatoin (images, vidoes, gifs, etc)
-     'allow_file_attachments'=>true,  //bool -Allow participants to share files in conversatoin (documents, zip , pdf, etc)
-     
+     'allow_media_attachments'=>true,  //bool -Allow participants to share media in conversatoin (images, vidoes, gifs, etc)
+     'allow_file_attachments'=>true,   //bool -Allow participants to share files in conversatoin (documents, zip , pdf, etc)
 
      'user_searchable_fields'=>['name','email'],   //['email','profession']etc
+     'max_group_members'=>3,        //Maximum members allowed per group
 
     /**
      * Attachments:

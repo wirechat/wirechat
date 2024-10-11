@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Room;
+use Namu\WireChat\Models\Group;
 
 return new class extends Migration
 {
@@ -14,11 +14,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create((new Room())->getTable(), function (Blueprint $table) {
+        Schema::create((new Group())->getTable(), function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('conversation_id');
             $table->foreign('conversation_id')->references('id')->on((new Conversation())->getTable())->onDelete('cascade');
-            $table->string('type');
             $table->string('title')->nullable();
             $table->string('description')->nullable();
             $table->string('avatar_url')->nullable();
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists((new Room())->getTable());
+        Schema::dropIfExists((new Group())->getTable());
     }
 };

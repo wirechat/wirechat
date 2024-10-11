@@ -71,7 +71,8 @@
                 <input id="chats-search-field" name="chats_search" type="search" wire:model.live.debounce='search'
                     placeholder="Search"
                     class=" col-span-11 border-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
-            </div>
+          
+                </div>
 
         </section>
     @endif

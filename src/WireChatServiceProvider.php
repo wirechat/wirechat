@@ -10,6 +10,7 @@ use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Livewire\Chat\Index;
 use Namu\WireChat\Livewire\Components\NewChat;
+use Namu\WireChat\Livewire\Components\NewGroup;
 use Namu\WireChat\Livewire\Modal\Modal;
 use Namu\WireChat\Services\WireChatService;
 use Namu\WireChat\View\Components\ChatBox\Image;
@@ -50,6 +51,8 @@ class WireChatServiceProvider extends ServiceProvider
         Livewire::component('wirechat-modal', Modal::class);
 
         Livewire::component('new-chat', NewChat::class);
+        Livewire::component('new-group', NewGroup::class);
+
 
 
 

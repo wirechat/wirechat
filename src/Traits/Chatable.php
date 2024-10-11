@@ -143,17 +143,25 @@ trait Chatable
 
 
 
-     //helper to create rooms 
+     
+     /**
+      * Create group
+      */
+     public function createGroup(string $title,string $description=null,string $avatar_url=null):Conversation
+     {
+        
 
-     protected function createRoom(RoomType $type):Room  {
+        //create rooom
         #Otherwise, create a new conversation
-          $conversation = Conversation::create([
-            'type' => ConversationType::ROOM
+        $conversation = Conversation::create([
+            'type' => ConversationType::GROUP
         ]);
 
         #create room 
-       $room= $conversation->room()->create([
-            'type'=>$type
+       $group= $conversation->group()->create([
+            'title'=>$title,
+            'description'=>$description,
+            'avatar_url'=>$avatar_url
         ]);
 
 
@@ -166,50 +174,9 @@ trait Chatable
         ]);
 
 
-        return $room;
+        return $conversation;
      }
-
-     /**
-      * Create group
-      */
-     public function createGroup(string $title=null,string $description=null,string $avatar_url=null):Conversation
-     {
-
-        //create rooom
-       $room =  $this->createRoom(RoomType::GROUP);
-
-        //create room 
-        $room->update([
-            'title'=>$title,
-            'description'=>$description,
-            'avatar_url'=>$avatar_url
-        ]);
-
-
-        return $room->conversation;
-     }
-
-
-
-
-      /**
-      * Create group
-      */
-      public function createChannel(string $title=null,string $description=null,string $avatar_url=null):Conversation
-      {
-
-        //create rooom
-       $room =  $this->createRoom(RoomType::CHANNEL);
-
-        //create room 
-       $room->update([
-            'title'=>$title,
-            'description'=>$description,
-            'avatar_url'=>$avatar_url
-        ]);
-
-        return $room->conversation;
-     }
+ 
 
 
 
@@ -412,9 +379,9 @@ trait Chatable
                 $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
             }
         })
-            //  ->where('id', '!=', $this->id) // Exclude the authenticated user
-            ->limit(20)
-            ->get();
+        //  ->where('id', '!=', $this->id) // Exclude the authenticated user
+        ->limit(20)
+        ->get();
     }
 
 
@@ -442,13 +409,6 @@ trait Chatable
         return $searchableFields ?: null;
     }
 
-
-    /**
-     * Get all of the reads for the model (polymorphic).
-     */
-    public function reads(): MorphMany
-    {
-        return $this->morphMany(Read::class, 'readable');
-    }
+ 
 
 }

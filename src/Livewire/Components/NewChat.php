@@ -1,27 +1,29 @@
 <?php
 
 namespace Namu\WireChat\Livewire\Components;
+
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Modal\ModalComponent ;
 
 class NewChat extends ModalComponent
 {
 
     public $users;
-    public $searchUsers;
+    public $search;
       /** 
    * Search For users to create conversations with
    */
-  public function updatedSearchUsers()
+  public function updatedsearch()
   {
 
 
     //Make sure it's not empty
-    if (blank($this->searchUsers)) {
+    if (blank($this->search)) {
 
       $this->users = null;
     } else {
 
-      $this->users = auth()->user()->searchUsers($this->searchUsers);
+      $this->users = auth()->user()->searchUsers($this->search);
     }
   }
 
@@ -47,6 +49,13 @@ class NewChat extends ModalComponent
     }
   }
 
+
+
+  public function mount()  {
+
+    abort_unless(auth()->check(),401);
+    abort_unless(WireChat::allowsNewChatModal(),503,'The NewChat feature is currently unavailable.');
+  }
 
 
     public function render()

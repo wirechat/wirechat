@@ -52,4 +52,60 @@ class WireChatService
     {
         return config('wirechat.table_prefix') . $table;
     }
+
+      //return a formatted tabel name 
+      public static function allowsGroups(): bool
+      {
+          return config('wirechat.allow_new_group_modal',false);
+      }
+
+
+
+      /**
+       * Checks if should show new group modal 
+       * @return bool
+      */
+      public static function allowsNewGroupModal(): bool
+      {
+          return config('wirechat.allow_new_group_modal',false);
+      }
+      
+
+      /**
+       * Checks if should show new chat modal 
+       * @return bool
+      */
+      public static function allowsNewChatModal(): bool
+      {
+          return config('wirechat.allow_new_chat_modal',false);
+      }
+
+
+    /**
+     * Maximum members allowed per group
+     * @return int
+     */
+    public static function maxGroupMembers(): int
+    {
+        return (int) config('wirechat.max_group_members', 1000);
+    }
+
+
+    /**
+     * Get wirechat storage disk 
+     */
+    public static function storageDisk(): string
+    {
+        return (string) config('wirechat.attachments.storage_disk', 'public');
+    }
+
+     /**
+     * Get wirechat storage folder 
+     */
+    public static function storageFolder(): string
+    {
+        return (string) config('wirechat.attachments.storage_folder', 'attachments');
+    }
+
 }
+

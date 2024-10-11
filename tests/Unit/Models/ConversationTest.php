@@ -6,7 +6,7 @@ use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Room;
+use Namu\WireChat\Models\group;
 use Workbench\App\Models\User;
 
 describe('MarkAsRead()',function(){
@@ -352,7 +352,7 @@ describe('deleting permanently()',function(){
 
         $auth = User::factory()->create();
 
-        $conversation = Conversation::factory()->create(['type'=>ConversationType::GROUP]);
+        $conversation = Conversation::factory()->create(['type'=>ConversationType::Group]);
 
        // dd($conversation);
         $conversation->addParticipant($auth);
@@ -402,24 +402,24 @@ describe('deleting permanently()',function(){
     });
 
 
-    it('deletes room when conversation is deleted ', function () {
+    it('deletes group when conversation is deleted ', function () {
         $auth = User::factory()->create();
 
         $receiver = User::factory()->create();
 
 
          $conversation= $auth->createGroup();
-         $room = $conversation ->room;
+         $group = $conversation ->group;
 
         //get conversation reads
-         expect(Room::find($room->id))->not->toBe(null);
+         expect(Group::find($group->id))->not->toBe(null);
 
 
         //Delete message
         $conversation->delete();
 
         //assert count
-        expect(Room::find($room->id))->toBe(null);
+        expect(Group::find($group->id))->toBe(null);
 
 
 

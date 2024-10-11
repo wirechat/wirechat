@@ -1,0 +1,434 @@
+<?php
+///Presence test
+
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
+use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Livewire\Components\NewGroup;
+use Namu\WireChat\Models\Attachment;
+use Namu\WireChat\Models\Conversation;
+use Workbench\App\Models\User as ModelsUser;
+
+
+beforeEach(function (){
+
+    Storage::fake(WireChat::storageDisk());
+});
+
+
+it('user must be authenticated', function () {
+    $auth = ModelsUser::factory()->create();
+    $request = Livewire::test(NewGroup::class);
+
+    $request->assertStatus(401);
+
+});
+
+
+test('aborts 503 is feature not available', function () {
+    Config::set('wirechat.allow_new_group_modal',false);
+    $auth = ModelsUser::factory()->create();
+    
+    $request = Livewire::actingAs($auth)->test(NewGroup::class);
+
+    $request->assertStatus(503,'The New Group feature is currently unavailable.');
+
+});
+
+
+
+describe('Initial page',function(){
+
+    test('Name label is set and property is wired', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+        ->assertSee('Group Name')
+        ->assertPropertyWired('name');
+    
+    });
+
+    test('Name can be set', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+        ->set('name','Test')
+        ->assertSet('name','Test');
+    
+    });
+    
+    
+    test('Description label is set and property is wired', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+        ->assertPropertyWired('description')
+        ->assertSee('Description')
+        ;
+    
+    });
+    
+    test('Description can be set', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+        ->set('description','Test Description')
+        ->assertSet('description','Test Description');
+    });
+    
+    
+    test('Cancel button is set', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->assertSee('Cancel');
+    
+    });
+    
+    
+    test('Next button is set', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->assertSee('Next');
+    
+    });
+
+
+
+});
+
+describe('Validations',function(){
+
+    //validations
+    
+    test('Photo must be an image', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+
+        $file =UploadedFile::fake()->create('photo.mp3', '400');
+        $request->set('photo',$file)
+                ->call('validateDetails')
+                ->assertHasErrors('photo');
+    
+    });
+
+
+    test('A group name is required', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->set('name',null)
+                ->call('validateDetails')
+                ->assertHasErrors('name','Please provide a group name.')
+                ->assertSee('Please provide a group name.');
+    });
+
+
+    test('Name is max 120', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->set('name',str()->random(150))
+                ->call('validateDetails')
+                ->assertHasErrors('name','Name cannot exceed 120 characters.')
+                ->assertSee('Name cannot exceed 120 characters.');
+    });
+
+    test('Description is max 500', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->set('description',str()->random(501))
+                ->call('validateDetails')
+                ->assertHasErrors('description','Description cannot exceed 500 characters.')
+                ->assertSee('Description cannot exceed 500 characters.');
+    });
+
+
+
+
+    test('it sets add members to true after validations passed', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->set('name','test')
+                ->call('validateDetails')
+                ->assertHasNoErrors()
+                ->assertSet('showAddMembers',true);
+    });
+
+});
+
+
+describe('Add members page',function(){
+
+    test('Add Members title is set', function () {
+
+        Config::set('wirechat.max_group_members',1000);
+
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+
+        $maxGroupMembers = WireChat::maxGroupMembers();
+
+        $request
+                ->set('showAddMembers',true)
+                ->assertSee('Add Members')
+                ->assertSee('0 / 1000');
+
+    
+    });
+
+
+    test('Create button is set and wired', function () {
+        $auth = ModelsUser::factory()->create();
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+                ->set('showAddMembers',true)
+                ->assertSee('Create');
+    });
+
+
+
+    test('Search can be filtered', function () {
+        $auth = ModelsUser::factory()->create();
+        //create another user
+        ModelsUser::factory()->create(['name'=>'Micheal']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+                ->set('search','Mic')
+                ->assertSee('Micheal');
+    
+    });
+
+    test('calling addMember()  can add selected members', function () {
+        $auth = ModelsUser::factory()->create();
+        //create another user
+       $user=  ModelsUser::factory()->create(['name'=>'Micheal']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+                ->call('addMember',$user->id,$user->getMorphClass())
+                ->assertSee('Micheal');
+    
+    });
+
+
+    test('calling removeMember() can remove selected members', function () {
+        $auth = ModelsUser::factory()->create();
+        //create another user
+       $user=  ModelsUser::factory()->create(['name'=>'Micheal']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+                #first add member
+                ->call('addMember',$user->id,$user->getMorphClass())
+                ->assertSee('Micheal')
+                #then remove memener
+                ->call('removeMember',$user->id,$user->getMorphClass())
+                ->assertDontSee('Micheal');
+    });
+
+
+    test('show error if member limit is exceeded', function () {
+
+        Config::set('wirechat.max_group_members',2);
+        $auth = ModelsUser::factory()->create();
+        //create another user
+        $member1=  ModelsUser::factory()->create(['name'=>'Micheal']);
+        $member2=  ModelsUser::factory()->create(['name'=>'Boost']);
+        $member3=  ModelsUser::factory()->create(['name'=>'Ultra']);
+
+
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+                #first add member
+                ->call('addMember',$member1->id,$member1->getMorphClass())
+                ->call('addMember',$member2->id,$member2->getMorphClass())
+                ->call('addMember',$member3->id,$member3->getMorphClass())
+                ->assertSee('Members cannot exceed 2');
+    });
+
+    
+
+}) ;
+
+
+describe('Creteing group',function(){
+
+
+
+ 
+    it('can create conversation  is validations pass', function () {
+        Config::set('wirechat.max_group_members',3);
+        $auth = ModelsUser::factory()->create();
+        //create another user
+        $member1=  ModelsUser::factory()->create(['name'=>'Micheal']);
+        $member2=  ModelsUser::factory()->create(['name'=>'Boost']);
+        $member3=  ModelsUser::factory()->create(['name'=>'Ultra']);
+
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file =UploadedFile::fake()->create('photo.png');
+
+        $request
+                #add details
+                ->set('name','Test Group')
+                ->set('description','Description Testing')
+                ->set('photo',$file)
+                #add members
+                ->call('addMember',$member1->id,$member1->getMorphClass())
+                ->call('addMember',$member2->id,$member2->getMorphClass())
+                ->call('addMember',$member3->id,$member3->getMorphClass())
+
+                #create group
+                ->call('create');
+
+         $conversation= Conversation::withoutGlobalScopes()->first();
+
+        expect($conversation->type)->toBe(ConversationType::GROUP);
+        expect($conversation)->not->toBe(null);
+    });
+
+
+    it('Creates group model', function () {
+        Config::set('wirechat.max_group_members',3);
+        $auth = ModelsUser::factory()->create();
+        //create another user
+        $member1=  ModelsUser::factory()->create(['name'=>'Micheal']);
+        $member2=  ModelsUser::factory()->create(['name'=>'Boost']);
+        $member3=  ModelsUser::factory()->create(['name'=>'Ultra']);
+
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file =UploadedFile::fake()->create('photo.png');
+
+        $request
+                #add details
+                ->set('name','Test Group')
+                ->set('description','Description Testing')
+                ->set('photo',$file)
+                #add members
+                ->call('addMember',$member1->id,$member1->getMorphClass())
+                ->call('addMember',$member2->id,$member2->getMorphClass())
+                ->call('addMember',$member3->id,$member3->getMorphClass())
+
+                #create group
+                ->call('create');
+
+         $conversation= Conversation::withoutGlobalScopes()->first();
+
+        expect($conversation->group)->not->toBe(null);
+    });
+
+
+    it('it Saves image', function () {
+        Config::set('wirechat.max_group_members',3);
+
+
+        $auth = ModelsUser::factory()->create();
+        //create another user
+        $member1=  ModelsUser::factory()->create(['name'=>'Micheal']);
+        $member2=  ModelsUser::factory()->create(['name'=>'Boost']);
+        $member3=  ModelsUser::factory()->create(['name'=>'Ultra']);
+
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file =UploadedFile::fake()->create('photo.png');
+
+        $request
+                #add details
+                ->set('name','Test Group')
+                ->set('description','Description Testing')
+                ->set('photo',$file)
+                #add members
+                ->call('addMember',$member1->id,$member1->getMorphClass())
+                ->call('addMember',$member2->id,$member2->getMorphClass())
+                ->call('addMember',$member3->id,$member3->getMorphClass())
+
+                #create group
+                ->call('create');
+
+         $conversation= Conversation::withoutGlobalScopes()->first();
+
+         $attachment= Attachment::first();
+        expect($attachment)->not->toBe(null);
+        Storage::disk(WireChat::storageDisk())->assertExists($attachment->file_path);
+        expect($conversation->group->avatar_url)->not->toBe(null);
+
+    });
+
+
+
+
+    it('creates participants', function () {
+        Config::set('wirechat.max_group_members',3);
+        $auth = ModelsUser::factory()->create();
+        //create another user
+        $member1=  ModelsUser::factory()->create(['name'=>'Micheal']);
+        $member2=  ModelsUser::factory()->create(['name'=>'Boost']);
+        $member3=  ModelsUser::factory()->create(['name'=>'Ultra']);
+
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file =UploadedFile::fake()->create('photo.png');
+
+        $request
+                #add details
+                ->set('name','Test Group')
+                ->set('description','Description Testing')
+                ->set('photo',$file)
+                #add members
+                ->call('addMember',$member1->id,$member1->getMorphClass())
+                ->call('addMember',$member2->id,$member2->getMorphClass())
+                ->call('addMember',$member3->id,$member3->getMorphClass())
+
+                #create group
+                ->call('create');
+
+         $conversation= Conversation::withoutGlobalScopes()->first();
+
+        expect($conversation->participants->count())->toBe(4);
+    });
+
+
+    it('redirects after creating conversation', function () {
+        Config::set('wirechat.max_group_members',3);
+        $auth = ModelsUser::factory()->create();
+        //create another user
+        $member1=  ModelsUser::factory()->create(['name'=>'Micheal']);
+        $member2=  ModelsUser::factory()->create(['name'=>'Boost']);
+        $member3=  ModelsUser::factory()->create(['name'=>'Ultra']);
+
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file =UploadedFile::fake()->create('photo.png');
+
+        $request
+                #add details
+                ->set('name','Test Group')
+                ->set('description','Description Testing')
+                ->set('photo',$file)
+                #add members
+                ->call('addMember',$member1->id,$member1->getMorphClass())
+                ->call('addMember',$member2->id,$member2->getMorphClass())
+                ->call('addMember',$member3->id,$member3->getMorphClass())
+
+                #create group
+                ->call('create');
+
+         $conversation= Conversation::withoutGlobalScopes()->first();
+
+         $request->assertRedirect(route('wirechat.chat',$conversation->id));
+
+    });
+
+})->only();
+
+
+
+
+
+
+
+

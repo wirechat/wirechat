@@ -691,6 +691,7 @@ $primaryColor= WireChat::getColor();
             </script>
         @endscript
         
+        <x-wirechat::toast />
     
     </div>
 

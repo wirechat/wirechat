@@ -1,3 +1,4 @@
+@use('Namu\WireChat\Facades\WireChat')
 <div>
 
     <div 
@@ -5,8 +6,12 @@
 
     <header class=" sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
         <div class="flex justify-between items-center justify-between pb-2">
+
             <h3 class="text-lg font-semibold">New Chat</h3>
-            <button wire:click="$dispatch('closeModal')"
+
+            <button
+             dusk="close_modal_button"
+             wire:click="$dispatch('closeModal')"
                 class="p-2  text-gray-600 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor">
@@ -15,32 +20,27 @@
                 </svg>
             </button>
 
-
         </div>
+        
         <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
-            <p>
-                To:
-            </p>
-            <input type="search" id="users-search-field"
-                wire:model.live.debounce='searchUsers' placeholder="Search"
-                class=" border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
+            <input  dusk="search_users_field" type="search" id="users-search-field"
+                wire:model.live.debounce='search' autocomplete="off"  placeholder="Search"
+                class=" w-full border-0 w-auto px-0 dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
 
         </section>
-
     </header>
 
     <div class="relative w-full">
+
+        {{-- New Group --}}
+        @if (WireChat::allowsNewGroupModal())
         <button
+         style=" color: var(--primary-color); "
+         wire:click="$dispatch('openWireChatModal', {component: 'new-group'})"
+         dusk="open_new_group_modal_button"
+         class="flex items-center gap-3 my-4 rounded-lg p-2 w-full border hover:border-gray-300 transition-colors  dark:border-gray-800 dark:hover:border-gray-700   "
 
-        onclick="Livewire.dispatch('openModal', { component: 'new-chat' })"
-
-
-        style="
-        color: var(--primary-color);
-        
-        "
-     
-       class="flex items-center gap-3 my-4 rounded-lg  w-full p-2">
+         >
         <span class="p-1 bg-gray-100  rounded-full ">
 
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class=" w-5 h-5">
@@ -54,9 +54,8 @@
             New group 
         </p>
      </button>
-
+     @endif
     {{-- <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5> --}}
-
         <section class="my-4">
             @if ($users)
 
@@ -77,8 +76,8 @@
 
 
                 </ul>
-            @else
-                No accounts found
+            {{-- @else
+                No accounts found --}}
 
             @endif
 

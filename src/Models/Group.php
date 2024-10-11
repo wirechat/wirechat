@@ -4,32 +4,23 @@ namespace Namu\WireChat\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Namu\WireChat\Enums\RoomType;
 use Namu\WireChat\Facades\WireChat;
 
-class Room extends Model
+class Group extends Model
 {
     use HasFactory;
 
-
-
+    
     protected $fillable = [
         'conversation_id',
-        'type',
         'title',
         'description',
-        'avatar_url',
-
-
-    ];
-
-    protected $casts = [
-        'type' => RoomType::class
+        'avatar_url'
     ];
 
     public function __construct(array $attributes = [])
     {
-        $this->table = WireChat::formatTableName('rooms');
+        $this->table = WireChat::formatTableName('group');
         parent::__construct($attributes);
     }
 
@@ -40,26 +31,13 @@ class Room extends Model
      */
     protected static function newFactory()
     {
-        return \Namu\WireChat\Workbench\Database\Factories\RoomFactory::new();
+        return \Namu\WireChat\Workbench\Database\Factories\GroupFactory::new();
     }
 
 
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
-    }
-
-
-    function isGroup()  {
-
-        $this->type==RoomType::GROUP;
-        
-    }
-
-    function isChannel()  {
-
-        $this->type==RoomType::CHANNEL;
-        
     }
 
 

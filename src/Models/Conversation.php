@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
@@ -64,8 +65,8 @@ class Conversation extends Model
             //Delete actions 
             $conversation->actions()->delete();
 
-            //Delete actions 
-            $conversation->room()->delete();
+            //Delete group 
+            $conversation->group()->delete();
             });
         });
     }
@@ -119,6 +120,7 @@ class Conversation extends Model
         $this->participants()->create([
             'participantable_id' => $participant->id,
             'participantable_type' => get_class($participant),
+            'role'=>ParticipantRole::PARTICIPANT
         ]);
     }
 
@@ -128,10 +130,10 @@ class Conversation extends Model
         return $this->type == ConversationType::PRIVATE;
     }
 
-    // public function isGroup(): bool
-    // {
-    //     return $this->type == ConversationType::GROUP;
-    // }
+    public function isGroup(): bool
+    {
+        return $this->type == ConversationType::PRIVATE;
+    }
 
 
     public function messages()
@@ -463,17 +465,12 @@ class Conversation extends Model
      * -------------------------------------------
      */
 
-    public function room()
+    public function group()
     {
-        return $this->hasOne(Room::class,'conversation_id');
+        return $this->hasOne(Group::class,'conversation_id','id');
     }
 
-
-    public function isRoom()
-    {
-        return $this->type === ConversationType::ROOM;
-    }
-
+ 
    
 
  

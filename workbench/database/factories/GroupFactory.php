@@ -3,12 +3,12 @@
 namespace Namu\WireChat\Workbench\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Namu\WireChat\Models\Room;
+use Namu\WireChat\Models\Group;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\RoomSetting>
  */
-class RoomFactory extends Factory
+class GroupFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,7 +16,7 @@ class RoomFactory extends Factory
      * @return array<string, mixed>
      */
 
-     protected $model = Room::class;
+    protected $model = Group::class;
     public function definition(): array
     {
         return [

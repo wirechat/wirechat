@@ -10,7 +10,7 @@ use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 class View extends Component{
 
-  public $chat;
+  public $conversation_id;
 
   public $conversation;
 
@@ -23,7 +23,7 @@ class View extends Component{
     abort_unless(auth()->check(),401);
     
     //We remove deleted conversation incase the user decides to visit the delted conversation 
-    $this->conversation= Conversation::with('participants.participantable')->withoutGlobalScope(WithoutClearedScope::class)->where('id',$this->chat)->firstOrFail();
+    $this->conversation= Conversation::with('participants.participantable')->withoutGlobalScope(WithoutClearedScope::class)->where('id',$this->conversation_id)->firstOrFail();
     
     //dd($this->conversation);
    //dd( $this->conversation->hasBeenDeletedBy(auth()->user()));

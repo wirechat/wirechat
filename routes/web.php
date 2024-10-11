@@ -5,12 +5,10 @@ use Namu\WireChat\Livewire\Chat\View;
 use Namu\WireChat\Livewire\Chat\Index;
 
 
-
-Route::middleware(['auth','web'])->group(function (){
-
-
-Route::get('/chats',Index::class)->name('wirechat');
-Route::get('/chats/{chat}',View::class)->name('wirechat.chat');
-    
-});
+Route::middleware(config('wirechat.routes.middleware'))
+    ->prefix(config('wirechat.routes.prefix'))
+    ->group(function () {
+        Route::get('/', Index::class)->name('wirechat');
+        Route::get('/{conversation_id}', View::class)->name('wirechat.chat');
+    });
 
