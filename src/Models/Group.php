@@ -4,6 +4,7 @@ namespace Namu\WireChat\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Facades\WireChat;
 
 class Group extends Model
@@ -14,14 +15,35 @@ class Group extends Model
     protected $fillable = [
         'conversation_id',
         'title',
-        'description',
-        'avatar_url'
+        'description'
     ];
 
     public function __construct(array $attributes = [])
     {
         $this->table = WireChat::formatTableName('group');
         parent::__construct($attributes);
+    }
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // listen to deleted
+        static::deleted(function ($group) {
+
+            if ($group->cover?->exists()) {
+
+                //delete cover
+                $group->cover?->delete();
+
+                //also delete from storage
+                if (file_exists(Storage::disk(WireChat::storageDisk())->exists($group->cover->file_path))) {
+                    Storage::disk(WireChat::storageDisk())->delete($group->cover->file_path);
+                }
+            }
+
+        });
     }
 
     /** 
@@ -39,6 +61,14 @@ class Group extends Model
     {
         return $this->belongsTo(Conversation::class);
     }
+
+
+    public function cover()
+    {
+        return $this->morphOne(Attachment::class, 'attachable');
+    }
+
+
 
 
 

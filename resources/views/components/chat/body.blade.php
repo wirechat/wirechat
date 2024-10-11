@@ -118,6 +118,7 @@ x-init="
                     $nextMessage = $key < $messageGroup->count() - 1 ? $messageGroup->get($key + 1) : null;
                 @endphp
 
+
                 <div wire:key="message-{{ $key }}" @class([
                     'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
                     'ml-auto' => $belongsToAuth

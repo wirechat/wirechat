@@ -264,8 +264,17 @@ class Chat extends Component
                 #save photo to disk 
                 $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
 
-                #create attachment
-                $createdAttachment = Attachment::create([
+                // Create the message
+                $message = Message::create([
+                    'reply_id' => $this->replyMessage?->id,
+                    'conversation_id' => $this->conversation->id,
+                    'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
+                    'sendable_id' => auth()->id(), // Polymorphic sender ID
+                    // 'body' => $this->body, // Add body if required
+                ]);
+
+                // Create and associate the attachment with the message
+                $message->attachment()->create([
                     'file_path' => $path,
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
@@ -273,15 +282,6 @@ class Chat extends Component
                     'url' => url($path)
                 ]);
 
-
-                $message = Message::create([
-                    'reply_id' => $this->replyMessage?->id,
-                    'conversation_id' => $this->conversation->id,
-                    'attachment_id' => $createdAttachment?->id, // Ensure that $createdAttachment is nullable if not always present
-                    'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
-                    'sendable_id' => auth()->id(), // Polymorphic sender ID
-                    // 'body' => $this->body, // Add body if required
-                ]);
 
                 #append message to createdMessages
                 $createdMessages[] = $message;
@@ -506,7 +506,6 @@ class Chat extends Component
 
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
-            'attachment_id' => null,
             'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
             'sendable_id' => auth()->id(), // Polymorphic sender ID
             'body' => '❤️'

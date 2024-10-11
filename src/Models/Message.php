@@ -23,7 +23,6 @@ class Message extends Model
         'sendable_type', // Now includes sendable_type for polymorphism
         'sendable_id',   // Now includes sendable_id for polymorphis
         'conversation_id',
-        'attachment_id',
         'reply_id'
     ];
 
@@ -104,8 +103,9 @@ class Message extends Model
 
     public function attachment()
     {
-        return $this->belongsTo(Attachment::class);
+        return $this->morphOne(Attachment::class, 'attachable');
     }
+
 
     public function hasAttachment()
     {

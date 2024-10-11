@@ -322,7 +322,7 @@ describe('Creteing group',function(){
     });
 
 
-    it('it Saves image', function () {
+    it('creates attachment images if uploaded', function () {
         Config::set('wirechat.max_group_members',3);
 
 
@@ -351,10 +351,11 @@ describe('Creteing group',function(){
 
          $conversation= Conversation::withoutGlobalScopes()->first();
 
-         $attachment= Attachment::first();
+        $attachment= Attachment::first();
         expect($attachment)->not->toBe(null);
         Storage::disk(WireChat::storageDisk())->assertExists($attachment->file_path);
-        expect($conversation->group->avatar_url)->not->toBe(null);
+
+        expect($conversation->group->cover)->not->toBe(null);
 
     });
 

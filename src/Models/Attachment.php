@@ -10,7 +10,7 @@ class Attachment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['file_path', 'file_name', 'mime_type','url','original_name'];
+    protected $fillable = ['attachable_id','attachable_type', 'file_path', 'file_name', 'mime_type','url','original_name'];
 
 
     public function __construct(array $attributes = [])
@@ -30,6 +30,11 @@ class Attachment extends Model
         return \Namu\WireChat\Workbench\Database\Factories\AttachmentFactory::new();
     }
 
+
+    public function attachable()
+{
+    return $this->morphTo();
+}
 
 
     public function message()

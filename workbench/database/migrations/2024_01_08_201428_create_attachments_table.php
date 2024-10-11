@@ -15,6 +15,7 @@ return new class extends Migration
 
         Schema::create(WireChat::formatTableName('attachments'), function (Blueprint $table) {
             $table->id();
+            $table->morphs('attachable'); // Adds 'attachable_id' and 'attachable_type' columns
             $table->string('file_path');
             $table->string('file_name');
             $table->string('original_name');
