@@ -176,6 +176,9 @@ $conversations = $auth->conversations()->get();
 ///send a message to another user ,Note: if no conversation is available yet between the two users , one will be created 
 $auth->sendMessageTo($user,'message'); //returns created $message model
 
+//You can also send message to conversation or group directly using the same method 
+//Note:if user does not belong to conversation , then no message will be sent or created
+$auth->sendMessageTo($conversation,'message'); //returns created $message model
 
 //Create a conversation :Note if a conversation already exists , it will return the existing conversation
 $auth->createConversationWith($user,'message');// returns $conversation model 
@@ -190,9 +193,8 @@ $auth->hasConversationWith($user); // bool
 
 
 ///Deleting conversation :note this will only delete or hide messages from the user who deleted the conversation 
-//messages will be retained with the other user , the conversation will only permanenlty be deleted if the other 
-//user also deleted the conversation 
-$auth->deleteConversationWith($user);
+//messages will be still be accesible to other participants of the conversation until the also delete the conversatoin
+$auth->deleteConversation();
 
 
 ```
