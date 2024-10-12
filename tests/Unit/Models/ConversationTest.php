@@ -352,7 +352,7 @@ describe('deleting permanently()',function(){
 
         $auth = User::factory()->create();
 
-        $conversation = Conversation::factory()->create(['type'=>ConversationType::Group]);
+        $conversation = Conversation::factory()->create(['type'=>ConversationType::GROUP]);
 
        // dd($conversation);
         $conversation->addParticipant($auth);
@@ -408,7 +408,7 @@ describe('deleting permanently()',function(){
         $receiver = User::factory()->create();
 
 
-         $conversation= $auth->createGroup();
+         $conversation= $auth->createGroup('Test');
          $group = $conversation ->group;
 
         //get conversation reads

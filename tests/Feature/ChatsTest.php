@@ -250,15 +250,17 @@ describe('Chatlist', function () {
         //create conversation with user1
        $conversation=  $auth->createConversationWith($user1);
 
-       $createdAttachment = Attachment::factory()->create();
 
         //manually create message so we can attach attachment id
-       Message::create([
+       $message= Message::create([
         'conversation_id' => $conversation->id,
         'sendable_type' => get_class($auth),  
-        'sendable_id' =>$auth->id, 
-        'attachment_id'=>$createdAttachment->id
+        'sendable_id' =>$auth->id
         ]);
+
+
+       $createdAttachment = Attachment::factory()->for($message,'attachable')->create();
+
 
 
 

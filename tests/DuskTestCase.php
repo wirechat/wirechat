@@ -51,8 +51,7 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
     protected $enablesPackageDiscoveries = true; 
 
     public array $packageProviders = [
-        WireChatServiceProvider::class,
-        LivewireServiceProvider::class,
+        WireChatServiceProvider::class
     ];
 
     public function viewsDirectory(): string
@@ -60,6 +59,18 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
     // Resolves to 'tests/Browser/views'
     return __DIR__.'./Browser/views';
 }
+
+
+
+   /**
+     * Create the RemoteWebDriver instance.
+     */
+    // protected function driver(): RemoteWebDriver
+    // {
+    //     return RemoteWebDriver::create(
+    //         'http://localhost:9515', DesiredCapabilities::chrome()
+    //     );
+    // }
     // protected function getPackageProviders($app)
     // {
     //     return [
@@ -69,7 +80,12 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
     //     ];
     // }
 
- 
+    public static function defineWebDriverOptions() 
+    {
+
+        // To hide the UI during testing
+       // Options::withoutUI();
+    }
     protected function defineEnvironment($app) 
     {
         // Setup default database to use sqlite :memory:
@@ -118,6 +134,7 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
     {
         parent::setUp();
         //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
+
 
        //$this->artisan('migrate:rollback')->run();
     //    Carbon::setTestNow(null);

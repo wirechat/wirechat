@@ -83,17 +83,18 @@ class NewGroupDuskTest extends DuskTestCase
 
 
       /** @test */
-    //   public function next_button_is_enabled_if_name_input_not_empty()
-    //   {
+      public function next_button_is_enabled_if_name_input_not_empty()
+      {
   
-    //       Config::set('wirechat.allow_new_group_modal', true);
-    //       $auth = User::factory()->create();
-    //       Livewire::actingAs($auth)
-    //           ->visit(NewGroup::class)
-    //           ->typeSlowly('#name','Test')
-    //           ->refresh()
-    //           ->assertButtonEnabled('@next_button');
-    //   }
+          Config::set('wirechat.allow_new_group_modal', true);
+          $auth = User::factory()->create();
+          Livewire::actingAs($auth)
+              ->visit(NewGroup::class)
+              ->waitForLivewire()
+              ->typeSlowly('#name','Test')
+              ->refresh()
+              ->assertButtonEnabled('@next_button');
+      }
 
 
     //    /** @test */

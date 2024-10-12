@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\UploadedFile;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Enums\RoomType;
@@ -107,7 +108,7 @@ describe('createConversationWith() ',function(){
         //check database
         expect($bothAreOwners)->toBe(true);
 
-    })->only();
+    });
 
     it('saved correct type and id in participants model', function () {
 
@@ -533,7 +534,7 @@ describe('createGroup',function(){
     it('it creates conversation in database', function () {
 
         $auth = User::factory()->create();
-        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:fake()->url());
+        $conversation= $auth->createGroup(title:'New group',description:'description');
 
         //assert
         expect(Conversation::find($conversation))->not->toBe(null);
@@ -546,7 +547,7 @@ describe('createGroup',function(){
 
         $auth = User::factory()->create();
 
-        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:fake()->url());
+        $conversation= $auth->createGroup(title:'New group',description:'description');
 
         $group = $conversation->group;
 
@@ -560,17 +561,15 @@ describe('createGroup',function(){
     it('it saves room data if correctly', function () {
 
         $auth = User::factory()->create();
-
-        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:'url');
+        $photo =UploadedFile::fake()->create('photo.png');
+        $conversation= $auth->createGroup(title:'New group',description:'description',photo:$photo);
 
         $group = $conversation->group;
-
-
         //assert
 
         expect($group->title)->toBe('New group');
         expect($group->description)->toBe('description');
-        expect($group->avatar_url)->toBe('url');
+        expect($group->cover)->not->toBe(null);
 
 
     });
@@ -581,7 +580,7 @@ describe('createGroup',function(){
 
         $auth = User::factory()->create();
 
-        $conversation= $auth->createGroup(title:'New group',description:'description',avatar_url:'url');
+        $conversation= $auth->createGroup(title:'New group',description:'description');
 
         $participant = $conversation->participants()->first();
 
@@ -594,7 +593,7 @@ describe('createGroup',function(){
     });
 
 
-})->only();
+});
 
 
  

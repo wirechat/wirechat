@@ -917,7 +917,7 @@ describe('deleteMessage ForEveryone', function () {
 
           //assert count 4
           $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages) == 4;
+            return count($messages->flatten()) == 4;
         });
 
         //call deleteForMe
@@ -929,7 +929,7 @@ describe('deleteMessage ForEveryone', function () {
 
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages) == 3;
+            return count($messages->flatten()) == 3;
         });
 
     });
@@ -1128,7 +1128,7 @@ describe('deletForMe', function () {
 
           //assert count 4
           $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages) == 4;
+            return count($messages->flatten()) == 4;
         });
 
         //call deleteForMe
@@ -1140,7 +1140,7 @@ describe('deletForMe', function () {
 
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages) == 3;
+            return count($messages->flatten()) == 3;
         });
 
     });

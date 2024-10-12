@@ -38,20 +38,21 @@ use Workbench\App\Models\User;
         #save photo to disk 
         $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk','public'));
 
-        #create attachment
-        $attachment = Attachment::factory()->create([
-            'file_path' => $path,
-            'file_name' => basename($path),
-            'original_name' => $attachment->getClientOriginalName(),
-            'mime_type' => $attachment->getMimeType(),
-            'url' => url($path)
-        ]);
+  
 
         //create message
-        $message  = Message::factory()->sender($auth)->create(['attachment_id'=>$attachment->id]);
+        $message  = Message::factory()->sender($auth)->create();
 
+      #create attachment
+      $attachment =  Attachment::factory()->for($message,'attachable')->create([
+        'file_path' => $path,
+        'file_name' => basename($path),
+        'original_name' => $attachment->getClientOriginalName(),
+        'mime_type' => $attachment->getMimeType(),
+        'url' => url($path)
+    ]);
         //dd($message->sendable);
-        expect($message->attachment_id)->toBe($attachment->id);
+        expect($message->attachment->id)->toBe($attachment->id);
 
     });
 
@@ -66,19 +67,21 @@ use Workbench\App\Models\User;
         $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk','public'));
 
         #create attachment
-        $attachment = Attachment::factory()->create([
+       
+
+        //create message
+        $message  = Message::factory()->sender($auth)->create();
+        $attachment= Attachment::factory()->for($message,'attachable')->create([
+
             'file_path' => $path,
             'file_name' => basename($path),
             'original_name' => $attachment->getClientOriginalName(),
             'mime_type' => $attachment->getMimeType(),
             'url' => url($path)
+        
         ]);
-
-        //create message
-        $message  = Message::factory()->sender($auth)->create(['attachment_id'=>$attachment->id]);
-
         //assert
-        expect($message->attachment_id)->toBe($attachment->id);
+        expect($message->attachment->id)->toBe($attachment->id);
 
         //delete message
         $message->delete();
@@ -99,19 +102,22 @@ use Workbench\App\Models\User;
         $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk','public'));
 
         #create attachment
-        $attachment = Attachment::factory()->create([
+   
+        //create message
+        $message  = Message::factory()->sender($auth)->create();
+
+       $attachment= Attachment::factory()->for($message,'attachable')->create([
+
             'file_path' => $path,
             'file_name' => basename($path),
             'original_name' => $attachment->getClientOriginalName(),
             'mime_type' => $attachment->getMimeType(),
             'url' => url($path)
+        
         ]);
 
-        //create message
-        $message  = Message::factory()->sender($auth)->create(['attachment_id'=>$attachment->id]);
-
         //assert
-        expect($message->attachment_id)->toBe($attachment->id);
+        expect($message->attachment->id)->toBe($attachment->id);
 
         //delete message
         $message->delete();

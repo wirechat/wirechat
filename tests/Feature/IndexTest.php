@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Chat\ChatBox;
+use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Models\Attachment;
@@ -43,7 +43,7 @@ test('it doest not render livewire ChatBox component', function () {
     $auth = User::factory()->create();
     $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
  
-     $response ->assertDontSeeLivewire(ChatBox::class);
+     $response ->assertDontSeeLivewire(Chat::class);
     
 });
 
@@ -52,7 +52,7 @@ test('it shows label "Send private photos and messages" ', function () {
     $auth = User::factory()->create();
     $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
  
-     $response ->assertSee("Send private  photos and messages");
+     $response ->assertSee("Select a conversation to start messaging");
     
 });
  

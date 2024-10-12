@@ -140,40 +140,23 @@ class NewGroup extends ModalComponent
 
 
     #create group
-    $conversation= auth()->user()->createGroup($this->name,$this->description);
-
-
-
-
-    #save photo
-    if ($this->photo) {
-
-      #save photo to disk 
-      $path =  $this->photo->store(WireChat::storageFolder(), WireChat::storageDisk());
-
-      #create attachment
-      $conversation->group->cover()->create([
-          'file_path' => $path,
-          'file_name' => basename($path),
-          'original_name' => $this->photo->getClientOriginalName(),
-          'mime_type' => $this->photo->getMimeType(),
-          'url' => url($path)
-      ]);
-
-    }
+    $conversation= auth()->user()->createGroup($this->name,$this->description,$this->photo);
 
     #Add participants
     foreach ($this->selectedMembers as $key => $participant) {
 
-      $conversation->addParticipant($participant);
+       #make sure user does not belong to conversation already 
+       #mostly this is the auth user
+       $alreadyExists =  $conversation->participants()->where('participantable_id', $participant->id) ->where('participantable_type', get_class($participant)) ->exists();
+       if (!$alreadyExists) {
+         $conversation->addParticipant($participant);
+       }
     }
-
 
     #redirect
      return redirect()->route('wirechat.chat', [$conversation->id]);
 
 
-    
   }
 
 

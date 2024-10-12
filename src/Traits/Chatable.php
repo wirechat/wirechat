@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Enums\RoomType;
@@ -147,7 +149,7 @@ trait Chatable
      /**
       * Create group
       */
-     public function createGroup(string $title,string $description=null,string $avatar_url=null):Conversation
+     public function createGroup(string $title,string $description=null,UploadedFile $photo=null):Conversation
      {
         
 
@@ -160,10 +162,25 @@ trait Chatable
         #create room 
        $group= $conversation->group()->create([
             'title'=>$title,
-            'description'=>$description,
-            'avatar_url'=>$avatar_url
+            'description'=>$description
         ]);
 
+
+        #create and save photo is present
+        if ($photo) {
+            #save photo to disk 
+            $path =  $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
+      
+            #create attachment
+            $group->cover()->create([
+                'file_path' => $path,
+                'file_name' => basename($path),
+                'original_name' => $photo->getClientOriginalName(),
+                'mime_type' => $photo->getMimeType(),
+                'url' => url($path)
+            ]);
+      
+          }
 
         #create participant as owner
         Participant::create([

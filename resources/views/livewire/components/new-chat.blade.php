@@ -1,5 +1,5 @@
 @use('Namu\WireChat\Facades\WireChat')
-<div>
+<div id="new-chat-modal">
 
     <div 
     class="relative w-full h-96  border  dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800 dark:text-white px-7 sm:max-w-lg sm:rounded-lg">

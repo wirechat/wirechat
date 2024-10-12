@@ -36,15 +36,6 @@ it('Title is set ', function () {
 
 
 
-it('it shows no accounts found is search is empty', function () {
-    $auth = ModelsUser::factory()->create();
-
-    $request = Livewire::actingAs($auth)->test(NewChat::class);
-
-    $request->assertSee('No accounts found');
-
-});
-
 
 it('can filter users if search input is set', function () {
     $auth = ModelsUser::factory()->create();

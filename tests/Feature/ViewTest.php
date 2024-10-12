@@ -18,7 +18,6 @@ it('redirects to login page if guest user tries to access chats page ', function
 
 test('authenticaed user can access chats page ', function () {
     $auth = User::factory()->create();
-
     $conversation =  Conversation::factory()->withParticipants([$auth])->create();
    // dd($conversation);
    $this->actingAs($auth)->get(route("wirechat.chat",$conversation->id))
