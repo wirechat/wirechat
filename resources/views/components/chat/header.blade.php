@@ -5,6 +5,10 @@
 
 )
 
+@php
+$group=$conversation->group;
+@endphp
+
 <header class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10  dark:border-gray-700 border-b">
 
     <div class="  flex  w-full items-center   px-2   lg:px-4 gap-2 md:gap-5 ">
@@ -19,9 +23,9 @@
         {{--Receiver wirechat::Avatar --}}
         <div class="shrink-0">
             <a class="flex items-center gap-2 " href="{{$receiver?->profile_url??'#'}}">
-                <x-wirechat::avatar src="{{$receiver?->cover_url??null}}" wire:ignore
+                <x-wirechat::avatar src="{{$group?$group?->cover_url: $receiver?->cover_url ?? null }}" wire:ignore
                     class="h-8 w-8 lg:w-10 lg:h-10 " />
-                <h6 class="font-bold text-base text-gray-800 dark:text-white truncate"> {{$receiver?->display_name}}  @if ($conversation->isSelfConversation()) (You) @endif  </h6>
+                <h6 class="font-bold text-base text-gray-800 dark:text-white truncate"> {{ $group?$group?->name: $receiver?->display_name }}  @if ($conversation->isSelfConversation()) (You) @endif  </h6>
             </a>
         </div>
 

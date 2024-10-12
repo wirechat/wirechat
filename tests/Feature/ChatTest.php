@@ -72,6 +72,27 @@ describe('Box presence test: ', function () {
     });
 
 
+    test('it shows group name if conversation is group', function () {
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $conversation->addParticipant($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee("My Group");
+    })->only();
+
+
+
 
     test('it loads messages if they Exists in the conversation', function () {
         $auth = User::factory()->create();
@@ -938,7 +959,6 @@ describe('deleteMessage ForEveryone', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-
 
         $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');

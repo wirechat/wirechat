@@ -165,7 +165,7 @@ class Message extends Model
             return false;
         }
     
-        return $this->sendable_type === get_class($user) && $this->sendable_id == $user->id;
+        return $this->sendable_type == get_class($user) && $this->sendable_id == $user->id;
     }
     
 
@@ -174,7 +174,7 @@ class Message extends Model
     public function belongsToAuth(): bool
     {
         $user = auth()->user();
-        return $this->sendable_type === get_class($user) && $this->sendable_id == $user->id;
+        return $this->sendable_type == get_class($user) && $this->sendable_id == $user->id;
     }
 
 

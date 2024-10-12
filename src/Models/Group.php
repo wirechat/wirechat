@@ -14,7 +14,7 @@ class Group extends Model
     
     protected $fillable = [
         'conversation_id',
-        'title',
+        'name',
         'description'
     ];
 
@@ -62,6 +62,13 @@ class Group extends Model
         return $this->belongsTo(Conversation::class);
     }
 
+
+    function getCoverUrlAttribute():?string
+      {
+
+    return    $this->cover?->url;
+        
+    }
 
     public function cover()
     {

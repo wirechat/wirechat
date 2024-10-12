@@ -250,7 +250,7 @@ x-init="
                                 {{-- Attachemnt is Video/ --}}
                                 @if (str()->startsWith($attachment->mime_type, 'video/'))
                                     <x-wirechat::chat.video height="max-h-[400px]" :cover="false"
-                                        source="{{ url('storage/' . $attachment?->file_path) }}" />
+                                        source="{{$attachment?->url}}" />
                                 @endif
 
                                 {{-- Attachemnt is image/ --}}

@@ -84,7 +84,7 @@
 
                 <footer class="flex gap-4 justify-end mt-auto">
 
-                    <button wire:click="$dispatch('closeModal')" dusk="cancel_create_new_group_button"
+                    <button type="button" wire:click="$dispatch('closeModal')" dusk="cancel_create_new_group_button"
                         class="font-bold dark:hover:bg-gray-700 p-3 px-4 rounded-xl ">
                         Cancel
                     </button>

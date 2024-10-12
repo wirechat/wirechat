@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
@@ -149,7 +150,7 @@ trait Chatable
      /**
       * Create group
       */
-     public function createGroup(string $title,string $description=null,UploadedFile $photo=null):Conversation
+     public function createGroup(string $name,string $description=null,UploadedFile $photo=null):Conversation
      {
         
 
@@ -161,7 +162,7 @@ trait Chatable
 
         #create room 
        $group= $conversation->group()->create([
-            'title'=>$title,
+            'name'=>$name,
             'description'=>$description
         ]);
 
@@ -177,7 +178,7 @@ trait Chatable
                 'file_name' => basename($path),
                 'original_name' => $photo->getClientOriginalName(),
                 'mime_type' => $photo->getMimeType(),
-                'url' => url($path)
+                'url' =>  Storage::url($path) 
             ]);
       
           }
@@ -198,40 +199,56 @@ trait Chatable
 
 
     /**
-     * Creates a private conversation if one doesnt not already exists
-     * And sends the attached message 
+     * Creates a conversation if one doesn't already exist with the recipient model,
+     * or uses an existing conversation directly, and sends the attached message.
+     * Works with both private and group conversations in a polymorphic manner.
+     * 
+     * @param Model $model - The recipient model or conversation instance
+     * @param string $message - The message content to send
      * @return Message|null
      */
 
-    function sendMessageTo(Model $user, string $message)
+   public  function sendMessageTo(Model $model, string $message)
     {
+        // Check if the recipient is a model (polymorphic) and not a conversation
+        if (!$model instanceof Conversation) {
+            // Ensure the model has the required trait
+            if (!in_array(static::class, class_uses($model))) {
+                return null;
+            }
+            // Create or get a private conversation with the recipient
+            $conversation = $this->createConversationWith($model);
+        
+        } else {
+            // If it's a Conversation, use it directly
+            $conversation = $model;
 
-        //Create or get converstion with user 
-        $conversation = $this->createConversationWith($user);
+   
 
-        if ($conversation != null) {
-            //create message
+            // Optionally, check that the current model is part of the conversation
+            if (!$this->belongsToConversation($conversation)) {
+
+                return null; // Exit if not a participant
+            }
+        }
+
+        // Proceed to create the message if a valid conversation is found or created
+        if ($conversation) {
             $createdMessage = Message::create([
                 'conversation_id' => $conversation->id,
                 'sendable_type' => get_class($this), // Polymorphic sender type
                 'sendable_id' => $this->id, // Polymorphic sender ID
                 'body' => $message
             ]);
-            // dd($createdMessage);
 
-            /** 
-             * update conversation :we use this in to show the conversation
-             *  with the latest message at the top of the chatlist  */
-            $conversation->updated_at = now();
-            $conversation->save();
+            // Update the conversation timestamp
+            $conversation->touch();
 
             return $createdMessage;
         }
 
-        //make sure user belong to conversation
-
+        return null;
     }
-
     /**
      * Accessor Returns the URL for the user's cover image (used as an avatar).
      * Customize this based on your avatar field.

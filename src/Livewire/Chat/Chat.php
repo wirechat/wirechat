@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Notifications\TestNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 //use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -279,7 +280,7 @@ class Chat extends Component
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
                     'mime_type' => $attachment->getMimeType(),
-                    'url' => url($path)
+                    'url' => Storage::url($path) 
                 ]);
 
 

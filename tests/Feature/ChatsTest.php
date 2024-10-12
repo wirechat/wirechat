@@ -94,6 +94,46 @@ describe('Chatlist', function () {
 
 
 
+    it('shows suffix (sender name ) if conversation is group and message does not belong to auth', function () {
+
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $conversation->addParticipant($participant);
+
+        $participant->sendMessageTo($conversation,'Hello');
+
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSee('John:');
+    });
+
+
+    it('it shows group name if conversation is group', function () {
+
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $conversation->addParticipant($participant);
+
+        $participant->sendMessageTo($conversation,'Hello');
+
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSee('My Group');
+    });
+
+
     it('shows suffix (You) if user has a self conversation', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
