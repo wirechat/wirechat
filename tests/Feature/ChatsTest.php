@@ -125,7 +125,7 @@ describe('Chatlist', function () {
 
         #add participant
         $conversation->addParticipant($participant);
-
+        
         $participant->sendMessageTo($conversation,'Hello');
 
 

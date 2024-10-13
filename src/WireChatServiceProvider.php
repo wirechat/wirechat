@@ -9,6 +9,7 @@ use Namu\WireChat\Livewire\Chat\View;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Livewire\Chat\Index;
+use Namu\WireChat\Livewire\Info\Info;
 use Namu\WireChat\Livewire\Components\NewChat;
 use Namu\WireChat\Livewire\Components\NewGroup;
 use Namu\WireChat\Livewire\Modal\Modal;
@@ -52,6 +53,8 @@ class WireChatServiceProvider extends ServiceProvider
 
         Livewire::component('new-chat', NewChat::class);
         Livewire::component('new-group', NewGroup::class);
+        Livewire::component('info', Info::class);
+
 
 
 

@@ -51,6 +51,7 @@ class Chat extends Component
     public function getListeners()
     {
         return [
+            'refresh'=>'$refresh',
             "echo-private:conversation.{$this->conversation->id},.Namu\\WireChat\\Events\\MessageCreated" => 'appendNewMessage',
         ];
     }

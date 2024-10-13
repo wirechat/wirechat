@@ -125,16 +125,6 @@ class Conversation extends Model
     }
 
 
-    public function isPrivate(): bool
-    {
-        return $this->type == ConversationType::PRIVATE;
-    }
-
-    public function isGroup(): bool
-    {
-        return $this->type == ConversationType::PRIVATE;
-    }
-
 
     public function messages()
     {
@@ -467,10 +457,20 @@ class Conversation extends Model
 
     public function group()
     {
-        return $this->hasOne(Group::class,'conversation_id','id');
+        return $this->hasOne(Group::class,'conversation_id');
     }
 
  
+    public function isPrivate(): bool
+    {
+        return $this->type == ConversationType::PRIVATE;
+    }
+
+    public function isGroup(): bool
+    {
+        return $this->type == ConversationType::GROUP;
+    }
+
    
 
  

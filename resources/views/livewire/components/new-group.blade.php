@@ -5,10 +5,12 @@
         class="relative w-full h-[410px] border  items-center justify-center dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800 dark:text-white sm:max-w-lg sm:rounded-lg">
 
         {{--  Group Details --}}
-        <section x-show="$wire.showAddMembers==false" x-transition:enter="ease-out duration-300"
+        <section x-show="$wire.showAddMembers==false" 
+            x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
             x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0"
-            x-transition:leave-end="opacity-0 -translate-x-full">
+            x-transition:leave-end="opacity-0 -translate-x-full"
+            >
 
             <form wire:submit="validateDetails()" class="flex flex-col  h-full p-4">
 

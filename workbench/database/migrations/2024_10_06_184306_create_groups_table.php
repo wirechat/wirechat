@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('conversation_id');
             $table->foreign('conversation_id')->references('id')->on((new Conversation())->getTable())->onDelete('cascade');
             $table->string('name')->nullable();
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('avatar_url')->nullable();
             $table->timestamps();
 

@@ -113,7 +113,7 @@ $primaryColor= WireChat::getColor();
             {{-- ---------- --}}
             {{-- -Footer--- --}}
             {{-- ---------- --}}
-            <footer class="shrink-0 z-10  py-2 overflow-y-visible relative  ">
+            <footer class="shrink-0  py-2 overflow-y-visible relative  ">
 
                 <div
                     class="  border dark:border-gray-700 px-3 sm:px-4 py-1.5 rounded-3xl grid gap-3 items-center  w-full max-w-[97%] mx-auto">
@@ -508,7 +508,7 @@ $primaryColor= WireChat::getColor();
                         </div>
 
                             {{-- send Like --}}
-                            {{-- <button wire:click='sendLike()' type="button " class="group ml-auto">
+                            <button wire:click='sendLike()' type="button " class="group ml-auto">
 
                                 <!-- outlined heart -->
                                 <span class=" group-hover:hidden transition">
@@ -528,7 +528,7 @@ $primaryColor= WireChat::getColor();
                                     </svg>
                                 </span>
 
-                            </button> --}}
+                            </button>
                         </div>
                         
                     </form>

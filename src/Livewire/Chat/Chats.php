@@ -102,7 +102,7 @@ class Chats extends Component
   {
 
     abort_unless(auth()->check(), 401);
-    $this->selectedConversationId = request()->chat;
+    $this->selectedConversationId = request()->conversation_id;
   }
 
 
