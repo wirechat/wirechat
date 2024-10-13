@@ -1,6 +1,6 @@
 @props([
     'receiver' => $receiver,
-    'conversation' => $conversation,
+    'conversation' => $conversation
 ])
 
 @php
@@ -24,8 +24,7 @@
             <div x-data="{ modalOpen: false }" @keydown.escape.window="modalOpen = false" class="relative z-50 w-full h-auto">
               
                     <button  @click="modalOpen=true" class="flex items-center gap-2 ">
-                        <x-wirechat::avatar group="{{$conversation->isGroup()}}" src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}" wire:ignore
-                            class="h-8 w-8 lg:w-10 lg:h-10 " />
+                        <x-wirechat::avatar group="{{$conversation->isGroup()}}" src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}" class="h-8 w-8 lg:w-10 lg:h-10 " />
                         <h6 class="font-bold text-base text-gray-800 dark:text-white truncate">
                             {{ $group ? $group?->name : $receiver?->display_name }} @if ($conversation->isSelfConversation())
                                 (You)

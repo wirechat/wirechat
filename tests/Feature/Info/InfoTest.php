@@ -1,8 +1,12 @@
 <?php
 
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Info\Info;
+use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Workbench\App\Models\User;
 
@@ -227,7 +231,6 @@ describe('updating group name and description',function(){
     });
 
 
-
     test('it saved updated description to database if no errors', function () {
 
         $auth = User::factory()->create(['id' => '345678']);
@@ -242,20 +245,114 @@ describe('updating group name and description',function(){
 
         expect($conversation->group()->first()->description)->toBe('New description');
     });
+ 
+    //Photo 
 
-    // test('it dispactches refersh event after description', function () {
 
-    //     $auth = User::factory()->create(['id' => '345678']);
+    test('it can save photo to database', function () {
+        UploadedFile::fake();
+        
+
+        $auth = User::factory()->create(['id' => '345678']);
     
-    //     $conversation =  $auth->createGroup(name:'My Group');
+        $conversation =  $auth->createGroup(name:'My Group');
 
-    //    $request=  Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation]);
+        $request=  Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation]);
+
+        $file =UploadedFile::fake()->create('photo.png');
+
+        #update 
+        $request->set('photo',$file);
 
 
-    //    #update 
-    //    $request->set('description','New description')->assertDispatched('refresh');;
+        expect($conversation->group()->first()->cover_url)->not->toBe(null);
+        
+    });
 
-    // });
+    test('it deletes previous photo/attachment before saving the new one', function () {
+        UploadedFile::fake();
+        
+
+        $auth = User::factory()->create(['id' => '345678']);
+    
+        $conversation =  $auth->createGroup(name:'My Group');
+
+        $request=  Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation]);
+
+        $file =UploadedFile::fake()->create('photo.png');
+
+        #upload 
+        $request->set('photo',$file);
+
+        $previousAttachment = $conversation->group()->first()->cover;
+
+
+
+         #upload  again
+         $request->set('photo',UploadedFile::fake()->create('new.png'));
+
+         #expect previuus photo no onger available
+         expect(Attachment::find($previousAttachment->id))->toBe(null);
+
+
+         #assert new photo available 
+
+         expect($conversation->group()->first()->cover_url)->not->toBe(null);
+         expect($conversation->group()->count())->toBe(1);
+
+
+        
+    });
+
+
+
+    test('it saves save photo to storage', function () {
+        UploadedFile::fake();
+        
+
+        $auth = User::factory()->create(['id' => '345678']);
+    
+        $conversation =  $auth->createGroup(name:'My Group');
+
+        $request=  Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation]);
+
+        $file =UploadedFile::fake()->create('photo.png');
+
+        #update 
+        $request->set('photo',$file);
+
+        $attachment = $conversation->group()->first()->cover;
+
+
+        Storage::disk(WireChat::storageDisk())->assertExists($attachment->file_path);
+        
+    });
+
+
+
+    test('it dispaches event after saving photo', function () {
+        UploadedFile::fake();
+        
+
+        $auth = User::factory()->create(['id' => '345678']);
+    
+        $conversation =  $auth->createGroup(name:'My Group');
+
+        $request=  Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation]);
+
+        $file =UploadedFile::fake()->create('photo.png');
+
+        #update 
+        $request->set('photo',$file)
+                 ->assertDispatched('refresh');
+        
+    });
+
+
+
+
+
+
 
 
 

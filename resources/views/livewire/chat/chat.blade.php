@@ -102,7 +102,7 @@ $primaryColor= WireChat::getColor();
             {{-- --Header-- --}}
             {{-- ---------- --}}
 
-            <x-wirechat::chat.header :receiver="$receiver" :conversation="$conversation" />
+            <x-wirechat::chat.header :receiver="$receiver" :conversation="$conversation"  />
 
 
             {{-- ---------- --}}

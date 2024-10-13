@@ -52,7 +52,6 @@ class NewGroup extends ModalComponent
   public function updatedSearch()
   {
 
-
     //Make sure it's not empty
     if (blank($this->search)) {
 

@@ -18,6 +18,7 @@ use Namu\WireChat\Models\Message;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
@@ -25,79 +26,150 @@ use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 class Info extends Component
 {
 
+  use WithFileUploads;
 
-    public Conversation $conversation;
-    public $group;
-
-
-    public $description;
-
-    // #[Validate('required', message: 'Please provide a group name.')]
-    // #[Validate('max:120', message: 'Name cannot exceed 120 characters.')]
-    public $groupName;
+  public $conversation;
+  public $group;
 
 
+  public $description;
+
+  // #[Validate('required', message: 'Please provide a group name.')]
+  // #[Validate('max:120', message: 'Name cannot exceed 120 characters.')]
+  public $groupName;
 
 
-    private function setDefaultValues()  {
-      $this->description = $this->group?->description;
-      $this->groupName = $this->group?->name;
-    }
+  public $photo;
+  public $cover_url;
 
 
 
-    function updatedDescription($value)  {
 
+
+
+  private function setDefaultValues()
+  {
+    $this->description = $this->group?->description;
+    $this->groupName = $this->group?->name;
+    $this->cover_url = $this->conversation?->group?->cover_url ?? ($receiver?->cover_url ?? null);
+  }
+
+
+
+  function updatedDescription($value)
+  {
+
+    abort_unless($this->conversation->isGroup(),405);
     // dd($value,str($value)->length() );
 
-          $this->validate(
-                ['description'=>'max:500|nullable'],
-                ['description.max'=>'Description cannot exceed 500 characters.']
-              );
+    $this->validate(
+      ['description' => 'max:500|nullable'],
+      ['description.max' => 'Description cannot exceed 500 characters.']
+    );
 
-          $this->conversation->group?->updateOrCreate(['conversation_id'=>$this->conversation->id],['description'=>$value]);
-      
+    $this->conversation->group?->updateOrCreate(['conversation_id' => $this->conversation->id], ['description' => $value]);
+  }
+
+  /* Update Group name when for submittted */
+  public function updateGroupName()
+  {
+
+    abort_unless($this->conversation->isGroup(),405);
+
+    $this->validate(
+      ['groupName' => 'required|max:120|nullable'],
+      [
+        'groupName.required' => 'The Group name cannot be empty',
+        'groupName.max' => 'Group name cannot exceed 120 characters.'
+
+      ]
+    );
+
+    $this->conversation->group?->updateOrCreate(['conversation_id' => $this->conversation->id], ['name' => $this->groupName]);
+
+    $this->dispatch('refresh');
+  }
+
+  /**
+   * Group Photo  Configuration
+   */
+  public function deletePhoto()
+  {
+
+    abort_unless($this->conversation->isGroup(),405);
+    #delete photo from group  
+
+    $this->group?->cover()?->delete();
+
+    $this->reset('photo');
+    $this->cover_url = null;
+
+    $this->dispatch('refresh');
+
+
+  }
+
+  /**
+   * Group Photo  Configuration
+   */
+  public function updatedPhoto($photo)
+  {
+
+    abort_unless($this->conversation->isGroup(),405);
+
+    #validate
+    $this->validate([
+      'photo' => 'image|max:12024|nullable'
+    ]);
+
+
+    #create and save photo is present
+    if ($photo) {
+
+          #remove current photo
+    $this->group?->cover?->delete();
+      #save photo to disk 
+      $path =  $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
+      $url = Storage::url($path);
+      #create attachment
+      $this->conversation->group?->cover()?->create([
+        'file_path' => $path,
+        'file_name' => basename($path),
+        'original_name' => $photo->getClientOriginalName(),
+        'mime_type' => $photo->getMimeType(),
+        'url' =>  $url
+      ]);
+
+      $this->cover_url = $url;
+
+    $this->dispatch('refresh');
+
     }
 
-    /* Update Group name when for submittted */
-   public function updateGroupName()  {
+    //$this->reset('photo');
+  }
 
 
 
-      $this->validate(
-            ['groupName'=>'required|max:120|nullable'],
-            [
-              'groupName.required'=>'The Group name cannot be empty',
-              'groupName.max'=>'Group name cannot exceed 120 characters.'
-            
-            ]
-          );
+  function mount(Conversation $conversation)
+  {
 
-      $this->conversation->group?->updateOrCreate(['conversation_id'=>$this->conversation->id],['name'=>$this->groupName]);
+    abort_unless(auth()->check(), 401);
+    $this->conversation = $conversation->load('group.cover');
+    $this->group = $this->conversation->group;
 
-      $this->dispatch('refresh');
-  
-}
+    $this->setDefaultValues();
+  }
 
 
-    function mount( Conversation $conversation)  {
-        
-        abort_unless(auth()->check(),401);
-        $this->conversation = $conversation;
-        $this->group = $this->conversation->group;
 
-        $this->setDefaultValues();
-
-
-    }
-
-
-   
 
   public function render()
   {
 
     // Pass data to the view
-    return view('wirechat::livewire.info.info',['receiver'=>$this->conversation->getReceiver()]);
+    return view('wirechat::livewire.info.info', [
+      'receiver' => $this->conversation->getReceiver()
+    ]);
   }
 }

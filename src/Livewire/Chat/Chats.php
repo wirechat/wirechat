@@ -64,7 +64,9 @@ class Chats extends Component
     // Start the query with eager loading
     $additionalConversations = Conversation::with([
       'participants.participantable',    // Eager load participants and the related participantable model
-      'lastMessage'                      // Eager load reads for each message to prevent individual checks
+      'lastMessage',                      // Eager load reads for each message to prevent individual checks
+      'group.cover'
+
     ])->whereHas('participants', function ($query) {
       $query->where('participantable_id', auth()->id())
         ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
