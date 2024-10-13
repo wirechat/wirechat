@@ -28,7 +28,9 @@ class Info extends Component
 
   use WithFileUploads;
 
+  #[Locked]
   public $conversation;
+
   public $group;
 
 
@@ -141,20 +143,40 @@ class Info extends Component
       ]);
 
       $this->cover_url = $url;
+    $this->reset('photo');
 
     $this->dispatch('refresh');
 
     }
 
-    //$this->reset('photo');
   }
 
 
+
+  /**
+    * Delete chat  */
+
+    function deleteChat()
+    {
+        abort_unless(auth()->check(), 401);
+
+
+        abort_unless(auth()->user()->belongsToConversation($this->conversation),403);
+
+        #delete conversation 
+        $this->conversation->deleteFor(auth()->user());
+
+        #redirect to chats page 
+        $this->redirectRoute("wirechat");
+    }
 
   function mount(Conversation $conversation)
   {
 
     abort_unless(auth()->check(), 401);
+    abort_unless(auth()->user()->belongsToConversation($this->conversation),403);
+
+    
     $this->conversation = $conversation->load('group.cover');
     $this->group = $this->conversation->group;
 

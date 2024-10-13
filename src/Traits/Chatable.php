@@ -443,6 +443,10 @@ trait Chatable
         return $searchableFields ?: null;
     }
 
+
+
+    
+
  
 
 }

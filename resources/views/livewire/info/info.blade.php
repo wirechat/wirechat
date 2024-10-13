@@ -7,7 +7,12 @@
 
 
 
-            <div class="relative  h-18 w-18 lg:w-24 lg:h-24 overflow-clip rounded-full">
+            <section class="mx-auto items-center justify-center grid">
+
+                @if ($conversation->isGroup())
+                    
+              
+            <div class="relative  h-18 w-18 lg:w-24 lg:h-24 overflow-clip mx-auto rounded-full">
 
                 <label wire:target="photo" wire:loading.class="cursor-not-allowed" for="photo"
                     class=" cursor-pointer w-full h-full">
@@ -40,11 +45,15 @@
                         </svg>
                     </button>
                 @endif
-
-                @error('photo')
-                    <p class="text-red-500">{{ $message }}</p>
-                @enderror
             </div>
+            @error('photo')
+            <span class="text-red-500">{{ $message }}</span>
+        @enderror
+        @else
+        <x-wirechat::avatar   src="{{ $cover_url }}" class="h-18 w-18 lg:w-24 lg:h-24 " />
+        @endif
+        </section>
+
 
             <div class="space-y-3 grid ">
 

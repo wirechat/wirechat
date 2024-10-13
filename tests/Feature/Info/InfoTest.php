@@ -17,6 +17,17 @@ test('user must be authenticated', function () {
         ->assertStatus(401);
 });
 
+test('aborts if user doest not belog to conversation', function () {
+
+
+    $auth = User::factory()->create(['id' => '345678']);
+
+
+    $conversation= Conversation::factory()->create();
+    Livewire::actingAs($auth)->test(Info::class,['conversation'=>$conversation])
+                 ->assertStatus(403);
+});
+
 test('authenticaed user can access info ', function () {
     $auth = User::factory()->create(['id' => '345678']);
 
@@ -104,6 +115,65 @@ test('it shows group members count if conversaton is group', function () {
     Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
                          ->assertSee("Members 3");
 });
+
+
+test('it shows "add member" if is group', function () {
+
+    $auth = User::factory()->create();
+
+
+    $conversation =  $auth->createGroup(name:'My Group',description:'This is a good group');
+    Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+                         ->assertSee("Add Member");
+});
+
+test('it doesnt shows "add member" if is not group', function () {
+
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create();
+
+
+    $conversation =  $auth->createConversationWith($receiver);
+    Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+                         ->assertDontSee("Add Members");
+});
+
+
+test('it shows "Exit Group" and method wired if is group', function () {
+
+    $auth = User::factory()->create();
+
+
+    $conversation =  $auth->createGroup(name:'My Group',description:'This is a good group');
+    Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+                         ->assertSee("Exit Group")
+                         ->assertMethodWired('exitGroup');
+});
+
+
+test('it doesnt shows "Exit Group" if is not group', function () {
+
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create();
+
+
+    $conversation =  $auth->createConversationWith($receiver);
+    Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+                         ->assertDontSee("Exit Group");
+});
+
+
+test('it shows "Delete Chat" and method wired if is group', function () {
+
+    $auth = User::factory()->create();
+
+
+    $conversation =  $auth->createGroup(name:'My Group',description:'This is a good group');
+    Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+                         ->assertSee("Delete Chat")
+                         ->assertMethodWired('deleteChat');
+});
+
 
 
 });
@@ -357,4 +427,24 @@ describe('updating group name and description',function(){
 
 
 
+});
+
+
+
+describe('Deleting Chat',function(){
+
+
+    test('it redirects to wirechat route after deleting conversation', function () {
+
+        $auth = User::factory()->create();
+
+    
+        $conversation =  $auth->createGroup(name:'My Group',description:'This is a good group');
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+                                ->call("deleteChat")
+                                ->assertStatus(200)
+                                ->assertRedirect(route("wirechat"));;
+    });
+    
+    
 });

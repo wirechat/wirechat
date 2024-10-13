@@ -21,7 +21,7 @@
         {{-- Receiver wirechat::Avatar --}}
         <div class="shrink-0">
           
-            <div x-data="{ modalOpen: false }" @keydown.escape.window="modalOpen = false" class="relative z-50 w-full h-auto">
+            <div x-data="{ modalOpen: false }"  class="relative z-50 w-full h-auto">
               
                     <button  @click="modalOpen=true" class="flex items-center gap-2 ">
                         <x-wirechat::avatar group="{{$conversation->isGroup()}}" src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}" class="h-8 w-8 lg:w-10 lg:h-10 " />
@@ -32,7 +32,7 @@
                         </h6>
                     </button>
 
-                    <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-full"
+                    <div  wire:ignore  x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-full"
                
                         class="fixed  inset-0 z-[99]  bg-white dark:bg-gray-900 dark:text-white" x-cloak>
                         <div x-trap.inert.noscroll="modalOpen" class="relative w-full space-y-4 ">

@@ -20,7 +20,7 @@ class Group extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = WireChat::formatTableName('group');
+        $this->table = WireChat::formatTableName('groups');
         parent::__construct($attributes);
     }
 
