@@ -445,7 +445,32 @@ trait Chatable
 
 
 
-    
+    /**
+     * Actions Permissions
+     * You can override the following to determine if user can perform these actions
+     */
+
+     /**
+      *  Check if user is allowd to send messages or interact with conversatoin
+      */
+     function canInteractWithConversation(Conversation $conversation):bool  {
+
+        return $this->belongsToConversation($conversation);
+        
+     }
+
+     function canCreateNewGroups():bool  {
+
+        return true;
+        
+     }
+
+     function canCreateNewChats():bool  {
+
+        return true;
+        
+     }
+
 
  
 

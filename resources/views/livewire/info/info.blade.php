@@ -1,4 +1,4 @@
-<div x-data x-init="console.log('here')" class="space-y-4">
+<div x-data x-init="console.log('here')" class="space-y-4 overflow-x-hidden">
 
     {{-- Details --}}
     <header class="">
@@ -55,34 +55,31 @@
         </section>
 
 
-            <div class="space-y-3 grid ">
+            <div class="space-y-3 grid  overflow-x-hidden">
 
 
                 @if ($group)
                     {{-- Form to update Group name  --}}
-                    <form wire:submit="updateGroupName" x-data="{ editing: false }" class="grid grid-cols-12 items-center">
+                    <form wire:submit="updateGroupName" x-data="{ editing: false }" class=" justify-center flex items-center w-full gap-5 px-5 items-center">
                         @csrf
 
                         {{-- Left side input --}}
-                        <span class="col-span-11">
-                            <div x-show="!editing">
-
-                                <h5 class="font-medium text-2xl">{{ $groupName }} </h5>
+                        <div class="  max-w-[90%] grid h-auto">
+                            <div x-show="!editing" >
+                                <h4 class="font-medium  break-all   whitespace-pre-line   text-2xl ">{{ $groupName }} </h4>
 
                             </div>
 
-                            <input x-cloak maxlength="130" x-show="editing" id='groupName' type="text"
-                                wire:model='groupName'
-                                class="resize-none text-2xl font-medium w-full border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
+                            <input x-cloak maxlength="110" x-show="editing" id='groupName' type="text" wire:model='groupName' class="resize-none text-2xl font-medium  border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
 
 
                             @error('groupName')
-                                <p class="text-red-500">{{ $message }}</p>
+                                <p class="text-red-500 inline">{{ $message }}</p>
                             @enderror
-                        </span>
+                        </div>
 
                         {{-- Right Side --}}
-                        <span class="col-span-1  items-center">
+                        <span class=" items-center">
 
                             <button type="button" @click="editing=true" x-show="!editing">
                                 {{-- pencil/edit --}}
@@ -133,7 +130,7 @@
                         @if (empty($description))
                             <p class="text-sm" style="color: var(--primary-color)">Add a group description</p>
                         @else
-                            <p class="font-medium">{{ $description }} </p>
+                            <p class="font-medium break-all   whitespace-pre-line ">{{ $description }} </p>
                         @endif
                     </div>
 
