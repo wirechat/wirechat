@@ -33,11 +33,11 @@
 
                         <div  wire:ignore  x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-full"
                 
-                            class="fixed  inset-0 z-[99]  bg-white dark:bg-gray-900 dark:text-white" x-cloak>
+                            class="fixed  inset-0 z-[99] h-full  bg-white dark:bg-gray-900 dark:text-white" x-cloak>
                             <div x-trap.inert.noscroll="modalOpen" class="relative w-full space-y-4 ">
                                 {{-- Header --}}
                                 <section class="flex gap-4  items-center p-5 sticky top-0 bg-white dark:bg-gray-900 ">
-                                    <button @click="modalOpen=false"class=""> <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /> </svg> </button>
+                                    <button class="focus:outline-none" @click="modalOpen=false"class=""> <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /> </svg> </button>
                                     <h3>{{$group?'Group':'Chat'}}  Info</h3>
                                 </section>
                                 <livewire:info :$conversation lazy />

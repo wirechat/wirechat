@@ -170,6 +170,17 @@ class Info extends Component
         $this->redirectRoute("wirechat");
     }
 
+
+    public function placeholder()
+    {
+        return <<<'HTML'
+        <div>
+            <!-- Loading spinner... -->
+            <x-wirechat::loading-spin class="m-auto" />
+        </div>
+        HTML;
+    }
+  
   function mount(Conversation $conversation)
   {
 
@@ -182,9 +193,6 @@ class Info extends Component
 
     $this->setDefaultValues();
   }
-
-
-
 
   public function render()
   {
