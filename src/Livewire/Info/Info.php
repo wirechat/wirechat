@@ -195,7 +195,7 @@ class Info extends ModalComponent
     abort_unless(auth()->user()->belongsToConversation($this->conversation),403);
 
     
-    $this->conversation = $this->conversation->load('group.cover');
+    $this->conversation = $this->conversation->load('group.cover','participants');
     $this->group = $this->conversation->group;
 
     $this->setDefaultValues();
