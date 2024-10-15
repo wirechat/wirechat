@@ -21,8 +21,22 @@
         {{-- Receiver wirechat::Avatar --}}
         <section class="grid grid-cols-12 w-full">
             <div class="shrink-0 col-span-11 w-full truncate overflow-h-hidden">
-                <div x-data="{ modalOpen: false }"  class="relative z-50 w-full h-auto ">
-                        <div  @click="modalOpen=true" class="flex items-center gap-2 cursor-pointer ">
+
+                <div 
+                wire:click="$dispatch('openChatModal', {component: 'info',arguments: { conversation: {{ $conversation->id }} }})"
+                
+                class="flex items-center gap-2 cursor-pointer ">
+                   <x-wirechat::avatar group="{{$conversation->isGroup()}}" src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}" class="h-8 w-8 lg:w-10 lg:h-10 " />
+                   <h6 class="font-bold text-base text-gray-800 dark:text-white w-full truncate">
+                       {{ $group ? $group?->name : $receiver?->display_name }} @if ($conversation->isSelfConversation())
+                           (You)
+                       @endif
+                   </h6>
+               </div>
+                {{-- <div x-data="{ modalOpen: false }"  class="relative z-50 w-full h-auto ">
+                        <div 
+                         @click="modalOpen=true" 
+                         class="flex items-center gap-2 cursor-pointer ">
                             <x-wirechat::avatar group="{{$conversation->isGroup()}}" src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}" class="h-8 w-8 lg:w-10 lg:h-10 " />
                             <h6 class="font-bold text-base text-gray-800 dark:text-white w-full truncate">
                                 {{ $group ? $group?->name : $receiver?->display_name }} @if ($conversation->isSelfConversation())
@@ -35,7 +49,7 @@
                 
                             class="fixed  inset-0 z-[99] h-full  bg-white dark:bg-gray-900 dark:text-white" x-cloak>
                             <div x-trap.inert.noscroll="modalOpen" class="relative w-full space-y-4 ">
-                                {{-- Header --}}
+
                                 <section class="flex gap-4  items-center p-5 sticky top-0 bg-white dark:bg-gray-900 ">
                                     <button class="focus:outline-none" @click="modalOpen=false"class=""> <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /> </svg> </button>
                                     <h3>{{$group?'Group':'Chat'}}  Info</h3>
@@ -44,7 +58,7 @@
 
                             </div>
                         </div>
-                </div>
+                </div> --}}
             </div>
 
             {{-- Header Actions --}}

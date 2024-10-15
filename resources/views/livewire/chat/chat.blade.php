@@ -93,15 +93,15 @@ $primaryColor= WireChat::getColor();
     "
 
         wire:loading.class.remove="overflow-y-scroll"
-    wire:loading.class="overflow-hidden"
-        class=" w-full overflow-hidden  h-full ">
+        wire:loading.class="overflow-hidden"
+        class=" w-full overflow-hidden  h-full relative"  style="contain:content">
 
         {{-- todo: add rounded corners to attachment --}}
         <div class="   flex flex-col  grow  h-full">
+            
             {{-- ---------- --}}
             {{-- --Header-- --}}
             {{-- ---------- --}}
-
             <x-wirechat::chat.header :receiver="$receiver" :conversation="$conversation"  />
 
 
@@ -693,6 +693,6 @@ $primaryColor= WireChat::getColor();
         @endscript
         
         <x-wirechat::toast />
-    
+        @livewire('chat-modal')
     </div>
 

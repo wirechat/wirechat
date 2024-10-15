@@ -1,6 +1,6 @@
 <?php
 
-namespace  Namu\WireChat\Livewire\Modal;
+namespace  Namu\WireChat\Livewire\Modals;
 
 
 use Illuminate\Contracts\Routing\UrlRoutable;
@@ -29,7 +29,7 @@ use Livewire\Mechanisms\ComponentRegistry;
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
 // THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-class Modal extends Component
+class ChatModal extends Component
 {
     public ?string $activeComponent;
 
@@ -41,7 +41,7 @@ class Modal extends Component
         $this->activeComponent = null;
     }
 
-    public function openWireChatModal($component, $arguments = [], $modalAttributes = []): void
+    public function openChatModal($component, $arguments = [], $modalAttributes = []): void
     {
         $componentClass = app(ComponentRegistry::class)->getClass($component);
         $id = md5($component.serialize($arguments));
@@ -49,7 +49,6 @@ class Modal extends Component
         $arguments = collect($arguments)
                 ->merge($this->resolveComponentProps($arguments, new $componentClass()))
                 ->all();
-
 
         $this->components[$id] = [
             'name' => $component,
@@ -67,18 +66,18 @@ class Modal extends Component
         ];
 
         $this->activeComponent = $id;
-
-        $this->dispatch('activeModalComponentChanged', id: $id);
+        
+        /*! Changed listener name to activeChatModalComponentChanged to not interfer with main modal*/
+        $this->dispatch('activeChatModalComponentChanged', id: $id);
     }
 
     public function resolveComponentProps(array $attributes, Component $component): Collection
     {
         return $this->getPublicPropertyTypes($component)
-            ->intersectByKeys($attributes)
-            ->map(function ($className, $propName) use ($attributes) {
-                $resolved = $this->resolveParameter($attributes, $propName, $className);
-
-                return $resolved;
+                    ->intersectByKeys($attributes)
+                    ->map(function ($className, $propName) use ($attributes) {
+                        $resolved = $this->resolveParameter($attributes, $propName, $className);
+                 return $resolved;
             });
     }
 
@@ -116,7 +115,7 @@ class Modal extends Component
             ->filter();
     }
 
-    public function destroyComponent($id): void
+    public function destroyChatComponent($id): void
     {
         unset($this->components[$id]);
     }
@@ -124,14 +123,14 @@ class Modal extends Component
     public function getListeners(): array
     {
         return [
-            'openWireChatModal',
-            'destroyComponent',
+            'openChatModal',
+            'destroyChatComponent',
         ];
     }
     
     public function render()
     {
       
-        return view('wirechat::livewire.modal');
+        return view('wirechat::livewire.modals.chat-modal');
     }
 }

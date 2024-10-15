@@ -5,7 +5,7 @@ namespace Namu\WireChat\Livewire\Components;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\Modal\ModalComponent;
+use Namu\WireChat\Livewire\Modals\ModalComponent;
 use Namu\WireChat\Models\Attachment;
 
 class NewGroup extends ModalComponent
@@ -58,7 +58,7 @@ class NewGroup extends ModalComponent
       $this->users = null;
     } else {
 
-      $this->users = auth()->user()->searchUsers($this->search);
+      $this->users = auth()->user()->searchChatables($this->search);
     }
   }
 

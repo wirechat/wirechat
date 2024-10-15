@@ -1,7 +1,7 @@
 <?php
 
 
-namespace  Namu\WireChat\Livewire\Modal;
+namespace  Namu\WireChat\Livewire\Modals;
 
 use InvalidArgumentException;
 use Livewire\Component;

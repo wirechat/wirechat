@@ -213,7 +213,7 @@ trait Chatable
         // Check if the recipient is a model (polymorphic) and not a conversation
         if (!$model instanceof Conversation) {
             // Ensure the model has the required trait
-            if (!in_array(static::class, class_uses($model))) {
+            if (!in_array(Chatable::class, class_uses($model))) {
                 return null;
             }
             // Create or get a private conversation with the recipient
@@ -386,34 +386,35 @@ trait Chatable
 
 
 
-    /**
-     * Search for users when creating a conversation.
-     * This method can be overridden and customized to apply additional filtering logic.
+       /**
+     * Search for users who are eligible to participate in a conversation.
+     * This method can be customized to include additional filtering logic, 
+     * such as limiting results to friends, followers, or other specific groups.
      *
-     * @param string $query The search input to match against user fields.
-     * @return Collection|null A collection of users matching the query, or null if no matches are found.
+     * @param string $query The search term to match against user fields.
+     * @return Collection|null A collection of users matching the search criteria, 
+     *                         or null if no matches are found.
      */
-    public function searchUsers(string $query): ?Collection
+    public function searchChatables(string $query): ?Collection
     {
         // Retrieve the fields that are searchable for users.
         $searchableFields = WireChat::searchableFields();
 
-        // Get the user model from the config, defaulting to the App\Models\User class.
+        // Get the user model from the configuration, defaulting to App\Models\User.
         $userModel = app(config('wirechat.user_model', \App\Models\User::class));
 
-        // If the search query or user model is empty, return null.
+        // Return null if the search query is blank or the user model is unavailable.
         if (blank($query) || !$userModel) {
             return null;
         }
 
-        // Perform the search by matching the query against any of the searchable fields.
-        // Limit the results to 20 users.
+        // Perform the search across the specified fields, limiting results to 20 users.
         return $userModel::where(function ($queryBuilder) use ($searchableFields, $query) {
             foreach ($searchableFields as $field) {
                 $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
             }
         })
-        //  ->where('id', '!=', $this->id) // Exclude the authenticated user
+        //  ->where('id', '!=', $this->id) // Optionally exclude the current user.
         ->limit(20)
         ->get();
     }

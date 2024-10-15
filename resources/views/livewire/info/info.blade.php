@@ -1,5 +1,9 @@
-<div x-data x-init="console.log('here')" class="space-y-4 overflow-x-hidden">
+<div x-data x-init="console.log('here')" class="bg-white dark:bg-gray-900">
 
+    <section class="flex gap-4 z-[10]  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
+        <button wire:click="$dispatch('closeChatModal')" class="focus:outline-none" > <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /> </svg> </button>
+        <h3>{{$group?'Group':'Chat'}}  Info</h3>
+    </section>
     {{-- Details --}}
     <header class="">
         <div class="flex  flex-col items-center gap-5">
@@ -111,8 +115,6 @@
                     <h5 class="text-2xl">{{ $receiver?->display_name }}</h5>
                 @endif
             </div>
-
-
         </div>
 
     </header>
@@ -179,7 +181,8 @@
     {{-- Members --}}
     @if ($conversation->isGroup())
         <section>
-            <button
+            <button 
+                wire:click="$dispatch('openWireChatModal', {component: 'add-members',arguments: { conversation: {{ $conversation->id }} }})"
                 class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-800 flex gap-3 items-center">
 
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -189,7 +192,7 @@
                 </svg>
 
 
-                <span>Add Member</span>
+                <span>Add Members</span>
             </button>
         </section>
 
@@ -197,7 +200,7 @@
     @endif
 
     {{-- Footer section --}}
-    <section class="flex flex-col justify-start w-full h-[900px]">
+    <section class="flex flex-col justify-start w-full h-[500px]">
 
         @if ($conversation->isGroup())
             <button wire:confirm="Are you sure you want to exit Group ?" wire:click="exitGroup"

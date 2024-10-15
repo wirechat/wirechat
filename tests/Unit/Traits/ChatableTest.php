@@ -534,7 +534,7 @@ describe('createGroup',function(){
     it('it creates conversation in database', function () {
 
         $auth = User::factory()->create();
-        $conversation= $auth->createGroup(title:'New group',description:'description');
+        $conversation= $auth->createGroup(name:'New group',description:'description');
 
         //assert
         expect(Conversation::find($conversation))->not->toBe(null);
@@ -547,7 +547,7 @@ describe('createGroup',function(){
 
         $auth = User::factory()->create();
 
-        $conversation= $auth->createGroup(title:'New group',description:'description');
+        $conversation= $auth->createGroup(name:'New group',description:'description');
 
         $group = $conversation->group;
 
@@ -562,12 +562,12 @@ describe('createGroup',function(){
 
         $auth = User::factory()->create();
         $photo =UploadedFile::fake()->create('photo.png');
-        $conversation= $auth->createGroup(title:'New group',description:'description',photo:$photo);
+        $conversation= $auth->createGroup(name:'New group',description:'description',photo:$photo);
 
         $group = $conversation->group;
         //assert
 
-        expect($group->title)->toBe('New group');
+        expect($group->name)->toBe('New group');
         expect($group->description)->toBe('description');
         expect($group->cover)->not->toBe(null);
 
@@ -580,7 +580,7 @@ describe('createGroup',function(){
 
         $auth = User::factory()->create();
 
-        $conversation= $auth->createGroup(title:'New group',description:'description');
+        $conversation= $auth->createGroup(name:'New group',description:'description');
 
         $participant = $conversation->participants()->first();
 

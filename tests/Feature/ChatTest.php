@@ -89,10 +89,10 @@ describe('Box presence test: ', function () {
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSee("My Group");
-    })->only();
+    });
 
 
-
+     
 
     test('it loads messages if they Exists in the conversation', function () {
         $auth = User::factory()->create();
@@ -114,29 +114,29 @@ describe('Box presence test: ', function () {
 
 
 
-    test('it shows message time', function () {
-        $auth = User::factory()->create();
+    // test('it shows message time', function () {
+    //     $auth = User::factory()->create();
 
-        $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+    //     $receiver = User::factory()->create(['name' => 'John']);
+    //     $conversation = Conversation::factory()
+    //                     ->withParticipants([$auth,$receiver])
+    //         ->create();
 
 
-        //send messages
-        $auth->sendMessageTo($receiver, message: 'How are you');
+    //     //send messages
+    //     $auth->sendMessageTo($receiver, message: 'How are you');
 
-         Message::create([
-            'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth), // Polymorphic sender type
-            'sendable_id' =>$auth->id, // Polymorphic sender ID
-            'body' => 'How are you',
-            'created_at'=>now()->subDay()
-        ]);
+    //      Message::create([
+    //         'conversation_id' => $conversation->id,
+    //         'sendable_type' => get_class($auth), // Polymorphic sender type
+    //         'sendable_id' =>$auth->id, // Polymorphic sender ID
+    //         'body' => 'How are you',
+    //         'created_at'=>now()->subDay()
+    //     ]);
 
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Yesterday');
-    })->skip();
+    //     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+    //         ->assertSee('Yesterday');
+    // })->skip();
 
 });
 
@@ -436,7 +436,7 @@ describe('Sending messages ', function () {
 
         $messageExists = Attachment::all();
         expect(count($messageExists))->toBe(1);
-    })->skip();
+    });
 
 
 
@@ -535,8 +535,11 @@ describe('Sending reply', function () {
        // dd($conversation->id,$message->conversation_id);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call("setReply", $message->id)
-            ->call('$refresh')->assertSee("Replying to Yourself", $escaped = false);
-    })->skip();
+            ->call('$refresh')
+            #we test seprate because the text is not in same HTML tag
+            ->assertSee("Replying to")
+            ->assertSee("Yourself");
+    });
     test('it dispatches "focus-input-field" when reply is set', function () {
         $auth = User::factory()->create();
 
@@ -1172,6 +1175,8 @@ describe('deletForMe', function () {
 
 
         $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+
+        //dd($conversation);
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
         //receiver -> auth 

@@ -57,11 +57,9 @@ class View extends Component{
                     
                     @livewire('chat',['conversation'=>$conversation->id])
 
-
                   </main>
 
-                 
-              
+
               </div>
       BLADE;
   }

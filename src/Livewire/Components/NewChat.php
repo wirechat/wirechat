@@ -3,7 +3,7 @@
 namespace Namu\WireChat\Livewire\Components;
 
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\Modal\ModalComponent ;
+use Namu\WireChat\Livewire\Modals\ModalComponent ;
 
 class NewChat extends ModalComponent
 {
@@ -23,7 +23,7 @@ class NewChat extends ModalComponent
       $this->users = null;
     } else {
 
-      $this->users = auth()->user()->searchUsers($this->search);
+      $this->users = auth()->user()->searchChatables($this->search);
     }
   }
 

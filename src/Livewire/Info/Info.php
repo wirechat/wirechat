@@ -20,16 +20,17 @@ use Livewire\WithPagination;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\BroadcastMessage;
+use Namu\WireChat\Livewire\Modals\ModalComponent;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
-class Info extends Component
+class Info extends ModalComponent
 {
 
   use WithFileUploads;
 
   #[Locked]
-  public $conversation;
+  public Conversation $conversation;
 
   public $group;
 
@@ -44,6 +45,10 @@ class Info extends Component
   public $photo;
   public $cover_url;
 
+
+  protected $listeners=[
+    "refresh"=>'$refresh'
+  ];
 
 
 
@@ -181,14 +186,16 @@ class Info extends Component
         HTML;
     }
   
-  function mount(Conversation $conversation)
+  function mount()
   {
+    
+    abort_if(empty($this->conversation),404);
 
     abort_unless(auth()->check(), 401);
     abort_unless(auth()->user()->belongsToConversation($this->conversation),403);
 
     
-    $this->conversation = $conversation->load('group.cover');
+    $this->conversation = $this->conversation->load('group.cover');
     $this->group = $this->conversation->group;
 
     $this->setDefaultValues();

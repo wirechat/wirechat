@@ -187,7 +187,6 @@ describe('Add members page',function(){
     });
 
 
-
     test('Search can be filtered', function () {
         $auth = ModelsUser::factory()->create();
         //create another user

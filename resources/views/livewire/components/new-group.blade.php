@@ -92,8 +92,7 @@
                     </button>
 
                     <button type="submit" :disabled="!($wire.name?.trim()?.length)" dusk="next_button"
-                        :class="{ 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit opacity-70': !($wire.name?.trim()
-                                ?.length) }"
+                        :class="{ 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit opacity-70': !($wire.name?.trim()?.length) }"
                         class="font-bold transition dark:hover:bg-gray-700 p-3 px-4 rounded-xl ">
                         Next
                     </button>
@@ -136,7 +135,7 @@
 
                 {{-- Member limit error --}}
                 <div
-                x-data="{ showError:false }"
+                  x-data="{ showError:false }"
                   x-on:show-member-limit-error.window="
                   showError=true;
                   setTimeout(()=>{ showError=false; },1500);
