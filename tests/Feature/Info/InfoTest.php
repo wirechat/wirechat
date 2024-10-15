@@ -79,6 +79,58 @@ test('group description property is wired', function () {
                          ->assertPropertyWired("description");
 });
 
+
+test('it doent show photo property wired if auth is not admin', function () {
+
+    $auth = User::factory()->create(['id' => '345678']);
+
+
+
+    $user = User::factory()->create();
+
+
+    $conversation =  $auth->createGroup(name:'My Group',description:'This is a good group');
+
+    $conversation->addParticipant($user);
+
+    Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+                             ->assertPropertyNotWired("photo");
+})->only();
+
+test('it doent show name property wired if auth is not admin', function () {
+
+    $auth = User::factory()->create(['id' => '345678']);
+
+
+
+    $user = User::factory()->create();
+
+
+    $conversation =  $auth->createGroup(name:'My Group',description:'This is a good group');
+
+    $conversation->addParticipant($user);
+
+    Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+                             ->assertPropertyNotWired("groupName");
+})->only();
+
+test('it doent show description property wired if auth is not admin', function () {
+
+    $auth = User::factory()->create(['id' => '345678']);
+
+
+
+    $user = User::factory()->create();
+
+
+    $conversation =  $auth->createGroup(name:'My Group',description:'This is a good group');
+
+    $conversation->addParticipant($user);
+
+    Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+                             ->assertPropertyNotWired("description");
+})->only();
+
 test('it shows group description if conversaton is group', function () {
 
     $auth = User::factory()->create(['id' => '345678']);

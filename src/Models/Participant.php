@@ -59,6 +59,25 @@ class Participant extends Model
         return $this->belongsTo(Conversation::class);
     }
 
+
+    /**
+     * Check if participant is admin
+     **/
+    function isAdmin()  {
+
+        return $this->role ==ParticipantRole::OWNER || $this->role ==ParticipantRole::ADMIN;
+
+    }
+
+    /**
+     * Check if participant is owner of conversation
+     **/
+    function isOwner()  {
+
+        return $this->role ==ParticipantRole::OWNER;
+
+    }
+
     /**
      * Define a relationship to fetch the user of this model.
      */

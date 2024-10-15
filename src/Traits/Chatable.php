@@ -446,6 +446,59 @@ trait Chatable
 
 
 
+    /* Checking roles in conversation */
+
+     /**
+     * Check if the user is an admin in a specific conversation.
+     */
+    public function isAdminInConversation(Conversation $conversation): bool
+    {
+        // Check if participants are already loaded
+        if ($conversation->relationLoaded('participants')) {
+            // If loaded, simply check the existing collection
+            return $conversation->participants->contains(function ($participant) {
+                return $participant->participantable_id == $this->id &&
+                    $participant->participantable_type == get_class($this) &&
+                    in_array($participant->role, [ParticipantRole::OWNER, ParticipantRole::ADMIN]);
+            });
+        }
+
+        // If not loaded, perform the query
+        return $conversation->participants()
+            ->where('participantable_id', $this->id)
+            ->where('participantable_type', get_class($this))
+            ->whereIn('role', [ParticipantRole::OWNER, ParticipantRole::ADMIN])
+            ->exists();
+    }
+
+    /**
+     * Check if the user is the owner of a specific conversation.
+     */
+    public function isOwnerOfConversation(Conversation $conversation): bool
+    {
+        // Check if participants are already loaded
+        if ($conversation->relationLoaded('participants')) {
+            // If loaded, simply check the existing collection
+            return $conversation->participants->contains(function ($participant) {
+                return $participant->participantable_id == $this->id &&
+                    $participant->participantable_type == get_class($this) &&
+                    $participant->role == ParticipantRole::OWNER;
+            });
+        }
+
+        // If not loaded, perform the query
+        return $conversation->participants()
+            ->where('participantable_id', $this->id)
+            ->where('participantable_type', get_class($this))
+            ->where('role', ParticipantRole::OWNER)
+            ->exists();
+    }
+
+
+
+
+
+
     /**
      * Actions Permissions
      * You can override the following to determine if user can perform these actions
