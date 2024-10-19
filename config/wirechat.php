@@ -48,7 +48,7 @@ return [
      'allow_media_attachments'=>true,  //bool -Allow participants to share media in conversatoin (images, vidoes, gifs, etc)
      'allow_file_attachments'=>true,   //bool -Allow participants to share files in conversatoin (documents, zip , pdf, etc)
 
-     'user_searchable_fields'=>['name','email'],   //['email','profession']etc
+     'user_searchable_fields'=>['name','email','username'],   //['email','profession']etc
      'max_group_members'=>1000,        //Maximum members allowed per group
 
     /**

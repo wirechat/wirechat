@@ -40,7 +40,7 @@ class Conversation extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new WithoutClearedScope());
+       // static::addGlobalScope(new WithoutClearedScope());
         //DELETED event
         static::deleted(function ($conversation) {
 
@@ -93,9 +93,9 @@ class Conversation extends Model
      * Add a new participant to the conversation.
      *
      * @param Model $participant
-     * @return void
+     * @return Participant
      */
-    public function addParticipant(Model $participant)
+    public function addParticipant(Model $participant):Participant
     {
         // Check if the participant is already in the conversation
         abort_if(
@@ -117,11 +117,13 @@ class Conversation extends Model
         }
 
         // Attach the participant to the conversation
-        $this->participants()->create([
+       $participant= $this->participants()->create([
             'participantable_id' => $participant->id,
             'participantable_type' => get_class($participant),
             'role'=>ParticipantRole::PARTICIPANT
         ]);
+
+        return $participant;
     }
 
 
@@ -135,6 +137,28 @@ class Conversation extends Model
     {
         return $this->hasOne(Message::class)->latestOfMany();
     }
+
+    /**
+     * Scope a query to only include active users.
+     */
+    public function scopeWithoutCleared(Builder $builder): void
+    {
+        $user = auth()->user(); // Get the authenticated user
+
+        // dd($model->id);
+         // Apply the scope only if the user is authenticated
+         if ($user) {
+             $builder->whereHas('messages', function ($q) use ($user) {
+                 $q->whereDoesntHave('actions', function ($q) use ($user) {
+                     $q->where('actor_id', $user->id)
+                         ->where('actor_type', get_class($user)) // Safe since $user is authenticated
+                         ->where('type', Actions::DELETE);
+                 });
+             });
+            }
+    }
+
+
     public function getReceiver()
     {
         // Check if the conversation is private

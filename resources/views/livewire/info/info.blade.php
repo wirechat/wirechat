@@ -1,4 +1,4 @@
-<div x-data x-init="console.log('here')" class="bg-white dark:bg-gray-900">
+<div x-data x-init="console.log('here')" class="bg-white dark:bg-gray-900 space-y-auto">
 
     <section class="flex gap-4 z-[10]  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
         <button wire:click="$dispatch('closeChatModal')" class="focus:outline-none"> <svg class="w-7 h-7"
@@ -17,7 +17,7 @@
 
             <section class="mx-auto items-center justify-center grid">
 
-                @if ($conversation->isGroup() && auth()->user()->isAdminInConversation($conversation))
+                @if ($conversation->isGroup() && auth()->user()->isAdminInGroup($conversation->group))
 
                     <div class="relative  h-18 w-18 lg:w-24 lg:h-24 overflow-clip mx-auto rounded-full">
 
@@ -71,7 +71,7 @@
                 @if ($conversation->isGroup())
 
                     {{-- Check if user is admin in conversation --}}
-                    @if (auth()->user()->isAdminInConversation($conversation))
+                    @if (auth()->user()->isAdminInGroup($conversation->group))
                         {{-- Form to update Group name  --}}
                         <form wire:submit="updateGroupName" x-data="{ editing: false }"
                             class=" justify-center flex  items-center w-full gap-5 px-5 items-center">
@@ -140,7 +140,7 @@
 
         @if ($conversation->isGroup())
 
-        @if (auth()->user()->isAdminInConversation($conversation))
+        @if (auth()->user()->isAdminInGroup($conversation->group))
         <div x-data="{ editing: false }" @click.outside="editing=false" class="grid grid-cols-12 items-center">
 
             {{-- Left side input --}}
@@ -202,9 +202,26 @@
 
     <x-wirechat::divider />
 
-    {{-- Members --}}
+    {{-- Members section --}}
     @if ($conversation->isGroup())
-        <section>
+        <section class="my-4 text-left space-y-3">
+
+                {{-- Members count --}}
+                <button
+                 wire:click="$dispatch('openWireChatModal', {component: 'members',arguments: { conversation: {{ $conversation->id }} }})"
+                 class="flex w-full justify-between items-center px-8 ">
+                   <span class="text-gray-600 dark:text-gray-300"> Members {{ $conversation->participants->count() }}</span>
+
+
+                    {{-- Search icon --}}
+                    <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                          </svg>
+                          
+                    </span>
+                </button>
+
             <button
                 wire:click="$dispatch('openWireChatModal', {component: 'add-members',arguments: { conversation: {{ $conversation->id }} }})"
                 class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-800 flex gap-3 items-center">

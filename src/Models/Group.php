@@ -5,6 +5,7 @@ namespace Namu\WireChat\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 
 class Group extends Model
@@ -68,6 +69,32 @@ class Group extends Model
 
     return    $this->cover?->url;
         
+    }
+
+   /**
+     * Check if group is owned by 
+     */
+    public function isOwnedBy(Model $user): bool
+    {
+
+        $conversation= $this->conversation;
+
+        // Check if participants are already loaded
+        if ($conversation->relationLoaded('participants')) {
+            // If loaded, simply check the existing collection
+            return $conversation->participants->contains(function ($participant) use($user) {
+                return $participant->participantable_id == $user->id &&
+                    $participant->participantable_type == get_class($user) &&
+                    $participant->role == ParticipantRole::OWNER;
+            });
+        }
+
+        // If not loaded, perform the query
+        return $conversation->participants()
+            ->where('participantable_id', $user->id)
+            ->where('participantable_type', get_class($user))
+            ->where('role', ParticipantRole::OWNER)
+            ->exists();
     }
 
     public function cover()

@@ -1,4 +1,4 @@
-<div class="h-96 bg-white dark:bg-gray-800 dark:text-white border dark:border-gray-700 overflow-y-auto overflow-x-hidden  ">
+<div class="h-[calc(100vh_-_10rem)]  sm:h-[450px] bg-white dark:bg-gray-800 dark:text-white border dark:border-gray-700 overflow-y-auto overflow-x-hidden  ">
  
 <header class=" sticky top-0 bg-white  dark:bg-gray-800 z-10 p-2">
     <div class="flex items-center pb-2">
@@ -42,7 +42,7 @@
         Members cannot exceed {{$maxGroupMembers}}
        </span>
     </div>
-    
+
     <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
         <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
             placeholder="Search"
@@ -106,7 +106,7 @@
                          @endif
         
                             class="flex cursor-pointer gap-2 items-center w-full">
-                            <x-wirechat::avatar class="w-10 h-10" />
+                            <x-wirechat::avatar src="{{$user->cover_url}}" class="w-10 h-10" />
 
                            <div @class(['opacity-70' => $isAlreadyAParticipant]) >
                             <p

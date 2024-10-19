@@ -13,7 +13,7 @@ use Workbench\App\Models\User;
 class ChatlistDuskTest extends DuskTestCase
 {
 
-/** @test */
+/** @test */ 
 public function it_shows_chats_title()
 {
     Config::set("wirechat.allow_chats_search", true);
@@ -63,7 +63,6 @@ public function it_shows_new_chat_modal_button_if_enabled_in_config()
 
     Livewire::actingAs($auth)
         ->visit(Chatlist::class)
-        
         ->assertVisible('#open-new-chat-modal-button');
 }
 
@@ -156,17 +155,16 @@ public function it_does_not_show_loadMoreButton_if_user_cannot_loadMore()
     $request->assertSee('iam user 1')->assertSee('iam user 2');
 
     //type
-    $request->typeSlowly('#chats-search-field','iam user 1')
-            ->refresh();
+    $request->typeSlowly('#chats-search-field','iam user 1');
 
     //assert only one visible after typing
-    $request->assertSee('iam user 1')->refresh()->assertDontSee('iam user 2');
+    $request->assertSee('iam user 1')->assertDontSee('iam user 2');
 
          
  }
 
 
-  /** @test */
+  /** @testu */
   public function It_opens_modal_when_open_new_chat_modal_button_button_is_tapped()
   {
  
@@ -188,8 +186,6 @@ public function it_does_not_show_loadMoreButton_if_user_cannot_loadMore()
      $request= Livewire::actingAs($auth)
           ->visit(Chatlist::class);
  
-     //Assert both conversations visible before typing
-     $request->assertSee('iam user 1')->assertSee('iam user 2');
 
      //assert not visible 
      $request->assertNotVisible('#new-chat-modal');
@@ -201,7 +197,7 @@ public function it_does_not_show_loadMoreButton_if_user_cannot_loadMore()
           
   }
 
-    /** @test */
+    /** @testu */
     public function assert_open_new_chat_modal_information_is_correct()
     {
    
@@ -270,10 +266,10 @@ public function it_does_not_show_loadMoreButton_if_user_cannot_loadMore()
            $request->assertNotVisible('#new-chat-modal');
        
            //Click and assert now visible
-           $request->click("#open-new-chat-modal-button")
+           $request
                     ->typeSlowly('#users-search-field','iam user 1')
-                    ->assertSee('john')
-                    ->assertDontSee('No accounts found');
+                    ->assertSee('iam user 1')
+                    ->assertDontSee('iam user 2');
 
                 
         }

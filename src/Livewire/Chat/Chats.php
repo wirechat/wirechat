@@ -11,6 +11,7 @@ use Livewire\Component;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Models\Conversation;
+use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 class Chats extends Component
 {
@@ -54,6 +55,11 @@ class Chats extends Component
   {
     $searchableFields = WireChat::searchableFields();
 
+
+
+      // Initialize cache for column checks
+      $columnCache = [];
+
     // Clear previous results if there is a new search term
     if ($this->search) {
       $this->conversations = []; // Clear previous results when a new search is made
@@ -62,7 +68,7 @@ class Chats extends Component
     }
 
     // Start the query with eager loading
-    $additionalConversations = Conversation::with([
+    $additionalConversations = Conversation::withoutCleared()-> with([
       'participants.participantable',    // Eager load participants and the related participantable model
       'lastMessage',                      // Eager load reads for each message to prevent individual checks
       'group.cover'
@@ -71,13 +77,27 @@ class Chats extends Component
       $query->where('participantable_id', auth()->id())
         ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
     })
-      ->when($this->search, function ($query) use ($searchableFields) {
-        $query->where(function ($query) use ($searchableFields) {
-          $query->whereHas('participants', function ($subquery) use ($searchableFields) {
+      ->when($this->search, function ($query) use ($searchableFields,$columnCache) {
+        $query->where(function ($query) use ($searchableFields,$columnCache) {
+          $query->whereHas('participants', function ($subquery) use ($searchableFields,$columnCache) {
             // Exclude the authenticated user
-            $subquery->whereHas('participantable', function ($subquery2) use ($searchableFields) {
-              $subquery2->whereAny($searchableFields, 'LIKE', '%' . $this->search . '%');
-            });
+
+          return  $subquery->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
+              $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
+                  $table = $query3->getModel()->getTable();
+
+                  foreach ($searchableFields as $field) {
+                      // Check if column existence is already cached for the table
+                      if (!isset($columnCache[$table])) {
+                          $columnCache[$table] = Schema::getColumnListing($table);
+                      }
+
+                      if (in_array($field, $columnCache[$table])) {
+                         return $query3->orWhere($field, 'LIKE', '%' . $this->search . '%');
+                      }
+                  }
+              });
+          });
           });
         });
       })

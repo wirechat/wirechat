@@ -95,7 +95,7 @@ test('it doent show photo property wired if auth is not admin', function () {
 
     Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
                              ->assertPropertyNotWired("photo");
-})->only();
+});
 
 test('it doent show name property wired if auth is not admin', function () {
 
@@ -112,7 +112,7 @@ test('it doent show name property wired if auth is not admin', function () {
 
     Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
                              ->assertPropertyNotWired("groupName");
-})->only();
+});
 
 test('it doent show description property wired if auth is not admin', function () {
 
@@ -129,7 +129,7 @@ test('it doent show description property wired if auth is not admin', function (
 
     Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
                              ->assertPropertyNotWired("description");
-})->only();
+});
 
 test('it shows group description if conversaton is group', function () {
 

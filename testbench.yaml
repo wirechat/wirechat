@@ -22,9 +22,9 @@ workbench:
     components: true
     views: true
   build: [
-    #  - drop-sqlite-db
-    #  - create-sqlite-db
-     - migrate:refresh
+      - drop-sqlite-db
+      - create-sqlite-db
+      - migrate:refresh
 
   ]
   assets: []

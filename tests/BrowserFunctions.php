@@ -11,26 +11,26 @@ use Laravel\Dusk\Browser;
 /** @mixin BrowserTestCase */
 trait BrowserFunctions
 {
-    public function render(string $html): Browser
-    {
-        $uuid = Str::uuid()->toString();
+    // public function render(string $html): Browser
+    // {
+    //     $uuid = Str::uuid()->toString();
 
-        $path = self::tmpPath("{$uuid}.blade.php");
+    //     $path = self::tmpPath("{$uuid}.blade.php");
 
-        $blade = <<<BLADE
-        <x-layouts.app>
-            {$html}
-        </x-layouts.app>
-        BLADE;
+    //     $blade = <<<BLADE
+    //     <x-layouts.app>
+    //         {$html}
+    //     </x-layouts.app>
+    //     BLADE;
 
-        file_put_contents($path, $blade);
+    //     file_put_contents($path, $blade);
 
-        $browser = $this->newBrowser($this->createWebDriver());
+    //     $browser = $this->newBrowser($this->createWebDriver());
 
-        static::$browsers = collect([$browser]);
+    //     static::$browsers = collect([$browser]);
 
-        return $browser->visit('/testing/'.base64_encode($path));
-    }
+    //     return $browser->visit('/testing/'.base64_encode($path));
+    // }
 
     public function visit(Browser $browser, string $livewire, $queryParams = [])
     {
@@ -39,44 +39,44 @@ trait BrowserFunctions
         return $browser->visit($url)->waitForLivewireToLoad();
     }
 
-    /** @param Router $router */
-    protected function defineWebRoutes($router)
-    {
-        $router->get('/testing/{path}', function (string $path) {
-            $path = base64_decode($path);
+    // /** @param Router $router */
+    // protected function defineWebRoutes($router)
+    // {
+    //     $router->get('/testing/{path}', function (string $path) {
+    //         $path = base64_decode($path);
 
-            return View::file($path);
-        });
+    //         return View::file($path);
+    //     });
 
-        $router->get('/api/options', function () {
-            return collect([
-                ['id' => 1, 'name' => 'Pedro'],
-                ['id' => 2, 'name' => 'Keithy'],
-                ['id' => 3, 'name' => 'Fernando'],
-                ['id' => 4, 'name' => 'Andre'],
-            ])->filter(function (array $option) {
-                return str_contains(
-                    strtolower($option['name']),
-                    strtolower(request()->query('search')),
-                );
-            })->values();
-        })->name('api.options');
+    //     $router->get('/api/options', function () {
+    //         return collect([
+    //             ['id' => 1, 'name' => 'Pedro'],
+    //             ['id' => 2, 'name' => 'Keithy'],
+    //             ['id' => 3, 'name' => 'Fernando'],
+    //             ['id' => 4, 'name' => 'Andre'],
+    //         ])->filter(function (array $option) {
+    //             return str_contains(
+    //                 strtolower($option['name']),
+    //                 strtolower(request()->query('search')),
+    //             );
+    //         })->values();
+    //     })->name('api.options');
 
-        $router->get('/api/options/nested', function () {
-            $data = collect([
-                ['id' => 1, 'name' => 'Pedro'],
-                ['id' => 2, 'name' => 'Keithy'],
-                ['id' => 3, 'name' => 'Fernando'],
-                ['id' => 4, 'name' => 'Andre'],
-                ['id' => 5, 'name' => 'Tommy'],
-            ])->filter(function (array $option) {
-                return str_contains(
-                    strtolower($option['name']),
-                    strtolower(request()->query('search')),
-                );
-            })->values();
+    //     $router->get('/api/options/nested', function () {
+    //         $data = collect([
+    //             ['id' => 1, 'name' => 'Pedro'],
+    //             ['id' => 2, 'name' => 'Keithy'],
+    //             ['id' => 3, 'name' => 'Fernando'],
+    //             ['id' => 4, 'name' => 'Andre'],
+    //             ['id' => 5, 'name' => 'Tommy'],
+    //         ])->filter(function (array $option) {
+    //             return str_contains(
+    //                 strtolower($option['name']),
+    //                 strtolower(request()->query('search')),
+    //             );
+    //         })->values();
 
-            return ['data' => ['nested' => $data]];
-        })->name('api.options.nested');
-    }
+    //         return ['data' => ['nested' => $data]];
+    //     })->name('api.options.nested');
+    // }
 }

@@ -14,9 +14,8 @@ return new class extends Migration
     {
         Schema::create(WireChat::formatTableName('conversations'), function (Blueprint $table) {
             $table->id();
-            $table->string('type')->comment('Private is 1-1 and room is group or channel'); 
+            $table->string('type')->comment('can be a private or group chat'); 
             $table->softDeletes();
-        
             $table->timestamps();
         });
         

@@ -15,6 +15,7 @@ use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Enums\RoomType;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
+use Namu\WireChat\Models\Group;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Models\Read;
@@ -399,25 +400,40 @@ trait Chatable
     {
         // Retrieve the fields that are searchable for users.
         $searchableFields = WireChat::searchableFields();
-
+    
         // Get the user model from the configuration, defaulting to App\Models\User.
         $userModel = app(config('wirechat.user_model', \App\Models\User::class));
-
+    
         // Return null if the search query is blank or the user model is unavailable.
         if (blank($query) || !$userModel) {
             return null;
         }
-
-        // Perform the search across the specified fields, limiting results to 20 users.
-        return $userModel::where(function ($queryBuilder) use ($searchableFields, $query) {
+    
+        // Initialize cache for column checks.
+        $columnCache = [];
+    
+        return $userModel::where(function ($queryBuilder) use ($searchableFields, $query, &$columnCache) {
+            // Get the table name for the user model.
+            $table = $queryBuilder->getModel()->getTable();
+    
+            // Iterate over searchable fields.
             foreach ($searchableFields as $field) {
-                $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
+                // Check if column existence is already cached for the table.
+                if (!isset($columnCache[$table])) {
+                    $columnCache[$table] = Schema::getColumnListing($table);
+                }
+    
+                // Only perform the search if the field exists in the table.
+                if (in_array($field, $columnCache[$table])) {
+                    $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
+                }
             }
         })
         //  ->where('id', '!=', $this->id) // Optionally exclude the current user.
         ->limit(20)
         ->get();
     }
+    
 
 
 
@@ -451,8 +467,9 @@ trait Chatable
      /**
      * Check if the user is an admin in a specific conversation.
      */
-    public function isAdminInConversation(Conversation $conversation): bool
+    public function isAdminInGroup(Group $group): bool
     {
+        $conversation= $group->conversation;
         // Check if participants are already loaded
         if ($conversation->relationLoaded('participants')) {
             // If loaded, simply check the existing collection
@@ -495,6 +512,33 @@ trait Chatable
     }
 
 
+    /**
+     * Check if the user is the owner of a specific conversation.
+     */
+    public function isOwnerOfGroup(Group $group): bool
+    {
+        $conversation =$group->conversation;
+
+        // Check if participants are already loaded
+        if ($conversation->relationLoaded('participants')) {
+            // If loaded, simply check the existing collection
+            return $conversation->participants->contains(function ($participant) {
+                return $participant->participantable_id == $this->id &&
+                    $participant->participantable_type == get_class($this) &&
+                    $participant->role == ParticipantRole::OWNER;
+            });
+        }
+
+        // If not loaded, perform the query
+        return $conversation->participants()
+            ->where('participantable_id', $this->id)
+            ->where('participantable_type', get_class($this))
+            ->where('role', ParticipantRole::OWNER)
+            ->exists();
+    }
+
+
+    
 
 
 
