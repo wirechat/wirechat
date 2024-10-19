@@ -91,9 +91,9 @@
 
 @if (!$belongsToAuth && $isGroup)
 <div    
-    style="color:  var(--primary-color);"
+    {{-- style="color:  var(--primary-color);" --}}
     @class([
-    'shrink-0 font-medium',
+    'shrink-0 font-medium text-purple-500',
     // Hide avatar if the next message is from the same user
     'hidden' =>
         $message?->sendable_id == $previousMessage?->sendable_id &&
