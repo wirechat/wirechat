@@ -35,13 +35,13 @@
         {{-- New Group --}}
         @if (WireChat::allowsNewGroupModal())
         <button
-         style=" color: var(--primary-color); "
+  
          wire:click="$dispatch('openWireChatModal', {component: 'new-group'})"
          dusk="open_new_group_modal_button"
-         class="flex items-center gap-3 my-4 rounded-lg p-2 w-full border hover:border-gray-300 transition-colors  dark:border-gray-800 dark:hover:border-gray-700   "
+         class="flex items-center gap-3 my-4  rounded-lg p-2 w-full border hover:border-gray-300 transition-colors  dark:border-gray-800 dark:hover:border-gray-700   "
 
          >
-        <span class="p-1 bg-gray-100  rounded-full ">
+        <span        style=" color: var(--primary-color); " class="p-1 bg-gray-100  rounded-full ">
 
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class=" w-5 h-5">
                 <path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM15.75 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM2.25 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM6.31 15.117A6.745 6.745 0 0 1 12 12a6.745 6.745 0 0 1 6.709 7.498.75.75 0 0 1-.372.568A12.696 12.696 0 0 1 12 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 0 1-.372-.568 6.787 6.787 0 0 1 1.019-4.38Z" clip-rule="evenodd" />
@@ -50,7 +50,7 @@
 
         </span>
 
-        <p>
+        <p class="dark:text-white">
             New group 
         </p>
      </button>
@@ -66,7 +66,7 @@
                             wire:click="createConversation('{{ $user->id }}',{{ json_encode(get_class($user)) }})"
                             class="flex cursor-pointer group gap-2 items-center p-2">
 
-                            <x-wirechat::avatar class="w-5 h-5" />
+                            <x-wirechat::avatar src="{{ $user->cover_url }}" class="w-10 h-10" />
 
                             <p class="group-hover:underline transition-all">
                                 {{ $user->display_name }}</p>

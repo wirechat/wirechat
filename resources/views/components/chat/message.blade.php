@@ -29,62 +29,42 @@
 
     // First message on RIGHT
     'rounded-br-md rounded-tr-2xl' => (
-        $message->sendable_id == $nextMessage?->sendable_id
-        && $message->sendable_type == $nextMessage?->sendable_type
-        && $message->sendable_id != $previousMessage?->sendable_id
-        && $message->sendable_type == $previousMessage?->sendable_type
-        && $belongsToAuth
+        $message?->sendable?->is($nextMessage?->sendable) && $message?->sendable?->isNot($previousMessage?->sendable) && $belongsToAuth
     ),
 
     // Middle message on RIGHT
     'rounded-r-md' => (
-        $previousMessage?->sendable_id == $message->sendable_id && $previousMessage?->sendable_type == $message->sendable_type
-        && $belongsToAuth
+        $previousMessage?->sendable?->is($message?->sendable) && $belongsToAuth
     ),
 
     // Standalone message RIGHT
     'rounded-br-xl rounded-r-xl' => (
-        $previousMessage?->sendable_id != $message->sendable_id
-        && $previousMessage?->sendable_type != $message->sendable_type
-        && $nextMessage?->sendable_id != $message->sendable_id
-        && $nextMessage?->sendable_type != $message->sendable_type
-        && $belongsToAuth
+        $previousMessage?->sendable?->isNot($message?->sendable) && $nextMessage?->sendable?->isNot($message?->sendable) && $belongsToAuth
     ),
 
     // Last Message on RIGHT
     'rounded-br-2xl' => (
-        $previousMessage?->sendable_id != $nextMessage?->sendable_id && $previousMessage?->sendable_type == $nextMessage?->sendable_type && $belongsToAuth
+        $previousMessage?->sendable?->isNot($nextMessage?->sendable) && $belongsToAuth
     ),
 
     // First message on LEFT
     'rounded-bl-md rounded-tl-2xl' => (
-        $message->sendable_id == $nextMessage?->sendable_id
-        && $message->sendable_type == $nextMessage?->sendable_type
-        && $message->sendable_id != $previousMessage?->sendable_id
-        && $message->sendable_type == $previousMessage?->sendable_type
-        && !$belongsToAuth
+        $message?->sendable?->is($nextMessage?->sendable) &&  $message?->sendable?->isNot($previousMessage?->sendable) && !$belongsToAuth
     ),
 
     // Middle message on LEFT
     'rounded-l-md' => (
-        $previousMessage?->sendable_id == $message->sendable_id
-        && $previousMessage?->sendable_type == $message->sendable_type
-        && !$belongsToAuth
+        $previousMessage?->sendable?->is($message?->sendable) && !$belongsToAuth
     ),
 
     // Standalone message LEFT
     'rounded-bl-xl rounded-l-xl' => (
-        $previousMessage?->sendable_id != $message->sendable_id
-        && $previousMessage?->sendable_type != $message->sendable_type
-        && $nextMessage?->sendable_id != $message->sendable_id
-        && $nextMessage?->sendable_type != $message->sendable_type
-        && !$belongsToAuth
+        $previousMessage?->sendable->isNot($message?->sendable) && $nextMessage?->sendable->isNot($message?->sendable) && !$belongsToAuth
     ),
 
     // Last message on LEFT
     'rounded-bl-2xl' => (
-        $message->sendable_id != $nextMessage?->sendable_id
-        && $message->sendable_type == $nextMessage?->sendable_type && !$belongsToAuth
+        $message->sendable?->isNot($nextMessage?->sendable) && !$belongsToAuth
     ),
 
 ])>
@@ -93,12 +73,10 @@
 <div    
     {{-- style="color:  var(--primary-color);" --}}
     @class([
-    'shrink-0 font-medium text-purple-500',
-    // Hide avatar if the next message is from the same user
-    'hidden' =>
-        $message?->sendable_id == $previousMessage?->sendable_id &&
-        $message?->sendable_type == $previousMessage?->sendable_type,
-])>
+        'shrink-0 font-medium text-purple-500',
+        // Hide avatar if the next message is from the same user
+        'hidden' => $message?->sendable?->is($previousMessage?->sendable)
+    ])>
     {{ $message->sendable?->display_name }}
 </div>
 @endif

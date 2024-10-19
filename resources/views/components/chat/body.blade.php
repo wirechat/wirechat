@@ -222,10 +222,7 @@
                             <div @class([
                                 'shrink-0 mt-auto -mb-2',
                                 // Hide avatar if the next message is from the same user
-                                'invisible' =>
-                                    $nextMessage &&
-                                    $message->sendable_id == $nextMessage->sendable_id &&
-                                    $message->sendable_type == $nextMessage->sendable_type,
+                                'invisible' =>$nextMessage && $message?->sendable?->is($nextMessage?->sendable)
                             ])>
                                 <x-wirechat::avatar src="{{ $message->sendable?->cover_url ?? null }}" class="h-7 w-7" />
                             </div>
@@ -246,9 +243,7 @@
                                 @class([
                                 'shrink-0 font-medium',
                                 // Hide avatar if the next message is from the same user
-                                'hidden' =>
-                                    $message?->sendable_id == $previousMessage?->sendable_id &&
-                                    $message?->sendable_type == $previousMessage?->sendable_type,
+                                'hidden' => $message?->sendable?->is($previousMessage?->sendable)
                             ])>
                                 {{ $message->sendable?->display_name }}
                             </div>

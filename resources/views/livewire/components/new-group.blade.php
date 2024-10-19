@@ -204,7 +204,7 @@
                                     <label
                                         wire:click="toggleMember('{{ $user->id }}',{{ json_encode(get_class($user)) }})"
                                         class="flex cursor-pointer gap-2 items-center w-full">
-                                        <x-wirechat::avatar class="w-5 h-5" />
+                                        <x-wirechat::avatar  src="{{ $user->cover_url }}" class="w-10 h-10" />
 
                                         <p class="group-hover:underline transition-all truncate">
                                             {{ $user->display_name }}</p>
