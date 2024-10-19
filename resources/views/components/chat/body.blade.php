@@ -53,7 +53,7 @@
 
 "
     id="conversation" x-ref="chatbox"
-    class="flex flex-col h-full relative gap-2 gap-y-4  p-2.5  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
+    class="flex flex-col h-full relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
     style="contain: content" :class="{ 'invisible': initializing, 'visible': !initializing }">
 
 
@@ -224,7 +224,7 @@
                                 // Hide avatar if the next message is from the same user
                                 'invisible' =>$nextMessage && $message?->sendable?->is($nextMessage?->sendable)
                             ])>
-                                <x-wirechat::avatar src="{{ $message->sendable?->cover_url ?? null }}" class="h-7 w-7" />
+                                <x-wirechat::avatar src="{{ $message->sendable?->cover_url ?? null }}" class="h-8 w-8" />
                             </div>
                         @endif
 
