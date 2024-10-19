@@ -108,7 +108,7 @@ $primaryColor= WireChat::getColor();
             {{-- ---------- --}}
             {{-- -Body----- --}}
             {{-- ---------- --}}
-            <x-wirechat::chat.body :loadedMessages="$loadedMessages" :receiver="$receiver" />
+            <x-wirechat::chat.body :loadedMessages="$loadedMessages" :isGroup="$conversation->isGroup()" :receiver="$receiver" />
 
             {{-- ---------- --}}
             {{-- -Footer--- --}}

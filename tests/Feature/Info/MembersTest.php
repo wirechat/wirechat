@@ -489,7 +489,7 @@ describe('presence test', function () {
 
 
 
-})->only();
+});
 
 
 describe('actions test', function () {

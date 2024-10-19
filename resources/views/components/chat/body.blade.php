@@ -1,6 +1,7 @@
 @props([
     'loadedMessages' => $loadedMessages,
     'receiver' => $receiver,
+    'isGroup'=>false
 ])
 
 
@@ -9,35 +10,29 @@
     height: 0,
     previousHeight: 0,
     updateScrollPosition: function() {
-            // Calculate the difference in height
+        // Calculate the difference in height
 
-        newHeight=document.getElementById('conversation').scrollHeight;
-    
-        console.log('old height'+ height);
-        console.log('new height'+ document.getElementById('conversation').scrollHeight);
+        newHeight = document.getElementById('conversation').scrollHeight;
+
+        console.log('old height' + height);
+        console.log('new height' + document.getElementById('conversation').scrollHeight);
         heightDifference = newHeight - height;
 
-        console.log('conversationElement.scrollTop ' + conversationElement.scrollTop );
-        console.log('heightDifference'+ heightDifference);
+        console.log('conversationElement.scrollTop ' + conversationElement.scrollTop);
+        console.log('heightDifference' + heightDifference);
 
-        $el.scrollTop += heightDifference ;
+        $el.scrollTop += heightDifference;
         // Update the previous height to the new height
-        height= newHeight;
+        height = newHeight;
 
-        }
+    }
 
-}"
-
-
-x-init="
-    setTimeout(() => {
-        this.height = $el.scrollHeight;
-        console.log('height ' +this.height);
-        $nextTick(() => $el.scrollTop = this.height);
-    },0);
-    "
-
-     @scroll ="
+}" x-init="setTimeout(() => {
+    this.height = $el.scrollHeight;
+    console.log('height ' + this.height);
+    $nextTick(() => $el.scrollTop = this.height);
+}, 0);"
+    @scroll ="
         scrollTop= $el.scrollTop;
         if((scrollTop<=0) && canLoadMore){
 
@@ -45,7 +40,7 @@ x-init="
 
         }
   "
-  @update-height.window="
+    @update-height.window="
     {{-- 
         Replaced $nextTick with requestAnimationFrame: This will allow you to update the scroll position immediately after
         the next DOM repaint without causing any delay or visual glitch. It's a smoother solution than $nextTick for cases
@@ -57,10 +52,7 @@ x-init="
 
 
 "
-
-    id="conversation"
-
-    x-ref="chatbox"
+    id="conversation" x-ref="chatbox"
     class="flex flex-col h-full relative gap-2 gap-y-4  p-2.5  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
     style="contain: content" :class="{ 'invisible': initializing, 'visible': !initializing }">
 
@@ -95,8 +87,9 @@ x-init="
     @if ($loadedMessages)
         {{-- @dd($loadedMessages) --}}
         @foreach ($loadedMessages as $date => $messageGroup)
-
-        <div class="sticky top-0 uppercase p-2 shadow-sm px-2.5 rounded-xl text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">  {{$date}}</div>
+            <div
+                class="sticky top-0 uppercase p-2 shadow-sm px-2.5 rounded-xl text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
+                {{ $date }}</div>
 
             @foreach ($messageGroup as $key => $message)
                 {{-- @dd($message) --}}
@@ -121,16 +114,20 @@ x-init="
 
                 <div wire:key="message-{{ $key }}" @class([
                     'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
-                    'ml-auto' => $belongsToAuth
-                    ])>
+                    'ml-auto' => $belongsToAuth,
+                ])>
+
+                  
 
                     {{-- Show parent/reply message --}}
                     @if ($parent != null)
                         <div @class([
-                                'max-w-fit   flex flex-col gap-y-2',
-                                'ml-auto' => $belongsToAuth,
-                                'ml-9 sm:ml-10' => !$belongsToAuth
-                              ])>
+                            'max-w-fit   flex flex-col gap-y-2',
+                            'ml-auto' => $belongsToAuth,
+                            'ml-9 sm:ml-10' => !$belongsToAuth,
+                        ])>
+
+
 
                             <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
                                 {{ $message?->ownedBy(auth()->user()) ? 'You ' : $message->sendable?->display_name ?? 'User' }}
@@ -161,12 +158,12 @@ x-init="
                         ' justify-end' => $belongsToAuth,
                     ])>
 
-                        {{-- Actions --}}
+                        {{--Message Actions --}}
                         <div @class([
                             'my-auto flex invisible w-auto  items-center gap-2 group-hover:visible',
                             'order-1' => !$belongsToAuth,
-                        ])>
-
+                            ])>
+                            {{-- reply button --}}
                             <button wire:click="setReply('{{ $message->id }}')"
                                 class="hover:scale-110 transition-transform">
                                 {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
@@ -174,14 +171,14 @@ x-init="
                                       <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                                  </svg> --}}
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                     fill="currentColor" class="bi bi-reply-fill w-4 h-4 dark:text-white"
                                     viewBox="0 0 16 16">
                                     <path
                                         d="M5.921 11.9 1.353 8.62a.72.72 0 0 1 0-1.238L5.921 4.1A.716.716 0 0 1 7 4.719V6c1.5 0 6 0 7 8-2.5-4.5-7-4-7-4v1.281c0 .56-.606.898-1.079.62z" />
                                 </svg>
                             </button>
-
+                            {{-- Dropdown actions button --}}
                             <x-wirechat::dropdown align="{{ $belongsToAuth ? 'right' : 'left' }}" width="48">
                                 <x-slot name="trigger">
                                     {{-- Dots --}}
@@ -230,18 +227,32 @@ x-init="
                                     $message->sendable_id == $nextMessage->sendable_id &&
                                     $message->sendable_type == $nextMessage->sendable_type,
                             ])>
-                                <x-wirechat::avatar src="{{ $receiver->cover_url ?? null }}" class="h-7 w-7" />
+                                <x-wirechat::avatar src="{{ $message->sendable?->cover_url ?? null }}" class="h-7 w-7" />
                             </div>
                         @endif
 
                         {{-- Message body --}}
                         <div class="flex flex-col gap-2 max-w-[95%] ">
+                                {{--Show sender name is message does not belong to auth and conversation is group--}}
+                    
 
                             {{-- -------------------- --}}
                             {{-- Attachment section --}}
                             {{-- -------------------- --}}
-
                             @if ($attachment)
+                            @if (!$belongsToAuth && $isGroup)
+                            <div    
+                                style="color:  var(--primary-color);"
+                                @class([
+                                'shrink-0 font-medium',
+                                // Hide avatar if the next message is from the same user
+                                'hidden' =>
+                                    $message?->sendable_id == $previousMessage?->sendable_id &&
+                                    $message?->sendable_type == $previousMessage?->sendable_type,
+                            ])>
+                                {{ $message->sendable?->display_name }}
+                            </div>
+                            @endif
                                 {{-- Attachemnt is Application/ --}}
                                 @if (str()->startsWith($attachment->mime_type, 'application/'))
                                     <x-wirechat::chat.file :attachment="$attachment" />
@@ -250,7 +261,7 @@ x-init="
                                 {{-- Attachemnt is Video/ --}}
                                 @if (str()->startsWith($attachment->mime_type, 'video/'))
                                     <x-wirechat::chat.video height="max-h-[400px]" :cover="false"
-                                        source="{{$attachment?->url}}" />
+                                        source="{{ $attachment?->url }}" />
                                 @endif
 
                                 {{-- Attachemnt is image/ --}}
@@ -273,8 +284,13 @@ x-init="
                             {{-- -------------------- --}}
 
                             @if ($message->body && !$isEmoji)
-                                <x-wirechat::chat.message :previousMessage="$previousMessage" :message="$message" :nextMessage="$nextMessage"
-                                    :belongsToAuth="$belongsToAuth" :attachment="$attachment" />
+                                <x-wirechat::chat.message 
+                                    :previousMessage="$previousMessage" 
+                                    :message="$message" 
+                                    :nextMessage="$nextMessage"
+                                    :belongsToAuth="$belongsToAuth" 
+                                    :isGroup="$isGroup"
+                                    :attachment="$attachment" />
                             @endif
 
                         </div>

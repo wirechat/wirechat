@@ -114,6 +114,46 @@ describe('Box presence test: ', function () {
 
 
 
+    test('it shows sendable names if conversation is group ', function () {
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+
+        $conversation->addParticipant(User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'Micheal']));
+        $conversation->addParticipant(User::factory()->withMessage($conversation,'How can i repay you ')->create(['name' => 'Levo']));
+        $conversation->addParticipant(User::factory()->withMessage($conversation,'Wonderful')->create(['name' => 'Luis']));
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+               ->assertSee("Micheal")
+               ->assertSee("Levo")
+               ->assertSee("Luis");
+    });
+
+
+    test('it doesnt show auth name if conversation is group unless auth has replied to another you or vice versa ', function () {
+
+        $auth = User::factory()->create(['name'=>'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        #send message 
+        $auth->sendMessageTo($conversation,'Message from owner');
+
+        #add participant
+
+        $conversation->addParticipant(User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'Micheal']));
+        $conversation->addParticipant(User::factory()->withMessage($conversation,'How can i repay you ')->create(['name' => 'Levo']));
+        $conversation->addParticipant(User::factory()->withMessage($conversation,'Wonderful')->create(['name' => 'Luis']));
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+               ->assertSee("Message from owner")
+               ->assertdontSee("Namu");
+    });
+
+
     // test('it shows message time', function () {
     //     $auth = User::factory()->create();
 

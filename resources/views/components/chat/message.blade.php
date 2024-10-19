@@ -5,11 +5,13 @@
     'message' => $message,
     'nextMessage' => $nextMessage,
     'belongsToAuth' => $belongsToAuth,
-    'primaryColor'=> WireChat::getColor()
+    'primaryColor'=> WireChat::getColor(),
+    'isGroup'=>false
 
 ])
 
 <div
+
 
 {{-- We use style here to make it easy for dynamic and safe injection --}}
 @style([
@@ -36,8 +38,7 @@
 
     // Middle message on RIGHT
     'rounded-r-md' => (
-        $previousMessage?->sendable_id == $message->sendable_id
-        && $previousMessage?->sendable_type == $message->sendable_type
+        $previousMessage?->sendable_id == $message->sendable_id && $previousMessage?->sendable_type == $message->sendable_type
         && $belongsToAuth
     ),
 
@@ -87,6 +88,20 @@
     ),
 
 ])>
+
+@if (!$belongsToAuth && $isGroup)
+<div    
+    style="color:  var(--primary-color);"
+    @class([
+    'shrink-0 font-medium',
+    // Hide avatar if the next message is from the same user
+    'hidden' =>
+        $message?->sendable_id == $previousMessage?->sendable_id &&
+        $message?->sendable_type == $previousMessage?->sendable_type,
+])>
+    {{ $message->sendable?->display_name }}
+</div>
+@endif
 
 <pre class="whitespace-pre-line tracking-normal text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
