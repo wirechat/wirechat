@@ -19,13 +19,13 @@ class MessageCreated implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
-    public $receiver;
+    // public $receiver;
 
-    public function __construct(Message $message,Model $receiver)
+    public function __construct(Message $message)
     {
         $this->message = $message;
-        $this->receiver = $receiver;
-        Log::info(["$receiver->id"=>$receiver->id]);
+        // $this->receiver = $receiver;
+       // Log::info(["$receiver->id"=>$receiver->id]);
 
         //Exclude the current user from receiving the broadcast.
         //$this->broadcastToEveryone();
@@ -42,7 +42,7 @@ class MessageCreated implements ShouldBroadcast
             new PrivateChannel('conversation.' . $this->message->conversation_id),
     
             // In the participant, make sure the type is encoded using deslashType
-            new PrivateChannel('participant.'.MorphTypeHelper::deslash(get_class($this->receiver)).'.'.$this->receiver->id)
+            //new PrivateChannel('participant.'.MorphTypeHelper::deslash(get_class($this->receiver)).'.'.$this->receiver->id)
         ];
     }
     
@@ -60,7 +60,7 @@ class MessageCreated implements ShouldBroadcast
     {
         return [
             'message'=> $this->message,
-            'receiver_id'=>$this->receiver?->id
+            // 'receiver_id'=>$this->receiver?->id
         ];
     }
     }

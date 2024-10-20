@@ -49,7 +49,7 @@ return [
      'allow_file_attachments'=>true,   //bool -Allow participants to share files in conversatoin (documents, zip , pdf, etc)
 
      'user_searchable_fields'=>['name','email','username'],   //['email','profession']etc
-     'max_group_members'=>1000,        //Maximum members allowed per group
+     'max_group_members'=>3000,        //Maximum members allowed per group
 
     /**
      * Attachments:

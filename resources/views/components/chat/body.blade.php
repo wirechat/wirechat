@@ -246,7 +246,7 @@
                                     @if ($attachment)
                                         @if (!$belongsToAuth && $isGroup)
                                             <div style="color:  var(--primary-color);" @class([
-                                                'shrink-0 font-medium',
+                                                'shrink-0 font-medium text-sm sm:text-base',
                                                 // Hide avatar if the next message is from the same user
                                                 'hidden' => $message?->sendable?->is($previousMessage?->sendable),
                                             ])>
