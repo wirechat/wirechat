@@ -1,7 +1,7 @@
 @props([
     'loadedMessages' => $loadedMessages,
     'receiver' => $receiver,
-    'isGroup'=>false
+    'isGroup' => false,
 ])
 
 
@@ -112,185 +112,188 @@
                 @endphp
 
 
-                <div wire:key="message-{{ $key }}" @class([
-                    'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
-                    'ml-auto' => $belongsToAuth,
-                ])>
+                <div class="flex gap-2">
 
-                  
-
-                    {{-- Show parent/reply message --}}
-                    @if ($parent != null)
+                    {{-- Message user Avatar --}}
+                    {{-- Hide avatar if message belongs to auth --}}
+                    @if (!$belongsToAuth)
                         <div @class([
-                            'max-w-fit   flex flex-col gap-y-2',
-                            'ml-auto' => $belongsToAuth,
-                            'ml-9 sm:ml-10' => !$belongsToAuth,
+                            'shrink-0 mb-auto  -mb-2',
+                            // Hide avatar if the next message is from the same user
+                            'invisible' =>
+                                $previousMessage &&
+                                $message?->sendable?->is($previousMessage?->sendable),
                         ])>
-
-
-
-                            <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
-                                {{ $message?->ownedBy(auth()->user()) ? 'You ' : $message->sendable?->display_name ?? 'User' }}
-                                replied to
-                                {{ $parent?->ownedBy($receiver) ? ($message?->ownedBy($receiver) ? 'Themself' : $receiver->display_name) : ($message?->ownedBy(auth()->user()) ? 'Yourself' : ' You') }}
-                            </h6>
-
-                            <div @class([
-                                'px-1 dark:border-gray-500 overflow-hidden ',
-                                ' border-r-4 ml-auto' => $belongsToAuth,
-                                ' border-l-4 mr-auto ' => !$belongsToAuth,
-                            ])>
-                                <p
-                                    class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm  rounded-full max-w-fit   px-3 py-1 ">
-                                    {{ $parent?->body != '' ? $parent?->body : ($parent->hasAttachment() ? 'Attachment' : '') }}
-                                </p>
-                            </div>
-
-
+                            <x-wirechat::avatar src="{{ $message->sendable?->cover_url ?? null }}" class="h-8 w-8" />
                         </div>
                     @endif
 
+                    {{-- we use w-[95%] to leave space for the image --}}
+                    <div class="w-[95%]">
+                        <div wire:key="message-{{ $key }}" @class([
+                            'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
+                            'ml-auto' => $belongsToAuth])>
 
 
-                    {{-- Body section --}}
-                    <div @class([
-                        'flex gap-1 md:gap-4 group transition-transform ',
-                        ' justify-end' => $belongsToAuth,
-                    ])>
 
-                        {{--Message Actions --}}
-                        <div @class([
-                            'my-auto flex invisible w-auto  items-center gap-2 group-hover:visible',
-                            'order-1' => !$belongsToAuth,
+                            {{-- Show parent/reply message --}}
+                            @if ($parent != null)
+                                <div @class([
+                                    'max-w-fit   flex flex-col gap-y-2',
+                                    'ml-auto' => $belongsToAuth,
+                                    // 'ml-9 sm:ml-10' => !$belongsToAuth,
+                                ])>
+
+
+
+                                    <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
+                                        {{ $message?->ownedBy(auth()->user()) ? 'You ' : $message->sendable?->display_name ?? 'User' }}
+                                        replied to
+                                        {{ $parent?->ownedBy($receiver) ? ($message?->ownedBy($receiver) ? 'Themself' : $receiver->display_name) : ($message?->ownedBy(auth()->user()) ? 'Yourself' : ' You') }}
+                                    </h6>
+
+                                    <div @class([
+                                        'px-1 dark:border-gray-500 overflow-hidden ',
+                                        ' border-r-4 ml-auto' => $belongsToAuth,
+                                        ' border-l-4 mr-auto ' => !$belongsToAuth,
+                                    ])>
+                                        <p
+                                            class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm  rounded-full max-w-fit   px-3 py-1 ">
+                                            {{ $parent?->body != '' ? $parent?->body : ($parent->hasAttachment() ? 'Attachment' : '') }}
+                                        </p>
+                                    </div>
+
+
+                                </div>
+                            @endif
+
+
+
+                            {{-- Body section --}}
+                            <div @class([
+                                'flex gap-1 md:gap-4 group transition-transform ',
+                                ' justify-end' => $belongsToAuth,
                             ])>
-                            {{-- reply button --}}
-                            <button wire:click="setReply('{{ $message->id }}')"
-                                class="hover:scale-110 transition-transform">
-                                {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
+
+                                {{-- Message Actions --}}
+                                <div @class([
+                                    'my-auto flex invisible w-auto  items-center gap-2 group-hover:visible',
+                                    'order-1' => !$belongsToAuth,
+                                ])>
+                                    {{-- reply button --}}
+                                    <button wire:click="setReply('{{ $message->id }}')"
+                                        class="hover:scale-110 transition-transform">
+                                        {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
                                       stroke="currentColor" class="w-4 h-4 text-gray-600/80 dark:text-white">
                                       <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                                  </svg> --}}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                    fill="currentColor" class="bi bi-reply-fill w-4 h-4 dark:text-white"
-                                    viewBox="0 0 16 16">
-                                    <path
-                                        d="M5.921 11.9 1.353 8.62a.72.72 0 0 1 0-1.238L5.921 4.1A.716.716 0 0 1 7 4.719V6c1.5 0 6 0 7 8-2.5-4.5-7-4-7-4v1.281c0 .56-.606.898-1.079.62z" />
-                                </svg>
-                            </button>
-                            {{-- Dropdown actions button --}}
-                            <x-wirechat::dropdown align="{{ $belongsToAuth ? 'right' : 'left' }}" width="48">
-                                <x-slot name="trigger">
-                                    {{-- Dots --}}
-                                    <button class="hover:scale-110 transition-transform">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor"
-                                            class="bi bi-three-dots h-3 w-3 text-gray-700 dark:text-white"
+                                            fill="currentColor" class="bi bi-reply-fill w-4 h-4 dark:text-white"
                                             viewBox="0 0 16 16">
                                             <path
-                                                d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
+                                                d="M5.921 11.9 1.353 8.62a.72.72 0 0 1 0-1.238L5.921 4.1A.716.716 0 0 1 7 4.719V6c1.5 0 6 0 7 8-2.5-4.5-7-4-7-4v1.281c0 .56-.606.898-1.079.62z" />
                                         </svg>
                                     </button>
-                                </x-slot>
-                                <x-slot name="content">
+                                    {{-- Dropdown actions button --}}
+                                    <x-wirechat::dropdown align="{{ $belongsToAuth ? 'right' : 'left' }}"
+                                        width="48">
+                                        <x-slot name="trigger">
+                                            {{-- Dots --}}
+                                            <button class="hover:scale-110 transition-transform">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor"
+                                                    class="bi bi-three-dots h-3 w-3 text-gray-700 dark:text-white"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
+                                                </svg>
+                                            </button>
+                                        </x-slot>
+                                        <x-slot name="content">
 
-                                    @if ($message->ownedBy(auth()->user()))
-                                        <button wire:click="deleteForEveryone('{{ $message->id }}')"
-                                            wire:confirm="are you sure" class="w-full text-start">
-                                            <x-wirechat::dropdown-link>
-                                                Delete for everyone
-                                            </x-wirechat::dropdown-link>
-                                        </button>
+                                            @if ($message->ownedBy(auth()->user()))
+                                                <button wire:click="deleteForEveryone('{{ $message->id }}')"
+                                                    wire:confirm="are you sure" class="w-full text-start">
+                                                    <x-wirechat::dropdown-link>
+                                                        Delete for everyone
+                                                    </x-wirechat::dropdown-link>
+                                                </button>
+                                            @endif
+
+
+                                            <button wire:click="deleteForMe('{{ $message->id }}')"
+                                                wire:confirm="are you sure" class="w-full text-start">
+                                                <x-wirechat::dropdown-link>
+                                                    Delete for me
+                                                </x-wirechat::dropdown-link>
+                                            </button>
+
+                                        </x-slot>
+                                    </x-wirechat::dropdown>
+
+                                </div>
+
+
+                                {{-- Message body --}}
+                                <div class="flex flex-col gap-2 max-w-[95%] ">
+                                    {{-- Show sender name is message does not belong to auth and conversation is group --}}
+
+
+                                    {{-- -------------------- --}}
+                                    {{-- Attachment section --}}
+                                    {{-- -------------------- --}}
+                                    @if ($attachment)
+                                        @if (!$belongsToAuth && $isGroup)
+                                            <div style="color:  var(--primary-color);" @class([
+                                                'shrink-0 font-medium',
+                                                // Hide avatar if the next message is from the same user
+                                                'hidden' => $message?->sendable?->is($previousMessage?->sendable),
+                                            ])>
+                                                {{ $message->sendable?->display_name }}
+                                            </div>
+                                        @endif
+                                        {{-- Attachemnt is Application/ --}}
+                                        @if (str()->startsWith($attachment->mime_type, 'application/'))
+                                            <x-wirechat::chat.file :attachment="$attachment" />
+                                        @endif
+
+                                        {{-- Attachemnt is Video/ --}}
+                                        @if (str()->startsWith($attachment->mime_type, 'video/'))
+                                            <x-wirechat::chat.video height="max-h-[400px]" :cover="false"
+                                                source="{{ $attachment?->url }}" />
+                                        @endif
+
+                                        {{-- Attachemnt is image/ --}}
+                                        @if (str()->startsWith($attachment->mime_type, 'image/'))
+                                            <x-wirechat::chat.image :previousMessage="$previousMessage" :message="$message"
+                                                :nextMessage="$nextMessage" :belongsToAuth="$belongsToAuth" :attachment="$attachment" />
+                                        @endif
                                     @endif
 
+                                    {{-- if message is emoji then don't show the styled messagebody layout --}}
+                                    @if ($isEmoji)
+                                        <p class="text-5xl dark:text-white ">
+                                            {{ $message->body }}
+                                        </p>
+                                    @endif
 
-                                    <button wire:click="deleteForMe('{{ $message->id }}')" wire:confirm="are you sure"
-                                        class="w-full text-start">
-                                        <x-wirechat::dropdown-link>
-                                            Delete for me
-                                        </x-wirechat::dropdown-link>
-                                    </button>
+                                    {{-- -------------------- --}}
+                                    {{-- Message body section --}}
+                                    {{-- If message is not emoji then show the message body styles --}}
+                                    {{-- -------------------- --}}
 
-                                </x-slot>
-                            </x-wirechat::dropdown>
+                                    @if ($message->body && !$isEmoji)
+                                        <x-wirechat::chat.message :previousMessage="$previousMessage" :message="$message" :nextMessage="$nextMessage"
+                                            :belongsToAuth="$belongsToAuth" :isGroup="$isGroup" :attachment="$attachment" />
+                                    @endif
 
-                        </div>
+                                </div>
 
-                        {{-- Message user Avatar --}}
-                        {{-- Hide avatar if message belongs to auth --}}
-                        @if (!$belongsToAuth)
-                            <div @class([
-                                'shrink-0 mt-auto -mb-2',
-                                // Hide avatar if the next message is from the same user
-                                'invisible' =>$nextMessage && $message?->sendable?->is($nextMessage?->sendable)
-                            ])>
-                                <x-wirechat::avatar src="{{ $message->sendable?->cover_url ?? null }}" class="h-8 w-8" />
                             </div>
-                        @endif
-
-                        {{-- Message body --}}
-                        <div class="flex flex-col gap-2 max-w-[95%] ">
-                                {{--Show sender name is message does not belong to auth and conversation is group--}}
-                    
-
-                            {{-- -------------------- --}}
-                            {{-- Attachment section --}}
-                            {{-- -------------------- --}}
-                            @if ($attachment)
-                            @if (!$belongsToAuth && $isGroup)
-                            <div    
-                                style="color:  var(--primary-color);"
-                                @class([
-                                'shrink-0 font-medium',
-                                // Hide avatar if the next message is from the same user
-                                'hidden' => $message?->sendable?->is($previousMessage?->sendable)
-                            ])>
-                                {{ $message->sendable?->display_name }}
-                            </div>
-                            @endif
-                                {{-- Attachemnt is Application/ --}}
-                                @if (str()->startsWith($attachment->mime_type, 'application/'))
-                                    <x-wirechat::chat.file :attachment="$attachment" />
-                                @endif
-
-                                {{-- Attachemnt is Video/ --}}
-                                @if (str()->startsWith($attachment->mime_type, 'video/'))
-                                    <x-wirechat::chat.video height="max-h-[400px]" :cover="false"
-                                        source="{{ $attachment?->url }}" />
-                                @endif
-
-                                {{-- Attachemnt is image/ --}}
-                                @if (str()->startsWith($attachment->mime_type, 'image/'))
-                                    <x-wirechat::chat.image :previousMessage="$previousMessage" :message="$message" :nextMessage="$nextMessage"
-                                        :belongsToAuth="$belongsToAuth" :attachment="$attachment" />
-                                @endif
-                            @endif
-
-                            {{-- if message is emoji then don't show the styled messagebody layout --}}
-                            @if ($isEmoji)
-                                <p class="text-5xl dark:text-white ">
-                                    {{ $message->body }}
-                                </p>
-                            @endif
-
-                            {{-- -------------------- --}}
-                            {{-- Message body section --}}
-                            {{-- If message is not emoji then show the message body styles --}}
-                            {{-- -------------------- --}}
-
-                            @if ($message->body && !$isEmoji)
-                                <x-wirechat::chat.message 
-                                    :previousMessage="$previousMessage" 
-                                    :message="$message" 
-                                    :nextMessage="$nextMessage"
-                                    :belongsToAuth="$belongsToAuth" 
-                                    :isGroup="$isGroup"
-                                    :attachment="$attachment" />
-                            @endif
-
                         </div>
-
                     </div>
+
                 </div>
             @endforeach
         @endforeach

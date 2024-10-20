@@ -23,8 +23,7 @@
 
                         <label wire:target="photo" wire:loading.class="cursor-not-allowed" for="photo"
                             class=" cursor-pointer w-full h-full">
-                            <x-wirechat::avatar wire:loading.class="cursor-not-allowed"
-                                group="{{ $conversation->isGroup() }}" src="{{ $cover_url }}"
+                            <x-wirechat::avatar wire:loading.class="cursor-not-allowed" group="{{ $conversation->isGroup() }}" src="{{ $cover_url }}"
                                 class="w-full h-full" />
                         </label>
                         <input wire:loading.attr="disabled" id="photo" wire:model="photo" dusk="add_photo_field"

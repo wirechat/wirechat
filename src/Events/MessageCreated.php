@@ -46,7 +46,6 @@ class MessageCreated implements ShouldBroadcast
         ];
     }
     
-
     // public function broadcastOn(): Channel
     // {
 
