@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Helpers\MorphTypeHelper;
-
+use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 
 class MessageCreated implements ShouldBroadcast
@@ -21,7 +21,7 @@ class MessageCreated implements ShouldBroadcast
     public $message;
     // public $receiver;
 
-    public function __construct(Message $message)
+    public function __construct(Message $message,public Conversation $conversation)
     {
         $this->message = $message;
         // $this->receiver = $receiver;
@@ -39,7 +39,7 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('conversation.' . $this->message->conversation_id),
+            new PrivateChannel('conversation.' . $this->message->conversation_id)
     
             // In the participant, make sure the type is encoded using deslashType
             //new PrivateChannel('participant.'.MorphTypeHelper::deslash(get_class($this->receiver)).'.'.$this->receiver->id)
@@ -59,7 +59,7 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'message'=> $this->message,
+            'message'=> $this->message
             // 'receiver_id'=>$this->receiver?->id
         ];
     }

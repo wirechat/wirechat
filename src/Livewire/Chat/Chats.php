@@ -28,7 +28,7 @@ class Chats extends Component
   {
     return [
       'refresh' => '$refresh',
-      "echo-private:participant." . MorphTypeHelper::deslash(get_class(auth()->user())) . "." . auth()->id() . ",.Namu\\WireChat\\Events\\MessageCreated" => '$refresh',
+      "echo-private:participant." .auth()->id() . ",.Namu\\WireChat\\Events\\NotifyParticipant" => '$refresh',
     ];
   }
 

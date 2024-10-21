@@ -67,6 +67,32 @@ $primaryColor= WireChat::getColor();
         $wire.dispatch('focus-input-field');
         initializing = false;
     }, 150);
+    Echo.private('conversation.{{$conversation->id }}')
+    .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
+        $wire.appendNewMessage(e); // Calling the Livewire method to handle the new message
+    });
+
+    {{-- if ($wire.conversationId == 1) {
+
+        setInterval(() => {
+           
+            sentences = [
+                'This is a fake sentence.',
+                'Alpine.js is great for reactive UIs!',
+                'Let’s build something amazing with Laravel.',
+                'This is another random sentence.',
+                'Keep coding and stay productive!',
+            ];
+            sentence= sentences[Math.floor(Math.random() * sentences.length)];
+            // Simulate the body message with a random sentence
+            //alert(sentence)
+            $wire.body = sentence;
+            
+            // Call the Livewire sendMessage method
+            $wire.sendMessage();
+        }, 5000); // Call every 3 seconds
+    } --}}
+
     "
 
         @scroll-bottom.window="

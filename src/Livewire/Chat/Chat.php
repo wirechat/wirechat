@@ -17,7 +17,9 @@ use Namu\WireChat\Models\Message;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Jobs\BroadcastMessage;
+use Namu\WireChat\Jobs\NotifyParticipantJob;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
@@ -29,6 +31,8 @@ class Chat extends Component
 
     #[Locked]
     public $conversation;
+    public $conversationId;
+
 
     #[Locked]
     public  $TYPE;
@@ -51,10 +55,19 @@ class Chat extends Component
     public function getListeners()
     {
         return [
-            'refresh'=>'$refresh',
-            "echo-private:conversation.{$this->conversation->id},.Namu\\WireChat\\Events\\MessageCreated" => 'appendNewMessage',
+            'refresh' => '$refresh',
+            // 'echo-private:conversation.' . $this->conversation->id . ',.Namu\\WireChat\\Events\\MessageCreated' => 'appendNewMessage',
         ];
     }
+    
+
+ 
+
+//   function testable($event)  {
+
+//     dd($event);
+    
+//   }
 
 
     /** 
@@ -489,9 +502,9 @@ class Chat extends Component
         try {
 
             //!remove the receiver from the messageCreated and add it to the job instead 
-            //!also do not forget to exlude auth user or message owner from particpants 
-
-            BroadcastMessage::dispatch($this->conversation, $message);
+            //!also do not forget to exlude auth user or message owner from particpants  
+            BroadcastMessage::dispatch($this->conversation, $message)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
+             NotifyParticipantJob::dispatch($this->conversation,$message);
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -598,7 +611,20 @@ class Chat extends Component
 
         $this->receiver = $this->conversation->getReceiver();
 
+        $this->conversationId= $this->conversation->id;
+
         //$this->authMessageBodyColor = $this->getAuthMessageBodyColor();
+
+        // if($this->conversation->id==3){
+
+        //    for ($i=0; $i < 300; $i++) { 
+
+        //     sleep(rand(1,2));
+        //     $this->body= fake()->sentence();
+        //     $this->sendMessage();
+        //     # code...
+        //    }
+        // }
 
 
         $this->loadMessages();

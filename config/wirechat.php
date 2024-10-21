@@ -16,10 +16,11 @@ return [
 
     /**
      * Broadcasting:
-     * define queue for broadcasting message events*/
-
-    'queue'=>'default',
-
+     * define queue config*/
+    'broadcasting' => [
+        'messages_queue' => 'high',  // Prioritize for real-time messaging in chat rooms
+        'message_notification_queue' => 'default',  // Notifications for new messages in other areas like the navbar
+    ],
     /**
      * Color:
      * This is the theme color that will be used in the chat

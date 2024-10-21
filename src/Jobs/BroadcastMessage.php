@@ -31,7 +31,7 @@ class BroadcastMessage implements ShouldQueue
     public function __construct(public Conversation $conversation, public Message $message)
     {
         //  
-        $this->onQueue(config('wirechat.queue', 'default'));
+        $this->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
         $this->auth = auth()->user();
 
 
@@ -46,7 +46,7 @@ class BroadcastMessage implements ShouldQueue
     public function handle(): void
     {
         //Broadcast to the conversation channel for all participants
-        broadcast(new MessageCreated($this->message))->toOthers();
+        broadcast(new MessageCreated($this->message,$this->conversation))->toOthers();
 
        // Get all participants, including those who haven't sent any messages
         // $participants = $this->conversation->participants()
@@ -66,7 +66,7 @@ class BroadcastMessage implements ShouldQueue
 
         // // Loop through users
         // foreach ($participants as $participant) {
-        //     broadcast(new NotifyParticipant($this->message, $participant->participantable))->toOthers();
+        //     broadcast(new NotifyParticipant($participant->participantable,$this->message));
         // }
     }
 }
