@@ -195,6 +195,24 @@ trait Chatable
 
         return $conversation;
      }
+
+
+     /**
+     * Exit a chat:group|channel by marking the user's participant record as exited.
+     *
+     * @param Conversation $conversation
+     * @return bool
+     */
+    public function exitConversation(Conversation $conversation): bool
+    {
+   
+        #get participant
+        $participant = $conversation->participant($this);
+
+
+        return $participant ? $participant->exitConversation() : false;
+    }
+
  
 
 

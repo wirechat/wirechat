@@ -15,7 +15,8 @@ class Participant extends Model
         'conversation_id',
         'participantable_id',
         'participantable_type',
-        'role'
+        'role',
+        'exited_at'
     ];
 
 
@@ -32,6 +33,17 @@ class Participant extends Model
         parent::__construct($attributes);
     }
 
+
+      /**
+     * Scope to exclude exited participants by default.
+     */
+    protected static function booted()
+    {
+        static::addGlobalScope('withoutExited', function ($query) {
+            $query->whereNull('exited_at');
+        });
+    }
+
     /** 
      * since you have a non-standard namespace; 
      * the resolver cannot guess the correct namespace for your Factory class.
@@ -42,6 +54,7 @@ class Participant extends Model
         return \Namu\WireChat\Workbench\Database\Factories\ParticipantFactory::new();
     }
 
+    
 
     /**
      * Polymorphic relation to the participantable model.
@@ -78,12 +91,40 @@ class Participant extends Model
 
     }
 
+
     /**
-     * Define a relationship to fetch the user of this model.
+     * Mark the participant as exited from the conversation.
+     *
+     * @param null
+     * @return bool
      */
-    // public function user()
-    // {
-    //     return $this->belongsTo($this->userModel::class);
-    // }
+    public function exitConversation(): bool
+    {
+        #make sure conversation is not private
+        abort_if($this->conversation->isPrivate(),403,"Participant cannot exited a private conversation");
+
+        #make sure owner if group cannot be removed from chat
+        abort_if($this->isOwner(),403,"Owner cannot exit conversation");
+
+        if (!$this->hasExited()) {
+            $this->exited_at = now();
+            return $this->save();
+        }
+        
+        return false; // Already exited or conversation mismatch
+    }
+    
+    /**
+     * Check if the participant has exited the conversation.
+     */
+    public function hasExited(): bool
+    {
+        return self::withoutGlobalScope('withoutExited')
+                ->where('id', $this->id)
+                ->whereNotNull('exited_at')
+                ->exists();
+    }
+
+
 
 }

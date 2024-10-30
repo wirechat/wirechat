@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('role');
             $table->string('participantable_id');
             $table->string('participantable_type');
+            $table->timestamp('exited_at')->nullable(); // Track when a participant exits
             $table->timestamps();
-    
         });
     }
 

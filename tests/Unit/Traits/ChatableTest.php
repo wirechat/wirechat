@@ -598,4 +598,56 @@ describe('createGroup',function(){
 });
 
 
+describe('Exit conversation',function(){
+
+
+
+    test('Owner cannot exit conversation', function () {
+
+        $auth = User::factory()->create();
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        //assert
+        expect($auth->exitConversation($conversation))->toBe(false);
+
+    })->throws(Exception::class,'Owner cannot exit conversation');
+
+
+
+    test('User cannot exit from private conversation', function () {
+
+        $auth = User::factory()->create();
+        $conversation= $auth->createConversationWith(User::factory()->create());
+
+        //assert
+        expect($auth->exitConversation($conversation))->toBe(false);
+
+    })->throws(Exception::class,'Participant cannot exited a private conversation');
+
+
+
+
+
+    it('marks participant exited_at table when user exits conversation', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+
+
+        $user->exitConversation($conversation);
+
+        #get participant 
+        $participant= $conversation->participant($user);
+
+        //assert
+        expect($participant->hasExited())->toBe(true);
+        expect($participant->exited_at)->not->toBe(null);
+
+    });
+
  
+})->only();

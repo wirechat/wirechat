@@ -40,33 +40,33 @@ class Conversation extends Model
     {
         parent::boot();
 
-       // static::addGlobalScope(new WithoutClearedScope());
+        // static::addGlobalScope(new WithoutClearedScope());
         //DELETED event
         static::deleted(function ($conversation) {
 
             // Use a DB transaction to ensure atomicity
             DB::transaction(function () use ($conversation) {
 
-            // Delete associated participants 
-            $conversation->participants()->delete();
+                // Delete associated participants 
+                $conversation->participants()->delete();
 
 
-            // Delete reads
-            // Use a DB transaction to ensure atomicity
-            DB::transaction(function () use ($conversation) {
-                // Delete associated reads (polymorphic readable relation)
-                $conversation->reads()->delete();
-            });
+                // Delete reads
+                // Use a DB transaction to ensure atomicity
+                DB::transaction(function () use ($conversation) {
+                    // Delete associated reads (polymorphic readable relation)
+                    $conversation->reads()->delete();
+                });
 
 
-            // Delete associated messages 
-            $conversation->messages()->forceDelete();
+                // Delete associated messages 
+                $conversation->messages()->forceDelete();
 
-            //Delete actions 
-            $conversation->actions()->delete();
+                //Delete actions 
+                $conversation->actions()->delete();
 
-            //Delete group 
-            $conversation->group()->delete();
+                //Delete group 
+                $conversation->group()->delete();
             });
         });
     }
@@ -89,13 +89,46 @@ class Conversation extends Model
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
 
+
+    /**
+     * Get a participant model  from the user
+     * @param Model $user
+     * @return Participant|null
+     */
+    public function participant(Model $user)
+    {
+
+        $participant = null;
+        // If loaded, simply check the existing collection
+        if ($this->relationLoaded('participants')) {
+            $participant = $this->participants
+              ->  withoutGlobalScope('withoutExited')
+                ->where('participantable_id', $user->id)
+                ->where('participantable_type', get_class($user))
+                ->first();
+        } else {
+            $participant = $this->participants()
+            ->  withoutGlobalScope('withoutExited')
+
+                ->where('participantable_id', $user->id)
+                ->where('participantable_type', get_class($user))
+                ->first();
+        }
+
+        return $participant;
+    }
+
+
+
+
+
     /**
      * Add a new participant to the conversation.
      *
      * @param Model $participant
      * @return Participant
      */
-    public function addParticipant(Model $participant):Participant
+    public function addParticipant(Model $participant): Participant
     {
         // Check if the participant is already in the conversation
         abort_if(
@@ -117,10 +150,10 @@ class Conversation extends Model
         }
 
         // Attach the participant to the conversation
-       $participant= $this->participants()->create([
+        $participant = $this->participants()->create([
             'participantable_id' => $participant->id,
             'participantable_type' => get_class($participant),
-            'role'=>ParticipantRole::PARTICIPANT
+            'role' => ParticipantRole::PARTICIPANT
         ]);
 
         return $participant;
@@ -146,16 +179,16 @@ class Conversation extends Model
         $user = auth()->user(); // Get the authenticated user
 
         // dd($model->id);
-         // Apply the scope only if the user is authenticated
-         if ($user) {
-             $builder->whereHas('messages', function ($q) use ($user) {
-                 $q->whereDoesntHave('actions', function ($q) use ($user) {
-                     $q->where('actor_id', $user->id)
-                         ->where('actor_type', get_class($user)) // Safe since $user is authenticated
-                         ->where('type', Actions::DELETE);
-                 });
-             });
-            }
+        // Apply the scope only if the user is authenticated
+        if ($user) {
+            $builder->whereHas('messages', function ($q) use ($user) {
+                $q->whereDoesntHave('actions', function ($q) use ($user) {
+                    $q->where('actor_id', $user->id)
+                        ->where('actor_type', get_class($user)) // Safe since $user is authenticated
+                        ->where('type', Actions::DELETE);
+                });
+            });
+        }
     }
 
 
@@ -243,11 +276,11 @@ class Conversation extends Model
      * @param Model $user||null 
      * If not user is passed ,it will attempt to user auth(),if not avaible then will return null
      */
-    public function markAsRead(Model $user=null)
+    public function markAsRead(Model $user = null)
     {
-        
-        $user =  $user??auth()->user();
-        if ($user==null) {
+
+        $user =  $user ?? auth()->user();
+        if ($user == null) {
 
             return null;
             # code...
@@ -349,8 +382,8 @@ class Conversation extends Model
         }
 
         //exclude messages which user owns 
-        $messages ->where('sendable_id','!=', $model->id)
-        ->where('sendable_type', get_class($model));
+        $messages->where('sendable_id', '!=', $model->id)
+            ->where('sendable_type', get_class($model));
 
         // If the conversation has never been marked as read, return all messages count
         if (!$lastReadAt) {
@@ -481,10 +514,10 @@ class Conversation extends Model
 
     public function group()
     {
-        return $this->hasOne(Group::class,'conversation_id');
+        return $this->hasOne(Group::class, 'conversation_id');
     }
 
- 
+
     public function isPrivate(): bool
     {
         return $this->type == ConversationType::PRIVATE;
@@ -494,9 +527,4 @@ class Conversation extends Model
     {
         return $this->type == ConversationType::GROUP;
     }
-
-   
-
- 
-
 }
