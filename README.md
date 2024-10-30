@@ -193,8 +193,15 @@ $auth->hasConversationWith($user); // bool
 
 
 ///Deleting conversation :note this will only delete or hide messages from the user who deleted the conversation 
-//messages will be still be accesible to other participants of the conversation until the also delete the conversatoin
-$auth->deleteConversation();
+//messages will be still be accesible to other participants of the conversation until they also delete the conversatoin
+$auth->deleteConversation($conversation);
+
+
+
+//Exit a chat:group|channel by marking the  participant record as exited.
+//The participant will longer be able to send or receive messages to this chat :note if a converstaio is private , the participant cannot exit conversation
+$auth->exitConversation($conversation);
+
 
 
 ```
