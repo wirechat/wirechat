@@ -106,11 +106,20 @@ class Participant extends Model
         #make sure owner if group cannot be removed from chat
         abort_if($this->isOwner(),403,"Owner cannot exit conversation");
 
+
+  #delete messages|conversation
+  $this->participantable->deleteConversation($this->conversation);
+
+
         if (!$this->hasExited()) {
             $this->exited_at = now();
             return $this->save();
         }
         
+      
+
+
+         
         return false; // Already exited or conversation mismatch
     }
     
@@ -119,7 +128,7 @@ class Participant extends Model
      */
     public function hasExited(): bool
     {
-        return self::withoutGlobalScope('withoutExited')
+        return self::withoutGlobalScopes()
                 ->where('id', $this->id)
                 ->whereNotNull('exited_at')
                 ->exists();

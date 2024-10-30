@@ -74,13 +74,25 @@
                         </button>
                     </x-slot>
                     <x-slot name="content">
-                        <button wire:click="deleteConversation" wire:confirm="Are you sure" class="w-full text-start">
+                        <button wire:click="deleteConversation" wire:confirm="Are you sure delete {{$conversation->isGroup()?'Group':'Chat'}}" class="w-full text-start">
 
                             <x-wirechat::dropdown-link>
-                                Delete Conversation
+                                Delete {{$conversation->isGroup()?'Group':'Chat'}}
                             </x-wirechat::dropdown-link>
 
                         </button>
+
+
+                        @if ($conversation->isGroup() && !auth()->user()->isOwnerOfConversation($conversation))
+                            
+                        <button wire:click="exitConversation" wire:confirm="Are you sure want to exit Group?" class="w-full text-start ">
+
+                            <x-wirechat::dropdown-link class="text-red-500 dark:text-gray-500">
+                                Exit Group
+                            </x-wirechat::dropdown-link>
+
+                        </button>
+                        @endif
 
                     </x-slot>
                 </x-wirechat::dropdown>

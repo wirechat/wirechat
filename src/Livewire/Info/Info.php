@@ -176,6 +176,24 @@ class Info extends ModalComponent
     }
 
 
+    function exitConversation()
+    {
+        abort_unless(auth()->check(), 401);
+
+        $auth= auth()->user();
+
+       //dd($auth->isOwnerOfConversation($this->conversation));
+        #make sure owner if group cannot be removed from chat
+        abort_if($auth->isOwnerOfConversation($this->conversation),403,"Owner cannot exit conversation");
+
+        #delete conversation 
+        $auth->exitConversation($this->conversation);
+
+        #redirect to chats page 
+        $this->redirectRoute("wirechat");
+    }
+
+
     public function placeholder()
     {
         return <<<'HTML'

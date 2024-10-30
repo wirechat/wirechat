@@ -94,6 +94,87 @@ describe('Box presence test: ', function () {
     });
 
 
+
+
+    test('Exit Group button and method  is wired', function () {
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $conversation->addParticipant($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+        
+        #
+        Livewire::actingAs($participant)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertMethodWired("exitConversation")
+        ->assertSeeText('Exit Group');
+    })->only();
+
+
+    test('It doesnt show Exit Group button and wire method', function () {
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createConversationWith($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+        
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertMethodNotWired("exitConversation")
+        ->assertDontSeeText('Exit Group');
+    })->only();
+
+
+    test('Delete Conversation Group button and method  is wired', function () {
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $conversation->addParticipant($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+        
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertMethodWired("deleteConversation")
+        ->assertSeeText('Delete Group');
+     })->only();
+
+
+
+     test('it shows "Delete Chat" button label if Conversation  is Group', function () {
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        #add participant
+        $conversation= $auth->createConversationWith($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+        
+        #
+        Livewire::actingAs($participant)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertMethodWired("deleteConversation")
+        ->assertSeeText('Delete Chat');
+     })->only();
+
+
      
 
     test('it loads messages if they Exists in the conversation', function () {
@@ -279,7 +360,6 @@ describe('Sending messages ', function () {
     });
 
 
-
     test('it pushed job "NotifyParticipants" when message is sent', function () {
         Event::fake();
         Queue::fake();
@@ -303,6 +383,9 @@ describe('Sending messages ', function () {
         Queue::assertPushed(NotifyParticipants::class, function ($event) use ($conversation,$message) {
             return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
         });
+
+
+
     });
 
 
@@ -328,6 +411,141 @@ describe('Sending messages ', function () {
 
         });
     });
+
+
+    
+
+
+    test('it broadcasts event "NotifyParticipant" to all members of group-except owner of message when message is sent', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        #create group
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+
+        #add members 
+        for ($i=0; $i < 20; $i++) { 
+         $conversation->addParticipant(User::factory()->create());
+
+        }
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->set("body", 'New message')
+        ->call("sendMessage");
+
+
+        Event::assertDispatchedTimes(NotifyParticipant::class,20);
+ 
+    });
+
+
+
+    test('it does not broadcasts event "NotifyParticipant" to member who exited the group-meaning expect only 20 event not 21', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        #create group
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        #add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation,'hi');
+        $user->exitConversation($conversation); //exit here
+
+        #add members 
+        for ($i=0; $i < 20; $i++) { 
+         $conversation->addParticipant(User::factory()->create());
+
+        }
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->set("body", 'New message')
+        ->call("sendMessage");
+
+
+        Event::assertDispatchedTimes(NotifyParticipant::class,20);
+ 
+    });
+
+
+
+
+    test('user cannot access conversation after exiting', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        #create group
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        #add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation,'hi');
+        $user->exitConversation($conversation); //exit here
+
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertStatus(403);
+
+ 
+    });
+
+
+
+    test('it redirects after exiting conversation to chats', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        #create group
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        #add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation,'hi');
+
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->call('exitConversation')
+        ->assertRedirect(route("wirechat"));;
+
+ 
+    });
+
+
+
+    test('owner cannot exit conversation', function () {
+    //    Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        #create group
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+        $auth->sendMessageTo($conversation,'hi');
+
+        #add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation,'hi');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->call('exitConversation')
+        ->assertStatus(403,'Owner cannot exit conversation');
+
+        expect($auth->belongsToConversation($conversation))->toBe(true);
+ 
+    });
+
 
 
 

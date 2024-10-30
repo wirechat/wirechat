@@ -211,6 +211,8 @@ trait Chatable
 
 
         return $participant ? $participant->exitConversation() : false;
+
+
     }
 
  
@@ -354,6 +356,7 @@ trait Chatable
     {
 
 
+     //   dd('reached');
         //use already created methods inside conversation model 
         $conversation->deleteFor($this);
     }
@@ -512,17 +515,18 @@ trait Chatable
     public function isOwnerOfConversation(Conversation $conversation): bool
     {
         // Check if participants are already loaded
-        if ($conversation->relationLoaded('participants')) {
-            // If loaded, simply check the existing collection
-            return $conversation->participants->contains(function ($participant) {
-                return $participant->participantable_id == $this->id &&
-                    $participant->participantable_type == get_class($this) &&
-                    $participant->role == ParticipantRole::OWNER;
-            });
-        }
+        // if ($conversation->relationLoaded('participants')) {
+        //     // If loaded, simply check the existing collection
+        //     return $conversation->participants()->withoutGlobalScopes()->contains(function ($participant) {
+        //         return $participant->participantable_id == $this->id &&
+        //             $participant->participantable_type == get_class($this) &&
+        //             $participant->role == ParticipantRole::OWNER;
+        //     });
+        // }
 
         // If not loaded, perform the query
         return $conversation->participants()
+            ->withoutGlobalScopes()
             ->where('participantable_id', $this->id)
             ->where('participantable_type', get_class($this))
             ->where('role', ParticipantRole::OWNER)

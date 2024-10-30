@@ -150,11 +150,11 @@ class Conversation extends Model
         }
 
         // Attach the participant to the conversation
-        $participant = $this->participants()->create([
+        $participant = $this->participants()->updateOrCreate([
             'participantable_id' => $participant->id,
             'participantable_type' => get_class($participant),
             'role' => ParticipantRole::PARTICIPANT
-        ]);
+        ],['exited_at'=>null]);
 
         return $participant;
     }
@@ -436,12 +436,13 @@ class Conversation extends Model
                 $this->forceDelete();
             } else {
 
+
                 // Retrieve the other participant in the private conversation
                 $otherParticipant = $this->participants
                     ->where('participantable_id', '!=', $participant->id)
                     ->where('participantable_type', get_class($participant))
                     ->first()?->participantable;
-
+                
                 // Return null if the other participant cannot be found
                 if (!$otherParticipant) {
                     return null;

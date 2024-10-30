@@ -4,6 +4,7 @@ use Illuminate\Http\UploadedFile;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Enums\RoomType;
+use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Group;
@@ -625,9 +626,6 @@ describe('Exit conversation',function(){
     })->throws(Exception::class,'Participant cannot exited a private conversation');
 
 
-
-
-
     it('marks participant exited_at table when user exits conversation', function () {
 
         $auth = User::factory()->create();
@@ -649,5 +647,62 @@ describe('Exit conversation',function(){
 
     });
 
+
+
+
+    it('it also deletes messages for user after exiting conversation', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+
+        //Send to conversation
+        $user->sendMessageTo($conversation,'hello-1');
+        $user->sendMessageTo($conversation,'hello-2');
+        $user->sendMessageTo($conversation,'hello-3');
+
+        $conversation=  $user->sendMessageTo($conversation,'hello-4')->conversation;
+
+        //Assert Count
+        expect($conversation->messages()->count())->toBe(4);
+
+        //Authenticate
+
+        $user->exitConversation($conversation);
+
+
+       // dd(Action::all());
+
+        $this->actingAs($user);
+
+        expect($conversation->messages->count())->toBe(0);
+
+
+    });
+
+
+
+    it('returns false when checking if user belongs to conversation after exiting', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+
+        $user->exitConversation($conversation);
+
+        #get participant 
+        $participant= $conversation->participant($user);
+
+        //assert
+        expect($user->belongsToConversation($conversation))->toBe(false);
+
+    });
+
  
-})->only();
+});
