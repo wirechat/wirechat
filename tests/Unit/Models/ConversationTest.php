@@ -195,7 +195,7 @@ describe('deleting for',function(){
     })->throws(Exception::class);
 
 
-    it('deletes and does not load deleted conversations(for me)', function () {
+    it('deletes and loads deleted conversations(for me)', function () {
         
         //Dusk to 
         $auth = User::factory()->create();
@@ -206,7 +206,7 @@ describe('deleting for',function(){
         $conversation3=  $auth->sendMessageTo(User::factory()->create(['name'=>'john']),'hello-3')->conversation;
 
         //Assert Count
-        expect($auth->conversations->count())->toBe(3);
+        expect($auth->conversations()->withoutCleared()->count())->toBe(3);
 
         //Authenticate
         //$auth->refresh();
@@ -217,9 +217,38 @@ describe('deleting for',function(){
         $conversation3->deleteFor($auth);
 
         //conversations
-        expect($auth->conversations()->count())->toBe(2);
+        expect($auth->conversations()->withoutCleared()->count())->toBe(2);
 
     });
+
+
+
+    it('deletes and does not load deleted conversations(for me) if scopewithoutCleared is added', function () {
+        
+        //Dusk to 
+        $auth = User::factory()->create();
+
+        //Send to receiver
+        $conversation1=  $auth->sendMessageTo(User::factory()->create(),'hello-1')->conversation;
+        $conversation2=  $auth->sendMessageTo(User::factory()->create(),'hello-2')->conversation;
+        $conversation3=  $auth->sendMessageTo(User::factory()->create(['name'=>'john']),'hello-3')->conversation;
+
+        //Assert Count
+        expect($auth->conversations()->withoutCleared()->count())->toBe(3);
+
+        //Authenticate
+        //$auth->refresh();
+        
+        $this->actingAs($auth);
+
+        //Delete Conversation
+        $conversation3->deleteFor($auth);
+
+        //conversations
+        expect($auth->conversations()->withoutCleared()->count())->toBe(2);
+
+    });
+
 
     
     it('triggers delete messages for me when conversation is deleted', function () {
@@ -266,12 +295,12 @@ describe('deleting for',function(){
         //Authenticate and delete 1
         $this->actingAs($auth);
         $conversation->deleteFor($auth);
-        expect($auth->conversations->count())->toBe(0);
+        expect($auth->conversations()->withoutCleared()->count())->toBe(0);
 
 
         //Authenticate and delete 2
          $this->actingAs($receiver);
-        expect($receiver->conversations->count())->toBe(1);
+        expect($receiver->conversations()->withoutCleared()->count())->toBe(1);
 
     });
 
@@ -290,7 +319,7 @@ describe('deleting for',function(){
         $conversation->deleteFor($auth);
 
         //assert
-        expect($auth->conversations()->count())->toBe(0);
+        expect($auth->conversations()->withoutCleared()->count())->toBe(0);
 
 
         //send message to $auth

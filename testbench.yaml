@@ -5,7 +5,8 @@ providers:
 
 migrations:
   - workbench\database\migrations
-  
+  - database\migrations
+
 
 seeders:
   - Workbench\Database\Seeders\DatabaseSeeder

@@ -15,9 +15,11 @@ describe('Getting conversations',function(){
     it('returns  correct conversations belonging to user', function () {
 
         $auth = User::factory()->create();
+      //  dd($auth);
 
         $conversations = Conversation::factory(3)->withParticipants([$auth])->create();
 
+      //  dd($conversations);
         //assert conversation belongs to user
         foreach ($conversations as $key => $conversation) {
 
@@ -41,7 +43,7 @@ describe('Getting conversations',function(){
 
     });
     
-});
+}) ;
 
 describe('createConversationWith() ',function(){
 

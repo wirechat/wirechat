@@ -65,8 +65,11 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     {
         parent::setUp();
         //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
-        $this->loadMigrationsFrom( workbench_path('database/migrations') );
 
+
+       // dd(             __DIR__.'../../database/migrations');
+        $this->loadMigrationsFrom( workbench_path('database/migrations') );
+        $this->loadMigrationsFrom( __DIR__.'/../database/migrations' );
         $this->withoutVite();
 
        // $this->artisan('migrate:fresh')->run();

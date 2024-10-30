@@ -7,7 +7,6 @@
 
         <div class="flex items-center gap-2 truncate ">
             <h2 class=" text-2xl font-bold dark:text-white">Chats</h2>
-            {{auth()->user()->name}}
         </div>
 
 

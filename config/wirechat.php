@@ -26,7 +26,7 @@ return [
      * This is the theme color that will be used in the chat
      * Default : #3b82f6 //blue-500
      *  */
-    'color'=>'#44403c',
+    'color'=>'#3b82f6',
 
 
     /**

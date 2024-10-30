@@ -230,8 +230,8 @@ $primaryColor= WireChat::getColor();
             {{-- Load more button --}}
             @if ($canLoadMore)
                 <section class="w-full justify-center flex my-3">
-                    <button dusk="loadMoreButton" @click="$wire.loadMore()"
-                        class=" text-sm dark:text-white hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
+                    <button wire:loading.attr="disabled" dusk="loadMoreButton" @click="$wire.loadMore()"
+                        class=" text-sm dark:text-white disabled:hover:cursor-not-allowed hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
                         Load more
                     </button>
                 </section>

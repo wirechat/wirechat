@@ -18,7 +18,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
 
             $broadcastMessage = (array) $event->broadcastWith();
@@ -41,7 +41,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
 
             $broadcastMessage = (array) $event->broadcastWith();
@@ -60,7 +60,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['conversation_id'])->toBe($message->conversation_id);
@@ -77,7 +77,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['sendable_id'])->toBe($message->sendable_id);
@@ -94,7 +94,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['sendable_type'])->toBe($message->sendable_type);
@@ -111,7 +111,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['receiver_id'])->toBe($message->receiver_id);
@@ -128,7 +128,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['body'])->toBe($message->body);
@@ -144,7 +144,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['attachment_id'])->toBe($message->attachment_id);
@@ -160,7 +160,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['reply_id'])->toBe($message->reply_id);
@@ -176,7 +176,7 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message, $receiver))->toOthers();
+        broadcast(new MessageCreated($message, $conversation))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['read_at'])->toBe($message->read_at);
