@@ -5,6 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
+use Namu\WireChat\Models\Read;
 
 return new class extends Migration
 {
@@ -13,21 +14,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        
-        Schema::create(WireChat::formatTableName('reads'), function (Blueprint $table) {
+        Schema::create((new Read())->getTable(), function (Blueprint $table) {
             $table->id();
+            
             $table->morphs('readable'); // Polymorphic relationship
-            $table->unsignedBigInteger('conversation_id'); // Reference to the message
+            
+            $table->unsignedBigInteger('conversation_id'); // Reference to the conversation
             $table->foreign('conversation_id')->references('id')->on((new Conversation())->getTable())->cascadeOnDelete();
+            
             $table->timestamp('read_at')->nullable();
+            
+            // Indexes for optimization
+            $table->index(['conversation_id']);
+            $table->index(['readable_id', 'readable_type']);
         });
     }
-
+    
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists(WireChat::formatTableName('reads'));
+        Schema::dropIfExists((new Read())->getTable());
     }
 };

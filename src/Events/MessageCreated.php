@@ -2,6 +2,7 @@
 
 namespace Namu\WireChat\Events;
 
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -39,10 +40,8 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('conversation.' . $this->message->conversation_id)
-    
-            // In the participant, make sure the type is encoded using deslashType
-            //new PrivateChannel('participant.'.MorphTypeHelper::deslash(get_class($this->receiver)).'.'.$this->receiver->id)
+            new PrivateChannel('conversation.'.$this->message->conversation_id)
+            // new PrivateChannel('wirechat')
         ];
     }
     

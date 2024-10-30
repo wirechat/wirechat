@@ -12,8 +12,9 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    
     public function up(): void
-    {
+    { 
         Schema::create((new Group())->getTable(), function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('conversation_id');

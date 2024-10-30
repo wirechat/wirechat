@@ -16,10 +16,11 @@ use Namu\WireChat\Models\Message;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
+use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Jobs\BroadcastMessage;
-use Namu\WireChat\Jobs\NotifyParticipantJob;
+use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
@@ -167,6 +168,11 @@ class Chat extends Component
 
             #mark as read
             $this->conversation->markAsRead();
+
+            #refresh chatlist 
+            #dispatch event 'refresh ' to chatlist 
+            $this->dispatch('refresh')->to(Chats::class);
+            
             #broadcast 
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
         }
@@ -501,10 +507,13 @@ class Chat extends Component
         // todo create a job to broadcast multiple messages
         try {
 
+       // event(new BroadcastMessageEvent($message,$this->conversation));
+
+
             //!remove the receiver from the messageCreated and add it to the job instead 
             //!also do not forget to exlude auth user or message owner from particpants  
-            BroadcastMessage::dispatch($this->conversation, $message)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
-             NotifyParticipantJob::dispatch($this->conversation,$message);
+            BroadcastMessage::dispatch($message,$this->conversation)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
+            NotifyParticipants::dispatch($this->conversation,$message);
         } catch (\Throwable $th) {
             throw $th;
         }

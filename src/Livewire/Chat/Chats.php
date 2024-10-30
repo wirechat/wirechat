@@ -28,7 +28,7 @@ class Chats extends Component
   {
     return [
       'refresh' => '$refresh',
-      "echo-private:participant." .auth()->id() . ",.Namu\\WireChat\\Events\\NotifyParticipant" => '$refresh',
+   //   "echo-private:participant." .auth()->id() . ",.Namu\\WireChat\\Events\\NotifyParticipant" => '$refresh',
     ];
   }
 

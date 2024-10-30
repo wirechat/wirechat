@@ -2,21 +2,26 @@
 
 namespace Namu\WireChat\Jobs;
 
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
+use Namu\WireChat\Notifications\MessageNotification;
 
 class BroadcastMessage implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable,Batchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
@@ -28,12 +33,13 @@ class BroadcastMessage implements ShouldQueue
 
 
 
-    public function __construct(public Conversation $conversation, public Message $message)
+    public function __construct( public Message $message,public Conversation $conversation)
     {
         //  
         $this->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
         $this->auth = auth()->user();
 
+        Log::info('BroadcastMessage');
 
         #Get table
         $this->messagesTable = (new Message())->getTable();
@@ -46,7 +52,42 @@ class BroadcastMessage implements ShouldQueue
     public function handle(): void
     {
         //Broadcast to the conversation channel for all participants
-        broadcast(new MessageCreated($this->message,$this->conversation))->toOthers();
+        event(new MessageCreated($this->message,$this->conversation));
+
+
+
+        // $participants = $this->conversation->participants()
+        // ->with('participantable')
+        // ->where('participantable_id', '!=', $this->auth->id)
+        // ->chunk(100, function ($chunkedParticipants) {
+        //     // Prepare the jobs for the chunk
+        //    // $jobs = [];
+    
+        //    $users = collect();
+
+        //    foreach ($chunkedParticipants as $participant) {
+        //        $users->push($participant->participantable);
+        //    }
+   
+        //    // Send the notification to the collection of users (or other participantable models)
+        //    Notification::send($users, new MessageNotification($this->message));
+
+        // });
+
+        // $participants = $this->conversation->participants()
+        // ->with('participantable')
+        // ->where('participantable_id', '!=', $this->auth->id)
+        // ->chunk(100, function ($chunkedParticipants) {
+        //     // Prepare the jobs for the chunk
+        //     $jobs = [];
+    
+        //     foreach ($chunkedParticipants as $participant) {
+        //         $jobs[] = new NotifySingleParticipantJob($participant, $this->message);
+        //     }
+    
+        //     // Dispatch the batch of jobs
+        //     Bus ::batch($jobs)->dispatch();
+        // });
 
        // Get all participants, including those who haven't sent any messages
         // $participants = $this->conversation->participants()

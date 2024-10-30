@@ -21,12 +21,12 @@ use Namu\WireChat\Models\Message;
 
 Broadcast::channel('conversation.{conversationId}', function ($user, int $conversationId) {
 
+    Log::info('Checkig conversation channel');
    $conversation= Conversation::find($conversationId);
 
    if ($user->belongsToConversation($conversation)) {
     // Broadcast an event to the user when they join the channel
          // broadcast(new NotifyParticipantJob($user));
-
         return true; // Allow access to the channel
     }
 
@@ -36,7 +36,22 @@ Broadcast::channel('conversation.{conversationId}', function ($user, int $conver
 
 
 });
+
+// Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+//     return   $user->id  ==   $id;
+// });
  
+// //Open notification channel
+// Broadcast::channel('wirechat', function ($user) {
+
+//     if (auth()->check()) {
+//         Log::info('Logged in . in channels');
+//         return true;
+//     }
+    
+//     Log::info('Not Logged in . in channels');
+//     return false;
+// });
 
 Broadcast::channel('participant.{id}', function ($user, $id) {
     //Check if the authenticated user matches the broadcast recipient (polymorphic check)

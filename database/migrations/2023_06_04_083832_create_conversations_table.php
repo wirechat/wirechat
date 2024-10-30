@@ -3,29 +3,29 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Models\Conversation;
+
+
 
 return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+{    
+    /*** Run the migrations */
     public function up(): void
     {
-        Schema::create(WireChat::formatTableName('conversations'), function (Blueprint $table) {
+        Schema::create((new Conversation())->getTable(), function (Blueprint $table) {
             $table->id();
-            $table->string('type')->comment('can be a private or group chat'); 
-            $table->softDeletes();
+            $table->string('type')->comment('Private is 1-1 and room is group or channel');  
+            //Index for conversation_id to speed up queries involving foreign keys
+            $table->index('type');
             $table->timestamps();
         });
-        
     }
+    
 
-    /**
-     * Reverse the migrations.
-     */
+    /*** Reverse the migrations */
     public function down(): void
     {
-        Schema::dropIfExists(config('wirechat.table_prefix').'conversations');
+       Schema::dropIfExists((new Conversation())->getTable());
     }
+
 };

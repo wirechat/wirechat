@@ -2,6 +2,7 @@
 
 namespace Namu\WireChat\Jobs;
 
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -10,15 +11,17 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
+use Namu\WireChat\Notifications\MessageNotification;
 
-class NotifyParticipantJob implements ShouldQueue
+class NotifyParticipants implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable,Batchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
@@ -34,6 +37,7 @@ class NotifyParticipantJob implements ShouldQueue
     {
         //  
         $this->onQueue(config('wirechat.broadcasting.message_notification_queue', 'default'));
+        $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
         $this->auth = $message->sendable;
 
 
@@ -79,34 +83,48 @@ class NotifyParticipantJob implements ShouldQueue
         // ->select("$this->participantsTable.*", DB::raw("MAX($this->messagesTable.created_at) as last_message_time")) // Get last message time
         // ->groupBy("$this->participantsTable.id") // Group by participants
         // ->orderByDesc('last_message_time') // Order by the most recent message
-        // ->get();
+        // ->chunk(100, function ($chunkedParticipants)   {
+        //     // Collect the participantable instances
+        //     $users = collect();
+    
+        //     foreach ($chunkedParticipants as $participant) {
+        //         $users->push($participant->participantable);
+        //     }
+    
+        //     // Send the notification to the collection of users (or other participantable models)
+        //     Notification::send($users, new MessageNotification($this->message));
+        // });
+    
 
-             //Get conversation participants except auth
-            //  $participants = $this->conversation->participants()
-            //  ->where('participantable_id','!=',$this->auth->id)
-            //  ->where('participantable_type',get_class($this->auth))
-            //   ->chunk(500, function ($participants) {
-            //             // Loop through participants in batches of 100
-            //             foreach ($participants as $participant) {
-            //                 broadcast(new NotifyParticipant($participant->participantable, $this->message));
-            //             }
-            //         });;
+        //     Get conversation participants except auth
+             $participants = $this->conversation->participants()
+             ->where('participantable_id','!=',$this->auth->id)
+             ->where('participantable_type',get_class($this->auth))
+              ->chunk(500, function ($participants) {
+                        // Loop through participants in batches of 100
+                        foreach ($participants as $participant) {
+                            broadcast(new NotifyParticipant($participant));
+                        }
+                    });;
 
 
-            $participants = $this->conversation->participants()
-            ->with('participantable')
-            ->where('participantable_id', '!=', $this->auth->id)
-            ->chunk(100, function ($chunkedParticipants) {
-                // Prepare the jobs for the chunk
-                $jobs = [];
+            // $participants = $this->conversation->participants()
+            // ->with('participantable')
+            // ->where('participantable_id', '!=', $this->auth->id)
+            // ->chunk(100, function ($chunkedParticipants) {
+            //     // Prepare the jobs for the chunk
+            //    // $jobs = [];
         
-                foreach ($chunkedParticipants as $participant) {
-                    $jobs[] = new NotifySingleParticipantJob($participant, $this->message);
-                }
-        
-                // Dispatch the batch of jobs
-                Bus::batch($jobs)->dispatch();
-            });
+            //    $users = collect();
+    
+            //    foreach ($chunkedParticipants as $participant) {
+            //        $users->push($participant->participantable);
+            //    }
+       
+            //    // Send the notification to the collection of users (or other participantable models)
+            //    Notification::send($users, new MessageNotification($this->message));
+
+            // });
 
                     
         

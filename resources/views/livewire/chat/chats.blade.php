@@ -85,6 +85,26 @@ $primaryColor= WireChat::getColor();
             $wire.loadMore();
         }
         "
+        x-init="
+       
+
+        Echo.private('participant.{{auth()->id()}}')
+        .listen('.Namu\\WireChat\\Events\\NotifyParticipant', (e) => {
+            
+            
+            $wire.$refresh()
+                
+        });
+
+        {{-- Echo.private('participant.{{auth()->id()}}')
+        .listen('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', (event) => {
+
+            if(event.type=="Namu\\WireChat\\Notifications\\MessageNotification"){
+                $wire.$refresh()
+            }
+             }); --}}
+    
+        "
          class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">
 
 

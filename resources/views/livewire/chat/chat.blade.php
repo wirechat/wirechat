@@ -67,6 +67,7 @@ $primaryColor= WireChat::getColor();
         $wire.dispatch('focus-input-field');
         initializing = false;
     }, 150);
+    
     Echo.private('conversation.{{$conversation->id }}')
     .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
         $wire.appendNewMessage(e); // Calling the Livewire method to handle the new message
@@ -90,7 +91,7 @@ $primaryColor= WireChat::getColor();
             
             // Call the Livewire sendMessage method
             $wire.sendMessage();
-        }, 5000); // Call every 3 seconds
+        }, 1000); // Call every 3 seconds
     } --}}
 
     "

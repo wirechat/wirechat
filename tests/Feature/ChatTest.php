@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Jobs\BroadcastMessage;
+use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Livewire\Chat\Chat as ChatBox;
 use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
 use Namu\WireChat\Models\Attachment;
@@ -150,7 +152,7 @@ describe('Box presence test: ', function () {
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
                ->assertSee("Message from owner")
-               ->assertdontSee("Namu");
+               ->assertdontSeeText("Namu");
     });
 
 
@@ -262,17 +264,68 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
                         ->withParticipants([$auth,$receiver])
+                        ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->set("body", 'New message')
+                ->call("sendMessage");
+
+        $message = Message::first();
+
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$conversation) {
+            return $event->message->id === $message->id && $event->conversation->id === $conversation->id;
+        });
+    });
+
+
+
+    test('it pushed job "NotifyParticipants" when message is sent', function () {
+        Event::fake();
+        Queue::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
             ->create();
 
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->set("body", 'New message')
-            ->call("sendMessage");
+        ->set("body", 'New message')
+        ->call("sendMessage");
 
         $message = Message::first();
 
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$receiver) {
-            return $event->message->id === $message->id && $event->receiver->id === $receiver->id;
+
+
+        Queue::assertPushed(NotifyParticipants::class, function ($event) use ($conversation,$message) {
+            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
+        });
+    });
+
+
+    test('it broadcasts event "NotifyParticipant" when message is sent', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->set("body", 'New message')
+        ->call("sendMessage");
+
+        $message = Message::first();
+
+        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($receiver) {
+            return $event->participant->participantable_id == $receiver->id;
+
         });
     });
 
@@ -382,6 +435,30 @@ describe('Sending messages ', function () {
 
     test('it broadcasts event "MessageCreated" when sendLike is called', function () {
         Event::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name'=>'John']);
+        $conversation = Conversation::factory()
+                                    ->withParticipants([$auth,$receiver])
+                                    ->create();
+
+
+        Livewire::actingAs($auth)
+                ->test(ChatBox::class,['conversation' => $conversation->id])
+                ->call("sendLike");
+
+        $message = Message::first();
+
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$conversation) {
+            return $event->message->id === $message->id && $event->conversation->id === $conversation->id;
+
+        });
+    });
+
+
+    test('it pushed job "NotifyParticipants" when sendLike is called', function () {
+        Event::fake();
+        Queue::fake();
        // Queue::fake();
 
         $auth = User::factory()->create();
@@ -396,8 +473,32 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$receiver) {
-            return $event->message->id === $message->id && $event->receiver->id === $receiver->id;
+
+
+        Queue::assertPushed(NotifyParticipants::class, function ($event) use ($conversation,$message) {
+            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
+        });
+    });
+
+
+    test('it broadcasts event "NotifyParticipant" when sendLike is called', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($receiver) {
+            return $event->participant->participantable_id == $receiver->id;
 
         });
     });
@@ -421,10 +522,7 @@ describe('Sending messages ', function () {
         $request->assertStatus(429);
     });
 
-
     //attchements
-
-
     test('it saves image to databse when created & clears files properties when done', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);

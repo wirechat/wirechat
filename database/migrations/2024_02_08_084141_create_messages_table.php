@@ -15,36 +15,38 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create(WireChat::formatTableName('messages'), function (Blueprint $table) {
-        
-        $table->id();
+        Schema::create((new Message())->getTable(), function (Blueprint $table) {
+            $table->id();
+    
+            $table->unsignedBigInteger('conversation_id')->nullable();
+            $table->foreign('conversation_id')->references('id')->on((new Conversation())->getTable())->cascadeOnDelete();
+    
+            $table->string('sendable_id'); // ID of the sender
+            $table->string('sendable_type'); // Model type of the sender
+    
+            $table->unsignedBigInteger('reply_id')->nullable();
+            $table->foreign('reply_id')->references('id')->on((new Message())->getTable())->nullOnDelete();
+    
+            $table->unsignedBigInteger('attachment_id')->nullable();
+            $table->foreign('attachment_id')->references('id')->on((new Attachment())->getTable())->nullOnDelete();
+    
+            $table->text('body')->nullable();
+    
+            $table->softDeletes();
+            $table->timestamps();
 
-        $table->unsignedBigInteger('conversation_id')->nullable();
-        $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
-
-        $table->string('sendable_id'); // ID of the sender
-        $table->string('sendable_type'); // Model type of the sender
-
-        $table->unsignedBigInteger('reply_id')->nullable();
-        $table->foreign('reply_id')->references('id')->on((new Message)->getTable())->nullOnDelete();
-
-        $table->unsignedBigInteger('attachment_id')->nullable();
-        $table->foreign('attachment_id')->references('id')->on((new Attachment)->getTable())->nullOnDelete();
-
-        $table->text('body')->nullable();
-
-        $table->softDeletes();
-
-        $table->timestamps();
+            
+            // Indexes for optimization
+            $table->index(['conversation_id']);
+            $table->index(['sendable_id', 'sendable_type']);
         });
-
     }
-
+    
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists(WireChat::formatTableName('messages'));
+        Schema::dropIfExists((new Message())->getTable());
     }
 };

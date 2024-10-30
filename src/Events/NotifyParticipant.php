@@ -21,23 +21,22 @@ class NotifyParticipant implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(public Model  $participant)
+    public function __construct(public Participant  $participant)
     {
-
+        
         //Log::info($participant);
     }
 
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('participant.'.$this->participant->id)
+            new PrivateChannel('participant.'.$this->participant->participantable_id)
         ];
     }
 
     public function broadcastWith(): array
     {
         return [
-            'message'=> '',
         ];
     }
 }

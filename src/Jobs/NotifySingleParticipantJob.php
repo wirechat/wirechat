@@ -39,7 +39,7 @@ class NotifySingleParticipantJob implements ShouldQueue
 
     public function handle(): void
     {
-        broadcast(new NotifyParticipant($this->participant->participantable, $this->message));
+        event(new NotifyParticipant($this->participant));
     }
 
     
