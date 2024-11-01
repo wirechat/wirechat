@@ -68,9 +68,14 @@ $primaryColor= WireChat::getColor();
         initializing = false;
     }, 150);
     
-    Echo.private('conversation.{{$conversation->id }}')
+    Echo.private('conversation.{{$conversation->id}}')
     .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
         $wire.appendNewMessage(e); // Calling the Livewire method to handle the new message
+    });
+
+    Echo.private('conversation.{{$conversation->id}}')
+    .listen('.Namu\\WireChat\\Events\\MessageDeleted', (e) => {
+        $wire.removeDeletedMessage(e); // Calling the Livewire method to handle the new message
     });
 
     {{-- if ($wire.conversationId == 1) {

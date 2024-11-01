@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipants;
@@ -1453,6 +1454,34 @@ describe('deleteMessage ForEveryone', function () {
        
 
     });
+
+
+    test('it broadcasts event "NotifyParticipant" when sendLike is called', function () {
+        Event::fake();
+       // Queue::fake();
+
+       $auth = User::factory()->create();
+       $receiver = User::factory()->create(['name' => 'John']);
+
+       $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+       $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
+
+       //receiver -> auth 
+       $receiver->sendMessageTo($auth, message: 'message-3');
+       $receiver->sendMessageTo($auth, message: 'message-4');
+
+       //run
+       Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+           ->call("deleteForEveryone", $authMessage->id);
+
+
+        Event::assertDispatched(MessageDeleted::class, function ($event) use ($conversation,$authMessage) {
+            return $event->conversation->id == $conversation->id && $event->message->id === $authMessage->id;
+        });
+
+
+     
+    })->only();
 
 
 }) ;

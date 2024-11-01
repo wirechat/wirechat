@@ -5,6 +5,7 @@ namespace Namu\WireChat\Tests;
 use Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithViews;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -18,7 +19,9 @@ use function Orchestra\Testbench\workbench_path;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
+    use DatabaseMigrations;
     //use InteractsWithViews; 
+   // use RefreshDatabase;
     use WithWorkbench;
 
 
@@ -68,11 +71,12 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
 
        // dd(             __DIR__.'../../database/migrations');
-        $this->loadMigrationsFrom( workbench_path('database/migrations') );
-        $this->loadMigrationsFrom( __DIR__.'/../database/migrations' );
+       $this->loadMigrationsFrom( __DIR__.'/../database/migrations',workbench_path('database/migrations')  );
+
+      //  $this->loadMigrationsFrom( );
         $this->withoutVite();
 
-       // $this->artisan('migrate:fresh')->run();
+      //  $this->artisan('migrate:fresh')->run();
 
       //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
         //here we add a new ile in the name of the mixture of the berir d 

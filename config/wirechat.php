@@ -18,8 +18,8 @@ return [
      * Broadcasting:
      * define queue config*/
     'broadcasting' => [
-        'messages_queue' => 'high',  // Prioritize for real-time messaging in chat rooms
-        'message_notification_queue' => 'default',  // Notifications for new messages in other areas like the navbar
+        'messages_queue' => 'default',  // Prioritize for real-time messaging in chat rooms
+        'message_notification_queue' => 'medium',  // Notifications for new messages in other areas like the navbar
     ],
     /**
      * Color:

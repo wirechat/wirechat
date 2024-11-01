@@ -18,6 +18,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipants;
@@ -55,13 +56,106 @@ class Chat extends Component
 
     public function getListeners()
     {
+       // dd($this->conversation);
         return [
-            'refresh' => '$refresh',
-            // 'echo-private:conversation.' . $this->conversation->id . ',.Namu\\WireChat\\Events\\MessageCreated' => 'appendNewMessage',
+            'refresh' => '$refresh'
+          //  'echo-private:conversation.' .$this->conversation->id. ',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
         ];
     }
 
 
+    
+    public function removeDeletedMessage($event)
+    {
+
+       // dd([$event]);
+
+        //before appending message make sure it belong to this conversation 
+        if ($event['message']['conversation_id'] == $this->conversation->id) {
+
+            #scroll to bottom
+           // $this->dispatch('scroll-bottom');
+
+            $newMessage = Collect($event['message']);
+
+            //Make sure message does not belong to auth
+            // Make sure message does not belong to auth
+            if ($event['message']['sendable_id'] == auth()->id() && $event['message']['sendable_type'] === get_class(auth()->user())) {
+                return null;
+            }
+
+           #remove message from collection
+         //   dd($newMessage);
+
+
+
+            $messageDate =  Carbon::parse($newMessage['created_at']); 
+            $groupKey = '';
+            if ($messageDate->isToday()) {
+                $groupKey = 'Today';
+            } elseif ($messageDate->isYesterday()) {
+                $groupKey = 'Yesterday';
+            } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
+                $groupKey = $messageDate->format('l'); // Day name
+            } else {
+                $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
+            }
+    
+
+            # Remove the message from the correct group
+            if ($this->loadedMessages->has($groupKey)) {
+                $this->loadedMessages[$groupKey] = $this->loadedMessages[$groupKey]->reject(function ($loadedMessage) use ($newMessage) {
+                    return $loadedMessage->id == $newMessage['id'];
+                })->values();
+    
+                # Optionally, remove the group if it's empty
+                if ($this->loadedMessages[$groupKey]->isEmpty()) {
+                    $this->loadedMessages->forget($groupKey)->values();
+                }
+    
+                //  $this->loadedMessages;
+            }
+
+            #refresh chatlist 
+            #dispatch event 'refresh ' to chatlist 
+            $this->dispatch('refresh')->to(Chats::class);
+            
+            #broadcast 
+            // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
+        }
+    }
+    //handle incomming broadcasted message event
+    public function appendNewMessage($event)
+    {
+
+        //before appending message make sure it belong to this conversation 
+        if ($event['message']['conversation_id'] == $this->conversation->id) {
+
+            #scroll to bottom
+            $this->dispatch('scroll-bottom');
+
+            $newMessage = Message::find($event['message']['id']);
+
+            //Make sure message does not belong to auth
+            // Make sure message does not belong to auth
+            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type === get_class(auth()->user())) {
+                return null;
+            }
+
+            #push message
+            $this->pushMessage($newMessage);
+
+            #mark as read
+            $this->conversation->markAsRead();
+
+            #refresh chatlist 
+            #dispatch event 'refresh ' to chatlist 
+            $this->dispatch('refresh')->to(Chats::class);
+            
+            #broadcast 
+            // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
+        }
+    }
 
 //   function testable($event)  {
 
@@ -143,39 +237,7 @@ class Chat extends Component
         $newMessage->read_at = now();
         $newMessage->save();
     }
-
-    //handle incomming broadcasted message event
-    public function appendNewMessage($event)
-    {
-
-        //before appending message make sure it belong to this conversation 
-        if ($event['message']['conversation_id'] == $this->conversation->id) {
-
-            #scroll to bottom
-            $this->dispatch('scroll-bottom');
-
-            $newMessage = Message::find($event['message']['id']);
-
-            //Make sure message does not belong to auth
-            // Make sure message does not belong to auth
-            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type === get_class(auth()->user())) {
-                return null;
-            }
-
-            #push message
-            $this->pushMessage($newMessage);
-
-            #mark as read
-            $this->conversation->markAsRead();
-
-            #refresh chatlist 
-            #dispatch event 'refresh ' to chatlist 
-            $this->dispatch('refresh')->to(Chats::class);
-            
-            #broadcast 
-            // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
-        }
-    }
+   
 
     /**
      * Delete conversation  */
@@ -438,8 +500,8 @@ class Chat extends Component
 
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
-
-
+    event(new MessageDeleted($message,$this->conversation));
+     // broadcast(new MessageDeleted($message,$this->conversation))->toOthers();
         //if message has reply then only soft delete it 
         if ($message->hasReply()) {
 
@@ -450,6 +512,7 @@ class Chat extends Component
             #else Force delete message from database
             $message->forceDelete();
         }
+
     }
 
 
