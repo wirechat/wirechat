@@ -60,9 +60,8 @@ class Chat extends Component
             // 'echo-private:conversation.' . $this->conversation->id . ',.Namu\\WireChat\\Events\\MessageCreated' => 'appendNewMessage',
         ];
     }
-    
 
- 
+
 
 //   function testable($event)  {
 
@@ -611,9 +610,61 @@ class Chat extends Component
 
 
 
+
+    public function placeholder()
+    {
+        return <<<'HTML'
+      
+            <div class="h-[calc(100vh)] flex flex-col bg-white dark:bg-gray-900   h-full">
+                <header class="w-full bg-gray-300 dark:bg-gray-900 animate-pulse h-16 sticky gap-5 inset-x-0 items-center  flex p-5  top-0 z-10  dark:border-gray-700 border-b">
+
+                    <div class="rounded-full bg-white dark:bg-gray-800 h-9 w-9  animate-pulse ">
+
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 h-3 w-72 animate-pulse rounded-xl">
+
+                    </div>
+                </header>
+
+                <main class=" bg-gray-200 dark:bg-gray-900 flex flex-col animate-pulse grow h-10/12 h-full">
+                    <div class="m-auto">
+                        <x-wirechat::loading-spin/>
+        
+                        </div>
+                </main>
+
+                    <!-- Loading spinner... -->
+                <foooter class=" sticky bottom-0 w-full h-20 flex items-center gap-3 p-4 dark:bg-gray-900 bg-gray-300 h-10 animate-pulse  border-t dark:border-gray-700">
+                    <span class="rounded-full bg-white dark:bg-gray-800 h-9 w-5  animate-pulse ">
+
+                    </span>
+                
+                    <div class="bg-white dark:bg-gray-800 h-8 w-11/12 animate-pulse rounded-xl">
+
+                    </div>
+
+                    <span class="rounded-full bg-white dark:bg-gray-800 h-9 w-9  animate-pulse ">
+
+                    </span>
+
+
+                </foooter>
+            </div>
+
+        HTML;
+    }
+ 
+
+    
+
+ 
+
     public function mount()
     {
         //auth 
+
+
+        //sleep(5);
 
         abort_unless(auth()->check(), 401);
 

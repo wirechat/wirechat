@@ -3,10 +3,12 @@
 namespace Namu\WireChat\Livewire\Chat;
 
 use Livewire\Attributes\Layout;
+
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
+
 
 class View extends Component{
 
@@ -53,9 +55,10 @@ class View extends Component{
                       @livewire('chats')
                   </div>
                   
-                  <main class="  grid  w-full  grow  h-full relative overflow-y-auto"  style="contain:content">
+                  <main  class="  grid  w-full  grow  h-full relative overflow-y-auto"  style="contain:content">
+
                     
-                    @livewire('chat',['conversation'=>$conversation->id])
+                    <livewire:chat lazy conversation="{{$conversation->id}}"/>
 
                   </main>
 
