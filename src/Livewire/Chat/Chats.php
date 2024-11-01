@@ -54,56 +54,62 @@ class Chats extends Component
   protected function loadConversations()
   {
     $searchableFields = WireChat::searchableFields();
-
-
-
-      // Initialize cache for column checks
-      $columnCache = [];
-
+    $groupSearchableFields = ['name', 'description']; // Define fields in the group to search
+    
+    // Initialize cache for column checks
+    $columnCache = [];
+    
     // Clear previous results if there is a new search term
     if ($this->search) {
-      $this->conversations = []; // Clear previous results when a new search is made
-       #also reset page
-       $this->reset(['page','canLoadMore']);
+        $this->conversations = []; // Clear previous results when a new search is made
+        $this->reset(['page', 'canLoadMore']);
     }
-
+    
     // Start the query with eager loading
-    $additionalConversations = Conversation::withoutCleared()-> with([
-      'participants.participantable',    // Eager load participants and the related participantable model
-      'lastMessage',                      // Eager load reads for each message to prevent individual checks
-      'group.cover'
-
+    $additionalConversations = Conversation::withoutCleared()->with([
+        'participants.participantable', // Eager load participants and the related participantable model
+        'lastMessage',                  // Eager load last message
+        'group.cover'                   // Eager load group cover
     ])->whereHas('participants', function ($query) {
-      $query->where('participantable_id', auth()->id())
-        ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
+        $query->where('participantable_id', auth()->id())
+            ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
     })
-      ->when($this->search, function ($query) use ($searchableFields,$columnCache) {
-        $query->where(function ($query) use ($searchableFields,$columnCache) {
-          $query->whereHas('participants', function ($subquery) use ($searchableFields,$columnCache) {
-            // Exclude the authenticated user
-
-          return  $subquery->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
-              $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
-                  $table = $query3->getModel()->getTable();
-
-                  foreach ($searchableFields as $field) {
-                      // Check if column existence is already cached for the table
-                      if (!isset($columnCache[$table])) {
-                          $columnCache[$table] = Schema::getColumnListing($table);
-                      }
-
-                      if (in_array($field, $columnCache[$table])) {
-                         return $query3->orWhere($field, 'LIKE', '%' . $this->search . '%');
-                      }
+    ->when($this->search, function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
+        $query->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
+            
+            // Search in participants' participantable fields
+            $query->whereHas('participants', function ($subquery) use ($searchableFields, &$columnCache) {
+                $subquery->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
+                    $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
+                        $table = $query3->getModel()->getTable();
+    
+                        foreach ($searchableFields as $field) {
+                            // Check if column existence is already cached for the table
+                            if (!isset($columnCache[$table])) {
+                                $columnCache[$table] = Schema::getColumnListing($table);
+                            }
+    
+                            if (in_array($field, $columnCache[$table])) {
+                                $query3->orWhere($field, 'LIKE', '%' . $this->search . '%');
+                            }
+                        }
+                    });
+                });
+            });
+    
+           // Search in group fields directly
+            $query->orWhereHas('group', function ($groupQuery) use ($groupSearchableFields) {
+              $groupQuery->where(function ($query4) use ($groupSearchableFields) {
+                  foreach ($groupSearchableFields as $field) {
+                      $query4->orWhere($field, 'LIKE', '%' . $this->search . '%');
                   }
               });
           });
-          });
         });
-      })
-      ->latest('updated_at')
-      ->paginate(10, ['*'], 'page', $this->page); // Load the next page of conversations
-
+    })
+    ->latest('updated_at')
+    ->paginate(10, ['*'], 'page', $this->page); // Load the next page of conversations
+    
     // Check if cannot load more
     if (!$additionalConversations->hasMorePages()) {
       $this->canLoadMore = false;

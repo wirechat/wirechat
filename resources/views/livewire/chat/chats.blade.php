@@ -109,7 +109,7 @@ $primaryColor= WireChat::getColor();
 
 
         @if (config('wirechat.allow_chats_search', false) == true)
-            <div x-cloak wire:loading.delay.shorter.class.remove="hidden"
+            <div x-cloak wire:loading.class.remove="hidden"
                 wire:target="search"class="hidden transition-all duration-300 ">
                 <x-wirechat::loading-spin />
             </div>
@@ -229,13 +229,19 @@ $primaryColor= WireChat::getColor();
 
             {{-- Load more button --}}
             @if ($canLoadMore)
-                <section class="w-full justify-center flex my-3">
-                    <button wire:loading.attr="disabled" dusk="loadMoreButton" @click="$wire.loadMore()"
-                        class=" text-sm dark:text-white disabled:hover:cursor-not-allowed hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
+                <section wire:loading.remove wire:target="search" class="w-full justify-center flex my-3 ">
+                    <button wire:loading.remove wire:target="loadMore" wire:loading.attr="disabled" dusk="loadMoreButton" @click="$wire.loadMore()"
+                        class="  text-sm dark:text-white disabled:hover:cursor-not-allowed hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
                         Load more
                     </button>
+
+                    <div wire:loading wire:target="loadMore" >
+                        <x-wirechat::loading-spin />
+                     </div>
                 </section>
             @endif
+
+            
         @else
             <div class="w-full flex items-center h-full justify-center">
                 <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet</h6>
