@@ -500,7 +500,9 @@ class Chat extends Component
 
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
-    event(new MessageDeleted($message,$this->conversation));
+
+        MessageDeleted::dispatch($message,$this->conversation);
+       //event(new MessageDeleted($message,$this->conversation));
      // broadcast(new MessageDeleted($message,$this->conversation))->toOthers();
         //if message has reply then only soft delete it 
         if ($message->hasReply()) {

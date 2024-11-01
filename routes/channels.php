@@ -21,7 +21,7 @@ use Namu\WireChat\Models\Message;
 
 Broadcast::channel('conversation.{conversationId}', function ($user, int $conversationId) {
 
-    Log::info('Checkig conversation channel');
+  //  Log::info('Checkig conversation channel');
    $conversation= Conversation::find($conversationId);
 
    if ($user->belongsToConversation($conversation)) {

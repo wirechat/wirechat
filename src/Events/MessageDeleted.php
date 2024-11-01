@@ -54,7 +54,17 @@ class MessageDeleted implements ShouldBroadcastNow
 
     //      return   new Channel('test');
     // }
+
+
     /**
+ * The name of the queue on which to place the broadcasting job.
+ */
+public function broadcastQueue(): string
+{
+    return 'default';
+}
+
+/**
      * Get the data to broadcast.
      *
      * @return array<string, mixed>
