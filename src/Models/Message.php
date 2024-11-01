@@ -164,6 +164,7 @@ class Message extends Model
         if (!$user || !($user instanceof \Illuminate\Database\Eloquent\Model)) {
             return false;
         }
+
     
         return $this->sendable_type == get_class($user) && $this->sendable_id == $user->id;
     }

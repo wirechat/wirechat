@@ -149,7 +149,8 @@
                                     <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
                                         {{ $message?->ownedBy(auth()->user()) ? 'You ' : $message->sendable?->display_name ?? 'User' }}
                                         replied to
-                                        {{ $parent?->ownedBy($receiver) ? ($message?->ownedBy($receiver) ? 'Themself' : $receiver->display_name) : ($message?->ownedBy(auth()->user()) ? 'Yourself' : ' You') }}
+
+                                        {{ $parent?->ownedBy(auth()->user()) ? ($message?->ownedBy(auth()->user()) ? 'Yourself' : ' You'):($message?->ownedBy($parent->sendable) ? 'Themself' : $parent->sendable?->display_name) }}
                                     </h6>
 
                                     <div @class([
