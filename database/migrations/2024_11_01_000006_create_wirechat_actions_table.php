@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Models\Action;
 
 return new class extends Migration
 {
@@ -13,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         
-        Schema::create(WireChat::formatTableName('actions'), function (Blueprint $table) {
+        Schema::create((new Action())->getTable(), function (Blueprint $table) {
 
             //The entity who deleted
             $table->id();
@@ -37,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists(WireChat::formatTableName('actions'));
+        Schema::dropIfExists((new Action())->getTable());
     }
 };
