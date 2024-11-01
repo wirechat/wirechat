@@ -174,22 +174,19 @@
                             {{-- Body section --}}
                             <div @class([
                                 'flex gap-1 md:gap-4 group transition-transform ',
-                                ' justify-end' => $belongsToAuth,
+                                'justify-end' => $belongsToAuth,
                             ])>
 
                                 {{-- Message Actions --}}
-                                <div @class([
-                                    'my-auto flex invisible w-auto  items-center gap-2 group-hover:visible',
+                                <div
+                                 @class([
+                                    'my-auto flex  w-auto  items-center gap-2',
                                     'order-1' => !$belongsToAuth,
                                 ])>
                                     {{-- reply button --}}
                                     <button wire:click="setReply('{{ $message->id }}')"
-                                        class="hover:scale-110 transition-transform">
-                                        {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.7"
-                                      stroke="currentColor" class="w-4 h-4 text-gray-600/80 dark:text-white">
-                                      <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                                 </svg> --}}
+                                        class=" invisible  group-hover:visible hover:scale-110 transition-transform">
+                                    
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                             fill="currentColor" class="bi bi-reply-fill w-4 h-4 dark:text-white"
                                             viewBox="0 0 16 16">
@@ -198,11 +195,11 @@
                                         </svg>
                                     </button>
                                     {{-- Dropdown actions button --}}
-                                    <x-wirechat::dropdown align="{{ $belongsToAuth ? 'right' : 'left' }}"
+                                    <x-wirechat::dropdown class="w-40" align="{{ $belongsToAuth ? 'right' : 'left' }}"
                                         width="48">
                                         <x-slot name="trigger">
                                             {{-- Dots --}}
-                                            <button class="hover:scale-110 transition-transform">
+                                            <button class="invisible  group-hover:visible hover:scale-110 transition-transform">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor"
                                                     class="bi bi-three-dots h-3 w-3 text-gray-700 dark:text-white"
@@ -216,7 +213,7 @@
 
                                             @if ($message->ownedBy(auth()->user()))
                                                 <button wire:click="deleteForEveryone('{{ $message->id }}')"
-                                                    wire:confirm="are you sure" class="w-full text-start">
+                                                    wire:confirm="Are you sure?" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
                                                         Delete for everyone
                                                     </x-wirechat::dropdown-link>
@@ -225,12 +222,19 @@
 
 
                                             <button wire:click="deleteForMe('{{ $message->id }}')"
-                                                wire:confirm="are you sure" class="w-full text-start">
+                                                wire:confirm="Are you sure?" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     Delete for me
                                                 </x-wirechat::dropdown-link>
                                             </button>
 
+                                            <button wire:click="setReply('{{ $message->id }}')"class="w-full text-start">
+                                                <x-wirechat::dropdown-link>
+                                                    Reply
+                                                </x-wirechat::dropdown-link>
+                                            </button>
+
+                                      
                                         </x-slot>
                                     </x-wirechat::dropdown>
 
