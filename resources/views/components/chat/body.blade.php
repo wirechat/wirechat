@@ -2,6 +2,7 @@
     'loadedMessages' => $loadedMessages,
     'receiver' => $receiver,
     'isGroup' => false,
+    'isPrivate'=>$isPrivate
 ])
 
 
@@ -116,7 +117,7 @@
 
                     {{-- Message user Avatar --}}
                     {{-- Hide avatar if message belongs to auth --}}
-                    @if (!$belongsToAuth)
+                    @if (!$belongsToAuth && !$isPrivate)
                         <div @class([
                             'shrink-0 mb-auto  -mb-2',
                             // Hide avatar if the next message is from the same user
@@ -129,7 +130,7 @@
                     @endif
 
                     {{-- we use w-[95%] to leave space for the image --}}
-                    <div class="w-[95%]">
+                    <div class="w-[95%] mx-auto">
                         <div wire:key="message-{{ $key }}" @class([
                             'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
                             'ml-auto' => $belongsToAuth])>

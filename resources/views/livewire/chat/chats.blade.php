@@ -135,7 +135,7 @@ $primaryColor= WireChat::getColor();
                             'border-color:' . $primaryColor . '20' => $selectedConversationId == $conversation?->id,
                         ]) @class([
                             'py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-sm transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2',
-                            'bg-gray-50 dark:bg-gray-700   border-r-4' =>
+                            'bg-gray-50 dark:bg-gray-800   border-r-4' =>
                                 $selectedConversationId == $conversation?->id,
                         ])>
 
