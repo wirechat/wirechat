@@ -364,14 +364,18 @@ class Chat extends Component
                 #save photo to disk 
                 $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
 
+                 // Determine the reply ID based on conditions
+                $replyId = ($key === 0 && $this->replyMessage) ? $this->replyMessage->id : null;
+
                 // Create the message
                 $message = Message::create([
-                    'reply_id' => $this->replyMessage?->id,
+                    'reply_id' => $replyId,
                     'conversation_id' => $this->conversation->id,
                     'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
                     'sendable_id' => auth()->id(), // Polymorphic sender ID
                     // 'body' => $this->body, // Add body if required
                 ]);
+
 
                 // Create and associate the attachment with the message
                 $message->attachment()->create([

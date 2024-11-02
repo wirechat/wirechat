@@ -165,6 +165,7 @@ $primaryColor= WireChat::getColor();
                                 x-transition:leave-start=" translate-y-0"
                                 x-transition:leave-end="translate-y-full"
                                 class="w-full flex hidden sm:flex  min-h-full py-2 sm:px-4 py-1.5 border-b dark:border-gray-700  h-96 min-w-full">
+                                
                         <emoji-picker dusk="emoji-picker" style="width: 100%" class=" flex w-full h-full rounded-xl"></emoji-picker>
                     </section>
                 {{-- form and detail section  --}}
