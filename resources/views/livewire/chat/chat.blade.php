@@ -156,6 +156,7 @@ $primaryColor= WireChat::getColor();
 
                 <div  class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]  rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
 
+                    {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
                     <section    x-cloak x-show="openEmojiPicker" 
                                 x-transition:enter="transition  ease-out duration-150 transform"
                                 x-transition:enter-start=" translate-y-full"
@@ -163,10 +164,10 @@ $primaryColor= WireChat::getColor();
                                 x-transition:leave="transition ease-in duration-150 transform"
                                 x-transition:leave-start=" translate-y-0"
                                 x-transition:leave-end="translate-y-full"
-                                class="w-full flex hidden sm:flex  min-h-full py-2 sm:px-4 py-1.5 border-b  h-96 min-w-full">
+                                class="w-full flex hidden sm:flex  min-h-full py-2 sm:px-4 py-1.5 border-b dark:border-gray-700  h-96 min-w-full">
                         <emoji-picker dusk="emoji-picker" style="width: 100%" class=" flex w-full h-full rounded-xl"></emoji-picker>
                     </section>
-
+                {{-- form and detail section  --}}
                 <section class=" py-2 sm:px-4 py-1.5  shadow dark:bg-gray-800 bg-gray-50 z-[50]   flex flex-col gap-3 items-center  w-full mx-auto">
 
                     {{-- Media preview section --}}
