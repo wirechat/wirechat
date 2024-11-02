@@ -5,6 +5,7 @@ namespace Namu\WireChat\Livewire\Chat;
 use App\Models\User;
 use App\Notifications\TestNotification;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
@@ -501,7 +502,12 @@ class Chat extends Component
         #dispatch event 'refresh ' to chatlist 
         $this->dispatch('refresh')->to(Chats::class);
 
-        MessageDeleted::dispatch($message,$this->conversation);
+        try {
+            MessageDeleted::dispatch($message,$this->conversation);
+
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage()) ;
+        }
        //event(new MessageDeleted($message,$this->conversation));
      // broadcast(new MessageDeleted($message,$this->conversation))->toOthers();
         //if message has reply then only soft delete it 
@@ -596,7 +602,8 @@ class Chat extends Component
             BroadcastMessage::dispatch($message,$this->conversation)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
             NotifyParticipants::dispatch($this->conversation,$message);
         } catch (\Throwable $th) {
-            throw $th;
+     
+            Log::error($th->getMessage()) ;
         }
     }
 
