@@ -29,16 +29,40 @@
 
         /* Define root properties */
 
-     
+        emoji-picker #search {
+            background: red;
+        }
+  
+    
 
         /* Emoji picker configuration */
         emoji-picker {
-            --background: white;
+            --background: #f9fafb;
             --border-radius: 12px;
-            --input-border-color: #e5e7eb;
-            --outline-color:#e5e7eb;
-            --outline-size:1px;
-            --emoji-padding: 0.6rem;
+            --input-border-color:rgb(229 229 229);
+            --input-padding:0.45rem;
+            --outline-color: none;
+            --outline-size: 1px;
+            --num-columns: 8; /* Mobile-first default */
+            --emoji-padding: 0.7rem;
+            --emoji-size: 1.5rem; /* Smaller size for mobile */
+            --border-color: none;
+            --indicator-color:#9ca3af;
+        }
+  
+
+        @media screen and (min-width: 600px) {
+            emoji-picker {
+                --num-columns: 10; /* Increase columns for larger screens */
+                --emoji-size: 1.9rem; /* Larger size for desktop */
+            }
+        }
+
+        @media screen and (min-width: 900px) {
+            emoji-picker {
+                --num-columns: 16; /* Increase columns for larger screens */
+                --emoji-size: 1.9rem; /* Larger size for desktop */
+            }
         }
 
         /* Emoji picker Dark mode configuration */
@@ -46,9 +70,9 @@
             emoji-picker {
                 --background: #1f2937;
                 --input-border-color: #374151;
-                --outline-color:#9ca3af;
+                --outline-color:none;
                 --outline-size:1px;
-                --border-color: #374151;
+                --border-color: none;
                 --input-font-color: white;
                 --indicator-color:#9ca3af;
                 --button-hover-background:#9ca3af

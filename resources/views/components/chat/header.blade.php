@@ -85,20 +85,20 @@
                             </x-wirechat::dropdown-link>
 
                         </button>
-                        <button wire:click="deleteConversation" wire:confirm="Are you sure delete {{$conversation->isGroup()?'Group':'Chat'}}" class="w-full text-start">
-
-                            <x-wirechat::dropdown-link>
-                                Delete {{$conversation->isGroup()?'Group':'Chat'}}
-                            </x-wirechat::dropdown-link>
-
-                        </button>
-
+                     
 
                             <x-wirechat::dropdown-link href="{{route('wirechat')}}">
                                 Close {{$conversation->isGroup()?'Group':'Chat'}}
                             </x-wirechat::dropdown-link>
 
+                            <button wire:click="deleteConversation" wire:confirm="Are you sure delete {{$conversation->isGroup()?'Group':'Chat'}}" class="w-full text-start">
 
+                                <x-wirechat::dropdown-link class="text-red-500">
+                                    Delete {{$conversation->isGroup()?'Group':'Chat'}}
+                                </x-wirechat::dropdown-link>
+    
+                            </button>
+    
 
 
                         @if ($conversation->isGroup() && !auth()->user()->isOwnerOfConversation($conversation))

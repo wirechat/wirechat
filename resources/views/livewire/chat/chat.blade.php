@@ -16,6 +16,13 @@ $primaryColor= WireChat::getColor();
             --primary-color: {{ $primaryColor }}
         }
 
+
+        emoji-picker {
+  width: 100%!important;
+  height: 100%;
+}
+
+
         .custom-scrollbar {
             overflow-y: auto;
             /* Make sure the div is scrollable */
@@ -126,10 +133,10 @@ $primaryColor= WireChat::getColor();
 
         wire:loading.class.remove="overflow-y-scroll"
         wire:loading.class="overflow-hidden"
-        class=" w-full overflow-hidden  h-full relative"  style="contain:content">
+        class=" w-full transition  overflow-hidden  h-full relative"  style="contain:content">
 
         {{-- todo: add rounded corners to attachment --}}
-        <div class="   flex flex-col  grow  h-full">
+        <div class=" flex flex-col  grow  h-full">
             
             {{-- ---------- --}}
             {{-- --Header-- --}}
@@ -145,10 +152,22 @@ $primaryColor= WireChat::getColor();
             {{-- ---------- --}}
             {{-- -Footer--- --}}
             {{-- ---------- --}}
-            <footer class="shrink-0 p-1.5 overflow-y-visible relative  ">
+            <footer  x-data="{ openEmojiPicker: false }" class="shrink-0 overflow-y-visible relative  ">
 
-                <div
-                    class="  border-t py-2 dark:bg-gray-800 bg-gray-50  rounded-xl dark:border-gray-700 px-3 sm:px-4 py-1.5  grid gap-3 items-center  w-full   mx-auto">
+                <div  class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]  rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
+
+                    <section    x-cloak x-show="openEmojiPicker" 
+                                x-transition:enter="transition  ease-out duration-150 transform"
+                                x-transition:enter-start=" translate-y-full"
+                                x-transition:enter-end=" translate-y-0"
+                                x-transition:leave="transition ease-in duration-150 transform"
+                                x-transition:leave-start=" translate-y-0"
+                                x-transition:leave-end="translate-y-full"
+                                class="w-full flex hidden sm:flex  min-h-full py-2 sm:px-4 py-1.5 border-b  h-96 min-w-full">
+                        <emoji-picker dusk="emoji-picker" style="width: 100%" class=" flex w-full h-full rounded-xl"></emoji-picker>
+                    </section>
+
+                <section class=" py-2 sm:px-4 py-1.5  shadow dark:bg-gray-800 bg-gray-50 z-[50]   flex flex-col gap-3 items-center  w-full mx-auto">
 
                     {{-- Media preview section --}}
                     @if (count($media) > 0)
@@ -361,15 +380,12 @@ $primaryColor= WireChat::getColor();
                         <input type="hidden" autocomplete="false" style="display: none">
 
 
-                              {{-- Emoji icon --}}
-                              <div x-data="{ open: false }"  class="w-10 hidden sm:flex max-w-fit  items-center">
-                                <button type="button" dusk="emoji-trigger-button" @click="open = ! open" x-ref="emojibutton" class=" rounded-full p-px dark:border-gray-700"> 
-                                    <svg viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="w-7 h-7 text-gray-700 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>smiley</title><path fill="currentColor" d="M9.153,11.603c0.795,0,1.439-0.879,1.439-1.962S9.948,7.679,9.153,7.679 S7.714,8.558,7.714,9.641S8.358,11.603,9.153,11.603z M5.949,12.965c-0.026-0.307-0.131,5.218,6.063,5.551 c6.066-0.25,6.066-5.551,6.066-5.551C12,14.381,5.949,12.965,5.949,12.965z M17.312,14.073c0,0-0.669,1.959-5.051,1.959 c-3.505,0-5.388-1.164-5.607-1.959C6.654,14.073,12.566,15.128,17.312,14.073z M11.804,1.011c-6.195,0-10.826,5.022-10.826,11.217 s4.826,10.761,11.021,10.761S23.02,18.423,23.02,12.228C23.021,6.033,17.999,1.011,11.804,1.011z M12,21.354 c-5.273,0-9.381-3.886-9.381-9.159s3.942-9.548,9.215-9.548s9.548,4.275,9.548,9.548C21.381,17.467,17.273,21.354,12,21.354z  M15.108,11.603c0.795,0,1.439-0.879,1.439-1.962s-0.644-1.962-1.439-1.962s-1.439,0.879-1.439,1.962S14.313,11.603,15.108,11.603z"></path></svg>
-                                </button>
-                                <div @click.away="open=false" x-cloak x-show="open" x-transition x-anchor.top.offset.11="$refs.emojibutton">
-                                    <emoji-picker dusk="emoji-picker" class=" rounded-xl"></emoji-picker>
-                                </div>
-                            </div>
+                        {{-- Emoji Triggger icon --}}
+                        <div  class="w-10 hidden sm:flex max-w-fit  items-center">
+                            <button  :class="openEmojiPicker:''" type="button" dusk="emoji-trigger-button" @click="openEmojiPicker = ! openEmojiPicker" x-ref="emojibutton" class=" rounded-full p-px dark:border-gray-700"> 
+                                <svg x-bind:style="openEmojiPicker && { color: 'var(--primary-color)' }" viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="w-7 h-7 text-gray-700 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>smiley</title><path fill="currentColor" d="M9.153,11.603c0.795,0,1.439-0.879,1.439-1.962S9.948,7.679,9.153,7.679 S7.714,8.558,7.714,9.641S8.358,11.603,9.153,11.603z M5.949,12.965c-0.026-0.307-0.131,5.218,6.063,5.551 c6.066-0.25,6.066-5.551,6.066-5.551C12,14.381,5.949,12.965,5.949,12.965z M17.312,14.073c0,0-0.669,1.959-5.051,1.959 c-3.505,0-5.388-1.164-5.607-1.959C6.654,14.073,12.566,15.128,17.312,14.073z M11.804,1.011c-6.195,0-10.826,5.022-10.826,11.217 s4.826,10.761,11.021,10.761S23.02,18.423,23.02,12.228C23.021,6.033,17.999,1.011,11.804,1.011z M12,21.354 c-5.273,0-9.381-3.886-9.381-9.159s3.942-9.548,9.215-9.548s9.548,4.275,9.548,9.548C21.381,17.467,17.273,21.354,12,21.354z  M15.108,11.603c0.795,0,1.439-0.879,1.439-1.962s-0.644-1.962-1.439-1.962s-1.439,0.879-1.439,1.962S14.313,11.603,15.108,11.603z"></path></svg>
+                            </button>
+                         </div>
                     
                         {{-- Show  upload pop if media or file are empty --}}
                         {{-- Also only show  upload popup if allowed in configuration  --}}
@@ -553,6 +569,8 @@ $primaryColor= WireChat::getColor();
                         </div>
                         
                     </form>
+                </section>
+
 
                 </div>
 
