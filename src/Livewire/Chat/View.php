@@ -21,13 +21,18 @@ class View extends Component{
   function mount()  {
 
 
+
+  //  dd(str()->uuid());
+
     ///make sure user is authenticated
     abort_unless(auth()->check(),401);
     
     //We remove deleted conversation incase the user decides to visit the delted conversation 
     $this->conversation= Conversation::with('participants.participantable')->withoutGlobalScope(WithoutClearedScope::class)->where('id',$this->conversation_id)->firstOrFail();
     
-    //dd($this->conversation);
+
+    // dd( $this->conversation->unique_id);
+    //dd($this->conversation);Fw2GKQ5xMvCHP80Ikyzjae
    //dd( $this->conversation->hasBeenDeletedBy(auth()->user()));
 
 

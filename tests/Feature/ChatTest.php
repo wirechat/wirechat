@@ -115,7 +115,7 @@ describe('Box presence test: ', function () {
         Livewire::actingAs($participant)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertMethodWired("exitConversation")
         ->assertSeeText('Exit Group');
-    })->only();
+    });
 
 
     test('It doesnt show Exit Group button and wire method', function () {
@@ -133,7 +133,7 @@ describe('Box presence test: ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertMethodNotWired("exitConversation")
         ->assertDontSeeText('Exit Group');
-    })->only();
+    });
 
 
     test('Delete Conversation Group button and method  is wired', function () {
@@ -154,7 +154,7 @@ describe('Box presence test: ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertMethodWired("deleteConversation")
         ->assertSeeText('Delete Group');
-     })->only();
+     });
 
 
 
@@ -173,7 +173,7 @@ describe('Box presence test: ', function () {
         Livewire::actingAs($participant)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertMethodWired("deleteConversation")
         ->assertSeeText('Delete Chat');
-     })->only();
+     });
 
 
      
@@ -798,6 +798,9 @@ describe('Sending messages ', function () {
 
 
     test('it saves file to databse when created & clears files properties when done', function () {
+
+        config::set('wirechat.attachments.storage_disk','public');
+        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
@@ -812,8 +815,10 @@ describe('Sending messages ', function () {
             ->assertSet('files', []);
 
         $messageExists = Attachment::all();
+
+
         expect(count($messageExists))->toBe(1);
-    });
+    })->only();
 
     test('dispatched event is listened to in chatlist after message is created', function () {
         $auth = User::factory()->create();
@@ -1481,7 +1486,7 @@ describe('deleteMessage ForEveryone', function () {
 
 
      
-    })->only();
+    });
 
 
 }) ;

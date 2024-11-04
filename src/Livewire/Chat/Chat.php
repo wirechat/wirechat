@@ -364,6 +364,7 @@ class Chat extends Component
                 #save photo to disk 
                 $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
 
+
                  // Determine the reply ID based on conditions
                 $replyId = ($key === 0 && $this->replyMessage) ? $this->replyMessage->id : null;
 

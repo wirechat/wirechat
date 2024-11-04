@@ -9,6 +9,23 @@ use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\group;
 use Workbench\App\Models\User;
 
+
+
+
+// it(' saves unique id when conversation is created', function () {
+
+//     $auth = User::factory()->create();
+//     $receiver = User::factory()->create();
+
+//     //Authenticate $auth
+//     $this->actingAs($auth);
+
+//     //Create conversation
+//     $conversation = $auth->sendMessageTo($receiver, message: '1')->conversation;
+   
+//     expect($conversation->unique_id)->not->toBe(null);
+
+// })->only();
 describe('MarkAsRead()',function(){
 
     // it('aborts with 401 is auth is not authenticated', function () {
@@ -481,6 +498,9 @@ describe('deleting permanently()',function(){
 
     });
 });
+
+
+
 
 
  

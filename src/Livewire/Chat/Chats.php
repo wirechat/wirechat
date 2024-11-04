@@ -107,20 +107,21 @@ class Chats extends Component
           });
         });
     })
-    ->latest('updated_at')
-    ->paginate(10, ['*'], 'page', $this->page); // Load the next page of conversations
-    
+    ->latest('updated_at') ->paginate(10, ['*'], 'page', $this->page); 
+    // Load the next page of conversations
     // Check if cannot load more
     if (!$additionalConversations->hasMorePages()) {
       $this->canLoadMore = false;
     }
 
+    // Ninj 
+
     // Merge the new conversations, ensure uniqueness, and sort by latest updated_at
     $this->conversations = collect($this->conversations)
-      ->merge($additionalConversations->items())
-      ->unique('id') // Ensure only unique conversations by comparing their IDs
-      ->sortByDesc('updated_at') // Sort by updated_at in descending order
-      ->values(); // Reset the array keys
+                                        ->merge($additionalConversations->items())
+                                        ->unique('id') //Ensure only unique conversations by comparing their IDs
+                                        ->sortByDesc('updated_at') //Sort by updated_at in descending order
+                                        ->values(); //Reset the array keys
   }
 
 

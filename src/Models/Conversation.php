@@ -15,7 +15,7 @@ use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
-
+use Illuminate\Support\Str;
 class Conversation extends Model
 {
     use HasFactory;
@@ -69,6 +69,25 @@ class Conversation extends Model
                 $conversation->group()->delete();
             });
         });
+
+        // static::created(function ($model) {
+        //     // Convert the id to base 36 and limit to 6 characters (to leave room for randomness)
+        //   //  dd(encrypt($model->id),$model->id);
+        //     $baseId = substr(base_convert($model->id, 10, 36), 0, 6); // 6 characters
+        //     dd($baseId);
+        //     // Generate a random alphanumeric string of 6 characters
+        //     $randomString = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 6); // 6 characters
+        //     // Combine to ensure total length is 12 characters
+        //     $model->unique_id = $baseId . $randomString; // Combine them
+        //     $model->saveQuietly(); // Save without triggering model events
+        // });
+        // static::creating(function ($model) {
+        //     do {
+        //         $uniqueId = Str::random(12);
+        //     } while (self::where('unique_id', $uniqueId)->exists());
+
+        //     $model->unique_id = $uniqueId;
+        // });
     }
 
     /** 
@@ -118,10 +137,6 @@ class Conversation extends Model
         return $participant;
     }
 
-
-
-
-
     /**
      * Add a new participant to the conversation.
      *
@@ -159,8 +174,6 @@ class Conversation extends Model
         return $participant;
     }
 
-
-
     public function messages()
     {
         return $this->hasMany(Message::class);
@@ -190,7 +203,6 @@ class Conversation extends Model
             });
         }
     }
-
 
     public function getReceiver()
     {
@@ -226,7 +238,6 @@ class Conversation extends Model
     }
 
 
-
     public function scopeWhereNotDeleted($query)
     {
         $userId = auth()->id();
@@ -249,8 +260,6 @@ class Conversation extends Model
                 ->orWhereDoesntHave('messages');
         });
     }
-
-
 
     /**
      * ----------------------------------------

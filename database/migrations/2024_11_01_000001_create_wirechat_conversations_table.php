@@ -14,6 +14,7 @@ return new class extends Migration
     {
         Schema::create((new Conversation())->getTable(), function (Blueprint $table) {
             $table->id();
+
             $table->string('type')->comment('Private is 1-1 , group or channel');  
             //Index for conversation_id to speed up queries involving foreign keys
             $table->index('type');

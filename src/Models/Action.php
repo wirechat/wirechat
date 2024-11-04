@@ -5,6 +5,7 @@ namespace Namu\WireChat\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Namu\WireChat\Enums\Actions;
+use Namu\WireChat\Facades\WireChat;
 
 class Action extends Model
 {
@@ -22,8 +23,8 @@ class Action extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = \config('wirechat.actions_table','wire_actions');
 
+        $this->table = WireChat::formatTableName('actions');
 
         parent::__construct($attributes);
     }
