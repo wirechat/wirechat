@@ -27,7 +27,7 @@
         darkModeMediaQuery.addEventListener('change', (event) => {
             updateTheme(event.matches);
         });
-    </script>
+      </script>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

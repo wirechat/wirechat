@@ -48,14 +48,14 @@ class View extends Component{
   }
 
 
-  #[Layout('wirechat::layouts.app')] 
+  #[Layout('layouts.app')] 
   #[Title('Chats')] 
   public function render()
   {
 
       return <<<'BLADE'
               <div class="w-full h-[calc(100vh_-_0.0rem)]  flex rounded-lg" >
-                  <div class=" hidden md:flex  dark:bg-inherit  relative w-full h-full md:w-[360px] lg:w-[400px] xl:w-[500px]  shrink-0 overflow-y-auto  ">
+                  <div class=" hidden md:flex bg-inherit  dark:bg-inherit  relative w-full h-full md:w-[360px] lg:w-[400px] xl:w-[500px]  shrink-0 overflow-y-auto  ">
 
                       @livewire('chats')
                   </div>

@@ -133,7 +133,7 @@ $primaryColor= WireChat::getColor();
 
         wire:loading.class.remove="overflow-y-scroll"
         wire:loading.class="overflow-hidden"
-        class=" w-full transition  overflow-hidden  h-full relative"  style="contain:content">
+        class=" w-full transition  bg-white/95 dark:bg-gray-900  overflow-hidden  h-full relative"  style="contain:content">
 
         {{-- todo: add rounded corners to attachment --}}
         <div class=" flex flex-col  grow  h-full">

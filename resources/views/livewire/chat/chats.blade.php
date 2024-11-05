@@ -61,7 +61,7 @@ $primaryColor= WireChat::getColor();
          conversationElement.scrollIntoView({ behavior: 'smooth' });
      }
  }, 200);"
-    class="flex flex-col transition-all h-full overflow-hidden w-full sm:p-3 border-r dark:border-gray-700  ">
+    class="flex flex-col bg-white/95 dark:bg-gray-900 transition-all h-full overflow-hidden w-full sm:p-3 border-r dark:border-gray-700  ">
 
     @php
         $authUser=auth()->user();

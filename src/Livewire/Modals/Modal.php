@@ -68,7 +68,7 @@ class Modal extends Component
 
         $this->activeComponent = $id;
 
-        $this->dispatch('activeModalComponentChanged', id: $id);
+        $this->dispatch('activeWireChatModalComponentChanged', id: $id);
     }
 
     public function resolveComponentProps(array $attributes, Component $component): Collection

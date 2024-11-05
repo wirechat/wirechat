@@ -18,7 +18,7 @@ class Index extends Component{
 
 
 
-  #[Layout('wirechat::layouts.app')] 
+  #[Layout('layouts.app')] 
   #[Title('Chats')] 
   public function render()
   {

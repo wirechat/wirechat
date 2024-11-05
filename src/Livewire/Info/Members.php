@@ -51,6 +51,10 @@ class Members extends ModalComponent
     #[Locked]
     public $newTotalCount;
 
+    protected $listeners=[
+        'refresh'=>'$refresh'
+    ];
+
 
 
 
@@ -126,6 +130,8 @@ class Members extends ModalComponent
         } else {
             $participant->update(['role' => ParticipantRole::ADMIN]);
         }
+        $this->dispatch('refresh')->self();
+
     }
 
     protected function loadParticipants()
@@ -190,6 +196,8 @@ class Members extends ModalComponent
           });
 
         $this->dispatch('refresh')->to(Info::class);
+      //  $this->dispatch('refresh')->self();
+
 
     }
 
