@@ -160,7 +160,7 @@ Echo.private('conversation.{{ $conversation->id }}')
         {{-- ---------- --}}
         {{-- -Footer--- --}}
         {{-- ---------- --}}
-        <footer x-data="{ openEmojiPicker: false }" class="shrink-0   relative  ">
+        <footer x-data="{ 'openEmojiPicker': false }" class="shrink-0 h-auto relative  ">
 
             <div class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]   rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
 
@@ -393,7 +393,7 @@ Echo.private('conversation.{{ $conversation->id }}')
 
                         {{-- Emoji Triggger icon --}}
                         <div class="w-10 hidden sm:flex max-w-fit  items-center">
-                            <button :class="openEmojiPicker: ''" type="button" dusk="emoji-trigger-button"
+                            <button type="button" dusk="emoji-trigger-button"
                                 @click="openEmojiPicker = ! openEmojiPicker" x-ref="emojibutton"
                                 class=" rounded-full p-px dark:border-gray-700">
                                 <svg x-bind:style="openEmojiPicker && { color: 'var(--primary-color)' }"
