@@ -43,13 +43,14 @@ class ChatModal extends Component
 
     public function openChatModal($component, $arguments = [], $modalAttributes = []): void
     {
+
+      
         $componentClass = app(ComponentRegistry::class)->getClass($component);
         $id = md5($component.serialize($arguments));
 
         $arguments = collect($arguments)
                 ->merge($this->resolveComponentProps($arguments, new $componentClass()))
                 ->all();
-
         $this->components[$id] = [
             'name' => $component,
             'attributes' => $arguments, // Deprecated
@@ -69,6 +70,9 @@ class ChatModal extends Component
         
         /*! Changed listener name to activeChatModalComponentChanged to not interfer with main modal*/
         $this->dispatch('activeChatModalComponentChanged', id: $id);
+
+
+
     }
 
     public function resolveComponentProps(array $attributes, Component $component): Collection

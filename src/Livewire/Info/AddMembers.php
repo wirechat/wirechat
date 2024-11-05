@@ -61,6 +61,12 @@ class AddMembers extends ModalComponent
     return false;
   }
 
+  public static function closeModalOnEscapeIsForceful(): bool
+  {
+      return false;
+  }
+
+
 
 
   /** 

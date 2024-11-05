@@ -19,17 +19,17 @@
                         return this.$wire.get('components')[this.activeComponent]['modalAttributes'][key];
                     }
                 },
-                closeModalOnEscape(trigger) {
-                    if (this.getActiveComponentModalAttribute('closeOnEscape') === false) {
-                        return;
-                    }
+                closeWireChatModalOnEscape(trigger) {
 
-                    if (!this.closingModal('closingModalOnEscape')) {
-                        return;
-                    }
 
-                    let force = this.getActiveComponentModalAttribute('closeOnEscapeIsForceful') === true;
-                    this.closeModal(force);
+                    ///Only proceed if the trigger is for ChatModal
+                   if (trigger.modalType != 'WireChatModal'){ return;}
+                   if (this.getActiveComponentModalAttribute('closeOnEscape') === false) { return; }
+                   if (!this.closingModal('closingModalOnEscape')) { return; }
+
+                   let force = this.getActiveComponentModalAttribute('closeOnEscapeIsForceful') === true;
+                   this.closeModal(force);
+
                 },
                 closeModalOnClickAway(trigger) {
                     if (this.getActiveComponentModalAttribute('closeOnClickAway') === false) {
@@ -67,7 +67,7 @@
                     }
 
                     if (this.getActiveComponentModalAttribute('destroyOnClose') === true) {
-                        Livewire.dispatch('destroyComponent', {
+                        Livewire.dispatch('destroyWireChatComponent', {
                             id: this.activeComponent
                         });
                     }
@@ -188,7 +188,8 @@
         }
     </script>
       <div x-data="WireChatModal()" x-on:close.stop="setShowPropertyTo(false)"
-        x-on:keydown.escape.window="closeModalOnEscape()" x-show="show" class="fixed inset-0 z-10 overflow-y-auto"
+           x-on:keydown.escape="closeWireChatModalOnEscape({modalType: 'WireChatModal', event: $event })"
+           x-show="show" class="fixed inset-0 z-10 overflow-y-auto"
         style="display: none;">
         <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-10 text-center sm:block sm:p-0">
             <div x-show="show" x-on:click="closeModalOnClickAway()" x-transition:enter="ease-out duration-300"

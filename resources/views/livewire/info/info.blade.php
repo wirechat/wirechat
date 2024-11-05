@@ -1,4 +1,4 @@
-<div x-data x-init="console.log('here')" class="bg-white dark:bg-gray-900 space-y-auto">
+<div id="info-modal" class="bg-white dark:bg-gray-900 space-y-auto">
 
     <section class="flex gap-4 z-[10]  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
         <button wire:click="$dispatch('closeChatModal')" class="focus:outline-none"> <svg class="w-7 h-7"
@@ -11,9 +11,6 @@
     {{-- Details --}}
     <header class="">
         <div class="flex  flex-col items-center gap-5">
-
-
-
 
             <section class="mx-auto items-center justify-center grid">
 

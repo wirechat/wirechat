@@ -116,7 +116,7 @@ class Modal extends Component
             ->filter();
     }
 
-    public function destroyComponent($id): void
+    public function destroyWireChatComponent($id): void
     {
         unset($this->components[$id]);
     }
@@ -125,7 +125,7 @@ class Modal extends Component
     {
         return [
             'openWireChatModal',
-            'destroyComponent',
+            'destroyWireChatComponent',
         ];
     }
     

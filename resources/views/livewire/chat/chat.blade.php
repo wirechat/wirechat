@@ -734,6 +734,6 @@ $primaryColor= WireChat::getColor();
         @endscript
         
         <x-wirechat::toast />
-        @livewire('chat-modal')
+        <livewire:chat-modal/>
     </div>
 

@@ -62,6 +62,15 @@ class Info extends ModalComponent
   }
 
 
+  public static function closeModalOnEscapeIsForceful(): bool
+  {
+      return false;
+  }
+  // public static function closeModalOnEscape(): bool
+  // {
+  //     return false;
+  // }
+
 
   function updatedDescription($value)
   {

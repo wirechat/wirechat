@@ -114,7 +114,7 @@ abstract class ModalComponent extends Component
 
     public static function closeModalOnEscapeIsForceful(): bool
     {
-        return true;
+        return false;
     }
 
     public static function dispatchCloseEvent(): bool

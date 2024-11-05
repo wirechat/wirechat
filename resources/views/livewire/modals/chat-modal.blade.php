@@ -5,6 +5,8 @@
     This script was copied from wire-elements modal 
     Copyright © 2021 Philo Hermans and contributors
     --}}
+    @script 
+
     <script>
         window.ChatModal = () => {
             return {
@@ -19,14 +21,14 @@
                         return this.$wire.get('components')[this.activeComponent]['modalAttributes'][key];
                     }
                 },
-                closeModalOnEscape(trigger) {
-                    if (this.getActiveComponentModalAttribute('closeOnEscape') === false) {
-                        return;
-                    }
+                closeChatModalOnEscape(trigger) {
 
-                    if (!this.closingModal('closingModalOnEscape')) {
-                        return;
-                    }
+                    console.log(trigger);  // Check the contents of the trigger
+
+                    ///Only proceed if the trigger is for ChatModal
+                    if (trigger.modalType != 'ChatModal'){ return;}
+                    if (this.getActiveComponentModalAttribute('closeOnEscape') === false) { return; }
+                    if (!this.closingModal('closingModalOnEscape')) { return; }
 
                     let force = this.getActiveComponentModalAttribute('closeOnEscapeIsForceful') === true;
                     this.closeModal(force);
@@ -124,12 +126,10 @@
                     });
                 },
                 focusables() {
-                    let selector =
-                        'a, button, input:not([type=\'hidden\'], textarea, select, details, [tabindex]:not([tabindex=\'-1\']))'
+                    return [...this.$el.querySelectorAll('*')];
+                }
 
-                    return [...this.$el.querySelectorAll(selector)]
-                        .filter(el => !el.hasAttribute('disabled'))
-                },
+                ,
                 firstFocusable() {
                     return this.focusables()[0]
                 },
@@ -191,8 +191,10 @@
             };
         }
     </script>
+    @endscript
       <div x-data="ChatModal()" x-on:close.stop="setShowPropertyTo(false)"
-        x-on:keydown.escape.window="closeModalOnEscape()" x-show="show" class="fixed dark:bg-gray-900  dark:text-white opacity-100 inset-0 z-10 overflow-y-auto" style="display: none;">
+           x-on:keydown.escape="closeChatModalOnEscape({ modalType: 'ChatModal', event: $event })"
+           x-show="show" class="fixed dark:bg-gray-900  dark:text-white opacity-100 inset-0 z-50 overflow-y-auto" style="display: none;">
         <div class="justify-center text-center overflow-y-auto">
             {{-- <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span> --}}
            <div x-show="show && showActiveComponent" 
