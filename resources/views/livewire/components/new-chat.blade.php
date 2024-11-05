@@ -33,7 +33,7 @@
     <div class="relative w-full">
 
         {{-- New Group --}}
-        @if (WireChat::allowsNewGroupModal())
+        @if (WireChat::showNewGroupModalButton())
         <button
   
          wire:click="$dispatch('openWireChatModal', {component: 'new-group'})"

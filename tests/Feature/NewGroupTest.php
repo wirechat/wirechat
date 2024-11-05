@@ -28,17 +28,6 @@ it('user must be authenticated', function () {
 });
 
 
-test('aborts 503 is feature not available', function () {
-    Config::set('wirechat.allow_new_group_modal',false);
-    $auth = ModelsUser::factory()->create();
-    
-    $request = Livewire::actingAs($auth)->test(NewGroup::class);
-
-    $request->assertStatus(503,'The New Group feature is currently unavailable.');
-
-});
-
-
 
 describe('Initial page',function(){
 

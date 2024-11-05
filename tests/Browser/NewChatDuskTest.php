@@ -68,7 +68,7 @@ class NewChatDuskTest extends DuskTestCase
          public function new_group_button_is_show_if_allowed()
          {
 
-             Config::set('wirechat.allow_new_group_modal',true);
+             Config::set('wirechat.show_new_group_modal_button',true);
              $auth = User::factory()->create();
              $receiver = User::factory()->create(['name' => 'John']);
      

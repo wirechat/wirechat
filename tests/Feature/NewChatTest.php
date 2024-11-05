@@ -15,15 +15,15 @@ it('user must be authenticated', function () {
 });
 
 
-it('aborts 503 is feature not available', function () {
-    Config::set('wirechat.allow_new_chat_modal',false);
-    $auth = ModelsUser::factory()->create();
+// it('aborts 503 is feature not available', function () {
+//     Config::set('wirechat.show_new_group_modal_button',false);
+//     $auth = ModelsUser::factory()->create();
     
-    $request = Livewire::actingAs($auth)->test(NewChat::class);
+//     $request = Livewire::actingAs($auth)->test(NewChat::class);
 
-    $request->assertStatus(503,'The NewChat feature is currently unavailable.');
+//     $request->assertStatus(503,'The NewChat feature is currently unavailable.');
 
-});
+// });
 
 
 it('Title is set ', function () {
@@ -55,7 +55,7 @@ it('can filter users if search input is set', function () {
 
 it('shows New group if allowed', function () {
 
-    Config::set('wirechat.allow_new_group_modal',true);
+    Config::set('wirechat.show_new_group_modal_button',true);
     $auth = ModelsUser::factory()->create();
 
     $request = Livewire::actingAs($auth)->test(NewChat::class);

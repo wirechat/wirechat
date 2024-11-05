@@ -58,7 +58,7 @@ public function it_does_not_show_search_field_if_not_enabled_in_config()
  /** @test */
 public function it_shows_new_chat_modal_button_if_enabled_in_config()
 {
-    Config::set("wirechat.allow_new_chat_modal", true);
+    Config::set("wirechat.show_new_chat_modal_button", true);
     $auth = User::factory()->create();
 
     Livewire::actingAs($auth)
@@ -70,7 +70,7 @@ public function it_shows_new_chat_modal_button_if_enabled_in_config()
 /** @test */
 public function it_does_not_show_new_chat_modal_button_if_not_enabled_in_config()
 {
-    Config::set("wirechat.allow_new_chat_modal", false);
+    Config::set("wirechat.show_new_chat_modal_button", false);
     $auth = User::factory()->create();
 
     Livewire::actingAs($auth)

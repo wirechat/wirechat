@@ -1,4 +1,7 @@
 
+@use('Namu\WireChat\Facades\WireChat')
+
+
 <header class="px-3 z-10  sticky top-0 w-full py-2  ">
 
 
@@ -12,7 +15,7 @@
 
         <div class="flex gap-x-3 items-center  ">
 
-            @if (config('wirechat.allow_new_chat_modal', false) == true)
+            @if (WireChat::showNewChatModalButton() == true)
                
             <button wire:click="$dispatch('openWireChatModal', {component: 'new-chat'})" id="open-new-chat-modal-button" class=" flex items-center">
                 <svg class="w-8 h-8 -mb-1 text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"

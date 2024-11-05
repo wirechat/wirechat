@@ -69,7 +69,21 @@ class WireChatService
       {
           return config('wirechat.allow_new_group_modal',false);
       }
+
+
+      /**
+       * Checks if new group modal button can be shown
+       * @return bool
+      */
+      public static function showNewGroupModalButton(): bool
+      {
+          return config('wirechat.show_new_group_modal_button',false);
+      }
       
+
+
+
+
 
       /**
        * Checks if should show new chat modal 
@@ -79,6 +93,17 @@ class WireChatService
       {
           return config('wirechat.allow_new_chat_modal',false);
       }
+
+
+       /**
+       * Checks if new chat modal button can be shown
+       * @return bool
+      */
+      public static function showNewChatModalButton(): bool
+      {
+          return config('wirechat.show_new_chat_modal_button',false);
+      }
+      
 
 
     /**

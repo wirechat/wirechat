@@ -153,8 +153,6 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
             $config->set('livewire', require __DIR__ . '/../workbench/config/livewire.php');
 
 
-
-
             //Load wherechat config 
             //Use of require: Use require to load the PHP config file (wirechat.php).
             $config->set('wirechat', require __DIR__ . '/../config/wirechat.php');

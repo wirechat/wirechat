@@ -54,7 +54,7 @@ class NewChat extends ModalComponent
   public function mount()  {
 
     abort_unless(auth()->check(),401);
-    abort_unless(WireChat::allowsNewChatModal(),503,'The NewChat feature is currently unavailable.');
+   // abort_unless(WireChat::allowsNewChatModal(),503,'The NewChat feature is currently unavailable.');
   }
 
 
