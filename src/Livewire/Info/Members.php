@@ -226,6 +226,7 @@ class Members extends ModalComponent
 
         $this->conversation = $conversation;
 
+
         // Log::info(['$conversation'=>$conversation]);
         abort_if($this->conversation->isPrivate(), 403, 'This is a private conversation');
 

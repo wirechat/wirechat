@@ -41,7 +41,8 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
 {
     use WithWorkbench;
 
-    use DatabaseMigrations;
+    //use DatabaseMigrations;
+    use DatabaseTruncation;
     use InteractsWithViews;
      use BrowserFunctions;
     public $baseUrl = 'http://127.0.0.1:8001';
@@ -112,7 +113,7 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
     {
 
         // To hide the UI during testing
-          Options::withoutUI();
+         Options::withoutUI();
     }
     protected function defineEnvironment($app)
     {
@@ -168,6 +169,7 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
 
          // $this->artisan('config:cache')->run();
 
+         $this->loadMigrationsFrom( __DIR__.'/../database/migrations',workbench_path('database/migrations')  );
 
         //$this->artisan('livewire:publish --assets')->run();
 

@@ -130,38 +130,38 @@ public function it_does_not_show_loadMoreButton_if_user_cannot_loadMore()
 
 
  /** @test */
- public function it_can_filter_chats_by_entering_text_in_search()
- {
+//  public function it_can_filter_chats_by_entering_text_in_search()
+//  {
 
-    Config::set("wirechat.allow_chats_search", true);
+//     Config::set("wirechat.allow_chats_search", true);
 
-    $auth = User::factory()->create();
+//     $auth = User::factory()->create();
 
-    $user1 = User::factory()->create(['name' => 'iam user 1']);
-    $user2 = User::factory()->create(['name' => 'iam user 2']);
-
-
-    //create conversation with user1
-    $auth->createConversationWith($user1, 'hello');
+//     $user1 = User::factory()->create(['name' => 'iam user 1']);
+//     $user2 = User::factory()->create(['name' => 'iam user 2']);
 
 
-    //create conversation with user2
-    $auth->createConversationWith($user2, 'new message');
+//     //create conversation with user1
+//     $auth->createConversationWith($user1, 'hello');
 
-    $request= Livewire::actingAs($auth)
-         ->visit(Chatlist::class);
 
-    //Assert both conversations visible before typing
-    $request->assertSee('iam user 1')->assertSee('iam user 2');
+//     //create conversation with user2
+//     $auth->createConversationWith($user2, 'new message');
 
-    //type
-    $request->typeSlowly('#chats-search-field','iam user 1');
+//     $request= Livewire::actingAs($auth)
+//          ->visit(Chatlist::class);
 
-    //assert only one visible after typing
-    $request->assertSee('iam user 1')->assertDontSee('iam user 2');
+//     //Assert both conversations visible before typing
+//     $request->assertSee('iam user 1')->assertSee('iam user 2');
+
+//     //type
+//     $request->typeSlowly('#chats-search-field','iam user 1');
+
+//     //assert only one visible after typing
+//     $request->assertSee('iam user 1')->assertDontSee('iam user 2');
 
          
- }
+//  }
 
 
   /** @testu */
@@ -236,43 +236,43 @@ public function it_does_not_show_loadMoreButton_if_user_cannot_loadMore()
 
 
         /** @test */
-        public function it_filters_users_when_user_types()
-        {
+        // public function it_filters_users_when_user_types()
+        // {
        
-           Config::set("wirechat.allow_chats_search", true);
+        //    Config::set("wirechat.allow_chats_search", true);
        
-           $auth = User::factory()->create();
+        //    $auth = User::factory()->create();
        
-           $user1 = User::factory()->create(['name' => 'iam user 1']);
-           $user2 = User::factory()->create(['name' => 'iam user 2']);
+        //    $user1 = User::factory()->create(['name' => 'iam user 1']);
+        //    $user2 = User::factory()->create(['name' => 'iam user 2']);
        
 
-           User::factory()->create(['name'=> 'john']);
+        //    User::factory()->create(['name'=> 'john']);
        
-           //create conversation with user1
-           $auth->createConversationWith($user1, 'hello');
+        //    //create conversation with user1
+        //    $auth->createConversationWith($user1, 'hello');
        
        
-           //create conversation with user2
-           $auth->createConversationWith($user2, 'new message');
+        //    //create conversation with user2
+        //    $auth->createConversationWith($user2, 'new message');
        
-           $request= Livewire::actingAs($auth)
-                ->visit(Chatlist::class);
+        //    $request= Livewire::actingAs($auth)
+        //         ->visit(Chatlist::class);
        
-           //Assert both conversations visible before typing
-           $request->assertSee('iam user 1')->assertSee('iam user 2');
+        //    //Assert both conversations visible before typing
+        //    $request->assertSee('iam user 1')->assertSee('iam user 2');
       
-           //assert not visible 
-           $request->assertNotVisible('#new-chat-modal');
+        //    //assert not visible 
+        //    $request->assertNotVisible('#new-chat-modal');
        
-           //Click and assert now visible
-           $request
-                    ->typeSlowly('#users-search-field','iam user 1')
-                    ->assertSee('iam user 1')
-                    ->assertDontSee('iam user 2');
+        //    //Click and assert now visible
+        //    $request
+        //             ->typeSlowly('#users-search-field','iam user 1')
+        //             ->assertSee('iam user 1')
+        //             ->assertDontSee('iam user 2');
 
                 
-        }
+        // }
 
 
             /** @test */

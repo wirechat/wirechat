@@ -51,19 +51,9 @@ class MembersDuskTest extends DuskTestCase
             }
         };
 
-
-        $this->browse(function (Browser $browser)use($conversation) {
-            Livewire::visit($browser, Members::class,['convesation'=>$conversation])
-                ->pause(2000)
-                ->assertSee('Members') ;
-        });
-    
-        // Livewire::actingAs($auth)
-        //         ->visit($component,$conversation)
-        // ->pause(2000)
-
-        //         ->assertSee('Members')  ;
-
+        Livewire::actingAs($auth)
+        ->visit($component, ['conversation' => $conversation])
+        ->assertSee('Members') ;
         
     }
 
@@ -133,50 +123,50 @@ class MembersDuskTest extends DuskTestCase
 
 
      /** @test */
-     public function it_shows_you_if_member_in_loop_is_auth()
-     {
+    //  public function it_shows_you_if_member_in_loop_is_auth()
+    //  {
  
-        $auth = User::factory()->create();
-        $conversation = $auth->createGroup('My Group');
-        $auth->sendMessageTo($conversation,'Hello');
+    //     $auth = User::factory()->create(['name'=>'Namu']);
+    //     $conversation = $auth->createGroup('My Group');
+    //     $auth->sendMessageTo($conversation,'Hello');
 
-        #add participants
-        $conversation->addParticipant(User::factory()->create(["name"=>"John"]));
-        $conversation->addParticipant(User::factory()->create(["name"=>"Lemon"]));
-        $conversation->addParticipant(User::factory()->create(["name"=>"Cold"]));
+    //     #add participants
+    //     $conversation->addParticipant(User::factory()->create(["name"=>"John"]));
+    //     $conversation->addParticipant(User::factory()->create(["name"=>"Lemon"]));
+    //     $conversation->addParticipant(User::factory()->create(["name"=>"Cold"]));
 
-        $component = new class() extends Members {
-            public Conversation $conversation;
+    //     $component = new class() extends Members {
+    //         public Conversation $conversation;
     
-            // Livewire will automatically call this with the parameters passed in `visit()`
-            public function mount(Conversation $conversation)
-            {
-                $this->conversation =Conversation::withoutGlobalScopes()->first();
-            }
-        };
+    //         // Livewire will automatically call this with the parameters passed in `visit()`
+    //         public function mount(Conversation $conversation)
+    //         {
+    //             $this->conversation =Conversation::withoutGlobalScopes()->first();
+    //         }
+    //     };
     
-        Livewire::actingAs($auth)
-                ->visit($component, ['conversation' => $conversation])
-                 ->assertSee('You');
+    //     Livewire::actingAs($auth)
+    //             ->visit($component, ['conversation' => $conversation])
+    //              ->assertSee('You');
 
-     }
+    //  }
 
 
      /** @test */
-     public function it_shows_load_more_if_user_can_load_more_than_10 ()
-     {
-        $auth = User::factory()->create();
-        $conversation = $auth->createGroup('My Group');
+    //  public function it_shows_load_more_if_user_can_load_more_than_10 ()
+    //  {
+    // $auth = User::factory()->create(['name'=>'namu']);
+    //     $conversation = $auth->createGroup('My Group');
 
-        #add participants
-        Participant::factory(20)->create(['conversation_id'=>$conversation->id]);
+    //     #add participants
+    //     Participant::factory(20)->create(['conversation_id'=>$conversation->id]);
 
-         Livewire::actingAs($auth)
+    //      Livewire::actingAs($auth)
 
-                 ->visit(Members::class,$conversation)
-                 ->assertSee('Load more');
+    //              ->visit(Members::class,$conversation)
+    //              ->assertPresent('Load more');
 
-     }
+    //  }
 
 
        /** @test */

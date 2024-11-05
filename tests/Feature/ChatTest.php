@@ -818,7 +818,7 @@ describe('Sending messages ', function () {
 
 
         expect(count($messageExists))->toBe(1);
-    })->only();
+    });
 
     test('dispatched event is listened to in chatlist after message is created', function () {
         $auth = User::factory()->create();
