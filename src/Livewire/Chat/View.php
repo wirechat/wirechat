@@ -48,7 +48,7 @@ class View extends Component{
   }
 
 
-  #[Layout('layouts.app')] 
+  #[Layout('wirechat::layouts.app')] 
   #[Title('Chats')] 
   public function render()
   {

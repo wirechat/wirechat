@@ -4,7 +4,7 @@
 
 @php
 
-$primaryColor= WireChat::getColor();
+    $primaryColor = WireChat::getColor();
 
 @endphp
 
@@ -18,9 +18,9 @@ $primaryColor= WireChat::getColor();
 
 
         emoji-picker {
-  width: 100%!important;
-  height: 100%;
-}
+            width: 100% !important;
+            height: 100%;
+        }
 
 
         .custom-scrollbar {
@@ -65,27 +65,40 @@ $primaryColor= WireChat::getColor();
 
 
 
-    <div x-data="{
+<div x-data="{
 
-        conversationElement: document.getElementById('conversation'),
-        initializing: true
-    }" x-init="
-    setTimeout(() => {
-        $wire.dispatch('focus-input-field');
-        initializing = false;
-    }, 150);
-    
-    Echo.private('conversation.{{$conversation->id}}')
+    conversationElement: document.getElementById('conversation'),
+    initializing: true,
+    'loadEmojiPicker':function(){
+
+        let script = document.createElement('script');
+        script.type = 'module';
+        script.src = 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js';
+        script.defer = true;
+        document.head.appendChild(script);
+    }
+}" x-init="
+setTimeout(() => {
+    $wire.dispatch('focus-input-field');
+    initializing = false;
+}, 150);
+
+Echo.private('conversation.{{ $conversation->id }}')
     .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
         $wire.appendNewMessage(e); // Calling the Livewire method to handle the new message
     });
 
-    Echo.private('conversation.{{$conversation->id}}')
+Echo.private('conversation.{{ $conversation->id }}')
     .listen('.Namu\\WireChat\\Events\\MessageDeleted', (e) => {
         $wire.removeDeletedMessage(e); // Calling the Livewire method to handle the new message
     });
 
-    {{-- if ($wire.conversationId == 1) {
+
+    loadEmojiPicker();
+   
+
+
+{{-- if ($wire.conversationId == 1) {
 
         setInterval(() => {
            
@@ -104,11 +117,8 @@ $primaryColor= WireChat::getColor();
             // Call the Livewire sendMessage method
             $wire.sendMessage();
         }, 1000); // Call every 3 seconds
-    } --}}
-
-    "
-
-        @scroll-bottom.window="
+    } --}}"
+    @scroll-bottom.window="
         
           setTimeout(() => {
 
@@ -130,50 +140,50 @@ $primaryColor= WireChat::getColor();
 
   
     "
+    wire:loading.class.remove="overflow-y-scroll" wire:loading.class="overflow-hidden"
+    class=" w-full transition  bg-white/95 dark:bg-gray-900  overflow-hidden  h-full relative" style="contain:content">
 
-        wire:loading.class.remove="overflow-y-scroll"
-        wire:loading.class="overflow-hidden"
-        class=" w-full transition  bg-white/95 dark:bg-gray-900  overflow-hidden  h-full relative"  style="contain:content">
+    {{-- todo: add rounded corners to attachment --}}
+    <div class=" flex flex-col  grow  h-full">
 
-        {{-- todo: add rounded corners to attachment --}}
-        <div class=" flex flex-col  grow  h-full">
-            
-            {{-- ---------- --}}
-            {{-- --Header-- --}}
-            {{-- ---------- --}}
-            <x-wirechat::chat.header :receiver="$receiver" :conversation="$conversation"  />
+        {{-- ---------- --}}
+        {{-- --Header-- --}}
+        {{-- ---------- --}}
+        <x-wirechat::chat.header :receiver="$receiver" :conversation="$conversation" />
 
 
-            {{-- ---------- --}}
-            {{-- -Body----- --}}
-            {{-- ---------- --}}
-            <x-wirechat::chat.body :loadedMessages="$loadedMessages" :isPrivate="$conversation->isPrivate()" :isGroup="$conversation->isGroup()" :receiver="$receiver" />
+        {{-- ---------- --}}
+        {{-- -Body----- --}}
+        {{-- ---------- --}}
+        <x-wirechat::chat.body :loadedMessages="$loadedMessages" :isPrivate="$conversation->isPrivate()" :isGroup="$conversation->isGroup()" :receiver="$receiver" />
 
-            {{-- ---------- --}}
-            {{-- -Footer--- --}}
-            {{-- ---------- --}}
-            <footer  x-data="{ openEmojiPicker: false }" class="shrink-0 overflow-y-visible relative  ">
+        {{-- ---------- --}}
+        {{-- -Footer--- --}}
+        {{-- ---------- --}}
+        <footer x-data="{ openEmojiPicker: false }" class="shrink-0   relative  ">
 
-                <div  class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]  rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
+            <div class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]   rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
 
-                    {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
-                    <section    x-cloak x-show="openEmojiPicker" 
-                                x-transition:enter="transition  ease-out duration-150 transform"
-                                x-transition:enter-start=" translate-y-full"
-                                x-transition:enter-end=" translate-y-0"
-                                x-transition:leave="transition ease-in duration-150 transform"
-                                x-transition:leave-start=" translate-y-0"
-                                x-transition:leave-end="translate-y-full"
-                                class="w-full flex hidden sm:flex  min-h-full py-2 sm:px-4 py-1.5 border-b dark:border-gray-700  h-96 min-w-full">
-                                
-                        <emoji-picker dusk="emoji-picker" style="width: 100%" class=" flex w-full h-full rounded-xl"></emoji-picker>
-                    </section>
+                {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
+                <section x-cloak x-show="openEmojiPicker"
+                    x-transition:enter="transition  ease-out duration-180 transform"
+                    x-transition:enter-start=" translate-y-full" x-transition:enter-end=" translate-y-0"
+                    x-transition:leave="transition ease-in duration-180 transform"
+                    x-transition:leave-start=" translate-y-0" x-transition:leave-end="translate-y-full"
+                    class="w-full flex hidden sm:flex   py-2 sm:px-4 py-1.5 border-b dark:border-gray-700  h-96 min-w-full">
+
+                    <emoji-picker dusk="emoji-picker" style="width: 100%"
+                        class=" flex w-full h-full rounded-xl"></emoji-picker>
+                </section>
                 {{-- form and detail section  --}}
-                <section class=" py-2 sm:px-4 py-1.5  shadow dark:bg-gray-800 bg-gray-50 z-[50]   flex flex-col gap-3 items-center  w-full mx-auto">
+                <section
+                    class=" py-2 sm:px-4 py-1.5  shadow dark:bg-gray-800 bg-gray-50 z-[50]   flex flex-col gap-3 items-center  w-full mx-auto">
 
                     {{-- Media preview section --}}
                     @if (count($media) > 0)
-                        <section x-data="attachments('media')" class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 " style=" scrollbar-width: none; -ms-overflow-style: none;">
+                        <section x-data="attachments('media')"
+                            class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
+                            style=" scrollbar-width: none; -ms-overflow-style: none;">
 
                             {{-- Loop through media for preview --}}
                             @foreach ($media as $key => $mediaItem)
@@ -215,20 +225,21 @@ $primaryColor= WireChat::getColor();
                                 @endif
                             @endforeach
 
-                            {{--TODO @if"( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}} {{-- Add more media --}} 
-                            <label class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
-                                    <input @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
-                                        accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only ">
-                                    <span class="m-auto">
+                            {{-- TODO @if"( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}} {{-- Add more media --}}
+                            <label
+                                class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
+                                <input @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
+                                    accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only ">
+                                <span class="m-auto">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                            class="w-7 h-7 text-gray-600 dark:text-gray-100">
-                                            <path fill-rule="evenodd"
-                                                d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-7 h-7 text-gray-600 dark:text-gray-100">
+                                        <path fill-rule="evenodd"
+                                            d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                                            clip-rule="evenodd" />
+                                    </svg>
 
-                                    </span>
+                                </span>
                             </label>
 
                         </section>
@@ -308,13 +319,14 @@ $primaryColor= WireChat::getColor();
                             <div class="flex justify-between items-center dark:text-white">
                                 <h6 class="text-sm">Replying to
                                     <span class="font-bold">
-                                        {{ $replyMessage?->ownedBy(auth()->user()) ?' Yourself': $replyMessage->sendable?->name  }}
+                                        {{ $replyMessage?->ownedBy(auth()->user()) ? ' Yourself' : $replyMessage->sendable?->name }}
                                     </span>
                                 </h6>
                                 <button wire:click="removeReply()">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M6 18 18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
@@ -327,54 +339,51 @@ $primaryColor= WireChat::getColor();
                         </section>
                     @endif
 
-                  
+
 
                     <form x-data="{
-                            'body': @entangle('body'),
-                            insertNewLine: function(textarea) {                      
-                                {{-- Get the current cursor position --}}
-                                var startPos = textarea.selectionStart;
-                                var endPos = textarea.selectionEnd;
-                        
-                                {{-- Insert a line break character at the cursor position --}}
-                                var text = textarea.value;
-                                var newText = text.substring(0, startPos) + '\n' + text.substring(endPos, text.length);
-                        
-                                {{-- Update the textarea value and cursor position --}}
-                                textarea.value = newText;
-                                textarea.selectionStart = startPos + 1; // Set cursor position after the inserted newline
-                                textarea.selectionEnd = startPos + 1;
-                        
-                                {{-- update height of element smoothly --}}
-                                textarea.style.height = 'auto';
-                                textarea.style.height = textarea.scrollHeight + 'px';
-                        
-                            }                      
-                        }"
-                        x-init="
-                        {{-- Emoji picture click event listener --}}
-                        document.querySelector('emoji-picker')
-                            .addEventListener('emoji-click', event => {
-                                // Get the emoji unicode from the event
-                                const emoji = event.detail['unicode'];
-                                
-                                // Get the current value and cursor position
-                                const inputField = $refs.body;
-                                const inputFieldValue = inputField._x_model.get() ?? '';
-
-                                const startPos = inputField.selectionStart;
-                                const endPos = inputField.selectionEnd;
-
-                                // Insert the emoji at the current cursor position
-                                const newValue = inputFieldValue.substring(0, startPos) + emoji + inputFieldValue.substring(endPos);
-
-                                // Update the value and move cursor after the emoji
-                                inputField._x_model.set(newValue);
-
-
-                                inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
-                            });
-                        "
+                        'body': @entangle('body'),
+                        insertNewLine: function(textarea) {
+                            {{-- Get the current cursor position --}}
+                            var startPos = textarea.selectionStart;
+                            var endPos = textarea.selectionEnd;
+                    
+                            {{-- Insert a line break character at the cursor position --}}
+                            var text = textarea.value;
+                            var newText = text.substring(0, startPos) + '\n' + text.substring(endPos, text.length);
+                    
+                            {{-- Update the textarea value and cursor position --}}
+                            textarea.value = newText;
+                            textarea.selectionStart = startPos + 1; // Set cursor position after the inserted newline
+                            textarea.selectionEnd = startPos + 1;
+                    
+                            {{-- update height of element smoothly --}}
+                            textarea.style.height = 'auto';
+                            textarea.style.height = textarea.scrollHeight + 'px';
+                    
+                        }
+                    }" x-init="{{-- Emoji picture click event listener --}}
+                    document.querySelector('emoji-picker')
+                        .addEventListener('emoji-click', event => {
+                            // Get the emoji unicode from the event
+                            const emoji = event.detail['unicode'];
+                    
+                            // Get the current value and cursor position
+                            const inputField = $refs.body;
+                            const inputFieldValue = inputField._x_model.get() ?? '';
+                    
+                            const startPos = inputField.selectionStart;
+                            const endPos = inputField.selectionEnd;
+                    
+                            // Insert the emoji at the current cursor position
+                            const newValue = inputFieldValue.substring(0, startPos) + emoji + inputFieldValue.substring(endPos);
+                    
+                            // Update the value and move cursor after the emoji
+                            inputField._x_model.set(newValue);
+                    
+                    
+                            inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
+                        });"
                         @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0)) ? $wire.sendMessage() : null"
                         method="POST" autocapitalize="off" @class(['flex items-center col-span-12 w-full  gap-2 gap-5'])>
                         @csrf
@@ -383,15 +392,28 @@ $primaryColor= WireChat::getColor();
 
 
                         {{-- Emoji Triggger icon --}}
-                        <div  class="w-10 hidden sm:flex max-w-fit  items-center">
-                            <button  :class="openEmojiPicker:''" type="button" dusk="emoji-trigger-button" @click="openEmojiPicker = ! openEmojiPicker" x-ref="emojibutton" class=" rounded-full p-px dark:border-gray-700"> 
-                                <svg x-bind:style="openEmojiPicker && { color: 'var(--primary-color)' }" viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" class="w-7 h-7 text-gray-700 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]" version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24"><title>smiley</title><path fill="currentColor" d="M9.153,11.603c0.795,0,1.439-0.879,1.439-1.962S9.948,7.679,9.153,7.679 S7.714,8.558,7.714,9.641S8.358,11.603,9.153,11.603z M5.949,12.965c-0.026-0.307-0.131,5.218,6.063,5.551 c6.066-0.25,6.066-5.551,6.066-5.551C12,14.381,5.949,12.965,5.949,12.965z M17.312,14.073c0,0-0.669,1.959-5.051,1.959 c-3.505,0-5.388-1.164-5.607-1.959C6.654,14.073,12.566,15.128,17.312,14.073z M11.804,1.011c-6.195,0-10.826,5.022-10.826,11.217 s4.826,10.761,11.021,10.761S23.02,18.423,23.02,12.228C23.021,6.033,17.999,1.011,11.804,1.011z M12,21.354 c-5.273,0-9.381-3.886-9.381-9.159s3.942-9.548,9.215-9.548s9.548,4.275,9.548,9.548C21.381,17.467,17.273,21.354,12,21.354z  M15.108,11.603c0.795,0,1.439-0.879,1.439-1.962s-0.644-1.962-1.439-1.962s-1.439,0.879-1.439,1.962S14.313,11.603,15.108,11.603z"></path></svg>
+                        <div class="w-10 hidden sm:flex max-w-fit  items-center">
+                            <button :class="openEmojiPicker: ''" type="button" dusk="emoji-trigger-button"
+                                @click="openEmojiPicker = ! openEmojiPicker" x-ref="emojibutton"
+                                class=" rounded-full p-px dark:border-gray-700">
+                                <svg x-bind:style="openEmojiPicker && { color: 'var(--primary-color)' }"
+                                    viewBox="0 0 24 24" height="24" width="24"
+                                    preserveAspectRatio="xMidYMid meet"
+                                    class="w-7 h-7 text-gray-700 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]"
+                                    version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24">
+                                    <title>smiley</title>
+                                    <path fill="currentColor"
+                                        d="M9.153,11.603c0.795,0,1.439-0.879,1.439-1.962S9.948,7.679,9.153,7.679 S7.714,8.558,7.714,9.641S8.358,11.603,9.153,11.603z M5.949,12.965c-0.026-0.307-0.131,5.218,6.063,5.551 c6.066-0.25,6.066-5.551,6.066-5.551C12,14.381,5.949,12.965,5.949,12.965z M17.312,14.073c0,0-0.669,1.959-5.051,1.959 c-3.505,0-5.388-1.164-5.607-1.959C6.654,14.073,12.566,15.128,17.312,14.073z M11.804,1.011c-6.195,0-10.826,5.022-10.826,11.217 s4.826,10.761,11.021,10.761S23.02,18.423,23.02,12.228C23.021,6.033,17.999,1.011,11.804,1.011z M12,21.354 c-5.273,0-9.381-3.886-9.381-9.159s3.942-9.548,9.215-9.548s9.548,4.275,9.548,9.548C21.381,17.467,17.273,21.354,12,21.354z  M15.108,11.603c0.795,0,1.439-0.879,1.439-1.962s-0.644-1.962-1.439-1.962s-1.439,0.879-1.439,1.962S14.313,11.603,15.108,11.603z">
+                                    </path>
+                                </svg>
                             </button>
-                         </div>
-                    
+                        </div>
+
                         {{-- Show  upload pop if media or file are empty --}}
                         {{-- Also only show  upload popup if allowed in configuration  --}}
-                        @if (count($this->media) == 0 && count($this->files) == 0 && (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
+                        @if (count($this->media) == 0 &&
+                                count($this->files) == 0 &&
+                                (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
                             <x-wirechat::popover position="top" popoverOffset="70">
 
                                 <x-slot name="trigger">
@@ -412,8 +434,15 @@ $primaryColor= WireChat::getColor();
                                         {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor" class="size-6 w-7 h-7 text-gray-600 dark:text-white/90">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
                                           </svg> --}}
-                                          <svg class="size-6 w-7 h-7 text-gray-600 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" class="ai ai-Attach"><path d="M6 7.91V16a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V6a4 4 0 0 0-4-4v0a4 4 0 0 0-4 4v9.182a2 2 0 0 0 2 2v0a2 2 0 0 0 2-2V8"/></svg>
-                                          
+                                        <svg class="size-6 w-7 h-7 text-gray-600 dark:text-white/60"
+                                            xmlns="http://www.w3.org/2000/svg" width="36" height="36"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"
+                                            class="ai ai-Attach">
+                                            <path
+                                                d="M6 7.91V16a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V6a4 4 0 0 0-4-4v0a4 4 0 0 0-4 4v9.182a2 2 0 0 0 2 2v0a2 2 0 0 0 2-2V8" />
+                                        </svg>
+
                                     </span>
 
                                 </x-slot>
@@ -436,8 +465,7 @@ $primaryColor= WireChat::getColor();
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                         height="16" fill="currentColor"
                                                         style="color: var(--primary-color);"
-                                                        class="bi bi-folder-fill w-6 h-6"
-                                                        viewBox="0 0 16 16">
+                                                        class="bi bi-folder-fill w-6 h-6" viewBox="0 0 16 16">
                                                         <path
                                                             d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3m-8.322.12q.322-.119.684-.12h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981z" />
                                                     </svg>
@@ -468,8 +496,7 @@ $primaryColor= WireChat::getColor();
                                                 <span class="">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                         fill="currentColor" class="w-6 h-6"
-                                                        style="color: var(--primary-color);"
-                                                        >
+                                                        style="color: var(--primary-color);">
                                                         <path fill-rule="evenodd"
                                                             d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
                                                             clip-rule="evenodd" />
@@ -488,59 +515,60 @@ $primaryColor= WireChat::getColor();
                             </x-wirechat::popover>
                         @endif
 
-                        {{--TextArea Input --}}
+                        {{-- TextArea Input --}}
                         <div @class(['flex gap-2 sm:px-2 w-full'])>
-                            <textarea 
-                            
-                               @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' x-ref="body" id="chat-input-field" autofocus
-                                type="text" name="message" placeholder="Message" maxlength="1700" rows="1"
-                                @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
+                            <textarea @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' x-ref="body"
+                                id="chat-input-field" autofocus type="text" name="message" placeholder="Message" maxlength="1700"
+                                rows="1" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
                                 @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                                 @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
                                 class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-none   "
-                                x-init="
-                                        document.querySelector('emoji-picker')
-                                            .addEventListener('emoji-click', event => {
-                                                const emoji = event.detail['unicode'];
-                                                const inputField = $refs.body;
-                                                
-                                                // Get the current cursor position (start and end)
-                                                const startPos = inputField.selectionStart;
-                                                const endPos = inputField.selectionEnd;
-
-                                                // Get current value of the input field
-                                                const currentValue = inputField.value;
-                                                
-                                                // Insert the emoji at the cursor position, preserving line breaks and spaces
-                                                const newValue = currentValue.substring(0, startPos) + emoji + currentValue.substring(endPos);
-                                                
-                                                // Update Alpine.js model (x-model='body') with the new value
-                                                inputField._x_model.set(newValue);
-                                                
-                                                // Set the cursor position after the inserted emoji
-                                                inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
-                                                
-                                                // Ensure the textarea resizes correctly after adding the emoji
-                                                inputField.style.height = 'auto'; 
-                                                inputField.style.height = inputField.scrollHeight + 'px';
-                                            });
-                                    "
+                                x-init="document.querySelector('emoji-picker')
+                                    .addEventListener('emoji-click', event => {
+                                        const emoji = event.detail['unicode'];
+                                        const inputField = $refs.body;
                                 
-                                ></textarea>
+                                        // Get the current cursor position (start and end)
+                                        const startPos = inputField.selectionStart;
+                                        const endPos = inputField.selectionEnd;
+                                
+                                        // Get current value of the input field
+                                        const currentValue = inputField.value;
+                                
+                                        // Insert the emoji at the cursor position, preserving line breaks and spaces
+                                        const newValue = currentValue.substring(0, startPos) + emoji + currentValue.substring(endPos);
+                                
+                                        // Update Alpine.js model (x-model='body') with the new value
+                                        inputField._x_model.set(newValue);
+                                
+                                        // Set the cursor position after the inserted emoji
+                                        inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
+                                
+                                        // Ensure the textarea resizes correctly after adding the emoji
+                                        inputField.style.height = 'auto';
+                                        inputField.style.height = inputField.scrollHeight + 'px';
+                                    });"></textarea>
                             <button
                                 :class="{ 'hidden': !((body?.trim()?.length) || @js(count($this->media) > 0) || @js(count($this->files) > 0)) }"
                                 type="submit" id="sendMessageButton"
                                 class="hidden  flex items-center justify-end w-[6%] font-bold  text-right">
 
-                                <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="ai ai-Send"><path d="M9.912 12H4L2.023 4.135A.662.662 0 0 1 2 3.995c-.022-.721.772-1.221 1.46-.891L22 12 3.46 20.896c-.68.327-1.464-.159-1.46-.867a.66.66 0 0 1 .033-.186L3.5 15"/></svg>
-                               
+                                <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
+                                    width="36" height="36" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" class="ai ai-Send">
+                                    <path
+                                        d="M9.912 12H4L2.023 4.135A.662.662 0 0 1 2 3.995c-.022-.721.772-1.221 1.46-.891L22 12 3.46 20.896c-.68.327-1.464-.159-1.46-.867a.66.66 0 0 1 .033-.186L3.5 15" />
+                                </svg>
+
                             </button>
 
                         </div>
 
-                        {{--input Actions --}}
-                        <div :class="{'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) || @json(count($this->files) > 0) }"
+                        {{-- input Actions --}}
+                        <div :class="{ 'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) ||
+                                @json(count($this->files) > 0) }"
                             @class([
                                 'w-[15%] justify-end flex items-center gap-2 hidden md:hidden',
                             ])>
@@ -558,7 +586,7 @@ $primaryColor= WireChat::getColor();
                                             d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                     </svg>
                                 </span>
-                              <!--  filled heart -->
+                                <!--  filled heart -->
                                 <span class="hidden group-hover:block transition " x-bounce>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                         class="size-6 w-7 h-7   text-red-500">
@@ -569,171 +597,170 @@ $primaryColor= WireChat::getColor();
 
                             </button>
                         </div>
-                        
+
                     </form>
                 </section>
 
 
-                </div>
+            </div>
 
-            </footer>
+        </footer>
 
-        </div>
-
-
-
-        @script
-            <script>
-                Alpine.data('attachments', (type = "media") => ({
-                    isDropping: false,
-                    type: type,
-                    isUploading: false,
-                    MAXFILES: @json(config('wirechat.attachments.max_uploads', 5)),
-                    maxSize: @json(config('wirechat.attachments.media_max_upload_size', 12288)) * 1024,
-                    allowedFileTypes: type == 'media' ? @json(config('wirechat.attachments.media_mimes')) : @json(config('wirechat.attachments.file_mimes')),
-                    progress: 0,
-                    wireModel: type,
-
-                    handleFileSelect(event, count) {
-
-                        if (event.target.files.length) {
-                            const files = event.target.files;
-                            this.validateFiles(files, count)
-                                .then((validFiles) => {
-                                    if (validFiles.length > 0) {
-                                        this.uploadFiles(validFiles);
-                                    } else {
-                                        console.log('No valid files to upload');
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.log('Validation error:', error);
-                                });
-                        }
-                    },
-                    uploadFiles(files) {
-
-                        //    console.log("type is "+  this.wireModel);
-                        //    console.log("allowedFileTypes"+  this.allowedFileTypes);
-
-
-                        const $this = this;
-                        this.isUploading = true;
-                        const promises = [];
-
-                        const promise = new Promise((resolve, reject) => {
-                            $wire.uploadMultiple(`${this.wireModel}`, files, function(success) {
-                                resolve(success);
-                            }, function(error) {
-                                console.log('Validation error:', error);
-                                reject(error);
-                            }, function(event) {
-                                $this.progress = event.detail.progress;
-                            });
-                        });
-
-                        promises.push(promise);
-
-
-                        Promise.all(promises)
-                            .then((results) => {
-                                //   console.log('Upload complete');
-                                $this.isUploading = false;
-                                $this.progress = 0;
-                            })
-                            .catch((error) => {
-                                console.log('Upload error:', error);
-                                $this.isUploading = false;
-                                $this.progress = 0;
-                            });
-                    },
-                    removeUpload(filename) {
-                        $wire.removeUpload(this.wireModel, filename);
-                    },
-
-                    validateFiles(files, count) {
-
-                        // const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-                        var totalFiles = count + files.length;
-
-
-                        //make sure max file not exceeded  
-                        // Make sure max file count is not exceeded
-                        if (totalFiles > this.MAXFILES) {
-
-                            files = Array.from(files).slice(0, this.MAXFILES - count);
-
-                            return $dispatch('notify', {
-                                type: 'warning',
-                                message: 'File limit exceeded , allowed ' + this.MAXFILES
-                            });
-                        }
-
-
-
-                        const invalidFiles = Array.from(files).filter((file) => {
-
-                            const fileType = file.type.split('/')[1]
-                        .toLowerCase(); // Get the file extension from the MIME type
-                            const isInvalid = file.size > this.maxSize || !(this.allowedFileTypes.includes(
-                                fileType));
-
-                            // console.log('maxSize ', this.maxSize);
-                            // console.log('File Name:', file.name);
-                            // console.log('File Type:', fileType);
-                            // console.log('Is Invalid:', isInvalid);
-                            // console.log('includes', this.allowedFileTypes.includes(fileType));
-
-
-                            return isInvalid;
-                        });
-
-                        //filter valid file 
-                        const validFiles = Array.from(files).filter((file) => {
-                            const fileType = file.type.split('/')[1].toLowerCase();
-                            return file.size <= this.maxSize && this.allowedFileTypes.includes(fileType);
-
-                            console.log(file);
-                            console.log(this.allowedFileTypes);
-                        });
-
-
-                        if (invalidFiles.length > 0) {
-
-                            const errorMessages = invalidFiles.map((file) => {
-                                if (file.size > this.maxSize) {
-
-                                    return $dispatch('notify', {
-                                        type: 'warning',
-                                        message: `File size exceeds the maximum limit (9MB): ${file.name}`
-                                    });
-
-                                } else {
-
-
-                                    return $dispatch('notify', {
-                                        type: 'warning',
-                                        message: 'File type is not allowed'
-                                    });
-                                }
-                            });
-
-
-
-
-                            console.log('Validation errors:', errorMessages);
-                            // Returning an empty array since there are no valid files
-                        }
-
-
-
-                        return Promise.resolve(validFiles);
-                    }
-                }))
-            </script>
-        @endscript
-        
-        <x-wirechat::toast />
-        <livewire:chat-modal/>
     </div>
 
+
+
+    @script
+        <script>
+            Alpine.data('attachments', (type = "media") => ({
+                isDropping: false,
+                type: type,
+                isUploading: false,
+                MAXFILES: @json(config('wirechat.attachments.max_uploads', 5)),
+                maxSize: @json(config('wirechat.attachments.media_max_upload_size', 12288)) * 1024,
+                allowedFileTypes: type == 'media' ? @json(config('wirechat.attachments.media_mimes')) : @json(config('wirechat.attachments.file_mimes')),
+                progress: 0,
+                wireModel: type,
+
+                handleFileSelect(event, count) {
+
+                    if (event.target.files.length) {
+                        const files = event.target.files;
+                        this.validateFiles(files, count)
+                            .then((validFiles) => {
+                                if (validFiles.length > 0) {
+                                    this.uploadFiles(validFiles);
+                                } else {
+                                    console.log('No valid files to upload');
+                                }
+                            })
+                            .catch((error) => {
+                                console.log('Validation error:', error);
+                            });
+                    }
+                },
+                uploadFiles(files) {
+
+                    //    console.log("type is "+  this.wireModel);
+                    //    console.log("allowedFileTypes"+  this.allowedFileTypes);
+
+
+                    const $this = this;
+                    this.isUploading = true;
+                    const promises = [];
+
+                    const promise = new Promise((resolve, reject) => {
+                        $wire.uploadMultiple(`${this.wireModel}`, files, function(success) {
+                            resolve(success);
+                        }, function(error) {
+                            console.log('Validation error:', error);
+                            reject(error);
+                        }, function(event) {
+                            $this.progress = event.detail.progress;
+                        });
+                    });
+
+                    promises.push(promise);
+
+
+                    Promise.all(promises)
+                        .then((results) => {
+                            //   console.log('Upload complete');
+                            $this.isUploading = false;
+                            $this.progress = 0;
+                        })
+                        .catch((error) => {
+                            console.log('Upload error:', error);
+                            $this.isUploading = false;
+                            $this.progress = 0;
+                        });
+                },
+                removeUpload(filename) {
+                    $wire.removeUpload(this.wireModel, filename);
+                },
+
+                validateFiles(files, count) {
+
+                    // const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                    var totalFiles = count + files.length;
+
+
+                    //make sure max file not exceeded  
+                    // Make sure max file count is not exceeded
+                    if (totalFiles > this.MAXFILES) {
+
+                        files = Array.from(files).slice(0, this.MAXFILES - count);
+
+                        return $dispatch('notify', {
+                            type: 'warning',
+                            message: 'File limit exceeded , allowed ' + this.MAXFILES
+                        });
+                    }
+
+
+
+                    const invalidFiles = Array.from(files).filter((file) => {
+
+                        const fileType = file.type.split('/')[1]
+                            .toLowerCase(); // Get the file extension from the MIME type
+                        const isInvalid = file.size > this.maxSize || !(this.allowedFileTypes.includes(
+                            fileType));
+
+                        // console.log('maxSize ', this.maxSize);
+                        // console.log('File Name:', file.name);
+                        // console.log('File Type:', fileType);
+                        // console.log('Is Invalid:', isInvalid);
+                        // console.log('includes', this.allowedFileTypes.includes(fileType));
+
+
+                        return isInvalid;
+                    });
+
+                    //filter valid file 
+                    const validFiles = Array.from(files).filter((file) => {
+                        const fileType = file.type.split('/')[1].toLowerCase();
+                        return file.size <= this.maxSize && this.allowedFileTypes.includes(fileType);
+
+                        console.log(file);
+                        console.log(this.allowedFileTypes);
+                    });
+
+
+                    if (invalidFiles.length > 0) {
+
+                        const errorMessages = invalidFiles.map((file) => {
+                            if (file.size > this.maxSize) {
+
+                                return $dispatch('notify', {
+                                    type: 'warning',
+                                    message: `File size exceeds the maximum limit (9MB): ${file.name}`
+                                });
+
+                            } else {
+
+
+                                return $dispatch('notify', {
+                                    type: 'warning',
+                                    message: 'File type is not allowed'
+                                });
+                            }
+                        });
+
+
+
+
+                        console.log('Validation errors:', errorMessages);
+                        // Returning an empty array since there are no valid files
+                    }
+
+
+
+                    return Promise.resolve(validFiles);
+                }
+            }))
+        </script>
+    @endscript
+
+    <x-wirechat::toast />
+    <livewire:chat-modal />
+</div>
