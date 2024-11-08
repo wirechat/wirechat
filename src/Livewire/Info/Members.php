@@ -142,28 +142,31 @@ class Members extends ModalComponent
         $this->participants = $this->participants ?? collect();
 
         $additionalParticipants = Participant::where('conversation_id', $this->conversation->id)
-            ->with('participantable')
-            ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
-
-                $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
-                    $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
-                        $table = $query3->getModel()->getTable();
-
-                        foreach ($searchableFields as $field) {
-                            // Check if column existence is already cached for the table
-                            if (!isset($columnCache[$table])) {
-                                $columnCache[$table] = Schema::getColumnListing($table);
-                            }
-
-                            if (in_array($field, $columnCache[$table])) {
-                                $query3->orWhere($field, 'LIKE', '%' . $this->search . '%');
-                            }
+        ->with('participantable')
+        ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
+            $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
+                $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
+                    $table = $query3->getModel()->getTable();
+    
+                    foreach ($searchableFields as $field) {
+                        if (!isset($columnCache[$table])) {
+                            $columnCache[$table] = Schema::getColumnListing($table);
                         }
-                    });
+    
+                        if (in_array($field, $columnCache[$table])) {
+                            $query3->orWhere($field, 'LIKE', '%' . $this->search . '%');
+                        }
+                    }
                 });
-            })
-            ->latest('updated_at')
-            ->paginate(10, ['*'], 'page', $this->page);
+            });
+        })
+        ->orderByRaw("FIELD(role, ?, ?, ?)", [
+            ParticipantRole::OWNER->value,
+            ParticipantRole::ADMIN->value,
+            ParticipantRole::PARTICIPANT->value,
+        ])
+        ->latest('updated_at')
+        ->paginate(10, ['*'], 'page', $this->page);
 
         // Check if cannot load more
         $this->canLoadMore = $additionalParticipants->hasMorePages();

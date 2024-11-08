@@ -18,8 +18,8 @@ return [
      * Broadcasting:
      * define queue config*/
     'broadcasting' => [
-        'messages_queue' => 'default',  // Prioritize for real-time messaging in chat rooms
-        'message_notification_queue' => 'medium',  // Notifications for new messages in other areas like the navbar
+        'messages_queue' => 'high',  // Prioritize for real-time messaging in chat rooms
+        'message_notification_queue' => 'default',  // Notifications for new messages in other areas like the navbar
     ],
     /**
      * Color:
@@ -43,10 +43,7 @@ return [
      /**
      * Features:
      * You can configure the feature you want to allow for wirechat */
-     'allow_new_chat_modal'=>false,     //bool -Show the modal to create create a new conversation inside
      'show_new_chat_modal_button'=>true,    //Show the button to create new group
-
-     'allow_new_group_modal'=>false,    //allow group creation
      'show_new_group_modal_button'=>false,    //Show the button to create new group inside new-chat component
 
      'allow_chats_search'=>true,       //bool -Show the search bar to existing conversations

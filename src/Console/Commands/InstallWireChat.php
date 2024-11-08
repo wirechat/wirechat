@@ -3,6 +3,7 @@
 namespace Namu\WireChat\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 
 class InstallWireChat extends Command
@@ -18,7 +19,7 @@ class InstallWireChat extends Command
         $this->comment('Publishing configuration...');
         if (! $this->configExists('wirechat.php')) {
             $this->publishConfiguration();
-            $this->info('Published configuration');
+            $this->info('[✓] Published configuration');
         } else {
             if ($this->shouldOverwriteConfig()) {
                 $this->comment('Overwriting configuration file...');
@@ -28,18 +29,24 @@ class InstallWireChat extends Command
             }
         }
 
+        //create storage sym link
+         $this->comment('Creating storage symlink...');
+         Artisan::call('storage:link');
+         $this->info('[✓] Storage linked.');
         // Publish migrations
         $this->comment('Publishing migrations...');
         $this->publishMigrations();
-        $this->info('Published migrations');
+        $this->info('[✓] Published migrations');
 
-        $this->info('Wirechat Package installed successfully.');
+        $this->info('[✓] Wirechat Package installed successfully.');
     }
 
     private function configExists($fileName)
     {
         return File::exists(config_path($fileName));
     }
+
+
 
     private function shouldOverwriteConfig()
     {
