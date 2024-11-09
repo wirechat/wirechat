@@ -42,7 +42,7 @@ abstract class DuskTestCase extends  \LivewireDuskTestbench\TestCase
     use WithWorkbench;
 
     //use DatabaseMigrations;
-    use DatabaseTruncation;
+   // use DatabaseTruncation;
     use InteractsWithViews;
      use BrowserFunctions;
     public $baseUrl = 'http://127.0.0.1:8001';
