@@ -72,6 +72,13 @@
                             Close {{ $conversation->isGroup() ? 'Group' : 'Chat' }}
                         </x-wirechat::dropdown-link>
 
+
+                        <x-wirechat::dropdown-link wire:click="clearConversation"
+                            wire:confirm="Are you sure clear this Chat History ?">
+                            Clear Chat History
+                        </x-wirechat::dropdown-link>
+
+
                         <button wire:click="deleteConversation"
                             wire:confirm="Are you sure delete {{ $conversation->isGroup() ? 'Group' : 'Chat' }}"
                             class="w-full text-start">

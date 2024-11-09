@@ -25,6 +25,7 @@ use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
+use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
 
 class Chat extends Component
 {
@@ -252,6 +253,21 @@ class Chat extends Component
         #redirect to chats page 
         $this->redirectRoute("wirechat");
     }
+
+
+     /**
+     * Delete conversation  */
+    function clearConversation()
+    {
+        abort_unless(auth()->check(), 401);
+
+        #delete conversation 
+        $this->conversation->clearFor(auth()->user());
+
+        #redirect to chats page 
+        $this->redirectRoute("wirechat");
+    }
+
 
 
     function exitConversation()
@@ -761,7 +777,7 @@ class Chat extends Component
       //  info(['conversation count before getting' => Conversation::withoutGlobalScopes()->count()]);
 
 
-        $this->conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('id', $this->conversation)->first();
+        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])->where('id', $this->conversation)->first();
         //Abort if not made 
         abort_unless($this->conversation, 404);
 

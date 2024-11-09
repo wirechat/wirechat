@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
@@ -22,11 +23,11 @@ use Workbench\App\Models\User;
 
 //     //Create conversation
 //     $conversation = $auth->sendMessageTo($receiver, message: '1')->conversation;
-   
+
 //     expect($conversation->unique_id)->not->toBe(null);
 
-// })->only();
-describe('MarkAsRead()',function(){
+// });
+describe('MarkAsRead()', function () {
 
     // it('aborts with 401 is auth is not authenticated', function () {
 
@@ -37,7 +38,7 @@ describe('MarkAsRead()',function(){
 
     //     $conversation->markAsRead();
 
-         
+
     // })->throws(Exception::class);
 
     it('marks messages as read', function () {
@@ -52,7 +53,7 @@ describe('MarkAsRead()',function(){
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
-        $conversation=  $auth->sendMessageTo($receiver, message: '2')->conversation;
+        $conversation =  $auth->sendMessageTo($receiver, message: '2')->conversation;
 
 
         //send message to auth
@@ -68,21 +69,18 @@ describe('MarkAsRead()',function(){
         //assert returns zero(0) when messages are marked as read
         $conversation->markAsRead();
         expect($auth->getUnreadCount($conversation))->toBe(0);
-
     });
-    
 });
 
-describe('AddParticipant()',function(){
+describe('AddParticipant()', function () {
 
     it('can add a participants to a conversation', function () {
 
         $auth = User::factory()->create();
         $conversation = Conversation::factory()->create();
         $conversation->addParticipant($auth);
-        
-        expect(count($conversation->participants()->get()))->toBe(1);
 
+        expect(count($conversation->participants()->get()))->toBe(1);
     });
 
     it('does not add same participant to conversation- aborts 422', function () {
@@ -95,11 +93,10 @@ describe('AddParticipant()',function(){
 
         $conversation->addParticipant($auth);
 
-       // dd($conversation->users);
+        // dd($conversation->users);
 
         expect(count($conversation->participants()->get()))->toBe(1);
-
-    })->throws(Exception::class,'Participant is already in the conversation.');
+    })->throws(Exception::class, 'Participant is already in the conversation.');
 
     it('does not add more than 2 participants to a PRIVATE conversation', function () {
 
@@ -112,17 +109,16 @@ describe('AddParticipant()',function(){
         $conversation->addParticipant(User::factory()->create());
 
         expect($conversation->participants()->count())->toBe(2);
-
     })->throws(Exception::class);
 
-   
+
     it('can add more than 2 participants if it is a  GROUP conversation', function () {
 
         $auth = User::factory()->create();
 
-        $conversation = Conversation::factory()->create(['type'=>ConversationType::GROUP]);
+        $conversation = Conversation::factory()->create(['type' => ConversationType::GROUP]);
 
-       // dd($conversation);
+        // dd($conversation);
         $conversation->addParticipant($auth);
         $conversation->addParticipant(User::factory()->create());
         $conversation->addParticipant(User::factory()->create());
@@ -130,13 +126,10 @@ describe('AddParticipant()',function(){
 
 
         expect($conversation->participants()->count())->toBe(4);
-
     });
-
-
 });
 
-describe('getUnreadCountFor()',function(){
+describe('getUnreadCountFor()', function () {
 
     it('returns unread messages count for the specified user', function () {
 
@@ -161,13 +154,11 @@ describe('getUnreadCountFor()',function(){
         //Assert number of unread messages for $auth
 
         expect($conversation->getUnreadCountFor($auth))->toBe(4);
-
     });
-
 });
 
 
-describe('deleting for',function(){
+describe('deleting for', function () {
 
 
     it('load all conversations if not deleted', function () {
@@ -179,83 +170,80 @@ describe('deleting for',function(){
         $receiver = User::factory()->create();
 
         //send to receiver
-        $auth->sendMessageTo($receiver,'hello-1');
-        $auth->sendMessageTo(User::factory()->create(),'hello-2');
-        $auth->sendMessageTo(User::factory()->create(),'hello-3');
+        $auth->sendMessageTo($receiver, 'hello-1');
+        $auth->sendMessageTo(User::factory()->create(), 'hello-2');
+        $auth->sendMessageTo(User::factory()->create(), 'hello-3');
 
         //assert count
 
-       /// dd($messages);
+        /// dd($messages);
         expect($auth->conversations->count())->toBe(3);
-
     });
 
 
 
 
 
-    it('aborts if user does not belong to conversation before deletingForMe', function () {
+    it('aborts if user does not belong to conversation when deletingForMe', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
-        $conversation = $auth->createConversationWith($receiver,'hello');
- 
+        $conversation = $auth->createConversationWith($receiver, 'hello');
+
         //Authenticate
         $this->actingAs($auth);
 
         //delete messages
         $conversation->deleteFor(User::factory()->create());
 
-         //assert new count
-         expect($conversation->count())->toBe(1);
-
+        //assert new count
+        expect($conversation->count())->toBe(1);
     })->throws(Exception::class);
 
 
-    it('deletes and loads deleted conversations(for me)', function () {
-        
+    it('deletes and does not load deleted conversations(for me) in query', function () {
+
         //Dusk to 
         $auth = User::factory()->create();
 
         //Send to receiver
-        $conversation1=  $auth->sendMessageTo(User::factory()->create(),'hello-1')->conversation;
-        $conversation2=  $auth->sendMessageTo(User::factory()->create(),'hello-2')->conversation;
-        $conversation3=  $auth->sendMessageTo(User::factory()->create(['name'=>'john']),'hello-3')->conversation;
+        $conversation1 =  $auth->sendMessageTo(User::factory()->create(), 'hello-1')->conversation;
+        $conversation2 =  $auth->sendMessageTo(User::factory()->create(), 'hello-2')->conversation;
+        $conversation3 =  $auth->sendMessageTo(User::factory()->create(['name' => 'john']), 'hello-3')->conversation;
 
         //Assert Count
         expect($auth->conversations()->withoutCleared()->count())->toBe(3);
 
         //Authenticate
         //$auth->refresh();
-        
+
         $this->actingAs($auth);
 
         //Delete Conversation
         $conversation3->deleteFor($auth);
 
         //conversations
-        expect($auth->conversations()->withoutCleared()->count())->toBe(2);
-
+        expect($auth->conversations()->count())->toBe(2);
     });
 
 
 
     it('deletes and does not load deleted conversations(for me) if scopewithoutCleared is added', function () {
-        
+
         //Dusk to 
         $auth = User::factory()->create();
 
         //Send to receiver
-        $conversation1=  $auth->sendMessageTo(User::factory()->create(),'hello-1')->conversation;
-        $conversation2=  $auth->sendMessageTo(User::factory()->create(),'hello-2')->conversation;
-        $conversation3=  $auth->sendMessageTo(User::factory()->create(['name'=>'john']),'hello-3')->conversation;
+        $conversation1 =  $auth->sendMessageTo(User::factory()->create(), 'hello-1')->conversation;
+        $conversation2 =  $auth->sendMessageTo(User::factory()->create(), 'hello-2')->conversation;
+        $conversation3 =  $auth->sendMessageTo(User::factory()->create(['name' => 'john']), 'hello-3')->conversation;
 
         //Assert Count
         expect($auth->conversations()->withoutCleared()->count())->toBe(3);
 
         //Authenticate
         //$auth->refresh();
-        
+
         $this->actingAs($auth);
 
         //Delete Conversation
@@ -263,32 +251,31 @@ describe('deleting for',function(){
 
         //conversations
         expect($auth->conversations()->withoutCleared()->count())->toBe(2);
-
     });
 
 
-    
+
     it('triggers delete messages for me when conversation is deleted', function () {
-        
+
         //Dusk to 
-        
+
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
 
 
         //Send to receiver
-        $auth->sendMessageTo($receiver,'hello-1');
-        $auth->sendMessageTo($receiver,'hello-2');
-        $auth->sendMessageTo($receiver,'hello-3');
-        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+        $auth->sendMessageTo($receiver, 'hello-1');
+        $auth->sendMessageTo($receiver, 'hello-2');
+        $auth->sendMessageTo($receiver, 'hello-3');
+        $conversation =  $auth->sendMessageTo($receiver, 'hello-4')->conversation;
 
         //Assert Count
         expect($conversation->messages()->count())->toBe(4);
 
         //Authenticate
         //$auth->refresh();
-        
+
         $this->actingAs($auth);
 
         //Delete Conversation
@@ -297,17 +284,16 @@ describe('deleting for',function(){
         $this->actingAs($auth);
 
         expect($conversation->messages()->count())->toBe(0);
-
     });
 
     test('other user can still access the converstion if other user deletes it ', function () {
-        
+
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
 
         //Send to receiver
-        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+        $conversation =  $auth->sendMessageTo($receiver, 'hello-4')->conversation;
 
         //Authenticate and delete 1
         $this->actingAs($auth);
@@ -316,23 +302,25 @@ describe('deleting for',function(){
 
 
         //Authenticate and delete 2
-         $this->actingAs($receiver);
+        $this->actingAs($receiver);
         expect($receiver->conversations()->withoutCleared()->count())->toBe(1);
-
     });
 
 
     test('it shows conversation again if new message is send to conversation after deleting', function () {
-        
+
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
 
         //Send to receiver
-        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+        Carbon::setTestNow(now()->addSeconds(1));
+        $conversation =  $auth->sendMessageTo($receiver, 'hello-4')->conversation;
 
         //Authenticate and delete 1
         $this->actingAs($auth);
+        Carbon::setTestNow(now()->addSeconds(2));
+
         $conversation->deleteFor($auth);
 
         //assert
@@ -340,67 +328,291 @@ describe('deleting for',function(){
 
 
         //send message to $auth
-        $receiver->sendMessageTo($auth,'hello-5');
+        Carbon::setTestNow(now()->addSeconds(3));
+        $receiver->sendMessageTo($auth, 'hello-5');
 
         //assert again
         expect($auth->conversations()->count())->toBe(1);
-
     });
 
     it('completely deletes the conversation if both users in a private conversation has deleted conversation(All messages)', function () {
-        
+
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
 
         //Send to receiver
-        $conversation=  $auth->sendMessageTo($receiver,'hello-4')->conversation;
+        $conversation =  $auth->sendMessageTo($receiver, 'hello-4')->conversation;
 
         //Authenticate and delete 1
         $this->actingAs($auth);
         $conversation->deleteFor($auth);
 
-         $this->flushSession();
+        $this->flushSession();
 
 
         //Authenticate and delete 2
-         $this->actingAs($receiver);
+        $this->actingAs($receiver);
         $conversation->deleteFor($receiver);
 
         expect(Conversation::find($conversation->id))->toBe(null);
-
     });
 
 
     it('completely deletes the conversation if conversation is self conversation with initiator(User)', function () {
-        
+
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
 
         //Send to self
-        $conversation=  $auth->sendMessageTo($auth,'hello-4')->conversation;
+        $conversation =  $auth->sendMessageTo($auth, 'hello-4')->conversation;
 
         //Authenticate and delete 1
         $conversation->deleteFor($auth);
 
-        expect(Conversation::withoutGlobalScopes()-> where('id', $conversation->id)->first())->toBe(null);
+        expect(Conversation::withoutGlobalScopes()->where('id', $conversation->id)->first())->toBe(null);
+    });
+
+
+
+    it('it saves or set conversation_deleted_at after deleting conversation ', function () {
+
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        $this->actingAs($auth);
+        //Send to self
+        $conversation =  $auth->createConversationWith($receiver, 'helo');
+
+        //Authenticate and delete 1
+        $conversation->deleteFor($auth);
+
+
+        $participant = $conversation->participant($auth);
+
+
+
+        //  dd(Conversation::all());
+
+        expect($participant->conversation_deleted_at)->not->toBe(null);
+    });
+
+
+    it('it exludes deleted conversation from query if not new message is available', function () {
+
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        $this->actingAs($auth);
+        //Send to self
+        Carbon::setTestNow(now());
+
+        $conversation =  $auth->createConversationWith($receiver, 'helo');
+        Carbon::setTestNow(now()->addMinute(20));
+
+        //Authenticate and delete 1
+        $conversation->deleteFor($auth);
+
+        $auth->refresh();
+
+        expect(count($auth->conversations()->get()))->toBe(0);
+    });
+
+
+    it('it adds deleted conversatoin to query when new message is available', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        $this->actingAs($auth);
+        //!we set custom time because time is same or models during test - maube it's bug
+        Carbon::setTestNow(now());
+        $conversation =  $auth->createConversationWith($receiver, 'helo');
+
+        Carbon::setTestNow(now()->addSeconds(10));
+
+        //Authenticate and delete 1
+        $conversation->deleteFor($auth);
+
+
+        //assert 0 for now
+        expect(count($auth->conversations()->get()))->toBe(0);
+
+        //send me message 
+        Carbon::setTestNow(now()->addSeconds(20));
+        $auth->sendMessageTo($receiver, 'hello');
+
+        $auth->refresh();
+        expect(count($auth->conversations()->get()))->toBe(1);
 
     });
 
 });
 
-describe('deleting permanently()',function(){
+describe('ClearFor()', function () {
+
+    it('load all conversations if not deleted', function () {
+        $auth = User::factory()->create();
+
+        //Authenticate
+        $this->actingAs($auth);
+
+        $receiver = User::factory()->create();
+
+        //send to receiver
+        $auth->sendMessageTo($receiver, 'hello-1');
+        $auth->sendMessageTo(User::factory()->create(), 'hello-2');
+        $auth->sendMessageTo(User::factory()->create(), 'hello-3');
+
+        //assert count
+
+        /// dd($messages);
+        expect($auth->conversations->count())->toBe(3);
+    });
+
+
+
+    it('aborts if user does not belong to conversation when deletingForMe', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver, 'hello');
+
+        //Authenticate
+        $this->actingAs($auth);
+
+        //delete messages
+        $conversation->clearFor(User::factory()->create());
+
+        //assert new count
+        expect($conversation->count())->toBe(1);
+    })->throws(Exception::class);
+
+
+    it('cleared conversation still appear in query', function () {
+
+        //Dusk to 
+        $auth = User::factory()->create();
+
+        //Send to receiver
+        $conversation1 =  $auth->sendMessageTo(User::factory()->create(), 'hello-1')->conversation;
+        $conversation2 =  $auth->sendMessageTo(User::factory()->create(), 'hello-2')->conversation;
+        $conversation3 =  $auth->sendMessageTo(User::factory()->create(['name' => 'john']), 'hello-3')->conversation;
+
+        //Assert Count
+        expect($auth->conversations()->count())->toBe(3);
+
+        //Authenticate
+        //$auth->refresh();
+
+        $this->actingAs($auth);
+
+        //Delete Conversation
+        $conversation3->clearFor($auth);
+
+        //conversations
+        expect($auth->conversations()->count())->toBe(3);
+    });
+
+
+
+
+    
+
+    test('user cannot no longer see cleared messages', function () {
+
+        //Dusk to 
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        Carbon::setTestNow(now()->addSeconds(2));
+
+        $conversation = $auth->createConversationWith($receiver);
+
+       Carbon::setTestNow(now()->addSeconds(2));
+
+        expect( $conversation->messages()->count())->toBe(0);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
+
+    //login so the messages scope will be applied
+    $this->actingAs($auth);
+        expect( $conversation->messages()->count())->toBe(4);
+
+        //Delete Conversation
+        $conversation->clearFor($auth);
+
+
+        expect( $conversation->messages()->count())->toBe(0);
+
+    });
+
+
+
+    test('Other user/users can still see cleared messages by auth', function () {
+
+        //Dusk to 
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        Carbon::setTestNow(now()->addSeconds(2));
+
+        $conversation = $auth->createConversationWith($receiver);
+ 
+        Carbon::setTestNow(now()->addSeconds(2));
+        expect( $conversation->messages()->count())->toBe(0);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
+
+        //login so the messages scope will be applied
+        $this->actingAs($auth);
+        expect( $conversation->messages()->count())->toBe(4);
+
+        //Delete Conversation
+        $conversation->clearFor($auth);
+
+
+        Auth::logout();
+        //login as other user
+        $this->actingAs($receiver);
+        
+        expect( $conversation->messages()->count())->toBe(4);
+
+    });
+
+
+});
+
+describe('deleting permanently()', function () {
 
     it('deletes all it\'s participants when conversation is deleted', function () {
 
         $auth = User::factory()->create();
 
-        $conversation = Conversation::factory()->create(['type'=>ConversationType::GROUP]);
+        $conversation = Conversation::factory()->create(['type' => ConversationType::GROUP]);
 
-       // dd($conversation);
+        // dd($conversation);
         $conversation->addParticipant($auth);
         $conversation->addParticipant(User::factory()->create());
         $conversation->addParticipant(User::factory()->create());
@@ -415,7 +627,6 @@ describe('deleting permanently()',function(){
 
 
         expect($conversation->participants()->count())->toBe(0);
-
     });
 
 
@@ -424,9 +635,9 @@ describe('deleting permanently()',function(){
         $receiver = User::factory()->create();
 
 
-        $conversation= 
-        $receiver->sendMessageTo($auth,'hello')->conversation;
-        $auth->sendMessageTo($receiver,'how do you do ');
+        $conversation =
+            $receiver->sendMessageTo($auth, 'hello')->conversation;
+        $auth->sendMessageTo($receiver, 'how do you do ');
 
 
 
@@ -436,7 +647,7 @@ describe('deleting permanently()',function(){
 
 
         //get conversation reads
-         expect($conversation->reads()->count())->toBe(2);
+        expect($conversation->reads()->count())->toBe(2);
 
 
         //Delete message
@@ -444,7 +655,6 @@ describe('deleting permanently()',function(){
 
         //assert count
         expect($conversation->reads()->count())->toBe(0);
-
     });
 
 
@@ -454,11 +664,11 @@ describe('deleting permanently()',function(){
         $receiver = User::factory()->create();
 
 
-         $conversation= $auth->createGroup('Test');
-         $group = $conversation ->group;
+        $conversation = $auth->createGroup('Test');
+        $group = $conversation->group;
 
         //get conversation reads
-         expect(Group::find($group->id))->not->toBe(null);
+        expect(Group::find($group->id))->not->toBe(null);
 
 
         //Delete message
@@ -466,9 +676,6 @@ describe('deleting permanently()',function(){
 
         //assert count
         expect(Group::find($group->id))->toBe(null);
-
-
-
     });
 
 
@@ -478,14 +685,14 @@ describe('deleting permanently()',function(){
         $receiver = User::factory()->create();
 
 
-        $conversation = Conversation::factory()->withParticipants([$receiver,$auth])->create(['type'=>ConversationType::PRIVATE]);
+        $conversation = Conversation::factory()->withParticipants([$receiver, $auth])->create(['type' => ConversationType::PRIVATE]);
 
         //dd($conversation);
-        $auth->sendMessageTo($receiver,'hello');
-        $auth->sendMessageTo($receiver,'hello');
-        $auth->sendMessageTo($receiver,'hello');
-        $auth->sendMessageTo($receiver,'hello');
-        $auth->sendMessageTo($receiver,'hello');
+        $auth->sendMessageTo($receiver, 'hello');
+        $auth->sendMessageTo($receiver, 'hello');
+        $auth->sendMessageTo($receiver, 'hello');
+        $auth->sendMessageTo($receiver, 'hello');
+        $auth->sendMessageTo($receiver, 'hello');
 
         //assert available 
         expect($conversation->messages()->count())->toBe(5);
@@ -495,12 +702,5 @@ describe('deleting permanently()',function(){
 
 
         expect($conversation->messages()->count())->toBe(0);
-
     });
 });
-
-
-
-
-
- 

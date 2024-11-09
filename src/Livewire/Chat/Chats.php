@@ -12,6 +12,7 @@ use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
+use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
 
 class Chats extends Component
 {
@@ -66,7 +67,7 @@ class Chats extends Component
     }
     
     // Start the query with eager loading
-    $additionalConversations = Conversation::withoutCleared()->with([
+    $additionalConversations = Conversation::with([
         'participants.participantable', // Eager load participants and the related participantable model
         'lastMessage',                  // Eager load last message
         'group.cover'                   // Eager load group cover
@@ -75,7 +76,7 @@ class Chats extends Component
             ->where('participantable_type', get_class(auth()->user())); // Ensure correct type (User model)
     })
     ->when($this->search, function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
-        $query->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
+        $query->withoutGlobalScope(WithoutDeletedScope::class)->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
             
             // Search in participants' participantable fields
             $query->whereHas('participants', function ($subquery) use ($searchableFields, &$columnCache) {
@@ -106,7 +107,10 @@ class Chats extends Component
               });
           });
         });
-    })
+    }, function ($query) {
+      // When there's no search term, apply the 'withoutBlanks' scope to filter out blank conversations
+      $query->withoutBlanks();
+  })
     ->latest('updated_at') ->paginate(10, ['*'], 'page', $this->page); 
     // Load the next page of conversations
     // Check if cannot load more

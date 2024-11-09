@@ -40,7 +40,7 @@ class WireChatServiceProvider extends ServiceProvider
         Blade::component('wirechat::chatbox.image', Image::class);
 
 
-       // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+ 
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
 
@@ -51,10 +51,23 @@ class WireChatServiceProvider extends ServiceProvider
         ],'wirechat-config');
 
 
-        $this->publishes([
-            __DIR__.'/../database/migrations' => database_path('migrations'),
-        ], 'wirechat-migrations');
+        //!for seamless devlopement loadmigrateions directly instead of publishing in development
+        //only publish in production
 
+        if (app()->isProduction()) {
+
+            $this->publishes([
+                __DIR__.'/../database/migrations' => database_path('migrations'),
+            ], 'wirechat-migrations');
+    
+            # code...
+        }
+        else{
+             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        }
+
+
+      
         /* Load channel routes */
         $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
           // Load the package's channels.php file

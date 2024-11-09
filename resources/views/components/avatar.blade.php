@@ -1,7 +1,7 @@
 @props(['src' => null, 'story' => null, 'group' => false])
 <div
     {{ $attributes->merge([
-            'class' => "shrink-0 inline-flex items-center justify-center 
+            'class' => "shrink-0 inline-flex items-center justify-center  transition
                       overflow-hidden rounded-full border border-gray-200 text-gray-300 bg-gray-100 dark:bg-gray-600
                       dark:border-gray-500  text-base ",
         ])->class(
@@ -12,7 +12,7 @@
 
 
     @if ($src)
-        <img @class([
+        <img  loading="lazy" @class([
             'shrink-0 w-full h-full object-cover object-center rounded-full',
         ]) src="{{ $src }}" />
     @endif

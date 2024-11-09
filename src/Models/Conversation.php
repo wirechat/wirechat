@@ -16,12 +16,15 @@ use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 use Illuminate\Support\Str;
+use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
+
 class Conversation extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'type'
+        'type',
+        //'updated_at'
     ];
 
     protected $casts = [
@@ -40,7 +43,7 @@ class Conversation extends Model
     {
         parent::boot();
 
-        // static::addGlobalScope(new WithoutClearedScope());
+        static::addGlobalScope(new WithoutDeletedScope());
         //DELETED event
         static::deleted(function ($conversation) {
 
@@ -120,14 +123,14 @@ class Conversation extends Model
         $participant = null;
         // If loaded, simply check the existing collection
         if ($this->relationLoaded('participants')) {
-            $participant = $this->participants
-              ->  withoutGlobalScope('withoutExited')
+            $participant = $this->participants()
+                ->withoutGlobalScope('withoutExited')
                 ->where('participantable_id', $user->id)
                 ->where('participantable_type', get_class($user))
                 ->first();
         } else {
             $participant = $this->participants()
-            ->  withoutGlobalScope('withoutExited')
+                ->withoutGlobalScope('withoutExited')
 
                 ->where('participantable_id', $user->id)
                 ->where('participantable_type', get_class($user))
@@ -169,7 +172,7 @@ class Conversation extends Model
             'participantable_id' => $participant->id,
             'participantable_type' => get_class($participant),
             'role' => ParticipantRole::PARTICIPANT
-        ],['exited_at'=>null]);
+        ], ['exited_at' => null]);
 
         return $participant;
     }
@@ -185,7 +188,7 @@ class Conversation extends Model
     }
 
     /**
-     * Scope a query to only include active users.
+     * Scope a query to only include conversation where user  cleraed all messsages users.
      */
     public function scopeWithoutCleared(Builder $builder): void
     {
@@ -202,7 +205,53 @@ class Conversation extends Model
                 });
             });
         }
+
     }
+
+   /**
+ * Exclude blank conversations that have no messages at all,
+ * including those that might be "soft deleted" by the user.
+ */
+public function scopeWithoutBlanks(Builder $builder): void
+{
+    $user = auth()->user(); // Get the authenticated user
+
+    if ($user) {
+        $builder->whereHas('messages', function ($query) use ($user) {
+            // Check for messages where the user has not marked them as deleted
+            $query->whereDoesntHave('actions', function ($query) use ($user) {
+                $query->where('actor_id', $user->id)
+                    ->where('actor_type', get_class($user))
+                    ->where('type', Actions::DELETE);
+            });
+        });
+    }
+}
+
+
+    public function scopeWithoutDeleted(Builder $builder)
+    {
+        $user = auth()->user();
+
+         // Dynamically get the parent model (i.e., the user)
+         $user = auth()->user();
+
+         if ($user) {
+             // Get the table name for conversations dynamically to avoid hardcoding.
+             $conversationsTableName = (new Conversation())->getTable();
+ 
+             // Apply the "without deleted conversations" scope
+             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
+                 $query->where('participantable_id', $user->id)
+                     ->whereRaw("
+                         (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at)
+                     ");
+             });
+             
+         }
+       
+    }
+
 
     public function getReceiver()
     {
@@ -238,28 +287,6 @@ class Conversation extends Model
     }
 
 
-    public function scopeWhereNotDeleted($query)
-    {
-        $userId = auth()->id();
-
-        return $query->where(function ($query) use ($userId) {
-
-            #where message is not deleted
-            $query->whereHas('messages', function ($query) use ($userId) {
-
-                $query->where(function ($query) use ($userId) {
-                    $query->where('sender_id', $userId)
-                        ->whereNull('sender_deleted_at');
-                })->orWhere(function ($query) use ($userId) {
-
-                    $query->where('receiver_id', $userId)
-                        ->whereNull('receiver_deleted_at');
-                });
-            })
-                #include conversations without messages
-                ->orWhereDoesntHave('messages');
-        });
-    }
 
     /**
      * ----------------------------------------
@@ -425,45 +452,63 @@ class Conversation extends Model
      * @param Model $participant The participant whose messages are to be deleted.
      * @return void|null Returns null if the other participant cannot be found in a private conversation.
      */
-    public function deleteFor(Model $participant)
+    public function deleteFor(Model $user)
     {
         // Ensure the participant belongs to the conversation
-        abort_unless($participant->belongsToConversation($this), 403, 'Does not belong to conversation');
+        abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
 
-        // Trigger deletion of all messages for the specified participant
-        $this->messages()?->each(function ($message) use ($participant) {
-            $message->deleteFor($participant);
-        });
+      //Clear conversation history for this user 
+       $this->clearFor($user);
+
+       //Mark this participant's conversation_deleted_at
+       $participant= $this->participant($user);
+       $participant->conversation_deleted_at= now();
+       $participant->save();
 
         // Check if the conversation is private
         if ($this->isPrivate()) {
-
             //check if conversatin is Self conversation 
             //Then force delete it 
-            if ($this->isSelfConversation($participant)) {
-
+            if ($this->isSelfConversation($user)) {
                 $this->forceDelete();
             } else {
 
-
                 // Retrieve the other participant in the private conversation
                 $otherParticipant = $this->participants
-                    ->where('participantable_id', '!=', $participant->id)
-                    ->where('participantable_type', get_class($participant))
+                    ->where('participantable_id', '!=', $user->id)
+                    ->where('participantable_type', get_class($user))
                     ->first()?->participantable;
-                
+
                 // Return null if the other participant cannot be found
                 if (!$otherParticipant) {
                     return null;
                 }
 
                 // If both participants have deleted all their messages, delete the conversation permanently
-                if ($this->hasBeenDeletedBy($participant) && $this->hasBeenDeletedBy($otherParticipant)) {
+                if ($this->hasBeenDeletedBy($user) && $this->hasBeenDeletedBy($otherParticipant)) {
                     // dd("deleted");
                     $this->forceDelete();
                 }
             }
         }
+
+    }
+
+
+     /**
+     * Clear conversation history for this particiclar user
+     * @param Model $participant The participant whose messages are to be deleted.
+     * @return void|null Returns null if the other participant cannot be found in a private conversation.
+     */
+    public function clearFor(Model $user)
+    {
+        // Ensure the participant belongs to the conversation
+        abort_unless($user->belongsToConversation($this), 403, 'User Does not belong to conversation');
+
+        // Trigger deletion of all messages for the specified user
+        $this->messages()?->each(function ($message) use ($user) {
+             $message->deleteFor($user);
+        });
     }
 
     /**

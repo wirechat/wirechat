@@ -16,12 +16,15 @@ class Participant extends Model
         'participantable_id',
         'participantable_type',
         'role',
-        'exited_at'
+        'exited_at',
+        'conversation_deleted_at'
     ];
 
 
     protected $casts=[
-        'role'=>ParticipantRole::class
+        'role'=>ParticipantRole::class,
+        'exited_at'=>'date',
+        'conversation_deleted_at'=>'date'
     ];
 
 
@@ -117,9 +120,6 @@ class Participant extends Model
         }
         
       
-
-
-         
         return false; // Already exited or conversation mismatch
     }
     

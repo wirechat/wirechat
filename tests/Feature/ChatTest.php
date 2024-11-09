@@ -1,6 +1,8 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -1013,21 +1015,18 @@ describe('Deleting Conversation', function () {
         $receiver->sendMessageTo($auth, message: '4');
 
 
+
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call("deleteConversation");
 
+        Carbon::setTestNow(now()->addSeconds(4));
+
 
         //let receiver send a new message
-      $message=  $receiver->sendMessageTo($auth, message: '5');
-        
-        
-   //dd($message);
+         $receiver->sendMessageTo($auth, message: '5');
+
         //assert conversation will be null
         expect($auth->conversations()->first())->not->toBe(null);
-
-
-   //     dd($conversation);
-
 
         //also assert that user receives 403 forbidden
         $this->actingAs($auth)->get(route("wirechat.chat", $conversation->id))->assertStatus(200);
@@ -1053,7 +1052,7 @@ describe('Deleting Conversation', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call("deleteConversation");
 
-
+        Carbon::setTestNow(now()->addSeconds(4));
         //let auth send a new message to conversation after deleting
         $auth->sendMessageTo($receiver, message: '5');
 
@@ -1089,7 +1088,7 @@ describe('Deleting Conversation', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call("deleteConversation");
 
-        $conversation = Conversation::withoutGlobalScope(WithoutClearedScope::class)->find($conversation->id);
+        $conversation = Conversation::withoutGlobalScopes()->find($conversation->id);
         expect($conversation)->not->toBe(null);
     }) ;
 
@@ -1114,7 +1113,9 @@ describe('Deleting Conversation', function () {
         $request->call("deleteConversation");
 
 
+        Auth::logout();
         //send new message in order to gain access to converstion
+       // Carbon::setTestNow(now()->addMinute(20));
         $auth->sendMessageTo($receiver, message: '5 message');
 
         //open conversation again
@@ -1152,8 +1153,13 @@ describe('Deleting Conversation', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call("deleteConversation");
 
-        //send after deleting conversation
+
+            Auth::logout();
+        
+        // //send after deleting conversation
+        Carbon::setTestNow(now()->addMinute(20));
         $auth->sendMessageTo($receiver, message: '5 message');
+     // dd($message,$conversation);
 
         ///request for $receiver to access conversation
         $request = Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id]);
@@ -1169,7 +1175,7 @@ describe('Deleting Conversation', function () {
         //assert user can see new messages
         $request->assertSee("5 message");
     });
-}) ;
+});
 
 // describe('Clearing Conversation', function () {
 

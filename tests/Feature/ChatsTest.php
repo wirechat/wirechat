@@ -54,7 +54,7 @@ it('shows search field if search is enabled in wirechat.config:tesiting Search p
 
 
 
-describe('Chatlist', function () {
+describe('List', function () {
 
 
     it('shows label "No conversations yet" items when user does not have chats', function () {
@@ -150,6 +150,7 @@ describe('Chatlist', function () {
     });
 
 
+    
     it('does not load blank conversations(where not even deleted messages exists)', function () {
 
         $auth = User::factory()->create();
@@ -158,7 +159,7 @@ describe('Chatlist', function () {
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
 
-        //create BLANK conversation with user1
+        //!create BLANK conversation with user1
         $auth->createConversationWith($user1);
 
         //create conversation with user2
@@ -308,6 +309,37 @@ describe('Chatlist', function () {
             ->assertSee('📎 Attachment');
     });
 
+
+
+    test('deleted conversation should not appear in user chats list', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3');
+        $receiver->sendMessageTo($auth, message: '4');
+
+        //delete conversation 
+        $auth->deleteConversation($conversation);
+
+        //start component
+        $request = Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSee('John')
+        ->assertViewHas('conversations', function ($conversations) {
+            return count($conversations) == 0;
+        });
+        
+
+    });
+
 });
 
 
@@ -359,5 +391,37 @@ describe('Search', function () {
                 return count($conversations) == 1;
             });
     });
+
+
+    test('deleted conversation should  appear when searched', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3');
+        $receiver->sendMessageTo($auth, message: '4');
+
+        //delete conversation 
+        $auth->deleteConversation($conversation);
+
+        //start component & search
+       Livewire::actingAs($auth)->test(Chatlist::class)
+        ->set('search','John')
+            ->assertSee('John')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 1;
+            });
+        
+
+    });
+
 
 });

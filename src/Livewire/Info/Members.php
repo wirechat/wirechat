@@ -141,7 +141,7 @@ class Members extends ModalComponent
         // Check if $this->participants is initialized
         $this->participants = $this->participants ?? collect();
 
-        $additionalParticipants = Participant::where('conversation_id', $this->conversation->id)
+          $additionalParticipants = Participant::where('conversation_id', $this->conversation->id)
         ->with('participantable')
         ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
             $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
@@ -160,14 +160,19 @@ class Members extends ModalComponent
                 });
             });
         })
-        ->orderByRaw("FIELD(role, ?, ?, ?)", [
-            ParticipantRole::OWNER->value,
-            ParticipantRole::ADMIN->value,
-            ParticipantRole::PARTICIPANT->value,
+        ->orderByRaw("
+            CASE role
+                WHEN ? THEN 1
+                WHEN ? THEN 2
+                WHEN ? THEN 3
+                ELSE 4
+            END", [
+                ParticipantRole::OWNER->value,
+                ParticipantRole::ADMIN->value,
+                ParticipantRole::PARTICIPANT->value,
         ])
         ->latest('updated_at')
         ->paginate(10, ['*'], 'page', $this->page);
-
         // Check if cannot load more
         $this->canLoadMore = $additionalParticipants->hasMorePages();
 

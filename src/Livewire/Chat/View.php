@@ -8,7 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
-
+use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
 
 class View extends Component{
 
@@ -28,7 +28,7 @@ class View extends Component{
     abort_unless(auth()->check(),401);
     
     //We remove deleted conversation incase the user decides to visit the delted conversation 
-    $this->conversation= Conversation::with('participants.participantable')->withoutGlobalScope(WithoutClearedScope::class)->where('id',$this->conversation_id)->firstOrFail();
+    $this->conversation= Conversation::with('participants.participantable')->withoutGlobalScopes([WithoutDeletedScope::class])->where('id',$this->conversation_id)->firstOrFail();
     
 
     // dd( $this->conversation->unique_id);

@@ -74,7 +74,7 @@ trait Chatable
         $selfConversationCheck = $participantId === $authenticatedUserId && $participantType === $authenticatedUserType;
 
         // Define the base query for finding conversations
-        $existingConversationQuery = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE);
+        $existingConversationQuery = Conversation::withoutGlobalScopes()->where('type', ConversationType::PRIVATE);
 
         // If it's a self-conversation, adjust the query to check for two identical participants
         if ($selfConversationCheck) {
@@ -86,6 +86,7 @@ trait Chatable
                     ->havingRaw('COUNT(*) = 2'); // Ensuring two participants in the conversation
             });
         } else {
+
             // If it's a conversation between two different participants, adjust the query accordingly
             $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
                 $query->select('conversation_id')
@@ -209,7 +210,6 @@ trait Chatable
         #get participant
         $participant = $conversation->participant($this);
 
-
         return $participant ? $participant->exitConversation() : false;
 
 
@@ -248,13 +248,18 @@ trait Chatable
 
             // Optionally, check that the current model is part of the conversation
             if (!$this->belongsToConversation($conversation)) {
-
+      
                 return null; // Exit if not a participant
             }
+
         }
 
         // Proceed to create the message if a valid conversation is found or created
         if ($conversation) {
+
+
+
+
             $createdMessage = Message::create([
                 'conversation_id' => $conversation->id,
                 'sendable_type' => get_class($this), // Polymorphic sender type
@@ -262,8 +267,11 @@ trait Chatable
                 'body' => $message
             ]);
 
+
             // Update the conversation timestamp
-            $conversation->touch();
+            $conversation->updated_at=now();
+            $conversation->save();
+
 
             return $createdMessage;
         }
@@ -355,10 +363,16 @@ trait Chatable
     public function deleteConversation(Conversation $conversation)
     {
 
-
-     //   dd('reached');
         //use already created methods inside conversation model 
         $conversation->deleteFor($this);
+    }
+
+
+    public function clearConversation(Conversation $conversation)
+    {
+
+        //use already created methods inside conversation model 
+        $conversation->clearFor($this);
     }
 
     /**

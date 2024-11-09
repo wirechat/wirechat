@@ -44,6 +44,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
             $config->set('app.debug', true);
             $config->set('app.env', 'testing');
+            $config->set('app.timezone', 'UTC');
+
 
            // $config->set('view.paths', [__DIR__.'/views', resource_path('views')]);
 
