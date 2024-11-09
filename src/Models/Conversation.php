@@ -217,11 +217,11 @@ public function scopeWithoutBlanks(Builder $builder): void
     $user = auth()->user(); // Get the authenticated user
 
     if ($user) {
-        $builder->whereHas('messages', function ($query) use ($user) {
-            // Check for messages where the user has not marked them as deleted
-            $query->whereDoesntHave('actions', function ($query) use ($user) {
-                $query->where('actor_id', $user->id)
-                    ->where('actor_type', get_class($user))
+        
+        $builder->whereHas('messages', function ($q) use ($user) {
+            $q->withoutGlobalScopes()->whereDoesntHave('actions', function ($q) use ($user) {
+                $q->where('actor_id','!=', $user->id)
+                    ->where('actor_type', get_class($user)) // Safe since $user is authenticated
                     ->where('type', Actions::DELETE);
             });
         });

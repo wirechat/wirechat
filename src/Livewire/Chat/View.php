@@ -63,7 +63,7 @@ class View extends Component{
                   <main  class="  grid  w-full  grow  h-full relative overflow-y-auto"  style="contain:content">
 
                     
-                    <livewire:chat lazy conversation="{{$conversation->id}}"/>
+                    <livewire:chat  conversation="{{$conversation->id}}"/>
 
                   </main>
 

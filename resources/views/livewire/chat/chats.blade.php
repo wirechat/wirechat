@@ -74,17 +74,28 @@ $primaryColor= WireChat::getColor();
     <x-wirechat::chats.header />
 
 
-    <main x-data="{ canLoadMore: @entangle('canLoadMore') }" {{-- Detect when scrolled to the bottom --}}
-        @scroll.self.debounce="
-        scrollTop = $el.scrollTop;
-        scrollHeight = $el.scrollHeight;
-        clientHeight = $el.clientHeight;
-        
-        if (scrollTop + clientHeight >= scrollHeight && canLoadMore) {
-            await $nextTick();
-            $wire.loadMore();
-        }
-        "
+    <main x-data
+    {{-- Detect when scrolled to the bottom --}}
+    @scroll.self.debounce="
+    // Calculate scroll values
+     scrollTop = $el.scrollTop;
+     scrollHeight = $el.scrollHeight;
+     clientHeight = $el.clientHeight;
+
+    console.log('clientHeight:', clientHeight);
+    console.log('scrollTop:', scrollTop);
+    console.log('scrollHeight:', scrollHeight);
+    console.log('$wire.canLoadMore:', $wire.canLoadMore);
+
+    console.log('scrollTop + clientHeight:', scrollTop + clientHeight);
+
+    // Check if the user is at the bottom of the scrollable element
+    if ((scrollTop + clientHeight) >= (scrollHeight - 1) && $wire.canLoadMore) {
+        // Trigger load more if we're at the bottom
+        await $nextTick();
+        $wire.loadMore();
+    }
+    "
         x-init="
        
 
@@ -109,7 +120,7 @@ $primaryColor= WireChat::getColor();
 
 
         @if (config('wirechat.allow_chats_search', false) == true)
-            <div x-cloak wire:loading.class.remove="hidden"
+            <div x-cloak wire:loading.delay.class.remove="hidden"
                 wire:target="search"class="hidden transition-all duration-300 ">
                 <x-wirechat::loading-spin />
             </div>
@@ -117,7 +128,7 @@ $primaryColor= WireChat::getColor();
 
         @if (count($conversations) > 0)
             {{-- chatlist  --}}
-            <ul wire:loading.delay.shorter.remove wire:target="search" class="p-2 grid w-full spacey-y-2">
+            <ul wire:loading.delay.long.remove wire:target="search" class="p-2 grid w-full spacey-y-2">
 
                 @foreach ($conversations as $conversation)
                     @php
