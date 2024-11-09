@@ -229,6 +229,16 @@ public function scopeWithoutBlanks(Builder $builder): void
 }
 
 
+public function scopeWhereHasParticipant(Builder $query, $userId, $userType):void
+{
+     $query->whereHas('participants', function ($query) use ($userId, $userType) {
+        $query->where('participantable_id', $userId)
+              ->where('participantable_type', $userType);
+    });
+}
+
+
+
     public function scopeWithoutDeleted(Builder $builder)
     {
         $user = auth()->user();
