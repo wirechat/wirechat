@@ -96,6 +96,26 @@ describe('Box presence test: ', function () {
             ->assertSee("My Group");
     });
 
+    test('Clear Chat button and method  is wired', function () {
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $conversation->addParticipant($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+        
+        #
+        Livewire::actingAs($participant)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertMethodWired("clearConversation")
+        ->assertSeeText('Clear Chat');
+    });
+
 
 
 
@@ -944,7 +964,7 @@ describe('Sending reply', function () {
 describe('Deleting Conversation', function () {
 
 
-    test('it redirects to wirechat route after deleting conversation', function () {
+    test('it redirects to chats route after deleting conversation', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
@@ -1215,14 +1235,13 @@ describe('Deleting Conversation', function () {
         $authParticipant->refresh();
         expect($authParticipant->conversation_deleted_at)->toBe(null);
          
-    })->only();
+    });
 
 
     test('it also resets conversation_deleted_at value of auth-particiapant they send new message from Chat within component to conversation themselves ', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-
 
         $conversation = $auth->createConversationWith($receiver);
 
@@ -1240,7 +1259,6 @@ describe('Deleting Conversation', function () {
         Carbon::setTestNow(now()->addSeconds(4));
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->call("deleteConversation");
 
-
         //assert not null
         $authParticipant->refresh();
         expect($authParticipant->conversation_deleted_at)->not->toBe(null);
@@ -1256,93 +1274,140 @@ describe('Deleting Conversation', function () {
         $authParticipant->refresh();
         expect($authParticipant->conversation_deleted_at)->toBe(null);
          
-    })->only();
-
-
+    });
     
 });
 
-// describe('Clearing Conversation', function () {
+describe('Clearing Conversation', function () {
 
-//     test('it removed messages from view when user clears chat', function () {
-//         $auth = User::factory()->create();
-//         $receiver = User::factory()->create(['name' => 'John']);
+   
+    test('user should still have access after deleting conversation', function () {
 
-
-//         $conversation = $auth->createConversationWith($receiver);
-
-//         //auth -> receiver
-//         $auth->sendMessageTo($receiver, message: 'message-1');
-//         $auth->sendMessageTo($receiver, message: 'message-2');
-//         $auth->sendMessageTo($receiver, message: 'message-3');
-
-//         //receiver -> auth 
-//         $receiver->sendMessageTo($auth, message: 'message-4');
-//         $receiver->sendMessageTo($auth, message: 'message-5');
-//         $receiver->sendMessageTo($auth, message: 'message-5');
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
 
 
-//         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+        $conversation = $auth->createConversationWith($receiver);
 
-//         $request
-//             ->call("clearChat")
-//             ->assertViewHas('loadedMessages', 0);
-//     });
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
 
-//     test('it stays in coversation after clearing chat', function () {
-//         $auth = User::factory()->create();
-//         $receiver = User::factory()->create(['name' => 'John']);
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
 
-
-//         $conversation = $auth->createConversationWith($receiver);
-
-//         //auth -> receiver
-//         $auth->sendMessageTo($receiver, message: '1');
-//         $auth->sendMessageTo($receiver, message: '2');
-//         $auth->sendMessageTo($receiver, message: '3');
-
-//         //receiver -> auth 
-//         $receiver->sendMessageTo($auth, message: '4');
-//         $receiver->sendMessageTo($auth, message: '5');
-//         $receiver->sendMessageTo($auth, message: '5');
+        //begin
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+        $request->call("clearConversation");
 
 
-//         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+        Auth::logout();
+        //send new message in order to gain access to converstion
+       // Carbon::setTestNow(now()->addMinute(20));
+        $auth->sendMessageTo($receiver, message: '5 message');
 
-//         $request
-//             ->call("clearChat")
-//             ->assertOk()
-//             ->assertNoRedirect();
-//     });
+        //open conversation again
+        $request2 = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
 
-//     test('user can still open conversatoin after clearing it ', function () {
-//         $auth = User::factory()->create();
-//         $receiver = User::factory()->create(['name' => 'John']);
+         
+    });
 
+    test('user shold not be able to see previous messages present after conversation was clear if they send a new message, but should be able to see new ones ', function () {
 
-//         $conversation = $auth->createConversationWith($receiver);
-
-//         //auth -> receiver
-//         $auth->sendMessageTo($receiver, message: '1');
-//         $auth->sendMessageTo($receiver, message: '2');
-//         $auth->sendMessageTo($receiver, message: '3');
-
-//         //receiver -> auth 
-//         $receiver->sendMessageTo($auth, message: '4');
-//         $receiver->sendMessageTo($auth, message: '5');
-//         $receiver->sendMessageTo($auth, message: '5');
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
 
 
-//         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+        $conversation = $auth->createConversationWith($receiver);
 
-//         $request
-//             ->call("clearChat");
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
 
-//         //assert 
-//         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
-//     });
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
 
-// });
+        //begin
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+        $request->call("clearConversation");
+
+
+        Auth::logout();
+        //send new message in order to gain access to converstion
+       // Carbon::setTestNow(now()->addMinute(20));
+        $auth->sendMessageTo($receiver, message: '5 message');
+
+        //open conversation again
+        $request2 = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        //assert user can't see previous messages
+        $request2
+            ->assertDontSee("1 message")
+            ->assertDontSee("2 message")
+            ->assertDontSee("3 message")
+            ->assertDontSee("4 message");
+
+        //assert user can see new messages
+        $request2
+            ->assertSee("5 message");
+    });
+
+
+    test('it redirects to chats route after clearing conversation', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+        $auth->sendMessageTo($receiver, message: '3');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '4');
+        $receiver->sendMessageTo($auth, message: '5');
+        $receiver->sendMessageTo($auth, message: '5');
+
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        $request
+            ->call("clearConversation")
+            ->assertStatus(200)
+            ->assertRedirect(route("wirechat"));
+    });
+
+    test('user can still open conversatoin after clearing it ', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1');
+        $auth->sendMessageTo($receiver, message: '2');
+        $auth->sendMessageTo($receiver, message: '3');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '4');
+        $receiver->sendMessageTo($auth, message: '5');
+        $receiver->sendMessageTo($auth, message: '5');
+
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        $request
+            ->call("clearConversation");
+
+        //assert 
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
+    });
+
+});
 
 describe('deleteMessage ForEveryone', function () {
 

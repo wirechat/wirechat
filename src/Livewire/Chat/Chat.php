@@ -264,6 +264,9 @@ class Chat extends Component
         #delete conversation 
         $this->conversation->clearFor(auth()->user());
 
+
+        $this->reset('loadedMessages','media', 'files', 'body');
+
         #redirect to chats page 
         $this->redirectRoute("wirechat");
     }
@@ -812,7 +815,6 @@ class Chat extends Component
             $participant =  $this->conversation->participant(auth()->user());
             $participant->conversation_deleted_at = null;
             $participant->save();
-            Log::info('value reset');
         }
     }
 
