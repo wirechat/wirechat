@@ -508,12 +508,13 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
      /**
      * Clear conversation history for this particiclar user
      * @param Model $participant The participant whose messages are to be deleted.
-     * @return void|null Returns null if the other participant cannot be found in a private conversation.
      */
     public function clearFor(Model $user)
     {
         // Ensure the participant belongs to the conversation
         abort_unless($user->belongsToConversation($this), 403, 'User Does not belong to conversation');
+
+        $participant = $this->participant($user);
 
         // Trigger deletion of all messages for the specified user
         $this->messages()?->each(function ($message) use ($user) {

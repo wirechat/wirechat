@@ -112,29 +112,7 @@ class Message extends Model
         return $this->attachment()->exists();
     }
 
-    /**
-     * Get all of the reads for the message.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    // public function reads(): HasMany
-    // {
-    //     return $this->hasMany(Read::class, 'message_id');
-    // }
-
-    // public function markAsRead()
-    // {
-
-    //     $authUser = auth()->user();
-    //     // Create a read record if it doesn't already exist
-    //     $this->reads()->firstOrCreate([
-    //         'readable_id' => $authUser->id,
-    //         'readable_type' => get_class($authUser),
-    //     ], [
-    //         'read_at' => now(),
-    //     ]);
-    // }
-    
+  
     /**
      * Check if the message has been read by a specific user.
      *
