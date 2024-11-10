@@ -24,11 +24,14 @@ Broadcast::channel('conversation.{conversationId}', function ($user, int $conver
   //  Log::info('Checkig conversation channel');
    $conversation= Conversation::find($conversationId);
 
+   if ($conversation) {
+    # code...
    if ($user->belongsToConversation($conversation)) {
     // Broadcast an event to the user when they join the channel
          // broadcast(new NotifyParticipantJob($user));
         return true; // Allow access to the channel
     }
+}
 
     return false; // Deny access to the channel
 

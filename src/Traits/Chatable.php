@@ -115,14 +115,14 @@ trait Chatable
             'conversation_id' => $existingConversation->id,
             'participantable_id' => $authenticatedUserId,
             'participantable_type' => $authenticatedUserType,
-            'role'=>ParticipantRole::OWNER
+            'role' => ParticipantRole::OWNER
         ]);
 
         Participant::create([
             'conversation_id' => $existingConversation->id,
             'participantable_id' => $participantId,
             'participantable_type' => $participantType,
-            'role'=>ParticipantRole::OWNER
+            'role' => ParticipantRole::OWNER
         ]);
 
 
@@ -148,13 +148,13 @@ trait Chatable
 
 
 
-     
-     /**
-      * Create group
-      */
-     public function createGroup(string $name,string $description=null,UploadedFile $photo=null):Conversation
-     {
-        
+
+    /**
+     * Create group
+     */
+    public function createGroup(string $name, string $description = null, UploadedFile $photo = null): Conversation
+    {
+
 
         //create rooom
         #Otherwise, create a new conversation
@@ -163,9 +163,9 @@ trait Chatable
         ]);
 
         #create room 
-       $group= $conversation->group()->create([
-            'name'=>$name,
-            'description'=>$description
+        $group = $conversation->group()->create([
+            'name' => $name,
+            'description' => $description
         ]);
 
 
@@ -173,32 +173,31 @@ trait Chatable
         if ($photo) {
             #save photo to disk 
             $path =  $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
-      
+
             #create attachment
             $group->cover()->create([
                 'file_path' => $path,
                 'file_name' => basename($path),
                 'original_name' => $photo->getClientOriginalName(),
                 'mime_type' => $photo->getMimeType(),
-                'url' =>  Storage::url($path) 
+                'url' =>  Storage::url($path)
             ]);
-      
-          }
+        }
 
         #create participant as owner
         Participant::create([
             'conversation_id' => $conversation->id,
             'participantable_id' => $this->id,
             'participantable_type' => get_class($this),
-            'role'=>ParticipantRole::OWNER
+            'role' => ParticipantRole::OWNER
         ]);
 
 
         return $conversation;
-     }
+    }
 
 
-     /**
+    /**
      * Exit a chat:group|channel by marking the user's participant record as exited.
      *
      * @param Conversation $conversation
@@ -206,16 +205,14 @@ trait Chatable
      */
     public function exitConversation(Conversation $conversation): bool
     {
-   
+
         #get participant
         $participant = $conversation->participant($this);
 
         return $participant ? $participant->exitConversation() : false;
-
-
     }
 
- 
+
 
 
 
@@ -229,7 +226,7 @@ trait Chatable
      * @return Message|null
      */
 
-   public  function sendMessageTo(Model $model, string $message)
+    public  function sendMessageTo(Model $model, string $message)
     {
         // Check if the recipient is a model (polymorphic) and not a conversation
         if (!$model instanceof Conversation) {
@@ -239,26 +236,19 @@ trait Chatable
             }
             // Create or get a private conversation with the recipient
             $conversation = $this->createConversationWith($model);
-        
         } else {
             // If it's a Conversation, use it directly
             $conversation = $model;
 
-   
-
             // Optionally, check that the current model is part of the conversation
             if (!$this->belongsToConversation($conversation)) {
-      
+
                 return null; // Exit if not a participant
             }
-
         }
 
         // Proceed to create the message if a valid conversation is found or created
         if ($conversation) {
-
-
-
 
             $createdMessage = Message::create([
                 'conversation_id' => $conversation->id,
@@ -269,7 +259,7 @@ trait Chatable
 
 
             // Update the conversation timestamp
-            $conversation->updated_at=now();
+            $conversation->updated_at = now();
             $conversation->save();
 
 
@@ -421,8 +411,32 @@ trait Chatable
     }
 
 
+    /**
+     * Check if the user has deleted a conversation.
+     *
+     * @param Conversation $conversation The conversation to check for deletion status.
+     * @param bool $checkDeletionExpired Optional. When true, checks if the deletion has "expired."
+     *     Deletion is considered expired if the conversation has been updated after it was deleted by the user.
+     *     Default is false, which checks only if the conversation has been deleted, regardless of updates.
+     *
+     * @return bool True if the conversation is deleted, false otherwise.
+     */
+    function hasDeletedConversation(Conversation $conversation, bool $checkDeletionExpired = false): bool
+    {
+        $participant = $conversation->participant($this);
+        return $participant?->hasDeletedConversation($checkDeletionExpired);
+    }
 
-       /**
+
+
+    function conversationDeletionExpired(Conversation $conversation) : bool {
+
+     return   $this->hasDeletedConversation($conversation,true);
+        
+    }
+
+
+    /**
      * Search for users who are eligible to participate in a conversation.
      * This method can be customized to include additional filtering logic, 
      * such as limiting results to friends, followers, or other specific groups.
@@ -435,40 +449,40 @@ trait Chatable
     {
         // Retrieve the fields that are searchable for users.
         $searchableFields = WireChat::searchableFields();
-    
+
         // Get the user model from the configuration, defaulting to App\Models\User.
         $userModel = app(config('wirechat.user_model', \App\Models\User::class));
-    
+
         // Return null if the search query is blank or the user model is unavailable.
         if (blank($query) || !$userModel) {
             return null;
         }
-    
+
         // Initialize cache for column checks.
         $columnCache = [];
-    
+
         return $userModel::where(function ($queryBuilder) use ($searchableFields, $query, &$columnCache) {
             // Get the table name for the user model.
             $table = $queryBuilder->getModel()->getTable();
-    
+
             // Iterate over searchable fields.
             foreach ($searchableFields as $field) {
                 // Check if column existence is already cached for the table.
                 if (!isset($columnCache[$table])) {
                     $columnCache[$table] = Schema::getColumnListing($table);
                 }
-    
+
                 // Only perform the search if the field exists in the table.
                 if (in_array($field, $columnCache[$table])) {
                     $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
                 }
             }
         })
-        //  ->where('id', '!=', $this->id) // Optionally exclude the current user.
-        ->limit(20)
-        ->get();
+            //  ->where('id', '!=', $this->id) // Optionally exclude the current user.
+            ->limit(20)
+            ->get();
     }
-    
+
 
 
 
@@ -499,12 +513,12 @@ trait Chatable
 
     /* Checking roles in conversation */
 
-     /**
+    /**
      * Check if the user is an admin in a specific conversation.
      */
     public function isAdminInGroup(Group $group): bool
     {
-        $conversation= $group->conversation;
+        $conversation = $group->conversation;
         // Check if participants are already loaded
         if ($conversation->relationLoaded('participants')) {
             // If loaded, simply check the existing collection
@@ -553,7 +567,7 @@ trait Chatable
      */
     public function isOwnerOfGroup(Group $group): bool
     {
-        $conversation =$group->conversation;
+        $conversation = $group->conversation;
 
         // Check if participants are already loaded
         if ($conversation->relationLoaded('participants')) {
@@ -574,7 +588,7 @@ trait Chatable
     }
 
 
-    
+
 
 
 
@@ -584,28 +598,24 @@ trait Chatable
      * You can override the following to determine if user can perform these actions
      */
 
-     /**
-      *  Check if user is allowd to send messages or interact with conversatoin
-      */
-     function canInteractWithConversation(Conversation $conversation):bool  {
+    /**
+     *  Check if user is allowd to send messages or interact with conversatoin
+     */
+    function canInteractWithConversation(Conversation $conversation): bool
+    {
 
         return $this->belongsToConversation($conversation);
-        
-     }
+    }
 
-     function canCreateNewGroups():bool  {
-
-        return true;
-        
-     }
-
-     function canCreateNewChats():bool  {
+    function canCreateNewGroups(): bool
+    {
 
         return true;
-        
-     }
+    }
 
+    function canCreateNewChats(): bool
+    {
 
- 
-
+        return true;
+    }
 }

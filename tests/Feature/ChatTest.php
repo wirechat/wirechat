@@ -1175,6 +1175,91 @@ describe('Deleting Conversation', function () {
         //assert user can see new messages
         $request->assertSee("5 message");
     });
+
+    test('it resets conversation_deleted_at value of auth-particiapant if new message is added to conversation by other user and user opens chat ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        $authParticipant = $conversation->participant($auth);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
+
+        ///load and delete conversation
+        Carbon::setTestNow(now()->addSeconds(4));
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->call("deleteConversation");
+
+
+        //assert not null
+        $authParticipant->refresh();
+        expect($authParticipant->conversation_deleted_at)->not->toBe(null);
+
+
+        //send message from receiver 
+        Carbon::setTestNow(now()->addSeconds(20));
+        $receiver->sendMessageTo($auth, message: '4 message');
+
+        //load again
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        //assert
+        $authParticipant->refresh();
+        expect($authParticipant->conversation_deleted_at)->toBe(null);
+         
+    })->only();
+
+
+    test('it also resets conversation_deleted_at value of auth-particiapant they send new message from Chat within component to conversation themselves ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        $authParticipant = $conversation->participant($auth);
+
+        //auth -> receiver
+        $auth->sendMessageTo($receiver, message: '1 message');
+        $auth->sendMessageTo($receiver, message: '2 message');
+
+        //receiver -> auth 
+        $receiver->sendMessageTo($auth, message: '3 message');
+        $receiver->sendMessageTo($auth, message: '4 message');
+
+        ///load and delete conversation
+        Carbon::setTestNow(now()->addSeconds(4));
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->call("deleteConversation");
+
+
+        //assert not null
+        $authParticipant->refresh();
+        expect($authParticipant->conversation_deleted_at)->not->toBe(null);
+
+
+        //load again
+        Carbon::setTestNow(now()->addSeconds(20));
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->set('body','hello')
+        ->call('sendMessage');
+
+        //assert
+        $authParticipant->refresh();
+        expect($authParticipant->conversation_deleted_at)->toBe(null);
+         
+    })->only();
+
+
+    
 });
 
 // describe('Clearing Conversation', function () {

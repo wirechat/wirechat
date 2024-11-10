@@ -76,7 +76,9 @@ class Chats extends Component
   {
     $additionalConversations = Conversation::query()
       ->tap(fn($query) => $this->applyEagerLoading($query))
-      ->whereHasParticipant(auth()->id(), get_class(auth()->user()))
+      ->whereHas('participants', function ($query){
+        $query->whereParticipantable(auth()->user());
+    })
       // Scope for participant check
       ->when(trim($this->search) != '', fn($query) => $this->applySearchConditions($query)) // Apply search
       ->when(trim($this->search) == '', fn($query) => $query->withoutBlanks()) // Without blanks when no search

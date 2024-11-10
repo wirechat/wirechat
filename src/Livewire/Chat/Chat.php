@@ -58,25 +58,25 @@ class Chat extends Component
 
     public function getListeners()
     {
-       // dd($this->conversation);
+        // dd($this->conversation);
         return [
             'refresh' => '$refresh'
-          //  'echo-private:conversation.' .$this->conversation->id. ',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
+            //  'echo-private:conversation.' .$this->conversation->id. ',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
         ];
     }
 
 
-    
+
     public function removeDeletedMessage($event)
     {
 
-       // dd([$event]);
+        // dd([$event]);
 
         //before appending message make sure it belong to this conversation 
         if ($event['message']['conversation_id'] == $this->conversation->id) {
 
             #scroll to bottom
-           // $this->dispatch('scroll-bottom');
+            // $this->dispatch('scroll-bottom');
 
             $newMessage = Collect($event['message']);
 
@@ -86,12 +86,12 @@ class Chat extends Component
                 return null;
             }
 
-           #remove message from collection
-         //   dd($newMessage);
+            #remove message from collection
+            //   dd($newMessage);
 
 
 
-            $messageDate =  Carbon::parse($newMessage['created_at']); 
+            $messageDate =  Carbon::parse($newMessage['created_at']);
             $groupKey = '';
             if ($messageDate->isToday()) {
                 $groupKey = 'Today';
@@ -102,26 +102,26 @@ class Chat extends Component
             } else {
                 $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
             }
-    
+
 
             # Remove the message from the correct group
             if ($this->loadedMessages->has($groupKey)) {
                 $this->loadedMessages[$groupKey] = $this->loadedMessages[$groupKey]->reject(function ($loadedMessage) use ($newMessage) {
                     return $loadedMessage->id == $newMessage['id'];
                 })->values();
-    
+
                 # Optionally, remove the group if it's empty
                 if ($this->loadedMessages[$groupKey]->isEmpty()) {
                     $this->loadedMessages->forget($groupKey)->values();
                 }
-    
+
                 //  $this->loadedMessages;
             }
 
             #refresh chatlist 
             #dispatch event 'refresh ' to chatlist 
             $this->dispatch('refresh')->to(Chats::class);
-            
+
             #broadcast 
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
         }
@@ -153,17 +153,17 @@ class Chat extends Component
             #refresh chatlist 
             #dispatch event 'refresh ' to chatlist 
             $this->dispatch('refresh')->to(Chats::class);
-            
+
             #broadcast 
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
         }
     }
 
-//   function testable($event)  {
+    //   function testable($event)  {
 
-//     dd($event);
-    
-//   }
+    //     dd($event);
+
+    //   }
 
 
     /** 
@@ -239,7 +239,7 @@ class Chat extends Component
         $newMessage->read_at = now();
         $newMessage->save();
     }
-   
+
 
     /**
      * Delete conversation  */
@@ -255,7 +255,7 @@ class Chat extends Component
     }
 
 
-     /**
+    /**
      * Delete conversation  */
     function clearConversation()
     {
@@ -274,11 +274,11 @@ class Chat extends Component
     {
         abort_unless(auth()->check(), 401);
 
-        $auth= auth()->user();
+        $auth = auth()->user();
 
-       //dd($auth->isOwnerOfConversation($this->conversation));
+        //dd($auth->isOwnerOfConversation($this->conversation));
         #make sure owner if group cannot be removed from chat
-        abort_if($auth->isOwnerOfConversation($this->conversation),403,"Owner cannot exit conversation");
+        abort_if($auth->isOwnerOfConversation($this->conversation), 403, "Owner cannot exit conversation");
 
         #delete conversation 
         $auth->exitConversation($this->conversation);
@@ -381,7 +381,7 @@ class Chat extends Component
                 $path =  $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
 
 
-                 // Determine the reply ID based on conditions
+                // Determine the reply ID based on conditions
                 $replyId = ($key === 0 && $this->replyMessage) ? $this->replyMessage->id : null;
 
                 // Create the message
@@ -400,7 +400,7 @@ class Chat extends Component
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
                     'mime_type' => $attachment->getMimeType(),
-                    'url' => Storage::url($path) 
+                    'url' => Storage::url($path)
                 ]);
 
 
@@ -468,6 +468,9 @@ class Chat extends Component
 
         #remove reply just incase it is present 
         $this->removeReply();
+
+        #reset expred conversation deletion
+        $this->removeExpiredConversationDeletion();
     }
 
     /**
@@ -524,13 +527,12 @@ class Chat extends Component
         $this->dispatch('refresh')->to(Chats::class);
 
         try {
-            MessageDeleted::dispatch($message,$this->conversation);
-
+            MessageDeleted::dispatch($message, $this->conversation);
         } catch (\Throwable $th) {
-            Log::error($th->getMessage()) ;
+            Log::error($th->getMessage());
         }
-       //event(new MessageDeleted($message,$this->conversation));
-     // broadcast(new MessageDeleted($message,$this->conversation))->toOthers();
+        //event(new MessageDeleted($message,$this->conversation));
+        // broadcast(new MessageDeleted($message,$this->conversation))->toOthers();
         //if message has reply then only soft delete it 
         if ($message->hasReply()) {
 
@@ -541,7 +543,6 @@ class Chat extends Component
             #else Force delete message from database
             $message->forceDelete();
         }
-
     }
 
 
@@ -615,16 +616,16 @@ class Chat extends Component
         // todo create a job to broadcast multiple messages
         try {
 
-       // event(new BroadcastMessageEvent($message,$this->conversation));
+            // event(new BroadcastMessageEvent($message,$this->conversation));
 
 
             //!remove the receiver from the messageCreated and add it to the job instead 
             //!also do not forget to exlude auth user or message owner from particpants  
-            BroadcastMessage::dispatch($message,$this->conversation)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
-            NotifyParticipants::dispatch($this->conversation,$message);
+            BroadcastMessage::dispatch($message, $this->conversation)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
+            NotifyParticipants::dispatch($this->conversation, $message);
         } catch (\Throwable $th) {
-     
-            Log::error($th->getMessage()) ;
+
+            Log::error($th->getMessage());
         }
     }
 
@@ -760,11 +761,11 @@ class Chat extends Component
 
         HTML;
     }
- 
 
-    
 
- 
+
+
+
 
     public function mount()
     {
@@ -774,7 +775,8 @@ class Chat extends Component
 
         //assign converstion
 
-      //  info(['conversation count before getting' => Conversation::withoutGlobalScopes()->count()]);
+        //  info(['conversation count before getting' => Conversation::withoutGlobalScopes()->count()]);
+
 
 
         $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])->where('id', $this->conversation)->first();
@@ -792,23 +794,26 @@ class Chat extends Component
 
         $this->receiver = $this->conversation->getReceiver();
 
-        $this->conversationId= $this->conversation->id;
+        $this->conversationId = $this->conversation->id;
 
-        //$this->authMessageBodyColor = $this->getAuthMessageBodyColor();
 
-        // if($this->conversation->id==3){
 
-        //    for ($i=0; $i < 300; $i++) { 
-
-        //     sleep(rand(1,2));
-        //     $this->body= fake()->sentence();
-        //     $this->sendMessage();
-        //     # code...
-        //    }
-        // }
+        $this->removeExpiredConversationDeletion();
 
 
         $this->loadMessages();
+    }
+
+    //If conversation deletion expired then set the participant conversation_deleted_at to NULL
+    private function removeExpiredConversationDeletion(): void
+    {
+
+        if (auth()->user()->conversationDeletionExpired($this->conversation)) {
+            $participant =  $this->conversation->participant(auth()->user());
+            $participant->conversation_deleted_at = null;
+            $participant->save();
+            Log::info('value reset');
+        }
     }
 
     public function render()
