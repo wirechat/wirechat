@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('participantable_id');
             $table->string('participantable_type');
             $table->timestamp('exited_at')->nullable(); // Track when a participant exits
+            $table->timestamp('conversation_cleared_at')->nullable(); // Track when a participant clears
             $table->timestamp('conversation_deleted_at')->nullable(); // Track when a participant exits
             $table->timestamps();
         });

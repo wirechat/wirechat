@@ -27,9 +27,6 @@ return new class extends Migration
             $table->unsignedBigInteger('reply_id')->nullable();
             $table->foreign('reply_id')->references('id')->on((new Message())->getTable())->nullOnDelete();
     
-            $table->unsignedBigInteger('attachment_id')->nullable();
-            $table->foreign('attachment_id')->references('id')->on((new Attachment())->getTable())->nullOnDelete();
-    
             $table->text('body')->nullable();
     
             $table->softDeletes();

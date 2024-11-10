@@ -29,8 +29,7 @@ class MessageFactory extends Factory
             'sendable_id' => $user->id,
             'sendable_type' => $user->getMorphClass(), // Get the morph class of the user
             'body' => $this->faker->text, // Add a body for completeness
-            'reply_id' => null,
-            'attachment_id' => null,
+            'reply_id' => null
         ];
     }
 

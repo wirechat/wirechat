@@ -37,10 +37,10 @@ class Attachment extends Model
 }
 
 
-    public function message()
-    {
-        return $this->hasOne(Message::class);
-    }
+    // public function message()
+    // {
+    //     return $this->hasOne(Message::class);
+    // }
 
     public function getCleanMimeTypeAttribute()
     {

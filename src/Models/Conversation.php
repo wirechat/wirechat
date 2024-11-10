@@ -505,22 +505,33 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
     }
 
 
-     /**
-     * Clear conversation history for this particiclar user
-     * @param Model $participant The participant whose messages are to be deleted.
-     */
+    
     public function clearFor(Model $user)
     {
         // Ensure the participant belongs to the conversation
-        abort_unless($user->belongsToConversation($this), 403, 'User Does not belong to conversation');
-
-        $participant = $this->participant($user);
-
-        // Trigger deletion of all messages for the specified user
-        $this->messages()?->each(function ($message) use ($user) {
-             $message->deleteFor($user);
-        });
+        abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
+    
+        // Update the participant's `conversation_cleared_at` to the current timestamp
+        $this->participant($user)->update(['conversation_cleared_at' => now()]);
     }
+    
+
+    //  /**
+    //  * Clear conversation history for this particiclar user
+    //  * @param Model $participant The participant whose messages are to be deleted.
+    //  */
+    // public function clearFor(Model $user)
+    // {
+    //     // Ensure the participant belongs to the conversation
+    //     abort_unless($user->belongsToConversation($this), 403, 'User Does not belong to conversation');
+
+    //     $participant = $this->participant($user);
+
+    //     // Trigger deletion of all messages for the specified user
+    //     $this->messages()?->each(function ($message) use ($user) {
+    //          $message->deleteFor($user);
+    //     });
+    // }
 
     /**
      * Check if the conversation is owned by the user themselves

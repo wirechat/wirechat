@@ -589,10 +589,6 @@ trait Chatable
 
 
 
-
-
-
-
     /**
      * Actions Permissions
      * You can override the following to determine if user can perform these actions
@@ -607,7 +603,7 @@ trait Chatable
         return $this->belongsToConversation($conversation);
     }
 
-    function canCreateNewGroups(): bool
+    static function canCreateNewGroups(): bool
     {
 
         return true;

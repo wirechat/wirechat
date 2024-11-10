@@ -18,7 +18,8 @@ class Participant extends Model
         'participantable_type',
         'role',
         'exited_at',
-        'conversation_deleted_at'
+        'conversation_deleted_at',
+        'conversation_cleared_at'
     ];
 
 

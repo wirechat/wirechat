@@ -63,18 +63,32 @@ class Message extends Model
     {
         parent::boot();
 
-        //Add scope if authenticated
+      // Add scope if authenticated
         static::addGlobalScope('excludeDeleted', function (Builder $builder) {
-            if (auth()->check()) {
 
-            return    $builder->whereDoesntHave('actions', function ($q) {
-                return    $q->where('actor_id', auth()->id())
-                        ->where('actor_type', get_class(auth()->user()))
-                        ->where('type', Actions::DELETE);
+            $messagesTableName = (new  Message() )->getTable();
+            $participantTableName = (new Participant())->getTable();
+
+            if (auth()->check()) {
+                $user = auth()->user();
+
+                $builder->whereDoesntHave('actions', function ($q) use ($user) {
+                    $q->where('actor_id', $user->id)
+                    ->where('actor_type', get_class($user))
+                    ->where('type', Actions::DELETE);
+                })
+                ->where(function ($query) use ($user,$messagesTableName,$participantTableName) {
+                    // Filter messages based on `conversation_deleted_at` in the participants table
+                    $query->whereHas('conversation.participants', function ($q) use ($user,$messagesTableName,$participantTableName) {
+                        $q->where('participantable_id', $user->id)
+                        ->where('participantable_type', get_class($user))
+                        ->where(function ($q)  use ($messagesTableName,$participantTableName) {
+                            $q->whereNull('conversation_cleared_at') // Include all messages if not cleared
+                                ->orWhereColumn("$messagesTableName.created_at", '>', "$participantTableName.conversation_cleared_at");
+                        });
+                    });
                 });
             }
-
-            return $builder;
         });
 
         // listen to deleted

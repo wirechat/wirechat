@@ -459,7 +459,7 @@ describe('deleting for', function () {
 
 describe('ClearFor()', function () {
 
-    it('load all conversations if not deleted', function () {
+    it('loads all conversations if not cleared', function () {
         $auth = User::factory()->create();
 
         //Authenticate
@@ -479,7 +479,6 @@ describe('ClearFor()', function () {
     });
 
 
-
     it('aborts if user does not belong to conversation when deletingForMe', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -490,6 +489,7 @@ describe('ClearFor()', function () {
         $this->actingAs($auth);
 
         //delete messages
+        Carbon::setTestNow(now()->addSeconds(5));
         $conversation->clearFor(User::factory()->create());
 
         //assert new count
@@ -516,6 +516,7 @@ describe('ClearFor()', function () {
         $this->actingAs($auth);
 
         //Delete Conversation
+        Carbon::setTestNow(now()->addSeconds(5));
         $conversation3->clearFor($auth);
 
         //conversations
@@ -555,9 +556,10 @@ describe('ClearFor()', function () {
         expect( $conversation->messages()->count())->toBe(4);
 
         //Delete Conversation
+        Carbon::setTestNow(now()->addSeconds(10));
         $conversation->clearFor($auth);
 
-
+        $this->actingAs($auth);
         expect( $conversation->messages()->count())->toBe(0);
 
     });
@@ -586,15 +588,18 @@ describe('ClearFor()', function () {
         $receiver->sendMessageTo($auth, message: '4 message');
 
         //login so the messages scope will be applied
+        Carbon::setTestNow(now()->addSeconds(10));
         $this->actingAs($auth);
         expect( $conversation->messages()->count())->toBe(4);
 
         //Delete Conversation
+        Carbon::setTestNow(now()->addSeconds(20));
         $conversation->clearFor($auth);
 
 
         Auth::logout();
         //login as other user
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->actingAs($receiver);
         
         expect( $conversation->messages()->count())->toBe(4);

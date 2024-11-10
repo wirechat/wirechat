@@ -1130,12 +1130,14 @@ describe('Deleting Conversation', function () {
 
         //begin
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+       
+        Carbon::setTestNow(now()->addMinute(4));
         $request->call("deleteConversation");
 
 
         Auth::logout();
         //send new message in order to gain access to converstion
-       // Carbon::setTestNow(now()->addMinute(20));
+       Carbon::setTestNow(now()->addMinute(20));
         $auth->sendMessageTo($receiver, message: '5 message');
 
         //open conversation again
@@ -1151,7 +1153,7 @@ describe('Deleting Conversation', function () {
         //assert user can see new messages
         $request2
             ->assertSee("5 message");
-    });
+    }) ;
 
     test('receiver in the conversation should be able to see all messages even when auth/other user deletes conversation', function () {
 
@@ -1336,7 +1338,7 @@ describe('Clearing Conversation', function () {
 
         Auth::logout();
         //send new message in order to gain access to converstion
-       // Carbon::setTestNow(now()->addMinute(20));
+       Carbon::setTestNow(now()->addMinute(20));
         $auth->sendMessageTo($receiver, message: '5 message');
 
         //open conversation again
