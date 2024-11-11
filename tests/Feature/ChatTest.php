@@ -1638,8 +1638,8 @@ describe('deleteMessage ForEveryone', function () {
            ->call("deleteForEveryone", $authMessage->id);
 
 
-        Event::assertDispatched(MessageDeleted::class, function ($event) use ($conversation,$authMessage) {
-            return $event->conversation->id == $conversation->id && $event->message->id === $authMessage->id;
+        Event::assertDispatched(MessageDeleted::class, function ($event) use ($authMessage) {
+            return  $event->message->id === $authMessage->id;
         });
 
 

@@ -47,8 +47,10 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'message_id'=> $this->message->id,
-            'conversation_id'=> $this->message->conversation_id,
+            'message'=>[
+                 'id'=> $this->message->id,
+                 'conversation_id'=> $this->message->conversation_id
+            ]
 
         ];
     }

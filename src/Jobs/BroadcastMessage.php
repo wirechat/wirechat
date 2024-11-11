@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\NotifyParticipant;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
@@ -36,7 +37,7 @@ class BroadcastMessage implements ShouldQueue
     public function __construct( public Message $message)
     {
         //  
-        $this->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
+        $this->onQueue(WireChat::messagesQueue());
         $this->auth = auth()->user();
 
         #Get table

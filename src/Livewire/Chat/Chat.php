@@ -20,6 +20,7 @@ use Livewire\WithPagination;
 use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipants;
@@ -71,19 +72,13 @@ class Chat extends Component
     }
 
 
-
+    /**
+     * Method to remove message from group key
+    */
     public function removeDeletedMessage($event)
     {
-
-        // dd([$event]);
-
         //before appending message make sure it belong to this conversation 
         if ($event['message']['conversation_id'] == $this->conversation->id) {
-
-            #scroll to bottom
-            // $this->dispatch('scroll-bottom');
-
-            $newMessage = Collect($event['message']);
 
             //Make sure message does not belong to auth
             // Make sure message does not belong to auth
@@ -91,56 +86,39 @@ class Chat extends Component
                 return null;
             }
 
-            #remove message from collection
-            //   dd($newMessage);
+            // The $messageId is the ID of the message you want to remove
+            $messageId = $event['message']['id'];
 
-
-
-            $messageDate =  Carbon::parse($newMessage['created_at']);
-            $groupKey = '';
-            if ($messageDate->isToday()) {
-                $groupKey = 'Today';
-            } elseif ($messageDate->isYesterday()) {
-                $groupKey = 'Yesterday';
-            } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
-                $groupKey = $messageDate->format('l'); // Day name
-            } else {
-                $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
-            }
-
-
-            # Remove the message from the correct group
-            if ($this->loadedMessages->has($groupKey)) {
-                $this->loadedMessages[$groupKey] = $this->loadedMessages[$groupKey]->reject(function ($loadedMessage) use ($newMessage) {
-                    return $loadedMessage->id == $newMessage['id'];
+            foreach ($this->loadedMessages as $groupKey => $messages) {
+                // Remove the message from the specific group
+                $this->loadedMessages[$groupKey] = $messages->reject(function ($loadedMessage) use ($messageId) {
+                    return $loadedMessage->id == $messageId;
                 })->values();
 
-                # Optionally, remove the group if it's empty
+                // Optionally, remove the group if it's empty
                 if ($this->loadedMessages[$groupKey]->isEmpty()) {
-                    $this->loadedMessages->forget($groupKey)->values();
+                    $this->loadedMessages->forget($groupKey);
                 }
-
-                //  $this->loadedMessages;
             }
 
-            #refresh chatlist 
-            #dispatch event 'refresh ' to chatlist 
+            // Dispatch refresh event
             $this->dispatch('refresh')->to(Chats::class);
 
-            #broadcast 
-            // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
+
         }
     }
+
+
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
         //before appending message make sure it belong to this conversation 
-        if ($event['conversation_id'] == $this->conversation->id) {
+        if ($event['message']['conversation_id'] == $this->conversation->id) {
 
             #scroll to bottom
             $this->dispatch('scroll-bottom');
 
-            $newMessage = Message::find($event['message_id']);
+            $newMessage = Message::find($event['message']['id']);
 
             //Make sure message does not belong to auth
             // Make sure message does not belong to auth
@@ -294,18 +272,7 @@ class Chat extends Component
         $this->redirectRoute("wirechat");
     }
 
-    /**
-     * clearChat  */
-    // function clearChat()
-    // {
-    //     abort_unless(auth()->check(),401);
-
-    //     #delete conversation 
-    //     $this->conversation->clearFor(auth()->user());
-
-    //     #clear the blade of chats
-    //     $this->reset('loadedMessages');
-    // }
+   
 
     protected function rateLimit()
     {
@@ -321,7 +288,7 @@ class Chat extends Component
 
     /**
      * Send a message  */
-    function sendMessage()
+    public function sendMessage()
     {
 
 
@@ -628,7 +595,7 @@ class Chat extends Component
 
             //!remove the receiver from the messageCreated and add it to the job instead 
             //!also do not forget to exlude auth user or message owner from particpants  
-            BroadcastMessage::dispatch($message)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
+            BroadcastMessage::dispatch($message)->onQueue(WireChat::messagesQueue());
             NotifyParticipants::dispatch($this->conversation, $message);
         } catch (\Throwable $th) {
 
@@ -809,16 +776,15 @@ class Chat extends Component
 
        // $expired = $authParticipant->conversationDeletionExpired();
     
-        Log::info([
-            'conversation_updated_at' => $this->conversation->updated_at,
-            'participant_deleted_at' => $this->authParticipant->conversation_deleted_at,
-            'deletion_expired' => true,
-        ]);
+        // Log::info([
+        //     'conversation_updated_at' => $this->conversation->updated_at,
+        //     'participant_deleted_at' => $this->authParticipant->conversation_deleted_at,
+        //     'deletion_expired' => true,
+        // ]);
     
-        // if ($expired) {
+        // // if ($expired) {
             $this->authParticipant->update(['conversation_deleted_at'=>null]);
     
-            Log::info('Conversation deletion timestamp reset to null due to expiration');
         // }
     }
 
@@ -828,6 +794,7 @@ class Chat extends Component
 
     public function render()
     {
+       // dd($this->loadedMessages->flatten());
 
 
         return view('wirechat::livewire.chat.chat');

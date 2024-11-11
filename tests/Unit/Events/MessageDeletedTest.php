@@ -2,11 +2,12 @@
 
 use Illuminate\Support\Facades\Event;
 use Namu\WireChat\Events\MessageCreated;
+use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
 
-describe("broadcastWith() Data verifiction ", function () {
+describe(" Data verifiction ", function () {
 
     test('message id  is present', function () {
 
@@ -17,8 +18,8 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
+        MessageDeleted::dispatch($message);
+        Event::assertDispatched(MessageDeleted::class, function ($event) use ($message) {
 
             $broadcastMessage = (array) $event->broadcastWith();
             expect($broadcastMessage['message']['id'])->toBe($message->id);
@@ -36,13 +37,15 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
+        MessageDeleted::dispatch($message);
+        Event::assertDispatched(MessageDeleted::class, function ($event) use ($message) {
             $broadcastMessage = (array) $event->broadcastWith();
+
             expect($broadcastMessage['message']['conversation_id'])->toBe($message->conversation_id);
             return $this;
         });
     });
+
 
 
 
@@ -54,8 +57,8 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
+        MessageDeleted::dispatch($message);
+        Event::assertDispatched(MessageDeleted::class, function ($event) use ($message) {
             $broadcastOn =  $event->broadcastOn();
             expect($broadcastOn[0]->name)->toBe("private-conversation.".$message->conversation_id);
             return $this;
@@ -71,8 +74,8 @@ describe("broadcastWith() Data verifiction ", function () {
 
         $message = Message::factory()->sender($auth)->create();
 
-        broadcast(new MessageCreated($message))->toOthers();
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
+        MessageDeleted::dispatch($message);
+        Event::assertDispatched(MessageDeleted::class, function ($event) use ($message) {
             $broadcastOn =  $event->broadcastOn();
             expect(count($broadcastOn))->toBe(1);
             return $this;

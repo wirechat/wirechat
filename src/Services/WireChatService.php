@@ -124,12 +124,33 @@ class WireChatService
         return (string) config('wirechat.attachments.storage_disk', 'public');
     }
 
+
      /**
      * Get wirechat storage folder 
      */
     public static function storageFolder(): string
     {
         return (string) config('wirechat.attachments.storage_folder', 'attachments');
+    }
+
+
+
+
+    /**
+     * Get wirechat storage disk 
+     */
+    public static function messagesQueue(): string
+    {
+        return (string) config('wirechat.broadcasting.messages_queue', 'default');
+    }
+
+
+     /**
+     * Get wirechat storage disk 
+     */
+    public static function notificationsQueue(): string
+    {
+        return (string) config('wirechat.broadcasting.message_notification_queue', 'default');
     }
 
 }
