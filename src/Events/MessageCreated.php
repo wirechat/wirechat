@@ -22,14 +22,9 @@ class MessageCreated implements ShouldBroadcast
     public $message;
     // public $receiver;
 
-    public function __construct(Message $message,public Conversation $conversation)
+    public function __construct(Message $message)
     {
-        $this->message = $message;
-        // $this->receiver = $receiver;
-       // Log::info(["$receiver->id"=>$receiver->id]);
-
-        //Exclude the current user from receiving the broadcast.
-        //$this->broadcastToEveryone();
+        $this->message = $message->load([]);
     }
 
        /**
@@ -41,15 +36,9 @@ class MessageCreated implements ShouldBroadcast
     {
         return [
             new PrivateChannel('conversation.'.$this->message->conversation_id)
-            // new PrivateChannel('wirechat')
         ];
     }
-    
-    // public function broadcastOn(): Channel
-    // {
 
-    //      return   new Channel('test');
-    // }
     /**
      * Get the data to broadcast.
      *
@@ -58,8 +47,9 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'message'=> $this->message
-            // 'receiver_id'=>$this->receiver?->id
+            'message_id'=> $this->message->id,
+            'conversation_id'=> $this->message->conversation_id,
+
         ];
     }
     }

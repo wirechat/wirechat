@@ -108,7 +108,7 @@
 @endassets
 
 <div x-data="{
-
+    
     conversationElement: document.getElementById('conversation'),
     initializing: true,
     'loadEmojiPicker':function(){

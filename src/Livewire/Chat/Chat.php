@@ -134,14 +134,13 @@ class Chat extends Component
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
-
         //before appending message make sure it belong to this conversation 
-        if ($event['message']['conversation_id'] == $this->conversation->id) {
+        if ($event['conversation_id'] == $this->conversation->id) {
 
             #scroll to bottom
             $this->dispatch('scroll-bottom');
 
-            $newMessage = Message::find($event['message']['id']);
+            $newMessage = Message::find($event['message_id']);
 
             //Make sure message does not belong to auth
             // Make sure message does not belong to auth
@@ -629,7 +628,7 @@ class Chat extends Component
 
             //!remove the receiver from the messageCreated and add it to the job instead 
             //!also do not forget to exlude auth user or message owner from particpants  
-            BroadcastMessage::dispatch($message, $this->conversation)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
+            BroadcastMessage::dispatch($message)->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
             NotifyParticipants::dispatch($this->conversation, $message);
         } catch (\Throwable $th) {
 

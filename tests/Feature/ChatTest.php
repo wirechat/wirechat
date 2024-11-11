@@ -355,8 +355,8 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Queue::assertPushed(BroadcastMessage::class, function ($event) use ($conversation,$message) {
-            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
+        Queue::assertPushed(BroadcastMessage::class, function ($event) use ($message) {
+            return $event->message->id === $message->id;
         });
     });
 
@@ -377,8 +377,8 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$conversation) {
-            return $event->message->id === $message->id && $event->conversation->id === $conversation->id;
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,) {
+            return $event->message->id === $message->id;
         });
     });
 
@@ -670,7 +670,7 @@ describe('Sending messages ', function () {
         $message = Message::first();
 
         Queue::assertPushed(BroadcastMessage::class, function ($event) use ($conversation,$message) {
-            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
+            return  $event->message->id === $message->id;
         });
     });
 
@@ -690,8 +690,8 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,$conversation) {
-            return $event->message->id === $message->id && $event->conversation->id === $conversation->id;
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,) {
+            return $event->message->id === $message->id;
 
         });
     });

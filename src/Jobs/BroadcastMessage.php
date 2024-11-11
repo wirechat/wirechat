@@ -33,13 +33,11 @@ class BroadcastMessage implements ShouldQueue
 
 
 
-    public function __construct( public Message $message,public Conversation $conversation)
+    public function __construct( public Message $message)
     {
         //  
         $this->onQueue(config('wirechat.broadcasting.messages_queue', 'default'));
         $this->auth = auth()->user();
-
-        Log::info('BroadcastMessage');
 
         #Get table
         $this->messagesTable = (new Message())->getTable();
@@ -52,9 +50,7 @@ class BroadcastMessage implements ShouldQueue
     public function handle(): void
     {
         //Broadcast to the conversation channel for all participants
-        event(new MessageCreated($this->message,$this->conversation));
-
-
+        event(new MessageCreated($this->message));
 
         // $participants = $this->conversation->participants()
         // ->with('participantable')
