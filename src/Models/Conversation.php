@@ -3,6 +3,7 @@
 namespace Namu\WireChat\Models;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,7 +29,8 @@ class Conversation extends Model
     ];
 
     protected $casts = [
-        'type' => ConversationType::class
+        'type' => ConversationType::class,
+        'updated_at'=>'datetime'
     ];
 
 
@@ -43,7 +45,7 @@ class Conversation extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new WithoutDeletedScope());
+        // static::addGlobalScope(new WithoutDeletedScope());
         //DELETED event
         static::deleted(function ($conversation) {
 
@@ -187,6 +189,13 @@ class Conversation extends Model
         return $this->hasOne(Message::class)->latestOfMany();
     }
 
+
+    /**
+     * ------------------------
+     * SCOPES
+     */
+
+
     /**
      * Scope a query to only include conversation where user  cleraed all messsages users.
      */
@@ -205,63 +214,80 @@ class Conversation extends Model
                 });
             });
         }
-
     }
 
-   /**
- * Exclude blank conversations that have no messages at all,
- * including those that might be "soft deleted" by the user.
- */
-public function scopeWithoutBlanks(Builder $builder): void
-{
-    $user = auth()->user(); // Get the authenticated user
+    /**
+     * Exclude blank conversations that have no messages at all,
+     * including those that might be "soft deleted" by the user.
+     */
+    public function scopeWithoutBlanks(Builder $builder): void
+    {
+        $user = auth()->user(); // Get the authenticated user
 
-    if ($user) {
-        
-        $builder->whereHas('messages', function ($q) use ($user) {
-            $q->withoutGlobalScopes()->whereDoesntHave('actions', function ($q) use ($user) {
-                $q->where('actor_id','!=', $user->id)
-                    ->where('actor_type', get_class($user)) // Safe since $user is authenticated
-                    ->where('type', Actions::DELETE);
+        if ($user) {
+
+            $builder->whereHas('messages', function ($q) use ($user) {
+                $q->withoutGlobalScopes()->whereDoesntHave('actions', function ($q) use ($user) {
+                    $q->where('actor_id', '!=', $user->id)
+                        ->where('actor_type', get_class($user)) // Safe since $user is authenticated
+                        ->where('type', Actions::DELETE);
+                });
             });
+        }
+    }
+
+
+    public function scopeWhereHasParticipant(Builder $query, $userId, $userType): void
+    {
+        $query->whereHas('participants', function ($query) use ($userId, $userType) {
+            $query->where('participantable_id', $userId)
+                ->where('participantable_type', $userType);
         });
     }
-}
-
-
-public function scopeWhereHasParticipant(Builder $query, $userId, $userType):void
-{
-     $query->whereHas('participants', function ($query) use ($userId, $userType) {
-        $query->where('participantable_id', $userId)
-              ->where('participantable_type', $userType);
-    });
-}
 
 
 
     public function scopeWithoutDeleted(Builder $builder)
     {
+
+        // Dynamically get the parent model (i.e., the user)
         $user = auth()->user();
 
-         // Dynamically get the parent model (i.e., the user)
-         $user = auth()->user();
+        if ($user) {
+            // Get the table name for conversations dynamically to avoid hardcoding.
+            $conversationsTableName = (new Conversation())->getTable();
 
-         if ($user) {
-             // Get the table name for conversations dynamically to avoid hardcoding.
-             $conversationsTableName = (new Conversation())->getTable();
- 
-             // Apply the "without deleted conversations" scope
-             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
-                 $query->where('participantable_id', $user->id)
-                     ->whereRaw("
-                         (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at)
-                     ");
-             });
-             
-         }
-       
+            // Apply the "without deleted conversations" scope
+            $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
+                $query->where('participantable_id', $user->id)
+                    ->whereRaw("
+                        (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at)
+                    ");
+            });
+        }
     }
 
+
+
+    // public function scopeWithDeleted(Builder $builder)
+    // {
+
+    //     // Dynamically get the parent model (i.e., the user)
+    //     $user = auth()->user();
+
+    //     if ($user) {
+    //         // Get the table name for conversations dynamically to avoid hardcoding.
+    //         $conversationsTableName = (new Conversation())->getTable();
+
+    //         // Apply the "without deleted conversations" scope
+    //         $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
+    //             $query->where('participantable_id', $user->id)
+    //                 ->whereRaw("
+    //                     (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at)
+    //                 ");
+    //         });
+    //     }
+    // }
 
     public function getReceiver()
     {
@@ -357,8 +383,6 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
         return $this->getUnreadCountFor($user) <= 0;
     }
 
-
-
     /**
      * Retrieve unread messages in this conversation for a specific user.
      *
@@ -376,34 +400,6 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
             ->where('created_at', '>', $lastReadAt)
             ->get();
     }
-
-
-    // /**
-    //  * Mark all messages in the conversation as read by the authenticated user.
-    //  *
-    //  * @return void
-    //  */
-    // public function markAsRead()
-    // {
-    //     abort_unless(auth()->check(), 401);
-    //     $authUserId = auth()->id();
-
-    //     // Get all messages in the conversation that are not already read by the authenticated user
-    //     $messages = $this->messages()->whereDoesntHave('reads', function ($query) use ($authUserId) {
-    //         $query->where('readable_id', $authUserId)
-    //             ->where('readable_type', get_class(auth()->user()));
-    //     })->get();
-
-    //     foreach ($messages as $message) {
-    //         // Create a read record if it doesn't already exist
-    //         $message->reads()->firstOrCreate([
-    //             'readable_id' => $authUserId,
-    //             'readable_type' => get_class(auth()->user())
-    //         ], [
-    //             'read_at' => now(),
-    //         ]);
-    //     }
-    // }
 
 
     /**
@@ -467,13 +463,13 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
         // Ensure the participant belongs to the conversation
         abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
 
-      //Clear conversation history for this user 
-       $this->clearFor($user);
+        //Clear conversation history for this user 
+        $this->clearFor($user);
 
-       //Mark this participant's conversation_deleted_at
-       $participant= $this->participant($user);
-       $participant->conversation_deleted_at= now();
-       $participant->save();
+        //Mark this participant's conversation_deleted_at
+        $participant = $this->participant($user);
+        $participant->conversation_deleted_at = Carbon::now();
+        $participant->save();
 
         // Check if the conversation is private
         if ($this->isPrivate()) {
@@ -487,7 +483,7 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
                 $otherParticipant = $this->participants
                     ->where('participantable_id', '!=', $user->id)
                     ->where('participantable_type', get_class($user))
-                    ->first()?->participantable;
+                    ->first();
 
                 // Return null if the other participant cannot be found
                 if (!$otherParticipant) {
@@ -495,43 +491,34 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
                 }
 
                 // If both participants have deleted all their messages, delete the conversation permanently
-                if ($this->hasBeenDeletedBy($user) && $this->hasBeenDeletedBy($otherParticipant)) {
+                if ($participant->hasDeletedConversation()&& $otherParticipant->hasDeletedConversation()) {
                     // dd("deleted");
                     $this->forceDelete();
                 }
             }
         }
+    }
 
+ /**
+     * Check if a given user has deleted all messages in the conversation using the deleteForMe
+     */
+    public function hasBeenDeletedBy(Model $user): bool
+    {
+        $participant = $this->participant($user);
+
+       return $participant->hasDeletedConversation(true);
+      
     }
 
 
-    
     public function clearFor(Model $user)
     {
         // Ensure the participant belongs to the conversation
         abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
-    
+
         // Update the participant's `conversation_cleared_at` to the current timestamp
         $this->participant($user)->update(['conversation_cleared_at' => now()]);
     }
-    
-
-    //  /**
-    //  * Clear conversation history for this particiclar user
-    //  * @param Model $participant The participant whose messages are to be deleted.
-    //  */
-    // public function clearFor(Model $user)
-    // {
-    //     // Ensure the participant belongs to the conversation
-    //     abort_unless($user->belongsToConversation($this), 403, 'User Does not belong to conversation');
-
-    //     $participant = $this->participant($user);
-
-    //     // Trigger deletion of all messages for the specified user
-    //     $this->messages()?->each(function ($message) use ($user) {
-    //          $message->deleteFor($user);
-    //     });
-    // }
 
     /**
      * Check if the conversation is owned by the user themselves
@@ -563,23 +550,7 @@ public function scopeWhereHasParticipant(Builder $query, $userId, $userType):voi
     }
 
 
-    /**
-     * Check if a given user has deleted all messages in the conversation using the deleteForMe
-     */
-    public function hasBeenDeletedBy(Model $user): bool
-    {
-        return !$this->messages()
-            // Remove global scope for "excludeDeleted"
-            ->withoutGlobalScope('excludeDeleted')
-            ->whereDoesntHave('actions', function ($q) use ($user) {
-                $q->where('actor_id', $user->id)
-                    ->where('actor_type', get_class($user))
-                    ->where('type', Actions::DELETE);
-            })
-            ->where('conversation_id', $this->id)
-            ->exists();
-    }
-
+   
 
 
     /**

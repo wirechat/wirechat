@@ -25,8 +25,9 @@ class Participant extends Model
 
     protected $casts = [
         'role' => ParticipantRole::class,
-        'exited_at' => 'date',
-        'conversation_deleted_at' => 'date'
+        'exited_at' => 'datetime',
+        'conversation_deleted_at' => 'datetime',
+        'conversation_cleared_at'=>'datetime'
     ];
 
 
@@ -171,19 +172,23 @@ class Participant extends Model
      */
     public function hasDeletedConversation(bool $checkDeletionExpired = false): bool
     {
+        // Check if `conversation_deleted_at` is null, which means no deletion
         if ($this->conversation_deleted_at === null) {
-            return false; // Conversation is not deleted
+            return false;
         }
-
+    
+        // Refresh conversation instance to ensure `updated_at` is current
+        $conversation = $this->conversation;
+    
         if ($checkDeletionExpired) {
-            // Check if the deletion has expired (conversation updated after deletion)
-            return $this->conversation_deleted_at < $this->conversation?->updated_at;
-        } else {
-            // Check if the conversation is deleted and still valid (no updates after deletion)
-            return $this->conversation_deleted_at > $this->conversation?->updated_at;
+            // If checking expiration, return true only if deletion timestamp is older than updated timestamp
+            return $this->conversation_deleted_at < $conversation->updated_at;
         }
+    
+        // Otherwise, return true if deletion is recent compared to updated timestamp
+        return true;
     }
-
+    
     // public function ConversationDeletionIsValid(): bool
     // {
 

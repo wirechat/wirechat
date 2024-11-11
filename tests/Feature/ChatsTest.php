@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
@@ -316,7 +317,7 @@ describe('List', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-
+        Carbon::setTestNow(now()->addSeconds(1));
         $conversation = $auth->createConversationWith($receiver);
 
         //auth -> receiver
@@ -328,6 +329,7 @@ describe('List', function () {
         $receiver->sendMessageTo($auth, message: '4');
 
         //delete conversation 
+        Carbon::setTestNow(now()->addSeconds(4));
         $auth->deleteConversation($conversation);
 
         //start component

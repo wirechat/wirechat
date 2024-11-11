@@ -201,7 +201,7 @@ describe('deleting for', function () {
     })->throws(Exception::class);
 
 
-    it('deletes and does not load deleted conversations(for me) in query', function () {
+    it('loads deleted  conversations(for me) in query', function () {
 
         //Dusk to 
         $auth = User::factory()->create();
@@ -209,21 +209,47 @@ describe('deleting for', function () {
         //Send to receiver
         $conversation1 =  $auth->sendMessageTo(User::factory()->create(), 'hello-1')->conversation;
         $conversation2 =  $auth->sendMessageTo(User::factory()->create(), 'hello-2')->conversation;
+        Carbon::setTestNow(now()->addSeconds(1));
+
         $conversation3 =  $auth->sendMessageTo(User::factory()->create(['name' => 'john']), 'hello-3')->conversation;
-
-        //Assert Count
-        expect($auth->conversations()->withoutCleared()->count())->toBe(3);
-
-        //Authenticate
-        //$auth->refresh();
-
         $this->actingAs($auth);
 
+        //Assert Count
+        expect($auth->conversations()->withoutDeleted()->count())->toBe(3);
+
+
         //Delete Conversation
+        Carbon::setTestNow(now()->addSeconds(5));
         $conversation3->deleteFor($auth);
 
         //conversations
-        expect($auth->conversations()->count())->toBe(2);
+        expect($auth->conversations()->count())->toBe(3);
+    });
+
+
+    it('does not loads deleted  conversations(for me) in query when ->withoutDeleted() scope is used ', function () {
+
+        //Dusk to 
+        $auth = User::factory()->create();
+
+        //Send to receiver
+        $conversation1 =  $auth->sendMessageTo(User::factory()->create(), 'hello-1')->conversation;
+        $conversation2 =  $auth->sendMessageTo(User::factory()->create(), 'hello-2')->conversation;
+        Carbon::setTestNow(now()->addSeconds(1));
+
+        $conversation3 =  $auth->sendMessageTo(User::factory()->create(['name' => 'john']), 'hello-3')->conversation;
+        $this->actingAs($auth);
+
+        //Assert Count
+        expect($auth->conversations()->withoutDeleted()->count())->toBe(3);
+
+
+        //Delete Conversation
+        Carbon::setTestNow(now()->addSeconds(5));
+        $conversation3->deleteFor($auth);
+
+        //conversations
+        expect($auth->conversations()->withoutDeleted()->count())->toBe(2);
     });
 
 
@@ -346,14 +372,28 @@ describe('deleting for', function () {
         $conversation =  $auth->sendMessageTo($receiver, 'hello-4')->conversation;
 
         //Authenticate and delete 1
+
         $this->actingAs($auth);
+        Carbon::setTestNow(now()->addSeconds(10));
+        $auth->sendMessageTo($receiver, 'hello75');
+
+        Carbon::setTestNow(now()->addSeconds(26));
+
+        Carbon::setTestNow(now()->addSeconds(27));
+    
         $conversation->deleteFor($auth);
 
-        $this->flushSession();
-
+        Auth::logout();
 
         //Authenticate and delete 2
+
         $this->actingAs($receiver);
+
+        Carbon::setTestNow(now()->addSeconds(28));
+        $receiver->sendMessageTo($auth, 'hello-5');
+
+        Carbon::setTestNow(now()->addSeconds(29));
+
         $conversation->deleteFor($receiver);
 
         expect(Conversation::find($conversation->id))->toBe(null);
@@ -403,7 +443,7 @@ describe('deleting for', function () {
     });
 
 
-    it('it exludes deleted conversation from query if not new message is available', function () {
+    it('it does not exludes deleted conversation from query if not new message is available', function () {
 
 
         $auth = User::factory()->create();
@@ -422,11 +462,11 @@ describe('deleting for', function () {
 
         $auth->refresh();
 
-        expect(count($auth->conversations()->get()))->toBe(0);
+        expect(count($auth->conversations()->get()))->toBe(1);
     });
 
 
-    it('it adds deleted conversatoin to query when new message is available', function () {
+    it('always adds deleted conversation to query even after sending new message', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -444,7 +484,7 @@ describe('deleting for', function () {
 
 
         //assert 0 for now
-        expect(count($auth->conversations()->get()))->toBe(0);
+        expect(count($auth->conversations()->get()))->toBe(1);
 
         //send me message 
         Carbon::setTestNow(now()->addSeconds(20));
@@ -452,9 +492,7 @@ describe('deleting for', function () {
 
         $auth->refresh();
         expect(count($auth->conversations()->get()))->toBe(1);
-
     });
-
 });
 
 describe('ClearFor()', function () {
@@ -526,7 +564,7 @@ describe('ClearFor()', function () {
 
 
 
-    
+
 
     test('user cannot no longer see cleared messages', function () {
 
@@ -539,9 +577,9 @@ describe('ClearFor()', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-       Carbon::setTestNow(now()->addSeconds(2));
+        Carbon::setTestNow(now()->addSeconds(2));
 
-        expect( $conversation->messages()->count())->toBe(0);
+        expect($conversation->messages()->count())->toBe(0);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
@@ -551,17 +589,16 @@ describe('ClearFor()', function () {
         $receiver->sendMessageTo($auth, message: '3 message');
         $receiver->sendMessageTo($auth, message: '4 message');
 
-    //login so the messages scope will be applied
-    $this->actingAs($auth);
-        expect( $conversation->messages()->count())->toBe(4);
+        //login so the messages scope will be applied
+        $this->actingAs($auth);
+        expect($conversation->messages()->count())->toBe(4);
 
         //Delete Conversation
         Carbon::setTestNow(now()->addSeconds(10));
         $conversation->clearFor($auth);
 
         $this->actingAs($auth);
-        expect( $conversation->messages()->count())->toBe(0);
-
+        expect($conversation->messages()->count())->toBe(0);
     });
 
 
@@ -575,9 +612,9 @@ describe('ClearFor()', function () {
         Carbon::setTestNow(now()->addSeconds(2));
 
         $conversation = $auth->createConversationWith($receiver);
- 
+
         Carbon::setTestNow(now()->addSeconds(2));
-        expect( $conversation->messages()->count())->toBe(0);
+        expect($conversation->messages()->count())->toBe(0);
 
         //auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
@@ -590,7 +627,7 @@ describe('ClearFor()', function () {
         //login so the messages scope will be applied
         Carbon::setTestNow(now()->addSeconds(10));
         $this->actingAs($auth);
-        expect( $conversation->messages()->count())->toBe(4);
+        expect($conversation->messages()->count())->toBe(4);
 
         //Delete Conversation
         Carbon::setTestNow(now()->addSeconds(20));
@@ -601,12 +638,9 @@ describe('ClearFor()', function () {
         //login as other user
         Carbon::setTestNow(now()->addSeconds(30));
         $this->actingAs($receiver);
-        
-        expect( $conversation->messages()->count())->toBe(4);
 
+        expect($conversation->messages()->count())->toBe(4);
     });
-
-
 });
 
 describe('deleting permanently()', function () {

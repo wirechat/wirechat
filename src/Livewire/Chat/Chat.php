@@ -24,6 +24,7 @@ use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Models\Attachment;
+use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
 
@@ -33,8 +34,8 @@ class Chat extends Component
     use WithFileUploads;
     use WithPagination;
 
-    #[Locked]
-    public $conversation;
+
+    public  $conversation;
     public $conversationId;
 
 
@@ -50,6 +51,10 @@ class Chat extends Component
 
     public array $media = [];
     public array $files = [];
+
+
+    public Participant $authParticipant;
+
 
     //Theme 
     public string $authMessageBodyColor;
@@ -706,8 +711,6 @@ class Chat extends Component
     }
 
 
-
-
     public function placeholder()
     {
         return <<<'HTML'
@@ -768,55 +771,61 @@ class Chat extends Component
 
 
 
-
-
     public function mount()
     {
-        //auth 
-
+        // Check authentication
         abort_unless(auth()->check(), 401);
-
-        //assign converstion
-
-        //  info(['conversation count before getting' => Conversation::withoutGlobalScopes()->count()]);
-
-
-
-        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])->where('id', $this->conversation)->first();
-        //Abort if not made 
+    
+        // Retrieve conversation without global scopes
+        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
+            ->where('id', $this->conversation)->first();
+    
+        // Abort if conversation not found
         abort_unless($this->conversation, 404);
-
-        //set converstion type
-        $TYPE = $this->conversation->type;
-
-
-        $belongsToConversation = auth()->user()->belongsToConversation($this->conversation);
-
-
-        abort_unless($belongsToConversation, 403);
-
+    
+        // Ensure the user belongs to the conversation
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+    
+        // Assign receiver and conversation ID
         $this->receiver = $this->conversation->getReceiver();
-
         $this->conversationId = $this->conversation->id;
+    
+        //Set auth participant 
+        $this->authParticipant=$this->conversation->participant(auth()->user());
 
-
-
+        // Attempt to clear expired deletion if necessary
         $this->removeExpiredConversationDeletion();
-
-
+    
+        // Load conversation messages
         $this->loadMessages();
     }
-
-    //If conversation deletion expired then set the participant conversation_deleted_at to NULL
+    
     private function removeExpiredConversationDeletion(): void
     {
 
-        if (auth()->user()->conversationDeletionExpired($this->conversation)) {
-            $participant =  $this->conversation->participant(auth()->user());
-            $participant->conversation_deleted_at = null;
-            $participant->save();
-        }
+        //dd(now());
+        $user = auth()->user();
+        if($this->authParticipant->hasDeletedConversation(true)){
+           // $participant = $this->conversation->participant($user);
+
+       // $expired = $authParticipant->conversationDeletionExpired();
+    
+        Log::info([
+            'conversation_updated_at' => $this->conversation->updated_at,
+            'participant_deleted_at' => $this->authParticipant->conversation_deleted_at,
+            'deletion_expired' => true,
+        ]);
+    
+        // if ($expired) {
+            $this->authParticipant->update(['conversation_deleted_at'=>null]);
+    
+            Log::info('Conversation deletion timestamp reset to null due to expiration');
+        // }
     }
+
+    }
+    
+    
 
     public function render()
     {

@@ -75,13 +75,11 @@ class Chats extends Component
   protected function loadConversations()
   {
     $additionalConversations = Conversation::query()
+  
       ->tap(fn($query) => $this->applyEagerLoading($query))
-      ->whereHas('participants', function ($query){
-        $query->whereParticipantable(auth()->user());
-    })
-      // Scope for participant check
+      ->whereHas('participants', function ($query){ $query->whereParticipantable(auth()->user()); })
       ->when(trim($this->search) != '', fn($query) => $this->applySearchConditions($query)) // Apply search
-      ->when(trim($this->search) == '', fn($query) => $query->withoutBlanks()) // Without blanks when no search
+      ->when(trim($this->search) == '', fn($query) => $query->withoutDeleted()->withoutBlanks()) // Without blanks & deletedByUser when no search
       ->latest('updated_at')
       ->paginate(10, ['*'], 'page', $this->page);
 
@@ -98,15 +96,7 @@ class Chats extends Component
 
   }
 
-  #Eager loading relationships for better readability
-  protected function applyEagerLoading($query)
-  {
-    return $query->with([
-      'participants.participantable',
-      'lastMessage',
-      'group.cover'
-    ]);
-  }
+
 
   #Helper method for applying search logic
   protected function applySearchConditions($query)
@@ -141,6 +131,16 @@ class Chats extends Component
     });
   }
 
+
+    #Eager loading relationships for better readability
+    protected function applyEagerLoading($query)
+    {
+      return $query->with([
+        'participants.participantable',
+        'lastMessage',
+        'group.cover'
+      ]);
+    }
   #Helper function to check and cache column existence
   protected function columnExists($table, $field, &$columnCache)
   {

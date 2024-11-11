@@ -14,6 +14,16 @@ class Read extends Model
     public $timestamps = false;
 
     protected $fillable = ['read_at', 'conversation_id','readable_id','readable_type'];
+    
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'read_at' => 'datetime'
+
+    ];
 
 
 

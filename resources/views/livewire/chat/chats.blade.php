@@ -82,13 +82,6 @@ $primaryColor= WireChat::getColor();
      scrollHeight = $el.scrollHeight;
      clientHeight = $el.clientHeight;
 
-    console.log('clientHeight:', clientHeight);
-    console.log('scrollTop:', scrollTop);
-    console.log('scrollHeight:', scrollHeight);
-    console.log('$wire.canLoadMore:', $wire.canLoadMore);
-
-    console.log('scrollTop + clientHeight:', scrollTop + clientHeight);
-
     // Check if the user is at the bottom of the scrollable element
     if ((scrollTop + clientHeight) >= (scrollHeight - 1) && $wire.canLoadMore) {
         // Trigger load more if we're at the bottom
