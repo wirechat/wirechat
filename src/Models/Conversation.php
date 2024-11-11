@@ -23,10 +23,10 @@ class Conversation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'type',
-        //'updated_at'
-    ];
+    // protected $fillable = [
+    //     'type',
+    //     //'updated_at'
+    // ];
 
     protected $casts = [
         'type' => ConversationType::class,
@@ -471,8 +471,8 @@ class Conversation extends Model
         $participant->conversation_deleted_at = Carbon::now();
         $participant->save();
 
-        // Check if the conversation is private
-        if ($this->isPrivate()) {
+        // Check if the conversation is private or self
+        if ($this->isPrivate()||$this->isSelf()) { 
             //check if conversatin is Self conversation 
             //Then force delete it 
             if ($this->isSelfConversation($user)) {
@@ -521,32 +521,13 @@ class Conversation extends Model
     }
 
     /**
-     * Check if the conversation is owned by the user themselves
+     * Check if the conversation is owned by the  user themselves
      */
     public function isSelfConversation(Model $participant = null): bool
     {
-        // Use the authenticated user if no participant is provided
-        $participant = $participant ?? auth()->user();
 
-        $isSelfConversation = false;
 
-        // Ensure the conversation is private and has exactly two participants
-        if ($this->type === ConversationType::PRIVATE) {
-            $participants = $this->participants; // Use the loaded participants
-
-            if ($participants->count() === 2) {
-                // Check if both participants are the same user
-                $isSelfConversation = $participants->every(function ($p) use ($participant) {
-                    $value = $p->participantable_id == $participant->id && $p->participantable_type == get_class($participant);
-
-                    // Log::info($value);
-
-                    return $value;
-                });
-            }
-        }
-
-        return $isSelfConversation;
+        return $this->isSelf();
     }
 
 
@@ -569,6 +550,11 @@ class Conversation extends Model
     public function isPrivate(): bool
     {
         return $this->type == ConversationType::PRIVATE;
+    }
+
+    public function isSelf(): bool
+    {
+        return $this->type == ConversationType::SELF;
     }
 
     public function isGroup(): bool

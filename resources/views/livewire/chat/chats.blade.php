@@ -155,12 +155,12 @@ $primaryColor= WireChat::getColor();
 
                                 {{-- name --}}
                                 <div class="flex gap-1 mb-1 w-full items-center">
-                                    <h6 class="truncate   font-bold  text-gray-900 dark:text-white">
+                                    <h6 class="truncate   font-medium  text-gray-900 dark:text-white">
                                         {{ $group?$group?->name: $receiver?->display_name }}
                                     </h6>
 
                                     @if ($conversation->isSelfConversation())
-                                        <span class="font-bold dark:text-white">(You)</span>
+                                        <span class="font-medium dark:text-white">(You)</span>
                                     @endif
 
                                 </div>
@@ -171,12 +171,12 @@ $primaryColor= WireChat::getColor();
 
                                         {{-- Only show if AUTH is onwer of message --}}
                                         @if ($lastMessage->belongsToAuth())
-                                            <span class="font-bold text-xs dark:text-white dark:font-normal">
+                                            <span class="font-bold text-xs dark:text-white/90 dark:font-normal">
                                                 You:
                                             </span>
 
                                         @elseif(!$lastMessage->belongsToAuth() && $group!==null)
-                                        <span class="font-bold text-xs dark:text-white dark:font-normal">
+                                        <span class="font-bold text-xs dark:text-white/80 dark:font-normal">
                                             {{$lastMessage->sendable?->display_name}}:
                                         </span>
 

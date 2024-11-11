@@ -198,7 +198,7 @@ describe('createConversationWith() ',function(){
 
     });
 
-    it('user can create conversation with themselves', function () {
+    test('user can create conversation with themselves and participant must be 1 ', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -213,7 +213,7 @@ describe('createConversationWith() ',function(){
 
        $participants = $conversation->participants;
 
-       expect(count($participants))->toBe(2);
+       expect(count($participants))->toBe(1);
 
        
        foreach ($participants as $key => $participant) {

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->string('avatar_url')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
         });
