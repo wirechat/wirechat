@@ -14,7 +14,6 @@ describe(" Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
 
         $message = Message::factory()->sender($auth)->create();
 
@@ -33,7 +32,6 @@ describe(" Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
 
         $message = Message::factory()->sender($auth)->create();
 
@@ -53,7 +51,6 @@ describe(" Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
 
         $message = Message::factory()->sender($auth)->create();
 
@@ -70,7 +67,6 @@ describe(" Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
 
         $message = Message::factory()->sender($auth)->create();
 

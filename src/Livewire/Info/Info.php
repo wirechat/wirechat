@@ -222,7 +222,7 @@ class Info extends ModalComponent
     abort_unless(auth()->user()->belongsToConversation($this->conversation),403);
 
     
-    $this->conversation = $this->conversation->load('group.cover','participants');
+    $this->conversation = $this->conversation->load('group.conversation.participants', 'group.cover')->loadCount('participants');
     $this->group = $this->conversation->group;
 
     $this->setDefaultValues();
@@ -233,7 +233,8 @@ class Info extends ModalComponent
 
     // Pass data to the view
     return view('wirechat::livewire.info.info', [
-      'receiver' => $this->conversation->getReceiver()
+      'receiver' => $this->conversation->getReceiver(),
+      'participant'=>$this->conversation->participant(auth()->user())
     ]);
   }
 }

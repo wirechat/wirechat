@@ -22,33 +22,39 @@
             height: 100%;
         }
 
-          /* Emoji picker configuration */
-          emoji-picker {
+        /* Emoji picker configuration */
+        emoji-picker {
             --background: #f9fafb;
             --border-radius: 12px;
-            --input-border-color:rgb(229 229 229);
-            --input-padding:0.45rem;
+            --input-border-color: rgb(229 229 229);
+            --input-padding: 0.45rem;
             --outline-color: none;
             --outline-size: 1px;
-            --num-columns: 8; /* Mobile-first default */
+            --num-columns: 8;
+            /* Mobile-first default */
             --emoji-padding: 0.7rem;
-            --emoji-size: 1.5rem; /* Smaller size for mobile */
+            --emoji-size: 1.5rem;
+            /* Smaller size for mobile */
             --border-color: none;
-            --indicator-color:#9ca3af;
+            --indicator-color: #9ca3af;
         }
-  
+
 
         @media screen and (min-width: 600px) {
             emoji-picker {
-                --num-columns: 10; /* Increase columns for larger screens */
-                --emoji-size: 1.8rem; /* Larger size for desktop */
+                --num-columns: 10;
+                /* Increase columns for larger screens */
+                --emoji-size: 1.8rem;
+                /* Larger size for desktop */
             }
         }
 
         @media screen and (min-width: 900px) {
             emoji-picker {
-                --num-columns: 16; /* Increase columns for larger screens */
-                --emoji-size: 1.9rem; /* Larger size for desktop */
+                --num-columns: 16;
+                /* Increase columns for larger screens */
+                --emoji-size: 1.9rem;
+                /* Larger size for desktop */
             }
         }
 
@@ -57,12 +63,12 @@
             emoji-picker {
                 --background: #1f2937;
                 --input-border-color: #374151;
-                --outline-color:none;
-                --outline-size:1px;
+                --outline-color: none;
+                --outline-size: 1px;
                 --border-color: none;
                 --input-font-color: white;
-                --indicator-color:#9ca3af;
-                --button-hover-background:#9ca3af
+                --indicator-color: #9ca3af;
+                --button-hover-background: #9ca3af
             }
         }
 
@@ -108,10 +114,10 @@
 @endassets
 
 <div x-data="{
-    
+
     conversationElement: document.getElementById('conversation'),
     initializing: true,
-    'loadEmojiPicker':function(){
+    'loadEmojiPicker': function() {
 
         let script = document.createElement('script');
         script.type = 'module';
@@ -119,28 +125,27 @@
         script.defer = true;
         document.head.appendChild(script);
     }
-}" x-init="
-setTimeout(() => {
-    $wire.dispatch('focus-input-field');
-    initializing = false;
-}, 150);
+    }" x-init="setTimeout(() => {
+        $wire.dispatch('focus-input-field');
+        initializing = false;
+    }, 150);
 
-Echo.private('conversation.{{ $conversation->id }}')
-    .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
-        $wire.appendNewMessage(e); // Calling the Livewire method to handle the new message
-    });
+    Echo.private('conversation.{{ $conversation->id }}')
+        .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
+            $wire.appendNewMessage(e); // Calling the Livewire method to handle the new message
+        });
 
-Echo.private('conversation.{{ $conversation->id }}')
-    .listen('.Namu\\WireChat\\Events\\MessageDeleted', (e) => {
-        $wire.removeDeletedMessage(e); // Calling the Livewire method to handle the new message
-    });
+    Echo.private('conversation.{{ $conversation->id }}')
+        .listen('.Namu\\WireChat\\Events\\MessageDeleted', (e) => {
+            $wire.removeDeletedMessage(e); // Calling the Livewire method to handle the new message
+        });
 
 
     loadEmojiPicker();
-   
 
 
-{{-- if ($wire.conversationId == 1) {
+
+{{-- if ($wire.conversationId == 51) {
 
         setInterval(() => {
            
@@ -159,7 +164,8 @@ Echo.private('conversation.{{ $conversation->id }}')
             // Call the Livewire sendMessage method
             $wire.sendMessage();
         }, 1000); // Call every 3 seconds
-    } --}}"
+    } --}}
+     "
     @scroll-bottom.window="
         
           setTimeout(() => {
@@ -204,7 +210,8 @@ Echo.private('conversation.{{ $conversation->id }}')
         {{-- ---------- --}}
         <footer x-data="{ 'openEmojiPicker': false }" class="shrink-0 h-auto relative  ">
 
-            <div class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]   rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
+            <div
+                class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]   rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
 
                 {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
                 <section x-cloak x-show="openEmojiPicker"
@@ -609,8 +616,10 @@ Echo.private('conversation.{{ $conversation->id }}')
                         </div>
 
                         {{-- input Actions --}}
-                        <div :class="{ 'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) ||
-                                @json(count($this->files) > 0) }"
+                        <div :class="{
+                            'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) ||
+                                @json(count($this->files) > 0)
+                        }"
                             @class([
                                 'w-[15%] justify-end flex items-center gap-2 hidden md:hidden',
                             ])>

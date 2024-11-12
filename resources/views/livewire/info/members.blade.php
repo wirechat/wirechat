@@ -1,3 +1,11 @@
+@php
+       $authIsAdminInGroup=  $participant?->isAdmin();
+       $authIsOwner=  $participant?->isOwner();
+       $isGroup=  $conversation?->isGroup();
+
+    @endphp
+
+
 <div x-ref="members"
     class="h-[calc(100vh_-_6rem)]  sm:h-[450px] bg-white dark:bg-gray-800 dark:text-white border dark:border-gray-700 overflow-y-auto overflow-x-hidden  ">
 
@@ -38,7 +46,7 @@
 
                     @foreach ($participants as $key => $participant)
                         @php
-                            $participantIsAuth =
+                            $loopParticipantIsAuth =
                                 $participant->participantable_id == auth()->id() &&
                                 $participant->participantable_type == get_class(auth()->user());
                         @endphp
@@ -55,7 +63,7 @@
 
                                 <div class="grid grid-cols-12 w-full ">
                                     <h6 @class(['transition-all truncate group-hover:underline col-span-10' ])>
-                                        {{ $participantIsAuth ? 'You' : $participant->participantable->display_name }}</h6>
+                                        {{ $loopParticipantIsAuth ? 'You' : $participant->participantable->display_name }}</h6>
                                         @if ($participant->isOwner()|| $participant->isAdmin())
                                         <span  style="background-color: var(--primary-color);" class=" flex items-center col-span-2 text-white text-xs font-medium ml-auto px-2.5 py-px rounded ">
                                             {{$participant->isOwner()? "Owner":"Admin"}}
@@ -73,13 +81,13 @@
                                     <x-wirechat::dropdown-button wire:click="sendMessage('{{ $participant->id }}')"
                                         class="truncate dark:hover:bg-gray-700 dark:focus:bg-gray-700">
                                         Message
-                                        {{ $participantIsAuth ? 'Yourself' : $participant->participantable->display_name }}
+                                        {{ $loopParticipantIsAuth ? 'Yourself' : $participant->participantable->display_name }}
                                     </x-wirechat::dropdown-button>
 
-                                    @if (auth()->user()->isOwnerOfGroup($conversation->group) ||auth()->user()->isAdminInGroup($conversation->group))
+                                    @if ($authIsAdminInGroup || $authIsOwner)
                                         {{-- Only show admin actions to owner of group and if is not the current loop --}}
                                         {{--AND We only want to show admin actions if participant is not owner --}}
-                                        @if (auth()->user()->isOwnerOfGroup($conversation->group) && !$participantIsAuth)
+                                        @if ($authIsOwner && !$loopParticipantIsAuth)
                                             @if ($participant->isAdmin())
                                                 <x-wirechat::dropdown-button
                                                     wire:click="dismissAdmin('{{ $participant->id }}')"
@@ -98,7 +106,7 @@
                                         @endif
 
                                                 {{--AND We only want to show remove actions if participant is not owner of conversation because we don't want to remove owner--}}
-                                                @if (!$participant->isOwner() && !$participantIsAuth && !$participant->isAdmin())
+                                                @if (!$participant->isOwner() && !$loopParticipantIsAuth && !$participant->isAdmin())
                                                 <x-wirechat::dropdown-button
                                                     wire:click="removeFromGroup('{{ $participant->id }}')"
                                                     wire:confirm="Are you sure you want to remove {{$participant->participantable?->display_name }} from Group ?"

@@ -4,6 +4,7 @@ namespace Namu\WireChat\Models;
 
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -119,28 +120,46 @@ class Conversation extends Model
      * @param Model $user
      * @return Participant|null
      */
-    public function participant(Model $user)
-    {
+   public function participant(Model|Authenticatable $user)
+{
+    $query = $this->participants()->withoutGlobalScope('withoutExited');
 
-        $participant = null;
-        // If loaded, simply check the existing collection
-        if ($this->relationLoaded('participants')) {
-            $participant = $this->participants()
-                ->withoutGlobalScope('withoutExited')
-                ->where('participantable_id', $user->id)
-                ->where('participantable_type', get_class($user))
-                ->first();
-        } else {
-            $participant = $this->participants()
-                ->withoutGlobalScope('withoutExited')
-
-                ->where('participantable_id', $user->id)
-                ->where('participantable_type', get_class($user))
-                ->first();
-        }
-
-        return $participant;
+    if ($this->relationLoaded('participants')) {
+        $participant = $query->where('participantable_id', $user->id)
+                             ->where('participantable_type', get_class($user))
+                             ->first();
+    } else {
+        $participant = $query->where('participantable_id', $user->id)
+                             ->where('participantable_type', get_class($user))
+                             ->first();
     }
+
+    return $participant;
+}
+
+// public function participant(Model $user)
+// {
+
+//     $participant = null;
+//     // If loaded, simply check the existing collection
+//     if ($this->relationLoaded('participants')) {
+//         $participant = $this->participants()
+//             ->withoutGlobalScope('withoutExited')
+//             ->where('participantable_id', $user->id)
+//             ->where('participantable_type', get_class($user))
+//             ->first();
+//     } else {
+//         $participant = $this->participants()
+//             ->withoutGlobalScope('withoutExited')
+
+//             ->where('participantable_id', $user->id)
+//             ->where('participantable_type', get_class($user))
+//             ->first();
+//     }
+
+//     return $participant;
+// }
+
 
     /**
      * Add a new participant to the conversation.

@@ -2,11 +2,14 @@
 
 namespace Namu\WireChat\Notifications;
 
+use Carbon\Carbon;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Namu\WireChat\Facades\WireChat;
 
 class MessageNotification extends Notification implements ShouldQueue
 {
@@ -20,10 +23,9 @@ class MessageNotification extends Notification implements ShouldQueue
     public function __construct($message)
     {
         $this->message = $message;
-        $this->onQueue(config('wirechat.broadcasting.message_notification_queue', 'default'));
+        $this->onQueue(WireChat::messageNotificationQueue());
         $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
     }
-
 
     /**
      * Get the notification's delivery channels.
@@ -35,6 +37,27 @@ class MessageNotification extends Notification implements ShouldQueue
         return ['broadcast'];
     }
 
+    /**
+     * Determine if the notification should be sent.
+     * Only send if the message is less than 3 minutes old.
+     */
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        return $this->message->created_at->greaterThan(Carbon::now()->subMinutes(3));
+    }
+    
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return array<int, \Illuminate\Broadcasting\PrivateChannel>
+     */
+    public function broadcastOn(): array
+    {
+        return [
+            new PrivateChannel('conversation.'.$this->message->conversation_id)
+        ];
+    }
+
     // Broadcast data for real-time notifications
     public function toBroadcast($notifiable)
     {
@@ -43,5 +66,4 @@ class MessageNotification extends Notification implements ShouldQueue
             'conversation_id' => $this->message->conversation_id,
         ]);
     }
-
 }

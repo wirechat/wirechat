@@ -13,7 +13,7 @@ describe("broadcastWith() Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
+        
 
         $message = Message::factory()->sender($auth)->create();
 
@@ -32,7 +32,7 @@ describe("broadcastWith() Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
+        
 
         $message = Message::factory()->sender($auth)->create();
 
@@ -50,7 +50,7 @@ describe("broadcastWith() Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
+        
 
         $message = Message::factory()->sender($auth)->create();
 
@@ -67,12 +67,12 @@ describe("broadcastWith() Data verifiction ", function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver,'hello');
+        
 
         $message = Message::factory()->sender($auth)->create();
 
         broadcast(new MessageCreated($message))->toOthers();
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
+        Event::assertDispatched(MessageCreated::class, function ($event) use ($receiver) {
             $broadcastOn =  $event->broadcastOn();
             expect(count($broadcastOn))->toBe(1);
             return $this;

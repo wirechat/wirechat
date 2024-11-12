@@ -21,8 +21,10 @@ class NotifyParticipant implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(public Participant  $participant)
+    public function __construct(public Participant  $participant,public Message $message)
     {
+
+        $this->dontBroadcastToCurrentUser();
         
         //Log::info($participant);
     }
@@ -37,6 +39,10 @@ class NotifyParticipant implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
+            'message'=>[
+                'id'=> $this->message->id,
+                'conversation_id'=> $this->message->conversation_id
+           ]
         ];
     }
 }

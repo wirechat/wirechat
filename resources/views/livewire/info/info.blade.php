@@ -1,5 +1,12 @@
 <div id="info-modal" class="bg-white dark:bg-gray-900 space-y-auto">
 
+    @php
+       $authIsAdminInGroup=  $participant->isAdmin();
+       $authIsOwner=  $participant->isOwner();
+       $isGroup=  $conversation->isGroup();
+
+    @endphp
+
     <section class="flex gap-4 z-[10]  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
         <button wire:click="$dispatch('closeChatModal')" class="focus:outline-none"> <svg class="w-7 h-7"
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
@@ -14,13 +21,13 @@
 
             <section class="mx-auto items-center justify-center grid">
 
-                @if ($conversation->isGroup() && auth()->user()->isAdminInGroup($conversation->group))
+                @if ($isGroup && $authIsAdminInGroup)
 
                     <div class="relative  h-18 w-18 lg:w-24 lg:h-24 overflow-clip mx-auto rounded-full">
 
                         <label wire:target="photo" wire:loading.class="cursor-not-allowed" for="photo"
                             class=" cursor-pointer w-full h-full">
-                            <x-wirechat::avatar wire:loading.class="cursor-not-allowed" group="{{ $conversation->isGroup() }}" src="{{ $cover_url }}"
+                            <x-wirechat::avatar wire:loading.class="cursor-not-allowed" group="{{ $isGroup }}" src="{{ $cover_url }}"
                                 class="w-full h-full" />
                         </label>
                         <input wire:loading.attr="disabled" id="photo" wire:model="photo" dusk="add_photo_field"
@@ -64,10 +71,10 @@
             <div class="space-y-3 grid  overflow-x-hidden">
 
 
-                @if ($conversation->isGroup())
+                @if ($isGroup)
 
                     {{-- Check if user is admin in conversation --}}
-                    @if (auth()->user()->isAdminInGroup($conversation->group))
+                    @if ($authIsAdminInGroup)
                         {{-- Form to update Group name  --}}
                         <form wire:submit="updateGroupName" x-data="{ editing: false }"
                             class=" justify-center flex  items-center w-full gap-5 px-5 items-center">
@@ -120,7 +127,7 @@
 
 
                     {{-- Members count --}}
-                    <p class="mx-auto"> Members {{ $conversation->participants->count() }} </p>
+                    <p class="mx-auto"> Members {{ $conversation->participants_count }} </p>
                 @else
                     {{-- Receiver --}}
                     <h5 class="text-2xl">{{ $receiver?->display_name }}</h5>
@@ -134,9 +141,9 @@
     {{-- About --}}
     <section class=" px-8 py-5 ">
 
-        @if ($conversation->isGroup())
+        @if ($isGroup)
 
-        @if (auth()->user()->isAdminInGroup($conversation->group))
+        @if ($authIsAdminInGroup)
         <div x-data="{ editing: false }" @click.outside="editing=false" class="grid grid-cols-12 items-center">
 
             {{-- Left side input --}}
@@ -199,14 +206,14 @@
     <x-wirechat::divider />
 
     {{-- Members section --}}
-    @if ($conversation->isGroup())
+    @if ($isGroup)
         <section class="my-4 text-left space-y-3">
 
                 {{-- Members count --}}
                 <button
                  wire:click="$dispatch('openWireChatModal', {component: 'members',arguments: { conversation: {{ $conversation->id }} }})"
                  class="flex w-full justify-between items-center px-8 ">
-                   <span class="text-gray-600 dark:text-gray-300"> Members {{ $conversation->participants->count() }}</span>
+                   <span class="text-gray-600 dark:text-gray-300"> Members {{ $conversation->participants_count }}</span>
 
 
                     {{-- Search icon --}}
@@ -239,7 +246,7 @@
     {{-- Footer section --}}
     <section class="flex flex-col justify-start w-full h-[500px]">
 
-        @if ($conversation->isGroup() && !auth()->user()->isOwnerOfConversation($conversation) )
+        @if ($isGroup && !$authIsOwner )
             <button wire:confirm="Are you sure you want to exit Group ?" wire:click="exitConversation"
                 class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-700 flex gap-3 items-center text-red-500">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -262,7 +269,7 @@
                     d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
             </svg>
 
-            <span>Delete {{$conversation->isGroup()?'Group':'Chat'}}</span>
+            <span>Delete {{$isGroup?'Group':'Chat'}}</span>
         </button>
 
     </section>

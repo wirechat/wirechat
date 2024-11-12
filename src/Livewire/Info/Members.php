@@ -79,7 +79,7 @@ class Members extends ModalComponent
     public function updatedSearch($value)
     {
         $this->page = 1; // Reset page number when search changes
-        $this->participants = collect(); // Reset to empty collection
+        $this->participants = collect([]); // Reset to empty collection
 
 
         $this->loadParticipants();
@@ -141,8 +141,8 @@ class Members extends ModalComponent
         // Check if $this->participants is initialized
         $this->participants = $this->participants ?? collect();
 
-          $additionalParticipants = Participant::where('conversation_id', $this->conversation->id)
-        ->with('participantable')
+          $additionalParticipants = $this->conversation->participants()
+        // ->with('participantable')
         ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
             $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
                 $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
@@ -182,10 +182,12 @@ class Members extends ModalComponent
         $this->participants = $this->participants->merge($additionalParticipants->items())->unique('id');
     }
 
-
+    
     /*Deleting from group*/
     function removeFromGroup(Participant $participant)  {
 
+
+      //  dd($participant);
 
         #abort if user does not belong to conversation
         abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
@@ -197,15 +199,16 @@ class Members extends ModalComponent
         #remove from group
         $participant->delete();
 
+
         #remove from 
          // Remove member if they are already selected
          $this->participants = $this->participants->reject(function ($member) use ($participant) {
             return $member->id == $participant->id && get_class($member) == get_class($participant);
           });
 
+
         $this->dispatch('refresh')->to(Info::class);
       //  $this->dispatch('refresh')->self();
-
 
     }
 
@@ -232,16 +235,14 @@ class Members extends ModalComponent
         abort_unless(auth()->check(), 401);
 
 
-        $this->conversation = $conversation;
+        $this->conversation = $conversation->load('participants','group');
 
 
-        // Log::info(['$conversation'=>$conversation]);
         abort_if($this->conversation->isPrivate(), 403, 'This is a private conversation');
 
 
         $this->participants = collect();
-        // Load participants and get the count
-        //    $this->conversation->loadCount('participants');
+        $this->loadParticipants();
     }
 
 
@@ -249,10 +250,12 @@ class Members extends ModalComponent
     {
 
 
-
-        $this->loadParticipants();
+      //  
 
         // Pass data to the view
-        return view('wirechat::livewire.info.members');
+        return view('wirechat::livewire.info.members',[
+      'participant'=>$this->conversation->participant(auth()->user())
+
+        ]);
     }
 }

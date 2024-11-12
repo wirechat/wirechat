@@ -519,26 +519,16 @@ trait Chatable
 
     /**
      * Check if the user is an admin in a specific conversation.
+     * Or if if owner , because owner can also be admin
      */
     public function isAdminInGroup(Group $group): bool
     {
         $conversation = $group->conversation;
-        // Check if participants are already loaded
-        if ($conversation->relationLoaded('participants')) {
-            // If loaded, simply check the existing collection
-            return $conversation->participants->contains(function ($participant) {
-                return $participant->participantable_id == $this->id &&
-                    $participant->participantable_type == get_class($this) &&
-                    in_array($participant->role, [ParticipantRole::OWNER, ParticipantRole::ADMIN]);
-            });
-        }
 
         // If not loaded, perform the query
-        return $conversation->participants()
-            ->where('participantable_id', $this->id)
-            ->where('participantable_type', get_class($this))
-            ->whereIn('role', [ParticipantRole::OWNER, ParticipantRole::ADMIN])
-            ->exists();
+        $pariticipant = $conversation->participant($this);
+        return  $pariticipant->isAdmin() || $pariticipant->isOwner();
+
     }
 
     /**
@@ -546,23 +536,9 @@ trait Chatable
      */
     public function isOwnerOfConversation(Conversation $conversation): bool
     {
-        // Check if participants are already loaded
-        // if ($conversation->relationLoaded('participants')) {
-        //     // If loaded, simply check the existing collection
-        //     return $conversation->participants()->withoutGlobalScopes()->contains(function ($participant) {
-        //         return $participant->participantable_id == $this->id &&
-        //             $participant->participantable_type == get_class($this) &&
-        //             $participant->role == ParticipantRole::OWNER;
-        //     });
-        // }
-
-        // If not loaded, perform the query
-        return $conversation->participants()
-            ->withoutGlobalScopes()
-            ->where('participantable_id', $this->id)
-            ->where('participantable_type', get_class($this))
-            ->where('role', ParticipantRole::OWNER)
-            ->exists();
+             // If not loaded, perform the query
+             $pariticipant = $conversation->participant($this);
+             return  $pariticipant->isOwner();
     }
 
 
@@ -573,22 +549,8 @@ trait Chatable
     {
         $conversation = $group->conversation;
 
-        // Check if participants are already loaded
-        if ($conversation->relationLoaded('participants')) {
-            // If loaded, simply check the existing collection
-            return $conversation->participants->contains(function ($participant) {
-                return $participant->participantable_id == $this->id &&
-                    $participant->participantable_type == get_class($this) &&
-                    $participant->role == ParticipantRole::OWNER;
-            });
-        }
-
-        // If not loaded, perform the query
-        return $conversation->participants()
-            ->where('participantable_id', $this->id)
-            ->where('participantable_type', get_class($this))
-            ->where('role', ParticipantRole::OWNER)
-            ->exists();
+        $pariticipant = $conversation->participant($this);
+        return  $pariticipant->isOwner();
     }
 
 
