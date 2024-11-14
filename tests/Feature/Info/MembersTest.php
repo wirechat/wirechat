@@ -716,6 +716,31 @@ describe('actions test', function () {
     });
 
 
+    test('it abort removeFromGroup if auth is not admin in group ', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+
+        #add participant
+        $randomUser = User::factory()->create(['name' => 'Micheal']);
+        $conversation->addParticipant($randomUser);
+
+
+        $userTobeRemoved = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($userTobeRemoved);
+
+
+     
+        
+        $request =  Livewire::actingAs($randomUser)->test(Members::class, ['conversation' => $conversation]);
+        $request->call('removeFromGroup', $participant->id)
+                ->assertStatus(403,'You do not have permission to perform this action in this group. Only admins can proceed.');
+ 
+
+    });
+
+
+
     test('it deletes participants modol and removed from database when removeFromGroup', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
