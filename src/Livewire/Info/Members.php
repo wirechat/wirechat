@@ -19,11 +19,13 @@ use Namu\WireChat\Models\Message;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
+use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Livewire\Modals\ModalComponent;
+use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
@@ -200,7 +202,16 @@ class Members extends ModalComponent
 
 
         #remove from group
-        $participant->delete();
+
+          // Create the 'remove' action record in the actions table
+        Action::create([
+            'actionable_id' => $participant->id,
+            'actionable_type' => Participant::class,
+            'actor_id' => auth()->id(),  // The admin who performed the action
+            'actor_type' => get_class(auth()->user()),  // Assuming 'User' is the actor model
+            'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
+        ]);
+      //  $participant->delete();
 
 
         #remove from 

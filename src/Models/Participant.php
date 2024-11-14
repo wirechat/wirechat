@@ -5,8 +5,12 @@ namespace Namu\WireChat\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Models\Scopes\WithoutRemovedAction;
+use Namu\WireChat\Models\Scopes\WithoutRemovedActionScope;
 
 class Participant extends Model
 {
@@ -30,7 +34,6 @@ class Participant extends Model
         'conversation_deleted_at' => 'datetime',
         'conversation_cleared_at'=>'datetime',
         'last_active_at'=>'datetime'
-
     ];
 
 
@@ -50,6 +53,20 @@ class Participant extends Model
     {
         static::addGlobalScope('withoutExited', function ($query) {
             $query->whereNull('exited_at');
+        });
+
+        static::addGlobalScope(WithoutRemovedActionScope::class);
+
+
+         // listen to deleted
+         static::deleted(function ($participant) {
+
+            // Delete reads
+            // Use a DB transaction to ensure atomicity
+            DB::transaction(function () use ($participant) {
+                // Delete associated actions (polymorphic actionable relation)
+                $participant->actions()->delete();
+            });
         });
     }
 
@@ -169,6 +186,19 @@ class Participant extends Model
     }
 
 
+      // Relationship with actions table (to track the removal actions)
+      public function actions()
+      {
+          return $this->morphMany(Action::class, 'actionable');
+      }
+
+
+      public function isRemoved(): bool
+      {
+          return $this->actions()
+              ->where('type', Actions::REMOVED_BY_ADMIN->value)
+              ->exists();
+      }
 
     /**
      * Determine if the user has deleted this conversation and if the deletion is still "valid."

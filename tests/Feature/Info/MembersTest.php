@@ -5,11 +5,13 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Info\Members;
+use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Participant;
@@ -741,7 +743,7 @@ describe('actions test', function () {
 
 
 
-    test('it deletes participants modol and removed from database when removeFromGroup', function () {
+    test('it creates ations REMOVED_BY_ADMIN when a participant is  removed from  group', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -756,14 +758,38 @@ describe('actions test', function () {
         $request =  Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request  ->call('removeFromGroup', $participant->id);
 
-        #assert after
+        #assert removed
+        $removed = Action::where('actionable_id', $participant->id)
+                 ->where('actionable_type', Participant::class)
+                 ->where('type', Actions::REMOVED_BY_ADMIN)
+                 ->exists();
+        expect($removed)->toBe(true);
 
-        $participant->refresh();
-        // dd(Participant::all());
-        // dd($participant->participantable ->belongsToConversation($conversation));
-        // expect($participant->participantable ->belongsToConversation($conversation))->toBe(false);
+        expect($participant->isRemoved())->toBe(true);
+     });
 
-     })->throws(ModelNotFoundException::class);
+
+
+    test('removed participant->participantable is no longer a member of the conversation', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($user);
+
+
+        #assert before 
+        expect($user->belongsToConversation($conversation))->toBe(true);
+
+        $request =  Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+        $request  ->call('removeFromGroup', $participant->id);
+
+        #assert removed
+        $conversation= $conversation->refresh();
+
+        expect($user->belongsToConversation($conversation))->toBe(false);
+     })->only();
 
 
 
@@ -819,4 +845,4 @@ describe('actions test', function () {
 
 
 
-});
+})->only();
