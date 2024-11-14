@@ -777,9 +777,11 @@ class Chat extends Component
     
         // Assign receiver and conversation ID
         $this->receiver = $this->conversation->getReceiver();
+
+     //  dd( $this->conversation);
         $this->conversationId = $this->conversation->id;
 
-       // dd($this->receiver);
+   //  dd($this->receiver);
     
         //Set auth participant 
         $this->authParticipant=$this->conversation->participant(auth()->user());

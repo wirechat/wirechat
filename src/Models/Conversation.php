@@ -318,26 +318,39 @@ class Conversation extends Model
 
 
         // Check if the conversation is private
-        if (!in_array($this->type,[ConversationType::PRIVATE, $this->type != ConversationType::SELF ]) ) {
+      //  dd($this->type);
+        if (!in_array($this->type,[ConversationType::PRIVATE,ConversationType::SELF ]) ) {
             return null;
         }
 
 
-        // Ensure participants are already loaded (use the loaded relationship, not fresh queries)
-        $participants = $this->participants;
 
+        // Ensure participants are already loaded (use the loaded relationship, not fresh queries)
+        $participants = $this->participants->where('conversation_id',$this->id);
+
+     //   dd($participants);
         // Ensure there are exactly two participants
         // if ($participants->count() !== 2) {
         //     return null;
         // }
 
+       // dd($participants);
+
         // Get the participant who is not the authenticated user
+
+
         $receiverParticipant = $participants->where('participantable_id', '!=', auth()->id())
             ->where('participantable_type', get_class(auth()->user()))
             ->first();
 
+
+       
+
+
         if ($receiverParticipant) {
             // Return the associated model via the participant's relationship
+
+         //  dd('reacch',$receiverParticipant->participantable);
             return $receiverParticipant->participantable;
         }
 

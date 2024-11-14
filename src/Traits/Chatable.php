@@ -75,6 +75,7 @@ trait Chatable
          // Determine if this is a self-conversation (for the same user as both participants)
          $selfConversationCheck = $participantId == $authenticatedUserId && $participantType === $authenticatedUserType;
      
+       //  dd($selfConversationCheck);
          $existingConversationQuery = Conversation::withoutGlobalScopes()
              ->where('type', $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE)
              ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType, $selfConversationCheck) {
@@ -94,9 +95,12 @@ trait Chatable
                  }
              }, '=', $selfConversationCheck ? 1 : 2);
      
+
          // Get the first matching conversation
          $existingConversation = $existingConversationQuery->first();
-          
+
+       // dd($existingConversation,$selfConversationCheck);
+         
          // If an existing conversation is found, return it
          if ($existingConversation) {
              return $existingConversation;
@@ -108,7 +112,8 @@ trait Chatable
         $existingConversation->save();
 
             
-         // Add the authenticated user as a participant
+
+             // Add the authenticated user as a participant
          Participant::create([
              'conversation_id' => $existingConversation->id,
              'participantable_id' => $authenticatedUserId,
