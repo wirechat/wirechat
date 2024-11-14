@@ -88,6 +88,20 @@ class Participant extends Model
     }
 
 
+
+    /**
+     * Scope for filtering by participantable model.
+     */
+    /**
+     * Remove global scope withoutExited.
+     */
+    public function scopeWithExited(Builder $query): void
+    {
+        $query->withoutGlobalScope('withoutExited');
+    }
+
+
+
     /**
      * Define a relationship to fetch the conversation.
      */
@@ -102,7 +116,6 @@ class Participant extends Model
      **/
     function isAdmin()
     {
-
         return $this->role == ParticipantRole::OWNER || $this->role == ParticipantRole::ADMIN;
     }
 

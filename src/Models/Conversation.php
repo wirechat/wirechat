@@ -190,11 +190,11 @@ class Conversation extends Model
         }
 
         // Attach the participant to the conversation
-        $participant = $this->participants()->updateOrCreate([
+        $participant = $this->participants()->withExited()->updateOrCreate([
             'participantable_id' => $participant->id,
             'participantable_type' => get_class($participant),
             'role' => ParticipantRole::PARTICIPANT
-        ], ['exited_at' => null]);
+        ], ['exited_at' => null]); //also update exited_at to null so they can see the conversation and be able to participate
 
         return $participant;
     }

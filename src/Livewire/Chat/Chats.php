@@ -78,8 +78,8 @@ class Chats extends Component
   
       ->tap(fn($query) => $this->applyEagerLoading($query))
       ->whereHas('participants', function ($query){ $query->whereParticipantable(auth()->user()); })
-      ->when(trim($this->search) != '', fn($query) => $this->applySearchConditions($query)) // Apply search
-      ->when(trim($this->search) == '', fn($query) => $query->withoutDeleted()->withoutBlanks()) // Without blanks & deletedByUser when no search
+      ->when(trim($this->search??'') != '', fn($query) => $this->applySearchConditions($query)) // Apply search
+      ->when(trim($this->search??'') == '', fn($query) => $query->withoutDeleted()->withoutBlanks()) // Without blanks & deletedByUser when no search
       ->latest('updated_at')
       ->paginate(10, ['*'], 'page', $this->page);
 
