@@ -21,6 +21,7 @@ use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Notifications\MessageNotification;
+use Namu\WireChat\Notifications\NewMessageNotification;
 
 class NotifyParticipants implements ShouldQueue
 {
@@ -74,17 +75,14 @@ class NotifyParticipants implements ShouldQueue
         $this->conversation->participants()
 
         //exclude current user 
+        ->with('participantable')
         ->where("$this->participantsTable.participantable_id", '!=', $this->auth->id)
         ->where("$this->participantsTable.participantable_type", get_class($this->auth))
         // ->select("$this->participantsTable.*")
         ->latest('last_active_at') // Prioritize active participants
         ->chunk(50, function ($participants) {
             foreach ($participants as $key=> $participant) {
-
-                broadcast(new NotifyParticipant($participant, $this->message));
-              //  Log::info("broadcasetd.key-$key.conversation-{$this->message->conversation_id}.participant-{$participant->participantable_id}");
-
-                // Additional logic as needed
+               broadcast(new NotifyParticipant($participant, $this->message));
             }
         });
 

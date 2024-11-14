@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Notifications\TestNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
@@ -29,6 +30,7 @@ use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
+use Namu\WireChat\Notifications\NewMessageNotification;
 
 class Chat extends Component
 {
@@ -605,10 +607,14 @@ class Chat extends Component
 
             //if conversation is private then Notify particpant immediately
             if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
-                if ($this->receiverParticipant) {
-                broadcast( new NotifyParticipant($this->receiverParticipant,$message))->toOthers();
 
+                if ($this->conversation->isPrivate() && $this->receiver) {
+
+                    broadcast( new NotifyParticipant($this->receiverParticipant,$message))->toOthers();
+                //    Notification::send($this->receiver, new NewMessageNotification($message));
+                
                 }
+             
 
             } else {
                 # code...

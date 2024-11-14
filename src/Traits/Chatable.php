@@ -64,43 +64,39 @@ trait Chatable
 
      public function createConversationWith(Model $participant, ?string $message = null)
      {
+        
+   
          $participantId = $participant->id;
          $participantType = get_class($participant);
      
          $authenticatedUserId = $this->id;
          $authenticatedUserType = get_class($this);
      
-         // Check if this is a self-conversation (both participants are the authenticated user)
+         // Determine if this is a self-conversation (for the same user as both participants)
          $selfConversationCheck = $participantId == $authenticatedUserId && $participantType === $authenticatedUserType;
      
-         // Define the base query for finding conversations
          $existingConversationQuery = Conversation::withoutGlobalScopes()
-         ->where('type', $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE);
-
-        if ($selfConversationCheck) {
-            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType) {
-                $query->where('participantable_id', $authenticatedUserId)
-                    ->where('participantable_type', $authenticatedUserType)
-                    ->selectRaw('conversation_id, COUNT(*) AS participant_count')
-                    ->having('participant_count', '=', 1);
-            });
-        } else {
-            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
-                $query->where(function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
-                        $query->where('participantable_id', $authenticatedUserId)
-                            ->where('participantable_type', $authenticatedUserType);
-                    })
-                    ->orWhere(function ($query) use ($participantId, $participantType) {
-                        $query->where('participantable_id', $participantId)
-                            ->where('participantable_type', $participantType);
-                    })
-                    ->selectRaw('conversation_id, COUNT(DISTINCT participantable_id) AS distinct_participants')
-                    ->having('distinct_participants', '=', 2);
-            });
-        }
-
-        $existingConversation = $existingConversationQuery->first();
-
+             ->where('type', $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE)
+             ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType, $selfConversationCheck) {
+                 if ($selfConversationCheck) {
+                     // Self-conversation: check for one participant record
+                     $query->where('participantable_id', $authenticatedUserId)
+                         ->where('participantable_type', $authenticatedUserType);
+                 } else {
+                     // Private conversation between two participants
+                     $query->where(function ($query) use ($authenticatedUserId, $authenticatedUserType) {
+                         $query->where('participantable_id', $authenticatedUserId)
+                               ->where('participantable_type', $authenticatedUserType);
+                     })->orWhere(function ($query) use ($participantId, $participantType) {
+                         $query->where('participantable_id', $participantId)
+                               ->where('participantable_type', $participantType);
+                     });
+                 }
+             }, '=', $selfConversationCheck ? 1 : 2);
+     
+         // Get the first matching conversation
+         $existingConversation = $existingConversationQuery->first();
+          
          // If an existing conversation is found, return it
          if ($existingConversation) {
              return $existingConversation;

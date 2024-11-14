@@ -54,7 +54,7 @@ $primaryColor= WireChat::getColor();
 
 
 <div x-init=" setTimeout(() => {
-     conversationElement = document.getElementById('conversation-' + {{ $selectedConversationId }});
+     conversationElement = document.getElementById('conversation-{{$selectedConversationId }}');
 
      // Scroll to the conversation element
      if (conversationElement) {
@@ -99,14 +99,14 @@ $primaryColor= WireChat::getColor();
             $wire.$refresh()
                 
         });
+        
+        Echo.private('App.Models.User.{{auth()->id()}}')
+        .notification((notification) => {
+            if(notification.type=='Namu\\WireChat\\Notifications\\NewMessageNotification'){
+                  $wire.$refresh();
+               }
+        });
 
-        {{-- Echo.private('participant.{{auth()->id()}}')
-        .listen('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', (event) => {
-
-            if(event.type=="Namu\\WireChat\\Notifications\\MessageNotification"){
-                $wire.$refresh()
-            }
-             }); --}}
     
         "
          class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">

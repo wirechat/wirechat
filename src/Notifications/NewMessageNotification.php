@@ -11,21 +11,24 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Models\Message;
 
-class MessageNotification extends Notification implements ShouldBroadcastNow
+class NewMessageNotification extends Notification implements ShouldBroadcastNow
 {
-    use Queueable;
+  //  use Queueable;
 
     /**
      * Create a new notification instance.
      */
     public $message;
 
-    public function __construct($message)
+    public function __construct(Message $message)
     {
         $this->message = $message;
-        $this->onQueue(WireChat::messageNotificationQueue());
-        $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
+
+      ///  $this->onConnection('sync');
+      //  $this->onQueue(WireChat::notificationsQueue());
+     //   $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
     }
 
     /**
@@ -36,16 +39,18 @@ class MessageNotification extends Notification implements ShouldBroadcastNow
     public function via(object $notifiable): array
     {
         return ['broadcast'];
+
     }
 
     /**
      * Determine if the notification should be sent.
      * Only send if the message is less than 3 minutes old.
      */
-    public function shouldSend(object $notifiable, string $channel): bool
-    {
-        return $this->message->created_at->greaterThan(Carbon::now()->subMinutes(3));
-    }
+    // public function shouldSend(object $notifiable, string $channel): bool
+    // {
+    //    /// dd($this->message->created_at->greaterThan(Carbon::now()->subMinutes(3)));
+    //     return $this->message->created_at->greaterThan(Carbon::now()->subMinutes(3));
+    // }
     
     // /**
     //  * Get the channels the event should broadcast on.
@@ -62,6 +67,7 @@ class MessageNotification extends Notification implements ShouldBroadcastNow
     // Broadcast data for real-time notifications
     public function toBroadcast($notifiable)
     {
+
         return new BroadcastMessage([
             'message_id' => $this->message->id,
             'conversation_id' => $this->message->conversation_id,
