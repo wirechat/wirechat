@@ -117,12 +117,13 @@ class Conversation extends Model
 
     /**
      * Get a participant model  from the user
-     * @param Model $user
+     * @param Model|Authenticatable $user
      * @return Participant|null
      */
-   public function participant(Model|Authenticatable $user)
+   public function participant(Model $user)
 {
     $query = $this->participants()->withoutGlobalScope('withoutExited');
+
 
     if ($this->relationLoaded('participants')) {
         $participant = $query->where('participantable_id', $user->id)
@@ -308,20 +309,27 @@ class Conversation extends Model
     //     }
     // }
 
+    /**
+     * Get the receiver of the private conversation
+     * 
+     * */ 
     public function getReceiver()
     {
+
+
         // Check if the conversation is private
-        if ($this->type != ConversationType::PRIVATE) {
+        if (!in_array($this->type,[ConversationType::PRIVATE, $this->type != ConversationType::SELF ]) ) {
             return null;
         }
+
 
         // Ensure participants are already loaded (use the loaded relationship, not fresh queries)
         $participants = $this->participants;
 
         // Ensure there are exactly two participants
-        if ($participants->count() !== 2) {
-            return null;
-        }
+        // if ($participants->count() !== 2) {
+        //     return null;
+        // }
 
         // Get the participant who is not the authenticated user
         $receiverParticipant = $participants->where('participantable_id', '!=', auth()->id())

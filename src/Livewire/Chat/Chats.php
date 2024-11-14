@@ -237,6 +237,12 @@ class Chats extends Component
   {
 
     $this->loadConversations();
+
+
+
+
+
+  //  dd($conversationIds);
     // Pass data to the view
     return view('wirechat::livewire.chat.chats');
   }

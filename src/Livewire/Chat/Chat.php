@@ -20,6 +20,7 @@ use Livewire\WithPagination;
 use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
+use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Jobs\BroadcastMessage;
@@ -55,6 +56,7 @@ class Chat extends Component
 
 
     public Participant $authParticipant;
+    public Participant $receiverParticipant;
 
 
     //Theme 
@@ -112,6 +114,9 @@ class Chat extends Component
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
+
+
+
         //before appending message make sure it belong to this conversation 
         if ($event['message']['conversation_id'] == $this->conversation->id) {
 
@@ -444,7 +449,8 @@ class Chat extends Component
         $this->removeReply();
 
         #reset expred conversation deletion
-        $this->removeExpiredConversationDeletion();
+        // $this->removeExpiredConversationDeletion();
+
     }
 
     /**
@@ -595,8 +601,21 @@ class Chat extends Component
 
             //!remove the receiver from the messageCreated and add it to the job instead 
             //!also do not forget to exlude auth user or message owner from particpants  
-            BroadcastMessage::dispatch($message)->onQueue(WireChat::messagesQueue());
+            broadcast( new MessageCreated($message))->toOthers();
+
+            //if conversation is private then Notify particpant immediately
+            if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
+                if ($this->receiverParticipant) {
+                broadcast( new NotifyParticipant($this->receiverParticipant,$message))->toOthers();
+
+                }
+
+            } else {
+                # code...
             NotifyParticipants::dispatch($this->conversation, $message);
+
+            }
+            
         } catch (\Throwable $th) {
 
             Log::error($th->getMessage());
@@ -735,8 +754,6 @@ class Chat extends Component
     }
 
 
-
-
     public function mount()
     {
         // Check authentication
@@ -755,9 +772,20 @@ class Chat extends Component
         // Assign receiver and conversation ID
         $this->receiver = $this->conversation->getReceiver();
         $this->conversationId = $this->conversation->id;
+
+       // dd($this->receiver);
     
         //Set auth participant 
         $this->authParticipant=$this->conversation->participant(auth()->user());
+
+        if ($this->conversation->isPrivate()) {
+            # code...
+             $this->receiverParticipant=$this->conversation->participant($this->receiver);
+
+        }
+
+         //update auth participant last active ;
+         $this->authParticipant->update(['last_active_at' => now()]);
 
         // Attempt to clear expired deletion if necessary
         $this->removeExpiredConversationDeletion();

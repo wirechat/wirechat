@@ -142,29 +142,26 @@
 
 
     loadEmojiPicker();
+    {{-- if ($wire.conversationId == 51) {
 
-
-
-{{-- if ($wire.conversationId == 51) {
-
-        setInterval(() => {
-           
-            sentences = [
-                'This is a fake sentence.',
-                'Alpine.js is great for reactive UIs!',
-                'Let’s build something amazing with Laravel.',
-                'This is another random sentence.',
-                'Keep coding and stay productive!',
-            ];
-            sentence= sentences[Math.floor(Math.random() * sentences.length)];
-            // Simulate the body message with a random sentence
-            //alert(sentence)
-            $wire.body = sentence;
+            setInterval(() => {
             
-            // Call the Livewire sendMessage method
-            $wire.sendMessage();
-        }, 1000); // Call every 3 seconds
-    } --}}
+                sentences = [
+                    'This is a fake sentence.',
+                    'Alpine.js is great for reactive UIs!',
+                    'Let’s build something amazing with Laravel.',
+                    'This is another random sentence.',
+                    'Keep coding and stay productive!',
+                ];
+                sentence= sentences[Math.floor(Math.random() * sentences.length)];
+                // Simulate the body message with a random sentence
+                //alert(sentence)
+                $wire.body = sentence;
+                
+                // Call the Livewire sendMessage method
+                $wire.sendMessage();
+            }, 7000); // Call every 3 seconds
+        } --}}
      "
     @scroll-bottom.window="
         

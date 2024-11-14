@@ -13,20 +13,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
 
-class NotifyParticipant implements ShouldBroadcast
+class NotifyParticipant implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(public Participant  $participant,public Message $message)
     {
 
-        $this->dontBroadcastToCurrentUser();
+      //  $this->dontBroadcastToCurrentUser();
         
-        //Log::info($participant);
+     // dd($message->conversation->isPrivate());
+      //  Log::info($participant);
+       
+    }
+
+
+       /**
+     * The name of the queue on which to place the broadcasting job.
+     */
+    public function broadcastQueue(): string
+    {
+        return $this->message->conversation->isPrivate()?WireChat::messagesQueue():WireChat::notificationsQueue();
     }
 
     public function broadcastOn(): array

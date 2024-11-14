@@ -95,7 +95,7 @@ $primaryColor= WireChat::getColor();
         Echo.private('participant.{{auth()->id()}}')
         .listen('.Namu\\WireChat\\Events\\NotifyParticipant', (e) => {
             
-            
+           // alert('here');
             $wire.$refresh()
                 
         });

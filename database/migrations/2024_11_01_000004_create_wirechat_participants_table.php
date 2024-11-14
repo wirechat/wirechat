@@ -32,12 +32,12 @@ return new class extends Migration
     
             // Timestamps for tracking participant activity
             $table->timestamp('exited_at')->nullable()->index();  // Index if filtering active/inactive participants
+            $table->timestamp('last_active_at')->nullable();
             $table->timestamp('conversation_cleared_at')->nullable()->index();
             $table->timestamp('conversation_deleted_at')->nullable()->index();
             
             $table->softDeletes();
             $table->timestamps();
-
             
             // Unique constraint on conversation_id, participantable_id, and participantable_type
             $table->unique(['conversation_id', 'participantable_id', 'participantable_type'],'conv_part_id_type_unique');

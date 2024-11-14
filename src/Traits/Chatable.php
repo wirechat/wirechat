@@ -75,30 +75,32 @@ trait Chatable
      
          // Define the base query for finding conversations
          $existingConversationQuery = Conversation::withoutGlobalScopes()
-             ->where('type', $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE);
-     
-         if ($selfConversationCheck) {
-             // If it's a self-conversation, check for one participant
-             $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType) {
-                 $query->where('participantable_id', $authenticatedUserId)
-                       ->where('participantable_type', $authenticatedUserType)
-                       ->groupBy('conversation_id')
-                       ->havingRaw('COUNT(*) = 1'); // Ensuring only one participant
-             });
-         } else {
-             // For non-self conversations, check for both participants
-             $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
-                 $query->select('conversation_id')
-                       ->whereIn('participantable_id', [$authenticatedUserId, $participantId])
-                       ->whereIn('participantable_type', [$authenticatedUserType, $participantType])
-                       ->groupBy('conversation_id')
-                       ->havingRaw('COUNT(DISTINCT participantable_id) = 2'); // Ensuring two distinct participants
-             });
-         }
-     
-         // Get the first matching conversation
-         $existingConversation = $existingConversationQuery->first();
-     
+         ->where('type', $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE);
+
+        if ($selfConversationCheck) {
+            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType) {
+                $query->where('participantable_id', $authenticatedUserId)
+                    ->where('participantable_type', $authenticatedUserType)
+                    ->selectRaw('conversation_id, COUNT(*) AS participant_count')
+                    ->having('participant_count', '=', 1);
+            });
+        } else {
+            $existingConversationQuery->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
+                $query->where(function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType) {
+                        $query->where('participantable_id', $authenticatedUserId)
+                            ->where('participantable_type', $authenticatedUserType);
+                    })
+                    ->orWhere(function ($query) use ($participantId, $participantType) {
+                        $query->where('participantable_id', $participantId)
+                            ->where('participantable_type', $participantType);
+                    })
+                    ->selectRaw('conversation_id, COUNT(DISTINCT participantable_id) AS distinct_participants')
+                    ->having('distinct_participants', '=', 2);
+            });
+        }
+
+        $existingConversation = $existingConversationQuery->first();
+
          // If an existing conversation is found, return it
          if ($existingConversation) {
              return $existingConversation;
@@ -261,6 +263,10 @@ trait Chatable
                 'body' => $message
             ]);
 
+
+            //update auth participant last active 
+            $participant  = $conversation->participant($this);
+            $participant->update(['last_active_at' => now()]);
 
             // Update the conversation timestamp
             $conversation->updated_at = now();

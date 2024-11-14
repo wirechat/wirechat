@@ -2,28 +2,33 @@
 
 namespace Namu\WireChat\Events;
 
+use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphTypeHelper;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 
 class MessageCreated implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets,InteractsWithQueue, SerializesModels ,Queueable;
 
     public $message;
     // public $receiver;
 
     public function __construct(Message $message)
     {
+        $this->onQueue(WireChat::messagesQueue());
         $this->message = $message->load([]);
     }
 
@@ -37,6 +42,22 @@ class MessageCreated implements ShouldBroadcast
         return [
             new PrivateChannel('conversation.'.$this->message->conversation_id)
         ];
+    }
+
+
+
+    // public function broadcastWhen(): bool
+    // {
+    //     // Check if the message is not older than 2 minutes
+    //     return Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinutes(2));
+    // }
+
+       /**
+     * The name of the queue on which to place the broadcasting job.
+     */
+    public  function broadcastQueue(): string
+    {
+        return WireChat::messagesQueue();
     }
 
     /**

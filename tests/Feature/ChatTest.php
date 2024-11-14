@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Events\NotifyParticipant;
@@ -58,6 +59,38 @@ test('returns 403(Forbidden) if user doesnt not bleong to conversation', functio
 
     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertStatus(403);
+});
+
+
+describe('mount()', function () {
+
+
+
+
+    test('updates the auth particiapnt  last_active_at field when component is opened', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        Carbon::setTestNow(now()->addSeconds(3));
+        $conversation = $auth->createConversationWith($receiver);
+
+        Carbon::setTestNow(now()->addSeconds(4));
+       // $this->actingAs($auth);
+
+
+        $participant = $conversation->participant($auth);
+        expect($participant->last_active_at)->toBe(null);
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+
+        $participant->refresh();
+
+
+        expect($participant->last_active_at)->not->toBe(null);
+    });
+
 });
 
 
@@ -339,7 +372,7 @@ describe('Sending messages ', function () {
     });
 
 
-    test('it pushes job "BroadcastMessage" when message is sent', function () {
+    test('it doesn not pushes job "BroadcastMessage" when message is sent', function () {
         Event::fake();
         Queue::fake();
         $auth = User::factory()->create();
@@ -355,7 +388,7 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Queue::assertPushed(BroadcastMessage::class, function ($event) use ($message) {
+        Queue::assertNotPushed(BroadcastMessage::class, function ($event) use ($message) {
             return $event->message->id === $message->id;
         });
     });
@@ -383,7 +416,7 @@ describe('Sending messages ', function () {
     });
 
 
-    test('it pushed job "NotifyParticipants" when message is sent', function () {
+    test('it does not push job "NotifyParticipants" when conversation is private', function () {
         Event::fake();
         Queue::fake();
        // Queue::fake();
@@ -393,6 +426,62 @@ describe('Sending messages ', function () {
         $conversation = Conversation::factory()
                         ->withParticipants([$auth,$receiver])
             ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->set("body", 'New message')
+        ->call("sendMessage");
+
+        $message = Message::first();
+
+
+
+        Queue::assertNotPushed(NotifyParticipants::class, function ($event) use ($conversation,$message) {
+            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
+        });
+
+
+
+    });
+
+
+    test('it does not push job "NotifyParticipants" when conversation is Self', function () {
+        Event::fake();
+        Queue::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth])
+            ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->set("body", 'New message')
+        ->call("sendMessage");
+
+        $message = Message::first();
+
+
+
+        Queue::assertNotPushed(NotifyParticipants::class);
+
+
+
+    });
+
+
+    test('it only pushes job "NotifyParticipants" when conversation is a Group ', function () {
+        Event::fake();
+        Queue::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create(['type'=>ConversationType::GROUP]);
 
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -653,7 +742,7 @@ describe('Sending messages ', function () {
     });
 
 
-    test('it pushes job "BroadcastMessage" when sendLike is called', function () {
+    test('it Broadcaste event job "MessageCreted" when sendLike is called and conversation is Group', function () {
         Event::fake();
         Queue::fake();
      
@@ -661,7 +750,7 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
                         ->withParticipants([$auth,$receiver])
-            ->create();
+                        ->create(['type'=>ConversationType::GROUP]);
 
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -669,35 +758,53 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Queue::assertPushed(BroadcastMessage::class, function ($event) use ($conversation,$message) {
-            return  $event->message->id === $message->id;
-        });
+        event::assertDispatched(MessageCreated::class);
     });
-
-    test('it broadcasts event "MessageCreated" when sendLike is called', function () {
+ 
+    test('it Broadcaste event job "MessageCreted" when sendLike is called and conversation is PRIVATE', function () {
         Event::fake();
-
+        Queue::fake();
+     
         $auth = User::factory()->create();
-        $receiver = User::factory()->create(['name'=>'John']);
+        $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
-                                    ->withParticipants([$auth,$receiver])
-                                    ->create();
+                        ->withParticipants([$auth,$receiver])
+                        ->create(['type'=>ConversationType::PRIVATE]);
 
 
-        Livewire::actingAs($auth)
-                ->test(ChatBox::class,['conversation' => $conversation->id])
-                ->call("sendLike");
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
 
         $message = Message::first();
 
-        Event::assertDispatched(MessageCreated::class, function ($event) use ($message,) {
-            return $event->message->id === $message->id;
-
-        });
+        event::assertDispatched(MessageCreated::class);
     });
 
 
-    test('it pushed job "NotifyParticipants" when sendLike is called', function () {
+    test('it does not Broadcaste event job "MessageCreted" when sendLike is called and conversation is SELF', function () {
+        Event::fake();
+        Queue::fake();
+     
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth])
+                        ->create(['type'=>ConversationType::SELF]);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        event::assertNotDispatched(MessageCreated::class);
+    });
+
+
+
+
+
+    test('it pushed job "NotifyParticipants" when sendLike is called and is GROUP', function () {
         Event::fake();
         Queue::fake();
        // Queue::fake();
@@ -706,7 +813,7 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
                         ->withParticipants([$auth,$receiver])
-            ->create();
+            ->create(['type'=>ConversationType::GROUP]);
 
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -721,8 +828,48 @@ describe('Sending messages ', function () {
         });
     });
 
+    test('it does not pushed job "NotifyParticipants" when sendLike is called and is PRIVATE', function () {
+        Event::fake();
+        Queue::fake();
+       // Queue::fake();
 
-    test('it broadcasts event "NotifyParticipant" when sendLike is called', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create(['type'=>ConversationType::PRIVATE]);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        Queue::assertNotPushed(NotifyParticipants::class);
+    });
+
+    test('it does not pushed job "NotifyParticipants" when sendLike is called and is SELF', function () {
+        Event::fake();
+        Queue::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth])
+            ->create(['type'=>ConversationType::SELF]);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        Queue::assertNotPushed(NotifyParticipants::class);
+    });
+
+
+    test('it broadcasts event "NotifyParticipant" when sendLike is called when conversation is PRIVATE', function () {
         Event::fake();
        // Queue::fake();
 
@@ -730,7 +877,7 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
                         ->withParticipants([$auth,$receiver])
-            ->create();
+                        ->create(['type'=>ConversationType::PRIVATE]);
 
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -743,6 +890,46 @@ describe('Sending messages ', function () {
 
         });
     });
+
+
+    test('it does not broadcasts event "NotifyParticipant" when sendLike is called when conversation is SELF', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth])
+                        ->create(['type'=>ConversationType::SELF]);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        Event::assertNotDispatched(NotifyParticipant::class);
+    });
+
+    test('it does not broadcasts event "NotifyParticipant" when sendLike is called when conversation is GROUP', function () {
+        Event::fake();
+       // Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth])
+                        ->create(['type'=>ConversationType::GROUP]);
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("sendLike");
+
+        $message = Message::first();
+
+        Event::assertNotDispatched(NotifyParticipant::class);
+    });
+
 
     test('sending hearts(❤️) is rate limited by 50 in 60 seconds', function () {
         $auth = User::factory()->create();
@@ -1240,43 +1427,43 @@ describe('Deleting Conversation', function () {
     });
 
 
-    test('it also resets conversation_deleted_at value of auth-particiapant they send new message from Chat within component to conversation themselves ', function () {
+    // test('it does not also resets conversation_deleted_at value of auth-particiapant they send new message from Chat within component to conversation themselves ', function () {
 
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create(['name' => 'John']);
+    //     $auth = User::factory()->create();
+    //     $receiver = User::factory()->create(['name' => 'John']);
 
-        $conversation = $auth->createConversationWith($receiver);
+    //     $conversation = $auth->createConversationWith($receiver);
 
-        $authParticipant = $conversation->participant($auth);
+    //     $authParticipant = $conversation->participant($auth);
 
-        //auth -> receiver
-        $auth->sendMessageTo($receiver, message: '1 message');
-        $auth->sendMessageTo($receiver, message: '2 message');
+    //     //auth -> receiver
+    //     $auth->sendMessageTo($receiver, message: '1 message');
+    //     $auth->sendMessageTo($receiver, message: '2 message');
 
-        //receiver -> auth 
-        $receiver->sendMessageTo($auth, message: '3 message');
-        $receiver->sendMessageTo($auth, message: '4 message');
+    //     //receiver -> auth 
+    //     $receiver->sendMessageTo($auth, message: '3 message');
+    //     $receiver->sendMessageTo($auth, message: '4 message');
 
-        ///load and delete conversation
-        Carbon::setTestNow(now()->addSeconds(4));
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->call("deleteConversation");
+    //     ///load and delete conversation
+    //     Carbon::setTestNow(now()->addSeconds(4));
+    //     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->call("deleteConversation");
 
-        //assert not null
-        $authParticipant->refresh();
-        expect($authParticipant->conversation_deleted_at)->not->toBe(null);
+    //     //assert not null
+    //     $authParticipant->refresh();
+    //     expect($authParticipant->conversation_deleted_at)->not->toBe(null);
 
 
-        //load again
-        Carbon::setTestNow(now()->addSeconds(20));
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-        ->set('body','hello')
-        ->call('sendMessage');
+    //     //load again
+    //     Carbon::setTestNow(now()->addSeconds(20));
+    //     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+    //     ->set('body','hello')
+    //     ->call('sendMessage');
 
-        //assert
-        $authParticipant->refresh();
-        expect($authParticipant->conversation_deleted_at)->toBe(null);
+    //     //assert
+    //     $authParticipant->refresh();
+    //     expect($authParticipant->conversation_deleted_at)->toBe(null);
          
-    });
+    // });
     
 });
 

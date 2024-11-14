@@ -41,7 +41,7 @@ test('it renders livewire Chat component', function () {
     $conversation =  Conversation::factory()->withParticipants([$auth])->create();
    // dd($conversation);
    $this->actingAs($auth)->get(route("wirechat.chat",$conversation->id))
-   ->assertSeeLivewire(Chat::class);
+                           ->assertSeeLivewire(Chat::class);
     
 });
 

@@ -19,7 +19,8 @@ class Participant extends Model
         'role',
         'exited_at',
         'conversation_deleted_at',
-        'conversation_cleared_at'
+        'conversation_cleared_at',
+        'last_active_at'
     ];
 
 
@@ -27,7 +28,9 @@ class Participant extends Model
         'role' => ParticipantRole::class,
         'exited_at' => 'datetime',
         'conversation_deleted_at' => 'datetime',
-        'conversation_cleared_at'=>'datetime'
+        'conversation_cleared_at'=>'datetime',
+        'last_active_at'=>'datetime'
+
     ];
 
 

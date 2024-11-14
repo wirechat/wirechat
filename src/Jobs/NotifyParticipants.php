@@ -12,6 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\NotifyParticipant;
@@ -46,7 +47,7 @@ class NotifyParticipants implements ShouldQueue
     {
         //  
         $this->onQueue(WireChat::notificationsQueue());
-        $this->delay(now()->addSeconds(1)); // Delay 
+        $this->delay(now()->addSeconds(3)); // Delay 
         $this->auth = $message->sendable;
 
 
@@ -64,27 +65,51 @@ class NotifyParticipants implements ShouldQueue
     {
 
 
-        // // Chunk the participants to avoid memory overload
-        $this->conversation->participants()
-            ->with('participantable')
-            ->where("$this->participantsTable.participantable_id", '!=', $this->auth->id)
-            ->where("$this->participantsTable.participantable_type", get_class($this->auth))
-            ->leftJoin("$this->messagesTable", function ($join) {
-                $join->on("$this->participantsTable.participantable_id", '=', "$this->messagesTable.sendable_id")
-                    ->on("$this->participantsTable.participantable_type", '=', "$this->messagesTable.sendable_type")
-                    ->where("$this->messagesTable.conversation_id", $this->conversation->id);
-            })
-            ->select("$this->participantsTable.*", DB::raw("MAX($this->messagesTable.created_at) as last_message_time")) // Get last message time
-            ->groupBy("$this->participantsTable.id") // Group by participants
-            ->orderByDesc('last_message_time') // Order by the most recent message
-            ->chunk(40, function ($participants) {
-                // Loop through participants in batches of 100
 
-                foreach ($participants as $participant) {
-                    event(new NotifyParticipant($participant,$this->message));
-                    // broadcast(new NotifyParticipant($participant));
-                }
-            });
+        /**
+         * Fetch participants, ordered by `last_active_at` in descending order,
+         * so that the most recently active participants are notified first. */
+
+    //     $queueToUse = $this->conversation->isPrivate()?WireChat::messagesQueue():WireChat::notificationsQueue();
+        $this->conversation->participants()
+
+        //exclude current user 
+        ->where("$this->participantsTable.participantable_id", '!=', $this->auth->id)
+        ->where("$this->participantsTable.participantable_type", get_class($this->auth))
+        // ->select("$this->participantsTable.*")
+        ->latest('last_active_at') // Prioritize active participants
+        ->chunk(50, function ($participants) {
+            foreach ($participants as $key=> $participant) {
+
+                broadcast(new NotifyParticipant($participant, $this->message));
+              //  Log::info("broadcasetd.key-$key.conversation-{$this->message->conversation_id}.participant-{$participant->participantable_id}");
+
+                // Additional logic as needed
+            }
+        });
+
+
+        // // // Chunk the participants to avoid memory overload
+        // $this->conversation->participants()
+        //     ->with('participantable')
+        //     ->where("$this->participantsTable.participantable_id", '!=', $this->auth->id)
+        //     ->where("$this->participantsTable.participantable_type", get_class($this->auth))
+        //     ->leftJoin("$this->messagesTable", function ($join) {
+        //         $join->on("$this->participantsTable.participantable_id", '=', "$this->messagesTable.sendable_id")
+        //             ->on("$this->participantsTable.participantable_type", '=', "$this->messagesTable.sendable_type")
+        //             ->where("$this->messagesTable.conversation_id", $this->conversation->id);
+        //     })
+        //     ->select("$this->participantsTable.*", DB::raw("MAX($this->messagesTable.created_at) as last_message_time")) // Get last message time
+        //     ->groupBy("$this->participantsTable.id") // Group by participants
+        //     ->orderByDesc('last_message_time') // Order by the most recent message
+        //     ->chunk(40, function ($participants) {
+        //         // Loop through participants in batches of 100
+
+        //         foreach ($participants as $participant) {
+        //             event(new NotifyParticipant($participant,$this->message));
+        //             // broadcast(new NotifyParticipant($participant));
+        //         }
+        //     });
 
         // $participants = $this->conversation->participants()
         // ->with('participantable')

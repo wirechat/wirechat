@@ -48,4 +48,44 @@ class ConversationFactory extends Factory
         });
     
     }
+
+    /* 
+    public function withParticipants(array $models, ?ParticipantRole $role = null): Factory
+    {
+        return $this->state(function () use ($models) {
+            $participantCount = count($models);
+
+            // Set type based on the number of participants
+            if ($participantCount == 1) {
+
+                return ['type' => ConversationType::SELF];
+            }
+
+            if ($participantCount == 2) {
+
+                return ['type' => ConversationType::PRIVATE];
+            }
+
+            if ($participantCount > 2) {
+
+                return ['type' => ConversationType::GROUP];
+            }
+          
+
+        })
+        ->afterCreating(function (Conversation $conversation) use ($models, $role) {
+            $role = $role ?? ParticipantRole::OWNER;
+
+            // Attach each participant to the conversation
+            foreach ($models as $model) {
+                Participant::factory()->create([
+                    'conversation_id' => $conversation->id,
+                    'participantable_id' => $model->id,
+                    'participantable_type' => get_class($model),
+                    'role' => $role,
+                ]);
+            }
+        });
+    }
+    */
 }

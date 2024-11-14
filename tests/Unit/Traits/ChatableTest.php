@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
@@ -355,6 +356,34 @@ describe('sendMessageTo() ',function(){
 
 
         
+
+    });
+
+
+
+    it('updates the auth particiapnt  last_active_at field when message is created', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        //create conversation
+        $conversation = $auth->createConversationWith($receiver);
+
+        $participant = $conversation->participant($auth);
+        expect($participant->last_active_at)->toBe(null);
+
+        //we use sleep to avoid timestamps being the same during test
+        sleep(1);
+
+        Carbon::setTestNow(now()->addSeconds(3));
+
+        $auth->sendMessageTo($receiver,'hello');
+
+        $participant->refresh();
+
+
+        expect($participant->last_active_at)->not->toBe(null);
 
     });
 
