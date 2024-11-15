@@ -43,4 +43,4 @@ describe('Delete Permanently',function(){
 
 
     });
-})->only();
+});

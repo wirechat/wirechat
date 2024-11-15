@@ -345,7 +345,7 @@ class Chat extends Component
             } catch (\Illuminate\Validation\ValidationException $th) {
 
 
-                return $this->dispatch('notify', type: 'warning', message: $th->getMessage());
+                return $this->dispatch('wirechat-toast', type: 'warning', message: $th->getMessage());
             }
 
 

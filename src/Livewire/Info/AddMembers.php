@@ -104,12 +104,18 @@ class AddMembers extends ModalComponent
         });
       } else {
 
-        #validte members count
+        #validate members count
         if ($this->newTotalCount >= WireChat::maxGroupMembers()) {
           return $this->dispatch('show-member-limit-error');
         }
 
+        #abort if member already exited group
+        $participant= $this->conversation->participant($model);
+        abort_if($participant?->hasExited(),403,'Cannot add '.$model->display_name.' because they left the group');
+
+
         // Add member if they are not selected
+      
         $this->selectedMembers->push($model);
       }
 
@@ -154,6 +160,7 @@ class AddMembers extends ModalComponent
     $this->conversation->loadCount('participants');
     $this->participants = $this->conversation->participants;
 
+    //var_dump($this->conversation);
     // Dump the participants count
     //  dump($this->participants->count());
 

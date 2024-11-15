@@ -8,7 +8,6 @@
 
 <main x-data="{
 
-    canLoadMore: @entangle('canLoadMore'),
     height: 0,
     previousHeight: 0,
     updateScrollPosition: function() {
@@ -37,7 +36,7 @@
         }, 0);"
     @scroll ="
         scrollTop= $el.scrollTop;
-        if((scrollTop<=0) && canLoadMore){
+        if((scrollTop<=0) && $wire.canLoadMore){
 
             $wire.loadMore();
 
@@ -66,6 +65,11 @@
         class="invisible transition-all duration-300 ">
         <x-wirechat::loading-spin />
     </div>
+{{-- 
+<button @click="$dispatch('wirechat-toast', {
+    type: 'warning',
+    message: 'File type is not allowed'
+})" >Notify</button> --}}
 
 
     {{-- Define previous message outside the loop --}}

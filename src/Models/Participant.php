@@ -179,10 +179,7 @@ class Participant extends Model
      */
     public function hasExited(): bool
     {
-        return self::withoutGlobalScopes()
-            ->where('id', $this->id)
-            ->whereNotNull('exited_at')
-            ->exists();
+        return $this->exited_at !=null;
     }
 
 

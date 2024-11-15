@@ -739,7 +739,7 @@
 
                         files = Array.from(files).slice(0, this.MAXFILES - count);
 
-                        return $dispatch('notify', {
+                        return $dispatch('wirechat-toast', {
                             type: 'warning',
                             message: 'File limit exceeded , allowed ' + this.MAXFILES
                         });
@@ -779,7 +779,7 @@
                         const errorMessages = invalidFiles.map((file) => {
                             if (file.size > this.maxSize) {
 
-                                return $dispatch('notify', {
+                                return $dispatch('wirechat-toast', {
                                     type: 'warning',
                                     message: `File size exceeds the maximum limit (9MB): ${file.name}`
                                 });
@@ -787,7 +787,7 @@
                             } else {
 
 
-                                return $dispatch('notify', {
+                                return $dispatch('wirechat-toast', {
                                     type: 'warning',
                                     message: 'File type is not allowed'
                                 });

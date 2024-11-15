@@ -166,6 +166,30 @@ describe('actions test',function(){
      });
 
 
+     test('it aborts if admin tries to add a member who exited the group', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+
+        #add participant
+        $randomUser = User::factory()->create(['name' => 'Micheal']);
+        $conversation->addParticipant($randomUser);
+
+
+        $userTobeRemoved = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($userTobeRemoved);
+
+        $participant->exitConversation();
+
+     
+        
+        $request =  Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request->call('toggleMember',$userTobeRemoved->id,$userTobeRemoved->getMorphClass())
+                ->assertStatus(403,"Cannot add {$participant->participantable->display_name} because they left the group");
+ 
+    });
+
+
      test('it shows "Already added to group" if already added to group', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');

@@ -5,8 +5,42 @@
     type:'default',
     message:' ',
     bannerVisibleAfter: 300,
+    counter: 3000, 
+    timer: null,
+    closeToast:function(){
+
+        this.bannerVisible = false;
+        clearInterval(this.timer);
+
+    }
     }"
 
+    @wirechat-toast.window="
+        message = $event.detail.message;
+        type = $event.detail.type;
+        bannerVisible = true;
+        counter = 3000;
+        if (timer) clearInterval(timer);
+        timer = setInterval(() => {
+            if (counter <= 0) {
+                bannerVisible = false;
+                clearInterval(timer);
+            } else {
+                counter -= 100;
+            }
+        }, 100);
+    "
+    @mouseenter="clearInterval(timer)"
+    @mouseleave="
+        timer = setInterval(() => {
+            if (counter <= 0) {
+                bannerVisible = false;
+                clearInterval(timer);
+            } else {
+                counter -= 100;
+            }
+        }, 100);
+    "
     x-show="bannerVisible"
     x-transition:enter="transition ease-out duration-500"
     x-transition:enter-start="-translate-y-10"
@@ -14,17 +48,8 @@
     x-transition:leave="transition ease-in duration-300"
     x-transition:leave-start="translate-y-0"
     x-transition:leave-end="-translate-y-10"
-    x-init="
-       {{-- this.message= $event.detail.message;
-        setTimeout(()=>{ bannerVisible = true }, bannerVisibleAfter); --}}
-    "
-    @notify.window="
-        message= $event.detail.message;
-        type= $event.detail.type;
-        bannerVisible=true;
-
-        setTimeout(()=>{ bannerVisible = false }, 3000);
-    "
+   
+    
     class="fixed  sm:top-2 top-0  z-50 inset-x-0 sm:max-w-md mx-auto sm:ml-auto sm:mx-0 w-full h-auto  py-2.5 duration-300 ease-out bg-white shadow-md sm:border rounded-md " x-cloak>
     <div class="flex items-center justify-between w-full h-full  px-3 mx-auto max-w-7xl ">
         <div class="flex items-center gap-3 w-full h-full ">
@@ -51,7 +76,7 @@
             <p class="text-xs  text-black " x-text="message"></p>
         </div>
 
-        <button @click="bannerVisible=false;" class="flex items-center flex-shrink-0 translate-x-1 ease-out duration-150 justify-center w-6 h-6 p-1.5 text-black rounded-full hover:bg-neutral-100">
+        <button @click="closeToast()" class="flex items-center flex-shrink-0 translate-x-1 ease-out duration-150 justify-center w-6 h-6 p-1.5 text-black rounded-full hover:bg-neutral-100">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     </div>

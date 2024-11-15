@@ -738,9 +738,12 @@ describe('actions test', function () {
         $request->call('removeFromGroup', $participant->id)
                 ->assertStatus(403,'You do not have permission to perform this action in this group. Only admins can proceed.');
  
-
     });
 
+
+
+
+   
 
 
     test('it creates ations REMOVED_BY_ADMIN when a participant is  removed from  group', function () {
@@ -789,7 +792,7 @@ describe('actions test', function () {
         $conversation= $conversation->refresh();
 
         expect($user->belongsToConversation($conversation))->toBe(false);
-     })->only();
+     });
 
 
 
@@ -845,4 +848,4 @@ describe('actions test', function () {
 
 
 
-})->only();
+});
