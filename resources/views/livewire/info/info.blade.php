@@ -127,7 +127,7 @@
 
 
                     {{-- Members count --}}
-                    <p class="mx-auto"> Members {{ $conversation->participants_count }} </p>
+                    <p class="mx-auto"> Members {{ $totalParticipants }} </p>
                 @else
                     {{-- Receiver --}}
                     <h5 class="text-2xl">{{ $receiver?->display_name }}</h5>
@@ -213,7 +213,7 @@
                 <button
                  wire:click="$dispatch('openWireChatModal', {component: 'members',arguments: { conversation: {{ $conversation->id }} }})"
                  class="flex w-full justify-between items-center px-8 ">
-                   <span class="text-gray-600 dark:text-gray-300"> Members {{ $conversation->participants_count }}</span>
+                   <span class="text-gray-600 dark:text-gray-300"> Members {{ $totalParticipants }}</span>
 
 
                     {{-- Search icon --}}

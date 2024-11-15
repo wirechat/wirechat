@@ -248,7 +248,7 @@ describe('actions test',function(){
      });
 
 
-     test('it dispatches refresh event after saving ', function () {
+     test('it dispatches participantsCountUpdated event after saving ', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -261,7 +261,7 @@ describe('actions test',function(){
                 ->call('toggleMember',$user->id,$user->getMorphClass())
                 ->call('save');
 
-        $request->assertDispatched('refresh');
+        $request->assertDispatched('participantsCountUpdated');
 
      });
 

@@ -822,7 +822,7 @@ describe('actions test', function () {
      });
 
 
-     test('it dispatches livewire event "refresh" after removing from group', function () {
+     test('it dispatches livewire event "participantsCountUpdated" after removing from group', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -837,7 +837,7 @@ describe('actions test', function () {
         #action
         $request->call('removeFromGroup', $participant->id);
 
-        $request->assertDispatched('refresh');
+        $request->assertDispatched('participantsCountUpdated');
 
     
 

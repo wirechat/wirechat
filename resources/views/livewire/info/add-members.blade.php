@@ -85,7 +85,6 @@
 
 </header>
 
-
 <div class="relative w-full p-2 ">
     {{-- <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5> --}}
     <section class="my-4">
@@ -148,7 +147,6 @@
 
             </ul>
         @endif
-
     </section>
 </div>
 

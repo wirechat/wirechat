@@ -42,6 +42,9 @@ class Members extends ModalComponent
     public $group;
 
 
+    public int $totalMembersCount;
+
+
     protected $page = 1;
     public $users;
     public $search;
@@ -215,7 +218,11 @@ class Members extends ModalComponent
           });
 
 
-        $this->dispatch('refresh')->to(Info::class);
+        //subtract one from total members and update chat list
+        $this->totalMembersCount =$this->totalMembersCount-1;
+
+
+        $this->dispatch('participantsCountUpdated',$this->totalMembersCount)->to(Info::class);
       //  $this->dispatch('refresh')->self();
 
     }
@@ -243,8 +250,10 @@ class Members extends ModalComponent
         abort_unless(auth()->check(), 401);
 
 
-        $this->conversation = $conversation->load('participants','group');
+        $this->conversation = $conversation->load('group')->loadCount('participants');
 
+
+        $this->totalMembersCount= $this->conversation->participants_count??0;
 
         abort_if($this->conversation->isPrivate(), 403, 'This is a private conversation');
 

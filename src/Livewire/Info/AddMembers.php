@@ -135,7 +135,8 @@ class AddMembers extends ModalComponent
     foreach ($this->selectedMembers as $key => $member) {
 
       #make sure user does not belong to conversation already 
-      $alreadyExists =  $member->belongsToConversation($this->conversation);
+      #we set gloabl scopes to true to as to also check members hidden by scopes- to avoid duplicate constraint error 
+      $alreadyExists =  $member->belongsToConversation($this->conversation,withoutGlobalScopes:true);
       if (!$alreadyExists) {
         $this->conversation->addParticipant($member);
       }
@@ -143,7 +144,7 @@ class AddMembers extends ModalComponent
 
     $this->closeModal();
 
-    $this->dispatch('refresh')->to(Info::class);
+    $this->dispatch('participantsCountUpdated',$this->newTotalCount)->to(Info::class);
   }
 
 

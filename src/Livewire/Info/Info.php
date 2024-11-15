@@ -47,8 +47,18 @@ class Info extends ModalComponent
 
 
   protected $listeners=[
-    "refresh"=>'$refresh'
+    "participantsCountUpdated"
   ];
+
+  public $totalParticipants;
+
+
+  public function participantsCountUpdated(int $newCount){
+
+   // dd($newCount);
+    return  $this->totalParticipants= $newCount;
+
+  }
 
 
 
@@ -222,7 +232,10 @@ class Info extends ModalComponent
     abort_unless(auth()->user()->belongsToConversation($this->conversation),403);
 
     
-    $this->conversation = $this->conversation->load('group.conversation.participants', 'group.cover')->loadCount('participants');
+    $this->conversation = $this->conversation->load('group.conversation', 'group.cover')->loadCount('participants');
+
+  
+    $this->totalParticipants= $this->conversation->participants_count;
     $this->group = $this->conversation->group;
 
     $this->setDefaultValues();
