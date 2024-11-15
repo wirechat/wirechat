@@ -210,6 +210,63 @@ describe('actions test',function(){
     });
 
 
+
+    test('it aborts if NON-admin tries to add a member removed by admin', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+
+        #add participant
+        $randomUser = User::factory()->create(['name' => 'Micheal']);
+        $conversation->addParticipant($randomUser);
+
+
+        $userTobeRemoved = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($userTobeRemoved);
+
+        #remove by auth
+        $participant->remove($auth);
+
+        
+        $request =  Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request->call('toggleMember',$userTobeRemoved->id,$userTobeRemoved->getMorphClass())
+                ->assertStatus(403,"Cannot add {$participant->participantable->display_name} because they were removed from the group by an Admin.");
+ 
+    });
+
+
+
+    test('it does not abort if ADMIN tries to add a member removed by admin', function () {
+        $auth = User::factory()->create(['name'=>'auth User']);
+        $conversation = $auth->createGroup('My Group');
+
+ 
+        $userTobeRemoved = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($userTobeRemoved);
+
+        #assert new count is 2
+        expect($conversation->participants()->count())->toBe(2);
+
+        #remove by auth
+        $participant->remove($auth);
+
+        #assert new count is now 1 
+  
+        expect($conversation->participants()->count())->toBe(1);
+
+        
+        $request =  Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request->call('toggleMember',$userTobeRemoved->id,$userTobeRemoved->getMorphClass())
+                ->call('save')
+                ->assertStatus(200);
+
+
+        #assert new count is back to  2
+        expect($conversation->participants()->count())->toBe(2);
+ 
+    });
+
+
      test('it shows "Already added to group" if already added to group', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -225,7 +282,6 @@ describe('actions test',function(){
                 #user  
                 ->assertSee('Already added to group');
      });
-
 
 
 

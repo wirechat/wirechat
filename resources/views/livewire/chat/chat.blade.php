@@ -205,10 +205,10 @@
         {{-- ---------- --}}
         {{-- -Footer--- --}}
         {{-- ---------- --}}
-        <footer x-data="{ 'openEmojiPicker': false }" class="shrink-0 h-auto relative  ">
+        <footer x-data="{ 'openEmojiPicker': false }" class="shrink-0 h-auto relative ">
 
             <div
-                class="  border-t  dark:bg-gray-800 bg-gray-50 z-[50]   rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
+                class=" px-3 md:px-1 border-t  dark:bg-gray-800 bg-gray-50 z-[50]   rounded-md dark:border-gray-700  flex flex-col gap-3 items-center  w-full   mx-auto">
 
                 {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
                 <section x-cloak x-show="openEmojiPicker"

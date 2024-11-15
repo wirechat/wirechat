@@ -83,7 +83,7 @@ describe('AddParticipant()', function () {
         expect(count($conversation->participants()->get()))->toBe(1);
     });
 
-    it('does not add same participant to conversation- aborts 422', function () {
+    it('does not add same participant to conversation -aborts 422', function () {
 
         $auth = User::factory()->create();
 
@@ -109,8 +109,21 @@ describe('AddParticipant()', function () {
         $conversation->addParticipant(User::factory()->create());
 
         expect($conversation->participants()->count())->toBe(2);
-    })->throws(Exception::class);
+    })->throws(Exception::class,'Private conversations cannot have more than two participants.');
 
+    it('does not add more than 1 participant to a SELF conversation', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation = Conversation::factory()->create(['type'=>ConversationType::SELF]);
+
+        $conversation->addParticipant($auth);
+        $conversation->addParticipant(User::factory()->create())
+        ->assertStatus(422,'Self conversations cannot have more than 1 participant.');
+
+        expect($conversation->participants()->count())->toBe(1);
+
+    })->throws(Exception::class,'Self conversations cannot have more than one participant.');
 
     it('can add more than 2 participants if it is a  GROUP conversation', function () {
 
@@ -127,6 +140,63 @@ describe('AddParticipant()', function () {
 
         expect($conversation->participants()->count())->toBe(4);
     });
+
+    it('aborts if user who exited conversation is added', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation = $auth->createGroup('test group');
+
+        #add user
+        $user = User::factory()->create(['name'=>'user']);
+        $conversation->addParticipant($user);
+
+        #assert count is 2 
+        expect($conversation->participants()->count())->toBe(2);
+
+        #let user exit conversation 
+        $user->exitConversation($conversation);
+
+
+        #assert new count is 1 
+        expect($conversation->participants()->count())->toBe(1);
+
+        #attemp to readd user
+        $conversation->addParticipant($user);
+
+
+        #assert new count is still 1 
+        expect($conversation->participants()->count())->toBe(1);
+    })->throws(Exception::class,'Cannot add user because they left the group.');
+
+
+    it('aborts if user who was removed is added and revive was false', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation = $auth->createGroup('test group');
+
+        #add user
+        $user = User::factory()->create(['name'=>'user']);
+        $conversation->addParticipant($user);
+
+        #assert count is 2 
+        expect($conversation->participants()->count())->toBe(2);
+
+        #remove user from group
+        $userParticipant= $conversation->participant($user);
+        $userParticipant->remove($auth);
+
+        #assert new count is 1 
+        expect($conversation->participants()->count())->toBe(1);
+
+        #attemp to readd user
+        $conversation->addParticipant($user);
+
+        #assert new count is still 1 
+        expect($conversation->participants()->count())->toBe(1);
+    })->throws(Exception::class,'Cannot add user because they were removed from the group by an Admin.');
+
 });
 
 describe('getUnreadCountFor()', function () {

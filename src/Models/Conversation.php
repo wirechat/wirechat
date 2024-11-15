@@ -31,7 +31,7 @@ class Conversation extends Model
 
     protected $casts = [
         'type' => ConversationType::class,
-        'updated_at'=>'datetime'
+        'updated_at' => 'datetime'
     ];
 
 
@@ -120,67 +120,172 @@ class Conversation extends Model
      * @param Model|Authenticatable $user
      * @return Participant|null
      */
-   public function participant(Model $user)
-{
-    $query = $this->participants()->withoutGlobalScope('withoutExited');
+    public function participant(Model|Authenticatable $user, bool $withoutGlobalScopes = false)
+    {
 
 
-    if ($this->relationLoaded('participants')) {
-        $participant = $query->where('participantable_id', $user->id)
-                             ->where('participantable_type', get_class($user))
-                             ->first();
-    } else {
-        $participant = $query->where('participantable_id', $user->id)
-                             ->where('participantable_type', get_class($user))
-                             ->first();
+        $query = $this->participants()->withoutGlobalScope('withoutExited');
+
+        if ($withoutGlobalScopes) {
+            $query->withoutGlobalScopes();
+            # code...
+        }
+
+
+        if ($this->relationLoaded('participants')) {
+            $participant = $query->where('participantable_id', $user->id)
+                ->where('participantable_type', get_class($user))
+                ->first();
+        } else {
+            $participant = $query->where('participantable_id', $user->id)
+                ->where('participantable_type', get_class($user))
+                ->first();
+        }
+//dd($participant);
+        return $participant;
     }
 
-    return $participant;
-}
+    // public function participant(Model $user)
+    // {
 
-// public function participant(Model $user)
-// {
+    //     $participant = null;
+    //     // If loaded, simply check the existing collection
+    //     if ($this->relationLoaded('participants')) {
+    //         $participant = $this->participants()
+    //             ->withoutGlobalScope('withoutExited')
+    //             ->where('participantable_id', $user->id)
+    //             ->where('participantable_type', get_class($user))
+    //             ->first();
+    //     } else {
+    //         $participant = $this->participants()
+    //             ->withoutGlobalScope('withoutExited')
 
-//     $participant = null;
-//     // If loaded, simply check the existing collection
-//     if ($this->relationLoaded('participants')) {
-//         $participant = $this->participants()
-//             ->withoutGlobalScope('withoutExited')
-//             ->where('participantable_id', $user->id)
-//             ->where('participantable_type', get_class($user))
-//             ->first();
-//     } else {
-//         $participant = $this->participants()
-//             ->withoutGlobalScope('withoutExited')
+    //             ->where('participantable_id', $user->id)
+    //             ->where('participantable_type', get_class($user))
+    //             ->first();
+    //     }
 
-//             ->where('participantable_id', $user->id)
-//             ->where('participantable_type', get_class($user))
-//             ->first();
-//     }
-
-//     return $participant;
-// }
+    //     return $participant;
+    // }
 
 
     /**
      * Add a new participant to the conversation.
      *
-     * @param Model $participant
+     * @param Model $user
+     * @param bool  $revive =if user was recently deleted by admin or owner then add them back
      * @return Participant
      */
-    public function addParticipant(Model $participant): Participant
-    {
-        // Check if the participant is already in the conversation
-        abort_if(
-            $this->participants()
-                ->where('participantable_id', $participant->id)
-                ->where('participantable_type', get_class($participant))
-                ->exists(),
-            422,
-            'Participant is already in the conversation.'
-        );
+    // public function addParticipant(Model $user, bool $revive = false): Participant
+    // {
+    //     // Check if the participant is already in the conversation
+    //     abort_if(
+    //         $this->participants()
+    //             ->where('participantable_id', $user->id)
+    //             ->where('participantable_type', get_class($user))
+    //             ->exists(),
+    //         422,
+    //         'Participant is already in the conversation.'
+    //     );
 
-        // If the conversation is private, ensure it doesn't exceed two participants
+    //     #If the conversation is private, ensure it doesn't exceed two participants
+    //     if ($this->isPrivate()) {
+    //         abort_if(
+    //             $this->participants()->count() >= 2,
+    //             422,
+    //             'Private conversations cannot have more than two participants.'
+    //         );
+    //     }
+
+    //     #ensure Self conversations do not have more than 1 participant
+    //     if ($this->isSelf()) {
+    //         abort_if(
+    //             $this->participants()->count() >= 1,
+    //             422,
+    //             'Self conversations cannot have more than 1 participant.'
+    //         );
+    //     }
+
+
+    //     $participantWithoutScopes = $this->participants()
+    //         ->withoutGlobalScopes()
+    //         ->where('participantable_id', $user->id)
+    //         ->where('participantable_type', get_class($user))
+    //         ->first();
+
+    //     if ($participantWithoutScopes) {
+    //         # abort if exited already exited group
+    //         abort_if($participantWithoutScopes?->hasExited(), 403, 'Cannot add ' . $user->display_name . ' because they left the group');
+
+
+    //         #reomve removed_by_action if existed
+    //         if ($revive) {
+    //             $participantWithoutScopes->actions()->where('type', Actions::REMOVED_BY_ADMIN)->delete();
+    //         }
+
+    //         return $participantWithoutScopes;
+    //     } else {
+
+    //         #create particicipant
+    //         $participant = $this->participants()->withoutGlobalScopes()->updateOrCreate([
+    //             'participantable_id' => $user->id,
+    //             'participantable_type' => get_class($user),
+    //             'role' => ParticipantRole::PARTICIPANT
+    //         ]);
+
+
+    //         return $participant;
+    //     }
+    // }
+
+
+
+    /**
+     * Add a new participant to the conversation.
+     *
+     * @param Model $user
+     * @param bool  $revive If the user was recently removed, allow re-adding.
+     * @return Participant
+     */
+    public function addParticipant(Model $user, bool $revive = false): Participant
+    {
+        // Check if the participant already exists (with or without global scopes)
+        $participant = $this->participants()
+            ->withoutGlobalScopes()
+            ->where('participantable_id', $user->id)
+            ->where('participantable_type', get_class($user))
+            ->first();
+
+            if ($participant) {
+                // Abort if the participant exited themselves
+                abort_if(
+                    $participant->hasExited(),
+                    403,
+                    'Cannot add ' . $user->display_name . ' because they left the group.'
+                );
+            
+                // Check if the participant was removed by an admin or owner
+                if ($participant->isRemoved()) {
+                    // Abort if revive is not true
+                    abort_if(
+                        !$revive,
+                        403,
+                        'Cannot add ' . $user->display_name . ' because they were removed from the group by an Admin.'
+                    );
+            
+                    // If revive is true, remove admin removal actions and return the participant
+                    $participant->actions()
+                        ->where('type', Actions::REMOVED_BY_ADMIN)
+                        ->delete();
+            
+                    return $participant;
+                }
+            
+                // Abort if the participant is already in the group and has not exited
+                abort(422, 'Participant is already in the conversation.');
+            }
+            
+        // Validate participant limits for private or self conversations
         if ($this->isPrivate()) {
             abort_if(
                 $this->participants()->count() >= 2,
@@ -189,15 +294,22 @@ class Conversation extends Model
             );
         }
 
-        // Attach the participant to the conversation
-        $participant = $this->participants()->withExited()->updateOrCreate([
-            'participantable_id' => $participant->id,
-            'participantable_type' => get_class($participant),
-            'role' => ParticipantRole::PARTICIPANT
-        ], ['exited_at' => null]); //also update exited_at to null so they can see the conversation and be able to participate
+        if ($this->isSelf()) {
+            abort_if(
+                $this->participants()->count() >= 1,
+                422,
+                'Self conversations cannot have more than one participant.'
+            );
+        }
 
-        return $participant;
+        // Add a new participant
+        return $this->participants()->create([
+            'participantable_id' => $user->id,
+            'participantable_type' => get_class($user),
+            'role' => ParticipantRole::PARTICIPANT,
+        ]);
     }
+
 
     public function messages()
     {
@@ -312,29 +424,29 @@ class Conversation extends Model
     /**
      * Get the receiver of the private conversation
      * 
-     * */ 
+     * */
     public function getReceiver()
     {
 
 
         // Check if the conversation is private
-      //  dd($this->type);
-        if (!in_array($this->type,[ConversationType::PRIVATE,ConversationType::SELF ]) ) {
+        //  dd($this->type);
+        if (!in_array($this->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
             return null;
         }
 
 
 
         // Ensure participants are already loaded (use the loaded relationship, not fresh queries)
-        $participants = $this->participants->where('conversation_id',$this->id);
+        $participants = $this->participants->where('conversation_id', $this->id);
 
-     //   dd($participants);
+        //   dd($participants);
         // Ensure there are exactly two participants
         // if ($participants->count() !== 2) {
         //     return null;
         // }
 
-       // dd($participants);
+        // dd($participants);
 
         // Get the participant who is not the authenticated user
 
@@ -344,13 +456,13 @@ class Conversation extends Model
             ->first();
 
 
-       
+
 
 
         if ($receiverParticipant) {
             // Return the associated model via the participant's relationship
 
-         //  dd('reacch',$receiverParticipant->participantable);
+            //  dd('reacch',$receiverParticipant->participantable);
             return $receiverParticipant->participantable;
         }
 
@@ -512,7 +624,7 @@ class Conversation extends Model
         $participant->save();
 
         // Check if the conversation is private or self
-        if ($this->isPrivate()||$this->isSelf()) { 
+        if ($this->isPrivate() || $this->isSelf()) {
             //check if conversatin is Self conversation 
             //Then force delete it 
             if ($this->isSelfConversation($user)) {
@@ -531,7 +643,7 @@ class Conversation extends Model
                 }
 
                 // If both participants have deleted all their messages, delete the conversation permanently
-                if ($participant->hasDeletedConversation()&& $otherParticipant->hasDeletedConversation()) {
+                if ($participant->hasDeletedConversation() && $otherParticipant->hasDeletedConversation()) {
                     // dd("deleted");
                     $this->forceDelete();
                 }
@@ -539,15 +651,14 @@ class Conversation extends Model
         }
     }
 
- /**
+    /**
      * Check if a given user has deleted all messages in the conversation using the deleteForMe
      */
     public function hasBeenDeletedBy(Model $user): bool
     {
         $participant = $this->participant($user);
 
-       return $participant->hasDeletedConversation(true);
-      
+        return $participant->hasDeletedConversation(true);
     }
 
 
@@ -571,7 +682,7 @@ class Conversation extends Model
     }
 
 
-   
+
 
 
     /**
