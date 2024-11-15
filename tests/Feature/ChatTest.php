@@ -501,15 +501,13 @@ describe('Sending messages ', function () {
     });
 
 
-    test('it broadcasts event "NotifyParticipant" when message is sent', function () {
+    test('it broadcasts event "NotifyParticipant" when message is sent to private conversation', function () {
         Event::fake();
        // Queue::fake();
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = Conversation::factory()
-                        ->withParticipants([$auth,$receiver])
-            ->create();
+        $conversation = $auth->createConversationWith($receiver);
 
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])

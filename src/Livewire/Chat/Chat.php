@@ -57,12 +57,13 @@ class Chat extends Component
     public array $files = [];
 
 
-    public Participant $authParticipant;
+    protected Participant $authParticipant;
+
+    #[Locked]
     public Participant $receiverParticipant;
 
 
     //Theme 
-    public string $authMessageBodyColor;
     public $replyMessage = null;
 
 
@@ -116,8 +117,6 @@ class Chat extends Component
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
-
-
 
         //before appending message make sure it belong to this conversation 
         if ($event['message']['conversation_id'] == $this->conversation->id) {
@@ -588,6 +587,7 @@ class Chat extends Component
     {
 
         //Dont dispatch if it is a selfConversation
+
         if ($this->conversation->isSelfConversation(auth()->user())) {
 
             return null;
@@ -608,7 +608,8 @@ class Chat extends Component
             //if conversation is private then Notify particpant immediately
             if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
 
-                if ($this->conversation->isPrivate() && $this->receiver) {
+                if ($this->conversation->isPrivate() && $this->receiverParticipant) {
+
 
                     broadcast( new NotifyParticipant($this->receiverParticipant,$message))->toOthers();
                 //    Notification::send($this->receiver, new NewMessageNotification($message));
@@ -683,7 +684,7 @@ class Chat extends Component
 
         # Fetch paginated messages
         $messages = Message::where('conversation_id', $this->conversation->id)
-            ->with('parent')
+            ->with('sendable', 'parent')
             ->orderBy('created_at', 'asc')
             ->skip($count - $this->paginate_var)
             ->take($this->paginate_var)
@@ -778,11 +779,8 @@ class Chat extends Component
         // Assign receiver and conversation ID
         $this->receiver = $this->conversation->getReceiver();
 
-     //  dd( $this->conversation);
         $this->conversationId = $this->conversation->id;
 
-   //  dd($this->receiver);
-    
         //Set auth participant 
         $this->authParticipant=$this->conversation->participant(auth()->user());
 

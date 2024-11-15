@@ -87,16 +87,15 @@ class AddMembers extends ModalComponent
   public function toggleMember($id, string $class)
   {
 
-    //exist operation if is already a participant/member
-    $isAlreadyAParticipant =  $this->participants->contains(fn($participant) => $participant->participantable_id == $id && $participant->participantable_type == $class);
-    if ($isAlreadyAParticipant) {
-      return null;
-    }
-
-
     $model = app($class)->find($id);
 
+   
     if ($model) {
+
+       #abort if member already belong to conversation
+      abort_if($model->belongsToConversation($this->conversation),403,$model->display_name.' Is already a member');
+    
+
       if ($this->selectedMembers->contains(fn($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
         // Remove member if they are already selected
         $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
@@ -115,7 +114,6 @@ class AddMembers extends ModalComponent
 
 
         // Add member if they are not selected
-      
         $this->selectedMembers->push($model);
       }
 
@@ -134,9 +132,7 @@ class AddMembers extends ModalComponent
     foreach ($this->selectedMembers as $key => $member) {
 
       #make sure user does not belong to conversation already 
-      #mostly this is the auth user
-      $alreadyExists =  $this->participants->contains(fn($participant) => $participant->participantable_id == $member->id && $participant->participantable_type == get_class($member));
-      //$this->participants->where('participantable_id', $participant->id) ->where('participantable_type', get_class($participant)) ->exists();
+      $alreadyExists =  $member->belongsToConversation($this->conversation);
       if (!$alreadyExists) {
         $this->conversation->addParticipant($member);
       }

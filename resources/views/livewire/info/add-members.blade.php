@@ -95,7 +95,7 @@
 
                 @foreach ($users as $key => $user)
                     @php
-                        $isAlreadyAParticipant=  $participants->contains(fn($participant) => $participant->participantable_id == $user->id && $participant->participantable_type == get_class($user));
+                        $isAlreadyAParticipant= $user->belongsToConversation($conversation);
                     @endphp
                     <li wire:key="users-{{$key}}" class="flex cursor-pointer group gap-2 items-center p-2">
 

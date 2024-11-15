@@ -110,7 +110,7 @@ describe('actions test',function(){
       });
 
 
-     test('toggleMember() method words correclty', function () {
+     test('toggleMember() method works correclty', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -147,7 +147,7 @@ describe('actions test',function(){
      });
 
 
-     test('existing member cannot be added to selectedMembers', function () {
+     test('toggleMember() - can add and removing members from selectedMembers list', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -164,6 +164,26 @@ describe('actions test',function(){
                 ->call('toggleMember',$user->id,$user->getMorphClass())
                 ->assertDontSee('Micheal');
      });
+
+
+     test('existing member cannot be added to selectedMembers it aborts 403', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+        $user = User::factory()->create(['name'=>'Micheal']);
+        $conversation->addParticipant($user);
+
+        $request =  Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+  
+        $request
+                #first add member
+                ->call('toggleMember',$user->id,$user->getMorphClass())
+                ->assertDontSee('Micheal')
+                ->assertStatus(403, $user->display_name.' is already a member');
+     });
+
+
 
 
      test('it aborts if admin tries to add a member who exited the group', function () {
