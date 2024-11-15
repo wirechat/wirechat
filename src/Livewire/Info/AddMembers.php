@@ -45,6 +45,8 @@ class AddMembers extends ModalComponent
   #[Locked]
   public $newTotalCount;
 
+  public $exitingMembersCount;
+
 
 
 
@@ -119,7 +121,8 @@ class AddMembers extends ModalComponent
 
 
       #update total count 
-      $this->newTotalCount = count($this->selectedMembers) + $this->participants->count();
+      //dd($this->conversation);
+      $this->newTotalCount = count($this->selectedMembers) + $this->exitingMembersCount;
     }
   }
 
@@ -154,13 +157,15 @@ class AddMembers extends ModalComponent
 
     // Load participants and get the count
     $this->conversation->loadCount('participants');
-    $this->participants = $this->conversation->participants;
 
-    //var_dump($this->conversation);
+     //$this->participants = $this->conversation->participants;
+
+   // var_dump($this->conversation);
     // Dump the participants count
-    //  dump($this->participants->count());
 
-    $this->newTotalCount = $this->participants->count();
+    $this->exitingMembersCount =$this->conversation->participants_count;
+    $this->newTotalCount =$this->exitingMembersCount;
+
     $this->selectedMembers = collect();
   }
 

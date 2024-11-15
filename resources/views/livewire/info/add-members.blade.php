@@ -13,7 +13,7 @@
 
         </button>
 
-        <h3 class="text-sm mx-auto font-semibold "><span>Add Members</span> {{$newTotalCount}} / {{$maxGroupMembers}}</h3>
+        <h3  class="text-sm mx-auto font-semibold "  ><span>Add Members</span> {{$newTotalCount}} / {{$maxGroupMembers}}</h3>
 
         <button 
             wire:click="save"
