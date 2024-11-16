@@ -150,7 +150,51 @@ use Workbench\App\Models\User;
     // });
 
 
-    describe('Delete Permanently',function(){
+describe('Delete Permanently',function(){
+
+
+    // it('deletes actions when message is deleted ', function () {
+        
+    //     $auth = User::factory()->create();
+
+    //     $receiver = User::factory()->create();
+
+    //     $conversation = $auth->createConversationWith($receiver);
+
+    //     //send to receiver
+    //     $auth->sendMessageTo($receiver,'hello-1');
+    //     $message1=  $auth->sendMessageTo($receiver,'hello-2');
+    //     $auth->sendMessageTo($receiver,'hello-3');
+
+    //     //authenticate
+    //     $this->actingAs($auth);
+
+    //     //send to auth
+    //     $receiver->sendMessageTo($auth,'hello-4');
+    //     $receiver->sendMessageTo($auth,'hello-5');
+    //     $receiver->sendMessageTo($auth,'hello-6');
+
+    //     //assert count is 6
+    //     expect($conversation->messages()->count())->toBe(6);
+
+
+    //     //delete messages
+    //     $message1->deleteFor($auth);
+
+
+    //     //assert actions
+
+    //     expect($message1->actions()->count())->toBe(1);
+
+
+    //     //Permantly Delete message
+    //     $message1->delete();
+
+    //     //assert count
+    //     expect($message1->actions()->count())->toBe(0);
+
+
+    // });
 
 
     it('deletes actions when message is deleted ', function () {
@@ -195,6 +239,9 @@ use Workbench\App\Models\User;
 
 
     });
+
+
+
 });
 
 

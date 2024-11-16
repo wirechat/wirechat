@@ -73,7 +73,9 @@
                         </x-wirechat::dropdown-link>
 
 
-                        <button class="w-full" wire:click="clearConversation"
+                    {{-- Only show delete and clear if conversation is NOT group --}}
+                    @if (!$conversation->isGroup())
+                    <button class="w-full" wire:click="clearConversation"
                         wire:confirm="Are you sure you want to clear this Chat History ?">
 
                         <x-wirechat::dropdown-link >
@@ -81,20 +83,19 @@
                         </x-wirechat::dropdown-link>
                     </button>
 
+                    <button wire:click="deleteConversation"
+                        wire:confirm="Are you sure delete {{ $conversation->isGroup() ? 'Group' : 'Chat' }}"
+                        class="w-full text-start">
 
-                        <button wire:click="deleteConversation"
-                            wire:confirm="Are you sure delete {{ $conversation->isGroup() ? 'Group' : 'Chat' }}"
-                            class="w-full text-start">
+                        <x-wirechat::dropdown-link class="text-red-500 dark:text-red-500">
+                            Delete Chat
+                        </x-wirechat::dropdown-link>
 
-                            <x-wirechat::dropdown-link class="text-red-500 dark:text-red-500">
-                                Delete {{ $conversation->isGroup() ? 'Group' : 'Chat' }}
-                            </x-wirechat::dropdown-link>
-
-                        </button>
+                    </button>
+                    @endif
 
 
-
-                        @if ($conversation->isGroup() && !auth()->user()->isOwnerOfConversation($conversation))
+                    @if ($conversation->isGroup() && !auth()->user()->isOwnerOfConversation($conversation))
                             <button wire:click="exitConversation" wire:confirm="Are you sure want to exit Group?"
                                 class="w-full text-start ">
 

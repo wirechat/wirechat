@@ -240,16 +240,55 @@ describe('presence test', function () {
     });
 
 
-    test('it shows "Delete Group" and method wired if is group', function () {
+
+    
+
+
+
+    test('it shows "Delete Chat" if is not group', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        $conversation =  $auth->createConversationWith($receiver);
+
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertSee("Delete Chat")
+            ->assertMethodWired('deleteChat');
+    });
+
+
+    test('it shows "Delete Group" and method wired if is group and auth is Owner', function () {
 
         $auth = User::factory()->create();
 
 
         $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->assertSee("Delete Group")
-            ->assertMethodWired('deleteChat');
+            ->assertMethodWired('deleteGroup')
+            ->assertSee("Before you can delete the group, you’ll need to remove all group members") ;
     });
+
+    test('it doenst shows "Delete Group" and method wired if is group and auth is NOT Owner', function () {
+
+        $auth = User::factory()->create();
+        $participant = User::factory()->create();
+
+
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        
+        Livewire::actingAs($participant)->test(Info::class, ['conversation' => $conversation])
+            ->assertDontSee("Delete Group")
+            ->assertMethodNotWired('deleteChat');
+    });
+
+
 });
 
 
@@ -491,7 +530,36 @@ describe('updating group name and description', function () {
 describe('Deleting Chat', function () {
 
 
-    test('it redirects to wirechat route after deleting conversation', function () {
+    test('it redirects to wirechat route after deleting Private conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        $conversation =  $auth->createConversationWith($receiver);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteChat")
+            ->assertStatus(200)
+            ->assertRedirect(route("wirechat"));;
+    });
+
+
+    test('it redirects to wirechat route after deleting Self conversation', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation =  $auth->createConversationWith($auth);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteChat")
+            ->assertStatus(200)
+            ->assertRedirect(route("wirechat"));;
+    });
+
+
+
+    test('it aborts if conversation is Group', function () {
 
         $auth = User::factory()->create();
 
@@ -499,8 +567,7 @@ describe('Deleting Chat', function () {
         $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call("deleteChat")
-            ->assertStatus(200)
-            ->assertRedirect(route("wirechat"));;
+            ->assertStatus(403,'This operation is not available for Groups.');
     });
 });
 

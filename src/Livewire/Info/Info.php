@@ -186,6 +186,8 @@ class Info extends ModalComponent
 
 
         abort_unless(auth()->user()->belongsToConversation($this->conversation),403);
+        abort_unless($this->conversation->isSelf()||$this->conversation->isPrivate(),403,'This operation is not available for Groups.');
+
 
         #delete conversation 
         $this->conversation->deleteFor(auth()->user());

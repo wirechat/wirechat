@@ -715,7 +715,7 @@ describe('ClearFor()', function () {
 
 describe('deleting permanently()', function () {
 
-    it('deletes all it\'s participants when conversation is deleted', function () {
+    it('deletes all it\'s participants when conversation is deleted inluding exited and remove_by_admin', function () {
 
         $auth = User::factory()->create();
 
@@ -723,19 +723,25 @@ describe('deleting permanently()', function () {
 
         // dd($conversation);
         $conversation->addParticipant($auth);
-        $conversation->addParticipant(User::factory()->create());
+
+
+        $participant=   $conversation->addParticipant(User::factory()->create());
         $conversation->addParticipant(User::factory()->create());
         $conversation->addParticipant(User::factory()->create());
 
         //assert available 
         expect($conversation->participants()->count())->toBe(4);
 
+         
+        #exit to create hidden participants
+        $participant->exitConversation();
+
         //delete conversation 
 
         $conversation->delete();
 
 
-        expect($conversation->participants()->count())->toBe(0);
+        expect($conversation->participants()->withoutGlobalScopes()->count())->toBe(0);
     });
 
 
@@ -811,5 +817,45 @@ describe('deleting permanently()', function () {
 
 
         expect($conversation->messages()->count())->toBe(0);
+    });
+
+
+    it('also deletes all messages with hidden scope when converstion is deleted', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+        $conversation = Conversation::factory()->withParticipants([$receiver, $auth])->create(['type' => ConversationType::PRIVATE]);
+
+        /* perfomr actions that hide some message from queries */
+
+        #delete for 
+        $message=   $auth->sendMessageTo($receiver, 'hello');
+        $message->deleteFor($receiver);
+
+
+        #soft delete
+        $message= $auth->sendMessageTo($receiver, 'hello');
+        $message->delete();
+
+        $auth->sendMessageTo($receiver, 'hello');
+        $auth->sendMessageTo($receiver, 'hello');
+        $auth->sendMessageTo($receiver, 'hello');
+        $auth->sendMessageTo($receiver, 'hello');
+
+        $this->actingAs($receiver);
+
+        //assert available 
+        expect($conversation->messages()->count())->toBe(4);
+
+        //delete conversation 
+        $conversation->delete();
+
+
+
+        expect($conversation->messages()->withoutGlobalScopes()->count())->toBe(0);
+
+        expect(Message::withoutGlobalScopes()->count())->toBe(0);
     });
 });

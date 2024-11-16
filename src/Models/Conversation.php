@@ -54,7 +54,7 @@ class Conversation extends Model
             DB::transaction(function () use ($conversation) {
 
                 // Delete associated participants 
-                $conversation->participants()->delete();
+                $conversation->participants()->withoutGlobalScopes()->forceDelete();
 
 
                 // Delete reads
@@ -66,7 +66,7 @@ class Conversation extends Model
 
 
                 // Delete associated messages 
-                $conversation->messages()->forceDelete();
+                $conversation->messages()->withoutGlobalScopes()->forceDelete();
 
                 //Delete actions 
                 $conversation->actions()->delete();

@@ -129,30 +129,31 @@ describe('Box presence test: ', function () {
             ->assertSee("My Group");
     });
 
-    test('Clear Chat button and method  is wired', function () {
+    test('It shows Clear Chat button and method  is wired if conversation is Private', function () {
         $auth = User::factory()->create();
 
         $participant=  User::factory()->create(['name' => 'John']);
 
         //create conversation with user1
-        $conversation= $auth->createGroup('My Group');
-
-        #add participant
-        $conversation->addParticipant($participant);
-
-        #send message
-        $participant->sendMessageTo($conversation,'Hello');
-        
+        $conversation= $auth->createConversationWith($participant);
         #
         Livewire::actingAs($participant)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertMethodWired("clearConversation")
         ->assertSeeText('Clear Chat');
     });
 
+    test('It shows Clear Chat button and method  is wired if conversation is Self', function () {
+        $auth = User::factory()->create();
 
+        //create conversation with user1
+        $conversation= $auth->createConversationWith($auth);
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertMethodWired("clearConversation")
+        ->assertSeeText('Clear Chat');
+    });
 
-
-    test('Exit Group button and method  is wired', function () {
+    test('it shows Exit Group button and method  is wired if conversation is Group and auth is not Owner', function () {
         $auth = User::factory()->create();
 
         $participant=  User::factory()->create(['name' => 'John']);
@@ -173,7 +174,7 @@ describe('Box presence test: ', function () {
     });
 
 
-    test('It doesnt show Exit Group button and wire method', function () {
+    test('It doesnt show Exit Group button and wire method if auth is Owner', function () {
         $auth = User::factory()->create();
 
         $participant=  User::factory()->create(['name' => 'John']);
@@ -191,7 +192,7 @@ describe('Box presence test: ', function () {
     });
 
 
-    test('Delete Conversation Group button and method  is wired', function () {
+    it('Doesn\'nt show Clear Chat History button and method  is wired if conversation is group', function () {
         $auth = User::factory()->create();
 
         $participant=  User::factory()->create(['name' => 'John']);
@@ -207,13 +208,34 @@ describe('Box presence test: ', function () {
         
         #
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-        ->assertMethodWired("deleteConversation")
-        ->assertSeeText('Delete Group');
+        ->assertMethodNotWired("clearConversation")
+        ->assertDontSeeText('Clear Chat History');
+     });
+
+
+    it('Doesn\'nt show Delete chat button and method  is wired if conversation is group', function () {
+        $auth = User::factory()->create();
+
+        $participant=  User::factory()->create(['name' => 'John']);
+
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $conversation->addParticipant($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+        
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertMethodNotWired("deleteConversation")
+        ->assertDontSeeText('Delete Group');
      });
 
 
 
-     test('it shows "Delete Chat" button label if Conversation  is Group', function () {
+     test('it shows "Delete Chat" button label if Conversation  is Private', function () {
         $auth = User::factory()->create();
 
         $participant=  User::factory()->create(['name' => 'John']);
