@@ -572,6 +572,111 @@ describe('Deleting Chat', function () {
 });
 
 
+
+describe('Deleting Group', function () {
+
+    test('it deletes group from database after delete is successful', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteGroup")
+            ->assertStatus(200);
+
+        expect(Conversation::withoutGlobalScopes()->count())->toBe(0);
+    });
+
+
+    test('it redirects to wirechat route after deleting Group conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteGroup")
+            ->assertStatus(200)
+            ->assertRedirect(route("wirechat"));;
+    });
+
+
+    test('it aborts if conversation is private ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation =  $auth->createConversationWith($receiver);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteGroup")
+            ->assertStatus(403,'Operation not allowed: Private chats cannot be deleted.')
+            ->assertNoRedirect();
+    });
+
+    test('it aborts if group members is not 0 excluding owner', function () {
+
+        $auth = User::factory()->create();
+
+
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        #add members
+        $conversation->addParticipant(User::factory()->create());
+        $conversation->addParticipant(User::factory()->create());
+        $conversation->addParticipant(User::factory()->create());
+
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteGroup")
+            ->assertStatus(403,'Cannot delete group: Please remove all members before attempting to delete the group.');
+    });
+
+
+    test('group can be deleted after removing all members or when if they all remove themselves', function () {
+
+        $auth = User::factory()->create();
+
+
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        #add members
+        $conversation->addParticipant(User::factory()->create())->exitConversation();
+        $conversation->addParticipant(User::factory()->create())->exitConversation();
+        $conversation->addParticipant(User::factory()->create())->remove($auth);
+
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteGroup")
+            ->assertStatus(200);
+    
+        expect(Conversation::withoutGlobalScopes()->count())->toBe(0);
+    });
+
+    test('it aborts if auth is not owner of group', function () {
+
+        $auth = User::factory()->create();
+
+
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        #add members
+        $nonOwner= User::factory()->create();
+        $conversation->addParticipant($nonOwner);
+        $conversation->addParticipant(User::factory()->create());
+        $conversation->addParticipant(User::factory()->create());
+
+
+        Livewire::actingAs($nonOwner)->test(Info::class, ['conversation' => $conversation])
+            ->call("deleteGroup")
+            ->assertStatus(403,'Forbidden: You do not have permission to delete this group.');
+    });
+
+});
+
 describe('Exiting Chat', function () {
 
 

@@ -17,6 +17,7 @@ use Namu\WireChat\Models\Message;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\BroadcastMessage;
@@ -178,7 +179,7 @@ class Info extends ModalComponent
 
 
   /**
-    * Delete chat  */
+    * Delete  private or self chat  */
 
     function deleteChat()
     {
@@ -196,6 +197,37 @@ class Info extends ModalComponent
         $this->redirectRoute("wirechat");
     }
 
+
+
+  /**
+    * Delete  private or self chat  */
+
+    function deleteGroup()
+    {
+        abort_unless(auth()->check(), 401);
+    
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+    
+        abort_if($this->conversation->isPrivate(), 403, 'Operation not allowed: Private chats cannot be deleted.');
+
+        abort_unless(auth()->user()->isOwnerOfGroup($this->conversation->group), 403, 'Forbidden: You do not have permission to delete this group.');
+    
+    
+        // Ensure all participants are removed before deleting the group
+        $participantCount = $this->conversation->participants
+                                               ->where('participantable_id', '!=', auth()->id())
+                                               ->where('type','!=',ParticipantRole::OWNER)
+                                               ->where('participantable_type', get_class(auth()->user()))
+                                               ->count();
+                                   
+        abort_unless($participantCount == 0, 403, 'Cannot delete group: Please remove all members before attempting to delete the group.');
+    
+        #delete conversation 
+        $this->conversation->forceDelete();
+
+        #redirect to chats page 
+        $this->redirectRoute("wirechat");
+    }
 
     function exitConversation()
     {
