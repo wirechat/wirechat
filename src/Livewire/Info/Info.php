@@ -69,7 +69,12 @@ class Info extends ModalComponent
   {
     $this->description = $this->group?->description;
     $this->groupName = $this->group?->name;
-    $this->cover_url = $this->conversation?->group?->cover_url ?? ($receiver?->cover_url ?? null);
+    if ($this->conversation?->isGroup()) {
+      $this->cover_url = $this->conversation?->group?->cover_url;
+    } else {
+      $this->cover_url = $this->conversation->getReceiver()?->cover_url;
+    }
+    
   }
 
 
@@ -146,7 +151,7 @@ class Info extends ModalComponent
 
     #validate
     $this->validate([
-      'photo' => 'image|max:12024|nullable'
+      'photo' => 'image|max:12024|nullable|mimes:png,jpg,jpeg,webp'
     ]);
 
 

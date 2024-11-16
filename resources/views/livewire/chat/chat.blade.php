@@ -657,7 +657,6 @@
     </div>
 
 
-
     @script
         <script>
             Alpine.data('attachments', (type = "media") => ({

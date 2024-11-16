@@ -233,6 +233,14 @@ class Chats extends Component
   }
 
 
+  // public function boot()  {
+  //   $this->selectedConversationId = request()->conversation_id;
+    
+  // }
+
+
+
+
   public function render()
   {
 

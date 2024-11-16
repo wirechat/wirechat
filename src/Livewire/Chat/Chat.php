@@ -113,7 +113,6 @@ class Chat extends Component
         }
     }
 
-
     //handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
