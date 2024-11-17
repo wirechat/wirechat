@@ -13,7 +13,8 @@
 @assets
     <style>
         :root {
-            --primary-color: {{ $primaryColor }}
+            --primary-color: {{ $primaryColor }};
+            --wirechat-primary-color: {{ $primaryColor }}
         }
 
 

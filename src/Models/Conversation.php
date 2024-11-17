@@ -712,4 +712,30 @@ class Conversation extends Model
     {
         return $this->type == ConversationType::GROUP;
     }
+
+
+   /**
+     * ------------------------------------------
+     *  Role Checks
+     * -------------------------------------------
+     */
+
+   public  function isOwner(Model|Authenticatable $model) : bool {
+        
+     $pariticipant = $this->participant($model);
+     return  $pariticipant->isOwner();
+    }
+
+
+    /**
+     * ------------------------------------------
+     *  Role Checks
+     * -------------------------------------------
+     */
+
+   public  function isAdmin(Model|Authenticatable $model) : bool {
+        
+    $pariticipant = $this->participant($model);
+    return  $pariticipant->isAdmin();
+   }
 }

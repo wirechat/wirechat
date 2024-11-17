@@ -13,6 +13,7 @@ use Namu\WireChat\Livewire\Chat\Index;
 use Namu\WireChat\Livewire\Info\Info;
 use Namu\WireChat\Livewire\Components\NewChat;
 use Namu\WireChat\Livewire\Components\NewGroup;
+use Namu\WireChat\Livewire\Group\Permissions;
 use Namu\WireChat\Livewire\Info\AddMembers;
 use Namu\WireChat\Livewire\Info\Members;
 use Namu\WireChat\Livewire\Modals\ChatModal;
@@ -92,10 +93,14 @@ class WireChatServiceProvider extends ServiceProvider
 
 
         Livewire::component('new-chat', NewChat::class);
+
+        #Group related components
         Livewire::component('new-group', NewGroup::class);
         Livewire::component('info', Info::class);
         Livewire::component('add-members', AddMembers::class);
         Livewire::component('members', Members::class);
+        Livewire::component('permissions', Permissions::class);
+
 
 
 

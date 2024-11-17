@@ -19,6 +19,14 @@ class Group extends Model
         'description'
     ];
 
+
+    protected $casts=[
+        'allow_members_to_send_messages'=>'boolean',
+        'allow_members_to_add_others'=>'boolean',
+        'allow_members_to_edit_group_info'=>'boolean',
+
+    ];
+
     public function __construct(array $attributes = [])
     {
         $this->table = WireChat::formatTableName('groups');
