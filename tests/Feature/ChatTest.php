@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Events\NotifyParticipant;
@@ -340,6 +341,186 @@ describe('Box presence test: ', function () {
     // })->skip();
 
 });
+
+
+
+
+describe('Testing permissions accssibility ', function () {
+
+
+    test('it shows footer & message actions but NOT "Only admins can send messages" label if auth is Owner', function () {
+        $auth = User::factory()->create();
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $participant=  User::factory()->create(['name' => 'John']);
+        $conversation->addParticipant($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+
+        #test
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+              ->assertDontSee("Only admins can send messages")
+              ->assertSeeHtml('id="chat-footer"')
+              ->assertSeeHtml('@dusk="message_actions"');
+    });
+
+
+
+    test('it still shows footer & message actions but does not show "Only admins can send messages" label if auth is Owner when send_messages permission is off', function () {
+        $auth = User::factory()->create();
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant
+        $participant=  User::factory()->create(['name' => 'John']);
+        $conversation->addParticipant($participant);
+
+        #send message
+        $participant->sendMessageTo($conversation,'Hello');
+
+
+        #Turn off permission
+       $group=  $conversation->group;
+       $group->allow_members_to_send_messages=false;
+       $group->save();
+
+
+        #test
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+              ->assertDontSee("Only admins can send messages")
+              ->assertSeeHtml('id="chat-footer"')
+              ->assertSeeHtml('@dusk="message_actions"');
+    });
+
+
+
+    test('it shows footer & message actions but NOT "Only admins can send messages" label if is Admin and send_messages permission is on', function () {
+        $auth = User::factory()->create();
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant ADMIN
+        $user=  User::factory()->create(['name' => 'John']);
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::ADMIN;
+        $participant->save();
+
+         
+
+        #send message
+        $user->sendMessageTo($conversation,'Hello');
+
+        #Turn off permission
+        $group=  $conversation->group;
+        $group->allow_members_to_send_messages=true;
+        $group->save();
+
+
+        #test
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+              ->assertDontSee("Only admins can send messages")
+              ->assertSeeHtml('id="chat-footer"')
+              ->assertSeeHtml('@dusk="message_actions"');
+    });
+
+
+    test('it still shows chat-footer& message actions but NOT "Only admins can send messages" label if auth is Admin when send_messages permission is off', function () {
+        $auth = User::factory()->create();
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant ADMIN
+        $user=  User::factory()->create(['name' => 'John']);
+        $participant=$conversation->addParticipant($user);
+        $participant->role= ParticipantRole::ADMIN;
+        $participant->save();
+
+        #send message
+        $user->sendMessageTo($conversation,'Hello');
+
+        #Turn off permission
+        $group=  $conversation->group;
+        $group->allow_members_to_send_messages=false;
+        $group->save();
+
+
+        #test
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+              ->assertDontSee("Only admins can send messages")
+              ->assertSeeHtml('id="chat-footer"')
+              ->assertSeeHtml('@dusk="message_actions"');
+    });
+
+
+
+
+    test('it shows chat-footer & message actions but NOT "Only admins can send messages" label if auth is PARTICIPANT when send_messages permission is on', function () {
+        $auth = User::factory()->create();
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant ADMIN
+        $user=  User::factory()->create(['name' => 'John']);
+        $participant= $conversation->addParticipant($user);
+
+
+        #send message
+        $user->sendMessageTo($conversation,'Hello');
+
+        #Turn off permission
+        $group=  $conversation->group;
+        $group->allow_members_to_send_messages=true;
+        $group->save();
+
+
+        #test
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+              ->assertDontSee("Only admins can send messages")
+              ->assertSeeHtml('id="chat-footer"')
+              ->assertSeeHtml('@dusk="message_actions"');
+    });
+
+
+
+
+    test('it does not shows chat-footer & message actions but show "Only admins can send messages" label if auth is PARTICIPANT when send_messages permission is off', function () {
+        $auth = User::factory()->create();
+        //create conversation with user1
+        $conversation= $auth->createGroup('My Group');
+
+        #add participant ADMIN
+        $user=  User::factory()->create(['name' => 'John']);
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::PARTICIPANT;
+        $participant->save();
+
+        #send message
+        $user->sendMessageTo($conversation,'Hello');
+
+        #Turn off permission
+        $group= $conversation->group;
+        $group->allow_members_to_send_messages=false;
+        $group->save();
+
+
+        #test
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+              ->assertSee("Only admins can send messages")
+              ->assertDontSeeHtml('id="chat-footer"')
+              ->assertDontSeeHtml('@dusk="message_actions"');
+    });
+
+
+
+
+
+
+});
+
+
 
 
 describe('Sending messages ', function () {

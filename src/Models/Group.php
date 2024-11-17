@@ -105,10 +105,35 @@ class Group extends Model
             ->exists();
     }
 
+
+
     public function cover()
     {
         return $this->morphOne(Attachment::class, 'attachable');
     }
+
+
+
+    /** 
+     * Permissions
+     */
+
+     public function allowsMembersToSendMessages(): bool
+    {
+        return $this->allow_members_to_send_messages==true;
+    }
+
+    public function allowsMembersToAddOthers(): bool
+    {
+        return $this->allow_members_to_add_others==true;
+    }
+
+    public function allowsMembersToEditGroupInfo(): bool
+    {
+        return $this->allow_members_to_edit_group_info==true;
+    }
+
+
 
 
 

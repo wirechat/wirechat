@@ -2,7 +2,9 @@
     'loadedMessages' => $loadedMessages,
     'receiver' => $receiver,
     'isGroup' => false,
-    'isPrivate'=>$isPrivate
+    'isPrivate'=>$isPrivate,
+    'authParticipant'=>$authParticipant,
+    "conversation"
 ])
 
 
@@ -174,11 +176,8 @@
                             ])>
 
                                 {{-- Message Actions --}}
-                                <div
-                                 @class([
-                                    'my-auto flex  w-auto  items-center gap-2',
-                                    'order-1' => !$belongsToAuth,
-                                ])>
+                                @if (($isGroup && $conversation->group->allowsMembersToSendMessages()) || $authParticipant->isAdmin())
+                                <div @dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
                                     <button wire:click="setReply('{{ $message->id }}')"
                                         class=" invisible  group-hover:visible hover:scale-110 transition-transform">
@@ -235,6 +234,7 @@
                                     </x-wirechat::dropdown>
 
                                 </div>
+                                @endif
 
 
                                 {{-- Message body --}}

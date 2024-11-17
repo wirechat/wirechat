@@ -803,7 +803,7 @@ class Chat extends Component
     {
 
         //dd(now());
-        $user = auth()->user();
+        //$user = auth()->user();
         if($this->authParticipant->hasDeletedConversation(true)){
            // $participant = $this->conversation->participant($user);
 
@@ -829,7 +829,9 @@ class Chat extends Component
     {
        // dd($this->loadedMessages->flatten());
 
+        $authParticipant= $this->conversation->participant(auth()->user());
 
-        return view('wirechat::livewire.chat.chat');
+
+        return view('wirechat::livewire.chat.chat',['authParticipant'=>$authParticipant]);
     }
 }
