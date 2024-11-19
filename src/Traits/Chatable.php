@@ -589,15 +589,15 @@ trait Chatable
         return $this->belongsToConversation($conversation);
     }
 
-     /** 
-        * Determine if the user can create new groups.
-        * 
-        * @return bool
-        */
-        public  function canCreateNewGroups(): bool
-        {
-            return $this->hasVerifiedEmail()==true; 
-        }
+    /** 
+    * Determine if the user can create new groups.
+    * 
+    * @return bool
+    */
+    public  function canCreateNewGroups(): bool
+    {
+        return $this->hasVerifiedEmail()==true; 
+    }
 
     /** 
         * Determine if the user can create new groups with other users
