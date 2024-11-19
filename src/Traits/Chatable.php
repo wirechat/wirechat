@@ -161,10 +161,11 @@ trait Chatable
     public function createGroup(string $name, string $description = null, UploadedFile $photo = null): Conversation
     {
 
+        abort_unless($this->canCreateNewGroups(),403,"You do not have permission to create groups.");
+
 
         //create rooom
         #Otherwise, create a new conversation
-
         $conversation = new Conversation();
         $conversation->type =  ConversationType::GROUP;
         $conversation->save();
@@ -576,8 +577,7 @@ trait Chatable
 
 
     /**
-     * Actions Permissions
-     * You can override the following to determine if user can perform these actions
+     * User Permissions-You can override the following to determine if user can perform these actions
      */
 
     /**
@@ -589,15 +589,25 @@ trait Chatable
         return $this->belongsToConversation($conversation);
     }
 
-    static function canCreateNewGroups(): bool
-    {
+     /** 
+        * Determine if the user can create new groups.
+        * 
+        * @return bool
+        */
+        public  function canCreateNewGroups(): bool
+        {
+            return $this->hasVerifiedEmail()==true; 
+        }
 
-        return true;
+    /** 
+        * Determine if the user can create new groups with other users
+        * 
+        * @return bool
+        */
+    public  function canCreateNewChats(): bool
+    {
+        return true; // Default is true, allowing Chat creation.
     }
 
-    function canCreateNewChats(): bool
-    {
-
-        return true;
-    }
+   
 }

@@ -32,12 +32,12 @@
 
     <div class="relative w-full">
 
-        {{-- New Group --}}
-        @if (WireChat::showNewGroupModalButton())
+        {{-- New Group button --}}
+        @if (WireChat::showNewGroupModalButton() && auth()->user()->canCreateNewGroups())
         <button
   
          wire:click="$dispatch('openWireChatModal', {component: 'new-group'})"
-         dusk="open_new_group_modal_button"
+         @dusk="open_new_group_modal_button"
          class="flex items-center gap-3 my-4  rounded-lg p-2 w-full border hover:border-gray-300 transition-colors  dark:border-gray-800 dark:hover:border-gray-700   "
 
          >
@@ -50,9 +50,7 @@
 
         </span>
 
-        <p class="dark:text-white">
-            New group 
-        </p>
+        <p class="dark:text-white">New group</p>
      </button>
      @endif
     {{-- <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5> --}}

@@ -198,23 +198,32 @@ class Participant extends Model
       }
 
 
-      /**
-       * 
-       * @param Model admin model removing the participant
-       * @return void
-       */
-      function remove(Model $admin):void   {
-        
-         #Create the 'remove' action record in the actions table
-         Action::create([
+   /**
+ * Remove a participant and log the action if not already logged.
+ *
+ * @param Model $admin The admin model removing the participant.
+ * @return void
+ */
+function remove(Model $admin): void
+{
+    // Check if a remove action already exists for this participant
+    $exists = Action::where('actionable_id', $this->id)
+        ->where('actionable_type', Participant::class)
+        ->where('type', Actions::REMOVED_BY_ADMIN)
+        ->exists();
+
+    if (!$exists) {
+        // Create the 'remove' action record in the actions table
+        Action::create([
             'actionable_id' => $this->id,
             'actionable_type' => Participant::class,
             'actor_id' => $admin->id,  // The admin who performed the action
             'actor_type' => get_class($admin),  // Assuming 'User' is the actor model
             'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
         ]);
-        
-      }
+    }
+}
+
 
     /**
      * Determine if the user has deleted this conversation and if the deletion is still "valid."

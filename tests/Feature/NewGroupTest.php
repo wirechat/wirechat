@@ -86,6 +86,23 @@ describe('Initial page',function(){
 
 
 
+    test('it aborts if user canCreateNewGroups==FALSE (email  NOT is verified) in our case', function () {
+
+        $auth = ModelsUser::factory()->create(['email_verified_at'=>null]);
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->assertStatus(403,"You're not allowed to acccess this resource");
+    
+    });
+
+    test('it does not abort if canCreateNewGroups==TRUE (email is verified) in our case', function () {
+
+        $auth = ModelsUser::factory()->create(['email_verified_at'=>now()]);
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request->assertStatus(200);
+
+    });
+
+
 });
 
 describe('Validations',function(){

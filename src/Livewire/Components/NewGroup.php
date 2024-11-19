@@ -165,7 +165,7 @@ class NewGroup extends ModalComponent
   {
 
     abort_unless(auth()->check(), 401);
-    //abort_unless(WireChat::allowsNewGroupModal(), 503, 'The NewChat feature is currently unavailable.');
+    abort_unless(auth()->user()->canCreateNewGroups(), 403, "You're not allowed to acccess this resource");
 
     $this->selectedMembers = collect();
   }

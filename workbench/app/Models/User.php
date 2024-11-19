@@ -76,10 +76,11 @@ class User extends Authenticatable
     }
 
 
-     /* UnRead Messages Count */
-    //  public function unReadMessagesCount() : int {
 
-    //     return $this->hasMany(Message::class,'receiver_id')->where('read_at',null)->count();
-       
-    // }
+    public  function canCreateNewGroups(): bool
+    {
+        return $this->hasVerifiedEmail()==true;
+    }
+
+
 }

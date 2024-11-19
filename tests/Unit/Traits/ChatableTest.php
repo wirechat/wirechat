@@ -607,7 +607,6 @@ describe('createGroup',function(){
     });
 
 
-
     it('creates participant as owner to group', function () {
 
         $auth = User::factory()->create();
@@ -616,16 +615,38 @@ describe('createGroup',function(){
 
         $participant = $conversation->participants()->first();
 
-
         //assert
         expect($participant->participantable_id)->toEqual($auth->id);
-        
 
+    });
+
+    it('does not abort if canCreateNewGroups == TRUE(email is verified)', function () {
+
+        $auth = User::factory()->create(["email_verified_at"=>now()]);
+
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        expect($conversation)->not->toBe(null);
+
+        expect(Conversation::count())->toBe(1);
 
     });
 
 
-});
+    it('aborts if canCreateNewGroups == FALSE(email NOT is verified)', function () {
+
+        $auth = User::factory()->create(["email_verified_at"=>null]);
+
+        $conversation= $auth->createGroup(name:'New group',description:'description');
+
+        expect($conversation)->toBe(null);
+
+        expect(Conversation::withoutGlobalScopes()->count())->toBe(0);
+
+    })->throws(Exception::class,"You do not have permission to create groups.");
+
+
+})->only();
 
 
 describe('Exit conversation',function(){
@@ -735,3 +756,6 @@ describe('Exit conversation',function(){
 
  
 });
+
+
+

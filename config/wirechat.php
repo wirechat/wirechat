@@ -44,7 +44,7 @@ return [
      * Features:
      * You can configure the feature you want to allow for wirechat */
      'show_new_chat_modal_button'=>true,    //Show the button to create new group
-     'show_new_group_modal_button'=>false,    //Show the button to create new group inside new-chat component
+     'show_new_group_modal_button'=>true,    //Show the button to create new group inside new-chat component
 
      'allow_chats_search'=>true,       //bool -Show the search bar to existing conversations
      'allow_media_attachments'=>true,  //bool -Allow participants to share media in conversatoin (images, vidoes, gifs, etc)
