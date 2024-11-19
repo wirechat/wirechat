@@ -145,3 +145,91 @@ describe('exitingConversation()', function () {
 
 
 });
+
+
+
+describe('removeByAdmin()', function () {
+
+
+
+
+    it('creates an action model relationship with type REMOVED_BY_ADMIN ', function () {
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($user);
+
+        #assert
+        expect($participant->isRemovedByAdmin())->toBe(false);
+
+        #action
+        $participant->removeByAdmin($auth);
+
+        $participant = $participant->refresh();
+
+        #assert
+        expect($participant->isRemovedByAdmin())->toBe(true);
+
+        $actionsCount= Action::where('type',Actions::REMOVED_BY_ADMIN)
+                        ->where('actionable_id',$participant->id)
+                        ->where('actionable_type',Participant::class)
+                        ->count();
+
+        expect($actionsCount)->toBe(1);
+    });
+
+
+    it('it only create one REMOVED_BY_ADMIN action no matter how many times it is called ', function () {
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($user);
+
+
+        #action - call 3 times 
+        $participant->removeByAdmin($auth);
+        $participant->removeByAdmin($auth);
+        $participant->removeByAdmin($auth);
+
+
+        $participant = $participant->refresh();
+
+        $actionsCount= Action::where('type',Actions::REMOVED_BY_ADMIN)
+                        ->where('actionable_id',$participant->id)
+                        ->where('actionable_type',Participant::class)
+                        ->count();
+
+        expect($actionsCount)->toBe(1);
+    });
+
+
+    it('removes Admin role and adds Participant role REMOVED_BY_ADMIN  ', function () {
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $participant =  $conversation->addParticipant($user, role: ParticipantRole::ADMIN);
+
+        #assert
+        expect($participant->role)->toBe(ParticipantRole::ADMIN);
+
+        #action
+        $participant->removeByAdmin($auth);
+
+        $participant = $participant->refresh();
+
+        #assert
+        expect($participant->role)->toBe(ParticipantRole::PARTICIPANT);
+
+    });
+
+
+});

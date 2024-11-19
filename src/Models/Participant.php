@@ -229,6 +229,11 @@ class Participant extends Model
                 'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
             ]);
         }
+
+
+          #update Role to Participant
+          $this->role= ParticipantRole::PARTICIPANT;
+          $this->save();
     }
 
 
