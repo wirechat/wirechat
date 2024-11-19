@@ -474,6 +474,11 @@ describe('sendMessageTo() ',function(){
     });
 
 
+
+
+
+
+
 });
 
 describe('belongsToConversation() ',function(){
@@ -508,6 +513,45 @@ describe('belongsToConversation() ',function(){
         //assert
         expect($auth->belongsToConversation($conversation))->toBe(true);
 
+
+    });
+
+
+    it('returns false if user exits conversation', function () {
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('Test','hello');
+
+        #add member
+        $receiver = User::factory()->create();
+        $participant = $conversation->addParticipant($receiver);
+
+        expect($receiver->belongsToConversation($conversation))->toBe(true);
+
+        #exit conversation
+        $participant->exitConversation();
+        #assert 
+        expect($receiver->belongsToConversation($conversation))->toBe(false);
+
+    });
+
+
+    it('returns false if user is removed from Group by admin', function () {
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('Test','hello');
+
+        #add member
+        $receiver = User::factory()->create();
+        $participant = $conversation->addParticipant($receiver);
+
+        expect($receiver->belongsToConversation($conversation))->toBe(true);
+
+        #exit conversation
+
+        $participant->remove($auth);
+        #assert 
+        expect($receiver->belongsToConversation($conversation))->toBe(false);
 
     });
 
