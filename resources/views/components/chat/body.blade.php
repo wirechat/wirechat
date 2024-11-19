@@ -176,7 +176,7 @@
                             ])>
 
                                 {{-- Message Actions --}}
-                                @if (($isGroup && $conversation->group->allowsMembersToSendMessages()) || $authParticipant->isAdmin())
+                                @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authParticipant->isAdmin())
                                 <div @dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
                                     <button wire:click="setReply('{{ $message->id }}')"

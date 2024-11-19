@@ -514,6 +514,8 @@ describe('Testing permissions accssibility ', function () {
     });
 
 
+    #todo: dispatch refresh event after updating permissions
+
 
 
 

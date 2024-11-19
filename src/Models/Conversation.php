@@ -244,10 +244,11 @@ class Conversation extends Model
      * Add a new participant to the conversation.
      *
      * @param Model $user
-     * @param bool  $revive If the user was recently removed, allow re-adding.
+     * @param ParticipantRole  a ParticipanRole enum to assign to member
+     * @param bool  $undoAdminRemovalAction If the user was recently removed by admin, allow re-adding.
      * @return Participant
      */
-    public function addParticipant(Model $user, bool $revive = false): Participant
+    public function addParticipant(Model $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
     {
         // Check if the participant already exists (with or without global scopes)
         $participant = $this->participants()
@@ -255,36 +256,36 @@ class Conversation extends Model
             ->where('participantable_id', $user->id)
             ->where('participantable_type', get_class($user))
             ->first();
-
-            if ($participant) {
-                // Abort if the participant exited themselves
+    
+        if ($participant) {
+            // Abort if the participant exited themselves
+            abort_if(
+                $participant->hasExited(),
+                403,
+                'Cannot add ' . $user->display_name . ' because they left the group.'
+            );
+    
+            // Check if the participant was removed by an admin or owner
+            if ($participant->isRemoved()) {
+                // Abort if undoAdminRemovalAction is not true
                 abort_if(
-                    $participant->hasExited(),
+                    !$undoAdminRemovalAction,
                     403,
-                    'Cannot add ' . $user->display_name . ' because they left the group.'
+                    'Cannot add ' . $user->display_name . ' because they were removed from the group by an Admin.'
                 );
-            
-                // Check if the participant was removed by an admin or owner
-                if ($participant->isRemoved()) {
-                    // Abort if revive is not true
-                    abort_if(
-                        !$revive,
-                        403,
-                        'Cannot add ' . $user->display_name . ' because they were removed from the group by an Admin.'
-                    );
-            
-                    // If revive is true, remove admin removal actions and return the participant
-                    $participant->actions()
-                        ->where('type', Actions::REMOVED_BY_ADMIN)
-                        ->delete();
-            
-                    return $participant;
-                }
-            
-                // Abort if the participant is already in the group and has not exited
-                abort(422, 'Participant is already in the conversation.');
+    
+                // If undoAdminRemovalAction is true, remove admin removal actions and return the participant
+                $participant->actions()
+                    ->where('type', Actions::REMOVED_BY_ADMIN)
+                    ->delete();
+    
+                return $participant;
             }
-            
+    
+            // Abort if the participant is already in the group and has not exited
+            abort(422, 'Participant is already in the conversation.');
+        }
+    
         // Validate participant limits for private or self conversations
         if ($this->isPrivate()) {
             abort_if(
@@ -293,7 +294,7 @@ class Conversation extends Model
                 'Private conversations cannot have more than two participants.'
             );
         }
-
+    
         if ($this->isSelf()) {
             abort_if(
                 $this->participants()->count() >= 1,
@@ -301,14 +302,15 @@ class Conversation extends Model
                 'Self conversations cannot have more than one participant.'
             );
         }
-
+    
         // Add a new participant
         return $this->participants()->create([
             'participantable_id' => $user->id,
             'participantable_type' => get_class($user),
-            'role' => ParticipantRole::PARTICIPANT,
+            'role' => $role,
         ]);
     }
+    
 
 
     public function messages()

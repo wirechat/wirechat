@@ -159,7 +159,7 @@ class AddMembers extends ModalComponent
 
    
       if (!$alreadyExists) {
-        $this->conversation->addParticipant($member,$authParticipant?->isAdmin());
+        $this->conversation->addParticipant($member,undoAdminRemovalAction:$authParticipant?->isAdmin());
       }
     }
 

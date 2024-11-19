@@ -149,7 +149,6 @@ describe('Presence check', function () {
 
 describe('Actions',function(){
 
-
     test('it can toggle "allow_members_to_edit_group_info" permission', function () {
 
 
@@ -205,7 +204,6 @@ describe('Actions',function(){
 
 
     });
-
 
     test('it can toggle "allow_members_to_send_messages" permission', function () {
 

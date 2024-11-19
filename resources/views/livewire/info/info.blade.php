@@ -4,6 +4,8 @@
         $authIsAdminInGroup = $participant->isAdmin();
         $authIsOwner = $participant->isOwner();
         $isGroup = $conversation->isGroup();
+        $group = $conversation->group;
+
 
     @endphp
 
@@ -17,15 +19,17 @@
     </section>
     {{-- Details --}}
     <header class="">
-        <div class="flex  flex-col items-center gap-5">
 
-            <section class="mx-auto items-center justify-center grid">
+        {{-- Edit Group info section --}}
+        @if ($isGroup)
 
-                @if ($isGroup)
-                {{-- Show if is admin so you can show options for editing group information --}}
-                    @if ($authIsAdminInGroup)
+           {{-- Edit group form  --}}
+           @if ($authIsAdminInGroup || $group->allowsMembersToEditGroupInfo())
+            <div @dusk="edit_group_information_section" class="flex  flex-col items-center gap-5 py-5  px-4    ">
 
-                        <div class="relative  h-32 w-32 overflow-clip mx-auto rounded-full">
+                {{-- Avatar --}}
+                <section class="mx-auto items-center justify-center grid">
+                        <div @dusk="edit_avatar_label" class="relative  h-32 w-32 overflow-clip mx-auto rounded-full">
 
                             <label wire:target="photo" wire:loading.class="cursor-not-allowed" for="photo"
                                 class=" cursor-pointer w-full h-full">
@@ -64,36 +68,21 @@
                         @error('photo')
                             <span class="text-red-500">{{ $message }}</span>
                         @enderror
-                    @else
-                        {{-- Show when is group but not admin --}}
-
-                        <x-wirechat::avatar src="{{ $cover_url }}" class=" h-32 w-32 mx-auto" />
-
-                    @endif
-                @else
-                {{-- show when if not group so you can add a refirect link --}}
-                    <a href="{{$receiver->profile_url}}">
-                        <x-wirechat::avatar src="{{ $cover_url }}" class=" h-32 w-32 mx-auto" />
-                    </a>
-                @endif
-            </section>
+                </section>
 
 
-            <div class="space-y-3 grid  overflow-x-hidden">
+                {{-- Form --}}
+                <div class="space-y-3 grid  overflow-x-hidden">
 
-                @if ($isGroup)
-                    {{-- Check if user is admin in conversation --}}
-                    @if ($authIsAdminInGroup)
                         {{-- Form to update Group name  --}}
-                        <form wire:submit="updateGroupName" x-data="{ editing: false }"
-                            class=" justify-center flex  items-center w-full gap-5 px-5 items-center">
+                        <form @dusk="edit_group_name_form" wire:submit="updateGroupName" x-data="{ editing: false }"
+                            class=" justify-center flex   items-center w-full gap-5 px-5 items-center">
                             @csrf
 
                             {{-- Left side input --}}
-                            <div class="  max-w-[90%] grid h-auto">
+                            <div class="   max-w-[90%] grid h-auto">
                                 <div x-show="!editing">
-                                    <h4 class="font-medium  break-all   whitespace-pre-line   text-2xl ">
-                                        {{ $groupName }} </h4>
+                                    <h4 class="font-medium  break-all   whitespace-pre-line   text-2xl "> {{ $groupName }} </h4>
                                 </div>
 
                                 <input x-cloak maxlength="110" x-show="editing" id='groupName' type="text"
@@ -131,88 +120,107 @@
                             </span>
 
                         </form>
-                    @else
-                        <h4 class="font-medium  break-all   whitespace-pre-line   text-2xl ">{{ $groupName }} </h4>
-                    @endif
-
 
                     {{-- Members count --}}
                     <p class="mx-auto"> Members {{ $totalParticipants }} </p>
-                @else
-                    {{-- Receiver --}}
-                    <a href="{{$receiver->profile_url}}">
-                    <h5 class="text-2xl">{{ $receiver?->display_name }}</h5>
-                    </a>
-                @endif
+
+                </div>
+
+
+                {{-- About --}}
+                <section class=" px-8 py-5 ">
+                        <div @dusk="edit_description_section" x-data="{ editing: false }" @click.outside="editing=false"
+                            class="grid grid-cols-12 items-center">
+
+                            {{-- Left side input --}}
+                            <span class="col-span-11">
+                                <div x-show="!editing">
+                                    @if (empty($description))
+                                        <p class="text-sm" style="color: var(--primary-color)">Add a group description
+                                        </p>
+                                    @else
+                                        <p class="font-medium break-all   whitespace-pre-line ">{{ $description }}
+                                        </p>
+                                    @endif
+                                </div>
+
+                                <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur='description'
+                                    class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
+                                </textarea>
+
+                                @error('description')
+                                    <p class="text-red-500">{{ $message }}</p>
+                                @enderror
+                            </span>
+
+                            {{-- Right Side --}}
+                            <span class="col-span-1 flex items-center justify-end">
+
+                                <button @click="editing=true" x-show="!editing">
+                                    {{-- pencil/edit --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="size-6  w-5 h-5">
+                                        <path
+                                            d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+                                    </svg>
+
+                                </button>
+
+                                <button x-cloak @click="editing=false" x-show="editing">
+                                    {{-- check --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        fill="currentColor" class="bi bi-check-lg w-5 h-5" viewBox="0 0 16 16">
+                                        <path
+                                            d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
+                                    </svg>
+                                </button>
+
+
+
+
+                            </span>
+
+                        </div>
+                </section>
+
             </div>
-        </div>
+            @else {{-- Plain group information --}}
+            <div @dusk="non_editable_group_information_section" class="flex  flex-col items-center gap-5 py-5 px-4  ">
+                <x-wirechat::avatar src="{{ $cover_url }}" class=" h-32 w-32 mx-auto" />
+                <h4 @dusk="group_name" class="font-medium  break-all   whitespace-pre-line   text-2xl "> {{ $groupName }} </h4>
+                <p class="mx-auto"> Members {{ $totalParticipants }} </p>
+                <p class="font-medium break-all   whitespace-pre-line ">{{ $description }} </p>
+            </div>
+            @endif
+
+        @else
+            {{-- Not Group --}}
+            <div class="flex  flex-col items-center gap-5 ">
+
+                <div class="mx-auto items-center justify-center grid">
+
+                    <a href="{{ $receiver->profile_url }}">
+                        <x-wirechat::avatar src="{{ $cover_url }}" class=" h-32 w-32 mx-auto" />
+                    </a>
+                </div>
+
+                <div class=" grid  ">
+
+                    <a class="px-8 py-5 " @dusk="receiver_name" href="{{ $receiver->profile_url }}">
+                        <h5 class="text-2xl">{{ $receiver?->display_name }}</h5>
+                    </a>
+                </div>
+
+
+                <p class="font-medium break-all px-8 py-5   whitespace-pre-line ">{{ $description }} </p>
+
+            </div>
+        @endif
+
 
     </header>
 
 
-    {{-- About --}}
-    <section class=" px-8 py-5 ">
-
-        @if ($isGroup)
-
-            @if ($authIsAdminInGroup)
-                <div x-data="{ editing: false }" @click.outside="editing=false" class="grid grid-cols-12 items-center">
-
-                    {{-- Left side input --}}
-                    <span class="col-span-11">
-                        <div x-show="!editing">
-                            @if (empty($description))
-                                <p class="text-sm" style="color: var(--primary-color)">Add a group description</p>
-                            @else
-                                <p class="font-medium break-all   whitespace-pre-line ">{{ $description }} </p>
-                            @endif
-                        </div>
-
-                        <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur='description'
-                            class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
-                        </textarea>
-
-                        @error('description')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
-                    </span>
-
-                    {{-- Right Side --}}
-                    <span class="col-span-1 flex items-center justify-end">
-
-                        <button @click="editing=true" x-show="!editing">
-                            {{-- pencil/edit --}}
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                class="size-6  w-5 h-5">
-                                <path
-                                    d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
-                            </svg>
-
-                        </button>
-
-                        <button x-cloak @click="editing=false" x-show="editing">
-                            {{-- check --}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                fill="currentColor" class="bi bi-check-lg w-5 h-5" viewBox="0 0 16 16">
-                                <path
-                                    d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
-                            </svg>
-                        </button>
-
-
-
-
-                    </span>
-
-                </div>
-            @else
-                <p class="font-medium break-all   whitespace-pre-line ">{{ $description }} </p>
-
-            @endif
-
-        @endif
-
-    </section>
 
     <x-wirechat::divider />
 
@@ -223,7 +231,7 @@
             {{-- Members count --}}
             <button
                 wire:click="$dispatch('openWireChatModal', {component: 'members',arguments: { conversation: {{ $conversation->id }} }})"
-                class="flex w-full justify-between items-center px-8 ">
+                class="flex w-full justify-between items-center px-8 focus:outline-none ">
                 <span class="text-gray-600 dark:text-gray-300"> Members {{ $totalParticipants }}</span>
 
 
@@ -238,9 +246,10 @@
                 </span>
             </button>
 
-            <button
-                wire:click="$dispatch('openWireChatModal', {component: 'add-members',arguments: { conversation: {{ $conversation->id }} }})"
-                class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-800 flex gap-3 items-center">
+            {{-- Add Members --}}
+            @if ($authIsAdminInGroup || $group->allowsMembersToAddOthers())
+            <button @dusk="open_add_members_modal_button" wire:click="$dispatch('openWireChatModal', {component: 'add-members',arguments: { conversation: {{ $conversation->id }} }})"
+                class=" w-full py-5 px-8 hover:bg-gray-200 focus:outline-none transition dark:hover:bg-gray-800 flex gap-3 items-center">
 
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="size-6 w-5 h-5">
@@ -248,9 +257,11 @@
                         d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
                 </svg>
 
-
                 <span>Add Members</span>
             </button>
+            @endif
+
+
         </section>
 
         <x-wirechat::divider />
@@ -289,22 +300,24 @@
                         <span>Delete Group</span>
                     </div>
 
-                    <p class="dark:text-white/60 text-sm text-gray-600/80">Before you can delete the group, you’ll need to remove all group members</p>
+                    <p class="dark:text-white/60 text-sm text-gray-600/80">Before you can delete the group, you need to remove all group members</p>
                 </button>
             </div>
 
             {{-- Permissions --}}
             <div>
 
-                <button  
-                  wire:click="$dispatch('openChatModal', {component: 'permissions',arguments: { conversation: {{ $conversation->id }} }})"
+                <button
+                    wire:click="$dispatch('openChatModal', {component: 'permissions',arguments: { conversation: {{ $conversation->id }} }})"
                     class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-700 text-start space-y-2   gap-3   dark:text-white/90">
                     <div class="flex gap-3 items-center ">
 
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5 dark:text-gray-400">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077 1.41-.513m14.095-5.13 1.41-.513M5.106 17.785l1.15-.964m11.49-9.642 1.149-.964M7.501 19.795l.75-1.3m7.5-12.99.75-1.3m-6.063 16.658.26-1.477m2.605-14.772.26-1.477m0 17.726-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205 12 12m6.894 5.785-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495" />
-                          </svg>
-                          
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5 dark:text-gray-400">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077 1.41-.513m14.095-5.13 1.41-.513M5.106 17.785l1.15-.964m11.49-9.642 1.149-.964M7.501 19.795l.75-1.3m7.5-12.99.75-1.3m-6.063 16.658.26-1.477m2.605-14.772.26-1.477m0 17.726-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205 12 12m6.894 5.785-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495" />
+                        </svg>
+
                         <span>Group Permissions</span>
                     </div>
                 </button>

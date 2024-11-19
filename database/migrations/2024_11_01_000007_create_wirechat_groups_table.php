@@ -25,7 +25,7 @@ return new class extends Migration
 
             // Permissions
             $table->boolean('allow_members_to_send_messages')->default(true);
-            $table->boolean('allow_members_to_add_others')->default(false);
+            $table->boolean('allow_members_to_add_others')->default(true);
             $table->boolean('allow_members_to_pin_messages')->default(false);
             $table->boolean('allow_members_to_edit_group_info')->default(false);
             $table->boolean('admins_must_approve_new_members')->default(false)->comment('when turned on, admins must approve anyone who wants to join group');

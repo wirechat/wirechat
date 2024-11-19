@@ -3,8 +3,8 @@
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Info\Info;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
@@ -97,7 +97,7 @@ describe('presence test', function () {
             ->assertPropertyNotWired("photo");
     });
 
-    test('it doent show name property wired if auth is not admin', function () {
+    test('it doent show name property wired or edit_group_name_form if auth is not admin', function () {
 
         $auth = User::factory()->create(['id' => '345678']);
 
@@ -111,7 +111,27 @@ describe('presence test', function () {
         $conversation->addParticipant($user);
 
         Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
-            ->assertPropertyNotWired("groupName");
+            ->assertPropertyNotWired("groupName")
+            ->assertDontSeeHtml('@dusk="edit_group_name_form"');
+    });
+
+
+    test('it show name property wired and edit_group_name_form if auth is  admin', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+
+
+
+        $user = User::factory()->create();
+
+
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertPropertyWired("groupName")
+            ->assertSeeHtml('@dusk="edit_group_name_form"');
     });
 
     test('it doent show description property wired if auth is not admin', function () {
@@ -271,7 +291,7 @@ describe('presence test', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->assertSee("Delete Group")
             ->assertMethodWired('deleteGroup')
-            ->assertSee("Before you can delete the group, you’ll need to remove all group members") ;
+            ->assertSee("Before you can delete the group, you need to remove all group members") ;
     });
 
 
@@ -321,6 +341,299 @@ describe('presence test', function () {
 
 });
 
+
+describe('allowsMembersToEditGroupInfo() Permission accesibility ', function () {
+
+ 
+
+    /**
+     * Turning feature ON
+     */
+
+     test('when "allow_members_to_edit_group_info" is ON &&  auth is OWNER, it still  shows "edit_group_information_section" & not "non_editable_group_information_section" ', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_edit_group_info=true;
+        $group->save();
+
+
+        $user = User::factory()->create();
+
+        $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="edit_group_information_section"')
+            ->assertDontSeeHtml('@dusk="non_editable_group_information_section"');
+
+    });
+
+
+    test('when "allow_members_to_edit_group_info" is ON &&  auth is ADMIN, it still  shows "edit_group_information_section" & not "non_editable_group_information_section" ', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_edit_group_info=true;
+        $group->save();
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::ADMIN;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="edit_group_information_section"')
+            ->assertDontSeeHtml('@dusk="non_editable_group_information_section"');
+
+    });
+
+
+    test('when "allow_members_to_edit_group_info" is ON &&  auth is PARTICIPANT, it still show "edit_group_information_section" but shows "non_editable_group_information_section" instead ', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_edit_group_info=true;
+        $group->save();
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::PARTICIPANT;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="edit_group_information_section"')
+            ->assertDontSeeHtml('@dusk="non_editable_group_information_section"');
+
+    });
+
+
+    /**
+     * Turning feature OFF
+     */
+
+     test('when "allow_members_to_edit_group_info" is OFF &&  auth is OWNER, it  shows "edit_group_information_section" & not "non_editable_group_information_section" ', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_edit_group_info=false;
+        $group->save();
+
+
+        $user = User::factory()->create();
+
+        $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="edit_group_information_section"')
+            ->assertDontSeeHtml('@dusk="non_editable_group_information_section"');
+
+    });
+
+
+    test('when "allow_members_to_edit_group_info" is OFF &&  auth is ADMIN, it  shows "edit_group_information_section" & not "non_editable_group_information_section" ', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_edit_group_info=false;
+        $group->save();
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::ADMIN;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="edit_group_information_section"')
+            ->assertDontSeeHtml('@dusk="non_editable_group_information_section"');
+
+    });
+
+
+    test('when "allow_members_to_edit_group_info" is OFF &&  auth is PARTICIPANT, it DOESNT show "edit_group_information_section" but shows "non_editable_group_information_section" instead ', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_edit_group_info=false;
+        $group->save();
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::PARTICIPANT;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertDontSeeHtml('@dusk="edit_group_information_section"')
+            ->assertSeeHtml('@dusk="non_editable_group_information_section"');
+
+    });
+
+
+
+
+});
+
+
+describe('allowsMembersToAddOthers() Permission accesibility ', function () {
+
+
+
+    /**
+     * Turning feature ON
+     */
+
+     test('when ON it shows "open_add_members_modal_button" if auth is OWNER,', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_add_others=true;
+        $group->save();
+
+
+        $user = User::factory()->create();
+
+        $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="open_add_members_modal_button"');
+
+    });
+
+
+    test('when ON it shows "open_add_members_modal_button" if auth is ADMIN,', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_add_others=true;
+        $group->save();
+
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::ADMIN;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="open_add_members_modal_button"');
+
+    });
+
+    test('when ON it shows "open_add_members_modal_button" if auth is PARTICIPANT,', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_add_others=true;
+        $group->save();
+
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::PARTICIPANT;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="open_add_members_modal_button"');
+
+    });
+
+    /**
+     * Turning feature OFF
+     */
+
+     test('when OFF it shows "open_add_members_modal_button" if auth is OWNER,', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_add_others=false;
+        $group->save();
+
+
+        $user = User::factory()->create();
+
+        $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="open_add_members_modal_button"');
+
+    });
+
+
+    test('when OFF it shows "open_add_members_modal_button" if auth is ADMIN,', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_add_others=false;
+        $group->save();
+
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::ADMIN;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('@dusk="open_add_members_modal_button"');
+
+    });
+
+    test('when OFF it shows "open_add_members_modal_button" if auth is PARTICIPANT,', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $conversation =  $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        //turn off feature
+        $group = $conversation->group;
+        $group->allow_members_to_add_others=false;
+        $group->save();
+
+
+        $user = User::factory()->create();
+        $participant= $conversation->addParticipant($user);
+        $participant->role= ParticipantRole::PARTICIPANT;
+        $participant->save();
+
+        Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
+            ->assertDontSeeHtml('@dusk="open_add_members_modal_button"');
+
+    });
+
+
+ 
+
+
+});
 
 
 describe('updating group name and description', function () {
