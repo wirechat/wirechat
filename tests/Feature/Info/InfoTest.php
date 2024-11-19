@@ -989,7 +989,7 @@ describe('Deleting Group', function () {
         #add members
         $conversation->addParticipant(User::factory()->create())->exitConversation();
         $conversation->addParticipant(User::factory()->create())->exitConversation();
-        $conversation->addParticipant(User::factory()->create())->remove($auth);
+        $conversation->addParticipant(User::factory()->create())->removeByAdmin($auth);
 
 
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])

@@ -549,7 +549,7 @@ describe('belongsToConversation() ',function(){
 
         #exit conversation
 
-        $participant->remove($auth);
+        $participant->removeByAdmin($auth);
         #assert 
         expect($receiver->belongsToConversation($conversation))->toBe(false);
 
@@ -801,7 +801,7 @@ describe('Exit conversation',function(){
         //assert
         expect($auth->exitConversation($conversation))->toBe(false);
 
-    })->throws(Exception::class,'Participant cannot exited a private conversation');
+    })->throws(Exception::class,'Participant cannot exit a private conversation');
 
 
     it('marks participant exited_at table when user exits conversation', function () {

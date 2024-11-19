@@ -225,7 +225,7 @@ describe('actions test',function(){
         $participant =  $conversation->addParticipant($userTobeRemoved);
 
         #remove by auth
-        $participant->remove($auth);
+        $participant->removeByAdmin($auth);
 
         
         $request =  Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
@@ -248,7 +248,7 @@ describe('actions test',function(){
         expect($conversation->participants()->count())->toBe(2);
 
         #remove by auth
-        $participant->remove($auth);
+        $participant->removeByAdmin($auth);
 
         #assert new count is now 1 
   

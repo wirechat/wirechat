@@ -155,14 +155,15 @@ class Participant extends Model
     public function exitConversation(): bool
     {
         #make sure conversation is not private
-        abort_if($this->conversation->isPrivate(), 403, "Participant cannot exited a private conversation");
+        abort_if($this->conversation->isPrivate(), 403, "Participant cannot exit a private conversation");
 
         #make sure owner if group cannot be removed from chat
         abort_if($this->isOwner(), 403, "Owner cannot exit conversation");
 
 
-        #delete messages|conversation
-        $this->participantable->deleteConversation($this->conversation);
+        #update Role to Participant
+        $this->role= ParticipantRole::PARTICIPANT;
+        $this->save();
 
 
         if (!$this->hasExited()) {
@@ -190,7 +191,13 @@ class Participant extends Model
       }
 
 
-      public function isRemoved(): bool
+
+   /**
+     * check if participant was removed by admin
+     *
+     * @return bool
+     */
+      public function isRemovedByAdmin(): bool
       {
           return $this->actions()
               ->where('type', Actions::REMOVED_BY_ADMIN->value)
@@ -199,30 +206,30 @@ class Participant extends Model
 
 
    /**
- * Remove a participant and log the action if not already logged.
- *
- * @param Model $admin The admin model removing the participant.
- * @return void
- */
-function remove(Model $admin): void
-{
-    // Check if a remove action already exists for this participant
-    $exists = Action::where('actionable_id', $this->id)
-        ->where('actionable_type', Participant::class)
-        ->where('type', Actions::REMOVED_BY_ADMIN)
-        ->exists();
+     * Remove a participant and log the action if not already logged.
+     *
+     * @param Model $admin The admin model removing the participant.
+     * @return void
+     */
+    function removeByAdmin(Model $admin): void
+    {
+        // Check if a remove action already exists for this participant
+        $exists = Action::where('actionable_id', $this->id)
+            ->where('actionable_type', Participant::class)
+            ->where('type', Actions::REMOVED_BY_ADMIN)
+            ->exists();
 
-    if (!$exists) {
-        // Create the 'remove' action record in the actions table
-        Action::create([
-            'actionable_id' => $this->id,
-            'actionable_type' => Participant::class,
-            'actor_id' => $admin->id,  // The admin who performed the action
-            'actor_type' => get_class($admin),  // Assuming 'User' is the actor model
-            'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
-        ]);
+        if (!$exists) {
+            // Create the 'remove' action record in the actions table
+            Action::create([
+                'actionable_id' => $this->id,
+                'actionable_type' => Participant::class,
+                'actor_id' => $admin->id,  // The admin who performed the action
+                'actor_type' => get_class($admin),  // Assuming 'User' is the actor model
+                'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
+            ]);
+        }
     }
-}
 
 
     /**

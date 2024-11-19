@@ -185,7 +185,7 @@ describe('AddParticipant()', function () {
 
         #remove user from group
         $userParticipant= $conversation->participant($user);
-        $userParticipant->remove($auth);
+        $userParticipant->removeByAdmin($auth);
 
         #assert new count is 1 
         expect($conversation->participants()->count())->toBe(1);

@@ -125,7 +125,7 @@ class AddMembers extends ModalComponent
 
         #check if is removed - if true then 
         #abort if non admin member tries to add a participant previously removed by admin 
-         if ($participant?->isRemoved()) {
+         if ($participant?->isRemovedByAdmin()) {
             $authParticipant = $this->conversation->participant(auth()->user());
 
            abort_unless($authParticipant?->isAdmin(),403,'Cannot add '.$model->display_name.' because they were removed from the group by an Admin.');

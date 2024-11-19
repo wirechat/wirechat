@@ -768,7 +768,7 @@ describe('actions test', function () {
                  ->exists();
         expect($removed)->toBe(true);
 
-        expect($participant->isRemoved())->toBe(true);
+        expect($participant->isRemovedByAdmin())->toBe(true);
      });
 
 

@@ -266,7 +266,7 @@ class Conversation extends Model
             );
     
             // Check if the participant was removed by an admin or owner
-            if ($participant->isRemoved()) {
+            if ($participant->isRemovedByAdmin()) {
                 // Abort if undoAdminRemovalAction is not true
                 abort_if(
                     !$undoAdminRemovalAction,
