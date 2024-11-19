@@ -90,7 +90,7 @@ describe('Initial page',function(){
 
         $auth = ModelsUser::factory()->create(['email_verified_at'=>null]);
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
-        $request->assertStatus(403,"You're not allowed to acccess this resource");
+        $request->assertStatus(403,"You do not have permission to create groups.");
     
     });
 

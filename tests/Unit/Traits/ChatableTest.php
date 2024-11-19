@@ -251,6 +251,92 @@ describe('sendMessageTo() ',function(){
 
 
 
+
+    it('aborts 403 is $model not extenting Chatable Trait ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+
+        $conversation = $auth->createConversationWith($receiver);
+
+
+        $participant= $conversation->participant($auth);
+
+
+         #pass participant model - which does not use Triat Chatable
+        $auth->sendMessageTo($participant,'hello');
+
+
+    })->throws(Exception::class,"The provided model does not support chat functionality.");
+
+
+    it('aborts 403 is user does not belong to conversation ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+
+
+        $conversation = $auth->createConversationWith($receiver);
+
+
+        $randomUser=  User::factory()->create();
+        $randomUserConversation = $randomUser->createConversationWith(User::factory()->create());
+
+         #pass participant model - which does not use Triat Chatable
+        $auth->sendMessageTo($randomUserConversation,'hello');
+
+
+    })->throws(Exception::class,"You do not have access to this conversation.");
+
+
+    it('can send message conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+
+
+        $message =$auth->sendMessageTo($conversation,'hello');
+
+        //assert 
+        expect($message)->not->toBe(null);
+
+        //check database
+        $messageFromDB= Message::find($message->id);
+
+        //assert content
+        expect($messageFromDB->id)->toBe($message->id);
+        expect($messageFromDB->body)->toBe($message->body);
+        expect($messageFromDB->conversation_id)->toBe($conversation->id);
+
+    });
+
+
+
+    it('can send message Model', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $message =$auth->sendMessageTo($receiver,'hello');
+
+        //assert 
+        expect($message)->not->toBe(null);
+
+        //check database
+        $messageFromDB= Message::find($message->id);
+
+        //assert content
+        expect($messageFromDB->id)->toBe($message->id);
+        expect($messageFromDB->body)->toBe($message->body);
+
+    });
+
+    
     it('creates new conversation if it didn\'t alrady exist between the two users ', function () {
 
         $auth = User::factory()->create();
@@ -386,8 +472,6 @@ describe('sendMessageTo() ',function(){
         expect($participant->last_active_at)->not->toBe(null);
 
     });
-
-
 
 
 });
@@ -646,7 +730,7 @@ describe('createGroup',function(){
     })->throws(Exception::class,"You do not have permission to create groups.");
 
 
-})->only();
+});
 
 
 describe('Exit conversation',function(){
