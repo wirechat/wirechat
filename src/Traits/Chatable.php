@@ -65,7 +65,9 @@ trait Chatable
 
      public function createConversationWith(Model $participant, ?string $message = null)
      {
-        
+
+        #abort if is not allowed to create new chats
+        abort_unless($this->canCreateChats(),403,"You do not have permission to create chats.");
    
          $participantId = $participant->id;
          $participantType = get_class($participant);
@@ -161,7 +163,8 @@ trait Chatable
     public function createGroup(string $name, string $description = null, UploadedFile $photo = null): Conversation
     {
 
-        abort_unless($this->canCreateNewGroups(),403,"You do not have permission to create groups.");
+        #abort if is not allowed to create new groups
+        abort_unless($this->canCreateGroups(),403,"You do not have permission to create groups.");
 
 
         //create rooom
@@ -594,9 +597,9 @@ trait Chatable
     * 
     * @return bool
     */
-    public  function canCreateNewGroups(): bool
+    public  function canCreateGroups(): bool
     {
-        return $this->hasVerifiedEmail()==true; 
+        return $this->hasVerifiedEmail(); 
     }
 
     /** 
@@ -604,9 +607,10 @@ trait Chatable
         * 
         * @return bool
         */
-    public  function canCreateNewChats(): bool
+    public  function canCreateChats(): bool
     {
-        return true; // Default is true, allowing Chat creation.
+        return $this->hasVerifiedEmail(); 
+
     }
 
    

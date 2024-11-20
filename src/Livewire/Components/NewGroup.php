@@ -165,7 +165,7 @@ class NewGroup extends ModalComponent
   {
 
     abort_unless(auth()->check(), 401);
-    abort_unless(auth()->user()->canCreateNewGroups(), 403, "You do not have permission to create groups.");
+    abort_unless(auth()->user()->canCreateGroups(), 403, "You do not have permission to create groups.");
 
     $this->selectedMembers = collect();
   }

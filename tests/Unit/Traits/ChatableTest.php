@@ -67,6 +67,21 @@ describe('createConversationWith() ',function(){
 
     });
 
+    it('aborts if canCreateNewChats() ==FALSE(in our case when user not verified)', function () {
+
+        $auth = User::factory()->create(['email_verified_at'=>null]);
+        $receiver = User::factory()->create();
+
+        //action 
+        $auth->createConversationWith($receiver);
+
+        //check database
+        $conversation= Conversation::withoutGlobalScopes()->get();
+        expect($conversation)->toBe(null);
+
+    })->throws(Exception::class,"You do not have permission to create chats.");
+
+
     it('creates 2 participants for conversation when created', function () {
 
         $auth = User::factory()->create();
@@ -244,6 +259,13 @@ describe('createConversationWith() ',function(){
 
 
     });
+
+
+    
+
+
+
+
 
 });
 
@@ -824,7 +846,6 @@ describe('Exit conversation',function(){
         expect($participant->exited_at)->not->toBe(null);
 
     });
-
 
 
 

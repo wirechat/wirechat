@@ -77,7 +77,12 @@ class User extends Authenticatable
 
 
 
-    public  function canCreateNewGroups(): bool
+    public  function canCreateGroups(): bool
+    {
+        return $this->hasVerifiedEmail()==true;
+    }
+
+    public  function canCreateChats(): bool
     {
         return $this->hasVerifiedEmail()==true;
     }
