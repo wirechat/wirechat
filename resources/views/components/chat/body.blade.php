@@ -177,7 +177,7 @@
 
                                 {{-- Message Actions --}}
                                 @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authParticipant->isAdmin())
-                                <div @dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
+                                <div dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
                                     <button wire:click="setReply('{{ $message->id }}')"
                                         class=" invisible  group-hover:visible hover:scale-110 transition-transform">
@@ -206,8 +206,8 @@
                                         </x-slot>
                                         <x-slot name="content">
 
-                                            @if ($message->ownedBy(auth()->user()))
-                                                <button wire:click="deleteForEveryone('{{ $message->id }}')"
+                                            @if ($message->ownedBy(auth()->user())|| ($authParticipant->isAdmin() && $isGroup))
+                                                <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ $message->id }}')"
                                                     wire:confirm="Are you sure?" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
                                                         Delete for everyone
@@ -216,14 +216,18 @@
                                             @endif
 
 
-                                            <button wire:click="deleteForMe('{{ $message->id }}')"
+                                            {{-- Dont show delete for me if is group --}}
+                                            @if (!$isGroup) 
+                                            <button dusk="delete_message_for_me" wire:click="deleteForMe('{{ $message->id }}')"
                                                 wire:confirm="Are you sure?" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     Delete for me
                                                 </x-wirechat::dropdown-link>
                                             </button>
+                                            @endif
 
-                                            <button wire:click="setReply('{{ $message->id }}')"class="w-full text-start">
+
+                                            <button dusk="reply_to_message_button" wire:click="setReply('{{ $message->id }}')"class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     Reply
                                                 </x-wirechat::dropdown-link>

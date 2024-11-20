@@ -260,13 +260,6 @@ describe('createConversationWith() ',function(){
 
     });
 
-
-    
-
-
-
-
-
 });
 
 describe('sendMessageTo() ',function(){

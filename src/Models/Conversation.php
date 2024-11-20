@@ -352,12 +352,11 @@ class Conversation extends Model
 
     /**
      * Exclude blank conversations that have no messages at all,
-     * including those that might be "soft deleted" by the user.
+     * including those that where deleted by the user.
      */
     public function scopeWithoutBlanks(Builder $builder): void
     {
         $user = auth()->user(); // Get the authenticated user
-
         if ($user) {
 
             $builder->whereHas('messages', function ($q) use ($user) {
@@ -380,7 +379,9 @@ class Conversation extends Model
     }
 
 
-
+    /**
+     * Exclude conversations that were marked as deleted by the auth participant 
+    */
     public function scopeWithoutDeleted(Builder $builder)
     {
 
@@ -394,9 +395,7 @@ class Conversation extends Model
             // Apply the "without deleted conversations" scope
             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
                 $query->where('participantable_id', $user->id)
-                    ->whereRaw("
-                        (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at)
-                    ");
+                    ->whereRaw(" (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at) ");
             });
         }
     }

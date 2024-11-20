@@ -489,12 +489,14 @@ class Chat extends Component
     function deleteForEveryone(Message $message)
     {
 
+        $authParticipant = $this->conversation->participant(auth()->user());
 
         #make sure user is authenticated
-        abort_unless(auth()->check(), 401);
 
-        #make sure user owns message
-        abort_unless($message->ownedBy(auth()->user()), 403);
+        abort_unless(auth()->check(), 401);
+        
+        #make sure user owns message OR allow if is admin in group
+        abort_unless($message->ownedBy(auth()->user())|| ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
 
         //make sure user belongs to conversation from the message
         //We are checking the $message->conversation for extra security because the param might be tempered with 

@@ -211,10 +211,11 @@ describe('Box presence test: ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertMethodNotWired("clearConversation")
         ->assertDontSeeText('Clear Chat History');
-     });
+    });
 
 
-    it('Doesn\'nt show Delete chat button and method  is wired if conversation is group', function () {
+    
+     it('Doesn\'nt show Delete chat button and method  is wired if conversation is group', function () {
         $auth = User::factory()->create();
 
         $participant=  User::factory()->create(['name' => 'John']);
@@ -235,7 +236,6 @@ describe('Box presence test: ', function () {
      });
 
 
-
      test('it shows "Delete Chat" button label if Conversation  is Private', function () {
         $auth = User::factory()->create();
 
@@ -254,8 +254,6 @@ describe('Box presence test: ', function () {
      });
 
 
-     
-
     test('it loads messages if they Exists in the conversation', function () {
         $auth = User::factory()->create();
 
@@ -273,7 +271,6 @@ describe('Box presence test: ', function () {
             ->assertSee('How are you')
             ->assertSee('i am good thanks');
     });
-
 
 
     test('it shows sendable names if conversation is group ', function () {
@@ -316,6 +313,13 @@ describe('Box presence test: ', function () {
     });
 
 
+
+
+
+
+
+
+
     // test('it shows message time', function () {
     //     $auth = User::factory()->create();
 
@@ -343,6 +347,230 @@ describe('Box presence test: ', function () {
 });
 
 
+describe('Message actions: Viewing Private Chat', function () {
+
+
+
+    /**
+     * Delete for me 
+     */
+
+    test('it doest shows dusk selector : "delete_message_for_everyone"  if message belongs to another user ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+
+        $receiver= User::factory()->create(['name'=>'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        #add participant
+        $receiver->sendMessageTo($conversation,"Nice things");
+
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSee('Nice things') //assert can see message
+                ->assertDontSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+
+    test('it shows dusk selector : "delete_message_for_everyone"  on auths own message ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+
+        $receiver= User::factory()->create(['name'=>'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        #add participant
+        $auth->sendMessageTo($conversation,"Nice things");
+
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                                ->assertSee('Nice things') //assert can see message
+                                ->assertSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+
+    /**
+     * Delete for me 
+     */
+
+
+    test('it  shows dusk selector : "delete_message_for_me"  if message belongs to another user ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+
+        $receiver= User::factory()->create(['name'=>'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        #add participant
+        $receiver->sendMessageTo($conversation,"Nice things");
+
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSee('Nice things') //assert can see message
+                ->assertSeeHtml('dusk="delete_message_for_me"');
+    });
+
+
+    test('it shows dusk selector : "delete_message_for_me"  on auths own message ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+
+        $receiver= User::factory()->create(['name'=>'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        #add participant
+        $auth->sendMessageTo($conversation,"Nice things");
+
+        #
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                                ->assertSee('Nice things') //assert can see message
+                                ->assertSeeHtml('dusk="delete_message_for_me"');
+    });
+
+   
+
+});
+
+
+describe('Message actions:Viewing Group Chat', function () {
+
+
+    test('it shows dusk selector : "delete_message_for_everyone"  if auth is OWNER & message belongs to another user ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+        $user = User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'user']);
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSee('Nice things') //assert can see message
+               ->assertSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+    test('it shows dusk selector : "delete_message_for_everyone" if auth is ADMIN & message belongs to another user ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $admin = User::factory()->create(['name'=>'User Admin']);
+
+        $conversation = $auth->createGroup('My Group');
+
+        #add admin
+        $conversation->addParticipant($admin,ParticipantRole::ADMIN);
+
+        #add participant and send messsage
+        User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'user']);
+
+        Livewire::actingAs($admin)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertSee('Nice things') //assert can see message
+        ->assertSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+    test('it shows dusk selector : "delete_message_for_everyone"  on auths own message ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name'=>'User']);
+        $conversation->addParticipant($user,ParticipantRole::PARTICIPANT);
+        $user->sendMessageTo($conversation,'Hi');
+
+        #add participant
+
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+           ->assertSee('Hi') //assert can see message
+           ->assertSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+    test('it doesnt show dusk selectors : "delete_message_for_everyone"  if auth is PARTICIPANT and does not own message ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name'=>'User']);
+        $conversation->addParticipant($user,ParticipantRole::PARTICIPANT);
+
+        #add participant and send message by random user
+        User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'user']);
+
+
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things') //assert can see message  but not options
+            ->assertDontSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+    /**
+     * Delete for me 
+     */
+
+    test('it doesnt show dusk selector : "delete_message_for_me"  if auth is OWNER & message belongs to another user ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $conversation = $auth->createGroup('My Group');
+
+        #add participant
+        $user = User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'user']);
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSee('Nice things') //assert can see message
+                ->assertDontSeeHtml('dusk="delete_message_for_me"');
+    });
+
+    test('it doesnt show dusk selector : "delete_message_for_me" if auth is ADMIN & message belongs to another user ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $admin = User::factory()->create(['name'=>'User Admin']);
+
+        $conversation = $auth->createGroup('My Group');
+
+        #add admin
+        $conversation->addParticipant($admin,ParticipantRole::ADMIN);
+
+        #add participant and send messsage
+        User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'user']);
+
+        Livewire::actingAs($admin)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertSee('Nice things') //assert can see message
+        ->assertDontSeeHtml('dusk="delete_message_for_me"');
+    });
+
+    test('it doesnt show dusk selector : "delete_message_for_me"  on auths own message ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name'=>'User Admin']);
+        $conversation->addParticipant($user,ParticipantRole::PARTICIPANT);
+        $user->sendMessageTo($conversation,'Hi');
+
+        #add participant
+
+        // dd($conversation);
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+           ->assertSee('Hi') //assert can see message
+        ->assertDontSeeHtml('dusk="delete_message_for_me"');
+    });
+
+    test('it doesnt show dusk selector : "delete_message_for_me"   if auth is PARTICIPANT and does not own message ', function () {
+
+        $auth = User::factory()->create(['name'=>'test']);
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name'=>'User']);
+        $conversation->addParticipant($user,ParticipantRole::PARTICIPANT);
+
+        #add participant and send message by random user
+        User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'user']);
+
+
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things') //assert can see message  but not options
+            ->assertDontSeeHtml('dusk="delete_message_for_me"');
+    });
+
+});
 
 
 describe('Testing permissions accssibility ', function () {
@@ -364,7 +592,7 @@ describe('Testing permissions accssibility ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
               ->assertDontSee("Only admins can send messages")
               ->assertSeeHtml('id="chat-footer"')
-              ->assertSeeHtml('@dusk="message_actions"');
+              ->assertSeeHtml('dusk="message_actions"');
     });
 
 
@@ -392,7 +620,7 @@ describe('Testing permissions accssibility ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
               ->assertDontSee("Only admins can send messages")
               ->assertSeeHtml('id="chat-footer"')
-              ->assertSeeHtml('@dusk="message_actions"');
+              ->assertSeeHtml('dusk="message_actions"');
     });
 
 
@@ -423,7 +651,7 @@ describe('Testing permissions accssibility ', function () {
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
               ->assertDontSee("Only admins can send messages")
               ->assertSeeHtml('id="chat-footer"')
-              ->assertSeeHtml('@dusk="message_actions"');
+              ->assertSeeHtml('dusk="message_actions"');
     });
 
 
@@ -451,7 +679,7 @@ describe('Testing permissions accssibility ', function () {
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
               ->assertDontSee("Only admins can send messages")
               ->assertSeeHtml('id="chat-footer"')
-              ->assertSeeHtml('@dusk="message_actions"');
+              ->assertSeeHtml('dusk="message_actions"');
     });
 
 
@@ -480,7 +708,7 @@ describe('Testing permissions accssibility ', function () {
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
               ->assertDontSee("Only admins can send messages")
               ->assertSeeHtml('id="chat-footer"')
-              ->assertSeeHtml('@dusk="message_actions"');
+              ->assertSeeHtml('dusk="message_actions"');
     });
 
 
@@ -510,7 +738,7 @@ describe('Testing permissions accssibility ', function () {
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
               ->assertSee("Only admins can send messages")
               ->assertDontSeeHtml('id="chat-footer"')
-              ->assertDontSeeHtml('@dusk="message_actions"');
+              ->assertDontSeeHtml('dusk="message_actions"');
     });
 
 
@@ -521,8 +749,6 @@ describe('Testing permissions accssibility ', function () {
 
 
 });
-
-
 
 
 describe('Sending messages ', function () {
@@ -1803,7 +2029,6 @@ describe('Clearing Conversation', function () {
 
 describe('deleteMessage ForEveryone', function () {
 
-
     test('user cannot delete message that does not belong to them ', function () {
 
         $auth = User::factory()->create();
@@ -1828,6 +2053,30 @@ describe('deleteMessage ForEveryone', function () {
         expect($messageAvailable)->not->toBe(null);
     });
 
+    test('IN GROUP: Admin can delete message that does not belong to them ', function () {
+
+   
+        $auth = User::factory()->create(['name'=>'test']);
+        $admin = User::factory()->create(['name'=>'User Admin']);
+
+        $conversation = $auth->createGroup('My Group');
+
+        #add admin
+        $conversation->addParticipant($admin,ParticipantRole::ADMIN);
+
+        #add participant and send messsage
+
+        User::factory()->withMessage($conversation,'Nice things')->create(['name' => 'user']);
+
+        Livewire::actingAs($admin)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call("deleteForEveryone", "1")
+            ->assertStatus(200);
+
+        $messageAvailable = Message::find("1");
+
+        ///assert message no longer visible
+        expect($messageAvailable)->toBe(null);
+    });
 
     test('deleted message is removed from blade', function () {
 
@@ -2008,7 +2257,6 @@ describe('deleteMessage ForEveryone', function () {
 
     });
 
-
     test('it broadcasts event "NotifyParticipant" when sendLike is called', function () {
         Event::fake();
        // Queue::fake();
@@ -2036,8 +2284,7 @@ describe('deleteMessage ForEveryone', function () {
      
     });
 
-
-}) ;
+});
 
 describe('deletForMe', function () {
 
