@@ -15,7 +15,7 @@ use Namu\WireChat\Models\Message;
 
 class NewMessageNotification extends Notification implements ShouldBroadcastNow
 {
-  //  use Queueable;
+   //use Queueable;
 
     /**
      * Create a new notification instance.
@@ -26,9 +26,11 @@ class NewMessageNotification extends Notification implements ShouldBroadcastNow
     {
         $this->message = $message;
 
-      ///  $this->onConnection('sync');
-      //  $this->onQueue(WireChat::notificationsQueue());
-     //   $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
+    //  Explicitly set the connection to sync
+    //  $this->onConnection = 'sync';
+    //  $this->onConnection('sync');
+    //  $this->onQueue(WireChat::notificationsQueue());
+    //  $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
     }
 
     /**

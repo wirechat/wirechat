@@ -215,7 +215,7 @@ class Info extends ModalComponent
     
         abort_if($this->conversation->isPrivate(), 403, 'Operation not allowed: Private chats cannot be deleted.');
 
-        abort_unless(auth()->user()->isOwnerOfGroup($this->conversation->group), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless(auth()->user()->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
     
     
         // Ensure all participants are removed before deleting the group
@@ -240,9 +240,9 @@ class Info extends ModalComponent
 
         $auth= auth()->user();
 
-       //dd($auth->isOwnerOfConversation($this->conversation));
+
         #make sure owner if group cannot be removed from chat
-        abort_if($auth->isOwnerOfConversation($this->conversation),403,"Owner cannot exit conversation");
+        abort_if($auth->isOwnerOf($this->conversation),403,"Owner cannot exit conversation");
 
         #delete conversation 
         $auth->exitConversation($this->conversation);

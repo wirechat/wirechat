@@ -95,7 +95,7 @@
                     @endif
 
 
-                    @if ($conversation->isGroup() && !auth()->user()->isOwnerOfConversation($conversation))
+                    @if ($conversation->isGroup() && !auth()->user()->isOwnerOf($conversation))
                             <button wire:click="exitConversation" wire:confirm="Are you sure want to exit Group?"
                                 class="w-full text-start ">
 

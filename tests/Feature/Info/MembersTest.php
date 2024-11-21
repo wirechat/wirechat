@@ -566,7 +566,7 @@ describe('actions test', function () {
 
         #assert before 
         expect($participant->isAdmin())->toBe(false);
-        expect($user->isAdminInGroup($conversation->group))->toBe(false);
+        expect($user->isAdminIn($conversation->group))->toBe(false);
 
         $request =  Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('makeAdmin', $participant->id);
@@ -577,7 +577,7 @@ describe('actions test', function () {
 
         #assert after
         expect($participant->isAdmin())->toBe(true);
-        expect($user->isAdminInGroup($conversation->group))->toBe(true);
+        expect($user->isAdminIn($conversation->group))->toBe(true);
     });
 
     test('calling dismiss as admin will remove admin role from participant', function () {
@@ -598,7 +598,7 @@ describe('actions test', function () {
 
         #assert before 
         expect($participant->isAdmin())->toBe(true);
-        expect($user->isAdminInGroup($conversation->group))->toBe(true);
+        expect($user->isAdminIn($conversation->group))->toBe(true);
 
         $request =  Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('dismissAdmin', $participant->id);
@@ -609,7 +609,7 @@ describe('actions test', function () {
 
         #assert after
         expect($participant->isAdmin())->toBe(false);
-        expect($user->isAdminInGroup($conversation->group))->toBe(false);
+        expect($user->isAdminIn($conversation->group))->toBe(false);
     });
 
 

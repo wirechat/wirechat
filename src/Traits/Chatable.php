@@ -63,90 +63,90 @@ trait Chatable
      * @return Conversation|null
      */
 
-     public function createConversationWith(Model $participant, ?string $message = null)
-     {
+    public function createConversationWith(Model $participant, ?string $message = null)
+    {
 
         #abort if is not allowed to create new chats
-        abort_unless($this->canCreateChats(),403,"You do not have permission to create chats.");
-   
-         $participantId = $participant->id;
-         $participantType = get_class($participant);
-     
-         $authenticatedUserId = $this->id;
-         $authenticatedUserType = get_class($this);
-     
-         // Determine if this is a self-conversation (for the same user as both participants)
-         $selfConversationCheck = $participantId == $authenticatedUserId && $participantType === $authenticatedUserType;
-     
-       //  dd($selfConversationCheck);
-         $existingConversationQuery = Conversation::withoutGlobalScopes()
-             ->where('type', $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE)
-             ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType, $selfConversationCheck) {
-                 if ($selfConversationCheck) {
-                     // Self-conversation: check for one participant record
-                     $query->where('participantable_id', $authenticatedUserId)
-                         ->where('participantable_type', $authenticatedUserType);
-                 } else {
-                     // Private conversation between two participants
-                     $query->where(function ($query) use ($authenticatedUserId, $authenticatedUserType) {
-                         $query->where('participantable_id', $authenticatedUserId)
-                               ->where('participantable_type', $authenticatedUserType);
-                     })->orWhere(function ($query) use ($participantId, $participantType) {
-                         $query->where('participantable_id', $participantId)
-                               ->where('participantable_type', $participantType);
-                     });
-                 }
-             }, '=', $selfConversationCheck ? 1 : 2);
-     
+        abort_unless($this->canCreateChats(), 403, "You do not have permission to create chats.");
 
-         // Get the first matching conversation
-         $existingConversation = $existingConversationQuery->first();
+        $participantId = $participant->id;
+        $participantType = get_class($participant);
 
-       // dd($existingConversation,$selfConversationCheck);
-         
-         // If an existing conversation is found, return it
-         if ($existingConversation) {
-             return $existingConversation;
-         }
-     
-         // Create a new conversation
-         $existingConversation = new Conversation();
+        $authenticatedUserId = $this->id;
+        $authenticatedUserType = get_class($this);
+
+        // Determine if this is a self-conversation (for the same user as both participants)
+        $selfConversationCheck = $participantId == $authenticatedUserId && $participantType === $authenticatedUserType;
+
+        //  dd($selfConversationCheck);
+        $existingConversationQuery = Conversation::withoutGlobalScopes()
+            ->where('type', $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE)
+            ->whereHas('participants', function ($query) use ($authenticatedUserId, $authenticatedUserType, $participantId, $participantType, $selfConversationCheck) {
+                if ($selfConversationCheck) {
+                    // Self-conversation: check for one participant record
+                    $query->where('participantable_id', $authenticatedUserId)
+                        ->where('participantable_type', $authenticatedUserType);
+                } else {
+                    // Private conversation between two participants
+                    $query->where(function ($query) use ($authenticatedUserId, $authenticatedUserType) {
+                        $query->where('participantable_id', $authenticatedUserId)
+                            ->where('participantable_type', $authenticatedUserType);
+                    })->orWhere(function ($query) use ($participantId, $participantType) {
+                        $query->where('participantable_id', $participantId)
+                            ->where('participantable_type', $participantType);
+                    });
+                }
+            }, '=', $selfConversationCheck ? 1 : 2);
+
+
+        // Get the first matching conversation
+        $existingConversation = $existingConversationQuery->first();
+
+        // dd($existingConversation,$selfConversationCheck);
+
+        // If an existing conversation is found, return it
+        if ($existingConversation) {
+            return $existingConversation;
+        }
+
+        // Create a new conversation
+        $existingConversation = new Conversation();
         $existingConversation->type = $selfConversationCheck ? ConversationType::SELF : ConversationType::PRIVATE;
         $existingConversation->save();
 
-            
 
-             // Add the authenticated user as a participant
-         Participant::create([
-             'conversation_id' => $existingConversation->id,
-             'participantable_id' => $authenticatedUserId,
-             'participantable_type' => $authenticatedUserType,
-             'role' => ParticipantRole::OWNER
-         ]);
-     
-         // For non-self conversations, add the other participant
-         if (!$selfConversationCheck) {
-             Participant::create([
-                 'conversation_id' => $existingConversation->id,
-                 'participantable_id' => $participantId,
-                 'participantable_type' => $participantType,
-                 'role' => ParticipantRole::OWNER
-             ]);
-         }
-     
-         // Create an initial message if provided
-         if (!empty($message)) {
-             Message::create([
-                 'sendable_id' => $authenticatedUserId,
-                 'sendable_type' => $authenticatedUserType,
-                 'conversation_id' => $existingConversation->id,
-                 'body' => $message
-             ]);
-         }
-     
-         return $existingConversation;
-     }
-     
+
+        // Add the authenticated user as a participant
+        Participant::create([
+            'conversation_id' => $existingConversation->id,
+            'participantable_id' => $authenticatedUserId,
+            'participantable_type' => $authenticatedUserType,
+            'role' => ParticipantRole::OWNER
+        ]);
+
+        // For non-self conversations, add the other participant
+        if (!$selfConversationCheck) {
+            Participant::create([
+                'conversation_id' => $existingConversation->id,
+                'participantable_id' => $participantId,
+                'participantable_type' => $participantType,
+                'role' => ParticipantRole::OWNER
+            ]);
+        }
+
+        // Create an initial message if provided
+        if (!empty($message)) {
+            Message::create([
+                'sendable_id' => $authenticatedUserId,
+                'sendable_type' => $authenticatedUserType,
+                'conversation_id' => $existingConversation->id,
+                'body' => $message
+            ]);
+        }
+
+        return $existingConversation;
+    }
+
 
 
     /**
@@ -164,7 +164,7 @@ trait Chatable
     {
 
         #abort if is not allowed to create new groups
-        abort_unless($this->canCreateGroups(),403,"You do not have permission to create groups.");
+        abort_unless($this->canCreateGroups(), 403, "You do not have permission to create groups.");
 
 
         //create rooom
@@ -240,7 +240,7 @@ trait Chatable
 
     public  function sendMessageTo(Model $model, string $message)
     {
-     // Check if the recipient is a model (polymorphic) and not a conversation
+        // Check if the recipient is a model (polymorphic) and not a conversation
         if (!$model instanceof Conversation) {
             // Ensure the model has the required trait
             if (!in_array(Chatable::class, class_uses($model))) {
@@ -345,12 +345,12 @@ trait Chatable
     /**
      * Check if the user belongs to a conversation.
      */
-    public function belongsToConversation(Conversation $conversation,bool $withoutGlobalScopes=false): bool
+    public function belongsToConversation(Conversation $conversation, bool $withoutGlobalScopes = false): bool
     {
         // Check if participants are already loaded
         if ($conversation->relationLoaded('participants')) {
             // If loaded, simply check the existing collection
-            $participants= $conversation->participants;
+            $participants = $conversation->participants;
 
             if ($withoutGlobalScopes) {
                 $participants->withoutGlobalScopes();
@@ -363,7 +363,7 @@ trait Chatable
             });
         }
 
-        $participants= $conversation->participants();
+        $participants = $conversation->participants();
 
         if ($withoutGlobalScopes) {
             $participants->withoutGlobalScopes();
@@ -457,10 +457,10 @@ trait Chatable
 
 
 
-    function conversationDeletionExpired(Conversation $conversation) : bool {
+    function conversationDeletionExpired(Conversation $conversation): bool
+    {
 
-     return   $this->hasDeletedConversation($conversation,true);
-        
+        return   $this->hasDeletedConversation($conversation, true);
     }
 
 
@@ -544,74 +544,70 @@ trait Chatable
     /**
      * Check if the user is an admin in a specific conversation.
      * Or if if owner , because owner can also be admin
+     * @param Group|Conversation $entity
+     * @return bool
      */
-    public function isAdminInGroup(Group $group): bool
+    public function isAdminIn(Group|Conversation $entity): bool
     {
-        $conversation = $group->conversation;
 
-        // If not loaded, perform the query
+        #check if is not Conversation model
+        if (!($entity instanceof Conversation)) {
+
+            $conversation =  $entity->conversation;
+        }
+        #means it is group to get Parent Relationship
+        else {
+
+            $conversation = $entity;
+        }
+
+
         $pariticipant = $conversation->participant($this);
         return  $pariticipant->isAdmin() || $pariticipant->isOwner();
-
     }
 
     /**
      * Check if the user is the owner of a specific conversation.
+     * @param Group|Conversation $entity
+     * @return bool
      */
-    public function isOwnerOfConversation(Conversation $conversation): bool
+    public function isOwnerOf(Group|Conversation $entity): bool
     {
-             // If not loaded, perform the query
-             $pariticipant = $conversation->participant($this);
-             return  $pariticipant->isOwner();
-    }
 
+        #check if is not Conversation model
+        if (!($entity instanceof Conversation)) {
 
-    /**
-     * Check if the user is the owner of a specific conversation.
-     */
-    public function isOwnerOfGroup(Group $group): bool
-    {
-        $conversation = $group->conversation;
+            $conversation =  $entity->conversation;
+        }
+        #means it is group to get Parent Relationship
+        else {
 
+            $conversation = $entity;
+        }
+        // If not loaded, perform the query
         $pariticipant = $conversation->participant($this);
         return  $pariticipant->isOwner();
     }
 
 
 
-    /**
-     * User Permissions-You can override the following to determine if user can perform these actions
-     */
-
-    /**
-     *  Check if user is allowd to send messages or interact with conversatoin
-     */
-    function canInteractWithConversation(Conversation $conversation): bool
-    {
-
-        return $this->belongsToConversation($conversation);
-    }
-
     /** 
-    * Determine if the user can create new groups.
-    * 
-    * @return bool
-    */
+     * Determine if the user can create new groups.
+     * 
+     * @return bool
+     */
     public  function canCreateGroups(): bool
     {
-        return $this->hasVerifiedEmail(); 
+        return $this->hasVerifiedEmail();
     }
 
     /** 
-        * Determine if the user can create new groups with other users
-        * 
-        * @return bool
-        */
+     * Determine if the user can create new groups with other users
+     * 
+     * @return bool
+     */
     public  function canCreateChats(): bool
     {
-        return $this->hasVerifiedEmail(); 
-
+        return $this->hasVerifiedEmail();
     }
-
-   
 }

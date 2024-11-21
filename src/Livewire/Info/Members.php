@@ -195,7 +195,7 @@ class Members extends ModalComponent
         abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
 
         #abort if auth is not admin
-        abort_unless(auth()->user()->isAdminInGroup($this->conversation->group), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
 
         #abort if user participants is owner
         abort_if($participant->isOwner(), 403, "Owner cannot be removed from group");
