@@ -423,6 +423,7 @@ class Chat extends Component
             $this->pushMessage($createdMessage);
 
             #update the conversation model - for sorting in chatlist
+            
             $this->conversation->touch();
 
             #broadcast message  

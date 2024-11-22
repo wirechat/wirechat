@@ -633,9 +633,6 @@ describe('ClearFor()', function () {
 
 
 
-
-
-
     test('user cannot no longer see cleared messages', function () {
 
         //Dusk to 
@@ -711,7 +708,76 @@ describe('ClearFor()', function () {
 
         expect($conversation->messages()->count())->toBe(4);
     });
+
+
+
+
+    it('removes cleared conversations from query if withoutCleared() is used', function () {
+
+        //Dusk to 
+        $auth = User::factory()->create();
+
+        //Send to receiver
+        $auth->sendMessageTo(User::factory()->create(), 'hello-1')->conversation;
+        $auth->sendMessageTo(User::factory()->create(), 'hello-2')->conversation;
+        $auth->sendMessageTo(User::factory()->create(), 'hello-2')->conversation;
+
+        Carbon::setTestNow(now()->addSeconds(2));
+        $conversation3 =  $auth->sendMessageTo(User::factory()->create(['name' => 'john']), 'hello-3')->conversation;
+
+        //Assert Count
+        expect($auth->conversations()->withoutCleared()->count())->toBe(4);
+
+        //Authenticate
+        //$auth->refresh();
+
+        $this->actingAs($auth);
+
+        //Delete Conversation
+        Carbon::setTestNow(now()->addSeconds(5));
+        $conversation3->clearFor($auth);
+
+        //conversations
+        expect($auth->conversations()->withoutCleared()->count())->toBe(3);
+    });
+
+
+
+
 });
+
+describe('Scopes()', function () {
+
+
+
+    it('it filters out blank messages when ->withoutBlanks() used ', function () {
+
+        //Dusk to 
+        $auth = User::factory()->create();
+
+        //Send to receiver
+        $auth->createConversationWith(User::factory()->create())->conversation;
+        $auth->createConversationWith(User::factory()->create())->conversation;
+       $conversation2= $auth->createConversationWith(User::factory()->create())->conversation;
+
+       #create conversation with message
+        Carbon::setTestNow(now()->addSeconds(2));
+        $conversation3 =  $auth->createConversationWith(User::factory()->create(['name' => 'john']), 'hello-3')->conversation;
+
+
+        //Assert Count
+        $this->actingAs($auth);
+
+        expect($auth->conversations()->withoutBlanks()->count())->toBe(1);
+
+    });
+
+
+
+
+
+});
+
 
 describe('deleting permanently()', function () {
 

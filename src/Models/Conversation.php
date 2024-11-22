@@ -330,26 +330,16 @@ class Conversation extends Model
      */
 
 
-    /**
-     * Scope a query to only include conversation where user  cleraed all messsages users.
-     */
-    public function scopeWithoutCleared(Builder $builder): void
-    {
-        $user = auth()->user(); // Get the authenticated user
 
-        // dd($model->id);
-        // Apply the scope only if the user is authenticated
-        if ($user) {
-            $builder->whereHas('messages', function ($q) use ($user) {
-                $q->whereDoesntHave('actions', function ($q) use ($user) {
-                    $q->where('actor_id', $user->id)
-                        ->where('actor_type', get_class($user)) // Safe since $user is authenticated
-                        ->where('type', Actions::DELETE);
-                });
-            });
-        }
+    public function scopeWhereHasParticipant(Builder $query, $userId, $userType): void
+    {
+        $query->whereHas('participants', function ($query) use ($userId, $userType) {
+            $query->where('participantable_id', $userId)
+                ->where('participantable_type', $userType);
+        });
     }
 
+    
     /**
      * Exclude blank conversations that have no messages at all,
      * including those that where deleted by the user.
@@ -370,14 +360,29 @@ class Conversation extends Model
     }
 
 
-    public function scopeWhereHasParticipant(Builder $query, $userId, $userType): void
-    {
-        $query->whereHas('participants', function ($query) use ($userId, $userType) {
-            $query->where('participantable_id', $userId)
-                ->where('participantable_type', $userType);
-        });
-    }
 
+    /**
+     * Scope a query to only include conversation where user cleraed all messsages users.
+     */
+    public function scopeWithoutCleared(Builder $builder): void
+    {
+        $user = auth()->user(); // Get the authenticated user
+
+        // dd($model->id);
+        // Apply the scope only if the user is authenticated
+        if ($user) {
+
+                // Get the table name for conversations dynamically to avoid hardcoding.
+                $conversationsTableName = (new Conversation())->getTable();
+    
+                // Apply the "without deleted conversations" scope
+                $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
+                    $query->where('participantable_id', $user->id)
+                        ->whereRaw(" (conversation_cleared_at IS NULL OR conversation_cleared_at < {$conversationsTableName}.updated_at) ");
+                });
+
+        }
+    }
 
     /**
      * Exclude conversations that were marked as deleted by the auth participant 
