@@ -8,7 +8,7 @@
 @endphp
 
 <header
-    class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-gray-50 dark:bg-gray-800  dark:border-slate-700 border-b">
+    class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-gray-50 dark:bg-gray-800 dark:border-gray-800/80  border-b">
 
     <div class="  flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
         {{-- Return --}}
