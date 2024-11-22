@@ -28,6 +28,9 @@ return new class extends Migration
             
             // Type of action (e.g., delete, archive)
             $table->string('type');
+
+            $table->string('data')->nullable()->comment('Some additional information about the action');
+
             
             $table->timestamps();
         });
