@@ -340,7 +340,10 @@
                 </x-wirechat::popover>
             @endif
 
+            {{-------------------}}
             {{-- TextArea Input --}}
+            {{-------------------}}
+
             <div @class(['flex gap-2 sm:px-2 w-full'])>
                 <textarea @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' x-ref="body"
                     id="chat-input-field" autofocus type="text" name="message" placeholder="Message" maxlength="1700"
@@ -374,9 +377,21 @@
                             inputField.style.height = 'auto';
                             inputField.style.height = inputField.scrollHeight + 'px';
                         });"></textarea>
-                <button :class="{ 'hidden': !((body?.trim()?.length) || @js(count($this->media) > 0) || @js(count($this->files) > 0)) }"
+               
+
+            </div>
+
+            {{-------------------}}
+            {{-- input Actions --}}
+            {{-------------------}}
+
+            <div x-cloak
+                @class([ 'w-[5%] justify-end min-w-max  items-center gap-2 ', ])>
+
+                {{--  Submit button --}}
+                <button x-show="((body?.trim()?.length>0) || @json(count($this->media) > 0) || @json(count($this->files) > 0))"
                     type="submit" id="sendMessageButton"
-                    class="hidden  flex items-center justify-end w-[6%] font-bold  text-right">
+                    class=" ml-auto  font-bold">
 
                     <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" width="36"
                         height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -387,20 +402,10 @@
 
                 </button>
 
-            </div>
-
-            {{-- input Actions --}}
-            <div :class="{
-                'hidden md:hidden': (body?.trim()?.length) || @json(count($this->media) > 0) ||
-                    @json(count($this->files) > 0)
-                 }"
-                @class([
-                    'w-[15%] justify-end flex items-center gap-2 hidden md:hidden',
-                ])>
-
-
-                {{-- send Like --}}
-                <button wire:click='sendLike()' type="button " class="group ml-auto">
+                {{-- send Like button--}}
+                <button x-show="!((body?.trim()?.length>0) || @json(count($this->media) > 0) ||@json(count($this->files) > 0))"
+                
+                    wire:click='sendLike()' type="button " class="group ">
 
                     <!-- outlined heart -->
                     <span class=" group-hover:hidden transition">

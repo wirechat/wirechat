@@ -419,30 +419,27 @@ class Chat extends Component
                 'body' => $this->body
             ]);
 
-
-            $this->reset('body');
-
-
             #push the message
             $this->pushMessage($createdMessage);
 
-
             #update the conversation model - for sorting in chatlist
-            $this->conversation->updated_at = now();
-            $this->conversation->save();
-
-            #dispatch event 'refresh ' to chatlist 
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->conversation->touch();
 
             #broadcast message  
             $this->dispatchMessageCreatedEvent($createdMessage);
+
+            #dispatch event 'refresh ' to chatlist
+            $this->dispatch('refresh')->to(Chats::class);
+
         }
+
+   //     dd('hoting');
 
         $this->reset('media', 'files', 'body');
 
         #scroll to bottom
+        
         $this->dispatch('scroll-bottom');
-
 
         #remove reply just incase it is present 
         $this->removeReply();
@@ -610,6 +607,7 @@ class Chat extends Component
 
                 if ($this->conversation->isPrivate() && $this->receiverParticipant) {
 
+                    
 
                     broadcast( new NotifyParticipant($this->receiverParticipant,$message))->toOthers();
                 //    Notification::send($this->receiver, new NewMessageNotification($message));

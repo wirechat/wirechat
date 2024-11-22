@@ -166,12 +166,10 @@
      "
     @scroll-bottom.window="
         
-          setTimeout(() => {
 
-            $nextTick(()=> { 
-
+            requestAnimationFrame(() => {
                 {{-- overflow-y: hidden; is used to hide the vertical scrollbar initially. --}}
-                //conversationElement.style.overflowY='hidden';
+                conversationElement.style.overflowY='hidden';
 
                 {{-- scroll the element down --}}
                 conversationElement.scrollTop = conversationElement.scrollHeight;
@@ -179,11 +177,8 @@
                 {{-- After updating the chat height, overflowY is set back to 'auto', 
                     which allows the browser to determine whether to display the scrollbar 
                     based on the content height.  --}}
-                //   conversationElement.style.overflowY='auto';
+                   conversationElement.style.overflowY='auto';
             });
-            
-        }); 
-
   
     "
     wire:loading.class.remove="overflow-y-scroll" wire:loading.class="overflow-hidden"

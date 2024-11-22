@@ -74,9 +74,9 @@ class NotifyParticipants implements ShouldQueue
     //     $queueToUse = $this->conversation->isPrivate()?WireChat::messagesQueue():WireChat::notificationsQueue();
         $this->conversation->participants()
         //exclude current user 
-        ->with('participantable')
-        ->where("$this->participantsTable.participantable_id", '!=', $this->auth->id)
-        ->where("$this->participantsTable.participantable_type", get_class($this->auth))
+        // ->with('participantable')
+         ->where("$this->participantsTable.participantable_id", '!=', $this->auth->id)
+         ->where("$this->participantsTable.participantable_type", get_class($this->auth))
         // ->select("$this->participantsTable.*")
         ->latest('last_active_at') // Prioritize active participants
         ->chunk(50, function ($participants) {
