@@ -314,6 +314,37 @@ describe('Box presence test: ', function () {
     });
 
 
+    test('it shows dusk="disappearing_messages_icon" if disappearingTurnedOn for conversation', function () {
+
+        $auth = User::factory()->create(['name'=>'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        #turn on disappearing 
+        $conversation->turnOnDisappearing(3600);
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+               ->assertSeeHtml('dusk="disappearing_messages_icon"');
+    });
+
+
+    test('it doesnt shows dusk="disappearing_messages_icon" if disappearingTurnedOFF for conversation', function () {
+
+        $auth = User::factory()->create(['name'=>'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        #turn on disappearing 
+        $conversation->turnOffDisappearing();
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+               ->assertDontSeeHtml('dusk="disappearing_messages_icon"');
+    });
+
+
+
+
+
 
 
 

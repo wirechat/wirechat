@@ -17,6 +17,11 @@ return new class extends Migration
 
             $table->string('type')->comment('Private is 1-1 , group or channel');  
             //Index for conversation_id to speed up queries involving foreign keys
+
+            $table->timestamp('disappearing_started_at')->nullable();
+            $table->integer('disappearing_duration')->nullable();
+
+
             $table->index('type');
             $table->timestamps();
         });

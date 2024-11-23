@@ -25,12 +25,14 @@ class Message extends Model
         'sendable_id',   // Now includes sendable_id for polymorphis
         'conversation_id',
         'reply_id',
-        'type'
+        'type',
+        'kept_at'
     ];
 
 
     protected $casts=[
-        'type'=>MessageType::class
+        'type'=>MessageType::class,
+        'kept_at'=>'datetime'
     ];
 
 
