@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Enums\RoomType;
 use Namu\WireChat\Models\Action;
@@ -331,7 +332,6 @@ describe('sendMessageTo() ',function(){
     });
 
 
-
     it('can send message Model', function () {
 
         $auth = User::factory()->create();
@@ -350,6 +350,27 @@ describe('sendMessageTo() ',function(){
         expect($messageFromDB->body)->toBe($message->body);
 
     });
+
+
+
+    it('saves defualt type as text', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $message =$auth->sendMessageTo($receiver,'hello');
+
+        //assert 
+        expect($message)->not->toBe(null);
+
+        //check database
+        $messageFromDB= Message::find($message->id);
+
+        //assert content
+        expect($messageFromDB->type)->toBe(MessageType::TEXT);
+
+    });
+
 
     
     it('creates new conversation if it didn\'t alrady exist between the two users ', function () {
@@ -487,6 +508,9 @@ describe('sendMessageTo() ',function(){
         expect($participant->last_active_at)->not->toBe(null);
 
     });
+
+
+
 
 
 

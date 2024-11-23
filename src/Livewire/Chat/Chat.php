@@ -18,6 +18,7 @@ use Namu\WireChat\Models\Message;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
+use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
@@ -368,6 +369,7 @@ class Chat extends Component
                     'conversation_id' => $this->conversation->id,
                     'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
                     'sendable_id' => auth()->id(), // Polymorphic sender ID
+                    'type'=>MessageType::ATTACHMENT
                     // 'body' => $this->body, // Add body if required
                 ]);
 
@@ -416,7 +418,8 @@ class Chat extends Component
                 'conversation_id' => $this->conversation->id,
                 'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
                 'sendable_id' => auth()->id(), // Polymorphic sender ID
-                'body' => $this->body
+                'body' => $this->body,
+                'type'=>MessageType::TEXT
             ]);
 
             #push the message
@@ -641,7 +644,8 @@ class Chat extends Component
             'conversation_id' => $this->conversation->id,
             'sendable_type' => get_class(auth()->user()), // Polymorphic sender type
             'sendable_id' => auth()->id(), // Polymorphic sender ID
-            'body' => '❤️'
+            'body' => '❤️',
+            'type'=>MessageType::TEXT
         ]);
 
 

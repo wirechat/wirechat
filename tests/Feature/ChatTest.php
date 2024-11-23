@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
@@ -770,6 +771,9 @@ describe('Sending messages ', function () {
         ;
     });
 
+
+ 
+
     test('it saves new message to database when it is sent', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -786,6 +790,25 @@ describe('Sending messages ', function () {
 
         expect($messageExists)->toBe(true);
     });
+
+    test('it saves text: message type as TEXT', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set("body", 'New message')
+            ->call("sendMessage");
+
+        $message = Message::where('body', 'New message')->first();
+
+
+        expect($message->type)->toBe(MessageType::TEXT);
+    });
+
 
     test('it dispatches livewire event "refresh" & "scroll-bottom" when message is sent', function () {
         $auth = User::factory()->create();
@@ -1156,6 +1179,23 @@ describe('Sending messages ', function () {
         expect($messageExists)->toBe(true);
     });
 
+    test('it saves textheart(❤️): message type as TEXT', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->call("sendLike");
+
+        $message = Message::where('body', '❤️')->first();
+
+        expect($message->type)->toBe(MessageType::TEXT);
+    });
+
+
     test('it dispatches livewire event "refresh" & "scroll-bottom" when sendLike is called', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1396,6 +1436,25 @@ describe('Sending messages ', function () {
         expect(count($messageExists))->toBe(1);
     });
 
+
+    test('it saves image: message type as attachemnt ', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth,$receiver])->create();
+
+        $file[] = UploadedFile::fake()->image('photo.png');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set("media", $file)
+            ->call("sendMessage")
+            //now assert that media is back to empty
+            ->assertSet('media', []);
+
+        $message = $conversation->messages()->first();
+
+
+        expect($message->type)->toBe(MessageType::ATTACHMENT);
+    });
+
     test('it renders image  to chatbox when it attachement is sent & clears files properties when done', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1433,6 +1492,24 @@ describe('Sending messages ', function () {
         expect(count($messageExists))->toBe(1);
     });
 
+
+    test('it saves video: message type as attachemnt', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+                        ->withParticipants([$auth,$receiver])
+            ->create();
+
+        $file = UploadedFile::fake()->create('sample.mp4', '1000', 'video/mp4');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set("media", $file)
+            ->call("sendMessage");
+
+        $message = $conversation->messages()->first();
+
+
+        expect($message->type)->toBe(MessageType::ATTACHMENT);
+    });
 
 
     test('it saves file to databse when created & clears files properties when done', function () {

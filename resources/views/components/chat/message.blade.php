@@ -18,57 +18,45 @@
 'background-color:'. $primaryColor .'' => $belongsToAuth==true
 ])
 
+@php
+    $isSameAsNext = $message?->sendable?->is($nextMessage?->sendable);
+    $isSameAsPrevious = $message?->sendable?->is($previousMessage?->sendable);
+    $isNotSameAsNext = $message?->sendable?->isNot($nextMessage?->sendable);
+    $isNotSameAsPrevious = $message?->sendable?->isNot($previousMessage?->sendable);
+@endphp
+
 @class([
     'flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-
-    // Background color for messages sent by the authenticated user
-    'text-white' => $belongsToAuth,//set backg
+    'text-white' => $belongsToAuth, // Background color for messages sent by the authenticated user
     'dark:bg-gray-800 dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
 
     // First message on RIGHT
-    'rounded-br-md rounded-tr-2xl' => (
-        $message?->sendable?->is($nextMessage?->sendable) && $message?->sendable?->isNot($previousMessage?->sendable) && $belongsToAuth
-    ),
+    'rounded-br-md rounded-tr-2xl' => ($isSameAsNext && $isNotSameAsPrevious && $belongsToAuth),
 
     // Middle message on RIGHT
-    'rounded-r-md' => (
-        $previousMessage?->sendable?->is($message?->sendable) && $belongsToAuth
-    ),
+    'rounded-r-md' => ($isSameAsPrevious && $belongsToAuth),
 
     // Standalone message RIGHT
-    'rounded-br-xl rounded-r-xl' => (
-        $previousMessage?->sendable?->isNot($message?->sendable) && $nextMessage?->sendable?->isNot($message?->sendable) && $belongsToAuth
-    ),
+    'rounded-br-xl rounded-r-xl' => ($isNotSameAsPrevious && $isNotSameAsNext && $belongsToAuth),
 
     // Last Message on RIGHT
-    'rounded-br-2xl' => (
-        $previousMessage?->sendable?->isNot($nextMessage?->sendable) && $belongsToAuth
-    ),
+    'rounded-br-2xl' => ($isNotSameAsPrevious && $belongsToAuth),
 
     // First message on LEFT
-    'rounded-bl-md rounded-tl-2xl' => (
-        $message?->sendable?->is($nextMessage?->sendable) &&  $message?->sendable?->isNot($previousMessage?->sendable) && !$belongsToAuth
-    ),
+    'rounded-bl-md rounded-tl-2xl' => ($isSameAsNext && $isNotSameAsPrevious && !$belongsToAuth),
 
     // Middle message on LEFT
-    'rounded-l-md' => (
-        $previousMessage?->sendable?->is($message?->sendable) && !$belongsToAuth
-    ),
+    'rounded-l-md' => ($isSameAsPrevious && !$belongsToAuth),
 
     // Standalone message LEFT
-    'rounded-bl-xl rounded-l-xl' => (
-        $previousMessage?->sendable->isNot($message?->sendable) && $nextMessage?->sendable->isNot($message?->sendable) && !$belongsToAuth
-    ),
+    'rounded-bl-xl rounded-l-xl' => ($isNotSameAsPrevious && $isNotSameAsNext && !$belongsToAuth),
 
     // Last message on LEFT
-    'rounded-bl-2xl' => (
-        $message->sendable?->isNot($nextMessage?->sendable) && !$belongsToAuth
-    ),
-
-])>
-
+    'rounded-bl-2xl' => ($isNotSameAsNext && !$belongsToAuth),
+])
+>
 @if (!$belongsToAuth && $isGroup)
 <div    
     {{-- style="color:  var(--primary-color);" --}}

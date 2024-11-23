@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Enums\Actions;
+use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Facades\WireChat;
 
 class Message extends Model
@@ -23,7 +24,13 @@ class Message extends Model
         'sendable_type', // Now includes sendable_type for polymorphism
         'sendable_id',   // Now includes sendable_id for polymorphis
         'conversation_id',
-        'reply_id'
+        'reply_id',
+        'type'
+    ];
+
+
+    protected $casts=[
+        'type'=>MessageType::class
     ];
 
 

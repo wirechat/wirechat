@@ -28,7 +28,8 @@ return new class extends Migration
             $table->foreign('reply_id')->references('id')->on((new Message())->getTable())->nullOnDelete();
     
             $table->text('body')->nullable();
-    
+            $table->string('type')->default('text');
+
             $table->softDeletes();
             $table->timestamps();
 
