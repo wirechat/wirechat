@@ -86,7 +86,7 @@
         @foreach ($loadedMessages as $date => $messageGroup)
 
             {{-- Date  --}}
-            <div  class="sticky top-0 uppercase p-2 shadow-sm px-2.5 z-[50] rounded-xl border dark:border-slate-700/20 text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
+            <div  class="sticky top-0 uppercase p-2 shadow-sm px-2.5 z-[50] rounded-xl border border-gray-100/50 dark:border-slate-700/20 text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
                 {{ $date }}
             </div>
 
