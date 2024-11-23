@@ -86,7 +86,7 @@
         @foreach ($loadedMessages as $date => $messageGroup)
 
             {{-- Date  --}}
-            <div  class="sticky top-0 uppercase p-2 shadow-sm px-2.5 rounded-xl text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
+            <div  class="sticky top-0 uppercase p-2 shadow-sm px-2.5 z-[50] rounded-xl border dark:border-slate-700/20 text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
                 {{ $date }}
             </div>
 
@@ -242,7 +242,7 @@
 
 
                                 {{-- Message body --}}
-                                <div class="flex flex-col gap-2 max-w-[95%] ">
+                                <div class="flex flex-col gap-2 max-w-[95%]  relative">
                                     {{-- Show sender name is message does not belong to auth and conversation is group --}}
 
 

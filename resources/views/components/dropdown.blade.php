@@ -36,7 +36,7 @@ switch ($width) {
             x-transition:leave-end="opacity-0 scale-95"
 
             {{-- class="absolute z-50 mt-2 shadow-lg {{ $alignmentClasses }}" --}}
-            {{$attributes->merge(['class'=>"rounded-lg absolute z-50 mt-2 shadow-lg w-48 bg-white dark:bg-gray-800 rounded-md border dark:border-gray-700/40 shadow overflow-hidden"])}}
+            {{$attributes->merge(['class'=>"rounded-lg absolute z-[50] mt-2 shadow-lg w-48 bg-white dark:bg-gray-800 rounded-md border dark:border-gray-700/40 shadow overflow-hidden"])}}
             style="display: none;"
             @click="open = false">
         <div>
