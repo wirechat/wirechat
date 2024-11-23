@@ -17,7 +17,8 @@ class Action extends Model
         'actor_type',
         'actionable_id',
         'actionable_type',
-        'type'
+        'type',
+        'data'
     ];
 
 

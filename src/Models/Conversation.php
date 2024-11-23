@@ -24,14 +24,15 @@ class Conversation extends Model
 {
     use HasFactory;
 
-    // protected $fillable = [
-    //     'type',
-    //     //'updated_at'
-    // ];
+    protected $fillable = [
+        'disappearing_started_at',
+        'disappearing_duration'
+    ];
 
     protected $casts = [
         'type' => ConversationType::class,
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
+        'disappearing_started_at'=>'datetime'
     ];
 
 
@@ -595,6 +596,59 @@ class Conversation extends Model
             ->where('created_at', '>', $lastReadAt)
             ->count();
     }
+
+
+     /**
+     * ----------------------------------------
+     * ----------------------------------------
+     * Disappearing 
+     * --------------------------------------------
+     */
+
+    /**
+     * Check if conversation allows disappearing messages.
+     */
+    public function hasDisappearingTurnedOn(): bool
+    {
+        return !is_null($this->disappearing_duration) 
+            && $this->disappearing_duration > 0 
+            && !is_null($this->disappearing_started_at);
+    }
+
+     /**
+     * Turn on disappearing messages for the conversation.
+     *
+     * @param int $durationInSeconds The duration for disappearing messages in seconds.
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    public function turnOnDisappearing(int $durationInSeconds): void
+    {
+        // Validate that the duration is not negative and is at least 1 hour
+        if ($durationInSeconds < 3600) {
+            throw new \InvalidArgumentException('Disappearing messages duration must be at least 1 hour (3600 seconds).');
+        }
+
+        $this->update([
+            'disappearing_duration' => $durationInSeconds,
+            'disappearing_started_at' => Carbon::now(),
+        ]);
+    }
+
+
+    /**
+     * Turn off disappearing messages for the conversation.
+     *
+     * @return void
+     */
+    public function turnOffDisappearing(): void
+    {
+        $this->update([
+            'disappearing_duration' => null,
+            'disappearing_started_at' => null,
+        ]);
+    }
+
 
 
     /**

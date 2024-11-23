@@ -144,7 +144,7 @@ $primaryColor= WireChat::getColor();
                         ])>
 
                         <a href="{{ route('wirechat.chat', $conversation->id) }}" class="shrink-0">
-                            <x-wirechat::avatar group="{{$conversation->isGroup()}}" src="{{ $group?$group?->cover_url: $receiver?->cover_url ?? null }}"  class="w-12 h-12" />
+                            <x-wirechat::avatar :disappearing="$conversation->hasDisappearingTurnedOn()"  group="{{$conversation->isGroup()}}" src="{{ $group?$group?->cover_url: $receiver?->cover_url ?? null }}"  class="w-12 h-12" />
                         </a>
 
                         <aside class="grid  grid-cols-12 w-full">
