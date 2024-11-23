@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Facades\WireChat;
@@ -28,16 +29,14 @@ class DeleteExpiredMessagesJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    protected  $auth;
-
-    protected $messagesTable;
-    protected $participantsTable;
-
-
+ 
 
     public function __construct()
     {
         //  
+       // $this->onQueue(WireChat::notificationsQueue());
+       
+    //   Log::info($this->queue);
 
     }
     public function handle()
@@ -48,13 +47,24 @@ class DeleteExpiredMessagesJob implements ShouldQueue
         foreach ($conversations as $conversation) {
 
             $messages = $conversation->messages()
-                ->withoutGlobalScopes()
-                ->where(function ($query) {
-                    $query->whereNull('kept_at') // Not kept
-                        ->orWhereNotNull('deleted_at'); // Include trashed messages
-                })
-                ->where('created_at', '>', $conversation->disappearing_started_at) // After disappearing_started_at
-                ->get();
+            ->withoutGlobalScopes()
+            ->where(function ($query) {
+                // Messages that are not kept
+                $query->whereNull('kept_at')
+                    // Or messages that are kept but have delete actions or are trashed
+                    ->orWhere(function ($query) {
+                        $query->whereNotNull('kept_at') // Kept messages
+                            ->where(function ($query) {
+                                $query->whereNotNull('deleted_at') // Trashed
+                                    ->orWhereHas('actions', function ($query) {
+                                        $query->where('type', Actions::DELETE);
+                                    });
+                            });
+                    });
+            })
+            ->where('created_at', '>', $conversation->disappearing_started_at) // After disappearing_started_at
+            ->get();
+        
         
             foreach ($messages as $message) {
                 // Check if the message is older than the disappearing_duration in relation to now

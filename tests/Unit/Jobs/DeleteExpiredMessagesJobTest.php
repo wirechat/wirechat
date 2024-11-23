@@ -127,7 +127,7 @@ test('it also deletes SoftDeleted messages that are expired and are kept ', func
     $this->assertDatabaseMissing((new Message())->getTable(), ['id' => $recentMessage->id]);
 });
 
-test('it deletes SoftDeleted messages that are expired and are NOT kept ', function () {
+test('SoftDeleted messages that are expired but not kept are Deleted ', function () {
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 
@@ -152,6 +152,68 @@ test('it deletes SoftDeleted messages that are expired and are NOT kept ', funct
     // Assert the recent message is still there
     $this->assertDatabaseMissing((new Message())->getTable(), ['id' => $recentMessage->id]);
 });
+
+
+test('messages WITHOUT delete Actions, that are expired, but not kept are Deleted ', function () {
+    // Set up a conversation with disappearing messages
+    $auth = User::factory()->create();
+
+    Carbon::setTestNowAndTimezone(now());
+    $conversation = Conversation::factory()->withParticipants([$auth], ParticipantRole::OWNER)->create([
+        'disappearing_duration' => 43200, // 12 hours in seconds
+        'disappearing_started_at' => Carbon::now(), // Started 2 days ago
+    ]);
+
+
+    $recentMessage = Message::factory()->sender($auth)->create([
+        'conversation_id' => $conversation->id,
+        'created_at' => Carbon::now()->addHours(13), // 13 hours ago, not expired
+        'kept_at' =>null, // Not kept
+        'deleted_at'=>Carbon::now(),
+    ]);
+
+
+    $recentMessage->deleteFor($auth);
+
+    // Run the job
+    $job = new DeleteExpiredMessagesJob();
+    $job->handle();
+
+    // Assert the recent message is still there
+    $this->assertDatabaseMissing((new Message())->getTable(), ['id' => $recentMessage->id]);
+});
+
+
+test('messages WITH delete Actions, that are expired, and kept are Deleted ', function () {
+    // Set up a conversation with disappearing messages
+    $auth = User::factory()->create();
+
+    Carbon::setTestNowAndTimezone(now());
+    $conversation = Conversation::factory()->withParticipants([$auth], ParticipantRole::OWNER)->create([
+        'disappearing_duration' => 43200, // 12 hours in seconds
+        'disappearing_started_at' => Carbon::now(), // Started 2 days ago
+    ]);
+
+
+    $recentMessage = Message::factory()->sender($auth)->create([
+        'conversation_id' => $conversation->id,
+        'created_at' => Carbon::now()->addHours(13), // 13 hours ago, not expired
+        'kept_at' =>Carbon::now(), // Not kept
+        'deleted_at'=>null,
+    ]);
+
+
+    $recentMessage->deleteFor($auth);
+
+    // Run the job
+    $job = new DeleteExpiredMessagesJob();
+    $job->handle();
+
+    // Assert the recent message is still there
+    $this->assertDatabaseMissing((new Message())->getTable(), ['id' => $recentMessage->id]);
+});
+
+
 
 
 test('test_kept_messages_are_not_deleted', function () {

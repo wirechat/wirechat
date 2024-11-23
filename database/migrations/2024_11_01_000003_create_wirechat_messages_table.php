@@ -28,10 +28,9 @@ return new class extends Migration
             $table->foreign('reply_id')->references('id')->on((new Message())->getTable())->nullOnDelete();
     
             $table->text('body')->nullable();
-            
             $table->string('type')->default('text');
 
-            $table->timestamp('kept_at')->nullable();
+            $table->timestamp('kept_at')->nullable()->comment('filled when a message is kept from disappearing');
 
             $table->softDeletes();
             $table->timestamps();
