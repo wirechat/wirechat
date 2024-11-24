@@ -239,7 +239,7 @@ class Chat extends Component
         $this->conversation->deleteFor(auth()->user());
 
         #redirect to chats page 
-        $this->redirectRoute("wirechat");
+        $this->redirectRoute(WireChat::indexRouteName());
     }
 
 
@@ -256,7 +256,7 @@ class Chat extends Component
         $this->reset('loadedMessages','media', 'files', 'body');
 
         #redirect to chats page 
-        $this->redirectRoute("wirechat");
+        $this->redirectRoute(WireChat::indexRouteName());
     }
 
 
@@ -274,7 +274,7 @@ class Chat extends Component
         $auth->exitConversation($this->conversation);
 
         #redirect to chats page 
-        $this->redirectRoute("wirechat");
+        $this->redirectRoute(WireChat::indexRouteName());
     }
 
    
@@ -769,6 +769,8 @@ class Chat extends Component
         // Check authentication
         abort_unless(auth()->check(), 401);
     
+
+    //    dd(route(WireChat::indexRouteName()));
         // Retrieve conversation without global scopes
         $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
             ->where('id', $this->conversation)->first();

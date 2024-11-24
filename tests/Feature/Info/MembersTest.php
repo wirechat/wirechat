@@ -527,7 +527,7 @@ describe('actions test', function () {
         $request =  Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request
             ->call('sendMessage', $participant->id)
-            ->assertRedirect(route('wirechat.chat', 2));
+            ->assertRedirect(route(WireChat::viewRouteName(), 2));
     });
 
 

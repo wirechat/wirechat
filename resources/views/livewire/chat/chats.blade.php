@@ -143,14 +143,14 @@ $primaryColor= WireChat::getColor();
                                 $selectedConversationId == $conversation?->id,
                         ])>
 
-                        <a href="{{ route('wirechat.chat', $conversation->id) }}" class="shrink-0">
+                        <a href="{{ route(WireChat::viewRouteName(), $conversation->id) }}" class="shrink-0">
                             <x-wirechat::avatar :disappearing="$conversation->hasDisappearingTurnedOn()"  group="{{$conversation->isGroup()}}" src="{{ $group?$group?->cover_url: $receiver?->cover_url ?? null }}"  class="w-12 h-12" />
                         </a>
 
                         <aside class="grid  grid-cols-12 w-full">
 
 
-                            <a wire:navigate href="{{ route('wirechat.chat', $conversation->id) }}"
+                            <a wire:navigate href="{{ route(WireChat::viewRouteName(), $conversation->id) }}"
                                 class="col-span-10 border-b pb-2 border-gray-100 dark:border-gray-700 relative overflow-hidden truncate leading-5 w-full flex-nowrap p-1">
 
                                 {{-- name --}}

@@ -1,3 +1,5 @@
+@use("Namu\WireChat\Facades\WireChat")
+
 @props([
     'receiver' => $receiver,
     'conversation' => $conversation,
@@ -12,7 +14,7 @@
 
     <div class="  flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
         {{-- Return --}}
-        <a href="{{ route('wirechat') }}" class=" shrink-0 lg:hidden  dark:text-white" id="chatReturn">
+        <a href="{{route(WireChat::indexRouteName())}}" class=" shrink-0 lg:hidden  dark:text-white" id="chatReturn">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -69,7 +71,7 @@
                         </button>
 
 
-                        <x-wirechat::dropdown-link href="{{ route('wirechat') }}">
+                        <x-wirechat::dropdown-link href='{{ route(WireChat::indexRouteName()) }}'>
                             Close Chat
                         </x-wirechat::dropdown-link>
 

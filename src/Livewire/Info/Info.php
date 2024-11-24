@@ -199,7 +199,7 @@ class Info extends ModalComponent
         $this->conversation->deleteFor(auth()->user());
 
         #redirect to chats page 
-        $this->redirectRoute("wirechat");
+        $this->redirectRoute(WireChat::indexRouteName());
     }
 
 
@@ -231,7 +231,7 @@ class Info extends ModalComponent
         $this->conversation->forceDelete();
 
         #redirect to chats page 
-        $this->redirectRoute("wirechat");
+        $this->redirectRoute(WireChat::indexRouteName());
     }
 
     function exitConversation()
@@ -248,7 +248,7 @@ class Info extends ModalComponent
         $auth->exitConversation($this->conversation);
 
         #redirect to chats page 
-        $this->redirectRoute("wirechat");
+        $this->redirectRoute(WireChat::indexRouteName());
     }
 
 

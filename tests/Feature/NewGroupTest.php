@@ -425,7 +425,7 @@ describe('Creteing group',function(){
 
          $conversation= Conversation::withoutGlobalScopes()->first();
 
-         $request->assertRedirect(route('wirechat.chat',$conversation->id));
+         $request->assertRedirect(route(WireChat::viewRouteName(),$conversation->id));
 
     });
 

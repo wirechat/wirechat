@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
 use Namu\WireChat\Livewire\Chat\Chats;
@@ -13,7 +14,7 @@ use Workbench\App\Models\User;
 
 ///Auth checks 
 it('it redirecdts to login page if guest user tries to access chats page ', function () {
-    $response = $this->get(route("wirechat"));
+    $response = $this->get(route(WireChat::indexRouteName()));
 
     $response->assertStatus(302);
     $response->assertRedirect(route('login')); // assuming 'login' is the route name for your login page
@@ -22,7 +23,7 @@ it('it redirecdts to login page if guest user tries to access chats page ', func
 
 test('authenticaed user can access chats page ', function () {
     $auth = User::factory()->create();
-    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
+    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route(WireChat::indexRouteName()));
  
      $response
      ->assertStatus(200);
@@ -32,7 +33,7 @@ test('authenticaed user can access chats page ', function () {
 
 test('it renders livewire ChatList component', function () {
     $auth = User::factory()->create();
-    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
+    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route(WireChat::indexRouteName()));
  
      $response ->assertSeeLivewire(Chatlist::class);
     
@@ -41,7 +42,7 @@ test('it renders livewire ChatList component', function () {
 
 test('it doest not render livewire ChatBox component', function () {
     $auth = User::factory()->create();
-    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
+    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route(WireChat::indexRouteName()));
  
      $response ->assertDontSeeLivewire(Chat::class);
     
@@ -50,7 +51,7 @@ test('it doest not render livewire ChatBox component', function () {
 
 test('it shows label "Send private photos and messages" ', function () {
     $auth = User::factory()->create();
-    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route("wirechat"));
+    $response = $this->withoutExceptionHandling()->actingAs($auth)->get(route(WireChat::indexRouteName()));
  
      $response ->assertSee("Select a conversation to start messaging");
     

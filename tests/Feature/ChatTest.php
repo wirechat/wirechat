@@ -16,6 +16,7 @@ use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Events\NotifyParticipant;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Livewire\Chat\Chat as ChatBox;
@@ -1111,7 +1112,7 @@ describe('Sending messages ', function () {
 
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->call('exitConversation')
-        ->assertRedirect(route("wirechat"));;
+        ->assertRedirect(route(WireChat::indexRouteName()));;
 
  
     });
@@ -1711,7 +1712,7 @@ describe('Deleting Conversation', function () {
         $request
             ->call("deleteConversation")
             ->assertStatus(200)
-            ->assertRedirect(route("wirechat"));
+            ->assertRedirect(route(WireChat::indexRouteName()));
     });
 
     test('Logged in user can still access deleted conversation in chat route or chatbox', function () {
@@ -1739,7 +1740,7 @@ describe('Deleting Conversation', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertStatus(200);
 
         //assert chat route
-        $this->actingAs($auth)->get(route("wirechat.chat", $conversation->id))->assertStatus(200);
+        $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
     });
 
     test('user can regain access to deleted conversation if receiver/other user send a new message', function () {
@@ -1773,7 +1774,7 @@ describe('Deleting Conversation', function () {
         expect($auth->conversations()->first())->not->toBe(null);
 
         //also assert that user receives 403 forbidden
-        $this->actingAs($auth)->get(route("wirechat.chat", $conversation->id))->assertStatus(200);
+        $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
     });
 
     test('user can regain access to deleted conversation if they send a new message after deleting conversation', function () {
@@ -1804,7 +1805,7 @@ describe('Deleting Conversation', function () {
         expect($auth->conversations()->first())->not->toBe(null);
 
         //also assert that user receives 403 forbidden
-        $this->actingAs($auth)->get(route("wirechat.chat", $conversation->id))->assertStatus(200);
+        $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
     });
 
     test('deleted convesation should be available in database if only one user has deleted it', function () {
@@ -2102,8 +2103,8 @@ describe('Clearing Conversation', function () {
 
         $request
             ->call("clearConversation")
-            ->assertStatus(200)
-            ->assertRedirect(route("wirechat"));
+            ->assertStatus(200) 
+            ->assertRedirect(route(WireChat::indexRouteName()));
     });
 
     test('user can still open conversatoin after clearing it ', function () {

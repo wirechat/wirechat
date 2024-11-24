@@ -873,7 +873,7 @@ describe('updating group name and description', function () {
 describe('Deleting Chat', function () {
 
 
-    test('it redirects to wirechat route after deleting Private conversation', function () {
+    test('it redirects to index route after deleting Private conversation', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -884,11 +884,11 @@ describe('Deleting Chat', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call("deleteChat")
             ->assertStatus(200)
-            ->assertRedirect(route("wirechat"));;
+            ->assertRedirect(route(WireChat::indexRouteName()));;
     });
 
 
-    test('it redirects to wirechat route after deleting Self conversation', function () {
+    test('it redirects to index route after deleting Self conversation', function () {
 
         $auth = User::factory()->create();
 
@@ -897,7 +897,7 @@ describe('Deleting Chat', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call("deleteChat")
             ->assertStatus(200)
-            ->assertRedirect(route("wirechat"));;
+            ->assertRedirect(route(WireChat::indexRouteName()));;
     });
 
 
@@ -933,7 +933,7 @@ describe('Deleting Group', function () {
     });
 
 
-    test('it redirects to wirechat route after deleting Group conversation', function () {
+    test('it redirects to index route after deleting Group conversation', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -943,7 +943,7 @@ describe('Deleting Group', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call("deleteGroup")
             ->assertStatus(200)
-            ->assertRedirect(route("wirechat"));;
+            ->assertRedirect(route(WireChat::indexRouteName()));;
     });
 
 
@@ -1023,7 +1023,7 @@ describe('Deleting Group', function () {
 describe('Exiting Chat', function () {
 
 
-    test('it redirects to wirechat route after exiting conversation', function () {
+    test('it redirects to index route after exiting conversation', function () {
 
         $auth = User::factory()->create();
 
@@ -1037,7 +1037,7 @@ describe('Exiting Chat', function () {
         Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation])
             ->call("exitConversation")
             ->assertStatus(200)
-            ->assertRedirect(route("wirechat"));;
+            ->assertRedirect(route(WireChat::indexRouteName()));;
     });
 
 

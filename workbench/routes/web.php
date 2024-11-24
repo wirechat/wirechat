@@ -46,12 +46,10 @@ return "login page";
 
 })->name("login");
  
-Route::middleware(['auth','web'])->group(function (){
-
-
-    Route::get('/chats',Index::class)->name('wirechat');
-    Route::get('/chats/{chat}',View::class)->name('wirechat.chat');
-        
+Route::middleware(config('wirechat.routes.middleware'))
+    ->prefix(config('wirechat.routes.prefix'))
+    ->group(function () {
+        Route::get('/', Index::class)->name('chats');
+        Route::get('/{conversation_id}', View::class)->name('chat');
     });
-    
-    
+

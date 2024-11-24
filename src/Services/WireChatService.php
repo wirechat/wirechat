@@ -153,5 +153,23 @@ class WireChatService
         return (string) config('wirechat.broadcasting.message_notification_queue', 'default');
     }
 
+
+     /**
+     * Get route name for index 
+     */
+    public static function indexRouteName(): string
+    {
+        return 'chats';
+    }
+
+
+    /**
+     * Get route name for chat view 
+     */
+    public static function viewRouteName(): string
+    {
+        return 'chat';
+    }
+
 }
 

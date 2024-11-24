@@ -44,7 +44,7 @@ class NewChat extends ModalComponent
 
       if ($createdConversation) {
         $this->closeModal();
-        return redirect()->route('wirechat.chat', [$createdConversation->id]);
+        return redirect()->route('chat', [$createdConversation->id]);
       }
     }
   }
