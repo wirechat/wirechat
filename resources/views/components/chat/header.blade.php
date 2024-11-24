@@ -25,7 +25,7 @@
         <section class="grid grid-cols-12 w-full">
             <div class="shrink-0 col-span-11 w-full truncate overflow-h-hidden relative">
 
-                <div wire:click="$dispatch('openChatModal', {component: 'info',arguments: { conversation: {{ $conversation->id }} }})"
+                <div wire:click="$dispatch('openChatDrawer', {component: 'info',arguments: { conversation: {{ $conversation->id }} }})"
                     class="flex items-center gap-2 cursor-pointer ">
                     <x-wirechat::avatar :disappearing="$conversation->hasDisappearingTurnedOn()" group="{{ $conversation->isGroup() }}"
                         src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}"
@@ -61,7 +61,7 @@
                     <x-slot name="content">
 
                         <button
-                            wire:click="$dispatch('openChatModal', {component: 'info',arguments: { conversation: {{ $conversation->id }} }})"
+                            wire:click="$dispatch('openChatDrawer', {component: 'info',arguments: { conversation: {{ $conversation->id }} }})"
                             class="w-full text-start">
 
                             <x-wirechat::dropdown-link>

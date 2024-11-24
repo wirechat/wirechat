@@ -127,6 +127,17 @@ abstract class ModalComponent extends Component
         return false;
     }
 
+
+    public static function modalAttributes(): array
+    {
+        return [
+            'closeOnEscape' => true,
+            'closeOnEscapeIsForceful' => false,
+            'dispatchCloseEvent' => false,
+            'destroyOnClose' => true,
+        ];
+    }
+
     private function emitModalEvents(array $events): void
     {
         foreach ($events as $component => $event) {

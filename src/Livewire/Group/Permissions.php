@@ -50,19 +50,12 @@ class Permissions extends ModalComponent
 
 
 
-
-
-  public static function closeModalOnClickAway(): bool
-  {
-
-    return false;
-  }
-
+  
 
   public static function closeModalOnEscape(): bool
   {
 
-    return false;
+    return true;
   }
 
   public static function closeModalOnEscapeIsForceful(): bool
@@ -70,6 +63,14 @@ class Permissions extends ModalComponent
       return false;
   }
 
+
+
+    public static function modalAttributes(): array
+    {
+        return [
+            'closeOnEscape' => true,
+        ];
+    }
 
 
  

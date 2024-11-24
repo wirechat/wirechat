@@ -230,5 +230,5 @@
 
 
     <x-wirechat::toast />
-    <livewire:chat-modal />
+    <livewire:chat-drawer />
 </div>

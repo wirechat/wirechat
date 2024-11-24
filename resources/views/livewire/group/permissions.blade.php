@@ -1,6 +1,6 @@
 <div class="bg-white  min-h-screen dark:bg-inherit overfo opaticy-100 h-full w-full">
     <section class="flex gap-4 z-[10]  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
-        <button wire:click="$dispatch('closeChatModal')" class="focus:outline-none"> <svg class="w-7 h-7"
+        <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-none"> <svg class="w-7 h-7"
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
