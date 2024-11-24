@@ -10,6 +10,18 @@ class NewChat extends ModalComponent
 
     public $users;
     public $search;
+
+
+    public static function modalAttributes(): array
+    {
+        return [
+            'closeOnEscape' => true,
+            'closeOnEscapeIsForceful' => true,
+            'destroyOnClose' => true,
+            'closeOnClickAway'=>true
+        ];
+        
+    }
       /** 
    * Search For users to create conversations with
    */
@@ -32,9 +44,8 @@ class NewChat extends ModalComponent
   public  function createConversation($id, string $class)
   {
 
-
+    //resolve model from params -get model class
     $model = app($class);
-
     $model = $model::find($id);
 
 

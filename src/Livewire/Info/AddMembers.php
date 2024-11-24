@@ -53,7 +53,7 @@ class AddMembers extends ModalComponent
 
 
 
-  public static function closeModalOnClickAway(): bool
+  public static function closeOnClickAway(): bool
   {
 
     return false;
@@ -66,12 +66,17 @@ class AddMembers extends ModalComponent
     return false;
   }
 
-  public static function closeModalOnEscapeIsForceful(): bool
+   
+  public static function modalAttributes(): array
   {
-      return false;
+      return [
+          'closeOnEscape' => true,
+          'closeOnEscapeIsForceful' => false,
+          'dispatchCloseEvent' => false,
+          'destroyOnClose' => true,
+          'closeOnClickAway'=>false
+      ];
   }
-
-
 
 
   /** 

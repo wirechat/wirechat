@@ -11,37 +11,19 @@ use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
 
 
-// This script was copied from wire-elements modal in accordance with the MIT License.
-// Copyright © 2021 Philo Hermans and contributors
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
-// and associated documentation files (the "Software"), to deal in the Software without restriction, 
-// including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-// and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or 
-// substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT 
-// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
-// THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-class Modal extends Component
+class ChatDialog extends Component
 {
     public ?string $activeComponent;
 
-    public array $components = [];
+    public array $dialogComponents = [];
 
     public function resetState(): void
     {
-        $this->components = [];
+        $this->dialogComponents = [];
         $this->activeComponent = null;
     }
 
-    public function openWireChatModal($component, $arguments = [], $modalAttributes = []): void
+    public function openChatDialog($component, $arguments = [], $modalAttributes = []): void
     {
         $componentClass = app(ComponentRegistry::class)->getClass($component);
         $id = md5($component.serialize($arguments));
@@ -51,24 +33,18 @@ class Modal extends Component
                 ->all();
 
 
-        $this->components[$id] = [
+        $this->dialogComponents[$id] = [
             'name' => $component,
-            'attributes' => $arguments, // Deprecated
             'arguments' => $arguments,
-            'modalAttributes' => array_merge([
-                'closeOnClickAway' => $componentClass::closeModalOnClickAway(),
-                'closeOnEscape' => $componentClass::closeModalOnEscape(),
-                'closeOnEscapeIsForceful' => $componentClass::closeModalOnEscapeIsForceful(),
-                'dispatchCloseEvent' => $componentClass::dispatchCloseEvent(),
-                'destroyOnClose' => $componentClass::destroyOnClose(),
-                'maxWidth' => $componentClass::modalMaxWidth(),
-                'maxWidthClass' => $componentClass::modalMaxWidthClass(),
-            ], $modalAttributes),
+            'modalAttributes' => array_merge(
+                $componentClass::modalAttributes(), // Fetch reusable modal attributes
+                $modalAttributes // Allow custom overrides
+            )
         ];
 
         $this->activeComponent = $id;
 
-        $this->dispatch('activeWireChatModalComponentChanged', id: $id);
+        $this->dispatch('activeDialogComponentChanged', id: $id);
     }
 
     public function resolveComponentProps(array $attributes, Component $component): Collection
@@ -118,20 +94,19 @@ class Modal extends Component
 
     public function destroyWireChatComponent($id): void
     {
-        unset($this->components[$id]);
+        unset($this->dialogComponents[$id]);
     }
 
     public function getListeners(): array
     {
         return [
-            'openWireChatModal',
+            'openChatDialog',
             'destroyWireChatComponent',
         ];
     }
     
     public function render()
     {
-      
-        return view('wirechat::livewire.modals.modal');
+        return view('wirechat::livewire.modals.chat-dialog');
     }
 }

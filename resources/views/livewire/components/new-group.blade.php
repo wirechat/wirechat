@@ -42,7 +42,7 @@
 
                             <label for="name">Group Name</label>
 
-                            <input id='name' type="text" wire:model='name' placeholder="Enter name"
+                            <input id='name' type="text" wire:model='name' autofocus placeholder="Enter name"
                                 class=" w-full border-0 px-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
 
                             <span class="text-red-500 text-sm ">

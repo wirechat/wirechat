@@ -6,7 +6,6 @@ use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Modals\ModalComponent;
-use Namu\WireChat\Models\Attachment;
 
 class NewGroup extends ModalComponent
 {
@@ -43,6 +42,18 @@ class NewGroup extends ModalComponent
     $this->reset('photo');
   }
 
+
+
+  public static function modalAttributes(): array
+  {
+      return [
+          'closeOnEscape' => false,
+          'closeOnEscapeIsForceful' => false,
+          'destroyOnClose' => false,
+          'closeOnClickAway'=>false
+      ];
+      
+  }
 
 
 

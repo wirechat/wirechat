@@ -18,7 +18,7 @@
 
             @if (WireChat::showNewChatModalButton() == true)
                
-            <button wire:click="$dispatch('openWireChatModal', {component: 'new-chat'})" id="open-new-chat-modal-button" class=" flex items-center">
+            <button wire:click="$dispatch('openChatDialog', {component: 'new-chat'})" id="open-new-chat-modal-button" class=" flex items-center focus:outline-none">
                 <svg class="w-8 h-8 -mb-1 text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"
                     xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
                     <g fill="none" stroke="currentColor">

@@ -16,7 +16,7 @@
     </section>
     {{-- form and detail section  --}}
     <section
-        class=" py-2 sm:px-4 py-1.5    z-[50]  bg-gray-50  dark:border-gray-800/80  flex flex-col gap-3 items-center  w-full mx-auto">
+        class=" py-2 sm:px-4 py-1.5    z-[50]  bg-gray-50 dark:bg-gray-800   flex flex-col gap-3 items-center  w-full mx-auto">
 
         {{-- Media preview section --}}
         @if (count($media) > 0)

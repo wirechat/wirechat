@@ -1,8 +1,8 @@
 @use('Namu\WireChat\Facades\WireChat')
-<div id="new-chat-modal">
+<div id="new-chat-modal ">
 
     <div 
-    class="relative w-full h-96  border  dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800 dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
+    class="relative w-full h-96  border mx-auto  dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800 dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
 
     <header class=" sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
         <div class="flex justify-between items-center justify-between pb-2">
@@ -23,7 +23,7 @@
         </div>
         
         <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
-            <input  dusk="search_users_field" type="search" id="users-search-field"
+            <input  dusk="search_users_field" autofocus type="search" id="users-search-field"
                 wire:model.live.debounce='search' autocomplete="off"  placeholder="Search"
                 class=" w-full border-0 w-auto px-0 dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
 
@@ -36,7 +36,7 @@
         @if (WireChat::showNewGroupModalButton() && auth()->user()->canCreateGroups())
         <button
   
-         wire:click="$dispatch('openWireChatModal', {component: 'new-group'})"
+         wire:click="$dispatch('openChatDialog', {component: 'new-group'})"
          @dusk="open_new_group_modal_button"
          class="flex items-center gap-3 my-4  rounded-lg p-2 w-full border hover:border-gray-300 transition-colors  dark:border-gray-800 dark:hover:border-gray-700   "
 

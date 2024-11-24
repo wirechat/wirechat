@@ -14,6 +14,7 @@
                     closeOnEscapeIsForceful: false,
                     dispatchCloseEvent: false,
                     destroyOnClose: false,
+                    closeModalOnClickAway:false,
 
                     closeChatDrawerOnEscape(trigger) {
 
@@ -111,12 +112,14 @@
                             }, 300);
                         }
 
-                        // Fetch modal attributes and set Alpine properties
+                        
+                        // Fetch modal attributes and set Alpine properties 
                         const attributes = this.$wire.get('drawerComponents')[id]?.modalAttributes || {};
                         this.closeOnEscape = attributes.closeOnEscape ?? false;
                         this.closeOnEscapeIsForceful = attributes.closeOnEscapeIsForceful ?? false;
                         this.dispatchCloseEvent = attributes.dispatchCloseEvent ?? false;
-                        this.destroyOnClose = attributes.destroyOnClose ?? false;
+                        this.destroyOnClose = attributes.destroyOnClose ?? false; 
+                        this.closeModalOnClickAway = attributes.closeModalOnClickAway ?? false; 
 
 
                         this.$nextTick(() => {

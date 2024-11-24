@@ -59,7 +59,7 @@
     </div>
     @livewireScripts
     @once
-    @livewire('wirechat-modal')
+    @livewire('chat-dialog')
    @endonce
 </body>
 
