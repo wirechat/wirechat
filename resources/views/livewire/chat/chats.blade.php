@@ -155,7 +155,7 @@ $primaryColor= WireChat::getColor();
 
                                 {{-- name --}}
                                 <div class="flex gap-1 mb-1 w-full items-center">
-                                    <h6 class="truncate   font-medium  text-gray-900 dark:text-white">
+                                    <h6 class="truncate font-medium text-gray-900 dark:text-white">
                                         {{ $group?$group?->name: $receiver?->display_name }}
                                     </h6>
 

@@ -2,6 +2,8 @@
 
 namespace Namu\WireChat\Helpers;
 
+use Carbon\Carbon;
+
 class Helper
 {
     /**
@@ -37,4 +39,27 @@ class Helper
 
         return '.'.implode(',.', $fileExtensions);
     }
+
+
+    /**
+     * format date for chats 
+     */
+
+    public  static function formatChatDate(Carbon $timestamp) :string {
+
+        $messageDate = $timestamp;
+
+        $groupKey = '';
+        if ($messageDate->isToday()) {
+            $groupKey = 'Today';
+        } elseif ($messageDate->isYesterday()) {
+            $groupKey = 'Yesterday'; 
+        } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
+            $groupKey = $messageDate->format('l'); 
+        } else {
+            $groupKey = $messageDate->format('d/m/Y'); 
+        }
+
+        return $groupKey;
+     }
 }

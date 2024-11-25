@@ -54,6 +54,20 @@ describe('presence test', function () {
             ->assertSee('Members');
     });
 
+    test('close_modal_button_is_set_correctly', function () {
+
+        Config::set('wirechat.max_group_members', 1000);
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+
+        //* since converstaion already have one user which is the auth then default is 1
+        $request
+            ->assertSeeHtml('dusk="close_modal_button"');
+    });
+
     test('it loads members', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');

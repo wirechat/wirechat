@@ -68,13 +68,7 @@
         class="invisible transition-all duration-300 ">
         <x-wirechat::loading-spin />
     </div>
-{{-- 
-<button @click="$dispatch('wirechat-toast', {
-    type: 'warning',
-    message: 'File type is not allowed'
-})" >Notify</button> --}}
-
-
+ 
     {{-- Define previous message outside the loop --}}
     @php
         $previousMessage = null;

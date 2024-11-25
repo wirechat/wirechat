@@ -28,13 +28,23 @@ it('has "chats label set in chatlist"', function () {
         ->assertSee('Chat');
 });
 
+
 it('doesnt shows search field if search is disabled in wirechat.config:tesiting Search placeholder', function () {
 
     Config::set('wirechat.allow_chats_search', false);
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
-        ->assertDontSee('Search my conversations');
+        ->assertDontSee('Search')
+        ->assertPropertyNotWired('search')
+        ->assertDontSeeHtml('id="chats-search-field"');
+});
+
+it('it_shows_redirect_button', function () {
+
+    $auth = User::factory()->create();
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('id="redirect-button"');
 });
 
 it('shows search field if search is enabled in wirechat.config:tesiting Search placeholder', function () {
@@ -43,9 +53,72 @@ it('shows search field if search is enabled in wirechat.config:tesiting Search p
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
-        ->assertSee('Search');
+        ->assertSee('Search')
+        ->assertPropertyWired('search')
+        ->assertSeeHtml('id="chats-search-field"');
 });
 
+
+test('it_shows_new_chat_modal_button_if_enabled_in_config', function () {
+
+    Config::set('wirechat.show_new_chat_modal_button', true);
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)
+        ->test(Chatlist::class)
+        ->assertSeeHtml('id="open-new-chat-modal-button"');
+});
+
+
+
+test('it_does_not_show_new_chat_modal_button_if_not_enabled_in_config', function () {
+
+    Config::set('wirechat.show_new_chat_modal_button', false);
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)
+        ->test(Chatlist::class)
+        ->assertDontSeeHtml('id="open-new-chat-modal-button"');
+});
+
+
+test('it_shows_load_more_button_if_user_can_load_more', function () {
+
+    $auth = User::factory()->create();
+
+    for ($i = 0; $i < 12; $i++) {
+
+        $user = Conversation::factory()->create();
+
+        $auth->createConversationWith($user, 'hello');
+    }
+
+
+
+    // dd($conversation);
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSee('Load more')
+        ->assertSeeHtml('dusk="loadMoreButton"');
+});
+
+test('it_does_not_show_load_more_button_if_user_cannot_load_more', function () {
+
+    $auth = User::factory()->create();
+
+    for ($i = 0; $i < 4; $i++) {
+
+        $user = Conversation::factory()->create();
+
+        $auth->createConversationWith($user, 'hello');
+    }
+
+
+
+    // dd($conversation);
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSee('Load more')
+        ->assertDontSeeHtml('dusk="loadMoreButton"');
+});
 test('it shows dusk="disappearing_messages_icon" if disappearingTurnedOn for conversation', function () {
 
     $auth = User::factory()->create(['name' => 'Namu']);
@@ -325,9 +398,7 @@ describe('List', function () {
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 0;
             });
-
     });
-
 });
 
 describe('Search', function () {
@@ -399,7 +470,5 @@ describe('Search', function () {
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 1;
             });
-
     });
-
 });
