@@ -757,7 +757,7 @@ describe('createGroup',function(){
     });
 
 
-    it('it saves room data if correctly', function () {
+    it('it saves group data if correctly', function () {
 
         $auth = User::factory()->create();
         $photo =UploadedFile::fake()->create('photo.png');
@@ -769,6 +769,8 @@ describe('createGroup',function(){
         expect($group->name)->toBe('New group');
         expect($group->description)->toBe('description');
         expect($group->cover)->not->toBe(null);
+        expect($group->type)->toBe('private');
+
 
 
     });
@@ -811,6 +813,7 @@ describe('createGroup',function(){
         expect(Conversation::withoutGlobalScopes()->count())->toBe(0);
 
     })->throws(Exception::class,"You do not have permission to create groups.");
+
 
 
 });
