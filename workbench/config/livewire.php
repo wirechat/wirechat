@@ -40,7 +40,6 @@ return [
     |
     */
 
-
     'layout' => 'layouts.app',
 
     /*
@@ -74,7 +73,7 @@ return [
         'preview_mimes' => [   // Supported file types for temporary pre-signed file URLs...
             'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
             'mov', 'avi', 'wmv', 'mp3', 'm4a',
-            'jpg', 'jpeg', 'mpga', 'webp', 'wma','pdf','zip','quicktime','mov'
+            'jpg', 'jpeg', 'mpga', 'webp', 'wma', 'pdf', 'zip', 'quicktime', 'mov',
         ],
         'max_upload_time' => 5, // Max duration (in minutes) before an upload is invalidated...
     ],

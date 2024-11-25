@@ -2,10 +2,8 @@
 
 namespace Namu\WireChat\Enums;
 
-enum MessageType :string
-
+enum MessageType: string
 {
-    
     case TEXT = 'text';
     case ATTACHMENT = 'attachment';
 

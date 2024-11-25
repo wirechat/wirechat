@@ -7,7 +7,6 @@ use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Workbench\App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Attachment>
@@ -19,37 +18,36 @@ class ConversationFactory extends Factory
      *
      * @return array<string, mixed>
      */
-
     protected $model = Conversation::class;
+
     public function definition(): array
     {
         return [
-        'type' =>ConversationType::PRIVATE
+            'type' => ConversationType::PRIVATE,
         ];
     }
 
-    public function withParticipants(array $models,ParticipantRole $role=null): Factory
+    public function withParticipants(array $models, ?ParticipantRole $role = null): Factory
     {
-        return $this->afterCreating(function (Conversation $conversation) use($models,$role) {
+        return $this->afterCreating(function (Conversation $conversation) use ($models, $role) {
 
-            $role=$role?$role:ParticipantRole::OWNER;
-
+            $role = $role ? $role : ParticipantRole::OWNER;
 
             foreach ($models as $key => $model) {
 
-            Participant::factory()->create([
-                'conversation_id'=>$conversation->id,
-                'participantable_id'=>$model->id,
-                'participantable_type'=>get_class($model),
-                'role'=>$role
-            ]);
+                Participant::factory()->create([
+                    'conversation_id' => $conversation->id,
+                    'participantable_id' => $model->id,
+                    'participantable_type' => get_class($model),
+                    'role' => $role,
+                ]);
 
             }
         });
-    
+
     }
 
-    /* 
+    /*
     public function withParticipants(array $models, ?ParticipantRole $role = null): Factory
     {
         return $this->state(function () use ($models) {
@@ -70,7 +68,7 @@ class ConversationFactory extends Factory
 
                 return ['type' => ConversationType::GROUP];
             }
-          
+
 
         })
         ->afterCreating(function (Conversation $conversation) use ($models, $role) {

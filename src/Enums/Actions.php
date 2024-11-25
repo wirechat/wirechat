@@ -2,12 +2,10 @@
 
 namespace Namu\WireChat\Enums;
 
-enum Actions :string
-
+enum Actions: string
 {
-
     case DELETE = 'delete';
     case ARCHIVE = 'archive';
-    case REMOVED_BY_ADMIN='removed-by-admin';
+    case REMOVED_BY_ADMIN = 'removed-by-admin';
 
 }

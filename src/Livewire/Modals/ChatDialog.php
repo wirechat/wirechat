@@ -1,7 +1,6 @@
 <?php
 
-namespace  Namu\WireChat\Livewire\Modals;
-
+namespace Namu\WireChat\Livewire\Modals;
 
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -9,7 +8,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
-
 
 class ChatDialog extends Component
 {
@@ -29,9 +27,8 @@ class ChatDialog extends Component
         $id = md5($component.serialize($arguments));
 
         $arguments = collect($arguments)
-                ->merge($this->resolveComponentProps($arguments, new $componentClass()))
-                ->all();
-
+            ->merge($this->resolveComponentProps($arguments, new $componentClass))
+            ->all();
 
         $this->dialogComponents[$id] = [
             'name' => $component,
@@ -39,7 +36,7 @@ class ChatDialog extends Component
             'modalAttributes' => array_merge(
                 $componentClass::modalAttributes(), // Fetch reusable modal attributes
                 $modalAttributes // Allow custom overrides
-            )
+            ),
         ];
 
         $this->activeComponent = $id;
@@ -66,10 +63,10 @@ class ChatDialog extends Component
             return $parameterValue;
         }
 
-        if(enum_exists($parameterClassName)){
+        if (enum_exists($parameterClassName)) {
             $enum = $parameterClassName::tryFrom($parameterValue);
-        
-            if($enum !== null){
+
+            if ($enum !== null) {
                 return $enum;
             }
         }
@@ -77,7 +74,7 @@ class ChatDialog extends Component
         $instance = app()->make($parameterClassName);
 
         if (! $model = $instance->resolveRouteBinding($parameterValue)) {
-            throw (new ModelNotFoundException())->setModel(get_class($instance), [$parameterValue]);
+            throw (new ModelNotFoundException)->setModel(get_class($instance), [$parameterValue]);
         }
 
         return $model;
@@ -104,7 +101,7 @@ class ChatDialog extends Component
             'destroyWireChatComponent',
         ];
     }
-    
+
     public function render()
     {
         return view('wirechat::livewire.modals.chat-dialog');

@@ -6,7 +6,6 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Traits\Chatable;
 
 class User extends Authenticatable
@@ -45,9 +44,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
- 
-    /** 
-     * since you have a non-standard namespace; 
+    /**
+     * since you have a non-standard namespace;
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
      */
@@ -59,33 +57,28 @@ class User extends Authenticatable
     public function getCoverUrlAttribute(): ?string
     {
 
-      return null;
+        return null;
     }
 
     public function wireChatProfileUrl(): ?string
     {
-       return null;
-    } 
-
-    
-    public function getDisplayNameAttribute() : ?string 
-    {
-
-        return $this->name??'user';
-        
+        return null;
     }
 
-
-
-    public  function canCreateGroups(): bool
+    public function getDisplayNameAttribute(): ?string
     {
-        return $this->hasVerifiedEmail()==true;
+
+        return $this->name ?? 'user';
+
     }
 
-    public  function canCreateChats(): bool
+    public function canCreateGroups(): bool
     {
-        return $this->hasVerifiedEmail()==true;
+        return $this->hasVerifiedEmail() == true;
     }
 
-
+    public function canCreateChats(): bool
+    {
+        return $this->hasVerifiedEmail() == true;
+    }
 }

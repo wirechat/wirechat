@@ -12,18 +12,16 @@ class Group extends Model
 {
     use HasFactory;
 
-    
     protected $fillable = [
         'conversation_id',
         'name',
-        'description'
+        'description',
     ];
 
-
-    protected $casts=[
-        'allow_members_to_send_messages'=>'boolean',
-        'allow_members_to_add_others'=>'boolean',
-        'allow_members_to_edit_group_info'=>'boolean',
+    protected $casts = [
+        'allow_members_to_send_messages' => 'boolean',
+        'allow_members_to_add_others' => 'boolean',
+        'allow_members_to_edit_group_info' => 'boolean',
 
     ];
 
@@ -32,7 +30,6 @@ class Group extends Model
         $this->table = WireChat::formatTableName('groups');
         parent::__construct($attributes);
     }
-
 
     protected static function boot()
     {
@@ -55,8 +52,8 @@ class Group extends Model
         });
     }
 
-    /** 
-     * since you have a non-standard namespace; 
+    /**
+     * since you have a non-standard namespace;
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
      */
@@ -65,32 +62,30 @@ class Group extends Model
         return \Namu\WireChat\Workbench\Database\Factories\GroupFactory::new();
     }
 
-
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
     }
 
+    public function getCoverUrlAttribute(): ?string
+    {
 
-    function getCoverUrlAttribute():?string
-      {
+        return $this->cover?->url;
 
-    return    $this->cover?->url;
-        
     }
 
-   /**
-     * Check if group is owned by 
+    /**
+     * Check if group is owned by
      */
     public function isOwnedBy(Model $user): bool
     {
 
-        $conversation= $this->conversation;
+        $conversation = $this->conversation;
 
         // Check if participants are already loaded
         if ($conversation->relationLoaded('participants')) {
             // If loaded, simply check the existing collection
-            return $conversation->participants->contains(function ($participant) use($user) {
+            return $conversation->participants->contains(function ($participant) use ($user) {
                 return $participant->participantable_id == $user->id &&
                     $participant->participantable_type == get_class($user) &&
                     $participant->role == ParticipantRole::OWNER;
@@ -105,38 +100,26 @@ class Group extends Model
             ->exists();
     }
 
-
-
     public function cover()
     {
         return $this->morphOne(Attachment::class, 'attachable');
     }
 
-
-
-    /** 
+    /**
      * Permissions
      */
-
-     public function allowsMembersToSendMessages(): bool
+    public function allowsMembersToSendMessages(): bool
     {
-        return $this->allow_members_to_send_messages==true;
+        return $this->allow_members_to_send_messages == true;
     }
 
     public function allowsMembersToAddOthers(): bool
     {
-        return $this->allow_members_to_add_others==true;
+        return $this->allow_members_to_add_others == true;
     }
 
     public function allowsMembersToEditGroupInfo(): bool
     {
-        return $this->allow_members_to_edit_group_info==true;
+        return $this->allow_members_to_edit_group_info == true;
     }
-
-
-
-
-
-
-
 }

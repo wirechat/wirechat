@@ -15,16 +15,16 @@ class AttachmentFactory extends Factory
      *
      * @return array<string, mixed>
      */
-
     protected $model = Attachment::class;
+
     public function definition(): array
     {
         return [
-        'file_path' => '/fake/path',
-        'file_name' => 'file.png',
-        'original_name' => 'file',
-        'mime_type' => "image/png",
-        'url'=>'test.example.com/attachments/file.png'
+            'file_path' => '/fake/path',
+            'file_name' => 'file.png',
+            'original_name' => 'file',
+            'mime_type' => 'image/png',
+            'url' => 'test.example.com/attachments/file.png',
         ];
     }
 }

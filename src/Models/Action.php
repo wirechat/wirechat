@@ -11,16 +11,14 @@ class Action extends Model
 {
     use HasFactory;
 
-
-    protected $fillable=[
+    protected $fillable = [
         'actor_id',
         'actor_type',
         'actionable_id',
         'actionable_type',
         'type',
-        'data'
+        'data',
     ];
-
 
     public function __construct(array $attributes = [])
     {
@@ -30,12 +28,12 @@ class Action extends Model
         parent::__construct($attributes);
     }
 
-    protected $casts =[
-        'type'=>Actions::class
+    protected $casts = [
+        'type' => Actions::class,
     ];
 
-        /** 
-     * since you have a non-standard namespace; 
+    /**
+     * since you have a non-standard namespace;
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
      */
@@ -44,18 +42,15 @@ class Action extends Model
         return \Namu\WireChat\Workbench\Database\Factories\ActionFactory::new();
     }
 
+    // Polymorphic relationship to the entity being acted upon (message, conversation, etc.)
+    public function actionable()
+    {
+        return $this->morphTo();
+    }
 
-       // Polymorphic relationship to the entity being acted upon (message, conversation, etc.)
-       public function actionable()
-       {
-           return $this->morphTo();
-       }
-   
-       // Polymorphic relationship to the actor (user, admin, etc.)
-       public function actor()
-       {
-           return $this->morphTo();
-       }
-   
-
+    // Polymorphic relationship to the actor (user, admin, etc.)
+    public function actor()
+    {
+        return $this->morphTo();
+    }
 }

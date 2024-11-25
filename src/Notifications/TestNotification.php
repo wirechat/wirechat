@@ -5,7 +5,6 @@ namespace Namu\WireChat\Notifications;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -22,9 +21,7 @@ class TestNotification extends Notification implements ShouldBroadcastNow
     {
         $this->message = $message;
 
-
     }
-
 
     /**
      * Get the notification's delivery channels.
@@ -42,9 +39,9 @@ class TestNotification extends Notification implements ShouldBroadcastNow
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('The introduction to the notification.')
+            ->action('Notification Action', url('/'))
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -56,11 +53,11 @@ class TestNotification extends Notification implements ShouldBroadcastNow
     {
         return [
             //
-            'data'=>'hello world'
+            'data' => 'hello world',
         ];
     }
 
-       /**
+    /**
      * Get the channels the event should broadcast on.
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>

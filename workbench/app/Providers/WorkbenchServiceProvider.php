@@ -5,21 +5,15 @@ namespace Workbench\App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Livewire\LivewireServiceProvider;
-use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\WireChatServiceProvider;
-use Workbench\App\Models\User;
 
 class WorkbenchServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
-    public function register(): void
-    {
-        
-
-    }
+    public function register(): void {}
 
     /**
      * Bootstrap services.
@@ -27,17 +21,14 @@ class WorkbenchServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
-      //  \Livewire\Livewire::forceAssetInjection();
+        //  \Livewire\Livewire::forceAssetInjection();
 
         Livewire::component('chat-list', Chats::class);
-
 
         $this->app->register(WireChatServiceProvider::class);
         $this->app->register(LivewireServiceProvider::class);
 
+        // Register the WireChatServiceProvider
 
-          // Register the WireChatServiceProvider
-
-        
     }
 }

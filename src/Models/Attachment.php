@@ -10,8 +10,7 @@ class Attachment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['attachable_id','attachable_type', 'file_path', 'file_name', 'mime_type','url','original_name'];
-
+    protected $fillable = ['attachable_id', 'attachable_type', 'file_path', 'file_name', 'mime_type', 'url', 'original_name'];
 
     public function __construct(array $attributes = [])
     {
@@ -20,8 +19,8 @@ class Attachment extends Model
         parent::__construct($attributes);
     }
 
-     /** 
-     * since you have a non-standard namespace; 
+    /**
+     * since you have a non-standard namespace;
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
      */
@@ -30,12 +29,10 @@ class Attachment extends Model
         return \Namu\WireChat\Workbench\Database\Factories\AttachmentFactory::new();
     }
 
-
     public function attachable()
-{
-    return $this->morphTo();
-}
-
+    {
+        return $this->morphTo();
+    }
 
     // public function message()
     // {
@@ -46,6 +43,4 @@ class Attachment extends Model
     {
         return explode('/', $this->mime_type)[1] ?? 'unknown';
     }
-
-
 }

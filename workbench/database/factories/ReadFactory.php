@@ -15,8 +15,8 @@ class ReadFactory extends Factory
      *
      * @return array<string, mixed>
      */
-
     protected $model = Read::class;
+
     public function definition(): array
     {
         return [

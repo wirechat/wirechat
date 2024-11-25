@@ -44,7 +44,8 @@
         "orchestra/testbench-dusk": "^8.26",
         "orchestra/testbench-browser-kit": "^8.6",
         "joshhanley/livewire-dusk-testbench": "^3.0@beta",
-        "christophrumpel/missing-livewire-assertions": "^2.8"
+        "christophrumpel/missing-livewire-assertions": "^2.8",
+        "laravel/pint": "^1.18"
     },
     "scripts": {
         "post-autoload-dump": [

@@ -2,7 +2,6 @@
 
 use App\Livewire\Test;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Chats;
 use Namu\WireChat\Livewire\Chat\Index;
@@ -23,33 +22,27 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
-
 
 //Route::get('/test',Test::class);
 
 // Route::middleware(['auth'])->group(function (){
 
-
 // Route::get('/chats',Chats::class)->name('wirechat');
 // Route::get('/chats/{chat}',Chat::class)->name('wirechat.chat');
-    
 
 // });
-Route::middleware('guest')->get('/login',function(){
+Route::middleware('guest')->get('/login', function () {
 
-return "login page";
+    return 'login page';
 
-})->name("login");
- 
+})->name('login');
+
 Route::middleware(config('wirechat.routes.middleware'))
-    ->prefix(config('wirechat.routes.prefix'))
-    ->group(function () {
-        Route::get('/', Index::class)->name('chats');
-        Route::get('/{conversation_id}', View::class)->name('chat');
-    });
-
+     ->prefix(config('wirechat.routes.prefix'))
+     ->group(function () {
+         Route::get('/', Index::class)->name('chats');
+         Route::get('/{conversation_id}', View::class)->name('chat');
+     });

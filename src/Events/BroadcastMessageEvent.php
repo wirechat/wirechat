@@ -2,10 +2,7 @@
 
 namespace Namu\WireChat\Events;
 
-
-
 use Illuminate\Broadcasting\InteractsWithSockets;
- 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Namu\WireChat\Models\Conversation;
@@ -15,11 +12,9 @@ class BroadcastMessageEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(public Message $message,public Conversation $conversation)
+    public function __construct(public Message $message, public Conversation $conversation)
     {
 
         //Log::info($participant);
     }
-
-   
 }

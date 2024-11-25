@@ -1,8 +1,5 @@
 <?php
 
-
- 
-
 arch('app')
     ->expect('Namu\\WireChat')
     //->toUseStrictTypes()

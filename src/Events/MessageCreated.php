@@ -3,25 +3,19 @@
 namespace Namu\WireChat\Events;
 
 use Carbon\Carbon;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Queue\SerializesModels;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Helpers\MorphTypeHelper;
-use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 
 class MessageCreated implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets,InteractsWithQueue, SerializesModels ,Queueable;
+    use Dispatchable, InteractsWithQueue,InteractsWithSockets, Queueable ,SerializesModels;
 
     public $message;
     // public $receiver;
@@ -32,7 +26,7 @@ class MessageCreated implements ShouldBroadcast
         $this->message = $message->load([]);
     }
 
-       /**
+    /**
      * Get the channels the event should broadcast on.
      *
      * @return array<int, \Illuminate\Broadcasting\PrivateChannel>
@@ -40,11 +34,9 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('conversation.'.$this->message->conversation_id)
+            new PrivateChannel('conversation.'.$this->message->conversation_id),
         ];
     }
-
-
 
     // public function broadcastWhen(): bool
     // {
@@ -52,10 +44,10 @@ class MessageCreated implements ShouldBroadcast
     //     return Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinutes(2));
     // }
 
-       /**
+    /**
      * The name of the queue on which to place the broadcasting job.
      */
-    public  function broadcastQueue(): string
+    public function broadcastQueue(): string
     {
         return WireChat::messagesQueue();
     }
@@ -68,11 +60,11 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'message'=>[
-                 'id'=> $this->message->id,
-                 'conversation_id'=> $this->message->conversation_id
-            ]
+            'message' => [
+                'id' => $this->message->id,
+                'conversation_id' => $this->message->conversation_id,
+            ],
 
         ];
     }
-    }
+}

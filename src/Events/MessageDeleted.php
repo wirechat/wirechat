@@ -5,8 +5,8 @@ namespace Namu\WireChat\Events;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Message;
 
@@ -30,7 +30,7 @@ class MessageDeleted implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('conversation.' . $this->message->conversation_id)
+            new PrivateChannel('conversation.'.$this->message->conversation_id),
             // new PrivateChannel('wirechat')
         ];
     }
@@ -52,12 +52,12 @@ class MessageDeleted implements ShouldBroadcastNow
     {
         //   dd($this->message);
         return [
-            'message' =>[
-                'id'=>$this->message->id,
-                'conversation_id'=>$this->message->conversation_id,
-                'sendable_id'=>$this->message->sendable_id,
-                'sendable_type'=>$this->message->sendable_type
-            ]
+            'message' => [
+                'id' => $this->message->id,
+                'conversation_id' => $this->message->conversation_id,
+                'sendable_id' => $this->message->sendable_id,
+                'sendable_type' => $this->message->sendable_type,
+            ],
         ];
     }
 }

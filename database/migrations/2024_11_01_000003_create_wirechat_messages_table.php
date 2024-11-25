@@ -3,8 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 
@@ -15,18 +13,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create((new Message())->getTable(), function (Blueprint $table) {
+        Schema::create((new Message)->getTable(), function (Blueprint $table) {
             $table->id();
-    
+
             $table->unsignedBigInteger('conversation_id')->nullable();
-            $table->foreign('conversation_id')->references('id')->on((new Conversation())->getTable())->cascadeOnDelete();
-    
+            $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
+
             $table->string('sendable_id'); // ID of the sender
             $table->string('sendable_type'); // Model type of the sender
-    
+
             $table->unsignedBigInteger('reply_id')->nullable();
-            $table->foreign('reply_id')->references('id')->on((new Message())->getTable())->nullOnDelete();
-    
+            $table->foreign('reply_id')->references('id')->on((new Message)->getTable())->nullOnDelete();
+
             $table->text('body')->nullable();
             $table->string('type')->default('text');
 
@@ -35,18 +33,17 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            
             // Indexes for optimization
             $table->index(['conversation_id']);
             $table->index(['sendable_id', 'sendable_type']);
         });
     }
-    
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists((new Message())->getTable());
+        Schema::dropIfExists((new Message)->getTable());
     }
 };

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Scopes\WithoutRemovedAction;
 use Namu\WireChat\Models\Scopes\WithoutRemovedActionScope;
 
 class Participant extends Model
@@ -24,27 +23,23 @@ class Participant extends Model
         'exited_at',
         'conversation_deleted_at',
         'conversation_cleared_at',
-        'last_active_at'
+        'last_active_at',
     ];
-
 
     protected $casts = [
         'role' => ParticipantRole::class,
         'exited_at' => 'datetime',
         'conversation_deleted_at' => 'datetime',
-        'conversation_cleared_at'=>'datetime',
-        'last_active_at'=>'datetime'
+        'conversation_cleared_at' => 'datetime',
+        'last_active_at' => 'datetime',
     ];
-
 
     public function __construct(array $attributes = [])
     {
         $this->table = WireChat::formatTableName('participants');
 
-
         parent::__construct($attributes);
     }
-
 
     /**
      * Scope to exclude exited participants by default.
@@ -57,9 +52,8 @@ class Participant extends Model
 
         static::addGlobalScope(WithoutRemovedActionScope::class);
 
-
-         // listen to deleted
-         static::deleted(function ($participant) {
+        // listen to deleted
+        static::deleted(function ($participant) {
 
             // Delete reads
             // Use a DB transaction to ensure atomicity
@@ -70,8 +64,8 @@ class Participant extends Model
         });
     }
 
-    /** 
-     * since you have a non-standard namespace; 
+    /**
+     * since you have a non-standard namespace;
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
      */
@@ -80,8 +74,6 @@ class Participant extends Model
         return \Namu\WireChat\Workbench\Database\Factories\ParticipantFactory::new();
     }
 
-
-
     /**
      * Polymorphic relation to the participantable model.
      */
@@ -89,8 +81,6 @@ class Participant extends Model
     {
         return $this->morphTo();
     }
-
-
 
     /**
      * Scope for filtering by participantable model.
@@ -104,8 +94,6 @@ class Participant extends Model
             ->where('participantable_type', get_class($model));
     }
 
-
-
     /**
      * Scope for filtering by participantable model.
      */
@@ -117,8 +105,6 @@ class Participant extends Model
         $query->withoutGlobalScope('withoutExited');
     }
 
-
-
     /**
      * Define a relationship to fetch the conversation.
      */
@@ -127,11 +113,10 @@ class Participant extends Model
         return $this->belongsTo(Conversation::class);
     }
 
-
     /**
      * Check if participant is admin
      **/
-    function isAdmin()
+    public function isAdmin()
     {
         return $this->role == ParticipantRole::OWNER || $this->role == ParticipantRole::ADMIN;
     }
@@ -139,38 +124,34 @@ class Participant extends Model
     /**
      * Check if participant is owner of conversation
      **/
-    function isOwner()
+    public function isOwner()
     {
 
         return $this->role == ParticipantRole::OWNER;
     }
 
-
     /**
      * Mark the participant as exited from the conversation.
      *
      * @param null
-     * @return bool
      */
     public function exitConversation(): bool
     {
-        #make sure conversation is not private
-        abort_if($this->conversation->isPrivate(), 403, "Participant cannot exit a private conversation");
+        //make sure conversation is not private
+        abort_if($this->conversation->isPrivate(), 403, 'Participant cannot exit a private conversation');
 
-        #make sure owner if group cannot be removed from chat
-        abort_if($this->isOwner(), 403, "Owner cannot exit conversation");
+        //make sure owner if group cannot be removed from chat
+        abort_if($this->isOwner(), 403, 'Owner cannot exit conversation');
 
-
-        #update Role to Participant
-        $this->role= ParticipantRole::PARTICIPANT;
+        //update Role to Participant
+        $this->role = ParticipantRole::PARTICIPANT;
         $this->save();
 
-
-        if (!$this->hasExited()) {
+        if (! $this->hasExited()) {
             $this->exited_at = now();
+
             return $this->save();
         }
-
 
         return false; // Already exited or conversation mismatch
     }
@@ -180,38 +161,31 @@ class Participant extends Model
      */
     public function hasExited(): bool
     {
-        return $this->exited_at !=null;
+        return $this->exited_at != null;
     }
 
+    // Relationship with actions table (to track the removal actions)
+    public function actions()
+    {
+        return $this->morphMany(Action::class, 'actionable');
+    }
 
-      // Relationship with actions table (to track the removal actions)
-      public function actions()
-      {
-          return $this->morphMany(Action::class, 'actionable');
-      }
-
-
-
-   /**
+    /**
      * check if participant was removed by admin
-     *
-     * @return bool
      */
-      public function isRemovedByAdmin(): bool
-      {
-          return $this->actions()
-              ->where('type', Actions::REMOVED_BY_ADMIN->value)
-              ->exists();
-      }
+    public function isRemovedByAdmin(): bool
+    {
+        return $this->actions()
+            ->where('type', Actions::REMOVED_BY_ADMIN->value)
+            ->exists();
+    }
 
-
-   /**
+    /**
      * Remove a participant and log the action if not already logged.
      *
-     * @param Model $admin The admin model removing the participant.
-     * @return void
+     * @param  Model  $admin  The admin model removing the participant.
      */
-    function removeByAdmin(Model $admin): void
+    public function removeByAdmin(Model $admin): void
     {
         // Check if a remove action already exists for this participant
         $exists = Action::where('actionable_id', $this->id)
@@ -219,7 +193,7 @@ class Participant extends Model
             ->where('type', Actions::REMOVED_BY_ADMIN)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             // Create the 'remove' action record in the actions table
             Action::create([
                 'actionable_id' => $this->id,
@@ -230,12 +204,10 @@ class Participant extends Model
             ]);
         }
 
-
-          #update Role to Participant
-          $this->role= ParticipantRole::PARTICIPANT;
-          $this->save();
+        //update Role to Participant
+        $this->role = ParticipantRole::PARTICIPANT;
+        $this->save();
     }
-
 
     /**
      * Determine if the user has deleted this conversation and if the deletion is still "valid."
@@ -246,11 +218,10 @@ class Participant extends Model
      *
      * - If `$checkDeletionExpired` is true, this method checks if the deletion has expired. A deletion is expired
      *   if the conversation was updated after the user deleted it, meaning new messages or changes were made.
-     * - If `$checkDeletionExpired` is false, the method only checks if the conversation is deleted, 
+     * - If `$checkDeletionExpired` is false, the method only checks if the conversation is deleted,
      *   without considering updates.
      *
-     * @param bool $checkDeletionExpired Whether to check if the deletion is expired.
-     *
+     * @param  bool  $checkDeletionExpired  Whether to check if the deletion is expired.
      * @return bool True if the conversation is deleted (and expired if `$checkDeletionExpired` is true), false otherwise.
      */
     public function hasDeletedConversation(bool $checkDeletionExpired = false): bool
@@ -259,19 +230,19 @@ class Participant extends Model
         if ($this->conversation_deleted_at === null) {
             return false;
         }
-    
+
         // Refresh conversation instance to ensure `updated_at` is current
         $conversation = $this->conversation;
-    
+
         if ($checkDeletionExpired) {
             // If checking expiration, return true only if deletion timestamp is older than updated timestamp
             return $this->conversation_deleted_at < $conversation->updated_at;
         }
-    
+
         // Otherwise, return true if deletion is recent compared to updated timestamp
         return true;
     }
-    
+
     // public function ConversationDeletionIsValid(): bool
     // {
 

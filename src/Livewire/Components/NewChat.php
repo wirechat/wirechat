@@ -3,14 +3,13 @@
 namespace Namu\WireChat\Livewire\Components;
 
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\Modals\ModalComponent ;
+use Namu\WireChat\Livewire\Modals\ModalComponent;
 
 class NewChat extends ModalComponent
 {
-
     public $users;
-    public $search;
 
+    public $search;
 
     public static function modalAttributes(): array
     {
@@ -18,56 +17,51 @@ class NewChat extends ModalComponent
             'closeOnEscape' => true,
             'closeOnEscapeIsForceful' => true,
             'destroyOnClose' => true,
-            'closeOnClickAway'=>true
+            'closeOnClickAway' => true,
         ];
-        
+
     }
-      /** 
-   * Search For users to create conversations with
-   */
-  public function updatedsearch()
-  {
 
+    /**
+     * Search For users to create conversations with
+     */
+    public function updatedsearch()
+    {
 
-    //Make sure it's not empty
-    if (blank($this->search)) {
+        //Make sure it's not empty
+        if (blank($this->search)) {
 
-      $this->users = null;
-    } else {
+            $this->users = null;
+        } else {
 
-      $this->users = auth()->user()->searchChatables($this->search);
+            $this->users = auth()->user()->searchChatables($this->search);
+        }
     }
-  }
 
+    public function createConversation($id, string $class)
+    {
 
+        //resolve model from params -get model class
+        $model = app($class);
+        $model = $model::find($id);
 
-  public  function createConversation($id, string $class)
-  {
+        if ($model) {
+            $createdConversation = auth()->user()->createConversationWith($model);
 
-    //resolve model from params -get model class
-    $model = app($class);
-    $model = $model::find($id);
+            if ($createdConversation) {
+                $this->closeModal();
 
-
-
-    if ($model) {
-      $createdConversation =  auth()->user()->createConversationWith($model);
-
-      if ($createdConversation) {
-        $this->closeModal();
-        return redirect()->route('chat', [$createdConversation->id]);
-      }
+                return redirect()->route('chat', [$createdConversation->id]);
+            }
+        }
     }
-  }
 
+    public function mount()
+    {
 
-
-  public function mount()  {
-
-    abort_unless(auth()->check(),401);
-   // abort_unless(WireChat::allowsNewChatModal(),503,'The NewChat feature is currently unavailable.');
-  }
-
+        abort_unless(auth()->check(), 401);
+        // abort_unless(WireChat::allowsNewChatModal(),503,'The NewChat feature is currently unavailable.');
+    }
 
     public function render()
     {

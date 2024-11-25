@@ -1,6 +1,6 @@
 <?php
 
-namespace  Namu\WireChat\Models\Scopes;
+namespace Namu\WireChat\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +16,7 @@ class WithoutClearedScope implements Scope
     {
         $user = auth()->user(); // Get the authenticated user
 
-       // dd($model->id);
+        // dd($model->id);
         // Apply the scope only if the user is authenticated
         if ($user) {
             $builder->whereHas('messages', function ($q) use ($user) {
@@ -30,7 +30,6 @@ class WithoutClearedScope implements Scope
             //
             //  ->orWhereDoesntHave('messages');
         }
-        
+
     }
 }
-

@@ -1,6 +1,6 @@
 <?php
 
-namespace  Namu\WireChat\Models\Scopes;
+namespace Namu\WireChat\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Scope;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Participant;
 
 class WithoutRemovedActionScope implements Scope
 {
@@ -18,12 +17,11 @@ class WithoutRemovedActionScope implements Scope
      *
      * The logic works as follows:
      * - If the conversation was deleted by the user, it will remain hidden.
-     * - If a new message (indicated by the `updated_at` timestamp on the conversation) is added 
+     * - If a new message (indicated by the `updated_at` timestamp on the conversation) is added
      *   after the user deleted it, the conversation will reappear in their list.
      *
      * @param  Builder  $builder  The Eloquent query builder instance.
      * @param  Model  $model  The model instance on which the scope is applied.
-     * @return void
      */
     public function apply(Builder $builder, Model $model): void
     {

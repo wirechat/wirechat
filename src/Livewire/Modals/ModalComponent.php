@@ -1,18 +1,17 @@
 <?php
 
-
-namespace  Namu\WireChat\Livewire\Modals;
+namespace Namu\WireChat\Livewire\Modals;
 
 use Livewire\Component;
 
-abstract class ModalComponent extends Component 
+abstract class ModalComponent extends Component
 {
     public bool $forceClose = false;
 
     public int $skipModals = 0;
 
     public bool $destroySkipped = false;
- 
+
     public function destroySkippedModals(): self
     {
         $this->destroySkipped = true;
@@ -53,7 +52,6 @@ abstract class ModalComponent extends Component
         $this->closeModal();
     }
 
-
     public static function modalAttributes(): array
     {
         return [
@@ -61,9 +59,9 @@ abstract class ModalComponent extends Component
             'closeOnEscapeIsForceful' => false,
             'dispatchCloseEvent' => false,
             'destroyOnClose' => false,
-            'closeOnClickAway'=>true
+            'closeOnClickAway' => true,
         ];
-        
+
     }
 
     private function emitModalEvents(array $events): void

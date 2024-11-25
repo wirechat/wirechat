@@ -6,16 +6,14 @@ use Carbon\Carbon;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Message;
 
 class NewMessageNotification extends Notification implements ShouldBroadcastNow
 {
-   //use Queueable;
+    //use Queueable;
 
     /**
      * Create a new notification instance.
@@ -26,11 +24,11 @@ class NewMessageNotification extends Notification implements ShouldBroadcastNow
     {
         $this->message = $message;
 
-    //  Explicitly set the connection to sync
-    //  $this->onConnection = 'sync';
-    //  $this->onConnection('sync');
-    //  $this->onQueue(WireChat::notificationsQueue());
-    //  $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
+        //  Explicitly set the connection to sync
+        //  $this->onConnection = 'sync';
+        //  $this->onConnection('sync');
+        //  $this->onQueue(WireChat::notificationsQueue());
+        //  $this->delay(now()->addSeconds(2)); // Delay the job by 5 seconds
     }
 
     /**
@@ -53,7 +51,7 @@ class NewMessageNotification extends Notification implements ShouldBroadcastNow
     //    /// dd($this->message->created_at->greaterThan(Carbon::now()->subMinutes(3)));
     //     return $this->message->created_at->greaterThan(Carbon::now()->subMinutes(3));
     // }
-    
+
     // /**
     //  * Get the channels the event should broadcast on.
     //  *

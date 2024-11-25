@@ -16,4 +16,3 @@ class MorphTypeHelper
         return str_replace('-', '\\', $type);
     }
 }
-

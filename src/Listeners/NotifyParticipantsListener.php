@@ -2,19 +2,17 @@
 
 namespace Namu\WireChat\Listeners;
 
-use App\Events\MessageCreated;
-use App\Jobs\NotifyParticipantJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Bus;
 use Namu\WireChat\Events\BroadcastMessageEvent;
-
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipantsJob;
 
 class NotifyParticipantsListener implements ShouldQueue
 {
-    use  Queueable;
+    use Queueable;
+
     public function __construct()
     {
 
@@ -24,16 +22,12 @@ class NotifyParticipantsListener implements ShouldQueue
     public function handle(BroadcastMessageEvent $event)
     {
 
-
-
-
-
         Bus::batch([
-          new  BroadcastMessage($event->message,$event->message->conversation),
-           new NotifyParticipantsJob($event->message->conversation,$event->message)
+            new BroadcastMessage($event->message, $event->message->conversation),
+            new NotifyParticipantsJob($event->message->conversation, $event->message),
         ])->dispatch();
 
         // Dispatch the job to notify participants
-     //   JobsNotifyParticipantJob::dispatch($event->message->conversation, $event->message);
+        //   JobsNotifyParticipantJob::dispatch($event->message->conversation, $event->message);
     }
 }

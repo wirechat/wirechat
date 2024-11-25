@@ -2,22 +2,14 @@
 
 namespace Namu\WireChat\Tests\Browser;
 
-use Carbon\Carbon;
-use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\ChatList;
 use Namu\WireChat\Livewire\Components\NewGroup;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
 use Namu\WireChat\Tests\DuskTestCase;
 use Workbench\App\Models\User;
 
 class NewGroupDuskTest extends DuskTestCase
 {
-
-
     /** @test */
     public function group_name_label_and_input_is_set_correctly()
     {
@@ -40,7 +32,6 @@ class NewGroupDuskTest extends DuskTestCase
             ->assertPresent('@add_photo_field');
     }
 
-
     /** @test */
     public function group_description_label_and_input_is_set_correctly()
     {
@@ -52,9 +43,8 @@ class NewGroupDuskTest extends DuskTestCase
             ->assertPresent('#description');
     }
 
-
     /** @test */
-    public function Cancel_and_next_button_is_set()
+    public function cancel_and_next_button_is_set()
     {
 
         Config::set('wirechat.allow_new_group_modal', true);
@@ -67,8 +57,6 @@ class NewGroupDuskTest extends DuskTestCase
             ->assertSee('Next');
     }
 
-
-
     /** @test */
     public function next_button_is_disabled_if_name_input_empty()
     {
@@ -80,12 +68,10 @@ class NewGroupDuskTest extends DuskTestCase
             ->assertButtonDisabled('@next_button');
     }
 
-
-
-      /** @test */
+    /** @test */
     //   public function next_button_is_enabled_if_name_input_not_empty()
     //   {
-  
+
     //       Config::set('wirechat.allow_new_group_modal', true);
     //       $auth = User::factory()->create();
     //       Livewire::actingAs($auth)
@@ -96,11 +82,10 @@ class NewGroupDuskTest extends DuskTestCase
     //           ->assertButtonEnabled('@next_button');
     //   }
 
-
     //    /** @test */
     //    public function it_shows_add_members_section_if_next_is_clicked()
     //    {
-   
+
     //        Config::set('wirechat.allow_new_group_modal', true);
     //        $auth = User::factory()->create();
     //        Livewire::actingAs($auth)

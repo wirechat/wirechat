@@ -1,14 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Event;
-use Namu\WireChat\Events\MessageCreated;
-use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Events\NotifyParticipant;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
 
-describe(" Data verifiction ", function () {
+describe(' Data verifiction ', function () {
 
     test('message id  is present', function () {
 
@@ -16,11 +12,11 @@ describe(" Data verifiction ", function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-        $message = $auth->sendMessageTo($receiver,'hello');
+        $message = $auth->sendMessageTo($receiver, 'hello');
 
-        $participant= $message->conversation->participant($receiver);
+        $participant = $message->conversation->participant($receiver);
 
-        NotifyParticipant::dispatch($participant,$message);
+        NotifyParticipant::dispatch($participant, $message);
         Event::assertDispatched(NotifyParticipant::class, function ($event) use ($message) {
 
             $broadcastMessage = (array) $event->broadcastWith();
@@ -36,57 +32,55 @@ describe(" Data verifiction ", function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-        $message = $auth->sendMessageTo($receiver,'hello');
+        $message = $auth->sendMessageTo($receiver, 'hello');
 
-        $participant= $message->conversation->participant($receiver);
+        $participant = $message->conversation->participant($receiver);
 
-        NotifyParticipant::dispatch($participant,$message);
+        NotifyParticipant::dispatch($participant, $message);
         Event::assertDispatched(NotifyParticipant::class, function ($event) use ($message) {
 
             $broadcastMessage = (array) $event->broadcastWith();
 
             expect($broadcastMessage['message']['conversation_id'])->toBe($message->conversation_id);
+
             return $this;
         });
     });
-
-
-
 
     it(' broadcasts on correct  private channnel', function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-        $message = $auth->sendMessageTo($receiver,'hello');
+        $message = $auth->sendMessageTo($receiver, 'hello');
 
-        $participant= $message->conversation->participant($receiver);
+        $participant = $message->conversation->participant($receiver);
 
+        NotifyParticipant::dispatch($participant, $message);
+        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($participant) {
 
-        NotifyParticipant::dispatch($participant,$message);
-        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($message,$participant) {
+            $broadcastOn = $event->broadcastOn();
+            expect($broadcastOn[0]->name)->toBe('private-participant.'.$participant->participantable_id);
 
-            $broadcastOn =  $event->broadcastOn();
-            expect($broadcastOn[0]->name)->toBe("private-participant.".$participant->participantable_id);
             return $this;
         });
     });
-
 
     it(' broadcasts only on correct 1  private channnel', function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-        $message = $auth->sendMessageTo($receiver,'hello');
+        $message = $auth->sendMessageTo($receiver, 'hello');
 
-        $participant= $message->conversation->participant($receiver);
+        $participant = $message->conversation->participant($receiver);
 
-        NotifyParticipant::dispatch($participant,$message);
-        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($message) {
+        NotifyParticipant::dispatch($participant, $message);
+        Event::assertDispatched(NotifyParticipant::class, function ($event) {
 
-            $broadcastOn =  $event->broadcastOn();
+            $broadcastOn = $event->broadcastOn();
             expect(count($broadcastOn))->toBe(1);
+
             return $this;
         });
     });

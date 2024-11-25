@@ -10,7 +10,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\NotifyParticipant;
@@ -22,27 +21,26 @@ use Namu\WireChat\Notifications\MessageNotification;
 
 class BroadcastMessage implements ShouldQueue
 {
-    use Dispatchable,Batchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable,Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
      */
-    protected  $auth;
+    protected $auth;
 
     protected $messagesTable;
+
     protected $participantsTable;
 
-
-
-    public function __construct( public Message $message)
+    public function __construct(public Message $message)
     {
-        //  
+        //
         $this->onQueue(WireChat::messagesQueue());
         $this->auth = auth()->user();
 
-        #Get table
-        $this->messagesTable = (new Message())->getTable();
-        $this->participantsTable = (new Participant())->getTable();
+        //Get table
+        $this->messagesTable = (new Message)->getTable();
+        $this->participantsTable = (new Participant)->getTable();
     }
 
     /**
@@ -59,13 +57,13 @@ class BroadcastMessage implements ShouldQueue
         // ->chunk(100, function ($chunkedParticipants) {
         //     // Prepare the jobs for the chunk
         //    // $jobs = [];
-    
+
         //    $users = collect();
 
         //    foreach ($chunkedParticipants as $participant) {
         //        $users->push($participant->participantable);
         //    }
-   
+
         //    // Send the notification to the collection of users (or other participantable models)
         //    Notification::send($users, new MessageNotification($this->message));
 
@@ -77,16 +75,16 @@ class BroadcastMessage implements ShouldQueue
         // ->chunk(100, function ($chunkedParticipants) {
         //     // Prepare the jobs for the chunk
         //     $jobs = [];
-    
+
         //     foreach ($chunkedParticipants as $participant) {
         //         $jobs[] = new NotifySingleParticipantJob($participant, $this->message);
         //     }
-    
+
         //     // Dispatch the batch of jobs
         //     Bus ::batch($jobs)->dispatch();
         // });
 
-       // Get all participants, including those who haven't sent any messages
+        // Get all participants, including those who haven't sent any messages
         // $participants = $this->conversation->participants()
         // ->with('participantable')
         // ->where("$this->participantsTable.participantable_id", '!=', $this->auth->id)
@@ -100,7 +98,6 @@ class BroadcastMessage implements ShouldQueue
         // ->groupBy("$this->participantsTable.id") // Group by participants
         // ->orderByDesc('last_message_time') // Order by the most recent message
         // ->get();
-
 
         // // Loop through users
         // foreach ($participants as $participant) {

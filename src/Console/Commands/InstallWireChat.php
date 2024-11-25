@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 class InstallWireChat extends Command
 {
     protected $signature = 'wirechat:install';
+
     protected $description = 'Install the Wirechat package and publish necessary files';
 
     public function handle()
@@ -30,9 +31,9 @@ class InstallWireChat extends Command
         }
 
         //create storage sym link
-         $this->comment('Creating storage symlink...');
-         Artisan::call('storage:link');
-         $this->info('[✓] Storage linked.');
+        $this->comment('Creating storage symlink...');
+        Artisan::call('storage:link');
+        $this->info('[✓] Storage linked.');
         // Publish migrations
         $this->comment('Publishing migrations...');
         $this->publishMigrations();
@@ -46,8 +47,6 @@ class InstallWireChat extends Command
         return File::exists(config_path($fileName));
     }
 
-
-
     private function shouldOverwriteConfig()
     {
         return $this->confirm(
@@ -60,7 +59,7 @@ class InstallWireChat extends Command
     {
         $params = [
             '--provider' => "Namu\WireChat\WireChatServiceProvider",
-            '--tag' => "wirechat-config"
+            '--tag' => 'wirechat-config',
         ];
 
         if ($forcePublish) {
@@ -73,9 +72,7 @@ class InstallWireChat extends Command
     {
         $this->call('vendor:publish', [
             '--provider' => "Namu\WireChat\WireChatServiceProvider",
-            '--tag' => 'wirechat-migrations'
+            '--tag' => 'wirechat-migrations',
         ]);
     }
-
-
 }

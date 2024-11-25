@@ -9,20 +9,17 @@ use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
 
-
-///Auth checks 
+///Auth checks
 it('checks if users is authenticated before loading chatlist', function () {
     Livewire::test(Chatlist::class)
         ->assertStatus(401);
 });
-
 
 test('authenticaed user can access chatlist ', function () {
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertStatus(200);
 });
-
 
 ///Content validations
 it('has "chats label set in chatlist"', function () {
@@ -31,76 +28,63 @@ it('has "chats label set in chatlist"', function () {
         ->assertSee('Chat');
 });
 
-
 it('doesnt shows search field if search is disabled in wirechat.config:tesiting Search placeholder', function () {
 
-    Config::set("wirechat.allow_chats_search", false);
+    Config::set('wirechat.allow_chats_search', false);
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
-                      ->assertDontSee('Search my conversations');
+        ->assertDontSee('Search my conversations');
 });
-
-
 
 it('shows search field if search is enabled in wirechat.config:tesiting Search placeholder', function () {
 
-    Config::set("wirechat.allow_chats_search", true);
+    Config::set('wirechat.allow_chats_search', true);
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertSee('Search');
 });
 
-
-
 test('it shows dusk="disappearing_messages_icon" if disappearingTurnedOn for conversation', function () {
 
-    $auth = User::factory()->create(['name'=>'Namu']);
+    $auth = User::factory()->create(['name' => 'Namu']);
     $conversation = $auth->createGroup('My Group');
 
-    $auth->sendMessageTo($conversation,'hi');
+    $auth->sendMessageTo($conversation, 'hi');
 
-    #turn on disappearing 
+    //turn on disappearing
     $conversation->turnOnDisappearing(3600);
 
     // dd($conversation);
     Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id])
-           ->assertSeeHtml('dusk="disappearing_messages_icon"');
+        ->assertSeeHtml('dusk="disappearing_messages_icon"');
 });
-
 
 test('it doesnt shows dusk="disappearing_messages_icon" if disappearingTurnedOFF for conversation', function () {
 
-    $auth = User::factory()->create(['name'=>'Namu']);
+    $auth = User::factory()->create(['name' => 'Namu']);
     $conversation = $auth->createGroup('My Group');
 
-    $auth->sendMessageTo($conversation,'hi');
+    $auth->sendMessageTo($conversation, 'hi');
 
-    #turn on disappearing 
+    //turn on disappearing
     $conversation->turnOffDisappearing();
 
     // dd($conversation);
     Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id])
-           ->assertDontSeeHtml('dusk="disappearing_messages_icon"');
+        ->assertDontSeeHtml('dusk="disappearing_messages_icon"');
 });
 
-
-
 describe('List', function () {
-
 
     it('shows label "No conversations yet" items when user does not have chats', function () {
 
         $auth = User::factory()->create();
 
-  
-
-
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('No conversations yet');
     });
-
 
     it('loads conversations items when user has them', function () {
 
@@ -109,13 +93,11 @@ describe('List', function () {
         $user1 = User::factory()->create(['name' => 'iam user 1']);
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
-
         //create conversation with user1
-        $auth->createConversationWith($user1,'hello');
+        $auth->createConversationWith($user1, 'hello');
 
         //create conversation with user2
-        $auth->createConversationWith($user2,'new message');
-
+        $auth->createConversationWith($user2, 'new message');
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('iam user 1')
@@ -125,55 +107,48 @@ describe('List', function () {
             });
     });
 
-
-
     it('shows suffix (sender name ) if conversation is group and message does not belong to auth', function () {
 
         $auth = User::factory()->create();
 
-        $participant=  User::factory()->create(['name' => 'John']);
+        $participant = User::factory()->create(['name' => 'John']);
 
         //create conversation with user1
-        $conversation= $auth->createGroup('My Group');
+        $conversation = $auth->createGroup('My Group');
 
-        #add participant
+        //add participant
         $conversation->addParticipant($participant);
 
-        $participant->sendMessageTo($conversation,'Hello');
-
+        $participant->sendMessageTo($conversation, 'Hello');
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('John:');
     });
 
-
     it('it shows group name if conversation is group', function () {
 
         $auth = User::factory()->create();
 
-        $participant=  User::factory()->create(['name' => 'John']);
+        $participant = User::factory()->create(['name' => 'John']);
 
         //create conversation with user1
-        $conversation= $auth->createGroup('My Group');
+        $conversation = $auth->createGroup('My Group');
 
-        #add participant
+        //add participant
         $conversation->addParticipant($participant);
-        
-        $participant->sendMessageTo($conversation,'Hello');
 
+        $participant->sendMessageTo($conversation, 'Hello');
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('My Group');
     });
-
 
     it('shows suffix (You) if user has a self conversation', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
         //create conversation with user1
-        $auth->createConversationWith($auth,'hello');
-
+        $auth->createConversationWith($auth, 'hello');
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('(You)')
@@ -182,8 +157,6 @@ describe('List', function () {
             });
     });
 
-
-    
     it('does not load blank conversations(where not even deleted messages exists)', function () {
 
         $auth = User::factory()->create();
@@ -191,13 +164,11 @@ describe('List', function () {
         $user1 = User::factory()->create(['name' => 'iam user 1']);
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
-
         //!create BLANK conversation with user1
         $auth->createConversationWith($user1);
 
         //create conversation with user2
-        $auth->createConversationWith($user2,'new message');
-
+        $auth->createConversationWith($user2, 'new message');
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSee('iam user 1') //Blank conversation should not load
@@ -207,7 +178,6 @@ describe('List', function () {
             });
     });
 
-
     it('does not load deleted conversations by user', function () {
 
         $auth = User::factory()->create();
@@ -215,12 +185,11 @@ describe('List', function () {
         $user1 = User::factory()->create(['name' => 'iam user 1']);
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
-
         //create conversation with user1
-        $auth->createConversationWith($user1,'nothing');
+        $auth->createConversationWith($user1, 'nothing');
 
         //create conversation with user2
-        $conversationToBeDeleted=   $auth->createConversationWith($user2,'nothing 2');
+        $conversationToBeDeleted = $auth->createConversationWith($user2, 'nothing 2');
 
         //!now delete conversation with user 2
         $auth->deleteConversation($conversationToBeDeleted);
@@ -233,7 +202,6 @@ describe('List', function () {
             });
     });
 
-
     it('it shows last message and lable "you:" if it exists in chatlist', function () {
 
         $auth = User::factory()->create();
@@ -242,7 +210,6 @@ describe('List', function () {
 
         //create conversation with user1
         $auth->createConversationWith($user1, message: 'How are you doing');
-
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('How are you doing')
@@ -259,10 +226,8 @@ describe('List', function () {
         $auth->createConversationWith($user1, message: 'How are you doing');
         sleep(1);
         //here we delay the create messsage so that we can NOT have both messages with the same timestamp
-        //now let's send message to auth 
+        //now let's send message to auth
         $user1->sendMessageTo($auth, message: 'I am good');
-
-
 
         // dd($conversations,$messages);
 
@@ -281,11 +246,9 @@ describe('List', function () {
         $auth->createConversationWith($user1, message: 'How are you doing');
         sleep(1);
         //here we delay the create messsage so that we can NOT have both messages with the same timestamp
-        //now let's send message to auth 
+        //now let's send message to auth
         $user1->sendMessageTo($auth, message: 'I am good');
         $user1->sendMessageTo($auth, message: 'kudos');
-
-
 
         // dd($conversations,$messages);
 
@@ -300,16 +263,15 @@ describe('List', function () {
         $user1 = User::factory()->create(['name' => 'iam user 1']);
 
         //create conversation with user1
-       $conversation=  $auth->createConversationWith($user1);
+        $conversation = $auth->createConversationWith($user1);
 
         //manually create message so that we can adjust the time to 3 weeks ago
-       Message::create([
-        'conversation_id' => $conversation->id,
-        'sendable_type' => get_class($auth),  
-        'sendable_id' =>$auth->id, 
-        'body' => "How are you doing"
+        Message::create([
+            'conversation_id' => $conversation->id,
+            'sendable_type' => get_class($auth),
+            'sendable_id' => $auth->id,
+            'body' => 'How are you doing',
         ]);
-
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('1s');
@@ -322,27 +284,20 @@ describe('List', function () {
         $user1 = User::factory()->create(['name' => 'iam user 1']);
 
         //create conversation with user1
-       $conversation=  $auth->createConversationWith($user1);
-
+        $conversation = $auth->createConversationWith($user1);
 
         //manually create message so we can attach attachment id
-       $message= Message::create([
-        'conversation_id' => $conversation->id,
-        'sendable_type' => get_class($auth),  
-        'sendable_id' =>$auth->id
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'sendable_type' => get_class($auth),
+            'sendable_id' => $auth->id,
         ]);
 
-
-       $createdAttachment = Attachment::factory()->for($message,'attachable')->create();
-
-
-
+        $createdAttachment = Attachment::factory()->for($message, 'attachable')->create();
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('📎 Attachment');
     });
-
-
 
     test('deleted conversation should not appear in user chats list', function () {
 
@@ -356,29 +311,26 @@ describe('List', function () {
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
 
-        //receiver -> auth 
+        //receiver -> auth
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
-        //delete conversation 
+        //delete conversation
         Carbon::setTestNow(now()->addSeconds(4));
         $auth->deleteConversation($conversation);
 
         //start component
         $request = Livewire::actingAs($auth)->test(Chatlist::class)
-        ->assertDontSee('John')
-        ->assertViewHas('conversations', function ($conversations) {
-            return count($conversations) == 0;
-        });
-        
+            ->assertDontSee('John')
+            ->assertViewHas('conversations', function ($conversations) {
+                return count($conversations) == 0;
+            });
 
     });
 
 });
 
-
 describe('Search', function () {
-
 
     it('it shows all conversations items when search query is null', function () {
 
@@ -387,13 +339,11 @@ describe('Search', function () {
         $user1 = User::factory()->create(['name' => 'John']);
         $user2 = User::factory()->create(['name' => 'Mary']);
 
-
         //create conversation with user1
-        $auth->createConversationWith($user1,'hello');
+        $auth->createConversationWith($user1, 'hello');
 
         //create conversation with user2
-        $auth->createConversationWith($user2,'how are you doing');
-
+        $auth->createConversationWith($user2, 'how are you doing');
 
         Livewire::actingAs($auth)->test(Chatlist::class, ['search' => null])
             ->assertSee('John')
@@ -410,28 +360,24 @@ describe('Search', function () {
         $user1 = User::factory()->create(['name' => 'John']);
         $user2 = User::factory()->create(['name' => 'Mary']);
 
-
         //create conversation with user1
-        $auth->createConversationWith($user1,'hello');
+        $auth->createConversationWith($user1, 'hello');
 
         //create conversation with user2
-        $auth->createConversationWith($user2,'how are you doing');
-
+        $auth->createConversationWith($user2, 'how are you doing');
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->set('search','John')
+            ->set('search', 'John')
             ->assertSee('John')
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 1;
             });
     });
 
-
     test('deleted conversation should  appear when searched', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
-
 
         $conversation = $auth->createConversationWith($receiver);
 
@@ -439,23 +385,21 @@ describe('Search', function () {
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
 
-        //receiver -> auth 
+        //receiver -> auth
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
-        //delete conversation 
+        //delete conversation
         $auth->deleteConversation($conversation);
 
         //start component & search
-       Livewire::actingAs($auth)->test(Chatlist::class)
-        ->set('search','John')
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->set('search', 'John')
             ->assertSee('John')
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 1;
             });
-        
 
     });
-
 
 });

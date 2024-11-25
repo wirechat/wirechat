@@ -1,7 +1,6 @@
 <?php
 
-namespace  Namu\WireChat\Livewire\Modals;
-
+namespace Namu\WireChat\Livewire\Modals;
 
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,28 +21,25 @@ class ChatDrawer extends Component
         $this->activeDrawerComponent = null;
     }
 
-
     public static function modalAttributes(): array
-{
-    return [
-        'closeOnEscape' => true,
-        'closeOnEscapeIsForceful' => false,
-        'dispatchCloseEvent' => true,
-        'destroyOnClose' => true,
-    ];
-}
-
+    {
+        return [
+            'closeOnEscape' => true,
+            'closeOnEscapeIsForceful' => false,
+            'dispatchCloseEvent' => true,
+            'destroyOnClose' => true,
+        ];
+    }
 
     public function openChatDrawer($component, $arguments = [], $modalAttributes = []): void
     {
 
-      
         $componentClass = app(ComponentRegistry::class)->getClass($component);
         $id = md5($component.serialize($arguments));
 
         $arguments = collect($arguments)
-                    ->merge($this->resolveComponentProps($arguments, new $componentClass()))
-                    ->all();
+            ->merge($this->resolveComponentProps($arguments, new $componentClass))
+            ->all();
 
         $this->drawerComponents[$id] = [
             'name' => $component,
@@ -56,7 +52,7 @@ class ChatDrawer extends Component
         ];
 
         $this->activeDrawerComponent = $id;
-        
+
         /*! Changed listener name to activeChatDrawerComponentChanged to not interfer with main modal*/
         $this->dispatch('activeChatDrawerComponentChanged', id: $id);
 
@@ -66,10 +62,11 @@ class ChatDrawer extends Component
     {
 
         return $this->getPublicPropertyTypes($component)
-                    ->intersectByKeys($attributes)
-                    ->map(function ($className, $propName) use ($attributes) {
-                        $resolved = $this->resolveParameter($attributes, $propName, $className);
-                 return $resolved;
+            ->intersectByKeys($attributes)
+            ->map(function ($className, $propName) use ($attributes) {
+                $resolved = $this->resolveParameter($attributes, $propName, $className);
+
+                return $resolved;
             });
     }
 
@@ -81,19 +78,18 @@ class ChatDrawer extends Component
             return $parameterValue;
         }
 
-        if(enum_exists($parameterClassName)){
+        if (enum_exists($parameterClassName)) {
             $enum = $parameterClassName::tryFrom($parameterValue);
-        
-            if($enum !== null){
+
+            if ($enum !== null) {
                 return $enum;
             }
         }
 
         $instance = app()->make($parameterClassName);
 
-
         if (! $model = $instance->resolveRouteBinding($parameterValue)) {
-            throw (new ModelNotFoundException())->setModel(get_class($instance), [$parameterValue]);
+            throw (new ModelNotFoundException)->setModel(get_class($instance), [$parameterValue]);
         }
 
         return $model;
@@ -101,14 +97,13 @@ class ChatDrawer extends Component
 
     public function getPublicPropertyTypes($component): Collection
     {
-         $types= collect($component->all())
+        $types = collect($component->all())
             ->map(function ($value, $name) use ($component) {
                 return Reflector::getParameterClassName(new \ReflectionProperty($component, $name));
             })
             ->filter();
 
         return $types;
-
 
     }
 
@@ -124,7 +119,7 @@ class ChatDrawer extends Component
             'destroyChatDrawer',
         ];
     }
-    
+
     public function render()
     {
         return view('wirechat::livewire.modals.chat-drawer');
