@@ -26,11 +26,11 @@ use function Orchestra\Testbench\workbench_path;
 abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
     // abstract class DuskTestCase extends  TestCase
 {
- ///   use BrowserFunctions;
+    ///   use BrowserFunctions;
     //use DatabaseMigrations;
-     //use DatabaseTruncation;
- //   use RefreshDatabase;
-   // use InteractsWithViews;
+    //use DatabaseTruncation;
+    //   use RefreshDatabase;
+    // use InteractsWithViews;
     use WithWorkbench;
 
     public $baseUrl = 'http://127.0.0.1:8001';
@@ -40,12 +40,12 @@ abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
      *
      * @var bool
      */
-   // protected $enablesPackageDiscoveries = true;
+    // protected $enablesPackageDiscoveries = true;
 
     public array $packageProviders = [
         WireChatServiceProvider::class,
-      //  LivewireServiceProvider::class,
-       // WorkbenchServiceProvider::class,
+        //  LivewireServiceProvider::class,
+        // WorkbenchServiceProvider::class,
 
     ];
 
@@ -53,7 +53,7 @@ abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
     {
         return function () {
             //   exec('php artisan serve > /dev/null 2>&1 &');
-           // sleep(1); // Small delay to allow application server to initialize
+            // sleep(1); // Small delay to allow application server to initialize
         };
     }
 
@@ -92,7 +92,7 @@ abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
     {
 
         // To hide the UI during testing
-      //  Options::withoutUI();
+        //  Options::withoutUI();
     }
 
     protected function defineEnvironment($app)
@@ -117,7 +117,7 @@ abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
             $config->set('database.connections.testbench', [
                 'driver' => 'sqlite',
                 ///'database' => workbench_path('database/database.sqlite'),
-              'database' => ':memory:' ,
+                'database' => ':memory:',
 
                 'prefix' => '',
                 // 'options' => [
@@ -135,14 +135,14 @@ abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
         });
     }
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
 
         // $this->artisan('config:cache')->run();
 
-     //   $this->loadMigrationsFrom(__DIR__.'/../database/migrations', workbench_path('database/migrations'));
+        //   $this->loadMigrationsFrom(__DIR__.'/../database/migrations', workbench_path('database/migrations'));
 
         //$this->artisan('livewire:publish --assets')->run();
 
@@ -153,7 +153,7 @@ abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
         //     workbench_path('database/migrations')
         // );
 
-           $this->artisan('migrate')->run();
+        $this->artisan('migrate')->run();
         //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
         //here we add a new ile in the name of the mixture of the berir d
         // $this->loadMigrationsFrom(__DIR__.'/migrations');

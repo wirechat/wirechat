@@ -40,12 +40,11 @@ class Helper
         return '.'.implode(',.', $fileExtensions);
     }
 
-
     /**
-     * format date for chats 
+     * format date for chats
      */
-
-    public  static function formatChatDate(Carbon $timestamp) :string {
+    public static function formatChatDate(Carbon $timestamp): string
+    {
 
         $messageDate = $timestamp;
 
@@ -53,13 +52,13 @@ class Helper
         if ($messageDate->isToday()) {
             $groupKey = 'Today';
         } elseif ($messageDate->isYesterday()) {
-            $groupKey = 'Yesterday'; 
+            $groupKey = 'Yesterday';
         } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
-            $groupKey = $messageDate->format('l'); 
+            $groupKey = $messageDate->format('l');
         } else {
-            $groupKey = $messageDate->format('d/m/Y'); 
+            $groupKey = $messageDate->format('d/m/Y');
         }
 
         return $groupKey;
-     }
+    }
 }

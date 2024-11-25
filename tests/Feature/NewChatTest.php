@@ -45,7 +45,6 @@ it('can filter users if search input is set', function () {
 
 });
 
-
 test('search_users_field_is_set_correctly', function () {
 
     $auth = ModelsUser::factory()->create(['email_verified_at' => now()]);
@@ -54,7 +53,6 @@ test('search_users_field_is_set_correctly', function () {
         ->assertSeeHtml('dusk="search_users_field"');
 
 });
-
 
 test('close_modal_button_is_set_correctly', function () {
 
@@ -89,8 +87,6 @@ it('doesnt shows New group if not allowed', function () {
 
 });
 
-
-
 test('it shows new group button if user canCreateNewGroups==TRUE (email is verified)', function () {
 
     $auth = ModelsUser::factory()->create(['email_verified_at' => now()]);
@@ -99,9 +95,6 @@ test('it shows new group button if user canCreateNewGroups==TRUE (email is verif
         ->assertSeeHtml('@dusk="open_new_group_modal_button"');
 
 });
-
-
-
 
 test('it doesnt show new group button if canCreateNewGroups==FALSE(email  NOT is verified)', function () {
 

@@ -107,10 +107,10 @@ describe('Presense', function () {
             'created_at' => $olderTime,
         ]);
 
-        // Expected outputs based on the message created_at timestamps 
+        // Expected outputs based on the message created_at timestamps
         $todayExpected = Helper::formatChatDate($todayMessage->created_at);
         $yesterdayExpected = Helper::formatChatDate($yesterdayMessage->created_at);
-        $thisWeekExpected =  Helper::formatChatDate($thisWeekMessage->created_at);
+        $thisWeekExpected = Helper::formatChatDate($thisWeekMessage->created_at);
         $olderExpected = Helper::formatChatDate($olderMessage->created_at);
 
         // Run the test
@@ -138,8 +138,8 @@ describe('Presense', function () {
 
         //Assert-both-conversations visible before typing
         $request
-            ->assertSee("Test")
-            ->assertSee("(You)");
+            ->assertSee('Test')
+            ->assertSee('(You)');
     });
 
     test('it_doesnt_show_upload_trigger_if_attachments_not_enabled', function () {
@@ -174,7 +174,6 @@ describe('Presense', function () {
         $request->assertSeeHtml('dusk="upload-trigger-button"');
     });
 
-
     test('it_shows_file_upload_input_if_enabled', function () {
 
         Config::set('wirechat.allow_media_attachments', false);
@@ -191,7 +190,6 @@ describe('Presense', function () {
         $request->assertSeeHtml('dusk="file-upload-input"');
     });
 
-
     test('it_doesnt_show_file_upload_input_if_not_enabled', function () {
 
         Config::set('wirechat.allow_media_attachments', true);
@@ -207,7 +205,6 @@ describe('Presense', function () {
         //Assert both conversations visible before typing
         $request->assertDontSeeHtml('dusk="file-upload-input"');
     });
-
 
     test('it_shows_media_upload_input_if_enabled', function () {
 
@@ -257,8 +254,6 @@ describe('Presense', function () {
         $request->assertSeeHtml('dusk="emoji-trigger-button"');
     });
 });
-
-
 
 describe('mount()', function () {
 

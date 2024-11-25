@@ -28,7 +28,6 @@ it('has "chats label set in chatlist"', function () {
         ->assertSee('Chat');
 });
 
-
 it('doesnt shows search field if search is disabled in wirechat.config:tesiting Search placeholder', function () {
 
     Config::set('wirechat.allow_chats_search', false);
@@ -58,7 +57,6 @@ it('shows search field if search is enabled in wirechat.config:tesiting Search p
         ->assertSeeHtml('id="chats-search-field"');
 });
 
-
 test('it_shows_new_chat_modal_button_if_enabled_in_config', function () {
 
     Config::set('wirechat.show_new_chat_modal_button', true);
@@ -68,8 +66,6 @@ test('it_shows_new_chat_modal_button_if_enabled_in_config', function () {
         ->test(Chatlist::class)
         ->assertSeeHtml('id="open-new-chat-modal-button"');
 });
-
-
 
 test('it_does_not_show_new_chat_modal_button_if_not_enabled_in_config', function () {
 
@@ -81,7 +77,6 @@ test('it_does_not_show_new_chat_modal_button_if_not_enabled_in_config', function
         ->assertDontSeeHtml('id="open-new-chat-modal-button"');
 });
 
-
 test('it_shows_load_more_button_if_user_can_load_more', function () {
 
     $auth = User::factory()->create();
@@ -92,8 +87,6 @@ test('it_shows_load_more_button_if_user_can_load_more', function () {
 
         $auth->createConversationWith($user, 'hello');
     }
-
-
 
     // dd($conversation);
     Livewire::actingAs($auth)->test(Chatlist::class)
@@ -111,8 +104,6 @@ test('it_does_not_show_load_more_button_if_user_cannot_load_more', function () {
 
         $auth->createConversationWith($user, 'hello');
     }
-
-
 
     // dd($conversation);
     Livewire::actingAs($auth)->test(Chatlist::class)

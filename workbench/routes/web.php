@@ -41,8 +41,8 @@ Route::middleware('guest')->get('/login', function () {
 })->name('login');
 
 Route::middleware(config('wirechat.routes.middleware'))
-     ->prefix(config('wirechat.routes.prefix'))
-     ->group(function () {
-         Route::get('/', Index::class)->name('chats');
-         Route::get('/{conversation_id}', View::class)->name('chat');
-     });
+    ->prefix(config('wirechat.routes.prefix'))
+    ->group(function () {
+        Route::get('/', Index::class)->name('chats');
+        Route::get('/{conversation_id}', View::class)->name('chat');
+    });
