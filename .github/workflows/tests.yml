@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - dev
+      - develop
   pull_request:
   schedule:
     - cron: '0 0 * * *'
@@ -15,15 +15,43 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.1, 8.2, 8.3]
+        php: [8.1, 8.2, 8.3, 8.4]
         laravel: [10.*, 11.*]
         dependency-version: [prefer-lowest, prefer-stable]
+        os: [ubuntu-latest]
+        include:
+          - laravel: 10.*
+            testbench: 8.*
+            php: 8.1
+          - laravel: 10.*
+            testbench: 8.*
+            php: 8.2
+          - laravel: 10.*
+            testbench: 8.*
+            php: 8.3
+          - laravel: 10.*
+            testbench: 8.*
+            php: 8.4
+          - laravel: 11.*
+            testbench: 9.*
+            php: 8.2
+          - laravel: 11.*
+            testbench: 9.*
+            php: 8.3
+          - laravel: 11.*
+            testbench: 9.*
+            php: 8.4
+        exclude:
+          - laravel: 11.*
+            php: 8.1  # Laravel 11 does not support PHP 8.1
+          - laravel: 10.*
+            php: 8.1  # We include PHP 8.1 for Laravel 10, but you can adjust as needed
 
-    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - ${{ matrix.dependency-version }}
+    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - ${{ matrix.dependency-version }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -34,9 +62,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Run tests
         run: vendor/bin/pest
-
