@@ -201,8 +201,7 @@ $primaryColor= WireChat::getColor();
                                             {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->hasAttachment() ? '📎 Attachment' : '') }}
                                         </p>
 
-                                        <span
-                                            class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
+                                        <span class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
 
 
                                     </div>

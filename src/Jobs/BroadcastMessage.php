@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\NotifyParticipant;
@@ -50,6 +51,7 @@ class BroadcastMessage implements ShouldQueue
     {
         //Broadcast to the conversation channel for all participants
         event(new MessageCreated($this->message));
+        Log::info('');
 
         // $participants = $this->conversation->participants()
         // ->with('participantable')

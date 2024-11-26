@@ -329,8 +329,8 @@ describe('List', function () {
         //create conversation with user1
         $conversation = $auth->createConversationWith($user1);
 
-        //manually create message so that we can adjust the time to 3 weeks ago
-        Message::create([
+
+        $lastMessage= Message::create([
             'conversation_id' => $conversation->id,
             'sendable_type' => get_class($auth),
             'sendable_id' => $auth->id,
@@ -338,7 +338,7 @@ describe('List', function () {
         ]);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSee('1s');
+            ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
     });
 
     it('it shows attatchment lable if message contains file or image', function () {
