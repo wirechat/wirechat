@@ -56,10 +56,7 @@ class DeleteExpiredMessagesJob implements ShouldQueue
                 ->where('created_at', '>', $conversation->disappearing_started_at) // After disappearing_started_at
                 ->get();
 
-
-
             foreach ($messages as $message) {
-
 
                 if ($message->created_at->isFuture()) {
                     continue; // Skip processing this message

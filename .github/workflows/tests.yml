@@ -61,4 +61,23 @@ jobs:
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Run tests
-        run: vendor/bin/pest
+        run: vendor/bin/pest --ci
+
+# Job for running Pint (linting) checks
+  lint-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, dom, curl
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-dev
+
+      - name: Run Pint for linting
+        run: vendor/bin/pint --test --ci

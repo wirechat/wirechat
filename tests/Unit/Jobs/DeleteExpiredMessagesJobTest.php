@@ -1,10 +1,6 @@
 <?php
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Jobs\DeleteExpiredMessagesJob;
 use Namu\WireChat\Models\Conversation;
@@ -13,7 +9,7 @@ use Workbench\App\Models\User;
 
 test('expired_messages_are_deleted', function () {
 
-        //**Use subHours()  because  future dates causes negative diffInSeconds()
+    //**Use subHours()  because  future dates causes negative diffInSeconds()
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 
@@ -128,7 +124,7 @@ test('it also deletes SoftDeleted messages that are expired and are kept ', func
 });
 
 test('SoftDeleted messages that are expired but not kept are Deleted ', function () {
- 
+
     //**Use subHours()  because  future dates causes negative diffInSeconds()
     $auth = User::factory()->create();
 
@@ -147,7 +143,6 @@ test('SoftDeleted messages that are expired but not kept are Deleted ', function
 
     // Run the job
     DeleteExpiredMessagesJob::dispatch();
-
 
     // Assert the recent message is still there
     $this->assertDatabaseMissing((new Message)->getTable(), ['id' => $recentMessage->id]);

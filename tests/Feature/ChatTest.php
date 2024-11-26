@@ -485,7 +485,6 @@ describe('Box presence test: ', function () {
             ->assertdontSeeText('Namu');
     });
 
-    
     test('it shows dusk="disappearing_messages_icon" if disappearingTurnedOn for conversation', function () {
 
         $auth = User::factory()->create(['name' => 'Namu']);
@@ -2176,8 +2175,6 @@ describe('deleteMessage ForEveryone', function () {
         //call deleteForMe
         $request->call('deleteForEveryone', $authMessage->id);
 
-
-
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 3;
@@ -2290,7 +2287,7 @@ describe('deleteMessage ForEveryone', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         //send reply
-        $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');;
+        $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
 
         //assert messsage visible
         $request->assertSee('This is reply');
@@ -2377,7 +2374,6 @@ describe('deletForMe', function () {
         //call deleteForMe
         $request->call('deleteForMe', $authMessage->id);
 
-
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 3;
@@ -2438,7 +2434,6 @@ describe('deletForMe', function () {
 
         //send reply
         $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
-
 
         //assert messsage visible
         $request->assertSee('This is reply');

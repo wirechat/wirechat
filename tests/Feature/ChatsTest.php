@@ -329,8 +329,7 @@ describe('List', function () {
         //create conversation with user1
         $conversation = $auth->createConversationWith($user1);
 
-
-        $lastMessage= Message::create([
+        $lastMessage = Message::create([
             'conversation_id' => $conversation->id,
             'sendable_type' => get_class($auth),
             'sendable_id' => $auth->id,
