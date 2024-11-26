@@ -632,7 +632,6 @@ describe('updating group name and description', function () {
         //update
         $text = str()->random(501);
         $request->set('description', $text)
-            ->refresh()
             ->assertHasErrors('description')
             ->assertSee('Description cannot exceed 500 characters.');
     });

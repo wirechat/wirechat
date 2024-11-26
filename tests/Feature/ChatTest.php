@@ -2176,8 +2176,7 @@ describe('deleteMessage ForEveryone', function () {
         //call deleteForMe
         $request->call('deleteForEveryone', $authMessage->id);
 
-        //refresh component
-        $request->refresh();
+
 
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
@@ -2291,14 +2290,10 @@ describe('deleteMessage ForEveryone', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         //send reply
-        $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
-
-        $request->refresh();
+        $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');;
 
         //assert messsage visible
         $request->assertSee('This is reply');
-
-        $request->refresh();
 
         //call deleteForMe
         $request->call('deleteForEveryone', '1');
@@ -2382,8 +2377,6 @@ describe('deletForMe', function () {
         //call deleteForMe
         $request->call('deleteForMe', $authMessage->id);
 
-        //refresh component
-        $request->refresh();
 
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
@@ -2446,7 +2439,6 @@ describe('deletForMe', function () {
         //send reply
         $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
 
-        $request->refresh();
 
         //assert messsage visible
         $request->assertSee('This is reply');

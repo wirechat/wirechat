@@ -713,7 +713,7 @@ describe('actions test', function () {
         $request->call('removeFromGroup', $participant->id);
 
         //assert after
-        $request->refresh()->assertDontSee($participant->display_name);
+        $request->assertDontSee($participant->display_name);
 
     });
 
