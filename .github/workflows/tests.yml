@@ -1,32 +1,33 @@
 jobs:
   php-tests:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    continue-on-error: true  # keep this if you want the workflow to continue even if the tests fail
+
     strategy:
       matrix:
         php: [8.2, 8.3, 8.4]
         laravel: [10.*, 11.*]
         dependency-version: [prefer-lowest, prefer-stable]
         os: [ubuntu-latest]
-        include:
-          - laravel: 10.*
-            testbench: 8.*
-            php: 8.2
-          - laravel: 10.*
-            testbench: 8.*
-            php: 8.3
-          - laravel: 10.*
-            testbench: 8.*
-            php: 8.4
-          - laravel: 11.*
-            testbench: 9.*
-            php: 8.2
-          - laravel: 11.*
-            testbench: 9.*
-            php: 8.3
-          - laravel: 11.*
-            testbench: 9.*
-            php: 8.4
+      include:
+        - laravel: 10.* 
+          testbench: 8.*
+          php: 8.2
+        - laravel: 10.* 
+          testbench: 8.*
+          php: 8.3
+        - laravel: 10.* 
+          testbench: 8.*
+          php: 8.4
+        - laravel: 11.* 
+          testbench: 9.*
+          php: 8.2
+        - laravel: 11.* 
+          testbench: 9.*
+          php: 8.3
+        - laravel: 11.* 
+          testbench: 9.*
+          php: 8.4
 
     name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - ${{ matrix.dependency-version }}
 
@@ -43,9 +44,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require --dev "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          # Install specific Laravel and Testbench versions
+          composer require --dev "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction
+          # Now, update dependencies based on the matrix dependency version
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Run tests
         run: vendor/bin/pest
-        continue-on-error: true

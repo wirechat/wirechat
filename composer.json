@@ -41,7 +41,7 @@
         "pestphp/pest-plugin-laravel": "^2.4",
         "laravel/dusk": "^8.2",
         "orchestra/testbench-dusk": "^8.26|^9.0",
-        "orchestra/testbench-browser-kit": "^8.6",
+        "orchestra/testbench-browser-kit": "^8.6|^9.0",
         "joshhanley/livewire-dusk-testbench": "^3.0@beta",
         "christophrumpel/missing-livewire-assertions": "^2.8",
         "laravel/pint": "^1.18"
