@@ -36,11 +36,11 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require-dev": {
-        "orchestra/testbench": "^8.24",
+        "orchestra/testbench": "^8.24|^9.0",
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin-laravel": "^2.4",
         "laravel/dusk": "^8.2",
-        "orchestra/testbench-dusk": "^8.26",
+        "orchestra/testbench-dusk": "^8.26|^9.0",
         "orchestra/testbench-browser-kit": "^8.6",
         "joshhanley/livewire-dusk-testbench": "^3.0@beta",
         "christophrumpel/missing-livewire-assertions": "^2.8",
