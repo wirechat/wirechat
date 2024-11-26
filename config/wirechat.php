@@ -27,7 +27,7 @@ return [
     /**
      * Home route:
      * This is the route to redirect to when exit button is clicked in the chat*/
-    'redirect_route' => '/users',
+    'redirect_route' => '/',
 
     'routes' => [
         'prefix' => '/chats',

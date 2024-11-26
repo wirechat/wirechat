@@ -24,14 +24,14 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Namu\\WireChat\\src\\WireChatServiceProvider"
+                "Namu\\WireChat\\WireChatServiceProvider"
             ]
         }
     },
     "require": {
         "php": "^8.1|^8.2|^8.3|^8.3",
         "livewire/livewire": "^3.2.3",
-        "laravel/framework": "^10.0"
+        "laravel/framework": "^10.0|^11.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

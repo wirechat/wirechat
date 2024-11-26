@@ -258,8 +258,9 @@ class Chat extends Component
 
     protected function rateLimit()
     {
+        $perMinute = 60;
 
-        if (RateLimiter::tooManyAttempts('send-message:'.auth()->id(), $perMinute = 60)) {
+        if (RateLimiter::tooManyAttempts('send-message:'.auth()->id(), $perMinute)) {
 
             return abort(429, 'Too many attempts!, Please slow down');
         }
