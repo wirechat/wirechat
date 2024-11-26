@@ -77,7 +77,7 @@ jobs:
           extensions: mbstring, dom, curl
 
       - name: Install Composer dependencies
-        run: composer install --no-interaction --no-dev
+        run: composer install --no-interaction 
 
       - name: Run Pint for linting
-        run: vendor/bin/pint --test --ci
+        run: vendor/bin/pint --test 
