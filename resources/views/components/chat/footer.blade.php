@@ -29,7 +29,7 @@
                     @if (str()->startsWith($mediaItem->getMimeType(), 'image/'))
                         <div class="relative h-24 sm:h-36 aspect-[4/3] ">
                             {{-- Delete image --}}
-                            <button class="absolute -top-2 -right-2  z-10 dark:text-gray-50"
+                            <button wire:loading.attr="disabled" class="disabled:cursor-progress absolute -top-2 -right-2  z-10 dark:text-gray-50"
                                 @click="removeUpload('{{ $mediaItem->getFilename() }}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                     fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
@@ -38,7 +38,7 @@
                                         d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
                                 </svg>
                             </button>
-                            <img class="h-full w-full  rounded-lg object-cover" src="{{ $mediaItem->temporaryUrl() }}"
+                            <img class="h-full w-full  rounded-lg object-scale-down" src="{{ $mediaItem->temporaryUrl() }}"
                                 alt="mediaItem">
 
                         </div>
@@ -47,7 +47,7 @@
                     {{-- Attachemnt is Video/ --}}
                     @if (str()->startsWith($mediaItem->getMimeType(), 'video/'))
                         <div class="relative h-24 sm:h-36 ">
-                            <button class="absolute -top-2 -right-2  z-10 dark:text-gray-50"
+                            <button wire:loading.attr="disabled" class="disabled:cursor-progress absolute -top-2 -right-2  z-10 dark:text-gray-50"
                                 @click="removeUpload('{{ $mediaItem->getFilename() }}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                     fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
@@ -64,10 +64,13 @@
 
                 {{-- TODO @if"( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}} {{-- Add more media --}}
                 <label
-                    class=" cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
-                    <input @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
-                        accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only ">
-                    <span class="m-auto">
+                    wire:loading.class="cursor-progress" 
+                    class="shrink-0 cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
+                    <input 
+                    wire:loading.attr="disabled"
+                    @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
+                        accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only">
+                    <span class="m-auto ">
 
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                             class="w-7 h-7 text-gray-600 dark:text-gray-100">
@@ -92,7 +95,7 @@
                 @foreach ($files as $key => $file)
                     <div class="relative">
                         {{-- Delete file button --}}
-                        <button class="absolute -top-2 -right-2  z-10"
+                        <button wire:loading.attr="disabled" class="disabled:cursor-progress absolute -top-2 -right-2  z-10"
                             @click="removeUpload('{{ $file->getFilename() }}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-x-circle dark:text-white dark:hover:text-red-500 hover:text-red-500 transition-colors"
@@ -126,10 +129,13 @@
                 {{-- Add more files --}}
                 {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
                 <label
+                    wire:loading.class="cursor-progress" 
                     class="cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors   flex text-center justify-center border dark:border-gray-800 border-gray-50">
-                    <input @change="handleFileSelect(event,{{ count($files) }})" type="file" multiple
+                    <input 
+                        wire:loading.attr="disabled"
+                        @change="handleFileSelect(event,{{ count($files) }})" type="file" multiple
                         accept="{{ Helper::formattedFileMimesForAcceptAttribute() }}" class="sr-only" hidden>
-                    <span class="  m-auto">
+                        <span class="  m-auto">
 
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                             class="w-6 h-6 dark:text-gray-50">
@@ -154,7 +160,7 @@
                             {{ $replyMessage?->ownedBy(auth()->user()) ? ' Yourself' : $replyMessage->sendable?->name }}
                         </span>
                     </h6>
-                    <button wire:click="removeReply()">
+                    <button  wire:loading.attr="disabled"  wire:click="removeReply()" class="disabled:cursor-progress">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -224,8 +230,8 @@
 
             {{-- Emoji Triggger icon --}}
             <div class="w-10 hidden sm:flex max-w-fit  items-center">
-                <button type="button" dusk="emoji-trigger-button" @click="openEmojiPicker = ! openEmojiPicker"
-                    x-ref="emojibutton" class=" rounded-full p-px dark:border-gray-700">
+                <button wire:loading.attr="disabled" type="button" dusk="emoji-trigger-button" @click="openEmojiPicker = ! openEmojiPicker"
+                    x-ref="emojibutton" class=" disabled:cursor-progress rounded-full p-px dark:border-gray-700">
                     <svg x-bind:style="openEmojiPicker && { color: 'var(--primary-color)' }" viewBox="0 0 24 24"
                         height="24" width="24" preserveAspectRatio="xMidYMid meet"
                         class="w-7 h-7 text-gray-700 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]" version="1.1"
@@ -240,12 +246,10 @@
 
             {{-- Show  upload pop if media or file are empty --}}
             {{-- Also only show  upload popup if allowed in configuration  --}}
-            @if (count($this->media) == 0 &&
-                    count($this->files) == 0 &&
-                    (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
+            @if (count($this->media) == 0 &&  count($this->files) == 0 && (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
                 <x-wirechat::popover position="top" popoverOffset="70">
 
-                    <x-slot name="trigger">
+                    <x-slot name="trigger"   wire:loading.attr="disabled">
                         <span dusk="upload-trigger-button">
 
                             {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -280,14 +284,18 @@
 
                         {{-- Upload Files --}}
                         @if (config('wirechat.allow_file_attachments', true))
-                            <label x-data="attachments('files')" class="cursor-pointer">
-                                <input dusk="file-upload-input"
+                            <label 
+                              wire:loading.class="cursor-progress" 
+                               x-data="attachments('files')" class="cursor-pointer">
+                                <input 
+                                    wire:loading.attr="disabled"
+                                    dusk="file-upload-input"
                                     @change="handleFileSelect(event, {{ count($files) }})" type="file" multiple
                                     accept="{{ Helper::formattedFileMimesForAcceptAttribute() }}" class="sr-only"
                                     style="display: none">
 
                                 <div
-                                    class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                    class="w-full  flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
 
                                     <span>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -308,10 +316,13 @@
 
                         {{-- Upload Media --}}
                         @if (config('wirechat.allow_media_attachments', true))
-                            <label x-data="attachments('media')" class="cursor-pointer">
+                            <label  
+                            wire:loading.class="cursor-progress" 
+                            w x-data="attachments('media')" class="cursor-pointer">
 
                                 {{-- Trigger image upload --}}
                                 <input dusk="media-upload-input"
+                                      wire:loading.attr="disabled"
                                     @change="handleFileSelect(event, {{ count($media) }})" type="file" multiple
                                     accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only"
                                     style="display: none">
@@ -346,12 +357,14 @@
 
             <div @class(['flex gap-2 sm:px-2 w-full'])>
                 <textarea @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' x-ref="body"
+ 
+                     wire:loading.delay.longest.attr="disabled"
                     id="chat-input-field" autofocus type="text" name="message" placeholder="Message" maxlength="1700"
                     rows="1" @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
                     @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                     @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
-                    class="w-full resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-none   "
+                    class="w-full disabled:cursor-progress resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-none   "
                     x-init="document.querySelector('emoji-picker')
                         .addEventListener('emoji-click', event => {
                             const emoji = event.detail['unicode'];
@@ -389,8 +402,8 @@
                 @class([ 'w-[5%] justify-end min-w-max  items-center gap-2 ', ])>
 
                 {{--  Submit button --}}
-                <template x-if="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )">
-                    <button  type="submit" id="sendMessageButton" class=" ml-auto  font-bold">
+                    <button    x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
+                        wire:loading.attr="disabled" type="submit" id="sendMessageButton" class=" ml-auto disabled:cursor-progress font-bold">
 
                         <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" width="36"
                             height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -400,12 +413,12 @@
                         </svg>
     
                     </button>
-                </template>
+
                
 
                 {{-- send Like button--}}
-                <template x-if="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )">
-                    <button wire:click='sendLike()' type="button " class="group ">
+                    <button  x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )"
+                       wire:loading.attr="disabled" wire:click='sendLike()' type="button" class="group disabled:cursor-progress">
 
                         <!-- outlined heart -->
                         <span class=" group-hover:hidden transition">
@@ -426,7 +439,7 @@
                         </span>
     
                     </button>
-                </template>
+
                
             </div>
 

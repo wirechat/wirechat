@@ -275,6 +275,7 @@ class Chat extends Component
 
         //dd($this->body);
 
+
         abort_unless(auth()->check(), 401);
 
         //rate limit

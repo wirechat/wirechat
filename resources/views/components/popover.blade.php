@@ -42,7 +42,7 @@ x-init="
 "
 class="relative overflow-visible">
 
-<button type="button" x-ref="popoverButton" @click="popoverOpen=!popoverOpen" class="flex items-center justify-center">
+<button {{$trigger->attributes->class(["flex items-center justify-center disabled:cursor-progress"] )}} type="button" x-ref="popoverButton" @click="popoverOpen=!popoverOpen">
      {{$trigger}}
 </button>
 
