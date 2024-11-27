@@ -14,8 +14,8 @@ return [
      * Broadcasting:
      * define queue config*/
     'broadcasting' => [
-        'messages_queue' => 'high',  // Prioritize for real-time messaging in chat rooms
-        'message_notification_queue' => 'default',  // Notifications for new messages in other areas like the navbar
+        'messages_queue' => 'messages',  // Prioritize for real-time messaging in chat rooms
+        'notifications_queue' => 'default',  // Notifications for new messages outside chatrooms
     ],
     /**
      * Color:
@@ -37,23 +37,23 @@ return [
     /**
      * Features:
      * You can configure the feature you want to allow for wirechat */
-    'show_new_chat_modal_button' => true,    //Show the button to create new group
-    'show_new_group_modal_button' => true,    //Show the button to create new group inside new-chat component
+    'show_new_chat_modal_button' => true,  
+    'show_new_group_modal_button' => true,  
 
-    'allow_chats_search' => true,       //bool -Show the search bar to existing conversations
-    'allow_media_attachments' => true,  //bool -Allow participants to share media in conversatoin (images, vidoes, gifs, etc)
-    'allow_file_attachments' => true,   //bool -Allow participants to share files in conversatoin (documents, zip , pdf, etc)
+    'allow_chats_search' => true, 
+    'allow_media_attachments' => true, 
+    'allow_file_attachments' => true,
 
-    'user_searchable_fields' => ['name', 'email', 'username'],   //['email','profession']etc
-    'max_group_members' => 3000,        //Maximum members allowed per group
+    'user_searchable_fields' => ['name'], 
+    'max_group_members' => 3000,
 
     /**
      * Attachments:
      **/
     'attachments' => [
-        'storage_folder' => 'attachments', //folder name for attachments to be saved
-        'storage_disk' => 'public', //The disk on which to store uploaded files
-        'max_uploads' => 10,  // Maximum number of files to be uploaded for each request
+        'storage_folder' => 'attachments',
+        'storage_disk' => 'public',
+        'max_uploads' => 10,
 
         //Media config
         'media_mimes' => (array) ['png', 'jpg', 'jpeg', 'gif', 'mov', 'mp4'],

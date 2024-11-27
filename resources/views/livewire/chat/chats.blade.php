@@ -124,6 +124,7 @@ $primaryColor= WireChat::getColor();
             <ul wire:loading.delay.long.remove wire:target="search" class="p-2 grid w-full spacey-y-2">
 
                 @foreach ($conversations as $conversation)
+
                     @php
                         $receiver = $conversation->getReceiver();
                         $lastMessage = $conversation->lastMessage;

@@ -705,9 +705,6 @@ class Chat extends Component
 
     private function removeExpiredConversationDeletion(): void
     {
-
-        //dd(now());
-        //$user = auth()->user();
         if ($this->authParticipant->hasDeletedConversation(true)) {
             // $participant = $this->conversation->participant($user);
 
@@ -722,15 +719,12 @@ class Chat extends Component
             // // if ($expired) {
             $this->authParticipant->update(['conversation_deleted_at' => null]);
 
-            // }
         }
 
     }
 
     public function render()
     {
-        // dd($this->loadedMessages->flatten());
-
         $authParticipant = $this->conversation->participant(auth()->user());
 
         return view('wirechat::livewire.chat.chat', ['authParticipant' => $authParticipant]);

@@ -129,7 +129,7 @@ class Chats extends Component
             'participants.participantable',
             'lastMessage',
             'group.cover',
-        ]);
+        ])->withCount('messages','participants');
     }
 
     //Helper function to check and cache column existence
@@ -228,6 +228,7 @@ class Chats extends Component
 
     public function render()
     {
+
 
         $this->loadConversations();
 
