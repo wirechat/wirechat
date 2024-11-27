@@ -32,6 +32,7 @@
 
     // Message styles based on position and ownership
 
+    // RIGHT
     // First message on RIGHT
     'rounded-br-md rounded-tr-2xl' => ($isSameAsNext && $isNotSameAsPrevious && $belongsToAuth),
 
@@ -42,8 +43,9 @@
     'rounded-br-xl rounded-r-xl' => ($isNotSameAsPrevious && $isNotSameAsNext && $belongsToAuth),
 
     // Last Message on RIGHT
-    'rounded-br-2xl' => ($isNotSameAsPrevious && $belongsToAuth),
+    'rounded-br-2xl' => ($isNotSameAsNext && $belongsToAuth),
 
+    // LEFT
     // First message on LEFT
     'rounded-bl-md rounded-tl-2xl' => ($isSameAsNext && $isNotSameAsPrevious && !$belongsToAuth),
 
