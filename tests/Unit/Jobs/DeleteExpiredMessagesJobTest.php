@@ -8,6 +8,8 @@ use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
 
 test('expired_messages_are_deleted', function () {
+
+    //**Use subHours()  because  future dates causes negative diffInSeconds()
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 
@@ -16,13 +18,13 @@ test('expired_messages_are_deleted', function () {
 
     $conversation = Conversation::factory()->withParticipants([$auth], ParticipantRole::OWNER)->create([
         'disappearing_duration' => 43200, // 12 hours in seconds (duration of disappearing messages)
-        'disappearing_started_at' => now(), // Started 3 days ago
+        'disappearing_started_at' => now()->subHours(26), // Started 3 days ago
     ]);
 
     // Create an old message that is outside the expiration period
     $oldMessage = Message::factory()->sender($auth)->create([
         'conversation_id' => $conversation->id,
-        'created_at' => now()->addHours(13), // Created 25 hours ago, expired
+        'created_at' => now()->subHours(13), // Created 25 hours ago, expired
         'kept_at' => null, // Not kept
     ]);
 
@@ -42,6 +44,7 @@ test('expired_messages_are_deleted', function () {
 });
 
 test('it doesnt delete messages not expired', function () {
+    //**Use subHours()  because  future dates causes negative diffInSeconds()
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 
@@ -94,21 +97,24 @@ test('it doesnt delete messages created before the "disappearing_started_at"', f
 
 test('it also deletes SoftDeleted messages that are expired and are kept ', function () {
     // Set up a conversation with disappearing messages
+
+    //**Use subHours()  because  future dates causes negative diffInSeconds()
     $auth = User::factory()->create();
 
     Carbon::setTestNowAndTimezone(now());
     $conversation = Conversation::factory()->withParticipants([$auth], ParticipantRole::OWNER)->create([
         'disappearing_duration' => 43200, // 12 hours in seconds
-        'disappearing_started_at' => Carbon::now(), // Started 2 days ago
+        'disappearing_started_at' => Carbon::now()->subHours(26), // Started 2 days ago
     ]);
 
     $recentMessage = Message::factory()->sender($auth)->create([
         'conversation_id' => $conversation->id,
-        'created_at' => Carbon::now()->addHours(13), // 13 hours ago, not expired
+        'created_at' => Carbon::now()->subHours(13), // EXPIRED
         'kept_at' => Carbon::now(), // Not kept
         'deleted_at' => Carbon::now(),
     ]);
 
+    Carbon::setTestNow(now()->addHours(14));
     // Run the job
     $job = new DeleteExpiredMessagesJob;
     $job->handle();
@@ -118,43 +124,44 @@ test('it also deletes SoftDeleted messages that are expired and are kept ', func
 });
 
 test('SoftDeleted messages that are expired but not kept are Deleted ', function () {
-    // Set up a conversation with disappearing messages
+
+    //**Use subHours()  because  future dates causes negative diffInSeconds()
     $auth = User::factory()->create();
 
-    Carbon::setTestNowAndTimezone(now());
+    Carbon::setTestNowAndTimezone(Carbon::now());
     $conversation = Conversation::factory()->withParticipants([$auth], ParticipantRole::OWNER)->create([
         'disappearing_duration' => 43200, // 12 hours in seconds
-        'disappearing_started_at' => Carbon::now(), // Started 2 days ago
+        'disappearing_started_at' => Carbon::now()->subHours(26), // Started 2 days ago
     ]);
 
     $recentMessage = Message::factory()->sender($auth)->create([
         'conversation_id' => $conversation->id,
-        'created_at' => Carbon::now()->addHours(13), // 13 hours ago, not expired
+        'created_at' => now()->subHours(13), // EXPIRED
         'kept_at' => null, // Not kept
-        'deleted_at' => Carbon::now(),
+        'deleted_at' => now()->subHours(13),
     ]);
 
     // Run the job
-    $job = new DeleteExpiredMessagesJob;
-    $job->handle();
+    DeleteExpiredMessagesJob::dispatch();
 
     // Assert the recent message is still there
     $this->assertDatabaseMissing((new Message)->getTable(), ['id' => $recentMessage->id]);
 });
 
 test('messages WITHOUT delete Actions, that are expired, but not kept are Deleted ', function () {
-    // Set up a conversation with disappearing messages
+
+    //**Use subHours()  because  future dates causes negative diffInSeconds()
     $auth = User::factory()->create();
 
     Carbon::setTestNowAndTimezone(now());
     $conversation = Conversation::factory()->withParticipants([$auth], ParticipantRole::OWNER)->create([
         'disappearing_duration' => 43200, // 12 hours in seconds
-        'disappearing_started_at' => Carbon::now(), // Started 2 days ago
+        'disappearing_started_at' => Carbon::now()->subHours(26), // Started 2 days ago
     ]);
 
     $recentMessage = Message::factory()->sender($auth)->create([
         'conversation_id' => $conversation->id,
-        'created_at' => Carbon::now()->addHours(13), // 13 hours ago, not expired
+        'created_at' => Carbon::now()->subHours(13), // 13 hours ago, not expired
         'kept_at' => null, // Not kept
         'deleted_at' => Carbon::now(),
     ]);
@@ -170,18 +177,20 @@ test('messages WITHOUT delete Actions, that are expired, but not kept are Delete
 });
 
 test('messages WITH delete Actions, that are expired, and kept are Deleted ', function () {
+
+    //**Use subHours()  because  future dates causes negative diffInSeconds()
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 
     Carbon::setTestNowAndTimezone(now());
     $conversation = Conversation::factory()->withParticipants([$auth], ParticipantRole::OWNER)->create([
         'disappearing_duration' => 43200, // 12 hours in seconds
-        'disappearing_started_at' => Carbon::now(), // Started 2 days ago
+        'disappearing_started_at' => Carbon::now()->subHours(26), // Started 2 days ago
     ]);
 
     $recentMessage = Message::factory()->sender($auth)->create([
         'conversation_id' => $conversation->id,
-        'created_at' => Carbon::now()->addHours(13), // 13 hours ago, not expired
+        'created_at' => Carbon::now()->subHours(13), // 13 hours ago, not expired
         'kept_at' => Carbon::now(), // Not kept
         'deleted_at' => null,
     ]);

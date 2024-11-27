@@ -124,7 +124,7 @@ class WireChatService
      */
     public static function notificationsQueue(): string
     {
-        return (string) config('wirechat.broadcasting.message_notification_queue', 'default');
+        return (string) config('wirechat.broadcasting.notifications_queue', 'default');
     }
 
     /**

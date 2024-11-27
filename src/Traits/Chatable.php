@@ -453,7 +453,6 @@ trait Chatable
                 }
             }
         })
-            //  ->where('id', '!=', $this->id) // Optionally exclude the current user.
             ->limit(20)
             ->get();
     }

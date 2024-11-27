@@ -1,0 +1,83 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  php-tests:
+    runs-on: ubuntu-latest
+    continue-on-error: false  # keep this if you want the workflow to continue even if the tests fail
+    
+
+    strategy:
+      matrix:
+        php: [8.2, 8.3, 8.4]
+        laravel: [10.*, 11.*]
+        dependency-version: [prefer-lowest, prefer-stable]
+        os: [ubuntu-latest]
+        include:
+          - laravel: 10.*
+            testbench: 8.*
+            php: 8.2
+          - laravel: 10.*
+            testbench: 8.*
+            php: 8.3
+          - laravel: 10.*
+            testbench: 8.*
+            php: 8.4
+          - laravel: 11.*
+            testbench: 9.*
+            php: 8.2
+          - laravel: 11.*
+            testbench: 9.*
+            php: 8.3
+          - laravel: 11.*
+            testbench: 9.*
+            php: 8.4
+
+
+    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - ${{ matrix.dependency-version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, mbstring, zip, sqlite, bcmath, soap, intl
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          # Install Laravel and Testbench based on the matrix
+          composer require --dev "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
+
+      - name: Run tests
+        run: vendor/bin/pest --ci
+
+# Job for running Pint (linting) checks
+  lint-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, dom, curl
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction 
+
+      - name: Run Pint for linting
+        run: vendor/bin/pint --test 

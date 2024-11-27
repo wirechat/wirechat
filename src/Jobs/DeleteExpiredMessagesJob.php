@@ -57,7 +57,11 @@ class DeleteExpiredMessagesJob implements ShouldQueue
                 ->get();
 
             foreach ($messages as $message) {
-                // Check if the message is older than the disappearing_duration in relation to now
+
+                if ($message->created_at->isFuture()) {
+                    continue; // Skip processing this message
+                }
+
                 if ($message->created_at->diffInSeconds(now()) > $conversation->disappearing_duration) {
                     $message->forceDelete(); // Permanently delete the message
                 }

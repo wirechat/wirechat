@@ -2175,9 +2175,6 @@ describe('deleteMessage ForEveryone', function () {
         //call deleteForMe
         $request->call('deleteForEveryone', $authMessage->id);
 
-        //refresh component
-        $request->refresh();
-
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 3;
@@ -2268,7 +2265,7 @@ describe('deleteMessage ForEveryone', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = $auth->createConversationWith($receiver, 'This is message');
 
-        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->refresh()->assertSeeText('This is message');
+        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSeeText('This is message');
 
         //run
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -2292,12 +2289,8 @@ describe('deleteMessage ForEveryone', function () {
         //send reply
         $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
 
-        $request->refresh();
-
         //assert messsage visible
         $request->assertSee('This is reply');
-
-        $request->refresh();
 
         //call deleteForMe
         $request->call('deleteForEveryone', '1');
@@ -2381,9 +2374,6 @@ describe('deletForMe', function () {
         //call deleteForMe
         $request->call('deleteForMe', $authMessage->id);
 
-        //refresh component
-        $request->refresh();
-
         //assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 3;
@@ -2421,7 +2411,7 @@ describe('deletForMe', function () {
 
         $conversation = $auth->createConversationWith($receiver, 'This is message');
 
-        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->refresh()->assertSeeText('This is message');
+        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSeeText('This is message');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
@@ -2444,8 +2434,6 @@ describe('deletForMe', function () {
 
         //send reply
         $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
-
-        $request->refresh();
 
         //assert messsage visible
         $request->assertSee('This is reply');
