@@ -2,6 +2,7 @@
 
 namespace Namu\WireChat\Events;
 
+use Carbon\Carbon;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
@@ -33,6 +34,18 @@ class NotifyParticipant implements ShouldBroadcastNow
     {
         return $this->message->conversation->isPrivate() ? WireChat::messagesQueue() : WireChat::notificationsQueue();
     }
+
+
+    public function broadcastWhen(): bool
+    {
+        // Check if the message is not older than 60 seconds
+        $isNotExpired=  Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinute(1));
+
+        Log::info(['NotifyParticipant isNotExpired'=>$isNotExpired]);
+
+        return $isNotExpired;
+    }
+
 
     public function broadcastOn(): array
     {

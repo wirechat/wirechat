@@ -54,6 +54,8 @@ class NotifyParticipants implements ShouldQueue
 
     }
 
+
+
     /**
      * Execute the job.
      */
@@ -63,6 +65,7 @@ class NotifyParticipants implements ShouldQueue
         /**
          * Fetch participants, ordered by `last_active_at` in descending order,
          * so that the most recently active participants are notified first. */
+
 
         //     $queueToUse = $this->conversation->isPrivate()?WireChat::messagesQueue():WireChat::notificationsQueue();
         $this->conversation->participants()

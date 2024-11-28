@@ -1,25 +1,14 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
 
-test('it dispatches event in job', function () {
 
-    Bus::fake();
-    $auth = User::factory()->create();
-    $receiver = User::factory()->create(['name' => 'John']);
-    $conversation = $auth->sendMessageTo($receiver, 'hello')->conversation;
-
-    $message = Message::factory()->sender($auth)->create();
-
-    NotifyParticipants::dispatch($conversation, $message);
-
-    Bus::assertDispatched(NotifyParticipants::class);
-
-});
 
 describe(' Data verifiction ', function () {
 
@@ -61,5 +50,36 @@ describe(' Data verifiction ', function () {
         });
 
     });
+
+});
+
+
+
+describe('Actions', function () {
+
+
+    test('it dispatches event in job', function () {
+
+        Bus::fake();
+        Queue::fake();
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = $auth->sendMessageTo($receiver, 'hello')->conversation;
+    
+        $message = Message::factory()->sender($auth)->create();
+
+
+        
+    
+        NotifyParticipants::dispatch($conversation, $message);
+    
+        Bus::assertDispatched(NotifyParticipants::class);
+    
+    });
+
+
+ 
+
+
 
 });
