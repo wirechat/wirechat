@@ -1,17 +1,11 @@
 <?php
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
-
-
 
 describe(' Data verifiction ', function () {
 
@@ -56,10 +50,7 @@ describe(' Data verifiction ', function () {
 
 });
 
-
-
 describe('Actions', function () {
-
 
     test('it notifies participants if  message is NOT  older than 60 Seconds ', function () {
 
@@ -69,7 +60,6 @@ describe('Actions', function () {
 
         $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
-
         //add user and exit conversation
         for ($i = 0; $i < 20; $i++) {
             $conversation->addParticipant(User::factory()->create());
@@ -78,7 +68,7 @@ describe('Actions', function () {
         $message = $auth->sendMessageTo($conversation, 'hello');
 
         //Create Job in database
-        $job=  ( new NotifyParticipants($conversation, $message));
+        $job = (new NotifyParticipants($conversation, $message));
 
         //Travel future JUst 5 seconds
         $this->travelTo(now()->addSeconds(5)); //VALID
@@ -86,9 +76,8 @@ describe('Actions', function () {
         $job->handle();
 
         Event::assertDispatchedTimes(NotifyParticipant::class, 20);
-    
-    });
 
+    });
 
     test('it does not notify participants if and deltes job if message is older than 60 Seconds ', function () {
 
@@ -98,17 +87,15 @@ describe('Actions', function () {
 
         $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
-
         //add user and exit conversation
         for ($i = 0; $i <= 20; $i++) {
             $conversation->addParticipant(User::factory()->create());
         }
 
-
         $message = $auth->sendMessageTo($conversation, 'hello');
 
         //Create Job instance
-        $job=  ( new NotifyParticipants($conversation, $message));
+        $job = (new NotifyParticipants($conversation, $message));
 
         //Travel future
         $this->travelTo(now()->addSeconds(100));
@@ -116,11 +103,7 @@ describe('Actions', function () {
         $job->handle();
 
         Event::assertDispatchedTimes(NotifyParticipant::class, 0);
-    
+
     });
-
-
-    
-
 
 });

@@ -1103,7 +1103,7 @@ describe('Sending messages ', function () {
 
     test('it does not broadcasts event "NotifyParticipant" to member who exited the group-meaning expect only 20 event not 21', function () {
         Event::fake();
-       //  Queue::fake();
+        //  Queue::fake();
 
         $auth = User::factory()->create();
 
@@ -1111,7 +1111,7 @@ describe('Sending messages ', function () {
         $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
         //add members
-     
+
         //add user and exit conversation
         $user = User::factory()->create();
         $conversation->addParticipant($user);
@@ -1119,16 +1119,15 @@ describe('Sending messages ', function () {
         for ($i = 0; $i < 20; $i++) {
             $conversation->addParticipant(User::factory()->create());
         }
-    
-     //   $user->sendMessageTo($conversation, 'hi');
+
+        //   $user->sendMessageTo($conversation, 'hi');
         $user->exitConversation($conversation); //exit here
 
-    
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('body', 'New message')
             ->call('sendMessage');
-            
-    //    Carbon::setTestNow(now()->addSeconds(6));
+
+        //    Carbon::setTestNow(now()->addSeconds(6));
 
         Event::assertDispatchedTimes(NotifyParticipant::class, 20);
     });

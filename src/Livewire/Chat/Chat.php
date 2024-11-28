@@ -275,7 +275,6 @@ class Chat extends Component
 
         //dd($this->body);
 
-
         abort_unless(auth()->check(), 401);
 
         //rate limit
@@ -564,7 +563,7 @@ class Chat extends Component
 
             //!remove the receiver from the messageCreated and add it to the job instead
             //!also do not forget to exlude auth user or message owner from particpants
-           // sleep(3);
+            // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
             //if conversation is private then Notify particpant immediately

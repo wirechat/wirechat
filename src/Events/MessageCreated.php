@@ -10,7 +10,6 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Message;
 
@@ -42,7 +41,8 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastWhen(): bool
     {
         // Check if the message is not older than 1 minutes
-        $isNotExpired=  Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinute(1));
+        $isNotExpired = Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinute(1));
+
         return $isNotExpired;
     }
 

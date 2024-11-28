@@ -37,14 +37,14 @@ return [
     /**
      * Features:
      * You can configure the feature you want to allow for wirechat */
-    'show_new_chat_modal_button' => true,  
-    'show_new_group_modal_button' => true,  
+    'show_new_chat_modal_button' => true,
+    'show_new_group_modal_button' => true,
 
-    'allow_chats_search' => true, 
-    'allow_media_attachments' => true, 
+    'allow_chats_search' => true,
+    'allow_media_attachments' => true,
     'allow_file_attachments' => true,
 
-    'user_searchable_fields' => ['name'], 
+    'user_searchable_fields' => ['name'],
     'max_group_members' => 3000,
 
     /**
