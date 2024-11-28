@@ -10,14 +10,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
+
 use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Notifications\MessageNotification;
 
 class NotifyParticipants implements ShouldQueue
 {
@@ -30,6 +27,7 @@ class NotifyParticipants implements ShouldQueue
     public int $timeout = 60;
 
     public int $retry_after = 65;
+    public int $tries=1;
 
     protected $auth;
 
@@ -48,12 +46,30 @@ class NotifyParticipants implements ShouldQueue
         $this->delay(now()->addSeconds(3)); // Delay
         $this->auth = $message->sendable;
 
+        
+
         //Get table
-        $this->messagesTable = (new Message)->getTable();
         $this->participantsTable = (new Participant)->getTable();
+
+        //dd($this);
 
     }
 
+
+
+      /**
+     * Get the middleware the job should pass through.
+     */
+    // public function middleware(): array
+    // {
+   
+    //     return [
+    //         new SkipIfOlderThanSeconds(60), // You can pass a custom max age in seconds
+    //     ];
+    // }
+
+
+    
 
 
     /**
@@ -61,7 +77,17 @@ class NotifyParticipants implements ShouldQueue
      */
     public function handle(): void
     {
+       // Check if the message is too old
+        $messageAgeInSeconds = now()->diffInSeconds($this->message->created_at);
 
+        #delete the job if it is greater then 60 seconds 
+        if ($messageAgeInSeconds > 60) {
+            // Delete the job and stop further processing
+            //$this->fail();
+           $this->delete();
+            return;
+        }
+    
         /**
          * Fetch participants, ordered by `last_active_at` in descending order,
          * so that the most recently active participants are notified first. */

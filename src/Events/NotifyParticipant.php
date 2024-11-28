@@ -41,7 +41,7 @@ class NotifyParticipant implements ShouldBroadcastNow
         // Check if the message is not older than 60 seconds
         $isNotExpired=  Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinute(1));
 
-        Log::info(['NotifyParticipant isNotExpired'=>$isNotExpired]);
+      //  Log::info(['NotifyParticipant isNotExpired'=>$isNotExpired]);
 
         return $isNotExpired;
     }

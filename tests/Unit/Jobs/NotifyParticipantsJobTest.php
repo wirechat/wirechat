@@ -2,8 +2,11 @@
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
@@ -58,28 +61,66 @@ describe(' Data verifiction ', function () {
 describe('Actions', function () {
 
 
-    test('it dispatches event in job', function () {
+    test('it notifies participants if  message is NOT  older than 60 Seconds ', function () {
 
         Bus::fake();
-        Queue::fake();
+        Event::fake();
         $auth = User::factory()->create();
-        $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = $auth->sendMessageTo($receiver, 'hello')->conversation;
-    
-        $message = Message::factory()->sender($auth)->create();
+
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
 
-        
-    
-        NotifyParticipants::dispatch($conversation, $message);
-    
-        Bus::assertDispatched(NotifyParticipants::class);
+        //add user and exit conversation
+        for ($i = 0; $i < 20; $i++) {
+            $conversation->addParticipant(User::factory()->create());
+        }
+
+        $message = $auth->sendMessageTo($conversation, 'hello');
+
+        //Create Job in database
+        $job=  ( new NotifyParticipants($conversation, $message));
+
+        //Travel future JUst 5 seconds
+        $this->travelTo(now()->addSeconds(5)); //VALID
+
+        $job->handle();
+
+        Event::assertDispatchedTimes(NotifyParticipant::class, 20);
     
     });
 
 
- 
+    test('it does not notify participants if and deltes job if message is older than 60 Seconds ', function () {
 
+        Bus::fake();
+        Event::fake();
+        $auth = User::factory()->create();
+
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+
+
+        //add user and exit conversation
+        for ($i = 0; $i <= 20; $i++) {
+            $conversation->addParticipant(User::factory()->create());
+        }
+
+
+        $message = $auth->sendMessageTo($conversation, 'hello');
+
+        //Create Job instance
+        $job=  ( new NotifyParticipants($conversation, $message));
+
+        //Travel future
+        $this->travelTo(now()->addSeconds(100));
+
+        $job->handle();
+
+        Event::assertDispatchedTimes(NotifyParticipant::class, 0);
+    
+    });
+
+
+    
 
 
 });
