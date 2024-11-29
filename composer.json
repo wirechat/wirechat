@@ -39,7 +39,6 @@
         "orchestra/testbench": "^8.24|^9.0",
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin-laravel": "^2.4",
-        "orchestra/testbench-dusk": "^8.26|^9.0",
         "christophrumpel/missing-livewire-assertions": "^2.8",
         "laravel/pint": "^1.18"
     },
