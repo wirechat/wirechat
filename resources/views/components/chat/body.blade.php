@@ -256,7 +256,7 @@
                                         @endif
                                         {{-- Attachemnt is Application/ --}}
                                         @if (str()->startsWith($attachment->mime_type, 'application/'))
-                                            <x-wirechat::chat.file :attachment="$attachment" />
+                                            <x-wirechat::chat.file  :attachment="$attachment" />
                                         @endif
 
                                         {{-- Attachemnt is Video/ --}}

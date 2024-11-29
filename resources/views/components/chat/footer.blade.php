@@ -514,62 +514,62 @@
             },
     
             // Upload files using Livewire's upload
-            uploadFiles(files) {
-                this.isUploading = true;
-                this.progress = 0;
+            // uploadFiles(files) {
+            //     this.isUploading = true;
+            //     this.progress = 0;
 
-                // Initialize per-file progress tracking
-                const fileProgress = Array.from(files).map(() => 0);
-                files.forEach((file, index) => {
-                    $wire.upload(
-                        `${this.wireModel}`, // Livewire model
-                        file, // Single file
-                        () => {
-                            fileProgress[index] = 100; // Mark this file as complete
-                            // this.isUploading = false;
-                            this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length);
-                        },
-                        (error) => {
-                            // this.isUploading = false;
-                            fileProgress[index] = -1; // Mark as failed
-                            $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` });
-                        },
-                        (event) => {
-                            fileProgress[index] = event.detail.progress; // Update per-file progress
-                            this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length); // Overall progress
-                        }
-                    );
-                });
-            },
+            //     // Initialize per-file progress tracking
+            //     const fileProgress = Array.from(files).map(() => 0);
+            //     files.forEach((file, index) => {
+            //         $wire.upload(
+            //             `${this.wireModel}`, // Livewire model
+            //             file, // Single file
+            //             () => {
+            //                 fileProgress[index] = 100; // Mark this file as complete
+            //                 // this.isUploading = false;
+            //                 this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length);
+            //             },
+            //             (error) => {
+            //                 // this.isUploading = false;
+            //                 fileProgress[index] = -1; // Mark as failed
+            //                 $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` });
+            //             },
+            //             (event) => {
+            //                 fileProgress[index] = event.detail.progress; // Update per-file progress
+            //                 this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length); // Overall progress
+            //             }
+            //         );
+            //     });
+            // },
 
              // Upload files using Livewire's uploadMultiple method
-            // uploadFiles(files) {
-            //     this.isUploading = true; // Set uploading state to true
-            //     this.progress = 0; // Reset progress bar
+            uploadFiles(files) {
+                this.isUploading = true; // Set uploading state to true
+                this.progress = 0; // Reset progress bar
 
-            //     // Call Livewire's uploadMultiple with callbacks for progress, success, and error
-            //     $wire.uploadMultiple(
-            //         `${this.wireModel}`, // The Livewire model name
-            //         files, // The array of files to upload
-            //         (success) => {
-            //             // Success callback
-            //             console.log('Upload complete:', success);
-            //             this.isUploading = false; // Reset uploading state
-            //             this.progress = 0; // Reset progress
-            //         },
-            //         (error) => {
-            //             // Error callback
-            //             console.log('Upload error:', error);
-            //             $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` }); // Show error message
-            //             this.isUploading = false; // Reset uploading state
-            //             this.progress = 0; // Reset progress
-            //         },
-            //         (event) => {
-            //             // Progress callback
-            //             this.progress = event.detail.progress; // Update progress bar
-            //         }
-            //     );
-            // },
+                // Call Livewire's uploadMultiple with callbacks for progress, success, and error
+                $wire.uploadMultiple(
+                    `${this.wireModel}`, // The Livewire model name
+                    files, // The array of files to upload
+                    (success) => {
+                        // Success callback
+                        console.log('Upload complete:', success);
+                        this.isUploading = false; // Reset uploading state
+                        this.progress = 0; // Reset progress
+                    },
+                    (error) => {
+                        // Error callback
+                        console.log('Upload error:', error);
+                        $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` }); // Show error message
+                        this.isUploading = false; // Reset uploading state
+                        this.progress = 0; // Reset progress
+                    },
+                    (event) => {
+                        // Progress callback
+                        this.progress = event.detail.progress; // Update progress bar
+                    }
+                );
+            },
 
 
     
@@ -612,10 +612,12 @@
                                 message: `File size exceeds the maximum limit (${this.maxSize / 1024 / 1024}MB): ${file.name}`
                             });
                         } else {
-                            $dispatch('wirechat-toast', {
-                                type: 'warning',
-                                message: 'File type is not allowed'
-                            });
+                            const extension = file.name.split('.').pop().toLowerCase();
+                                $dispatch('wirechat-toast', {
+                                    type: 'warning',
+                                    message: `One or more Files not uploaded: .${extension} (type not allowed)`
+                                });
+
                         }
                     });
                 }
