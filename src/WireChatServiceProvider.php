@@ -47,16 +47,9 @@ class WireChatServiceProvider extends ServiceProvider
         //!for seamless devlopement loadmigrateions directly instead of publishing in development
         //only publish in production
 
-        if (app()->isProduction()) {
-
-            $this->publishes([
-                __DIR__.'/../database/migrations' => database_path('migrations'),
-            ], 'wirechat-migrations');
-
-            // code...
-        } else {
-            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        }
+        $this->publishes([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'wirechat-migrations');
 
         /* Load channel routes */
         $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
