@@ -19,10 +19,36 @@
         class=" py-2 sm:px-4 py-1.5    z-[50]  bg-gray-50 dark:bg-gray-800   flex flex-col gap-3 items-center  w-full mx-auto">
 
         {{-- Media preview section --}}
+        <section 
+        x-show="$wire.media.length>0 ||$wire.files.length>0"
+        x-cloak
+
+        class="  flex flex-col w-full gap-3"
+        wire:loading.class="animate-pulse"
+        wire:target="sendMessage"
+        >
+
+       
+
         @if (count($media) > 0)
-            <section x-data="attachments('media')"
-                class="flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
+        <div  x-data="attachments('media')">
+          {{--todo: Implement error handling fromserver during file uploads --}}
+           {{--
+            @error('media')
+           <span class="flex text-sm text-red-500 pb-2 bg-gray-100 p-2 w-full justify-between">
+                {{$message}}
+                <button @click="$wire.resetAttachmentErrors()">X</button>
+           </span>
+           @enderror --}}
+           {{--todo:Show progress when uploading files --}}
+            {{-- <div  x-show="isUploading"  class="w-full">
+                <progress class="w-full h-1 rounded-lg" max="100" x-bind:value="progress"></progress>
+            </div> --}}
+            <section
+                
+                class=" flex  overflow-x-scroll  ms-overflow-style-none items-center w-full col-span-12 py-2 gap-5 "
                 style=" scrollbar-width: none; -ms-overflow-style: none;">
+
 
                 {{-- Loop through media for preview --}}
                 @foreach ($media as $key => $mediaItem)
@@ -62,6 +88,8 @@
                     @endif
                 @endforeach
 
+                
+
                 {{-- TODO @if"( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}} {{-- Add more media --}}
                 <label
                     wire:loading.class="cursor-progress" 
@@ -83,6 +111,8 @@
                 </label>
 
             </section>
+        </div>
+
         @endif
         {{-- ----------------------- --}}
         {{-- Files preview section --}}
@@ -93,7 +123,7 @@
 
                 {{-- Loop through files for preview --}}
                 @foreach ($files as $key => $file)
-                    <div class="relative">
+                    <div class="relative shrink-0">
                         {{-- Delete file button --}}
                         <button wire:loading.attr="disabled" class="disabled:cursor-progress absolute -top-2 -right-2  z-10"
                             @click="removeUpload('{{ $file->getFilename() }}')">
@@ -130,7 +160,7 @@
                 {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
                 <label
                     wire:loading.class="cursor-progress" 
-                    class="cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors   flex text-center justify-center border dark:border-gray-800 border-gray-50">
+                    class="cursor-pointer shrink-0 relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors   flex text-center justify-center border dark:border-gray-800 border-gray-50">
                     <input 
                         wire:loading.attr="disabled"
                         @change="handleFileSelect(event,{{ count($files) }})" type="file" multiple
@@ -150,6 +180,8 @@
 
             </section>
         @endif
+    </section>
+
 
         {{-- Replying to --}}
         @if ($replyMessage != null)
@@ -451,19 +483,22 @@
     @script
     <script>
         Alpine.data('attachments', (type = "media") => ({
-            isDropping: false,
-            type: type,
-            isUploading: false,
-            MAXFILES: @json(config('wirechat.attachments.max_uploads', 5)),
-            maxSize: @json(config('wirechat.attachments.media_max_upload_size', 12288)) * 1024,
-            allowedFileTypes: type == 'media' ? @json(config('wirechat.attachments.media_mimes')) : @json(config('wirechat.attachments.file_mimes')),
-            progress: 0,
-            wireModel: type,
-
+            // State variables
+            isDropping: false, // Tracks if a file is being dragged over the drop area
+            type: type, // Type of file being uploaded (e.g., "media" or "file")
+            isUploading: false, // Indicates if files are currently uploading
+            MAXFILES: @json(config('wirechat.attachments.max_uploads', 5)), // Maximum number of files allowed
+            maxSize: @json(config('wirechat.attachments.media_max_upload_size', 12288)) * 1024, // Max size per file (in bytes)
+            allowedFileTypes: type === 'media' ? @json(config('wirechat.attachments.media_mimes')) : @json(config('wirechat.attachments.file_mimes')), // Allowed MIME types based on type
+            progress: 0, // Progress of the current upload (0-100)
+            wireModel: type, // The Livewire model to bind to
+    
+            // Handle file selection from the input field
             handleFileSelect(event, count) {
-
                 if (event.target.files.length) {
                     const files = event.target.files;
+    
+                    // Validate selected files and upload if valid
                     this.validateFiles(files, count)
                         .then((validFiles) => {
                             if (validFiles.length > 0) {
@@ -477,125 +512,119 @@
                         });
                 }
             },
+    
+            // Upload files using Livewire's upload
             uploadFiles(files) {
-
-                //    console.log("type is "+  this.wireModel);
-                //    console.log("allowedFileTypes"+  this.allowedFileTypes);
-
-
-                const $this = this;
                 this.isUploading = true;
-                const promises = [];
+                this.progress = 0;
 
-                const promise = new Promise((resolve, reject) => {
-                    $wire.uploadMultiple(`${this.wireModel}`, files, function(success) {
-                        resolve(success);
-                    }, function(error) {
-                        console.log('Validation error:', error);
-                        reject(error);
-                    }, function(event) {
-                        $this.progress = event.detail.progress;
-                    });
+                // Initialize per-file progress tracking
+                const fileProgress = Array.from(files).map(() => 0);
+                files.forEach((file, index) => {
+                    $wire.upload(
+                        `${this.wireModel}`, // Livewire model
+                        file, // Single file
+                        () => {
+                            fileProgress[index] = 100; // Mark this file as complete
+                            // this.isUploading = false;
+                            this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length);
+                        },
+                        (error) => {
+                            // this.isUploading = false;
+                            fileProgress[index] = -1; // Mark as failed
+                            $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` });
+                        },
+                        (event) => {
+                            fileProgress[index] = event.detail.progress; // Update per-file progress
+                            this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length); // Overall progress
+                        }
+                    );
                 });
-
-                promises.push(promise);
-
-
-                Promise.all(promises)
-                    .then((results) => {
-                        //   console.log('Upload complete');
-                        $this.isUploading = false;
-                        $this.progress = 0;
-                    })
-                    .catch((error) => {
-                        console.log('Upload error:', error);
-                        $this.isUploading = false;
-                        $this.progress = 0;
-                    });
             },
+
+             // Upload files using Livewire's uploadMultiple method
+            // uploadFiles(files) {
+            //     this.isUploading = true; // Set uploading state to true
+            //     this.progress = 0; // Reset progress bar
+
+            //     // Call Livewire's uploadMultiple with callbacks for progress, success, and error
+            //     $wire.uploadMultiple(
+            //         `${this.wireModel}`, // The Livewire model name
+            //         files, // The array of files to upload
+            //         (success) => {
+            //             // Success callback
+            //             console.log('Upload complete:', success);
+            //             this.isUploading = false; // Reset uploading state
+            //             this.progress = 0; // Reset progress
+            //         },
+            //         (error) => {
+            //             // Error callback
+            //             console.log('Upload error:', error);
+            //             $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` }); // Show error message
+            //             this.isUploading = false; // Reset uploading state
+            //             this.progress = 0; // Reset progress
+            //         },
+            //         (event) => {
+            //             // Progress callback
+            //             this.progress = event.detail.progress; // Update progress bar
+            //         }
+            //     );
+            // },
+
+
+    
+            // Remove an uploaded file from Livewire
             removeUpload(filename) {
                 $wire.removeUpload(this.wireModel, filename);
             },
-
+    
+            // Validate selected files against constraints
             validateFiles(files, count) {
-
-                // const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-                var totalFiles = count + files.length;
-
-
-                //make sure max file not exceeded  
-                // Make sure max file count is not exceeded
+                const totalFiles = count + files.length; // Total file count including existing uploads
+    
+                // Check if total file count exceeds the maximum allowed
                 if (totalFiles > this.MAXFILES) {
-
-                    files = Array.from(files).slice(0, this.MAXFILES - count);
-
-                    return $dispatch('wirechat-toast', {
+                    files = Array.from(files).slice(0, this.MAXFILES - count); // Limit files to the allowed number
+                    $dispatch('wirechat-toast', {
                         type: 'warning',
-                        message: 'File limit exceeded , allowed ' + this.MAXFILES
+                        message: `File limit exceeded, allowed ${this.MAXFILES}`
                     });
                 }
-
-
-
+    
+                // Filter invalid files based on size and type
                 const invalidFiles = Array.from(files).filter((file) => {
-
-                    const fileType = file.type.split('/')[1]
-                        .toLowerCase(); // Get the file extension from the MIME type
-                    const isInvalid = file.size > this.maxSize || !(this.allowedFileTypes.includes(
-                        fileType));
-
-                    // console.log('maxSize ', this.maxSize);
-                    // console.log('File Name:', file.name);
-                    // console.log('File Type:', fileType);
-                    // console.log('Is Invalid:', isInvalid);
-                    // console.log('includes', this.allowedFileTypes.includes(fileType));
-
-
-                    return isInvalid;
+                    const fileType = file.type.split('/')[1].toLowerCase(); // Extract file extension
+                    return file.size > this.maxSize || !this.allowedFileTypes.includes(fileType); // Check size and type
                 });
-
-                //filter valid file 
+    
+                // Filter valid files
                 const validFiles = Array.from(files).filter((file) => {
                     const fileType = file.type.split('/')[1].toLowerCase();
                     return file.size <= this.maxSize && this.allowedFileTypes.includes(fileType);
-
-                    console.log(file);
-                    console.log(this.allowedFileTypes);
                 });
-
-
+    
+                // Handle invalid files by showing appropriate error messages
                 if (invalidFiles.length > 0) {
-
-                    const errorMessages = invalidFiles.map((file) => {
+                    invalidFiles.forEach((file) => {
                         if (file.size > this.maxSize) {
-
-                            return $dispatch('wirechat-toast', {
+                            $dispatch('wirechat-toast', {
                                 type: 'warning',
-                                message: `File size exceeds the maximum limit (9MB): ${file.name}`
+                                message: `File size exceeds the maximum limit (${this.maxSize / 1024 / 1024}MB): ${file.name}`
                             });
-
                         } else {
-
-
-                            return $dispatch('wirechat-toast', {
+                            $dispatch('wirechat-toast', {
                                 type: 'warning',
                                 message: 'File type is not allowed'
                             });
                         }
                     });
-
-
-
-
-                    console.log('Validation errors:', errorMessages);
-                    // Returning an empty array since there are no valid files
                 }
-
-
-
-                return Promise.resolve(validFiles);
+    
+                return Promise.resolve(validFiles); // Return valid files for further processing
             }
-        }))
+        }));
     </script>
-@endscript
+    
+    
+    @endscript
 </div>

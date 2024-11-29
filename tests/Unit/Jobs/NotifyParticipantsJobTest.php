@@ -47,7 +47,6 @@ describe(' Data verifiction ', function () {
         });
 
     });
-
 });
 
 describe('Actions', function () {
@@ -105,5 +104,4 @@ describe('Actions', function () {
         Event::assertDispatchedTimes(NotifyParticipant::class, 0);
 
     });
-
 });
