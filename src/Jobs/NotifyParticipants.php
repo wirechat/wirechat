@@ -2,6 +2,7 @@
 
 namespace Namu\WireChat\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -70,14 +71,12 @@ class NotifyParticipants implements ShouldQueue
     public function handle(): void
     {
         // Check if the message is too old
-        $messageAgeInSeconds = now()->diffInSeconds($this->message->created_at);
+        $messageAgeInSeconds = now()->diffInSeconds(Carbon::parse($this->message->created_at));
 
-        //delete the job if it is greater then 60 seconds
+        // Delete the job if it is older than 60 seconds
         if ($messageAgeInSeconds > 60) {
-            // Delete the job and stop further processing
-            //$this->fail();
-            $this->delete();
-
+            $this->delete(); // or use $this->fail() if you want to mark it as failed
+        
             return;
         }
 
