@@ -43,26 +43,24 @@
         "laravel/pint": "^1.18"
     },
     "scripts": {
-        "post-autoload-dump": [
-            "@clear",
-            "@prepare",
-            "@dusk:install-chromedriver"
-        ],
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "build": "@php vendor/bin/testbench workbench:build --ansi",
-        "serve": [
-            "Composer\\Config::disableProcessTimeout",
-            "@build",
-            "@php vendor/bin/testbench serve"
-        ],
-        "lint": [
-            "@php vendor/bin/phpstan analyse"
-        ],
-        "dusk:install-chromedriver": "@php vendor/bin/dusk-updater detect --auto-update --ansi",
-        "test": [
-            "@php vendor/bin/pest"
-        ]
+    "post-autoload-dump": [
+        "@clear",
+        "@prepare"
+    ],
+    "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "build": "@php vendor/bin/testbench workbench:build --ansi",
+    "serve": [
+        "Composer\\Config::disableProcessTimeout",
+        "@build",
+        "@php vendor/bin/testbench serve"
+    ],
+    "lint": [
+        "@php vendor/bin/phpstan analyse"
+    ],
+    "test": [
+        "@php vendor/bin/pest"
+    ]
     },
     "config": {
         "allow-plugins": {
