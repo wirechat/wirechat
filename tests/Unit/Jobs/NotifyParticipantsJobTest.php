@@ -99,7 +99,7 @@ describe('Actions', function () {
         $job = (new NotifyParticipants($conversation, $message));
 
         //Travel future
-        Carbon::setTestNowAndTimezone(now()->subSeconds(61));
+        Carbon::setTestNowAndTimezone(now()->subSeconds(139));
 
         $job->handle();
 
