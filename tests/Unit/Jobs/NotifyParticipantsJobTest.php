@@ -81,7 +81,7 @@ describe('Actions', function () {
 
     test('it does not notify participants if and deltes job if message is older than 60 Seconds ', function () {
 
-       // Bus::fake();
+        // Bus::fake();
         Event::fake();
         $auth = User::factory()->create();
 

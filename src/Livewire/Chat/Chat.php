@@ -198,12 +198,13 @@ class Chat extends Component
         app('livewire')->updateProperty($this, $name, $files);
     }
 
+    public function resetAttachmentErrors()
+    {
 
-    function resetAttachmentErrors()  {
+        $this->resetErrorBag(['media', 'files']);
 
-        $this->resetErrorBag(['media','files']);
-        
     }
+
     public function listenBroadcastedMessage($event)
     {
 
