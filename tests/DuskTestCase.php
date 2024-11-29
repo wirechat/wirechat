@@ -23,7 +23,7 @@ use PDO;
 use function Orchestra\Testbench\workbench_path;
 
 //#[WithMigration]
-abstract class DuskTestCase extends \LivewireDuskTestbench\TestCase
+abstract class DuskTestCase extends \Orchestra\Testbench\Dusk\TestCase
     // abstract class DuskTestCase extends  TestCase
 {
     ///   use BrowserFunctions;
