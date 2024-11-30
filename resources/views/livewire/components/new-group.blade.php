@@ -33,8 +33,8 @@
                             </div>
                         @else
                             <label class="cursor-pointer">
-                                <x-wirechat::avatar class="w-28 h-28" />
-                                <input wire:model="photo" dusk="add_photo_field" type="file" hidden>
+                                <x-wirechat::avatar wire:loading.class="animate-pulse" wire:target="photo" :group="true" class="w-28 h-28" />
+                                <input wire:model="photo" dusk="add_photo_field" type="file" hidden accept=".jpg,.jpeg,.png,.webp">
                             </label>
                         @endif
 
