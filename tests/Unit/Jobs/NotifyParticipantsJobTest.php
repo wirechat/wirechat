@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Namu\WireChat\Events\NotifyParticipant;
@@ -80,7 +81,7 @@ describe('Actions', function () {
 
     test('it does not notify participants if and deltes job if message is older than 60 Seconds ', function () {
 
-        Bus::fake();
+        // Bus::fake();
         Event::fake();
         $auth = User::factory()->create();
 
@@ -91,13 +92,14 @@ describe('Actions', function () {
             $conversation->addParticipant(User::factory()->create());
         }
 
+        Carbon::setTestNowAndTimezone(now()->subSeconds(200));
         $message = $auth->sendMessageTo($conversation, 'hello');
 
         //Create Job instance
         $job = (new NotifyParticipants($conversation, $message));
 
         //Travel future
-        $this->travelTo(now()->addSeconds(100));
+        Carbon::setTestNowAndTimezone(now()->subSeconds(139));
 
         $job->handle();
 
