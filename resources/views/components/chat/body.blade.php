@@ -9,7 +9,7 @@
 
 
 <main x-data="{
-
+    initializing: true,
     height: 0,
     previousHeight: 0,
     updateScrollPosition: function() {
@@ -34,7 +34,12 @@
         x-init="setTimeout(() => {
             this.height = $el.scrollHeight;
             console.log('height ' + this.height);
-            $nextTick(() => $el.scrollTop = this.height);
+            $nextTick(() => 
+            {
+                $el.scrollTop = this.height;
+                initializing = false;
+            }
+            );
         }, 0);"
     @scroll ="
         scrollTop= $el.scrollTop;
@@ -52,27 +57,21 @@
     --}}
     requestAnimationFrame(() => {
            updateScrollPosition();
-    });
-
-
-"
+    });"
   
     id="conversation" x-ref="chatbox"
-    class="flex flex-col h-full relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
-    style="contain: content" :class="{ 'invisible': initializing, 'visible': !initializing }">
+    class="flex invisible flex-col h-full relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
+    style="contain: content" :class="{'invisible': initializing }">
 
 
 
-
-    <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore"
-        class="invisible transition-all duration-300 ">
+    <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore" class="invisible transition-all duration-300 ">
         <x-wirechat::loading-spin />
     </div>
  
     {{-- Define previous message outside the loop --}}
     @php
         $previousMessage = null;
-
     @endphp
 
     <!--Message-->

@@ -117,7 +117,6 @@
 <div x-data="{
 
     conversationElement: document.getElementById('conversation'),
-    initializing: true,
     'loadEmojiPicker': function() {
 
         let script = document.createElement('script');
@@ -128,7 +127,6 @@
     }
     }" x-init="setTimeout(() => {
         $wire.dispatch('focus-input-field');
-        initializing = false;
     }, 150);
 
     Echo.private('conversation.{{ $conversation->id }}')
