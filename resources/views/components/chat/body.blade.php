@@ -9,7 +9,6 @@
 
 
 <main x-data="{
-    initializing: true,
     height: 0,
     previousHeight: 0,
     updateScrollPosition: function() {
@@ -31,16 +30,12 @@
     }
 
     }"  
-        x-init="setTimeout(() => {
-            this.height = $el.scrollHeight;
-            console.log('height ' + this.height);
-            $nextTick(() => 
-            {
+        x-init="
+            requestAnimationFrame(() => {
+                this.height = $el.scrollHeight;
                 $el.scrollTop = this.height;
-                initializing = false;
-            }
-            );
-        }, 0);"
+            });
+        "
     @scroll ="
         scrollTop= $el.scrollTop;
         if((scrollTop<=0) && $wire.canLoadMore){
@@ -50,18 +45,15 @@
         }
      "
     @update-height.window="
-    {{-- 
-        Replaced $nextTick with requestAnimationFrame: This will allow you to update the scroll position immediately after
-        the next DOM repaint without causing any delay or visual glitch. It's a smoother solution than $nextTick for cases
-        where visual glitches need to be minimized.
-    --}}
-    requestAnimationFrame(() => {
-           updateScrollPosition();
-    });"
+
+        requestAnimationFrame(() => {
+            updateScrollPosition();
+        });"
   
     id="conversation" x-ref="chatbox"
-    class="flex invisible flex-col h-full relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
-    style="contain: content" :class="{'invisible': initializing }">
+    x-cloak
+    {{$attributes->merge(['class'=>'flex flex-col h-full relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto'])}}
+    style="contain: content" >
 
 
 

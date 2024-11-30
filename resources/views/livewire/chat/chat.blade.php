@@ -114,20 +114,25 @@
     </style>
 @endassets
 
-<div x-data="{
+    <div x-data="{
+        initializing: true,
+        conversationElement: document.getElementById('conversation'),
+        'loadEmojiPicker': function() {
 
-    conversationElement: document.getElementById('conversation'),
-    'loadEmojiPicker': function() {
-
-        let script = document.createElement('script');
-        script.type = 'module';
-        script.src = 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js';
-        script.defer = true;
-        document.head.appendChild(script);
-    }
+            let script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js';
+            script.defer = true;
+            document.head.appendChild(script);
+        }
     }" x-init="setTimeout(() => {
-        $wire.dispatch('focus-input-field');
-    }, 150);
+        requestAnimationFrame(() => {
+            $wire.dispatch('focus-input-field');
+
+            initializing = false;
+        });
+
+    }, 120);
 
     Echo.private('conversation.{{ $conversation->id }}')
         .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
@@ -139,29 +144,7 @@
             $wire.removeDeletedMessage(e); // Calling the Livewire method to handle the new message
         });
 
-
-       loadEmojiPicker();
-    {{-- if ($wire.conversationId == 51) {
-
-            setInterval(() => {
-            
-                sentences = [
-                    'This is a fake sentence.',
-                    'Alpine.js is great for reactive UIs!',
-                    'Let’s build something amazing with Laravel.',
-                    'This is another random sentence.',
-                    'Keep coding and stay productive!',
-                ];
-                sentence= sentences[Math.floor(Math.random() * sentences.length)];
-                // Simulate the body message with a random sentence
-                //alert(sentence)
-                $wire.body = sentence;
-                
-                // Call the Livewire sendMessage method
-                $wire.sendMessage();
-            }, 7000); // Call every 3 seconds
-        } --}}
-     "
+    loadEmojiPicker();"
     @scroll-bottom.window="
         
 
@@ -179,12 +162,10 @@
             });
   
     "
-
     class=" w-full transition  bg-white/95 dark:bg-gray-900  overflow-hidden  h-full relative" style="contain:content">
 
     {{-- todo: add rounded corners to attachment --}}
-    <div 
-    class=" flex flex-col  grow  h-full">
+    <div class=" flex flex-col  grow  h-full relative ">
 
         {{-- ---------- --}}
         {{-- --Header-- --}}
@@ -195,32 +176,27 @@
         {{-- ---------- --}}
         {{-- -Body----- --}}
         {{-- ---------- --}}
-        <x-wirechat::chat.body :conversation="$conversation" :authParticipant="$authParticipant" :loadedMessages="$loadedMessages" :isPrivate="$conversation->isPrivate()" :isGroup="$conversation->isGroup()" :receiver="$receiver" />
+
+
+        <x-wirechat::chat.body :conversation="$conversation" :authParticipant="$authParticipant" :loadedMessages="$loadedMessages" :isPrivate="$conversation->isPrivate()" :isGroup="$conversation->isGroup()"
+            :receiver="$receiver" />
+
 
         {{-- ---------- --}}
         {{-- -Footer--- --}}
         {{-- ---------- --}}
 
+        <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 
-        <footer class="shrink-0 h-auto relative ">
+            @if ($conversation->isGroup() && !$conversation->group?->allowsMembersToSendMessages() && !$authParticipant->isAdmin())
+                <div
+                    class="bg-gray-50 w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 dark:bg-gray-800">
 
-            @if ($conversation->isGroup() &&  !$conversation->group?->allowsMembersToSendMessages() && !$authParticipant->isAdmin())
+                    Only admins can send messages
 
-            <div class="bg-gray-50 w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 dark:bg-gray-800">
-
-                Only admins can send messages
-
-            </div>
-
+                </div>
             @else
-            <x-wirechat::chat.footer 
-                    :media="$media" 
-                    :files="$files" 
-                    :replyMessage="$replyMessage" 
-
-
-
-                    />
+                <x-wirechat::chat.footer :media="$media" :files="$files" :replyMessage="$replyMessage" />
             @endif
 
         </footer>

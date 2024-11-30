@@ -49,14 +49,13 @@ class="relative overflow-visible">
 <div x-ref="popover"
     x-anchor.offset.17="$refs.popoverButton"  
     x-show="popoverOpen"
+
     x-init="setTimeout(function(){ popoverHeightCalculate(); }, 100);"
-    {{-- x-focus.inert="popoverOpen" --}}
     @click.away="popoverOpen=false;"
     @keydown.escape.window="popoverOpen=false"
-    {{-- :class="{ 'top-0 mt-12' : popoverPosition == 'bottom', 'bottom-0 mb-12' : popoverPosition == 'top' }" --}}
-    class=" min-w-[13rem]  max-w-fit " x-cloak
-    @click="popoverOpen=false"
-    >
+    class=" min-w-[13rem]  max-w-fit " 
+    x-cloak
+    @click="popoverOpen=false" >
     <div 
     
     
