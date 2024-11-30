@@ -13,6 +13,7 @@
     class="w-full  sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-gray-50 dark:bg-gray-800 dark:border-gray-800/80  border-b">
 
     <div class="  flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
+
         {{-- Return --}}
         <a href="{{route(WireChat::indexRouteName())}}" class=" shrink-0 lg:hidden  dark:text-white" id="chatReturn">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -24,7 +25,6 @@
         {{-- Receiver wirechat::Avatar --}}
         <section class="grid grid-cols-12 w-full">
             <div class="shrink-0 col-span-11 w-full truncate overflow-h-hidden relative">
-
                 <div wire:click="$dispatch('openChatDrawer', {component: 'info',arguments: { conversation: {{ $conversation->id }} }})"
                     class="flex items-center gap-2 cursor-pointer ">
                     <x-wirechat::avatar :disappearing="$conversation->hasDisappearingTurnedOn()" group="{{ $conversation->isGroup() }}"
