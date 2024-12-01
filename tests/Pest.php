@@ -1,4 +1,5 @@
 <?php
+
 use Namu\WireChat\Tests\TestCase;
 
 /*
