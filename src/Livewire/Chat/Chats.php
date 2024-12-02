@@ -26,6 +26,7 @@ class Chats extends Component
     {
         return [
             'refresh' => '$refresh',
+            
             //   "echo-private:participant." .auth()->id() . ",.Namu\\WireChat\\Events\\NotifyParticipant" => '$refresh',
         ];
     }
@@ -45,7 +46,7 @@ class Chats extends Component
 
         // Load the next page
         $this->page++;
-        $this->loadConversations();
+
     }
 
     public function updatedSearch($value)
@@ -56,7 +57,7 @@ class Chats extends Component
         $this->conversations = []; // Clear previous results when a new search is made
         $this->reset(['page', 'canLoadMore']);
         // }
-        $this->loadConversations();
+
 
     }
 
@@ -150,13 +151,13 @@ class Chats extends Component
     {
         abort_unless(auth()->check(), 401);
         $this->selectedConversationId = request()->conversation_id;
-        $this->loadConversations();
+        //$this->loadConversations();
     }
 
     public function render()
     {
 
-
+        $this->loadConversations();
         return view('wirechat::livewire.chat.chats');
     }
 }

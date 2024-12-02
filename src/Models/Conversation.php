@@ -132,6 +132,7 @@ class Conversation extends Model
                 ->where('participantable_type', get_class($user))
                 ->first();
         } else {
+            
             $participant = $query->where('participantable_id', $user->id)
                 ->where('participantable_type', get_class($user))
                 ->first();

@@ -55,10 +55,10 @@ class Chat extends Component
 
     public array $files = [];
 
-    public Participant $authParticipant;
+    public ?Participant $authParticipant;
 
-    #[Locked]
-    public Participant $receiverParticipant;
+   // #[Locked]
+    public ?Participant $receiverParticipant;
 
     //Theme
     public $replyMessage = null;
@@ -675,87 +675,70 @@ class Chat extends Component
 
     public function mount()
     {
-        // Check authentication
-        abort_unless(auth()->check(), 401);
-
-        //    dd(route(WireChat::indexRouteName()));
-        // Retrieve conversation without global scopes
-        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
-            ->where('id', $this->conversation)->firstOr(function(){
-
-                abort(404);
-            });
-
-        
-        if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
-
-            $this->conversation->load('participants.participantable');
-        }
-
-
-        $this->totalMessageCount=  Message::where('conversation_id', $this->conversation->id)->count();
-
-        // Abort if conversation not found
-        abort_unless($this->conversation, 404);
-
-        // Ensure the user belongs to the conversation
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
-
-        // Assign receiver and conversation ID
-
-        if (!$this->conversation->isGroup()) {
-
-            $participants= $this->conversation->participants;
-
-            $this->authParticipant= $participants->where('participantable_id',auth()->id())->first();
-            $this->receiverParticipant = $participants->where('participantable_id','!=',auth()->id())->first();
-            $this->receiver = $this->receiverParticipant->participantable;
-
-        } else {
-            # code...
-            $this->authParticipant = $this->conversation->participant(auth()->user());
-            $this->receiver=null;
-        }
-        
-        $this->conversationId = $this->conversation->id;
-
-        $this->conversation->markAsRead();
-
-
-        //update auth participant last active ;
-        $this->authParticipant->update(['last_active_at' => now()]);
-
-        // Attempt to clear expired deletion if necessary
-        $this->removeExpiredConversationDeletion();
-
-        // Load conversation messages
+        $this->initializeConversation();
+        $this->initializeParticipants();
+        $this->finalizeConversationState();
         $this->loadMessages();
     }
-
-    private function removeExpiredConversationDeletion(): void
+    
+    private function initializeConversation()
     {
-        if ($this->authParticipant->hasDeletedConversation(true)) {
-            // $participant = $this->conversation->participant($user);
-
-            // $expired = $authParticipant->conversationDeletionExpired();
-
-            // Log::info([
-            //     'conversation_updated_at' => $this->conversation->updated_at,
-            //     'participant_deleted_at' => $this->authParticipant->conversation_deleted_at,
-            //     'deletion_expired' => true,
-            // ]);
-
-            // // if ($expired) {
-            $this->authParticipant->update(['conversation_deleted_at' => null]);
-
-        }
-
+        abort_unless(auth()->check(), 401);
+    
+        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
+            ->where('id', $this->conversation)
+            ->firstOr(fn() => abort(404));
+    
+        $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+    
+        $this->conversationId = $this->conversation->id;
     }
+    
+    private function initializeParticipants()
+    {
+        if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
+            $this->conversation->load('participants');
+            $participants = $this->conversation->participants;
+    
+            $this->authParticipant = $participants
+                ->where('participantable_id', auth()->id())
+                ->first();
+    
+            $this->receiverParticipant = $participants
+                ->where('participantable_id', '!=', auth()->id())
+                ->first();
+
+            //If conversation is self then receiver is auth;
+            if ($this->conversation->type== ConversationType::SELF) {
+                $this->receiverParticipant = $this->authParticipant;
+            }
+    
+            $this->receiver = $this->receiverParticipant
+                ? $this->receiverParticipant->participantable
+                : null;
+        } else {
+            $this->authParticipant = Participant::whereParticipantable(auth()->user())->first();
+            $this->receiver = null;
+        }
+    }
+    
+    private function finalizeConversationState()
+    {
+        $this->conversation->markAsRead();
+    
+        if ($this->authParticipant) {
+            $this->authParticipant->update(['last_active_at' => now()]);
+    
+            if ($this->authParticipant->hasDeletedConversation(true)) {
+                $this->authParticipant->update(['conversation_deleted_at' => null]);
+            }
+        }
+    }
+    
 
     public function render()
     {
-        //$authParticipant = $this->conversation->participant(auth()->user());
-
         return view('wirechat::livewire.chat.chat');
     }
 }
