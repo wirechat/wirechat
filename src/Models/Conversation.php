@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Namu\WireChat\Enums\Actions;
@@ -108,6 +109,8 @@ class Conversation extends Model
     {
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
+
+
 
     /**
      * Get a participant model  from the user
@@ -301,9 +304,11 @@ class Conversation extends Model
 
     public function lastMessage()
     {
-        return $this->hasOne(Message::class)->latestOfMany();
+        return $this->hasOne(Message::class,'conversation_id')->latestOfMany();
     }
 
+
+    
     /**
      * ------------------------
      * SCOPES
@@ -399,6 +404,17 @@ class Conversation extends Model
     //     }
     // }
 
+    public function receiver(): HasOne
+    {
+        return $this->hasOne(Participant::class)
+                ->where('participantable_id', '!=', auth()->id())
+                ->where('role', 'owner')->whereHas('conversation', function ($query) {
+                    $query->whereIn('type', [ConversationType::PRIVATE, ConversationType::SELF]);
+                });
+    }
+    
+
+    
     /**
      * Get the receiver of the private conversation
      *
@@ -414,16 +430,6 @@ class Conversation extends Model
 
         // Ensure participants are already loaded (use the loaded relationship, not fresh queries)
         $participants = $this->participants->where('conversation_id', $this->id);
-
-        //   dd($participants);
-        // Ensure there are exactly two participants
-        // if ($participants->count() !== 2) {
-        //     return null;
-        // }
-
-        // dd($participants);
-
-        // Get the participant who is not the authenticated user
 
         $receiverParticipant = $participants->where('participantable_id', '!=', auth()->id())
             ->where('participantable_type', get_class(auth()->user()))

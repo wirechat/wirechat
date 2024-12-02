@@ -126,12 +126,16 @@ $primaryColor= WireChat::getColor();
                 @foreach ($conversations as $conversation)
 
                     @php
-                        $receiver = $conversation->getReceiver();
-                        $lastMessage = $conversation->lastMessage;
-                        $isReadByAuth = $conversation?->readBy(auth()?->user());
+                        //$receiver =$conversation->getReceiver();
                         $group=$conversation->group;
+                        $receiver = $group?null:$conversation->receiver?->participantable;
+                        $lastMessage = $conversation->lastMessage;
+                        $isReadByAuth = null;//$conversation?->readBy(auth()?->user());
+                
 
                     @endphp
+
+                    {{-- @dd($conversation->receiver()->first()) --}}
 
                     {{-- Chat list item --}}
                     {{-- We use style here to make it easy for dynamic and safe injection --}}
@@ -183,27 +187,16 @@ $primaryColor= WireChat::getColor();
 
                                         @endif
 
-
                                         <p @class([
                                             'truncate text-sm dark:text-white  gap-2 items-center',
-                                            'font-semibold text-black' =>
-                                                !$isReadByAuth &&
-                                                $lastMessage?->sendable_id != $authUser?->id &&
-                                                $lastMessage?->sendable_type == get_class($authUser),
-                                            'font-normal text-gray-600' =>
-                                                $isReadByAuth &&
-                                                $lastMessage?->sendable_id != $authUser?->id &&
-                                                $lastMessage?->sendable_type == get_class($authUser),
-                                            'font-normal text-gray-600' =>
-                                                $isReadByAuth &&
-                                                $lastMessage?->sendable_id == $authUser?->id &&
-                                                $lastMessage?->sendable_type == get_class($authUser),
+                                            'font-semibold text-black'  =>!$isReadByAuth && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser),
+                                            'font-normal text-gray-600' => $isReadByAuth && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser),
+                                            'font-normal text-gray-600' => $isReadByAuth && $lastMessage?->sendable_id == $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)
                                         ])>
                                             {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->hasAttachment() ? '📎 Attachment' : '') }}
                                         </p>
 
                                         <span class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
-
 
                                     </div>
                                 @endif
@@ -212,8 +205,7 @@ $primaryColor= WireChat::getColor();
 
                             {{-- Read status --}}
                             {{-- Only show if AUTH is NOT onwer of message --}}
-                            <div
-                                class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth ? 'visible' : 'invisible' }} col-span-2 flex flex-col text-center my-auto">
+                            <div class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth ? 'visible' : 'invisible' }} col-span-2 flex flex-col text-center my-auto">
 
                                 {{-- Dots icon --}}
                                 <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16" height="16"

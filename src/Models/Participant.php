@@ -74,6 +74,8 @@ class Participant extends Model
         return \Namu\WireChat\Workbench\Database\Factories\ParticipantFactory::new();
     }
 
+    
+
     /**
      * Polymorphic relation to the participantable model.
      */

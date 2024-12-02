@@ -13,6 +13,7 @@ use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
@@ -32,7 +33,7 @@ class Chat extends Component
     use WithFileUploads;
     use WithPagination;
 
-    public $conversation;
+    public  $conversation;
 
     public $conversationId;
 
@@ -48,12 +49,13 @@ class Chat extends Component
     public int $paginate_var = 10;
 
     public bool $canLoadMore;
-
+    #[Locked]
+    public $totalMessageCount;
     public array $media = [];
 
     public array $files = [];
 
-    protected Participant $authParticipant;
+    public Participant $authParticipant;
 
     #[Locked]
     public Participant $receiverParticipant;
@@ -645,13 +647,12 @@ class Chat extends Component
     public function loadMessages()
     {
         // Get total message count
-        $count = Message::where('conversation_id', $this->conversation->id)->count();
 
         // Fetch paginated messages
-        $messages = Message::where('conversation_id', $this->conversation->id)
-            ->with('sendable', 'parent')
+        $messages = $this->conversation->messages()
+            ->with('sendable', 'parent','attachment')
             ->orderBy('created_at', 'asc')
-            ->skip($count - $this->paginate_var)
+            ->skip( $this->totalMessageCount - $this->paginate_var)
             ->take($this->paginate_var)
             ->get();  // Fetch messages as Eloquent collection
 
@@ -661,7 +662,7 @@ class Chat extends Component
             ->groupBy(fn ($message) => $this->messageGroupKey($message))  // Grouping by custom logic
             ->map->values();  // Re-index each group
 
-        $this->canLoadMore = $count > $messages->count();
+        $this->canLoadMore =  $this->totalMessageCount > $messages->count();
 
         return $this->loadedMessages;
 
@@ -680,7 +681,19 @@ class Chat extends Component
         //    dd(route(WireChat::indexRouteName()));
         // Retrieve conversation without global scopes
         $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
-            ->where('id', $this->conversation)->first();
+            ->where('id', $this->conversation)->firstOr(function(){
+
+                abort(404);
+            });
+
+        
+        if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
+
+            $this->conversation->load('participants.participantable');
+        }
+
+
+        $this->totalMessageCount=  Message::where('conversation_id', $this->conversation->id)->count();
 
         // Abort if conversation not found
         abort_unless($this->conversation, 404);
@@ -689,18 +702,25 @@ class Chat extends Component
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
         // Assign receiver and conversation ID
-        $this->receiver = $this->conversation->getReceiver();
 
+        if (!$this->conversation->isGroup()) {
+
+            $participants= $this->conversation->participants;
+
+            $this->authParticipant= $participants->where('participantable_id',auth()->id())->first();
+            $this->receiverParticipant = $participants->where('participantable_id','!=',auth()->id())->first();
+            $this->receiver = $this->receiverParticipant->participantable;
+
+        } else {
+            # code...
+            $this->authParticipant = $this->conversation->participant(auth()->user());
+            $this->receiver=null;
+        }
+        
         $this->conversationId = $this->conversation->id;
 
-        //Set auth participant
-        $this->authParticipant = $this->conversation->participant(auth()->user());
+        $this->conversation->markAsRead();
 
-        if ($this->conversation->isPrivate()) {
-            // code...
-            $this->receiverParticipant = $this->conversation->participant($this->receiver);
-
-        }
 
         //update auth participant last active ;
         $this->authParticipant->update(['last_active_at' => now()]);
@@ -734,8 +754,8 @@ class Chat extends Component
 
     public function render()
     {
-        $authParticipant = $this->conversation->participant(auth()->user());
+        //$authParticipant = $this->conversation->participant(auth()->user());
 
-        return view('wirechat::livewire.chat.chat', ['authParticipant' => $authParticipant]);
+        return view('wirechat::livewire.chat.chat');
     }
 }
