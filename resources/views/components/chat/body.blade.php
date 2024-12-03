@@ -97,7 +97,7 @@
                 @endphp
 
 
-                <div class="flex gap-2">
+                <div class="flex gap-2" wire:key="message-{{ $key }}"  >
 
                     {{-- Message user Avatar --}}
                     {{-- Hide avatar if message belongs to auth --}}
@@ -115,7 +115,7 @@
 
                     {{-- we use w-[95%] to leave space for the image --}}
                     <div class="w-[95%] mx-auto">
-                        <div wire:key="message-{{ $key }}" @class([
+                        <div @class([
                             'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
                             'ml-auto' => $belongsToAuth])>
 

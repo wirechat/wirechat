@@ -567,9 +567,7 @@ class Conversation extends Model
      */
     public function hasDisappearingTurnedOn(): bool
     {
-        return ! is_null($this->disappearing_duration)
-            && $this->disappearing_duration > 0
-            && ! is_null($this->disappearing_started_at);
+        return !is_null($this->disappearing_duration) && $this->disappearing_duration > 0 && !is_null($this->disappearing_started_at);
     }
 
     /**

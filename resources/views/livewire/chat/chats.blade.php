@@ -127,10 +127,11 @@ $primaryColor= WireChat::getColor();
 
                     @php
                         //$receiver =$conversation->getReceiver();
-                        $group=$conversation->group;
-                        $receiver = $group?null:$conversation->receiver?->participantable;
+                        $group=$conversation->isGroup()? $conversation->group:null;
+                        $receiver =$conversation->isGroup()?null:$conversation->receiver?->participantable;
                         $lastMessage = $conversation->lastMessage;
-                        $isReadByAuth = null;//$conversation?->readBy(auth()?->user());
+                        $isReadByAuth = $conversation?->readBy(auth()?->user());
+                        $belongsToAuth = $lastMessage?->belongsToAuth();
                 
 
                     @endphp
@@ -149,7 +150,7 @@ $primaryColor= WireChat::getColor();
                         ])>
 
                         <a href="{{ route(WireChat::viewRouteName(), $conversation->id) }}" class="shrink-0">
-                            <x-wirechat::avatar :disappearing="$conversation->hasDisappearingTurnedOn()"  group="{{$conversation->isGroup()}}" src="{{ $group?$group?->cover_url: $receiver?->cover_url ?? null }}"  class="w-12 h-12" />
+                            <x-wirechat::avatar  disappearing="{{$conversation->hasDisappearingTurnedOn()}}"  group="{{$conversation->isGroup()}}" src="{{ $group?$group?->cover_url: $receiver?->cover_url ?? null }}"  class="w-12 h-12" />
                         </a>
 
                         <aside class="grid  grid-cols-12 w-full">
@@ -175,12 +176,12 @@ $primaryColor= WireChat::getColor();
                                     <div class="flex gap-x-2 items-center">
 
                                         {{-- Only show if AUTH is onwer of message --}}
-                                        @if ($lastMessage->belongsToAuth())
+                                        @if ($belongsToAuth)
                                             <span class="font-bold text-xs dark:text-white/90 dark:font-normal">
                                                 You:
                                             </span>
 
-                                        @elseif(!$lastMessage->belongsToAuth() && $group!==null)
+                                        @elseif(!$belongsToAuth && $group!==null)
                                         <span class="font-bold text-xs dark:text-white/80 dark:font-normal">
                                             {{$lastMessage->sendable?->display_name}}:
                                         </span>

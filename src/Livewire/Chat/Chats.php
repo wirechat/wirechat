@@ -68,29 +68,39 @@ class Chats extends Component
      */
     protected function loadConversations()
     {
-
+        // Calculate the offset based on the current page and the number of items per page
+        $perPage = 10; // Number of items per "page"
+        $offset = ($this->page - 1) * $perPage;
+    
         $additionalConversations = Conversation::query()
-            ->tap(fn ($query) => $this->applyEagerLoading($query))
-            ->whereHas('participants', function ($query) {
-                $query->whereParticipantable(auth()->user());
-            })
-            ->when(trim($this->search ?? '') != '', fn ($query) => $this->applySearchConditions($query)) // Apply search
-            ->when(trim($this->search ?? '') == '', fn ($query) => $query->withoutDeleted()->withoutBlanks()) // Without blanks & deletedByUser when no search
+            ->with([
+               // 'lastMessage' ,//=> fn($query) => $query->select('id', 'sendable_id','sendable_type', 'created_at'),
+                         'messages',
+               'lastMessage.attachment',
+               'receiver.participantable',
+               'group.cover' ,//=> fn($query) => $query->select('id', 'name'),
+     
+            ])
+            ->whereHas('participants', fn($query) => $query->whereParticipantable(auth()->user()))
+            ->when(trim($this->search ?? '') != '', fn($query) => $this->applySearchConditions($query)) // Apply search
+            ->when(trim($this->search ?? '') == '', fn($query) => $query->withoutDeleted()->withoutBlanks()) // Without blanks & deleted
             ->latest('updated_at')
-            ->paginate(10, ["*"], 'page', $this->page);
-
-        $this->canLoadMore = $additionalConversations->hasMorePages();
-
-        // Merge the new conversations, ensure uniqueness, and sort by latest updated_at
+            ->skip($offset)
+            ->take($perPage)
+            ->get(); // Fetch only required fields
+    
+        //    dd($additionalConversations->first);
+        // Check if there are more conversations for the next page
+        $this->canLoadMore = $additionalConversations->count() === $perPage;
+    
+        // Merge and sort conversations
         $this->conversations = collect($this->conversations)
-            ->concat($additionalConversations->items()) // Efficiently append the new conversations
-            ->unique('id') // Ensure uniqueness by conversation ID
-            ->sortByDesc(function ($conversation) {
-                return $conversation->updated_at; // Sort by updated_at in descending order
-            })
+            ->concat($additionalConversations) // Append new conversations
+            ->unique('id') // Ensure unique conversation IDs
+            ->sortByDesc('updated_at') // Sort by updated_at in descending order
             ->values(); // Reset the array keys
-
     }
+
 
     //Helper method for applying search logic
     protected function applySearchConditions($query)
@@ -126,15 +136,7 @@ class Chats extends Component
     }
 
     //Eager loading relationships for better readability
-    protected function applyEagerLoading($query)
-    {
-        return $query->with([
-            'participants',
-            'lastMessage.sendable',
-            'group.cover',
-           /// 'messages.sendable'
-        ]);
-    }
+   
 
     //Helper function to check and cache column existence
     protected function columnExists($table, $field, &$columnCache)
