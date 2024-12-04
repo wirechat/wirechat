@@ -12,8 +12,8 @@ use Namu\WireChat\Tests\TestCase;
 | need to change it using the "uses()" function to bind a different classes or traits.
 |
 */
-pest()->extends(TestCase::class)->in('Feature');
-pest()->extends(TestCase::class)->in('Unit');
+uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Unit');
 /*
 |--------------------------------------------------------------------------
 | Expectations

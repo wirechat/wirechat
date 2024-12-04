@@ -37,8 +37,8 @@
     "prefer-stable": true,
     "require-dev": {
         "orchestra/testbench": "^8.24|^9.0",
-        "pestphp/pest": "^3.0.0",
-        "pestphp/pest-plugin-laravel": "^3.0.0",
+        "pestphp/pest": "^2.34|^3.0.0",
+        "pestphp/pest-plugin-laravel": "^2.4|^3.0.0",
         "christophrumpel/missing-livewire-assertions": "^2.8",
         "laravel/pint": "^1.18"
     },
