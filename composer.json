@@ -1,8 +1,7 @@
 {
     "name": "namu/wirechat",
-    "description": "A Laravel Livewire-powered messaging app for teams, supporting private 1:1 chats and group conversations",
+    "description": "A Laravel Livewire messaging app for teams with private chats and group conversations.",
     "license": "MIT",
-    "version": "0.0.1", 
     "autoload": {
         "psr-4": {
             "Namu\\WireChat\\": "src/"
