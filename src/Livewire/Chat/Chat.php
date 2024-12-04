@@ -33,7 +33,7 @@ class Chat extends Component
     use WithFileUploads;
     use WithPagination;
 
-    public  $conversation;
+    public $conversation;
 
     public $conversationId;
 
@@ -49,15 +49,17 @@ class Chat extends Component
     public int $paginate_var = 10;
 
     public bool $canLoadMore;
+
     #[Locked]
     public $totalMessageCount;
+
     public array $media = [];
 
     public array $files = [];
 
     public ?Participant $authParticipant;
 
-   // #[Locked]
+    // #[Locked]
     public ?Participant $receiverParticipant;
 
     //Theme
@@ -66,8 +68,13 @@ class Chat extends Component
     public function getListeners()
     {
         // dd($this->conversation);
+        $conversationId = $this->conversation->id;
+
         return [
             'refresh' => '$refresh',
+            'echo-private:conversation.'.$conversationId.',.Namu\\WireChat\\Events\\MessageCreated' => 'appendNewMessage',
+            'echo-private:conversation.'.$conversationId.',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
+
             //  'echo-private:conversation.' .$this->conversation->id. ',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
         ];
     }
@@ -121,9 +128,11 @@ class Chat extends Component
 
             //Make sure message does not belong to auth
             // Make sure message does not belong to auth
-            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type === get_class(auth()->user())) {
+            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type == get_class(auth()->user())) {
                 return null;
             }
+
+            Log::info('reached in appendNewMessage()');
 
             //push message
             $this->pushMessage($newMessage);
@@ -576,11 +585,13 @@ class Chat extends Component
             // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
+            Log::info('broadcast called');
             //if conversation is private then Notify particpant immediately
             if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
-
+                Log::info('is private or self');
                 if ($this->conversation->isPrivate() && $this->receiverParticipant) {
 
+                    Log::info('broadcasted');
                     broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
                     //    Notification::send($this->receiver, new NewMessageNotification($message));
 
@@ -650,9 +661,9 @@ class Chat extends Component
 
         // Fetch paginated messages
         $messages = $this->conversation->messages()
-            ->with('sendable', 'parent','attachment')
+            ->with('sendable', 'parent', 'attachment')
             ->orderBy('created_at', 'asc')
-            ->skip( $this->totalMessageCount - $this->paginate_var)
+            ->skip($this->totalMessageCount - $this->paginate_var)
             ->take($this->paginate_var)
             ->get();  // Fetch messages as Eloquent collection
 
@@ -662,7 +673,7 @@ class Chat extends Component
             ->groupBy(fn ($message) => $this->messageGroupKey($message))  // Grouping by custom logic
             ->map->values();  // Re-index each group
 
-        $this->canLoadMore =  $this->totalMessageCount > $messages->count();
+        $this->canLoadMore = $this->totalMessageCount > $messages->count();
 
         return $this->loadedMessages;
 
@@ -680,40 +691,40 @@ class Chat extends Component
         $this->finalizeConversationState();
         $this->loadMessages();
     }
-    
+
     private function initializeConversation()
     {
         abort_unless(auth()->check(), 401);
-    
+
         $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
             ->where('id', $this->conversation)
-            ->firstOr(fn() => abort(404));
-    
+            ->firstOr(fn () => abort(404));
+
         $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
-    
+
         $this->conversationId = $this->conversation->id;
     }
-    
+
     private function initializeParticipants()
     {
         if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
             $this->conversation->load('participants');
             $participants = $this->conversation->participants;
-    
+
             $this->authParticipant = $participants
                 ->where('participantable_id', auth()->id())
                 ->first();
-    
+
             $this->receiverParticipant = $participants
                 ->where('participantable_id', '!=', auth()->id())
                 ->first();
 
             //If conversation is self then receiver is auth;
-            if ($this->conversation->type== ConversationType::SELF) {
+            if ($this->conversation->type == ConversationType::SELF) {
                 $this->receiverParticipant = $this->authParticipant;
             }
-    
+
             $this->receiver = $this->receiverParticipant
                 ? $this->receiverParticipant->participantable
                 : null;
@@ -722,24 +733,23 @@ class Chat extends Component
             $this->receiver = null;
         }
     }
-    
+
     private function finalizeConversationState()
     {
         $this->conversation->markAsRead();
-    
+
         if ($this->authParticipant) {
             $this->authParticipant->update(['last_active_at' => now()]);
-    
+
             if ($this->authParticipant->hasDeletedConversation(true)) {
                 $this->authParticipant->update(['conversation_deleted_at' => null]);
             }
         }
     }
-    
 
     public function render()
     {
-           // $this->conversation->turnOnDisappearing(3600);
+        // $this->conversation->turnOnDisappearing(3600);
         return view('wirechat::livewire.chat.chat');
     }
 }

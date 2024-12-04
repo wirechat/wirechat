@@ -1221,7 +1221,7 @@ describe('Sending messages ', function () {
         for ($i = 0; $i < 60; $i++) {
             $request->set('body', 'New message')->call('sendMessage');
         }
-        #on 61 abort 
+        //on 61 abort
         $request->set('body', 'New message')->call('sendMessage');
 
         $request->assertStatus(429);

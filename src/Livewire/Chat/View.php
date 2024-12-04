@@ -32,7 +32,7 @@ class View extends Component
         ///check if auth belongs to conversaiton
         // Check if the user belongs to the conversation
 
-       // abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+        // abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
         //Mark as read
 
@@ -48,7 +48,7 @@ class View extends Component
                   <div class=" hidden md:grid bg-inherit  dark:bg-inherit  relative w-full h-full md:w-[360px] lg:w-[400px] xl:w-[500px]  shrink-0 overflow-y-auto  ">
 
             
-                     <livewire:chats  /> 
+                     <livewire:chats/> 
 
                   </div>
                   

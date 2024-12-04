@@ -126,25 +126,17 @@
             document.head.appendChild(script);
         }
     }" x-init="setTimeout(() => {
+        $wire.dispatch('focus-input-field');
         requestAnimationFrame(() => {
-            $wire.dispatch('focus-input-field');
+          
 
             initializing = false;
         });
 
-    }, 120);
+        }, 120);
 
-    Echo.private('conversation.{{ $conversation->id }}')
-        .listen('.Namu\\WireChat\\Events\\MessageCreated', (e) => {
-            $wire.appendNewMessage(e); // Calling the Livewire method to handle the new message
-        });
-
-    Echo.private('conversation.{{ $conversation->id }}')
-        .listen('.Namu\\WireChat\\Events\\MessageDeleted', (e) => {
-            $wire.removeDeletedMessage(e); // Calling the Livewire method to handle the new message
-        });
-
-    loadEmojiPicker();"
+        loadEmojiPicker();
+    "
     @scroll-bottom.window="
         
 

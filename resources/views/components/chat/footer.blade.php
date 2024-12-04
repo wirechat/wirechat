@@ -211,7 +211,7 @@
 
 
         <form x-data="{
-            'body': @entangle('body'),
+            'body': $wire.entangle('body'),
             insertNewLine: function(textarea) {
                 {{-- Get the current cursor position --}}
                 var startPos = textarea.selectionStart;

@@ -8,7 +8,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -54,12 +53,7 @@ class Conversation extends Model
                 // Delete associated participants
                 $conversation->participants()->withoutGlobalScopes()->forceDelete();
 
-                // Delete reads
                 // Use a DB transaction to ensure atomicity
-                DB::transaction(function () use ($conversation) {
-                    // Delete associated reads (polymorphic readable relation)
-                    $conversation->reads()->delete();
-                });
 
                 // Delete associated messages
                 $conversation->messages()->withoutGlobalScopes()->forceDelete();
@@ -110,8 +104,6 @@ class Conversation extends Model
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
 
-
-
     /**
      * Get a participant model  from the user
      *
@@ -132,7 +124,7 @@ class Conversation extends Model
                 ->where('participantable_type', get_class($user))
                 ->first();
         } else {
-            
+
             $participant = $query->where('participantable_id', $user->id)
                 ->where('participantable_type', get_class($user))
                 ->first();
@@ -305,11 +297,9 @@ class Conversation extends Model
 
     public function lastMessage()
     {
-        return $this->hasOne(Message::class,'conversation_id')->latestOfMany();
+        return $this->hasOne(Message::class, 'conversation_id')->latestOfMany();
     }
 
-
-    
     /**
      * ------------------------
      * SCOPES
@@ -408,14 +398,12 @@ class Conversation extends Model
     public function receiver(): HasOne
     {
         return $this->hasOne(Participant::class)
-                ->where('participantable_id', '!=', auth()->id())
-                ->where('role', 'owner')->whereHas('conversation', function ($query) {
-                    $query->whereIn('type', [ConversationType::PRIVATE, ConversationType::SELF]);
-                });
+            ->where('participantable_id', '!=', auth()->id())
+            ->where('role', 'owner')->whereHas('conversation', function ($query) {
+                $query->whereIn('type', [ConversationType::PRIVATE, ConversationType::SELF]);
+            });
     }
-    
 
-    
     /**
      * Get the receiver of the private conversation
      *
@@ -452,22 +440,6 @@ class Conversation extends Model
     }
 
     /**
-     * ----------------------------------------
-     * ----------------------------------------
-     * Reads
-     * Define relationship and methods for conversation reads
-     * --------------------------------------------
-     */
-
-    /**
-     * Get all of the reads for the conversation.
-     */
-    public function reads(): HasMany
-    {
-        return $this->hasMany(Read::class, 'conversation_id');
-    }
-
-    /**
      * Mark the conversation as read for the current authenticated user.
      *
      * @param  Model  $user||null
@@ -482,16 +454,8 @@ class Conversation extends Model
             return null;
             // code...
         }
-        // Update or create a read record for the conversation
-        $this->reads()->updateOrCreate(
-            [
-                'readable_id' => $user->id,
-                'readable_type' => get_class($user),
-            ],
-            [
-                'read_at' => now(),
-            ]
-        );
+
+        $this->participant($user)->update(['conversation_read_at' => now()]);
     }
 
     /**
@@ -512,14 +476,37 @@ class Conversation extends Model
      */
     public function unreadMessages(Model $user)
     {
-        $lastReadAt = $this->reads()
-            ->where('readable_id', $user->id)
-            ->where('readable_type', get_class($user))
-            ->value('read_at');
+        $participant = $this->participant($user);
 
-        return $this->messages()
-            ->where('created_at', '>', $lastReadAt)
-            ->get();
+        if (! $participant) {
+            // If the participant is not found, return an empty collection
+            return collect();
+        }
+
+        $lastReadAt = $participant->conversation_read_at;
+
+        // Check if the messages relation is already loaded
+        if ($this->relationLoaded('messages')) {
+            // Filter messages based on last read time and exclude messages belonging to the user
+            return $this->messages->filter(function ($message) use ($lastReadAt, $user) {
+                // If lastReadAt is null, consider all messages as unread
+                // Also, exclude messages that belong to the user
+                return (! $lastReadAt || $message->created_at > $lastReadAt) &&
+                    $message->sendable_id != $user->id &&
+                    $message->sendable_type != get_class($user);
+            });
+        }
+
+        // Query builder for unread messages
+        $query = $this->messages();
+        if ($lastReadAt) {
+            $query->where('created_at', '>', $lastReadAt);
+        }
+
+        // Exclude messages that belong to the user
+        return $query->where('sendable_id', '!=', $user->id)
+            ->where('sendable_type', get_class($user))
+            ->get(); // Return the collection of unread messages
     }
 
     /**
@@ -527,32 +514,10 @@ class Conversation extends Model
      */
     public function getUnreadCountFor(Model $model): int
     {
-        // Get the last time the conversation was marked as read by the user
-        $lastReadAt = $this->reads()
-            ->where('readable_id', $model->id)
-            ->where('readable_type', get_class($model))
-            ->value('read_at');
+        // Get unread messages by reusing the unreadMessages method
+        $unreadMessages = $this->unreadMessages($model);
 
-        // Check if the messages relation is already loaded to avoid duplicate queries
-        if ($this->relationLoaded('messages')) {
-            $messages = $this->messages;
-        } else {
-            $messages = $this->messages();
-        }
-
-        //exclude messages which user owns
-        $messages->where('sendable_id', '!=', $model->id)
-            ->where('sendable_type', get_class($model));
-
-        // If the conversation has never been marked as read, return all messages count
-        if (! $lastReadAt) {
-            return $messages->count();
-        }
-
-        // Count the messages that were created after the last read timestamp
-        return $messages
-            ->where('created_at', '>', $lastReadAt)
-            ->count();
+        return $unreadMessages->count(); // Return the count of unread messages
     }
 
     /**
@@ -567,7 +532,7 @@ class Conversation extends Model
      */
     public function hasDisappearingTurnedOn(): bool
     {
-        return !is_null($this->disappearing_duration) && $this->disappearing_duration > 0 && !is_null($this->disappearing_started_at);
+        return ! is_null($this->disappearing_duration) && $this->disappearing_duration > 0 && ! is_null($this->disappearing_started_at);
     }
 
     /**

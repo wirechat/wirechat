@@ -109,7 +109,6 @@ class Message extends Model
                 }
             }
 
-            // Delete reads
             // Use a DB transaction to ensure atomicity
             DB::transaction(function () use ($message) {
                 // Delete associated actions (polymorphic actionable relation)
@@ -131,13 +130,13 @@ class Message extends Model
     /**
      * Check if the message has been read by a specific user.
      */
-    public function readBy(Model $user): bool
+    public function readBy(Model|Participant $user): bool
     {
-        // Check if the reads relationship is loaded
+        if ($user instanceof Participant) {
+            $user = $user->participantable;
+        }
 
-        $read = $user->reads()->where('conversation_id', $this->conversation_id)->first();
-
-        return $read?->read_at > $this->created_at;
+        return $this->conversation->getUnreadCountFor($user) <= 0;
 
     }
 

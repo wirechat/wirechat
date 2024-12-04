@@ -2,8 +2,6 @@
 
 namespace Namu\WireChat\Livewire\Chat;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Namu\WireChat\Facades\WireChat;
@@ -26,8 +24,7 @@ class Chats extends Component
     {
         return [
             'refresh' => '$refresh',
-            
-            //   "echo-private:participant." .auth()->id() . ",.Namu\\WireChat\\Events\\NotifyParticipant" => '$refresh',
+            'echo-private:participant.'.auth()->id().',.Namu\\WireChat\\Events\\NotifyParticipant' => '$refresh',
         ];
     }
 
@@ -58,7 +55,6 @@ class Chats extends Component
         $this->reset(['page', 'canLoadMore']);
         // }
 
-
     }
 
     /**
@@ -71,28 +67,28 @@ class Chats extends Component
         // Calculate the offset based on the current page and the number of items per page
         $perPage = 10; // Number of items per "page"
         $offset = ($this->page - 1) * $perPage;
-    
+
         $additionalConversations = Conversation::query()
             ->with([
-               // 'lastMessage' ,//=> fn($query) => $query->select('id', 'sendable_id','sendable_type', 'created_at'),
-                         'messages',
-               'lastMessage.attachment',
-               'receiver.participantable',
-               'group.cover' ,//=> fn($query) => $query->select('id', 'name'),
-     
+                // 'lastMessage' ,//=> fn($query) => $query->select('id', 'sendable_id','sendable_type', 'created_at'),
+                'messages',
+                'lastMessage.attachment',
+                'receiver.participantable',
+                'group.cover', //=> fn($query) => $query->select('id', 'name'),
+
             ])
-            ->whereHas('participants', fn($query) => $query->whereParticipantable(auth()->user()))
-            ->when(trim($this->search ?? '') != '', fn($query) => $this->applySearchConditions($query)) // Apply search
-            ->when(trim($this->search ?? '') == '', fn($query) => $query->withoutDeleted()->withoutBlanks()) // Without blanks & deleted
+            ->whereHas('participants', fn ($query) => $query->whereParticipantable(auth()->user()))
+            ->when(trim($this->search ?? '') != '', fn ($query) => $this->applySearchConditions($query)) // Apply search
+            ->when(trim($this->search ?? '') == '', fn ($query) => $query->withoutDeleted()->withoutBlanks()) // Without blanks & deleted
             ->latest('updated_at')
             ->skip($offset)
             ->take($perPage)
             ->get(); // Fetch only required fields
-    
+
         //    dd($additionalConversations->first);
         // Check if there are more conversations for the next page
         $this->canLoadMore = $additionalConversations->count() === $perPage;
-    
+
         // Merge and sort conversations
         $this->conversations = collect($this->conversations)
             ->concat($additionalConversations) // Append new conversations
@@ -100,7 +96,6 @@ class Chats extends Component
             ->sortByDesc('updated_at') // Sort by updated_at in descending order
             ->values(); // Reset the array keys
     }
-
 
     //Helper method for applying search logic
     protected function applySearchConditions($query)
@@ -136,7 +131,6 @@ class Chats extends Component
     }
 
     //Eager loading relationships for better readability
-   
 
     //Helper function to check and cache column existence
     protected function columnExists($table, $field, &$columnCache)
@@ -147,7 +141,6 @@ class Chats extends Component
 
         return in_array($field, $columnCache[$table]);
     }
-
 
     public function mount()
     {
@@ -160,6 +153,7 @@ class Chats extends Component
     {
 
         $this->loadConversations();
+
         return view('wirechat::livewire.chat.chats');
     }
 }

@@ -33,6 +33,7 @@ return new class extends Migration
             $table->timestamp('last_active_at')->nullable();
             $table->timestamp('conversation_cleared_at')->nullable()->index();
             $table->timestamp('conversation_deleted_at')->nullable()->index();
+            $table->timestamp('conversation_read_at')->nullable()->index();
 
             $table->softDeletes();
             $table->timestamps();

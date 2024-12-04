@@ -2,7 +2,7 @@
 
 @php
 
-$primaryColor= WireChat::getColor();
+    $primaryColor = WireChat::getColor();
 
 @endphp
 
@@ -54,7 +54,7 @@ $primaryColor= WireChat::getColor();
 
 
 <div x-init=" setTimeout(() => {
-     conversationElement = document.getElementById('conversation-{{$selectedConversationId }}');
+     conversationElement = document.getElementById('conversation-{{ $selectedConversationId }}');
 
      // Scroll to the conversation element
      if (conversationElement) {
@@ -64,7 +64,7 @@ $primaryColor= WireChat::getColor();
     class="flex flex-col bg-white/95 dark:bg-gray-900 transition-all h-full overflow-hidden w-full sm:p-3 border-r dark:border-gray-700  ">
 
     @php
-        $authUser=auth()->user();
+        $authUser = auth()->user();
         $authId = $authUser->id;
         $primaryColor = WireChat::getColor();
 
@@ -74,9 +74,8 @@ $primaryColor= WireChat::getColor();
     <x-wirechat::chats.header />
 
 
-    <main x-data
-    {{-- Detect when scrolled to the bottom --}}
-    @scroll.self.debounce="
+    <main x-data {{-- Detect when scrolled to the bottom --}}
+        @scroll.self.debounce="
     // Calculate scroll values
      scrollTop = $el.scrollTop;
      scrollHeight = $el.scrollHeight;
@@ -89,26 +88,7 @@ $primaryColor= WireChat::getColor();
         $wire.loadMore();
     }
     "
-        x-init="
-       
-
-        Echo.private('participant.{{auth()->id()}}')
-        .listen('.Namu\\WireChat\\Events\\NotifyParticipant', (e) => {
-            
-           // alert('here');
-            $wire.$refresh()
-                
-        });
-        
-        Echo.private('App.Models.User.{{auth()->id()}}')
-        .notification((notification) => {
-            if(notification.type=='Namu\\WireChat\\Notifications\\NewMessageNotification'){
-                  $wire.$refresh();
-               }
-        });
-
-    
-        "
+         
          class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">
 
 
@@ -124,15 +104,13 @@ $primaryColor= WireChat::getColor();
             <ul wire:loading.delay.long.remove wire:target="search" class="p-2 grid w-full spacey-y-2">
 
                 @foreach ($conversations as $conversation)
-
                     @php
                         //$receiver =$conversation->getReceiver();
-                        $group=$conversation->isGroup()? $conversation->group:null;
-                        $receiver =$conversation->isGroup()?null:$conversation->receiver?->participantable;
+                        $group = $conversation->isGroup() ? $conversation->group : null;
+                        $receiver = $conversation->isGroup() ? null : $conversation->receiver?->participantable;
                         $lastMessage = $conversation->lastMessage;
                         $isReadByAuth = $conversation?->readBy(auth()?->user());
                         $belongsToAuth = $lastMessage?->belongsToAuth();
-                
 
                     @endphp
 
@@ -140,7 +118,7 @@ $primaryColor= WireChat::getColor();
 
                     {{-- Chat list item --}}
                     {{-- We use style here to make it easy for dynamic and safe injection --}}
-                    <li id="conversation-{{ $conversation->id }}" wire:key="conversation-{{ $conversation->id }}"
+                    <li id="conversation-{{ $conversation->id }}" wire:key="conversation-em-{{ $conversation->id }}"
                         @style([
                             'border-color:' . $primaryColor . '20' => $selectedConversationId == $conversation?->id,
                         ]) @class([
@@ -150,7 +128,10 @@ $primaryColor= WireChat::getColor();
                         ])>
 
                         <a href="{{ route(WireChat::viewRouteName(), $conversation->id) }}" class="shrink-0">
-                            <x-wirechat::avatar  disappearing="{{$conversation->hasDisappearingTurnedOn()}}"  group="{{$conversation->isGroup()}}" src="{{ $group?$group?->cover_url: $receiver?->cover_url ?? null }}"  class="w-12 h-12" />
+                            <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
+                                group="{{ $conversation->isGroup() }}"
+                                src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}"
+                                class="w-12 h-12" />
                         </a>
 
                         <aside class="grid  grid-cols-12 w-full">
@@ -162,7 +143,7 @@ $primaryColor= WireChat::getColor();
                                 {{-- name --}}
                                 <div class="flex gap-1 mb-1 w-full items-center">
                                     <h6 class="truncate font-medium text-gray-900 dark:text-white">
-                                        {{ $group?$group?->name: $receiver?->display_name }}
+                                        {{ $group ? $group?->name : $receiver?->display_name }}
                                     </h6>
 
                                     @if ($conversation->isSelfConversation())
@@ -180,24 +161,32 @@ $primaryColor= WireChat::getColor();
                                             <span class="font-bold text-xs dark:text-white/90 dark:font-normal">
                                                 You:
                                             </span>
-
-                                        @elseif(!$belongsToAuth && $group!==null)
-                                        <span class="font-bold text-xs dark:text-white/80 dark:font-normal">
-                                            {{$lastMessage->sendable?->display_name}}:
-                                        </span>
-
+                                        @elseif(!$belongsToAuth && $group !== null)
+                                            <span class="font-bold text-xs dark:text-white/80 dark:font-normal">
+                                                {{ $lastMessage->sendable?->display_name }}:
+                                            </span>
                                         @endif
 
                                         <p @class([
                                             'truncate text-sm dark:text-white  gap-2 items-center',
-                                            'font-semibold text-black'  =>!$isReadByAuth && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser),
-                                            'font-normal text-gray-600' => $isReadByAuth && $lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser),
-                                            'font-normal text-gray-600' => $isReadByAuth && $lastMessage?->sendable_id == $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)
+                                            'font-semibold text-black' =>
+                                                !$isReadByAuth &&
+                                                $lastMessage?->sendable_id != $authUser?->id &&
+                                                $lastMessage?->sendable_type == get_class($authUser),
+                                            'font-normal text-gray-600' =>
+                                                $isReadByAuth &&
+                                                $lastMessage?->sendable_id != $authUser?->id &&
+                                                $lastMessage?->sendable_type == get_class($authUser),
+                                            'font-normal text-gray-600' =>
+                                                $isReadByAuth &&
+                                                $lastMessage?->sendable_id == $authUser?->id &&
+                                                $lastMessage?->sendable_type == get_class($authUser),
                                         ])>
                                             {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->hasAttachment() ? '📎 Attachment' : '') }}
                                         </p>
 
-                                        <span class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
+                                        <span
+                                            class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
 
                                     </div>
                                 @endif
@@ -206,7 +195,8 @@ $primaryColor= WireChat::getColor();
 
                             {{-- Read status --}}
                             {{-- Only show if AUTH is NOT onwer of message --}}
-                            <div class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth ? 'visible' : 'invisible' }} col-span-2 flex flex-col text-center my-auto">
+                            <div
+                                class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth ? 'visible' : 'invisible' }}  col-span-2 flex flex-col text-center my-auto">
 
                                 {{-- Dots icon --}}
                                 <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -227,18 +217,17 @@ $primaryColor= WireChat::getColor();
             {{-- Load more button --}}
             @if ($canLoadMore)
                 <section wire:loading.remove wire:target="search" class="w-full justify-center flex my-3 ">
-                    <button wire:loading.remove wire:target="loadMore" wire:loading.attr="disabled" dusk="loadMoreButton" @click="$wire.loadMore()"
+                    <button wire:loading.remove wire:target="loadMore" wire:loading.attr="disabled"
+                        dusk="loadMoreButton" @click="$wire.loadMore()"
                         class="  text-sm dark:text-white disabled:hover:cursor-not-allowed hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
                         Load more
                     </button>
 
-                    <div wire:loading wire:target="loadMore" >
+                    <div wire:loading wire:target="loadMore">
                         <x-wirechat::loading-spin />
-                     </div>
+                    </div>
                 </section>
             @endif
-
-            
         @else
             <div class="w-full flex items-center h-full justify-center">
                 <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet</h6>
@@ -246,7 +235,7 @@ $primaryColor= WireChat::getColor();
 
         @endif
     </main>
-    
+
 
 
 </div>
