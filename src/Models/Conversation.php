@@ -466,7 +466,7 @@ class Conversation extends Model
     public function readBy(Model $user): bool
     {
         // Reuse the unread count method and return true if unread count is 0
-        return $this->getUnreadCountFor($user) <= 0;
+        return $this->getUnreadCountFor($user) < 0;
     }
 
     /**

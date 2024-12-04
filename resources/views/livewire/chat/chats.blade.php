@@ -195,8 +195,11 @@
 
                             {{-- Read status --}}
                             {{-- Only show if AUTH is NOT onwer of message --}}
-                            <div
-                                class="{{ $lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth ? 'visible' : 'invisible' }}  col-span-2 flex flex-col text-center my-auto">
+
+                            {{-- {{'read by auth ?' . $isReadByAuth}} --}}
+                            @if ($lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth)
+                                
+                            <div class=" col-span-2 flex flex-col text-center my-auto">
 
                                 {{-- Dots icon --}}
                                 <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -205,6 +208,7 @@
                                 </svg>
 
                             </div>
+                            @endif
 
 
                         </aside>
