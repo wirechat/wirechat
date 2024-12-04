@@ -9,7 +9,6 @@
 
 
 <main x-data="{
-
     height: 0,
     previousHeight: 0,
     updateScrollPosition: function() {
@@ -31,11 +30,12 @@
     }
 
     }"  
-        x-init="setTimeout(() => {
-            this.height = $el.scrollHeight;
-            console.log('height ' + this.height);
-            $nextTick(() => $el.scrollTop = this.height);
-        }, 0);"
+        x-init="
+            requestAnimationFrame(() => {
+                this.height = $el.scrollHeight;
+                $el.scrollTop = this.height;
+            });
+        "
     @scroll ="
         scrollTop= $el.scrollTop;
         if((scrollTop<=0) && $wire.canLoadMore){
@@ -45,34 +45,25 @@
         }
      "
     @update-height.window="
-    {{-- 
-        Replaced $nextTick with requestAnimationFrame: This will allow you to update the scroll position immediately after
-        the next DOM repaint without causing any delay or visual glitch. It's a smoother solution than $nextTick for cases
-        where visual glitches need to be minimized.
-    --}}
-    requestAnimationFrame(() => {
-           updateScrollPosition();
-    });
 
-
-"
+        requestAnimationFrame(() => {
+            updateScrollPosition();
+        });"
   
     id="conversation" x-ref="chatbox"
-    class="flex flex-col h-full relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto "
-    style="contain: content" :class="{ 'invisible': initializing, 'visible': !initializing }">
+    x-cloak
+    {{$attributes->merge(['class'=>'flex flex-col h-full relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto'])}}
+    style="contain: content" >
 
 
 
-
-    <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore"
-        class="invisible transition-all duration-300 ">
+    <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore" class="invisible transition-all duration-300 ">
         <x-wirechat::loading-spin />
     </div>
  
     {{-- Define previous message outside the loop --}}
     @php
         $previousMessage = null;
-
     @endphp
 
     <!--Message-->
@@ -106,7 +97,7 @@
                 @endphp
 
 
-                <div class="flex gap-2">
+                <div class="flex gap-2" wire:key="message-{{ $key }}"  >
 
                     {{-- Message user Avatar --}}
                     {{-- Hide avatar if message belongs to auth --}}
@@ -124,7 +115,7 @@
 
                     {{-- we use w-[95%] to leave space for the image --}}
                     <div class="w-[95%] mx-auto">
-                        <div wire:key="message-{{ $key }}" @class([
+                        <div @class([
                             'max-w-[85%] md:max-w-[78%]  flex flex-col gap-y-2  ',
                             'ml-auto' => $belongsToAuth])>
 

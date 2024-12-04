@@ -8,12 +8,6 @@ use Livewire\Component;
 
 class Index extends Component
 {
-    /**
-     * todo:Make sure user is authenticaed for all methods
-     * todo:2 make sure user belongs to conversation
-     * todo:2 find a way to user protected methods and locked properties
-     * todo:3 devide code in chatbox into @includes in order to make code clean
-     */
     #[Layout('wirechat::layouts.app')]
     #[Title('Chats')]
     public function render()
@@ -21,7 +15,7 @@ class Index extends Component
         return <<<'BLADE'
               <div class="w-full h-[calc(100vh_-_0.0rem)] flex  rounded-lg" >
                   <div class="relative  w-full h-full   md:w-[360px] lg:w-[400px] xl:w-[500px] shrink-0 overflow-y-auto  ">
-                    @livewire('chats')
+                    <livewire:chats/> 
                   </div>
                   <main class=" hidden md:grid   w-full  dark:border-gray-700 h-full relative overflow-y-auto"  style="contain:content">
 

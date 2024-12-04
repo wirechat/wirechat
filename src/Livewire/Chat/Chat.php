@@ -13,6 +13,7 @@ use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
@@ -49,14 +50,17 @@ class Chat extends Component
 
     public bool $canLoadMore;
 
+    #[Locked]
+    public $totalMessageCount;
+
     public array $media = [];
 
     public array $files = [];
 
-    protected Participant $authParticipant;
+    public ?Participant $authParticipant;
 
-    #[Locked]
-    public Participant $receiverParticipant;
+    // #[Locked]
+    public ?Participant $receiverParticipant;
 
     //Theme
     public $replyMessage = null;
@@ -64,8 +68,13 @@ class Chat extends Component
     public function getListeners()
     {
         // dd($this->conversation);
+        $conversationId = $this->conversation->id;
+
         return [
             'refresh' => '$refresh',
+            'echo-private:conversation.'.$conversationId.',.Namu\\WireChat\\Events\\MessageCreated' => 'appendNewMessage',
+            'echo-private:conversation.'.$conversationId.',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
+
             //  'echo-private:conversation.' .$this->conversation->id. ',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
         ];
     }
@@ -119,9 +128,11 @@ class Chat extends Component
 
             //Make sure message does not belong to auth
             // Make sure message does not belong to auth
-            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type === get_class(auth()->user())) {
+            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type == get_class(auth()->user())) {
                 return null;
             }
+
+            Log::info('reached in appendNewMessage()');
 
             //push message
             $this->pushMessage($newMessage);
@@ -574,11 +585,13 @@ class Chat extends Component
             // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
+            Log::info('broadcast called');
             //if conversation is private then Notify particpant immediately
             if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
-
+                Log::info('is private or self');
                 if ($this->conversation->isPrivate() && $this->receiverParticipant) {
 
+                    Log::info('broadcasted');
                     broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
                     //    Notification::send($this->receiver, new NewMessageNotification($message));
 
@@ -645,13 +658,12 @@ class Chat extends Component
     public function loadMessages()
     {
         // Get total message count
-        $count = Message::where('conversation_id', $this->conversation->id)->count();
 
         // Fetch paginated messages
-        $messages = Message::where('conversation_id', $this->conversation->id)
-            ->with('sendable', 'parent')
+        $messages = $this->conversation->messages()
+            ->with('sendable', 'parent', 'attachment')
             ->orderBy('created_at', 'asc')
-            ->skip($count - $this->paginate_var)
+            ->skip($this->totalMessageCount - $this->paginate_var)
             ->take($this->paginate_var)
             ->get();  // Fetch messages as Eloquent collection
 
@@ -661,7 +673,7 @@ class Chat extends Component
             ->groupBy(fn ($message) => $this->messageGroupKey($message))  // Grouping by custom logic
             ->map->values();  // Re-index each group
 
-        $this->canLoadMore = $count > $messages->count();
+        $this->canLoadMore = $this->totalMessageCount > $messages->count();
 
         return $this->loadedMessages;
 
@@ -674,68 +686,70 @@ class Chat extends Component
 
     public function mount()
     {
-        // Check authentication
-        abort_unless(auth()->check(), 401);
-
-        //    dd(route(WireChat::indexRouteName()));
-        // Retrieve conversation without global scopes
-        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
-            ->where('id', $this->conversation)->first();
-
-        // Abort if conversation not found
-        abort_unless($this->conversation, 404);
-
-        // Ensure the user belongs to the conversation
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
-
-        // Assign receiver and conversation ID
-        $this->receiver = $this->conversation->getReceiver();
-
-        $this->conversationId = $this->conversation->id;
-
-        //Set auth participant
-        $this->authParticipant = $this->conversation->participant(auth()->user());
-
-        if ($this->conversation->isPrivate()) {
-            // code...
-            $this->receiverParticipant = $this->conversation->participant($this->receiver);
-
-        }
-
-        //update auth participant last active ;
-        $this->authParticipant->update(['last_active_at' => now()]);
-
-        // Attempt to clear expired deletion if necessary
-        $this->removeExpiredConversationDeletion();
-
-        // Load conversation messages
+        $this->initializeConversation();
+        $this->initializeParticipants();
+        $this->finalizeConversationState();
         $this->loadMessages();
     }
 
-    private function removeExpiredConversationDeletion(): void
+    private function initializeConversation()
     {
-        if ($this->authParticipant->hasDeletedConversation(true)) {
-            // $participant = $this->conversation->participant($user);
+        abort_unless(auth()->check(), 401);
 
-            // $expired = $authParticipant->conversationDeletionExpired();
+        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
+            ->where('id', $this->conversation)
+            ->firstOr(fn () => abort(404));
 
-            // Log::info([
-            //     'conversation_updated_at' => $this->conversation->updated_at,
-            //     'participant_deleted_at' => $this->authParticipant->conversation_deleted_at,
-            //     'deletion_expired' => true,
-            // ]);
+        $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
-            // // if ($expired) {
-            $this->authParticipant->update(['conversation_deleted_at' => null]);
+        $this->conversationId = $this->conversation->id;
+    }
 
+    private function initializeParticipants()
+    {
+        if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
+            $this->conversation->load('participants');
+            $participants = $this->conversation->participants;
+
+            $this->authParticipant = $participants
+                ->where('participantable_id', auth()->id())
+                ->first();
+
+            $this->receiverParticipant = $participants
+                ->where('participantable_id', '!=', auth()->id())
+                ->first();
+
+            //If conversation is self then receiver is auth;
+            if ($this->conversation->type == ConversationType::SELF) {
+                $this->receiverParticipant = $this->authParticipant;
+            }
+
+            $this->receiver = $this->receiverParticipant
+                ? $this->receiverParticipant->participantable
+                : null;
+        } else {
+            $this->authParticipant = Participant::whereParticipantable(auth()->user())->first();
+            $this->receiver = null;
         }
+    }
 
+    private function finalizeConversationState()
+    {
+        $this->conversation->markAsRead();
+
+        if ($this->authParticipant) {
+            $this->authParticipant->update(['last_active_at' => now()]);
+
+            if ($this->authParticipant->hasDeletedConversation(true)) {
+                $this->authParticipant->update(['conversation_deleted_at' => null]);
+            }
+        }
     }
 
     public function render()
     {
-        $authParticipant = $this->conversation->participant(auth()->user());
-
-        return view('wirechat::livewire.chat.chat', ['authParticipant' => $authParticipant]);
+        // $this->conversation->turnOnDisappearing(3600);
+        return view('wirechat::livewire.chat.chat');
     }
 }

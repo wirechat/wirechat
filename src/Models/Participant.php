@@ -23,6 +23,7 @@ class Participant extends Model
         'exited_at',
         'conversation_deleted_at',
         'conversation_cleared_at',
+        'conversation_read_at',
         'last_active_at',
     ];
 
@@ -31,6 +32,7 @@ class Participant extends Model
         'exited_at' => 'datetime',
         'conversation_deleted_at' => 'datetime',
         'conversation_cleared_at' => 'datetime',
+        'conversation_read_at' => 'datetime',
         'last_active_at' => 'datetime',
     ];
 

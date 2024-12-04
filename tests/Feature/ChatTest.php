@@ -1208,7 +1208,7 @@ describe('Sending messages ', function () {
         Event::assertNotDispatched(MessageCreated::class);
     });
 
-    test('sending messages is rate limited by 50 in 60 seconds', function () {
+    test('sending messages is rate limited by 60 in 60 seconds', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
@@ -1221,7 +1221,7 @@ describe('Sending messages ', function () {
         for ($i = 0; $i < 60; $i++) {
             $request->set('body', 'New message')->call('sendMessage');
         }
-
+        //on 61 abort
         $request->set('body', 'New message')->call('sendMessage');
 
         $request->assertStatus(429);

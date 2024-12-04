@@ -113,16 +113,19 @@ test('it_does_not_show_load_more_button_if_user_cannot_load_more', function () {
 test('it shows dusk="disappearing_messages_icon" if disappearingTurnedOn for conversation', function () {
 
     $auth = User::factory()->create(['name' => 'Namu']);
+
+    Carbon::setTestNowAndTimezone(now());
     $conversation = $auth->createGroup('My Group');
 
     $auth->sendMessageTo($conversation, 'hi');
 
     //turn on disappearing
+
     $conversation->turnOnDisappearing(3600);
 
-    // dd($conversation);
+    // dd($conversation->hasDisappearingTurnedOn());
     Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id])
-        ->assertSeeHtml('dusk="disappearing_messages_icon"');
+        ->assertSeeHtml('dusk="disappearing_messages_icon" ');
 });
 
 test('it doesnt shows dusk="disappearing_messages_icon" if disappearingTurnedOFF for conversation', function () {

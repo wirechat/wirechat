@@ -31,10 +31,6 @@ describe('MarkAsRead()', function () {
 
     //     $conversation = Conversation::factory()->withParticipants([$auth])->create();
 
-    //     $conversation->markAsRead();
-
-    // })->throws(Exception::class);
-
     it('marks messages as read', function () {
 
         $auth = User::factory()->create();
@@ -46,6 +42,7 @@ describe('MarkAsRead()', function () {
         //Create conversation
 
         //auth -> receiver
+        Carbon::setTestNowAndTimezone(now()->subMinutes(10));
         $auth->sendMessageTo($receiver, message: '1');
         $conversation = $auth->sendMessageTo($receiver, message: '2')->conversation;
 
@@ -57,6 +54,7 @@ describe('MarkAsRead()', function () {
         //Assert number of unread messages for $auth
         expect($auth->getUnreadCount($conversation))->toBe(2);
 
+        Carbon::setTestNowAndTimezone(now());
         //assert returns zero(0) when messages are marked as read
         $conversation->markAsRead();
         expect($auth->getUnreadCount($conversation))->toBe(0);
@@ -732,28 +730,6 @@ describe('deleting permanently()', function () {
         $conversation->delete();
 
         expect($conversation->participants()->withoutGlobalScopes()->count())->toBe(0);
-    });
-
-    it('deletes reads when conversation is deleted ', function () {
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation =
-            $receiver->sendMessageTo($auth, 'hello')->conversation;
-        $auth->sendMessageTo($receiver, 'how do you do ');
-
-        //mark as read for $auth
-        $conversation->markAsRead($auth);
-        $conversation->markAsRead($receiver);
-
-        //get conversation reads
-        expect($conversation->reads()->count())->toBe(2);
-
-        //Delete message
-        $conversation->delete();
-
-        //assert count
-        expect($conversation->reads()->count())->toBe(0);
     });
 
     it('deletes group when conversation is deleted ', function () {
