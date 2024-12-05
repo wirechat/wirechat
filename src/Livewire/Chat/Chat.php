@@ -583,19 +583,26 @@ class Chat extends Component
             broadcast(new MessageCreated($message))->toOthers();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 832c1f3 (fix:added notififcatinn job for private chats and fixed glictch in unread messages dot)
+=======
+>>>>>>> 1a9fc7a (pint)
             //if conversation is private then Notify particpant immediately
             if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
 
                 if ($this->conversation->isPrivate() && $this->receiverParticipant) {
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
 =======
                  //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
 >>>>>>> 832c1f3 (fix:added notififcatinn job for private chats and fixed glictch in unread messages dot)
+=======
+                    //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
+>>>>>>> 1a9fc7a (pint)
 
                     NotifyParticipants::dispatch($this->conversation, $message);
                     //    Notification::send($this->receiver, new NewMessageNotification($message));
