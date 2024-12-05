@@ -28,6 +28,7 @@ class Chats extends Component
         ];
     }
 
+<<<<<<< HEAD
     public function refreshComponent($event)
     {
 
@@ -36,6 +37,18 @@ class Chats extends Component
 
         }
 
+=======
+
+
+   public function refreshComponent($event)  {
+
+
+        if ($event['message']['conversation_id'] != $this->selectedConversationId ) {
+            $this->dispatch('refresh')->self();
+
+        }
+        
+>>>>>>> 832c1f3 (fix:added notififcatinn job for private chats and fixed glictch in unread messages dot)
     }
 
     /**
