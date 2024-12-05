@@ -323,7 +323,7 @@ describe('List', function () {
             ->assertSee('2'); //
     });
 
-    it('shows date/time message was created', function () {
+    it('shows message time AS "now"  if less than a minute old', function () {
 
         $auth = User::factory()->create();
 
@@ -332,6 +332,7 @@ describe('List', function () {
         //create conversation with user1
         $conversation = $auth->createConversationWith($user1);
 
+        Carbon::setTestNowAndTimezone(now());
         $lastMessage = Message::create([
             'conversation_id' => $conversation->id,
             'sendable_type' => get_class($auth),
@@ -340,6 +341,30 @@ describe('List', function () {
         ]);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeText('now');
+    });
+
+    it('shows message time AS "shortAbsoluteDiffForHumans"  if more than a minute old', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        //create conversation with user1
+        $conversation = $auth->createConversationWith($user1);
+
+        Carbon::setTestNowAndTimezone(now());
+        $lastMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'sendable_type' => get_class($auth),
+            'sendable_id' => $auth->id,
+            'body' => 'How are you doing',
+        ]);
+
+        Carbon::setTestNowAndTimezone(now()->addMinute(2));
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertDontSeeText('now')
             ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
     });
 

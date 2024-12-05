@@ -1,4 +1,4 @@
-<div id="info-modal" class="bg-white dark:bg-gray-900 space-y-auto">
+<div id="info-modal" class="bg-white dark:bg-gray-900 space-y-auto h-screen">
 
     @php
         $authIsAdminInGroup = $participant->isAdmin();
@@ -18,7 +18,7 @@
         <h3>{{ $group ? 'Group' : 'Chat' }} Info</h3>
     </section>
     {{-- Details --}}
-    <header class="">
+    <header>
 
         {{-- Edit Group info section --}}
         @if ($isGroup)
@@ -268,7 +268,7 @@
     @endif
 
     {{-- Footer section --}}
-    <section class="flex flex-col justify-start w-full h-[500px]">
+    <section class="flex flex-col justify-start w-full">
 
         @if ($isGroup && !$authIsOwner)
             <button wire:confirm="Are you sure you want to exit Group ?" wire:click="exitConversation"

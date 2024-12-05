@@ -24,8 +24,18 @@ class Chats extends Component
     {
         return [
             'refresh' => '$refresh',
-            'echo-private:participant.'.auth()->id().',.Namu\\WireChat\\Events\\NotifyParticipant' => '$refresh',
+            'echo-private:participant.'.auth()->id().',.Namu\\WireChat\\Events\\NotifyParticipant' => 'refreshComponent',
         ];
+    }
+
+    public function refreshComponent($event)
+    {
+
+        if ($event['message']['conversation_id'] != $this->selectedConversationId) {
+            $this->dispatch('refresh')->self();
+
+        }
+
     }
 
     /**

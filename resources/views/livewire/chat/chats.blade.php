@@ -185,8 +185,14 @@
                                             {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->hasAttachment() ? '📎 Attachment' : '') }}
                                         </p>
 
-                                        <span
-                                            class="font-medium px-1 text-xs shrink-0  text-gray-800  dark:text-gray-50 ">{{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}</span>
+                                    <span class="font-medium px-1 text-xs shrink-0 text-gray-800 dark:text-gray-50">
+                                        @if ($lastMessage->created_at->diffInMinutes(now()) < 1)
+                                            now
+                                        @else
+                                            {{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}
+                                        @endif
+                                    </span>
+
 
                                     </div>
                                 @endif
@@ -200,7 +206,6 @@
                             @if ($lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth)
                                 
                             <div class=" col-span-2 flex flex-col text-center my-auto">
-
                                 {{-- Dots icon --}}
                                 <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                     fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">

@@ -997,7 +997,7 @@ describe('Sending messages ', function () {
         });
     });
 
-    test('it does not push job "NotifyParticipants" when conversation is private', function () {
+    test('it pushes job "NotifyParticipants" when conversation is private', function () {
         Event::fake();
         Queue::fake();
         // Queue::fake();
@@ -1014,7 +1014,7 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Queue::assertNotPushed(NotifyParticipants::class, function ($event) use ($conversation, $message) {
+        Queue::assertPushed(NotifyParticipants::class, function ($event) use ($conversation, $message) {
             return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
         });
     });
@@ -1218,9 +1218,13 @@ describe('Sending messages ', function () {
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
+        Carbon::setTestNow(Carbon::now()); // Freeze the current time
         for ($i = 0; $i < 60; $i++) {
             $request->set('body', 'New message')->call('sendMessage');
         }
+
+        // Move the time forward slightly for the 61st message
+        Carbon::setTestNow(Carbon::now()->addSeconds(4));
         //on 61 abort
         $request->set('body', 'New message')->call('sendMessage');
 
@@ -1357,7 +1361,7 @@ describe('Sending messages ', function () {
         });
     });
 
-    test('it does not pushed job "NotifyParticipants" when sendLike is called and is PRIVATE', function () {
+    test('it pushes job "NotifyParticipants" when sendLike is called and is PRIVATE', function () {
         Event::fake();
         Queue::fake();
         // Queue::fake();
@@ -1373,7 +1377,7 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Queue::assertNotPushed(NotifyParticipants::class);
+        Queue::assertPushed(NotifyParticipants::class);
     });
 
     test('it does not pushed job "NotifyParticipants" when sendLike is called and is SELF', function () {
