@@ -727,18 +727,8 @@ describe('Exit conversation', function () {
 
         $user->exitConversation($conversation);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         //get participant set withoutGlobalScopes =true becuaes at this point the user should be added to query
         $participant = $conversation->participant($user, true);
-=======
-        //get participant set withoutGlobalScopes =true becuaes at this point the user should be added to query  
-        $participant = $conversation->participant($user,true);
->>>>>>> 3c915d4 (fix:fixed some failing tests)
-=======
-        //get participant set withoutGlobalScopes =true becuaes at this point the user should be added to query
-        $participant = $conversation->participant($user, true);
->>>>>>> a3241cd (pint)
 
         //assert
         expect($participant->hasExited())->toBe(true);

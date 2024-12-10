@@ -582,27 +582,12 @@ class Chat extends Component
             // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 832c1f3 (fix:added notififcatinn job for private chats and fixed glictch in unread messages dot)
-=======
->>>>>>> 1a9fc7a (pint)
             //if conversation is private then Notify particpant immediately
             if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
 
                 if ($this->conversation->isPrivate() && $this->receiverParticipant) {
 
-<<<<<<< HEAD
-<<<<<<< HEAD
                     //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
-=======
-                 //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
->>>>>>> 832c1f3 (fix:added notififcatinn job for private chats and fixed glictch in unread messages dot)
-=======
-                    //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
->>>>>>> 1a9fc7a (pint)
 
                     NotifyParticipants::dispatch($this->conversation, $message);
                     //    Notification::send($this->receiver, new NewMessageNotification($message));
@@ -747,20 +732,8 @@ class Chat extends Component
 
     private function finalizeConversationState()
     {
-<<<<<<< HEAD
-<<<<<<< HEAD
 
         $this->conversation->markAsRead();
-=======
-        /**
-         * todo:enable mark as read in here if embeding enabled
-         */
-        //$this->conversation->markAsRead();
->>>>>>> e2bc7d3 (fixed unread messages dot not appearing)
-=======
-
-        $this->conversation->markAsRead();
->>>>>>> 56ac3d0 (hid unread dot if conversation is currently openned in chat)
 
         if ($this->authParticipant) {
             $this->authParticipant->update(['last_active_at' => now()]);

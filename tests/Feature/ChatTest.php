@@ -1223,15 +1223,7 @@ describe('Sending messages ', function () {
             $request->set('body', 'New message')->call('sendMessage');
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         // Move the time forward slightly for the 61st message
-=======
-          // Move the time forward slightly for the 61st message
->>>>>>> 832c1f3 (fix:added notififcatinn job for private chats and fixed glictch in unread messages dot)
-=======
-        // Move the time forward slightly for the 61st message
->>>>>>> 1a9fc7a (pint)
         Carbon::setTestNow(Carbon::now()->addSeconds(4));
         //on 61 abort
         $request->set('body', 'New message')->call('sendMessage');

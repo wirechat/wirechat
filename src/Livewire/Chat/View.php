@@ -23,16 +23,7 @@ class View extends Component
 
         // Check if the user belongs to the conversation
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
-        //Mark as read
-        //*we mark as read here so in order for chats and chat component to see updates
-        $this->conversation->markAsRead();
->>>>>>> e2bc7d3 (fixed unread messages dot not appearing)
-=======
->>>>>>> 56ac3d0 (hid unread dot if conversation is currently openned in chat)
     }
 
     #[Layout('wirechat::layouts.app')]
