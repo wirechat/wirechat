@@ -747,8 +747,15 @@ class Chat extends Component
 
     private function finalizeConversationState()
     {
+<<<<<<< HEAD
 
         $this->conversation->markAsRead();
+=======
+        /**
+         * todo:enable mark as read in here if embeding enabled
+         */
+        //$this->conversation->markAsRead();
+>>>>>>> e2bc7d3 (fixed unread messages dot not appearing)
 
         if ($this->authParticipant) {
             $this->authParticipant->update(['last_active_at' => now()]);
