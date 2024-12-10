@@ -25,7 +25,6 @@ use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
 use Namu\WireChat\Notifications\NewMessageNotification;
 
 class Chat extends Component
@@ -131,8 +130,6 @@ class Chat extends Component
             if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type == get_class(auth()->user())) {
                 return null;
             }
-
-            Log::info('reached in appendNewMessage()');
 
             //push message
             $this->pushMessage($newMessage);
@@ -696,8 +693,7 @@ class Chat extends Component
     {
         abort_unless(auth()->check(), 401);
 
-        $this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])
-            ->where('id', $this->conversation)
+        $this->conversation = Conversation::where('id', $this->conversation)
             ->firstOr(fn () => abort(404));
 
         $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
@@ -736,6 +732,7 @@ class Chat extends Component
 
     private function finalizeConversationState()
     {
+
         $this->conversation->markAsRead();
 
         if ($this->authParticipant) {

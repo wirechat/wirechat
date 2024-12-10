@@ -111,26 +111,17 @@ class Conversation extends Model
      */
     public function participant(Model|Authenticatable $user, bool $withoutGlobalScopes = false)
     {
-
-        $query = $this->participants()->withoutGlobalScope('withoutExited');
+        $query = Participant::where('participantable_id', $user->id)
+            ->where('participantable_type', get_class($user))
+            ->where('conversation_id', $this->id); // Ensures you're querying for the correct conversation
 
         if ($withoutGlobalScopes) {
-            $query->withoutGlobalScopes();
-            // code...
+            $query->withoutGlobalScopes(); // Apply this condition if necessary
         }
 
-        if ($this->relationLoaded('participants')) {
-            $participant = $query->where('participantable_id', $user->id)
-                ->where('participantable_type', get_class($user))
-                ->first();
-        } else {
+        // Retrieve the participant directly
+        $participant = $query->first();
 
-            $participant = $query->where('participantable_id', $user->id)
-                ->where('participantable_type', get_class($user))
-                ->first();
-        }
-
-        //dd($participant);
         return $participant;
     }
 
@@ -455,7 +446,7 @@ class Conversation extends Model
             // code...
         }
 
-        $this->participant($user)->update(['conversation_read_at' => now()]);
+        $this->participant($user)?->update(['conversation_read_at' => now()]);
     }
 
     /**
@@ -492,8 +483,7 @@ class Conversation extends Model
                 // If lastReadAt is null, consider all messages as unread
                 // Also, exclude messages that belong to the user
                 return (! $lastReadAt || $message->created_at > $lastReadAt) &&
-                    $message->sendable_id != $user->id &&
-                    $message->sendable_type != get_class($user);
+                    $message->sendable_id != $user->id && $message->sendable_type == get_class($user);
             });
         }
 

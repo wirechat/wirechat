@@ -97,12 +97,12 @@ describe('Actions', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
+        Carbon::setTestNow(now()->subSeconds(59));
         $message = $auth->sendMessageTo($receiver, 'hello');
 
         $participant = $message->conversation->participant($receiver);
 
         // Set future time
-        Carbon::setTestNow(now()->addSeconds(59));
 
         NotifyParticipant::dispatch($participant, $message);
 

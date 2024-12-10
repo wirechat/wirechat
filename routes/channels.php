@@ -21,8 +21,6 @@ Broadcast::channel('conversation.{conversationId}', function ($user, int $conver
     if ($conversation) {
         // code...
         if ($user->belongsToConversation($conversation)) {
-            // Broadcast an event to the user when they join the channel
-            // broadcast(new NotifyParticipantJob($user));
             return true; // Allow access to the channel
         }
     }
@@ -31,19 +29,10 @@ Broadcast::channel('conversation.{conversationId}', function ($user, int $conver
 
 });
 
-// Broadcast::channel('participant', function ($user) {
-//     //Check if the authenticated user matches the broadcast recipient (polymorphic check)
-//     //we don't use  tripple '===' because the type and id are polymophic hence can be strings
-//     // so the validation will fail
-
-//    // Log::info('here');
-//     return  ;
-// });
-
 Broadcast::channel('participant.{id}', function ($user, $id) {
-    //Check if the authenticated user matches the broadcast recipient (polymorphic check)
-    //we don't use  tripple '===' because the type and id are polymophic hence can be strings
-    // so the validation will fail
+    //*Check if the authenticated user matches the broadcast recipient (polymorphic check)
+    //*we don't use  tripple '===' because the type and id are polymophic hence can be strings
+    //*so the validation will fail
 
     // Log::info('here');
     return $user->id == $id;

@@ -727,8 +727,8 @@ describe('Exit conversation', function () {
 
         $user->exitConversation($conversation);
 
-        //get participant
-        $participant = $conversation->participant($user);
+        //get participant set withoutGlobalScopes =true becuaes at this point the user should be added to query
+        $participant = $conversation->participant($user, true);
 
         //assert
         expect($participant->hasExited())->toBe(true);

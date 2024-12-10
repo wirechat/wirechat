@@ -6,7 +6,6 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
 
 class View extends Component
 {
@@ -16,26 +15,14 @@ class View extends Component
 
     public function mount()
     {
-
-        //  dd(str()->uuid());
-
         ///make sure user is authenticated
         abort_unless(auth()->check(), 401);
 
         //We remove deleted conversation incase the user decides to visit the delted conversation
-        //$this->conversation = Conversation::withoutGlobalScopes([WithoutDeletedScope::class])->where('id', $this->conversation_id)->firstOrFail();
+        $this->conversation = Conversation::where('id', $this->conversation_id)->firstOrFail();
 
-        // dd( $this->conversation->unique_id);
-        //dd($this->conversation);Fw2GKQ5xMvCHP80Ikyzjae
-        //dd( $this->conversation->hasBeenDeletedBy(auth()->user()));
-
-        ///check if auth belongs to conversaiton
         // Check if the user belongs to the conversation
-
-        // abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
-
-        //Mark as read
-
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
     }
 
     #[Layout('wirechat::layouts.app')]
