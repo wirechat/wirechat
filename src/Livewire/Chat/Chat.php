@@ -748,6 +748,7 @@ class Chat extends Component
     private function finalizeConversationState()
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         $this->conversation->markAsRead();
 =======
@@ -756,6 +757,10 @@ class Chat extends Component
          */
         //$this->conversation->markAsRead();
 >>>>>>> e2bc7d3 (fixed unread messages dot not appearing)
+=======
+
+        $this->conversation->markAsRead();
+>>>>>>> 56ac3d0 (hid unread dot if conversation is currently openned in chat)
 
         if ($this->authParticipant) {
             $this->authParticipant->update(['last_active_at' => now()]);
