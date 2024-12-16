@@ -45,13 +45,13 @@ body:
     validations:
       required: true
   - type: input
-  id: tailwind-version
-  attributes:
-    label: Tailwind CSS Version
-    description: Please provide the full Tailwind CSS version you are using.
-    placeholder: v3.3.0
-  validations:
-    required: true
+    id: tailwind-version
+    attributes:
+      label: Tailwind CSS Version
+      description: Please provide the full Tailwind CSS version you are using.
+      placeholder: v3.3.0
+    validations:
+      required: true
   - type: textarea
     id: environment
     attributes:
