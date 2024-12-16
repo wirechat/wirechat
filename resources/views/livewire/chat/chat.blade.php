@@ -1,5 +1,5 @@
 {{-- Import helper function to use in chatbox --}}
-@use('Namu\WireChat\Helpers\helper')
+@use('Namu\WireChat\Helpers\Helper')
 @use('Namu\WireChat\Facades\WireChat')
 
 @php

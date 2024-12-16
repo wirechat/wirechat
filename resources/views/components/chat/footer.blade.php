@@ -1,5 +1,5 @@
 
-@use('Namu\WireChat\Helpers\helper')
+@use('Namu\WireChat\Helpers\Helper')
 @props(['media','files','replyMessage','',''])
 
 <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
