@@ -1,0 +1,94 @@
+name: Bug report
+description: Report a problem you're experiencing
+labels: bug, unconfirmed, medium priority
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening a bug report, please search the existing issues (both open and closed).
+
+        ---
+
+        Thank you for taking the time to file a bug report. To address this bug as fast as possible, we need some information.
+  - type: markdown
+    attributes:
+      value: |
+        **Package:** Wirechat
+  - type: input
+    id: package-version
+    attributes:
+      label: Package Version
+      description: Please provide the full version of the package you have installed.
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: input
+    id: laravel-version
+    attributes:
+      label: Laravel Version
+      description: Please provide the full Laravel version of your project.
+      placeholder: v10.x.x
+    validations:
+      required: true
+  - type: input
+    id: livewire-version
+    attributes:
+      label: Livewire Version
+      description: Please provide the full Livewire version of your project, if applicable.
+      placeholder: v3.x.x
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP Version
+      description: Please provide the full PHP version of your server.
+      placeholder: PHP 8.3.0
+    validations:
+      required: true
+  - type: input
+  id: tailwind-version
+  attributes:
+    label: Tailwind CSS Version
+    description: Please provide the full Tailwind CSS version you are using.
+    placeholder: v3.3.0
+  validations:
+    required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Provide details about your setup (e.g., Docker, Homestead, Valet, etc.). Include any relevant configurations or special setups.
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem description
+      description: What happened when you experienced the problem?
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Which steps do we need to take to reproduce the problem? Any code examples need to be **as short as possible**, removing unrelated code. **This issue will be automatically closed and not reviewed if detailed replication steps are missing.**
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: If applicable, provide relevant log output. No need for backticks here.
+      render: shell
+  - type: input
+    id: image-output
+    attributes:
+      label: Image or Output
+      description: If possible, attach links to images or screenshots of the output to help understand the issue better.
+      placeholder: Paste URLs here (e.g., imgur.com/...)

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Feature request
+    url: https://github.com/namumakwembo/wirechat/discussions/new?category=ideas
+    about: Share ideas for new features or enhancements.
+  - name: Support question
+    url: https://github.com/namumakwembo/wirechat/discussions/new?category=q-a
+    about: Ask questions or seek help from the community.
+  - name: Telegram
+    url: https://t.me/+qrlxvZDCHxQ4NDJk
+    about: For quick help, ask questions in the telegram channel
