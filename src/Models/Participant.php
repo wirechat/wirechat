@@ -14,8 +14,8 @@ use Namu\WireChat\Traits\Actionable;
 
 class Participant extends Model
 {
-    use HasFactory;
     use Actionable;
+    use HasFactory;
 
     protected $fillable = [
         'conversation_id',
@@ -168,7 +168,6 @@ class Participant extends Model
         return $this->exited_at != null;
     }
 
-
     /**
      * check if participant was removed by admin
      */
@@ -240,5 +239,4 @@ class Participant extends Model
         // Otherwise, return true if deletion is recent compared to updated timestamp
         return true;
     }
-
 }

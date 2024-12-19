@@ -19,10 +19,10 @@ return new class extends Migration
 
             // Foreign key for conversation
             $table->unsignedBigInteger('conversation_id');
-            $table->foreign('conversation_id') ->references('id') ->on((new Conversation)->getTable()) ->cascadeOnDelete();
+            $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
 
             $table->string('role');
-            $table->unsignedBigInteger('participantable_id');  
+            $table->unsignedBigInteger('participantable_id');
             $table->string('participantable_type');
 
             // Timestamps for tracking participant activity

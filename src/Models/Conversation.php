@@ -18,8 +18,8 @@ use Namu\WireChat\Traits\Actionable;
 
 class Conversation extends Model
 {
-    use HasFactory;
     use Actionable;
+    use HasFactory;
 
     protected $fillable = [
         'disappearing_started_at',
@@ -535,8 +535,6 @@ class Conversation extends Model
             'disappearing_started_at' => null,
         ]);
     }
-
-    
 
     /**
      * Delete all messages for the given participant and check if the conversation can be deleted.

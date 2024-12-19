@@ -9,7 +9,6 @@ use Namu\WireChat\Models\group;
 use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
 
- 
 describe('MarkAsRead()', function () {
     it('marks messages as read', function () {
 

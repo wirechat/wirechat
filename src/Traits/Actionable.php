@@ -3,16 +3,12 @@
 namespace Namu\WireChat\Traits;
 
 use Namu\WireChat\Models\Action;
- 
+
 /**
  * Trait Actionable
- * 
- * 
  */
 trait Actionable
 {
-
-
     /**
      * ----------------------------------------
      * ----------------------------------------
@@ -23,6 +19,4 @@ trait Actionable
     {
         return $this->morphMany(Action::class, 'actionable', 'actionable_type', 'actionable_id', 'id');
     }
-
-
 }

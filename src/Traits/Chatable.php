@@ -25,7 +25,6 @@ use Namu\WireChat\Models\Scopes\WithoutClearedScope;
  */
 trait Chatable
 {
-
     use Actor;
 
     /**

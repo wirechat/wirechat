@@ -15,9 +15,10 @@ use Namu\WireChat\Traits\Actionable;
 
 class Message extends Model
 {
+    use Actionable;
     use HasFactory;
     use SoftDeletes;
-    use Actionable;
+
     protected $fillable = [
         'body',
         'sendable_type', // Now includes sendable_type for polymorphism
@@ -184,7 +185,6 @@ class Message extends Model
         return $this->parent()->exists();
     }
 
-   
     /**
      * Delete for
      * This will delete the message only for the auth user meaning other participants will be able to see it
