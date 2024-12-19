@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('conversation_id')->nullable();
             $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
 
-            $table->string('sendable_id'); // ID of the sender
-            $table->string('sendable_type'); // Model type of the sender
+            $table->unsignedBigInteger('sendable_id');
+            $table->string('sendable_type');
 
             $table->unsignedBigInteger('reply_id')->nullable();
             $table->foreign('reply_id')->references('id')->on((new Message)->getTable())->nullOnDelete();

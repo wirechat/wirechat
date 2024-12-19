@@ -180,6 +180,8 @@
 
         <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 
+
+            {{-- @dd(['is Admin'=>$authParticipant->isAdmin(),$authParticipant,$authParticipant->particapantable]) --}}
             @if ($conversation->isGroup() && !$conversation->group?->allowsMembersToSendMessages() && !$authParticipant->isAdmin())
                 <div
                     class="bg-gray-50 w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 dark:bg-gray-800">

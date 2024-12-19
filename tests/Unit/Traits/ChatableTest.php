@@ -210,7 +210,7 @@ describe('createConversationWith() ', function () {
 
         foreach ($participants as $key => $participant) {
 
-            expect($participant->participantable_id)->toBe("$auth->id");
+            expect($participant->participantable_id)->toBe($auth->id);
             expect($participant->participantable_type)->toBe(get_class($auth));
 
         }

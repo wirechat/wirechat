@@ -14,14 +14,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create((new Group)->getTable(), function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->id();
             $table->unsignedBigInteger('conversation_id');
             $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->onDelete('cascade');
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->string('avatar_url')->nullable();
-
-            //type
             $table->string('type')->default('private');
 
             // Permissions

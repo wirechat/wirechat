@@ -14,15 +14,14 @@ return new class extends Migration
     {
 
         Schema::create((new Action)->getTable(), function (Blueprint $table) {
-
-            //The entity who deleted
             $table->id();
-            // Actionable (the entity being acted upon, like message or conversation)
-            $table->string('actionable_id');
+
+            // Actionable (the entity being acted upon)
+            $table->unsignedBigInteger('actionable_id');
             $table->string('actionable_type');
 
-            // Actor (the one performing the action, like user or admin)
-            $table->string('actor_id');
+            // Actor (the one performing the action
+            $table->unsignedBigInteger('actor_id');
             $table->string('actor_type');
 
             // Type of action (e.g., delete, archive)
@@ -31,6 +30,11 @@ return new class extends Migration
             $table->string('data')->nullable()->comment('Some additional information about the action');
 
             $table->timestamps();
+
+            $table->index(['actionable_id', 'actionable_type']);
+            $table->index(['actor_id', 'actor_type']);
+            $table->index('type');
+
         });
     }
 

@@ -15,13 +15,14 @@ return new class extends Migration
 
         Schema::create((new Attachment)->getTable(), function (Blueprint $table) {
             $table->id();
-            $table->morphs('attachable'); // Adds 'attachable_id' and 'attachable_type' columns
+            $table->morphs('attachable');
             $table->string('file_path');
             $table->string('file_name');
             $table->string('original_name');
             $table->string('url');
             $table->string('mime_type');
             $table->timestamps();
+            $table->index(['attachable_id', 'attachable_type']);
         });
     }
 
