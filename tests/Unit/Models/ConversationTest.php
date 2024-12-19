@@ -9,28 +9,8 @@ use Namu\WireChat\Models\group;
 use Namu\WireChat\Models\Message;
 use Workbench\App\Models\User;
 
-// it(' saves unique id when conversation is created', function () {
-
-//     $auth = User::factory()->create();
-//     $receiver = User::factory()->create();
-
-//     //Authenticate $auth
-//     $this->actingAs($auth);
-
-//     //Create conversation
-//     $conversation = $auth->sendMessageTo($receiver, message: '1')->conversation;
-
-//     expect($conversation->unique_id)->not->toBe(null);
-
-// });
+ 
 describe('MarkAsRead()', function () {
-
-    // it('aborts with 401 is auth is not authenticated', function () {
-
-    //     $auth = User::factory()->create();
-
-    //     $conversation = Conversation::factory()->withParticipants([$auth])->create();
-
     it('marks messages as read', function () {
 
         $auth = User::factory()->create();

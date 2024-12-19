@@ -34,7 +34,7 @@ describe('Delete Permanently', function () {
 
         $participant->delete();
 
-        expect($participant->actions()->count())->toBe(0);
+        expect(Action::count())->toBe(0);
     });
 });
 

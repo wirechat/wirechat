@@ -45,12 +45,12 @@ class Action extends Model
     // Polymorphic relationship to the entity being acted upon (message, conversation, etc.)
     public function actionable()
     {
-        return $this->morphTo();
+        return $this->morphTo(null, 'actionable_type', 'actionable_id','id');
     }
 
-    // Polymorphic relationship to the actor (user, admin, etc.)
+    // Polymorphic relationship to the actor (User, Admin, etc.)
     public function actor()
     {
-        return $this->morphTo();
+        return $this->morphTo("actor", 'actor_type', 'actor_id','id');
     }
 }

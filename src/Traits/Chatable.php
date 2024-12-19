@@ -14,7 +14,6 @@ use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Group;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Models\Room;
 use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 /**
@@ -26,10 +25,9 @@ use Namu\WireChat\Models\Scopes\WithoutClearedScope;
  */
 trait Chatable
 {
-    // public function __construct()
-    // {
-    //     dd('Chatable trait loaded');
-    // }
+
+    use Actor;
+
     /**
      * Establishes a relationship between the user and conversations.
      *

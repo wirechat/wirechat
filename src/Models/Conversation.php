@@ -10,16 +10,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Scopes\WithoutDeletedScope;
+use Namu\WireChat\Traits\Actionable;
 
 class Conversation extends Model
 {
     use HasFactory;
+    use Actionable;
 
     protected $fillable = [
         'disappearing_started_at',
@@ -56,13 +56,13 @@ class Conversation extends Model
                 // Use a DB transaction to ensure atomicity
 
                 // Delete associated messages
-                $conversation->messages()->withoutGlobalScopes()->forceDelete();
+                $conversation->messages()?->withoutGlobalScopes()?->forceDelete();
 
                 //Delete actions
-                $conversation->actions()->delete();
+                $conversation->actions()?->delete();
 
                 //Delete group
-                $conversation->group()->delete();
+                $conversation->group()?->delete();
             });
         });
 
@@ -366,26 +366,6 @@ class Conversation extends Model
         }
     }
 
-    // public function scopeWithDeleted(Builder $builder)
-    // {
-
-    //     // Dynamically get the parent model (i.e., the user)
-    //     $user = auth()->user();
-
-    //     if ($user) {
-    //         // Get the table name for conversations dynamically to avoid hardcoding.
-    //         $conversationsTableName = (new Conversation())->getTable();
-
-    //         // Apply the "without deleted conversations" scope
-    //         $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
-    //             $query->where('participantable_id', $user->id)
-    //                 ->whereRaw("
-    //                     (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at)
-    //                 ");
-    //         });
-    //     }
-    // }
-
     public function receiver(): HasOne
     {
         return $this->hasOne(Participant::class)
@@ -556,17 +536,7 @@ class Conversation extends Model
         ]);
     }
 
-    /**
-     * ----------------------------------------
-     * ----------------------------------------
-     * Actions
-     * A message can have many actions by different users)
-     * --------------------------------------------
-     */
-    public function actions()
-    {
-        return $this->morphMany(Action::class, 'actionable', 'actionable_type', 'actionable_id', 'id');
-    }
+    
 
     /**
      * Delete all messages for the given participant and check if the conversation can be deleted.
