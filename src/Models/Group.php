@@ -87,7 +87,7 @@ class Group extends Model
             // If loaded, simply check the existing collection
             return $conversation->participants->contains(function ($participant) use ($user) {
                 return $participant->participantable_id == $user->id &&
-                    $participant->participantable_type == get_class($user) &&
+                    $participant->participantable_type == $user->getMorphClass() &&
                     $participant->role == ParticipantRole::OWNER;
             });
         }
@@ -95,7 +95,7 @@ class Group extends Model
         // If not loaded, perform the query
         return $conversation->participants()
             ->where('participantable_id', $user->id)
-            ->where('participantable_type', get_class($user))
+            ->where('participantable_type', $user->getMorphClass())
             ->where('role', ParticipantRole::OWNER)
             ->exists();
     }

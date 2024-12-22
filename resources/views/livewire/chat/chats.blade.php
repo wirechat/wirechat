@@ -88,7 +88,7 @@
         $wire.loadMore();
     }
     "
-         
+
          class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">
 
 
@@ -109,7 +109,7 @@
                         $group = $conversation->isGroup() ? $conversation->group : null;
                         $receiver = $conversation->isGroup() ? null : $conversation->receiver?->participantable;
                         $lastMessage = $conversation->lastMessage;
-                        //mark isReadByAuth true if user has chat opened 
+                        //mark isReadByAuth true if user has chat opened
                         $isReadByAuth = $conversation?->readBy(auth()?->user()) || $selectedConversationId ==$conversation->id;
                         $belongsToAuth = $lastMessage?->belongsToAuth();
 
@@ -173,15 +173,15 @@
                                             'font-semibold text-black' =>
                                                 !$isReadByAuth &&
                                                 $lastMessage?->sendable_id != $authUser?->id &&
-                                                $lastMessage?->sendable_type == get_class($authUser),
+                                                $lastMessage?->sendable_type == $authUser->getMorphClass(),
                                             'font-normal text-gray-600' =>
                                                 $isReadByAuth &&
                                                 $lastMessage?->sendable_id != $authUser?->id &&
-                                                $lastMessage?->sendable_type == get_class($authUser),
+                                                $lastMessage?->sendable_type == $authUser->getMorphClass(),
                                             'font-normal text-gray-600' =>
                                                 $isReadByAuth &&
                                                 $lastMessage?->sendable_id == $authUser?->id &&
-                                                $lastMessage?->sendable_type == get_class($authUser),
+                                                $lastMessage?->sendable_type == $authUser->getMorphClass(),
                                         ])>
                                             {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->hasAttachment() ? '📎 Attachment' : '') }}
                                         </p>
@@ -204,8 +204,8 @@
                             {{-- Only show if AUTH is NOT onwer of message --}}
 
                             {{-- {{'read by auth ?' . $isReadByAuth}} --}}
-                            @if ($lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == get_class($authUser)) && !$isReadByAuth)
-                                
+                            @if ($lastMessage != null && ($lastMessage?->sendable_id != $authUser?->id && $lastMessage?->sendable_type == $authUser->getMorphClass()) && !$isReadByAuth)
+
                             <div class=" col-span-2 flex flex-col text-center my-auto">
                                 {{-- Dots icon --}}
                                 <svg @style(['color:' . $primaryColor]) xmlns="http://www.w3.org/2000/svg" width="16" height="16"

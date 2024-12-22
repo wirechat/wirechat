@@ -57,10 +57,10 @@ trait Chatable
         abort_unless($this->canCreateChats(), 403, 'You do not have permission to create chats.');
 
         $participantId = $participant->id;
-        $participantType = get_class($participant);
+        $participantType = $participant->getMorphClass();
 
         $authenticatedUserId = $this->id;
-        $authenticatedUserType = get_class($this);
+        $authenticatedUserType = $this->getMorphClass();
 
         // Determine if this is a self-conversation (for the same user as both participants)
         $selfConversationCheck = $participantId == $authenticatedUserId && $participantType === $authenticatedUserType;
@@ -175,7 +175,7 @@ trait Chatable
         Participant::create([
             'conversation_id' => $conversation->id,
             'participantable_id' => $this->id,
-            'participantable_type' => get_class($this),
+            'participantable_type' => $this->getMorphClass(),
             'role' => ParticipantRole::OWNER,
         ]);
 
@@ -228,7 +228,7 @@ trait Chatable
 
             $createdMessage = Message::create([
                 'conversation_id' => $conversation->id,
-                'sendable_type' => get_class($this), // Polymorphic sender type
+                'sendable_type' => $this->getMorphClass(), // Polymorphic sender type
                 'sendable_id' => $this->id, // Polymorphic sender ID
                 'body' => $message,
             ]);
@@ -310,7 +310,7 @@ trait Chatable
 
             return $participants->contains(function ($participant) {
                 return $participant->participantable_id == $this->id &&
-                    $participant->participantable_type == get_class($this);
+                    $participant->participantable_type == $this->getMorphClass();
             });
         }
 
@@ -323,7 +323,7 @@ trait Chatable
         // If not loaded, perform the query
         return $participants
             ->where('participantable_id', $this->id)
-            ->where('participantable_type', get_class($this))
+            ->where('participantable_type', $this->getMorphClass())
             ->exists();
     }
 
@@ -351,10 +351,10 @@ trait Chatable
     {
 
         $participantId = $user->id;
-        $participantType = get_class($user);
+        $participantType = $user->getMorphClass();
 
         $authenticatedUserId = $this->id;
-        $authenticatedUserType = get_class($this);
+        $authenticatedUserType = $this->getMorphClass();
 
         // Check if this is a self-conversation (both participants are the authenticated user)
         $selfConversationCheck = $participantId === $authenticatedUserId && $participantType === $authenticatedUserType;
@@ -446,7 +446,7 @@ trait Chatable
 
                 // Only perform the search if the field exists in the table.
                 if (in_array($field, $columnCache[$table])) {
-                    $queryBuilder->orWhere($field, 'LIKE', '%'.$query.'%');
+                    $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
                 }
             }
         })

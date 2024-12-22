@@ -80,14 +80,14 @@ class Message extends Model
 
                 $builder->whereDoesntHave('actions', function ($q) use ($user) {
                     $q->where('actor_id', $user->id)
-                        ->where('actor_type', get_class($user))
+                        ->where('actor_type', $user->getMorphClass())
                         ->where('type', Actions::DELETE);
                 })
                     ->where(function ($query) use ($user, $messagesTableName, $participantTableName) {
                         // Filter messages based on `conversation_deleted_at` in the participants table
                         $query->whereHas('conversation.participants', function ($q) use ($user, $messagesTableName, $participantTableName) {
                             $q->where('participantable_id', $user->id)
-                                ->where('participantable_type', get_class($user))
+                                ->where('participantable_type', $user->getMorphClass())
                                 ->where(function ($q) use ($messagesTableName, $participantTableName) {
                                     $q->whereNull('conversation_cleared_at') // Include all messages if not cleared
                                         ->orWhereColumn("$messagesTableName.created_at", '>', "$participantTableName.conversation_cleared_at");
@@ -151,14 +151,14 @@ class Message extends Model
             return false;
         }
 
-        return $this->sendable_type == get_class($user) && $this->sendable_id == $user->id;
+        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->id;
     }
 
     public function belongsToAuth(): bool
     {
         $user = auth()->user();
 
-        return $this->sendable_type == get_class($user) && $this->sendable_id == $user->id;
+        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->id;
     }
 
     // Relationship for the parent message
@@ -201,7 +201,7 @@ class Message extends Model
         // Try to create an action
         $this->actions()->create([
             'actor_id' => $user->id,
-            'actor_type' => get_class($user),
+            'actor_type' => $user->getMorphClass(),
             'type' => Actions::DELETE,
         ]);
     }

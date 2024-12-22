@@ -95,7 +95,7 @@ class Participant extends Model
     public function scopeWhereParticipantable(Builder $query, Model $model): void
     {
         $query->where('participantable_id', $model->id)
-            ->where('participantable_type', get_class($model));
+            ->where('participantable_type', $model->getMorphClass());
     }
 
     /**
@@ -197,7 +197,7 @@ class Participant extends Model
                 'actionable_id' => $this->id,
                 'actionable_type' => Participant::class,
                 'actor_id' => $admin->id,  // The admin who performed the action
-                'actor_type' => get_class($admin),  // Assuming 'User' is the actor model
+                'actor_type' => $admin->getMorphClass(),  // Assuming 'User' is the actor model
                 'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
             ]);
         }

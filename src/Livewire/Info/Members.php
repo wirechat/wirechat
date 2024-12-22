@@ -179,7 +179,7 @@ class Members extends ModalComponent
             'actionable_id' => $participant->id,
             'actionable_type' => Participant::class,
             'actor_id' => auth()->id(),  // The admin who performed the action
-            'actor_type' => get_class(auth()->user()),  // Assuming 'User' is the actor model
+            'actor_type' => auth()->user()->getMorphClass(),  // Assuming 'User' is the actor model
             'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
         ]);
 

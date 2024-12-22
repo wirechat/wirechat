@@ -48,7 +48,7 @@
                         @php
                             $loopParticipantIsAuth =
                                 $participant->participantable_id == auth()->id() &&
-                                $participant->participantable_type == get_class(auth()->user());
+                                $participant->participantable_type == auth()->user()->getMorphClass();
                         @endphp
                         <li x-data="{ open: false }" x-ref="button" @click="open = ! open" x-init="$watch('open', value => {
                             $refs.members.style.overflow = value ? 'hidden' : '';
@@ -69,7 +69,7 @@
                                             {{$participant->isOwner()? "Owner":"Admin"}}
                                         </span>
                                         @endif
-                                     
+
                                 </div>
 
                                 <div x-show="open" x-anchor.bottom-end="$refs.button"
@@ -114,7 +114,7 @@
                                                     Remove
                                                 </x-wirechat::dropdown-button>
                                                 @endif
-                                
+
                                     @else
                                     @endif
 

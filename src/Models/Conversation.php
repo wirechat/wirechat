@@ -112,7 +112,7 @@ class Conversation extends Model
     public function participant(Model|Authenticatable $user, bool $withoutGlobalScopes = false)
     {
         $query = Participant::where('participantable_id', $user->id)
-            ->where('participantable_type', get_class($user))
+            ->where('participantable_type', $user->getMorphClass())
             ->where('conversation_id', $this->id); // Ensures you're querying for the correct conversation
 
         if ($withoutGlobalScopes) {
@@ -224,7 +224,7 @@ class Conversation extends Model
         $participant = $this->participants()
             ->withoutGlobalScopes()
             ->where('participantable_id', $user->id)
-            ->where('participantable_type', get_class($user))
+            ->where('participantable_type', $user->getMorphClass())
             ->first();
 
         if ($participant) {
@@ -276,7 +276,7 @@ class Conversation extends Model
         // Add a new participant
         return $this->participants()->create([
             'participantable_id' => $user->id,
-            'participantable_type' => get_class($user),
+            'participantable_type' => $user->getMorphClass(),
             'role' => $role,
         ]);
     }
@@ -315,7 +315,7 @@ class Conversation extends Model
             $builder->whereHas('messages', function ($q) use ($user) {
                 $q->withoutGlobalScopes()->whereDoesntHave('actions', function ($q) use ($user) {
                     $q->where('actor_id', '!=', $user->id)
-                        ->where('actor_type', get_class($user)) // Safe since $user is authenticated
+                        ->where('actor_type', $user->getMorphClass()) // Safe since $user is authenticated
                         ->where('type', Actions::DELETE);
                 });
             });
@@ -392,7 +392,7 @@ class Conversation extends Model
         $participants = $this->participants->where('conversation_id', $this->id);
 
         $receiverParticipant = $participants->where('participantable_id', '!=', auth()->id())
-            ->where('participantable_type', get_class(auth()->user()))
+            ->where('participantable_type', auth()->user()->getMorphClass())
             ->first();
 
         if ($receiverParticipant) {
@@ -404,7 +404,7 @@ class Conversation extends Model
 
         // Check the number of times the user appears as participant (fallback case)
         $authReceiver = $participants->where('participantable_id', auth()->id())
-            ->where('participantable_type', get_class(auth()->user()))
+            ->where('participantable_type', auth()->user()->getMorphClass())
             ->first();
 
         return $authReceiver?->participantable;
@@ -463,7 +463,7 @@ class Conversation extends Model
                 // If lastReadAt is null, consider all messages as unread
                 // Also, exclude messages that belong to the user
                 return (! $lastReadAt || $message->created_at > $lastReadAt) &&
-                    $message->sendable_id != $user->id && $message->sendable_type == get_class($user);
+                    $message->sendable_id != $user->id && $message->sendable_type == $user->getMorphClass();
             });
         }
 
@@ -475,7 +475,7 @@ class Conversation extends Model
 
         // Exclude messages that belong to the user
         return $query->where('sendable_id', '!=', $user->id)
-            ->where('sendable_type', get_class($user))
+            ->where('sendable_type', $user->getMorphClass())
             ->get(); // Return the collection of unread messages
     }
 
@@ -566,7 +566,7 @@ class Conversation extends Model
                 // Retrieve the other participant in the private conversation
                 $otherParticipant = $this->participants
                     ->where('participantable_id', '!=', $user->id)
-                    ->where('participantable_type', get_class($user))
+                    ->where('participantable_type', $user->getMorphClass())
                     ->first();
 
                 // Return null if the other participant cannot be found

@@ -22,7 +22,7 @@ class WithoutClearedScope implements Scope
             $builder->whereHas('messages', function ($q) use ($user) {
                 $q->whereDoesntHave('actions', function ($q) use ($user) {
                     $q->where('actor_id', $user->id)
-                        ->where('actor_type', get_class($user)) // Safe since $user is authenticated
+                        ->where('actor_type', $user->getMorphClass()) // Safe since $user is authenticated
                         ->where('type', Actions::DELETE);
                 });
             });
