@@ -446,7 +446,7 @@ trait Chatable
 
                 // Only perform the search if the field exists in the table.
                 if (in_array($field, $columnCache[$table])) {
-                    $queryBuilder->orWhere($field, 'LIKE', '%' . $query . '%');
+                    $queryBuilder->orWhere($field, 'LIKE', '%'.$query.'%');
                 }
             }
         })
