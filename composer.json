@@ -58,7 +58,8 @@
         "@php vendor/bin/phpstan analyse"
     ],
     "test": [
-        "@php vendor/bin/pest"
+        "@php vendor/bin/pest --parallel",
+        "@php vendor/bin/pint"
     ]
     },
     "config": {
