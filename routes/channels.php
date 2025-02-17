@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Broadcast;
+use Namu\WireChat\Helpers\MorphClassResolver;
 use Namu\WireChat\Models\Conversation;
 
 /*
@@ -27,13 +28,19 @@ Broadcast::channel('conversation.{conversationId}', function ($user, int $conver
 
     return false; // Deny access to the channel
 
-});
+},
+    [
+        'guards' => config('wirechat.routes.guards', ['web']),
+        'middleware' => config('wirechat.routes.middleware', ['web', 'auth']),
+    ]
+);
 
-Broadcast::channel('participant.{id}', function ($user, $id) {
-    //*Check if the authenticated user matches the broadcast recipient (polymorphic check)
-    //*we don't use  tripple '===' because the type and id are polymophic hence can be strings
-    //*so the validation will fail
+Broadcast::channel('participant.{encodedType}.{id}', function ($user, $encodedType, $id) {
+    // Decode the encoded type to get the raw value.
+    $morphType = MorphClassResolver::decode($encodedType);
 
-    // Log::info('here');
-    return $user->id == $id;
-});
+    return $user->id == $id && $user->getMorphClass() == $morphType;
+}, [
+    'guards' => config('wirechat.routes.guards', ['web']),
+    'middleware' => config('wirechat.routes.middleware', ['web', 'auth']),
+]);

@@ -37,30 +37,23 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        /* Define root properties */
-    </style>
-
     @livewireStyles
+    @wirechatStyles
 </head>
 
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-white dark:bg-gray-900">
 
         <!-- Page Content -->
-        <main>
+        <main class="h-[calc(100vh_-_0.0rem)]">
             {{ $slot }}
         </main>
 
     </div>
+
     @livewireScripts
-    @once
-    @livewire('chat-dialog')
-   @endonce
+    @wirechatAssets
+
 </body>
 
 </html>

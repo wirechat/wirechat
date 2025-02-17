@@ -2,24 +2,27 @@
 
 namespace Namu\WireChat;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Namu\WireChat\Console\Commands\InstallWireChat;
+use Namu\WireChat\Facades\WireChat as FacadesWireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\Chats;
-use Namu\WireChat\Livewire\Chat\Index;
-use Namu\WireChat\Livewire\Chat\View;
-use Namu\WireChat\Livewire\Components\NewChat;
-use Namu\WireChat\Livewire\Components\NewGroup;
-use Namu\WireChat\Livewire\Group\Permissions;
-use Namu\WireChat\Livewire\Info\AddMembers;
-use Namu\WireChat\Livewire\Info\Info;
-use Namu\WireChat\Livewire\Info\Members;
-use Namu\WireChat\Livewire\Modals\ChatDialog;
-use Namu\WireChat\Livewire\Modals\ChatDrawer;
+use Namu\WireChat\Livewire\Chat\Drawer;
+use Namu\WireChat\Livewire\Chat\Group\AddMembers;
+use Namu\WireChat\Livewire\Chat\Group\Members;
+use Namu\WireChat\Livewire\Chat\Group\Permissions;
+use Namu\WireChat\Livewire\Chat\Info;
+use Namu\WireChat\Livewire\Chats\Chats;
+use Namu\WireChat\Livewire\Modals\Modal;
+use Namu\WireChat\Livewire\New\Chat as NewChat;
+use Namu\WireChat\Livewire\New\Group as NewGroup;
+use Namu\WireChat\Livewire\Pages\Chat as View;
+use Namu\WireChat\Livewire\Pages\Chats as Index;
+use Namu\WireChat\Livewire\Widgets\WireChat;
+use Namu\WireChat\Middleware\BelongsToConversation;
 use Namu\WireChat\Services\WireChatService;
-use Namu\WireChat\View\Components\ChatBox\Image;
 
 class WireChatServiceProvider extends ServiceProvider
 {
@@ -35,50 +38,39 @@ class WireChatServiceProvider extends ServiceProvider
 
         $this->loadLivewireComponents();
 
-        Blade::component('wirechat::chatbox.image', Image::class);
-
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
 
+        // publish config
         $this->publishes([
             __DIR__.'/../config/wirechat.php' => config_path('wirechat.php'),
         ], 'wirechat-config');
 
-        //!for seamless devlopement loadmigrateions directly instead of publishing in development
-        //only publish in production
-
+        // publish migrations
         $this->publishes([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'wirechat-migrations');
 
+        // publish views
+        if ($this->app->runningInConsole()) {
+            // Publish views
+            $this->publishes([
+                __DIR__.'/../resources/views' => resource_path('views/vendor/wirechat'),
+            ], 'wirechat-views');
+
+        }
+
         /* Load channel routes */
         $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
-        // Load the package's channels.php file
-        // require __DIR__ . '/../routes/channels.php';
 
-    }
+        // load assets
+        $this->loadAssets();
 
-    //custom methods for livewire components
-    protected function loadLivewireComponents()
-    {
-        Livewire::component('index', Index::class);
-        Livewire::component('view', View::class);
+        // load styles
+        $this->loadStyles();
 
-        Livewire::component('chat', Chat::class);
-        Livewire::component('chats', Chats::class);
-
-        //wirechat  modal
-        Livewire::component('chat-dialog', ChatDialog::class);
-        Livewire::component('chat-drawer', ChatDrawer::class);
-
-        Livewire::component('new-chat', NewChat::class);
-
-        //Group related components
-        Livewire::component('new-group', NewGroup::class);
-        Livewire::component('info', Info::class);
-        Livewire::component('add-members', AddMembers::class);
-        Livewire::component('members', Members::class);
-        Livewire::component('permissions', Permissions::class);
+        // load middleware
+        $this->registerMiddlewares();
 
     }
 
@@ -89,12 +81,78 @@ class WireChatServiceProvider extends ServiceProvider
             __DIR__.'/../config/wirechat.php', 'wirechat'
         );
 
-        //register facades
+        // register facades
         $this->app->singleton('wirechat', function ($app) {
             return new WireChatService;
         });
 
-        //      $this->app->register(LivewireModalServiceProvider::class);
+    }
 
+    // custom methods for livewire components
+    protected function loadLivewireComponents(): void
+    {
+        // Pages
+        Livewire::component('wirechat.pages.index', Index::class);
+        Livewire::component('wirechat.pages.view', View::class);
+
+        // Chats
+        Livewire::component('wirechat.chats', Chats::class);
+
+        // modal
+        Livewire::component('wirechat.modal', Modal::class);
+
+        Livewire::component('wirechat.new.chat', NewChat::class);
+        Livewire::component('wirechat.new.group', NewGroup::class);
+
+        // Chat/Group related components
+        Livewire::component('wirechat.chat', Chat::class);
+        Livewire::component('wirechat.chat.info', Info::class);
+        Livewire::component('wirechat.chat.drawer', Drawer::class);
+        Livewire::component('wirechat.chat.group.add-members', AddMembers::class);
+        Livewire::component('wirechat.chat.group.members', Members::class);
+        Livewire::component('wirechat.chat.group.permissions', Permissions::class);
+
+        // stand alone widget component
+        Livewire::component('wirechat', WireChat::class);
+
+    }
+
+    protected function registerMiddlewares(): void
+    {
+
+        $router = $this->app->make(Router::class);
+        $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
+
+    }
+
+    // load assets
+    protected function loadAssets(): void
+    {
+
+        Blade::directive('wirechatAssets', function () {
+            return "<?php 
+                echo Blade::render('@livewire(\'wirechat.modal\')');
+                echo Blade::render('<x-wirechat::toast/>');
+                ?>";
+        });
+    }
+
+    // load assets
+    protected function loadStyles(): void
+    {
+
+        $primaryColor = FacadesWireChat::getColor();
+        Blade::directive('wirechatStyles', function () use ($primaryColor) {
+            return "<?php echo <<<EOT
+                <style>
+                    :root {
+                        --wirechat-primary-color: {$primaryColor};
+                    }
+                    [x-cloak] {
+                        display: none !important;
+                    }
+                </style>
+            EOT; ?>";
+        });
     }
 }

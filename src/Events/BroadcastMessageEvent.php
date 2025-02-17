@@ -15,6 +15,6 @@ class BroadcastMessageEvent
     public function __construct(public Message $message, public Conversation $conversation)
     {
 
-        //Log::info($participant);
+        // Log::info($participant);
     }
 }

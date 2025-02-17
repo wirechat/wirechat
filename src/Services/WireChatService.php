@@ -9,7 +9,7 @@ class WireChatService
     /**
      * Get the color used to be used in as themse
      */
-    public function getColor()
+    public static function getColor()
     {
         return config('wirechat.color', '#3b82f6');
     }
@@ -37,30 +37,16 @@ class WireChatService
         return $fieldsToCheck ?: null;
     }
 
-    //Get table prefix from congif
+    // Get table prefix from congif
     public static function tablePrefix(): ?string
     {
         return config('wirechat.table_prefix');
     }
 
-    //return a formatted tabel name
+    // return a formatted tabel name
     public static function formatTableName($table): string
     {
         return config('wirechat.table_prefix').$table;
-    }
-
-    //return a formatted tabel name
-    public static function allowsGroups(): bool
-    {
-        return config('wirechat.allow_new_group_modal', false);
-    }
-
-    /**
-     * Checks if should show new group modal
-     */
-    public static function allowsNewGroupModal(): bool
-    {
-        return config('wirechat.allow_new_group_modal', false);
     }
 
     /**
@@ -72,11 +58,11 @@ class WireChatService
     }
 
     /**
-     * Checks if should show new chat modal
+     * Checks if new group modal button can be shown
      */
-    public static function allowsNewChatModal(): bool
+    public static function allowChatsSearch(): bool
     {
-        return config('wirechat.allow_new_chat_modal', false);
+        return config('wirechat.allow_chats_search', false);
     }
 
     /**

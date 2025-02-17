@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Info\AddMembers;
+use Namu\WireChat\Livewire\Chat\Group\AddMembers;
 use Namu\WireChat\Models\Conversation;
 use Workbench\App\Models\User;
 
@@ -52,7 +52,7 @@ describe('presence test', function () {
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
-        //* since converstaion already have one user which is the auth then default is 1
+        // * since converstaion already have one user which is the auth then default is 1
         $request
             ->assertSee('Add Members')
             ->assertSee('1 / 1000');
@@ -78,7 +78,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $conversation->addParticipant(User::factory()->create(['name' => 'Micheal']));
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
@@ -91,13 +91,13 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $conversation->addParticipant($user);
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //attempt to add member
+                // attempt to add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal');
     });
@@ -108,16 +108,16 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //attempt to add member
+                // attempt to add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertSee('2 / 1000')
-                //attempt to remove member
+                // attempt to remove member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertSee('1 / 1000');
     });
@@ -126,16 +126,16 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //first add member
+                // first add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertSee('Micheal')
-                //then remove memener
+                // then remove memener
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal');
     });
@@ -144,14 +144,14 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $conversation->addParticipant($user);
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //first add member
+                // first add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal')
             ->assertStatus(403, $user->display_name.' is already a member');
@@ -161,7 +161,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $randomUser = User::factory()->create(['name' => 'Micheal']);
         $conversation->addParticipant($randomUser);
 
@@ -180,14 +180,14 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $randomUser = User::factory()->create(['name' => 'Micheal']);
         $conversation->addParticipant($randomUser);
 
         $userTobeRemoved = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($userTobeRemoved);
 
-        //remove by auth
+        // remove by auth
         $participant->removeByAdmin($auth);
 
         $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
@@ -203,13 +203,13 @@ describe('actions test', function () {
         $userTobeRemoved = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($userTobeRemoved);
 
-        //assert new count is 2
+        // assert new count is 2
         expect($conversation->participants()->count())->toBe(2);
 
-        //remove by auth
+        // remove by auth
         $participant->removeByAdmin($auth);
 
-        //assert new count is now 1
+        // assert new count is now 1
 
         expect($conversation->participants()->count())->toBe(1);
 
@@ -218,7 +218,7 @@ describe('actions test', function () {
             ->call('save')
             ->assertStatus(200);
 
-        //assert new count is back to  2
+        // assert new count is back to  2
         expect($conversation->participants()->count())->toBe(2);
 
     });
@@ -227,15 +227,15 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $conversation->addParticipant(User::factory()->create(['name' => 'John']));
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //first add member
+                // first add member
             ->set('search', 'John')
-                //user
+                // user
             ->assertSee('Already added to group');
     });
 
@@ -243,12 +243,12 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //attempt to add member
+                // attempt to add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
@@ -261,12 +261,12 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //attempt to add member
+                // attempt to add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
@@ -274,20 +274,20 @@ describe('actions test', function () {
 
     });
 
-    test('it dispatches closeModal event after saving ', function () {
+    test('it dispatches closeWireChatModal event after saving ', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
 
         $request
-                //attempt to add member
+                // attempt to add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
-        $request->assertDispatched('closeModal');
+        $request->assertDispatched('closeWireChatModal');
 
     });
 

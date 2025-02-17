@@ -7,10 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+
 ## [Unreleased]  
 ### Added  
 - Initial changelog setup.  
 - Placeholder for upcoming features.
+
+---
+
+
+## [v0.1.0](https://github.com/namumakwembo/wirechat/releases/tag/0.1.0) - 2025-02-16
+
+### Added
+- New config variables:
+  - `'guards' => ['web']`
+  - `'layout' => 'wirechat::layouts.app'`
+- Command for publishing views.
+- Standalone WireChat widget.
+- Added/Improved documentation on:
+  - Authorization
+  - Core Components
+  - Layout
+  - Views
+  - Contribution Guide
+  - Extending WireChat Components
+- `belongsToConversation` middleware added to the `/chats` view route.
+
+### Changed
+- `NotifyParticipant` channel now uses an encoded type and ID to support mixed models in conversations.
+
+  **Breaking Change:**  
+  If you previously listened to the `participant` channel, update to the new format:
+
+  ```diff
+  + userId = @js(auth()->id());
+  + encodedType = @js(Namu\WireChat\Helpers\MorphClassResolver::encode(auth()->user()->getMorphClass()));
+
+  - Echo.private(`participant.${userId}`)
+  + Echo.private(`participant.${encodedType}.${userId}`)
+        .listen('.Namu\\WireChat\\Events\\NotifyParticipant', (e) => {
+           console.log(e);
+      });
+  ```
+
+- `Folder Structure Reorganized `
+
+  We have restructured the package folders to group related components and assets more logically. This improves view publishing and feature additions. If you have previously published or customized views, please re-publish them using the new command and update any file path references accordingly.
+
+
+### Fixed  
+- Updated tests to fully support conversations with mixed models.  
+- Improved participant handling for different models.  
+
+### Updated  
+- Optimized code and queries for faster conversation loading.  
+- Updated brodcasting to use the guards provided in wirechat config the 
 
 ---
 

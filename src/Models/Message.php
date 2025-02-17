@@ -2,7 +2,6 @@
 
 namespace Namu\WireChat\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
 use Namu\WireChat\Traits\Actionable;
 
 class Message extends Model
@@ -21,8 +21,8 @@ class Message extends Model
 
     protected $fillable = [
         'body',
-        'sendable_type', // Now includes sendable_type for polymorphism
-        'sendable_id',   // Now includes sendable_id for polymorphis
+        'sendable_type',
+        'sendable_id',
         'conversation_id',
         'reply_id',
         'type',
@@ -34,7 +34,6 @@ class Message extends Model
         'kept_at' => 'datetime',
     ];
 
-    //  protected $dates=['read_at','receiver_deleted_at','sender_deleted_at'];
     public function __construct(array $attributes = [])
     {
         $this->table = WireChat::formatTableName('messages');
@@ -65,48 +64,21 @@ class Message extends Model
         return \Namu\WireChat\Workbench\Database\Factories\MessageFactory::new();
     }
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
-
         // Add scope if authenticated
-        static::addGlobalScope('excludeDeleted', function (Builder $builder) {
-
-            $messagesTableName = (new Message)->getTable();
-            $participantTableName = (new Participant)->getTable();
-
-            if (auth()->check()) {
-                $user = auth()->user();
-
-                $builder->whereDoesntHave('actions', function ($q) use ($user) {
-                    $q->where('actor_id', $user->id)
-                        ->where('actor_type', $user->getMorphClass())
-                        ->where('type', Actions::DELETE);
-                })
-                    ->where(function ($query) use ($user, $messagesTableName, $participantTableName) {
-                        // Filter messages based on `conversation_deleted_at` in the participants table
-                        $query->whereHas('conversation.participants', function ($q) use ($user, $messagesTableName, $participantTableName) {
-                            $q->where('participantable_id', $user->id)
-                                ->where('participantable_type', $user->getMorphClass())
-                                ->where(function ($q) use ($messagesTableName, $participantTableName) {
-                                    $q->whereNull('conversation_cleared_at') // Include all messages if not cleared
-                                        ->orWhereColumn("$messagesTableName.created_at", '>', "$participantTableName.conversation_cleared_at");
-                                });
-                        });
-                    });
-            }
-        });
+        static::addGlobalScope(WithoutRemovedMessages::class);
 
         // listen to deleted
         static::deleted(function ($message) {
 
             if ($message->attachment?->exists()) {
 
-                //delete attachment
+                // delete attachment
                 $message->attachment?->delete();
 
-                //also delete from storage
-                if (file_exists(Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->exists($message->attachment->file_path))) {
+                // also delete from storage
+                if (Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->exists($message->attachment->file_path)) {
                     Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->delete($message->attachment->file_path);
                 }
             }
@@ -124,9 +96,14 @@ class Message extends Model
         return $this->morphOne(Attachment::class, 'attachable');
     }
 
-    public function hasAttachment()
+    public function hasAttachment(): bool
     {
         return $this->attachment()->exists();
+    }
+
+    public function isAttachment(): bool
+    {
+        return $this->type == MessageType::ATTACHMENT;
     }
 
     /**
@@ -139,7 +116,6 @@ class Message extends Model
         }
 
         return $this->conversation->getUnreadCountFor($user) <= 0;
-
     }
 
     /**
@@ -164,7 +140,7 @@ class Message extends Model
     // Relationship for the parent message
     public function parent()
     {
-        return $this->belongsTo(Message::class, 'reply_id')->withoutGlobalScope('excludeDeleted')->withTrashed();
+        return $this->belongsTo(Message::class, 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
     }
 
     // Relationship for the reply
@@ -185,6 +161,21 @@ class Message extends Model
         return $this->parent()->exists();
     }
 
+    public function scopeWhereIsNotOwnedBy($query, $user)
+    {
+
+        $query->where(function ($query) use ($user) {
+            $query->where('sendable_id', '<>', $user->id)
+                ->orWhere('sendable_type', '<>', $user->getMorphClass());
+        });
+
+        // $query->where(function ($query) use ($user) {
+        //     $query->whereNot('sendable_id', $user->id)
+        //           ->orWhereNot('sendable_type', $user->getMorphClass());
+        // });
+
+    }
+
     /**
      * Delete for
      * This will delete the message only for the auth user meaning other participants will be able to see it
@@ -195,8 +186,17 @@ class Message extends Model
             return false;
         }
 
-        //make sure auth belongs to conversation for this message
-        abort_unless($user->belongsToConversation($this->conversation), 403);
+        $conversation = $this->conversation;
+
+        // Make sure auth belongs to conversation for this message
+        abort_unless($user->belongsToConversation($conversation), 403);
+
+        // If conversation is self, then delete permanently directly
+        if ($conversation->isSelf()) {
+            $this->forceDelete();
+
+            return;
+        }
 
         // Try to create an action
         $this->actions()->create([
@@ -204,5 +204,50 @@ class Message extends Model
             'actor_type' => $user->getMorphClass(),
             'type' => Actions::DELETE,
         ]);
+
+        // If it's a private conversation (only 2 users), then check if both users have deleted the message
+        if ($conversation->isPrivate()) {
+
+            // Eager load particiapnts
+            $conversation->loadMissing('participants.participantable');
+            $deletedByBothParticipants = true;
+
+            foreach ($conversation->participants as $participant) {
+                $deletedByBothParticipants = $deletedByBothParticipants &&
+                    $this->actions()
+                        ->whereActor($participant->participantable)
+                        ->where('type', Actions::DELETE)
+                        ->exists();
+            }
+
+            if ($deletedByBothParticipants) {
+                $this->forceDelete();
+            }
+        }
+    }
+
+    /**
+     * Deleting message for everyone   */
+    public function deleteForEveryone(Model $user)
+    {
+
+        $conversation = $this->conversation;
+        $participant = $conversation->participant($user);
+        $message = $this;
+
+        // Make sure auth belongs to conversation for this message
+        abort_unless($user->belongsToConversation($conversation), 403, 'You do not belong to this conversation');
+
+        // make sure user owns message OR allow if is admin in group
+        abort_unless($message->ownedBy($user) || ($participant->isAdmin() && $message->conversation->isGroup()), 403, 'You do not have permission to delete this message');
+
+        // if message has reply then only-soft delete it
+        if ($message->hasReply()) {
+            $message->delete();
+        } else {
+
+            $message->forceDelete();
+        }
+
     }
 }

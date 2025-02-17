@@ -11,11 +11,11 @@ it('it saves action to database when created', function () {
     $auth = User::factory()->create();
     $conversation = $auth->createGroup('My Group');
 
-    //add participant
+    // add participant
     $user = User::factory()->create(['name' => 'Micheal']);
     $participant = $conversation->addParticipant($user);
 
-    //remove by admin
+    // remove by admin
 
     $action = Action::create([
         'actionable_id' => $participant->id,
@@ -25,7 +25,7 @@ it('it saves action to database when created', function () {
         'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
     ]);
 
-    //data verification
+    // data verification
     expect(Action::find($action->id))->not->toBe(null);
 });
 
@@ -34,11 +34,11 @@ it('it saved correct data when action is created', function () {
     $auth = User::factory()->create();
     $conversation = $auth->createGroup('My Group');
 
-    //add participant
+    // add participant
     $user = User::factory()->create(['name' => 'Micheal']);
     $participant = $conversation->addParticipant($user);
 
-    //remove by admin
+    // remove by admin
 
     $action = Action::create([
         'actionable_id' => $participant->id,
@@ -48,7 +48,7 @@ it('it saved correct data when action is created', function () {
         'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
     ]);
 
-    //data verification
+    // data verification
     expect($action->actionable_id)->toBe($participant->id);
     expect($action->actionable_type)->toBe(Participant::class);
     expect($action->actor_id)->toBe($auth->id);
@@ -61,11 +61,11 @@ it('it retrives correct actionable model (The model the action was performed on)
     $auth = User::factory()->create();
     $conversation = $auth->createGroup('My Group');
 
-    //add participant
+    // add participant
     $user = User::factory()->create(['name' => 'Micheal']);
     $participant = $conversation->addParticipant($user);
 
-    //remove by admin
+    // remove by admin
 
     $action = Action::create([
         'actionable_id' => $participant->id,
@@ -75,7 +75,7 @@ it('it retrives correct actionable model (The model the action was performed on)
         'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
     ]);
 
-    //data verification
+    // data verification
 
     $actionable = $actionable = $action->actionable()->withoutGlobalScopes()->first();
 
@@ -89,11 +89,11 @@ it('it retrives correct actor model (The model performed the action)', function 
     $auth = User::factory()->create();
     $conversation = $auth->createGroup('My Group');
 
-    //add participant
+    // add participant
     $user = User::factory()->create(['name' => 'Micheal']);
     $participant = $conversation->addParticipant($user);
 
-    //remove by admin
+    // remove by admin
 
     $action = Action::create([
         'actionable_id' => $participant->id,
@@ -103,7 +103,7 @@ it('it retrives correct actor model (The model performed the action)', function 
         'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
     ]);
 
-    //data verification
+    // data verification
     expect($action->id)->toBe($auth->id);
     expect(get_class($action->actor))->toBe(get_class($auth));
 
@@ -114,13 +114,13 @@ test('A model returns actions when ->actions is called()', function () {
     $auth = User::factory()->create();
     $conversation = $auth->createGroup('My Group');
 
-    //add participant
+    // add participant
     $otherUser = $conversation->addParticipant(User::factory()->create(['name' => 'Micheal']));
 
-    //create message to be delete
+    // create message to be delete
     $message = $auth->sendMessageTo($conversation, 'Hello');
 
-    //Create delete action by auth
+    // Create delete action by auth
     Action::create([
         'actionable_id' => $message->id,
         'actionable_type' => Message::class,
@@ -129,7 +129,7 @@ test('A model returns actions when ->actions is called()', function () {
         'type' => Actions::DELETE,  // Type of action
     ]);
 
-    //Create delete action by auth
+    // Create delete action by auth
     Action::create([
         'actionable_id' => $message->id,
         'actionable_type' => Message::class,
@@ -138,7 +138,7 @@ test('A model returns actions when ->actions is called()', function () {
         'type' => Actions::DELETE,  // Type of action
     ]);
 
-    //get message actions
+    // get message actions
     expect($message->actions()->count())->toBe(2);
 
 });
@@ -148,14 +148,14 @@ test('A model returns performed actions when ->performedActions is called() on a
     $auth = User::factory()->create();
     $conversation = $auth->createGroup('My Group');
 
-    //add participant
+    // add participant
     $otherUser = $conversation->addParticipant(User::factory()->create(['name' => 'Micheal']));
 
-    //create message to be delete
+    // create message to be delete
     $message = $auth->sendMessageTo($conversation, 'Hello');
     $message2 = $auth->sendMessageTo($conversation, 'Hello');
 
-    //Create delete action by auth
+    // Create delete action by auth
     Action::create([
         'actionable_id' => $message->id,
         'actionable_type' => Message::class,
@@ -164,7 +164,7 @@ test('A model returns performed actions when ->performedActions is called() on a
         'type' => Actions::DELETE,  // Type of action
     ]);
 
-    //Create delete action by auth
+    // Create delete action by auth
     Action::create([
         'actionable_id' => $message2->id,
         'actionable_type' => Message::class,
@@ -173,7 +173,7 @@ test('A model returns performed actions when ->performedActions is called() on a
         'type' => Actions::DELETE,  // Type of action
     ]);
 
-    //get message actions
+    // get message actions
     expect($auth->performedActions()->count())->toBe(2);
 
 });

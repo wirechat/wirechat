@@ -30,7 +30,7 @@ class InstallWireChat extends Command
             }
         }
 
-        //create storage sym link
+        // create storage sym link
         $this->comment('Creating storage symlink...');
         Artisan::call('storage:link');
         $this->info('[✓] Storage linked.');

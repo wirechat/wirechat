@@ -4,8 +4,10 @@ namespace Namu\WireChat\Tests;
 
 use Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider;
 use Illuminate\Config\Repository;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithViews;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\View;
@@ -18,10 +20,12 @@ use function Orchestra\Testbench\workbench_path;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
-    use DatabaseMigrations;
+    // use DatabaseMigrations;
 
-    //use InteractsWithViews;
+    // use InteractsWithViews;
     // use RefreshDatabase;
+
+    // use DatabaseTruncation;
     use WithWorkbench;
 
     protected function getPackageProviders($app): array
@@ -53,32 +57,45 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
                 'prefix' => '',
             ]);
 
-            //set up user model
+            // set up user model
             $config->set('wirechat.user_model', \Workbench\App\Models\User::class);
 
             // Setup queue database connections.
             $config->set('queue.batching.database', 'testbench');
             $config->set('queue.failed.database', 'testbench');
         });
+
+        if (! app()->runningInConsole()) {
+            Model::shouldBeStrict();
+        }
+
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-        //Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
+        // Config::set(\Namu\WireChat\Workbench\App\Models\User::class, \App\Models\User::class);
 
         // dd(             __DIR__.'../../database/migrations');
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations', workbench_path('database/migrations'));
+        // $this->loadMigrationsFrom(__DIR__.'/../database/migrations', workbench_path('database/migrations'));
 
         //  $this->loadMigrationsFrom( );
         $this->withoutVite();
+        // $this->loadMigrationsFrom([workbench_path('database/migrations'),__DIR__.'/../database/migrations']);
 
-        //  $this->artisan('migrate:fresh')->run();
-
+        // $this->artisan('migrate:fresh ')->run();
         //  $this->loadRoutesFrom(workbench_path('routes/web.php'));
-        //here we add a new ile in the name of the mixture of the berir d
-        // $this->loadMigrationsFrom(__DIR__.'/migrations');
-        // $this->loadMigrationsFrom(dirname(__DIR__).'/migrations');
+        // here we add a new ile in the name of the mixture of the berir d
+        // / $this->loadMigrationsFrom(__DIR__.'/migrations');
+    }
+
+    protected function defineDatabaseMigrations()
+    {
+        // /$this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        $this->loadMigrationsFrom(workbench_path('database/migrations'));
+        //     $this->artisan('orchid:install'); // installs migrations required for Orchid admin panel
     }
 
     // public static function applicationBasePath()

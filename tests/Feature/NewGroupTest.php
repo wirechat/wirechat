@@ -1,6 +1,6 @@
 <?php
 
-///Presence test
+// /Presence test
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\Components\NewGroup;
+use Namu\WireChat\Livewire\New\Group as NewGroup;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Workbench\App\Models\User as ModelsUser;
@@ -67,6 +67,18 @@ describe('Initial page', function () {
         $auth = ModelsUser::factory()->create();
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request->assertSee('Cancel');
+        $request->assertSeeHtml('dusk="cancel_create_new_group_button"');
+        $request->assertContainsBladeComponent('wirechat::actions.close-modal');
+
+    });
+
+    test('cancel_create_new_group_button_is_set_correctly', function () {
+
+        $auth = ModelsUser::factory()->create(['email_verified_at' => now()]);
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $request
+            ->assertSeeHtml('dusk="cancel_create_new_group_button"');
+        $request->assertContainsBladeComponent('wirechat::actions.close-modal');
 
     });
 
@@ -97,7 +109,7 @@ describe('Initial page', function () {
 
 describe('Validations', function () {
 
-    //validations
+    // validations
 
     test('Photo must be an image', function () {
         $auth = ModelsUser::factory()->create();
@@ -176,7 +188,7 @@ describe('Add members page', function () {
 
     test('Search can be filtered', function () {
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         ModelsUser::factory()->create(['name' => 'Micheal']);
 
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
@@ -188,7 +200,7 @@ describe('Add members page', function () {
 
     test('calling addMember()  can add selected members', function () {
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $user = ModelsUser::factory()->create(['name' => 'Micheal']);
 
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
@@ -200,15 +212,15 @@ describe('Add members page', function () {
 
     test('calling removeMember() can remove selected members', function () {
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $user = ModelsUser::factory()->create(['name' => 'Micheal']);
 
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request
-                //first add member
+                // first add member
             ->call('addMember', $user->id, $user->getMorphClass())
             ->assertSee('Micheal')
-                //then remove memener
+                // then remove memener
             ->call('removeMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal');
     });
@@ -217,14 +229,14 @@ describe('Add members page', function () {
 
         Config::set('wirechat.max_group_members', 2);
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
         $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
         $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
 
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request
-                //first add member
+                // first add member
             ->call('addMember', $member1->id, $member1->getMorphClass())
             ->call('addMember', $member2->id, $member2->getMorphClass())
             ->call('addMember', $member3->id, $member3->getMorphClass())
@@ -238,7 +250,7 @@ describe('Creteing group', function () {
     it('can create conversation  is validations pass', function () {
         Config::set('wirechat.max_group_members', 3);
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
         $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
         $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
@@ -247,16 +259,16 @@ describe('Creteing group', function () {
         $file = UploadedFile::fake()->create('photo.png');
 
         $request
-                //add details
+                // add details
             ->set('name', 'Test Group')
             ->set('description', 'Description Testing')
             ->set('photo', $file)
-                //add members
+                // add members
             ->call('addMember', $member1->id, $member1->getMorphClass())
             ->call('addMember', $member2->id, $member2->getMorphClass())
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
-                //create group
+                // create group
             ->call('create');
 
         $conversation = Conversation::withoutGlobalScopes()->first();
@@ -268,7 +280,7 @@ describe('Creteing group', function () {
     it('Creates group model', function () {
         Config::set('wirechat.max_group_members', 3);
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
         $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
         $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
@@ -277,16 +289,16 @@ describe('Creteing group', function () {
         $file = UploadedFile::fake()->create('photo.png');
 
         $request
-                //add details
+                // add details
             ->set('name', 'Test Group')
             ->set('description', 'Description Testing')
             ->set('photo', $file)
-                //add members
+                // add members
             ->call('addMember', $member1->id, $member1->getMorphClass())
             ->call('addMember', $member2->id, $member2->getMorphClass())
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
-                //create group
+                // create group
             ->call('create');
 
         $conversation = Conversation::withoutGlobalScopes()->first();
@@ -298,7 +310,7 @@ describe('Creteing group', function () {
         Config::set('wirechat.max_group_members', 3);
 
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
         $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
         $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
@@ -307,16 +319,16 @@ describe('Creteing group', function () {
         $file = UploadedFile::fake()->create('photo.png');
 
         $request
-                //add details
+                // add details
             ->set('name', 'Test Group')
             ->set('description', 'Description Testing')
             ->set('photo', $file)
-                //add members
+                // add members
             ->call('addMember', $member1->id, $member1->getMorphClass())
             ->call('addMember', $member2->id, $member2->getMorphClass())
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
-                //create group
+                // create group
             ->call('create');
 
         $conversation = Conversation::withoutGlobalScopes()->first();
@@ -332,7 +344,7 @@ describe('Creteing group', function () {
     it('creates participants', function () {
         Config::set('wirechat.max_group_members', 3);
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
         $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
         $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
@@ -341,16 +353,16 @@ describe('Creteing group', function () {
         $file = UploadedFile::fake()->create('photo.png');
 
         $request
-                //add details
+                // add details
             ->set('name', 'Test Group')
             ->set('description', 'Description Testing')
             ->set('photo', $file)
-                //add members
+                // add members
             ->call('addMember', $member1->id, $member1->getMorphClass())
             ->call('addMember', $member2->id, $member2->getMorphClass())
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
-                //create group
+                // create group
             ->call('create');
 
         $conversation = Conversation::withoutGlobalScopes()->first();
@@ -358,10 +370,11 @@ describe('Creteing group', function () {
         expect($conversation->participants->count())->toBe(4);
     });
 
-    it('redirects after creating conversation', function () {
+    it('dispataches Livewire events "closeWireChatModal" event after creating Group', function () {
+
         Config::set('wirechat.max_group_members', 3);
         $auth = ModelsUser::factory()->create();
-        //create another user
+        // create another user
         $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
         $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
         $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
@@ -370,21 +383,83 @@ describe('Creteing group', function () {
         $file = UploadedFile::fake()->create('photo.png');
 
         $request
-                //add details
+                // add details
             ->set('name', 'Test Group')
             ->set('description', 'Description Testing')
             ->set('photo', $file)
-                //add members
+                // add members
             ->call('addMember', $member1->id, $member1->getMorphClass())
             ->call('addMember', $member2->id, $member2->getMorphClass())
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
-                //create group
+                // create group
+            ->call('create');
+
+        $request->assertDispatched('closeWireChatModal');
+
+    });
+
+    it('it redirects and does not dispatach Livewire events "open-chat" events after creating Group if is not Widget', function () {
+
+        Config::set('wirechat.max_group_members', 3);
+        $auth = ModelsUser::factory()->create();
+        // create another user
+        $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
+        $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
+        $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file = UploadedFile::fake()->create('photo.png');
+
+        $request
+                // add details
+            ->set('name', 'Test Group')
+            ->set('description', 'Description Testing')
+            ->set('photo', $file)
+                // add members
+            ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->call('addMember', $member3->id, $member3->getMorphClass())
+
+                // create group
             ->call('create');
 
         $conversation = Conversation::withoutGlobalScopes()->first();
 
-        $request->assertRedirect(route(WireChat::viewRouteName(), $conversation->id));
+        $request->assertRedirect(route(WireChat::viewRouteName(), $conversation->id))
+            ->assertNotDispatched('open-chat');
+
+    });
+
+    it('it does not redirects but  dispataches Livewire events "open-chat" events after creating group if IS Widget', function () {
+
+        Config::set('wirechat.max_group_members', 3);
+        $auth = ModelsUser::factory()->create();
+        // create another user
+        $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
+        $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
+        $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class, ['widget' => true]);
+        $file = UploadedFile::fake()->create('photo.png');
+
+        $request
+                // add details
+            ->set('name', 'Test Group')
+            ->set('description', 'Description Testing')
+            ->set('photo', $file)
+                // add members
+            ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->call('addMember', $member3->id, $member3->getMorphClass())
+
+                // create group
+            ->call('create');
+
+        $conversation = Conversation::withoutGlobalScopes()->first();
+
+        $request->assertNoRedirect(route(WireChat::viewRouteName(), $conversation->id))
+            ->assertDispatched('open-chat');
 
     });
 

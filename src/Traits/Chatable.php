@@ -14,7 +14,6 @@ use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Group;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Models\Scopes\WithoutClearedScope;
 
 /**
  * Trait Chatable
@@ -53,7 +52,7 @@ trait Chatable
     public function createConversationWith(Model $participant, ?string $message = null)
     {
 
-        //abort if is not allowed to create new chats
+        // abort if is not allowed to create new chats
         abort_unless($this->canCreateChats(), 403, 'You do not have permission to create chats.');
 
         $participantId = $participant->id;
@@ -63,7 +62,7 @@ trait Chatable
         $authenticatedUserType = $this->getMorphClass();
 
         // Determine if this is a self-conversation (for the same user as both participants)
-        $selfConversationCheck = $participantId == $authenticatedUserId && $participantType === $authenticatedUserType;
+        $selfConversationCheck = $participantId == $authenticatedUserId && $participantType == $authenticatedUserType;
 
         //  dd($selfConversationCheck);
         $existingConversationQuery = Conversation::withoutGlobalScopes()
@@ -141,27 +140,27 @@ trait Chatable
     public function createGroup(string $name, ?string $description = null, ?UploadedFile $photo = null): Conversation
     {
 
-        //abort if is not allowed to create new groups
+        // abort if is not allowed to create new groups
         abort_unless($this->canCreateGroups(), 403, 'You do not have permission to create groups.');
 
-        //create rooom
-        //Otherwise, create a new conversation
+        // create rooom
+        // Otherwise, create a new conversation
         $conversation = new Conversation;
         $conversation->type = ConversationType::GROUP;
         $conversation->save();
 
-        //create room
+        // create room
         $group = $conversation->group()->create([
             'name' => $name,
             'description' => $description,
         ]);
 
-        //create and save photo is present
+        // create and save photo is present
         if ($photo) {
-            //save photo to disk
+            // save photo to disk
             $path = $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
 
-            //create attachment
+            // create attachment
             $group->cover()->create([
                 'file_path' => $path,
                 'file_name' => basename($path),
@@ -171,7 +170,7 @@ trait Chatable
             ]);
         }
 
-        //create participant as owner
+        // create participant as owner
         Participant::create([
             'conversation_id' => $conversation->id,
             'participantable_id' => $this->id,
@@ -188,7 +187,7 @@ trait Chatable
     public function exitConversation(Conversation $conversation): bool
     {
 
-        //get participant
+        // get participant
         $participant = $conversation->participant($this);
 
         return $participant ? $participant->exitConversation() : false;
@@ -233,7 +232,7 @@ trait Chatable
                 'body' => $message,
             ]);
 
-            //update auth participant last active
+            // update auth participant last active
             $participant = $conversation->participant($this);
             $participant->update(['last_active_at' => now()]);
 
@@ -333,14 +332,14 @@ trait Chatable
     public function deleteConversation(Conversation $conversation)
     {
 
-        //use already created methods inside conversation model
+        // use already created methods inside conversation model
         $conversation->deleteFor($this);
     }
 
     public function clearConversation(Conversation $conversation)
     {
 
-        //use already created methods inside conversation model
+        // use already created methods inside conversation model
         $conversation->clearFor($this);
     }
 
@@ -360,7 +359,7 @@ trait Chatable
         $selfConversationCheck = $participantId === $authenticatedUserId && $participantType === $authenticatedUserType;
 
         // Define the base query for finding conversations
-        $existingConversationQuery = Conversation::withoutGlobalScope(WithoutClearedScope::class)->where('type', ConversationType::PRIVATE);
+        $existingConversationQuery = Conversation::whereIn('type', [ConversationType::PRIVATE, ConversationType::SELF]);
 
         // If it's a self-conversation, adjust the query to check for two identical participants
         if ($selfConversationCheck) {
@@ -368,8 +367,9 @@ trait Chatable
                 $query->select('conversation_id')
                     ->where('participantable_id', $authenticatedUserId)
                     ->where('participantable_type', $authenticatedUserType)
+                    ->whereType(ConversationType::SELF)
                     ->groupBy('conversation_id')
-                    ->havingRaw('COUNT(*) = 2'); // Ensuring two participants in the conversation
+                    ->havingRaw('COUNT(*) = 1'); // Ensuring two participants in the conversation
             });
         } else {
             // If it's a conversation between two different participants, adjust the query accordingly
@@ -377,8 +377,9 @@ trait Chatable
                 $query->select('conversation_id')
                     ->whereIn('participantable_id', [$authenticatedUserId, $participantId])
                     ->whereIn('participantable_type', [$authenticatedUserType, $participantType])
+                    ->whereType(ConversationType::PRIVATE)
                     ->groupBy('conversation_id')
-                    ->havingRaw('COUNT(DISTINCT participantable_id) = 2'); // Ensure both participants are different
+                    ->havingRaw('COUNT(*) = 2'); // Ensure both participants are different
             });
         }
 
@@ -486,12 +487,12 @@ trait Chatable
     public function isAdminIn(Group|Conversation $entity): bool
     {
 
-        //check if is not Conversation model
+        // check if is not Conversation model
         if (! ($entity instanceof Conversation)) {
 
             $conversation = $entity->conversation;
         }
-        //means it is group to get Parent Relationship
+        // means it is group to get Parent Relationship
         else {
 
             $conversation = $entity;
@@ -508,12 +509,12 @@ trait Chatable
     public function isOwnerOf(Group|Conversation $entity): bool
     {
 
-        //check if is not Conversation model
+        // check if is not Conversation model
         if (! ($entity instanceof Conversation)) {
 
             $conversation = $entity->conversation;
         }
-        //means it is group to get Parent Relationship
+        // means it is group to get Parent Relationship
         else {
 
             $conversation = $entity;
@@ -521,7 +522,7 @@ trait Chatable
         // If not loaded, perform the query
         $pariticipant = $conversation->participant($this);
 
-        return $pariticipant->isOwner();
+        return (bool) $pariticipant?->isOwner();
     }
 
     /**

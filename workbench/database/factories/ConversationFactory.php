@@ -38,7 +38,7 @@ class ConversationFactory extends Factory
                 Participant::factory()->create([
                     'conversation_id' => $conversation->id,
                     'participantable_id' => $model->id,
-                    'participantable_type' => get_class($model),
+                    'participantable_type' => $model->getMorphClass(),
                     'role' => $role,
                 ]);
 

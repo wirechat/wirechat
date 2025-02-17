@@ -118,12 +118,12 @@ describe('Actions', function () {
 
         $participant = $message->conversation->participant($receiver);
 
-        //set time to 70 seconds in the future
+        // set time to 70 seconds in the future
         Carbon::setTestNowAndTimezone(now()->addSeconds(65));
 
         MessageCreated::dispatch($message);
 
-        //assert event disptaches but fails
+        // assert event disptaches but fails
         Event::assertDispatched(MessageCreated::class, function ($event) {
             $broadcastOn = $event->broadcastWhen();
 

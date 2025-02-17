@@ -1,10 +1,11 @@
 <?php
 
-///Presence test
+// /Presence test
 
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Components\NewChat;
+use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Livewire\New\Chat as NewChat;
 use Workbench\App\Models\User as ModelsUser;
 
 it('user must be authenticated', function () {
@@ -36,7 +37,7 @@ it('Title is set ', function () {
 it('can filter users if search input is set', function () {
     $auth = ModelsUser::factory()->create();
 
-    //create user
+    // create user
     ModelsUser::factory()->create(['name' => 'John']);
 
     $request = Livewire::actingAs($auth)->test(NewChat::class);
@@ -60,6 +61,7 @@ test('close_modal_button_is_set_correctly', function () {
     $request = Livewire::actingAs($auth)->test(NewChat::class);
     $request
         ->assertSeeHtml('dusk="close_modal_button"');
+    $request->assertContainsBladeComponent('wirechat::actions.close-modal');
 
 });
 
@@ -102,5 +104,99 @@ test('it doesnt show new group button if canCreateNewGroups==FALSE(email  NOT is
     $request = Livewire::actingAs($auth)->test(NewChat::class);
     $request->assertDontSee('New group')
         ->assertDontSeeHtml('@dusk="open_new_group_modal_button"');
+
+});
+
+describe('Creating conversation', function () {
+
+    test('it created conversation when user is selected', function () {
+
+        $auth = ModelsUser::factory()->create();
+
+        // create user
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        // assert user doenst have conversation
+        expect($auth->hasConversationWith($otherUser))->toBeFalse();
+
+        $request = Livewire::actingAs($auth)->test(NewChat::class);
+
+        // search
+        $request->set('search', 'Joh')->assertSee('John');
+
+        // create conversation
+        $request->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        expect($auth->hasConversationWith($otherUser))->toBeTrue();
+
+    });
+
+    test('it dispataches Livewire events "closeWireChatModal" after creating conversation', function () {
+
+        $auth = ModelsUser::factory()->create();
+
+        // create user
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $request = Livewire::actingAs($auth)->test(NewChat::class);
+
+        // search
+        $request->set('search', 'Joh')->assertSee('John');
+
+        // create conversation
+        $request->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        // assert redirect
+        $request->assertDispatched('closeWireChatModal');
+
+    });
+
+    test('it redirects and does not dispatach Livewire events "open-chat" events after creating conversation if is not Widget', function () {
+
+        $auth = ModelsUser::factory()->create();
+
+        // create user
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $request = Livewire::actingAs($auth)->test(NewChat::class);
+
+        // search
+        $request->set('search', 'Joh')->assertSee('John');
+
+        // create conversation
+        $request->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        $conversation = $auth->conversations()->first();
+
+        // assert redirect
+        $request
+            ->assertRedirect(route(WireChat::viewRouteName(), $conversation->id))
+            ->assertNotDispatched('open-chat');
+
+    });
+
+    test('it does not redirects but  dispataches Livewire events "open-chat" events after creating conversation if IS Widget', function () {
+
+        $auth = ModelsUser::factory()->create();
+
+        // create user
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $request = Livewire::actingAs($auth)->test(NewChat::class, ['widget' => true]);
+
+        // search
+        $request->set('search', 'Joh')->assertSee('John');
+
+        // create conversation
+        $request->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        $conversation = $auth->conversations()->first();
+
+        // assert redirect
+        $request
+            ->assertNoRedirect(route(WireChat::viewRouteName(), $conversation->id))
+            ->assertDispatched('open-chat');
+
+    });
 
 });

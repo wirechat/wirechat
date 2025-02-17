@@ -2,36 +2,34 @@
 
 namespace Namu\WireChat\Livewire\Chat;
 
-use App\Models\User;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
-//use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\MessageType;
-use Namu\WireChat\Events\BroadcastMessageEvent;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
-use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\NotifyParticipants;
-use Namu\WireChat\Models\Attachment;
+use Namu\WireChat\Livewire\Chats\Chats;
+use Namu\WireChat\Livewire\Concerns\Widget;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Notifications\NewMessageNotification;
 
 class Chat extends Component
 {
+    use Widget;
     use WithFileUploads;
     use WithPagination;
 
+    // public ?Conversation $conversation;
     public $conversation;
 
     public $conversationId;
@@ -59,15 +57,15 @@ class Chat extends Component
     public ?Participant $authParticipant;
 
     // #[Locked]
-    public ?Participant $receiverParticipant;
+    public ?Participant $receiverParticipant = null;
 
-    //Theme
+    // Theme
     public $replyMessage = null;
 
     public function getListeners()
     {
         // dd($this->conversation);
-        $conversationId = $this->conversation->id;
+        $conversationId = $this->conversation?->id;
 
         return [
             'refresh' => '$refresh',
@@ -83,12 +81,12 @@ class Chat extends Component
      */
     public function removeDeletedMessage($event)
     {
-        //before appending message make sure it belong to this conversation
+        // before appending message make sure it belong to this conversation
         if ($event['message']['conversation_id'] == $this->conversation->id) {
 
-            //Make sure message does not belong to auth
             // Make sure message does not belong to auth
-            if ($event['message']['sendable_id'] == auth()->id() && $event['message']['sendable_type'] === auth()->user()->getMorphClass()) {
+            // Make sure message does not belong to auth
+            if ($event['message']['sendable_id'] == auth()->id() && $event['message']['sendable_type'] === $this->auth->getMorphClass()) {
                 return null;
             }
 
@@ -109,67 +107,57 @@ class Chat extends Component
 
             // Dispatch refresh event
             $this->dispatch('refresh')->to(Chats::class);
-
         }
     }
 
-    //handle incomming broadcasted message event
+    // handle incomming broadcasted message event
     public function appendNewMessage($event)
     {
 
-        //before appending message make sure it belong to this conversation
+        // before appending message make sure it belong to this conversation
         if ($event['message']['conversation_id'] == $this->conversation->id) {
 
-            //scroll to bottom
+            // scroll to bottom
             $this->dispatch('scroll-bottom');
 
             $newMessage = Message::find($event['message']['id']);
+            // dd($newMessage);
 
-            //Make sure message does not belong to auth
             // Make sure message does not belong to auth
-            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type == auth()->user()->getMorphClass()) {
+            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type == $this->auth->getMorphClass()) {
                 return null;
             }
 
-            //push message
+            // push message
             $this->pushMessage($newMessage);
 
-            //mark as read
+            // mark as read
             $this->conversation->markAsRead();
 
-            //refresh chatlist
-            //dispatch event 'refresh ' to chatlist
+            // refresh chatlist
+            // dispatch event 'refresh ' to chatlist
             $this->dispatch('refresh')->to(Chats::class);
 
-            //broadcast
+            // broadcast
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
         }
     }
 
-    //   function testable($event)  {
-
-    //     dd($event);
-
-    //   }
-
     /**
-     * Todo: Authorize the property
-     * Todo: or lock it
-     * todo:Check if user can reply to this message
      * Set replyMessage as Message Model
      *  */
     public function setReply(Message $message)
     {
-        //check if user belongs to message
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+        // check if user belongs to message
+        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
 
-        //abort if message does not belong to this conversation or is not owned by any participant
+        // abort if message does not belong to this conversation or is not owned by any participant
         abort_unless($message->conversation_id == $this->conversation->id, 403);
 
-        //Set owner as Id we are replying to
+        // Set owner as Id we are replying to
         $this->replyMessage = $message;
 
-        //dispatch event to focus input field
+        // dispatch event to focus input field
         $this->dispatch('focus-input-field');
     }
 
@@ -210,7 +198,6 @@ class Chat extends Component
     {
 
         $this->resetErrorBag(['media', 'files']);
-
     }
 
     public function listenBroadcastedMessage($event)
@@ -220,10 +207,10 @@ class Chat extends Component
         $this->dispatch('scroll-bottom');
         $newMessage = Message::find($event['message_id']);
 
-        //push message
+        // push message
         $this->pushMessage($newMessage);
 
-        //mark as read
+        // mark as read
         $newMessage->read_at = now();
         $newMessage->save();
     }
@@ -234,11 +221,16 @@ class Chat extends Component
     {
         abort_unless(auth()->check(), 401);
 
-        //delete conversation
-        $this->conversation->deleteFor(auth()->user());
+        // delete conversation
+        $this->conversation->deleteFor($this->auth);
 
-        //redirect to chats page
-        $this->redirectRoute(WireChat::indexRouteName());
+        $this->handleComponentTermination(
+            redirectRoute: route(WireChat::indexRouteName()),
+            events: [
+                'close-chat',
+                Chats::class => ['chat-deleted',  [$this->conversation->id]],
+            ]
+        );
     }
 
     /**
@@ -247,29 +239,45 @@ class Chat extends Component
     {
         abort_unless(auth()->check(), 401);
 
-        //delete conversation
-        $this->conversation->clearFor(auth()->user());
+        // delete conversation
+        $this->conversation->clearFor($this->auth);
 
         $this->reset('loadedMessages', 'media', 'files', 'body');
 
-        //redirect to chats page
-        $this->redirectRoute(WireChat::indexRouteName());
+        // Dispatach event instead if isWidget
+
+        $this->handleComponentTermination(
+            redirectRoute: route(WireChat::indexRouteName()),
+            events: [
+                'close-chat',
+                Chats::class => 'refresh',
+            ]
+        );
     }
 
     public function exitConversation()
     {
         abort_unless(auth()->check(), 401);
 
-        $auth = auth()->user();
+        $auth = $this->auth;
 
-        //make sure owner if group cannot be removed from chat
+        // make sure conversation is neigher self nor private
+
+        abort_unless($this->conversation->isGroup(), 403, 'Cannot exit self or private conversation');
+
+        // make sure owner if group cannot be removed from chat
         abort_if($auth->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
 
-        //delete conversation
+        // delete conversation
         $auth->exitConversation($this->conversation);
 
-        //redirect to chats page
-        $this->redirectRoute(WireChat::indexRouteName());
+        // Dispatach event instead if isWidget
+        if ($this->isWidget()) {
+            $this->dispatch('close-chat');
+        } else {
+            // redirect to chats page
+            $this->redirectRoute(WireChat::indexRouteName());
+        }
     }
 
     protected function rateLimit()
@@ -289,11 +297,9 @@ class Chat extends Component
     public function sendMessage()
     {
 
-        //dd($this->body);
-
         abort_unless(auth()->check(), 401);
 
-        //rate limit
+        // rate limit
         $this->rateLimit();
 
         /* If media is empty then conitnue to validate body , since media can be submited without body */
@@ -309,21 +315,21 @@ class Chat extends Component
 
         if (count($attachments) != 0) {
 
-            //Validation
+            // Validation
 
             // Retrieve maxUploads count
             $maxUploads = config('wirechat.attachments.max_uploads');
 
-            //Files
+            // Files
             $fileMimes = implode(',', config('wirechat.attachments.file_mimes'));
             $fileMaxUploadSize = config('wirechat.attachments.file_max_upload_size');
 
-            //media
+            // media
             $mediaMimes = implode(',', config('wirechat.attachments.media_mimes'));
             $mediaMaxUploadSize = config('wirechat.attachments.media_max_upload_size');
 
             try {
-                //$this->js("alert('message')");
+                // $this->js("alert('message')");
                 $this->validate([
                     'files' => "max:$maxUploads|nullable",
                     'files.*' => "mimes:$fileMimes|max:$fileMaxUploadSize",
@@ -336,7 +342,7 @@ class Chat extends Component
                 return $this->dispatch('wirechat-toast', type: 'warning', message: $th->getMessage());
             }
 
-            //Combine media and files thne perform loop together
+            // Combine media and files thne perform loop together
 
             $createdMessages = [];
             foreach ($attachments as $key => $attachment) {
@@ -345,7 +351,7 @@ class Chat extends Component
                  * todo: Add url to table
                  */
 
-                //save photo to disk
+                // save photo to disk
                 $path = $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
 
                 // Determine the reply ID based on conditions
@@ -355,7 +361,7 @@ class Chat extends Component
                 $message = Message::create([
                     'reply_id' => $replyId,
                     'conversation_id' => $this->conversation->id,
-                    'sendable_type' => auth()->user()->getMorphClass(), // Polymorphic sender type
+                    'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
                     'sendable_id' => auth()->id(), // Polymorphic sender ID
                     'type' => MessageType::ATTACHMENT,
                     // 'body' => $this->body, // Add body if required
@@ -370,28 +376,28 @@ class Chat extends Component
                     'url' => Storage::url($path),
                 ]);
 
-                //append message to createdMessages
+                // append message to createdMessages
                 $createdMessages[] = $message;
 
-                //update the conversation model - for sorting in chatlist
+                // update the conversation model - for sorting in chatlist
                 $this->conversation->updated_at = now();
                 $this->conversation->save();
 
-                //dispatch event 'refresh ' to chatlist
+                // dispatch event 'refresh ' to chatlist
                 $this->dispatch('refresh')->to(Chats::class);
 
-                //broadcast message
+                // broadcast message
                 $this->dispatchMessageCreatedEvent($message);
             }
 
-            //push the message
+            // push the message
             foreach ($createdMessages as $key => $message) {
                 // code...
 
                 $this->pushMessage($message);
             }
 
-            //scroll to bottom
+            // scroll to bottom
             $this->dispatch('scroll-bottom');
         }
 
@@ -400,39 +406,38 @@ class Chat extends Component
             $createdMessage = Message::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
-                'sendable_type' => auth()->user()->getMorphClass(), // Polymorphic sender type
+                'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
                 'sendable_id' => auth()->id(), // Polymorphic sender ID
                 'body' => $this->body,
                 'type' => MessageType::TEXT,
             ]);
 
-            //push the message
+            // push the message
             $this->pushMessage($createdMessage);
 
-            //update the conversation model - for sorting in chatlist
+            // update the conversation model - for sorting in chatlist
 
             $this->conversation->touch();
 
-            //broadcast message
+            // broadcast message
             $this->dispatchMessageCreatedEvent($createdMessage);
 
-            //dispatch event 'refresh ' to chatlist
+            // dispatch event 'refresh ' to chatlist
             $this->dispatch('refresh')->to(Chats::class);
-
         }
 
         //     dd('hoting');
 
         $this->reset('media', 'files', 'body');
 
-        //scroll to bottom
+        // scroll to bottom
 
         $this->dispatch('scroll-bottom');
 
-        //remove reply just incase it is present
+        // remove reply just incase it is present
         $this->removeReply();
 
-        //reset expred conversation deletion
+        // reset expred conversation deletion
         // $this->removeExpiredConversationDeletion();
 
     }
@@ -444,21 +449,21 @@ class Chat extends Component
     public function deleteForMe(Message $message)
     {
 
-        //make sure user is authenticated
+        // make sure user is authenticated
         abort_unless(auth()->check(), 401);
 
-        //make sure user belongs to conversation from the message
-        //We are checking the $message->conversation for extra security because the param might be tempered with
-        abort_unless(auth()->user()->belongsToConversation($message->conversation), 403);
+        // make sure user belongs to conversation from the message
+        // We are checking the $message->conversation for extra security because the param might be tempered with
+        abort_unless($this->auth->belongsToConversation($message->conversation), 403);
 
-        //remove message from collection
+        // remove message from collection
         $this->removeMessage($message);
 
-        //dispatch event 'refresh ' to chatlist
+        // dispatch event 'refresh ' to chatlist
         $this->dispatch('refresh')->to(Chats::class);
 
-        //delete For $user
-        $message->deleteFor(auth()->user());
+        // delete For $user
+        $message->deleteFor($this->auth);
     }
 
     /**
@@ -469,23 +474,23 @@ class Chat extends Component
     public function deleteForEveryone(Message $message)
     {
 
-        $authParticipant = $this->conversation->participant(auth()->user());
+        $authParticipant = $this->conversation->participant($this->auth);
 
-        //make sure user is authenticated
+        // make sure user is authenticated
 
         abort_unless(auth()->check(), 401);
 
-        //make sure user owns message OR allow if is admin in group
-        abort_unless($message->ownedBy(auth()->user()) || ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
+        // make sure user owns message OR allow if is admin in group
+        abort_unless($message->ownedBy($this->auth) || ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
 
-        //make sure user belongs to conversation from the message
-        //We are checking the $message->conversation for extra security because the param might be tempered with
-        abort_unless(auth()->user()->belongsToConversation($message->conversation), 403);
+        // make sure user belongs to conversation from the message
+        // We are checking the $message->conversation for extra security because the param might be tempered with
+        abort_unless($this->auth->belongsToConversation($message->conversation), 403);
 
-        //remove message from collection
+        // remove message from collection
         $this->removeMessage($message);
 
-        //dispatch event 'refresh ' to chatlist
+        // dispatch event 'refresh ' to chatlist
         $this->dispatch('refresh')->to(Chats::class);
 
         try {
@@ -493,21 +498,21 @@ class Chat extends Component
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }
-        //event(new MessageDeleted($message,$this->conversation));
+        // event(new MessageDeleted($message,$this->conversation));
         // broadcast(new MessageDeleted($message,$this->conversation))->toOthers();
-        //if message has reply then only soft delete it
+        // if message has reply then only soft delete it
         if ($message->hasReply()) {
 
-            //delete message from database
+            // delete message from database
             $message->delete();
         } else {
 
-            //else Force delete message from database
+            // else Force delete message from database
             $message->forceDelete();
         }
     }
 
-    //Helper method to get group key
+    // Helper method to get group key
     private function messageGroupKey(Message $message): string
     {
 
@@ -526,7 +531,7 @@ class Chat extends Component
         return $groupKey;
     }
 
-    //helper to push message to loadedMessages
+    // helper to push message to loadedMessages
     private function pushMessage(Message $message)
     {
         $groupKey = $this->messageGroupKey($message);
@@ -538,7 +543,24 @@ class Chat extends Component
         $this->loadedMessages->put($groupKey, $this->loadedMessages->get($groupKey, collect())->push($message));
     }
 
-    //Method to remove method from collection
+    /**
+     * Hydrate conversations in Livewire.
+     *
+     * This method is triggered during Livewire hydration to ensure that
+     * loadedMessages relationships are eagerloaded during state change
+     *
+     * @return void
+     */
+    public function hydrateLoadedMessages()
+    {
+        $this->loadedMessages = $this->loadedMessages->map(function ($group) {
+            return $group->map(function ($message) {
+                return $message->loadMissing('sendable', 'parent', 'attachment');
+            });
+        });
+    }
+
+    // Method to remove method from collection
     private function removeMessage(Message $message)
     {
 
@@ -559,13 +581,13 @@ class Chat extends Component
         }
     }
 
-    //used to broadcast message sent to receiver
+    // used to broadcast message sent to receiver
     protected function dispatchMessageCreatedEvent(Message $message)
     {
 
-        //Dont dispatch if it is a selfConversation
+        // Dont dispatch if it is a selfConversation
 
-        if ($this->conversation->isSelfConversation(auth()->user())) {
+        if ($this->conversation->isSelfConversation($this->auth)) {
 
             return null;
         }
@@ -577,29 +599,27 @@ class Chat extends Component
 
             // event(new BroadcastMessageEvent($message,$this->conversation));
 
-            //!remove the receiver from the messageCreated and add it to the job instead
-            //!also do not forget to exlude auth user or message owner from particpants
+            // !remove the receiver from the messageCreated and add it to the job instead
+            // !also do not forget to exlude auth user or message owner from particpants
             // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
-            //if conversation is private then Notify particpant immediately
+            // if conversation is private then Notify particpant immediately
             if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
 
                 if ($this->conversation->isPrivate() && $this->receiverParticipant) {
 
                     //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
 
+                    // dd('broadcasting');
                     NotifyParticipants::dispatch($this->conversation, $message);
                     //    Notification::send($this->receiver, new NewMessageNotification($message));
 
                 }
-
             } else {
                 // code...
                 NotifyParticipants::dispatch($this->conversation, $message);
-
             }
-
         } catch (\Throwable $th) {
 
             Log::error($th->getMessage());
@@ -610,45 +630,45 @@ class Chat extends Component
     public function sendLike()
     {
 
-        //sleep(2);
+        // sleep(2);
 
-        //rate limit
+        // rate limit
         $this->rateLimit();
 
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
-            'sendable_type' => auth()->user()->getMorphClass(), // Polymorphic sender type
+            'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
             'sendable_id' => auth()->id(), // Polymorphic sender ID
             'body' => '❤️',
             'type' => MessageType::TEXT,
         ]);
 
-        //update the conversation model - for sorting in chatlist
+        // update the conversation model - for sorting in chatlist
         $this->conversation->updated_at = now();
         $this->conversation->save();
 
-        //push the message
+        // push the message
         $this->pushMessage($message);
 
-        //dispatch event 'refresh ' to chatlist
+        // dispatch event 'refresh ' to chatlist
         $this->dispatch('refresh')->to(Chats::class);
 
-        //scroll to bottom
+        // scroll to bottom
         $this->dispatch('scroll-bottom');
 
-        //dispatch event
+        // dispatch event
         $this->dispatchMessageCreatedEvent($message);
     }
 
     // load more messages
     public function loadMore()
     {
-        //increment
+        // increment
         $this->paginate_var += 10;
-        //call loadMessage
+        // call loadMessage
         $this->loadMessages();
 
-        //dispatch event- update height
+        // dispatch event- update height
         $this->dispatch('update-height');
     }
 
@@ -673,7 +693,6 @@ class Chat extends Component
         $this->canLoadMore = $this->totalMessageCount > $messages->count();
 
         return $this->loadedMessages;
-
     }
 
     public function placeholder()
@@ -681,42 +700,67 @@ class Chat extends Component
         return view('wirechat::components.placeholders.chat');
     }
 
-    public function mount()
+    public function mount($conversation = null)
     {
-        $this->initializeConversation();
+
+        $this->initializeConversation($conversation);
         $this->initializeParticipants();
         $this->finalizeConversationState();
         $this->loadMessages();
     }
 
-    private function initializeConversation()
+    private function initializeConversation($conversation)
     {
         abort_unless(auth()->check(), 401);
 
-        $this->conversation = Conversation::where('id', $this->conversation)
-            ->firstOr(fn () => abort(404));
+        // Handle different input scenarios
+        if ($conversation instanceof Conversation) {
+            $this->conversation = $conversation;
+        } elseif (is_numeric($conversation)) {
+            // Cast to integer if numeric (handles numeric strings too)
+            $conversationId = (int) $conversation;
+            $this->conversation = Conversation::find($conversationId);
 
+            if (! $this->conversation) {
+                abort(404, 'Conversation not found.'); // Custom error response
+            }
+        } elseif (is_null($conversation)) {
+            abort(422, 'A conversation id is required'); // Custom error for missing input
+        } else {
+            return abort(422, 'Invalid conversation input.'); // Handle invalid input types
+        }
+
+        // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
         $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
+    }
 
-        $this->conversationId = $this->conversation->id;
+    /**
+     * Computed property for auth
+     * */
+
+    /**
+     * Returns the authenticated user.
+     *
+     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     */
+    #[Computed(persist: true)]
+    public function auth()
+    {
+        return auth()->user();
     }
 
     private function initializeParticipants()
     {
         if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
             $this->conversation->load('participants');
-            $participants = $this->conversation->participants;
+            $participants = $this->conversation->participants();
 
-            $this->authParticipant = $participants
-                ->where('participantable_id', auth()->id())
-                ->first();
+            $this->authParticipant = $participants->whereParticipantable($this->auth)->first();
 
-            $this->receiverParticipant = $participants
-                ->where('participantable_id', '!=', auth()->id())
-                ->first();
+            $this->receiverParticipant = $this->conversation->receiverParticipant;
 
-            //If conversation is self then receiver is auth;
+            // If conversation is self then receiver is auth;
             if ($this->conversation->type == ConversationType::SELF) {
                 $this->receiverParticipant = $this->authParticipant;
             }
@@ -725,20 +769,22 @@ class Chat extends Component
                 ? $this->receiverParticipant->participantable
                 : null;
         } else {
-            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable(auth()->user())->first();
+            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
             $this->receiver = null;
         }
     }
 
-    private function finalizeConversationState()
+    public function finalizeConversationState()
     {
 
         $this->conversation->markAsRead();
 
         if ($this->authParticipant) {
+
             $this->authParticipant->update(['last_active_at' => now()]);
 
-            if ($this->authParticipant->hasDeletedConversation(true)) {
+            // If has deletd Conversation and Deletion has expired
+            if ($this->authParticipant->hasDeletedConversation(true) == false) {
                 $this->authParticipant->update(['conversation_deleted_at' => null]);
             }
         }
@@ -746,7 +792,6 @@ class Chat extends Component
 
     public function render()
     {
-        // $this->conversation->turnOnDisappearing(3600);
         return view('wirechat::livewire.chat.chat');
     }
 }

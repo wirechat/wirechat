@@ -7,42 +7,51 @@ on:
       - dev
   pull_request:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   php-tests:
     runs-on: ubuntu-latest
-    continue-on-error: false  # keep this if you want the workflow to continue even if the tests fail
-    
+    continue-on-error: false
 
     strategy:
       matrix:
         php: [8.2, 8.3, 8.4]
         laravel: [10.*, 11.*]
         dependency-version: [prefer-lowest, prefer-stable]
-        os: [ubuntu-latest]
         include:
           - laravel: 10.*
             testbench: 8.*
+            pest: ^2.34
+            pest-plugin: ^2.4
             php: 8.2
           - laravel: 10.*
             testbench: 8.*
+            pest: ^2.34
+            pest-plugin: ^2.4
             php: 8.3
           - laravel: 10.*
             testbench: 8.*
+            pest: ^2.34
+            pest-plugin: ^2.4
             php: 8.4
           - laravel: 11.*
             testbench: 9.*
+            pest: ^3.7.4
+            pest-plugin: ^3.0
             php: 8.2
           - laravel: 11.*
             testbench: 9.*
+            pest: ^3.7.4
+            pest-plugin: ^3.0
             php: 8.3
           - laravel: 11.*
             testbench: 9.*
+            pest: ^3.7.4
+            pest-plugin: ^3.0
             php: 8.4
 
-
-    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - ${{ matrix.dependency-version }}
+    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }}  - Pest-Plugin${{ matrix.pest-plugin }} -  ${{ matrix.dependency-version }}
 
     steps:
       - name: Checkout code
@@ -57,14 +66,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Install Laravel and Testbench based on the matrix
-          composer require --dev "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer require --dev \
+            "laravel/framework:${{ matrix.laravel }}" \
+            "orchestra/testbench:${{ matrix.testbench }}" \
+            "pestphp/pest:${{ matrix.pest }}" \
+            "pestphp/pest-plugin-laravel:${{ matrix.pest-plugin }}" \
+            --no-interaction --no-update
+
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Run tests
         run: vendor/bin/pest --ci
 
-# Job for running Pint (linting) checks
   lint-tests:
     runs-on: ubuntu-latest
     steps:
@@ -78,7 +91,7 @@ jobs:
           extensions: mbstring, dom, curl
 
       - name: Install Composer dependencies
-        run: composer install --no-interaction 
+        run: composer install --no-interaction
 
       - name: Run Pint for linting
-        run: vendor/bin/pint --test 
+        run: vendor/bin/pint --test

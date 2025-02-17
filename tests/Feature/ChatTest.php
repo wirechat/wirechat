@@ -19,15 +19,16 @@ use Namu\WireChat\Helpers\Helper;
 use Namu\WireChat\Jobs\BroadcastMessage;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Livewire\Chat\Chat as ChatBox;
-use Namu\WireChat\Livewire\Chat\Chats as Chatlist;
+use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
+use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
-///Auth checks
+// /Auth checks
 it('checks if users is authenticated before loading chatbox', function () {
-    Livewire::test(ChatBox::class)
+    Livewire::test(ChatBox::class, ['conversation' => 1])
         ->assertStatus(401);
 });
 
@@ -66,45 +67,37 @@ describe('Presense', function () {
         $conversation = $auth->createConversationWith($receiver);
 
         // Set specific times for testing purposes
-        Carbon::setTestNowAndTimezone(now()->today());
-
-        //
-        $todayTime = now()->today(); // Today at 1:00 PM
-        $yesterdayTime = now()->subDay(); // Yesterday at 3:00 PM
-        $thisWeekTime = now()->subDays(2); // Two days ago at 9:00 AM
-        $olderTime = now()->subWeeks(2); // Two weeks ago at 10:30 AM
-
+        Carbon::setTestNow(now()->today());
         // Create messages with different timestamps
         $todayMessage = Message::create([
             'conversation_id' => $conversation->id,
             'sendable_type' => get_class($auth),
             'sendable_id' => $auth->id,
             'body' => 'Message from today',
-            'created_at' => $todayTime,
         ]);
 
+        Carbon::setTestNow(now()->subDay());
         $yesterdayMessage = Message::create([
             'conversation_id' => $conversation->id,
             'sendable_type' => get_class($auth),
             'sendable_id' => $auth->id,
             'body' => 'Message from yesterday',
-            'created_at' => $yesterdayTime,
         ]);
 
+        Carbon::setTestNow(now()->subDay(2));
         $thisWeekMessage = Message::create([
             'conversation_id' => $conversation->id,
             'sendable_type' => get_class($auth),
             'sendable_id' => $auth->id,
             'body' => 'Message from this week',
-            'created_at' => $thisWeekTime,
         ]);
 
+        Carbon::setTestNow(now()->subWeeks(2));
         $olderMessage = Message::create([
             'conversation_id' => $conversation->id,
             'sendable_type' => get_class($auth),
             'sendable_id' => $auth->id,
             'body' => 'Older message',
-            'created_at' => $olderTime,
         ]);
 
         // Expected outputs based on the message created_at timestamps
@@ -129,14 +122,14 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //Create-conversation with user1
+        // Create-conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         // dd($conversation);
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert-both-conversations visible before typing
+        // Assert-both-conversations visible before typing
         $request
             ->assertSee('Test')
             ->assertSee('(You)');
@@ -149,12 +142,12 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert both conversations visible before typing
+        // Assert both conversations visible before typing
         $request->assertDontSeeHtml('dusk="upload-trigger-button"');
     });
 
@@ -165,12 +158,12 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert both conversations visible before typing
+        // Assert both conversations visible before typing
         $request->assertSeeHtml('dusk="upload-trigger-button"');
     });
 
@@ -181,12 +174,12 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert both conversations visible before typing
+        // Assert both conversations visible before typing
         $request->assertSeeHtml('dusk="file-upload-input"');
     });
 
@@ -197,12 +190,12 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert both conversations visible before typing
+        // Assert both conversations visible before typing
         $request->assertDontSeeHtml('dusk="file-upload-input"');
     });
 
@@ -213,12 +206,12 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert both conversations visible before typing
+        // Assert both conversations visible before typing
         $request->assertSeeHtml('dusk="media-upload-input"');
     });
 
@@ -229,12 +222,12 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert both conversations visible before typing
+        // Assert both conversations visible before typing
         $request->assertDontSeeHtml('dusk="media-upload-input"');
     });
 
@@ -245,17 +238,61 @@ describe('Presense', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //Assert both conversations visible before typing
+        // Assert both conversations visible before typing
         $request->assertSeeHtml('dusk="emoji-trigger-button"');
     });
 });
 
 describe('mount()', function () {
+
+    test('it renders component when conversation is passed as Id ', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        $request->assertOk();
+    });
+
+    test('it renders component when conversation is passed as Conversation Model ', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation]);
+
+        $request->assertOk();
+    });
+
+    test('it aborts 422 if conversation is passsed as invalid input', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => 'randmo..']);
+
+        $request->assertStatus(422);
+    });
+
+    test('it aborts 422 if conversation is passsed as null', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => null]);
+
+        $request->assertStatus(422, 'A conversation is required');
+    });
 
     test('updates the auth particiapnt  last_active_at field when component is opened', function () {
         $auth = User::factory()->create();
@@ -277,6 +314,46 @@ describe('mount()', function () {
 
         expect($participant->last_active_at)->not->toBe(null);
     });
+
+    test('When NOT Widget it does not dispatches "refresh" event after succesfully loading chat', function () {
+        $auth = User::factory()->create();
+
+        // create group
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+        $auth->sendMessageTo($conversation, 'hi');
+
+        // add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation, 'hi');
+
+        // login as user not auth (Owner)
+        $request = Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => false]);
+
+        $request
+            ->assertStatus(200)
+            ->assertNotDispatched('refresh');
+    });
+
+    // test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
+    test('because event is fired in blade x-init so it\'s not testable so we just check it\'s presence ', function () {
+        $auth = User::factory()->create();
+        $user = User::factory()->create();
+
+        // create group
+        $conversation = $auth->createConversationWith($auth, 'hi');
+        // login as user not auth (Owner)
+        Carbon::setTestNow(now()->subSeconds(60));
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+        Carbon::setTestNow();
+
+        $request
+            ->assertOK()
+            ->assertSeeHtml('$wire.dispatch(\'chat-opened\',{conversation:conversationId})');
+    });
+
 });
 
 describe('Box presence test: ', function () {
@@ -293,18 +370,30 @@ describe('Box presence test: ', function () {
             ->assertSee('John');
     });
 
+    test('it still shows receiver name  when Conversation has Mixed Model Participants', function () {
+        $auth = User::factory()->create();
+        $receiver = Admin::factory()->create(['name' => 'John']);
+
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('John');
+    });
+
     test('it shows group name if conversation is group', function () {
         $auth = User::factory()->create();
 
         $participant = User::factory()->create(['name' => 'John']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $conversation->addParticipant($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
         // dd($conversation);
@@ -317,7 +406,7 @@ describe('Box presence test: ', function () {
 
         $participant = User::factory()->create(['name' => 'John']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($participant);
         //
         Livewire::actingAs($participant)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -328,7 +417,7 @@ describe('Box presence test: ', function () {
     test('It shows Clear Chat button and method  is wired if conversation is Self', function () {
         $auth = User::factory()->create();
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($auth);
         //
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -341,13 +430,13 @@ describe('Box presence test: ', function () {
 
         $participant = User::factory()->create(['name' => 'John']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $conversation->addParticipant($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
         //
@@ -361,10 +450,10 @@ describe('Box presence test: ', function () {
 
         $participant = User::factory()->create(['name' => 'John']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createConversationWith($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
         //
@@ -378,13 +467,13 @@ describe('Box presence test: ', function () {
 
         $participant = User::factory()->create(['name' => 'John']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $conversation->addParticipant($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
         //
@@ -398,13 +487,13 @@ describe('Box presence test: ', function () {
 
         $participant = User::factory()->create(['name' => 'John']);
 
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $conversation->addParticipant($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
         //
@@ -418,10 +507,10 @@ describe('Box presence test: ', function () {
 
         $participant = User::factory()->create(['name' => 'John']);
 
-        //add participant
+        // add participant
         $conversation = $auth->createConversationWith($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
         //
@@ -438,7 +527,7 @@ describe('Box presence test: ', function () {
             ->withParticipants([$auth, $receiver])
             ->create();
 
-        //send messages
+        // send messages
         $auth->sendMessageTo($receiver, message: 'How are you');
         $receiver->sendMessageTo($auth, message: 'i am good thanks');
 
@@ -452,7 +541,7 @@ describe('Box presence test: ', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
 
         $conversation->addParticipant(User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'Micheal']));
         $conversation->addParticipant(User::factory()->withMessage($conversation, 'How can i repay you ')->create(['name' => 'Levo']));
@@ -470,10 +559,10 @@ describe('Box presence test: ', function () {
         $auth = User::factory()->create(['name' => 'Namu']);
         $conversation = $auth->createGroup('My Group');
 
-        //send message
+        // send message
         $auth->sendMessageTo($conversation, 'Message from owner');
 
-        //add participant
+        // add participant
 
         $conversation->addParticipant(User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'Micheal']));
         $conversation->addParticipant(User::factory()->withMessage($conversation, 'How can i repay you ')->create(['name' => 'Levo']));
@@ -490,7 +579,7 @@ describe('Box presence test: ', function () {
         $auth = User::factory()->create(['name' => 'Namu']);
         $conversation = $auth->createGroup('My Group');
 
-        //turn on disappearing
+        // turn on disappearing
         $conversation->turnOnDisappearing(3600);
 
         // dd($conversation);
@@ -503,12 +592,48 @@ describe('Box presence test: ', function () {
         $auth = User::factory()->create(['name' => 'Namu']);
         $conversation = $auth->createGroup('My Group');
 
-        //turn on disappearing
+        // turn on disappearing
         $conversation->turnOffDisappearing();
 
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertDontSeeHtml('dusk="disappearing_messages_icon"');
+    });
+
+    describe('IsWidget:', function () {
+
+        test('it renders $dispatch("close-chat") BUT not redirect to chats index', function () {
+
+            $auth = User::factory()->create(['name' => 'Namu']);
+            $conversation = $auth->createGroup('My Group');
+
+            // turn on disappearing
+            $conversation->turnOffDisappearing();
+
+            // dd($conversation);
+            Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true])
+                ->assertDontSeeHtml('href="'.route(WireChat::indexRouteName()).'"')
+                ->assertSeeHtml('dusk="return_to_home_button_dispatch"')
+                ->assertDontSeeHtml('dusk="return_to_home_button_link"');
+            //                ->assertMethodWired('$dispatch(\'close-chat\')');
+
+        });
+
+        test('it doesnt render $dispatch("close-chat") BUT Renders redirect to chats index', function () {
+
+            $auth = User::factory()->create(['name' => 'Namu']);
+            $conversation = $auth->createGroup('My Group');
+
+            // turn on disappearing
+            $conversation->turnOffDisappearing();
+
+            // dd($conversation);
+            Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => false])
+                ->assertSeeHtml('href="'.route(WireChat::indexRouteName()).'"')
+                ->assertDontSeeHtml('dusk="return_to_home_button_dispatch"')
+                ->assertSeeHtml('dusk="return_to_home_button_link"')
+                ->assertDontSeeHtml('@click="$dispatch(\'close-chat\')"');
+        });
     });
 
     // test('it shows message time', function () {
@@ -548,12 +673,12 @@ describe('Message actions: Viewing Private Chat', function () {
         $receiver = User::factory()->create(['name' => 'User']);
         $conversation = $auth->createConversationWith($receiver);
 
-        //add participant
+        // add participant
         $receiver->sendMessageTo($conversation, 'Nice things');
 
         //
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertDontSeeHtml('dusk="delete_message_for_everyone"');
     });
 
@@ -564,12 +689,12 @@ describe('Message actions: Viewing Private Chat', function () {
         $receiver = User::factory()->create(['name' => 'User']);
         $conversation = $auth->createConversationWith($receiver);
 
-        //add participant
+        // add participant
         $auth->sendMessageTo($conversation, 'Nice things');
 
         //
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertSeeHtml('dusk="delete_message_for_everyone"');
     });
 
@@ -583,12 +708,12 @@ describe('Message actions: Viewing Private Chat', function () {
         $receiver = User::factory()->create(['name' => 'User']);
         $conversation = $auth->createConversationWith($receiver);
 
-        //add participant
+        // add participant
         $receiver->sendMessageTo($conversation, 'Nice things');
 
         //
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertSeeHtml('dusk="delete_message_for_me"');
     });
 
@@ -599,12 +724,12 @@ describe('Message actions: Viewing Private Chat', function () {
         $receiver = User::factory()->create(['name' => 'User']);
         $conversation = $auth->createConversationWith($receiver);
 
-        //add participant
+        // add participant
         $auth->sendMessageTo($conversation, 'Nice things');
 
         //
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertSeeHtml('dusk="delete_message_for_me"');
     });
 });
@@ -616,12 +741,12 @@ describe('Message actions:Viewing Group Chat', function () {
         $auth = User::factory()->create(['name' => 'test']);
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertSeeHtml('dusk="delete_message_for_everyone"');
     });
 
@@ -632,14 +757,14 @@ describe('Message actions:Viewing Group Chat', function () {
 
         $conversation = $auth->createGroup('My Group');
 
-        //add admin
+        // add admin
         $conversation->addParticipant($admin, ParticipantRole::ADMIN);
 
-        //add participant and send messsage
+        // add participant and send messsage
         User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
         Livewire::actingAs($admin)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertSeeHtml('dusk="delete_message_for_everyone"');
     });
 
@@ -652,10 +777,10 @@ describe('Message actions:Viewing Group Chat', function () {
         $conversation->addParticipant($user, ParticipantRole::PARTICIPANT);
         $user->sendMessageTo($conversation, 'Hi');
 
-        //add participant
+        // add participant
 
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Hi') //assert can see message
+            ->assertSee('Hi') // assert can see message
             ->assertSeeHtml('dusk="delete_message_for_everyone"');
     });
 
@@ -667,11 +792,11 @@ describe('Message actions:Viewing Group Chat', function () {
         $user = User::factory()->create(['name' => 'User']);
         $conversation->addParticipant($user, ParticipantRole::PARTICIPANT);
 
-        //add participant and send message by random user
+        // add participant and send message by random user
         User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message  but not options
+            ->assertSee('Nice things') // assert can see message  but not options
             ->assertDontSeeHtml('dusk="delete_message_for_everyone"');
     });
 
@@ -683,12 +808,12 @@ describe('Message actions:Viewing Group Chat', function () {
         $auth = User::factory()->create(['name' => 'test']);
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertDontSeeHtml('dusk="delete_message_for_me"');
     });
 
@@ -699,14 +824,14 @@ describe('Message actions:Viewing Group Chat', function () {
 
         $conversation = $auth->createGroup('My Group');
 
-        //add admin
+        // add admin
         $conversation->addParticipant($admin, ParticipantRole::ADMIN);
 
-        //add participant and send messsage
+        // add participant and send messsage
         User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
         Livewire::actingAs($admin)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message
+            ->assertSee('Nice things') // assert can see message
             ->assertDontSeeHtml('dusk="delete_message_for_me"');
     });
 
@@ -719,11 +844,11 @@ describe('Message actions:Viewing Group Chat', function () {
         $conversation->addParticipant($user, ParticipantRole::PARTICIPANT);
         $user->sendMessageTo($conversation, 'Hi');
 
-        //add participant
+        // add participant
 
         // dd($conversation);
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Hi') //assert can see message
+            ->assertSee('Hi') // assert can see message
             ->assertDontSeeHtml('dusk="delete_message_for_me"');
     });
 
@@ -735,11 +860,11 @@ describe('Message actions:Viewing Group Chat', function () {
         $user = User::factory()->create(['name' => 'User']);
         $conversation->addParticipant($user, ParticipantRole::PARTICIPANT);
 
-        //add participant and send message by random user
+        // add participant and send message by random user
         User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSee('Nice things') //assert can see message  but not options
+            ->assertSee('Nice things') // assert can see message  but not options
             ->assertDontSeeHtml('dusk="delete_message_for_me"');
     });
 });
@@ -748,17 +873,17 @@ describe('Testing permissions accssibility ', function () {
 
     test('it shows footer & message actions but NOT "Only admins can send messages" label if auth is Owner', function () {
         $auth = User::factory()->create();
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $participant = User::factory()->create(['name' => 'John']);
         $conversation->addParticipant($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
-        //test
+        // test
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertDontSee('Only admins can send messages')
             ->assertSeeHtml('id="chat-footer"')
@@ -767,22 +892,22 @@ describe('Testing permissions accssibility ', function () {
 
     test('it still shows footer & message actions but does not show "Only admins can send messages" label if auth is Owner when send_messages permission is off', function () {
         $auth = User::factory()->create();
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $participant = User::factory()->create(['name' => 'John']);
         $conversation->addParticipant($participant);
 
-        //send message
+        // send message
         $participant->sendMessageTo($conversation, 'Hello');
 
-        //Turn off permission
+        // Turn off permission
         $group = $conversation->group;
         $group->allow_members_to_send_messages = false;
         $group->save();
 
-        //test
+        // test
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertDontSee('Only admins can send messages')
             ->assertSeeHtml('id="chat-footer"')
@@ -791,24 +916,24 @@ describe('Testing permissions accssibility ', function () {
 
     test('it shows footer & message actions but NOT "Only admins can send messages" label if is Admin and send_messages permission is on', function () {
         $auth = User::factory()->create();
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant ADMIN
+        // add participant ADMIN
         $user = User::factory()->create(['name' => 'John']);
         $participant = $conversation->addParticipant($user);
         $participant->role = ParticipantRole::ADMIN;
         $participant->save();
 
-        //send message
+        // send message
         $user->sendMessageTo($conversation, 'Hello');
 
-        //Turn off permission
+        // Turn off permission
         $group = $conversation->group;
         $group->allow_members_to_send_messages = true;
         $group->save();
 
-        //test
+        // test
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertDontSee('Only admins can send messages')
             ->assertSeeHtml('id="chat-footer"')
@@ -817,24 +942,24 @@ describe('Testing permissions accssibility ', function () {
 
     test('it still shows chat-footer& message actions but NOT "Only admins can send messages" label if auth is Admin when send_messages permission is off', function () {
         $auth = User::factory()->create();
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant ADMIN
+        // add participant ADMIN
         $user = User::factory()->create(['name' => 'John']);
         $participant = $conversation->addParticipant($user);
         $participant->role = ParticipantRole::ADMIN;
         $participant->save();
 
-        //send message
+        // send message
         $user->sendMessageTo($conversation, 'Hello');
 
-        //Turn off permission
+        // Turn off permission
         $group = $conversation->group;
         $group->allow_members_to_send_messages = false;
         $group->save();
 
-        //test
+        // test
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertDontSee('Only admins can send messages')
             ->assertSeeHtml('id="chat-footer"')
@@ -843,22 +968,22 @@ describe('Testing permissions accssibility ', function () {
 
     test('it shows chat-footer & message actions but NOT "Only admins can send messages" label if auth is PARTICIPANT when send_messages permission is on', function () {
         $auth = User::factory()->create();
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant ADMIN
+        // add participant ADMIN
         $user = User::factory()->create(['name' => 'John']);
         $participant = $conversation->addParticipant($user);
 
-        //send message
+        // send message
         $user->sendMessageTo($conversation, 'Hello');
 
-        //Turn off permission
+        // Turn off permission
         $group = $conversation->group;
         $group->allow_members_to_send_messages = true;
         $group->save();
 
-        //test
+        // test
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertDontSee('Only admins can send messages')
             ->assertSeeHtml('id="chat-footer"')
@@ -867,37 +992,37 @@ describe('Testing permissions accssibility ', function () {
 
     test('it does not shows chat-footer & message actions but show "Only admins can send messages" label if auth is PARTICIPANT when send_messages permission is off', function () {
         $auth = User::factory()->create();
-        //create conversation with user1
+        // create conversation with user1
         $conversation = $auth->createGroup('My Group');
 
-        //add participant ADMIN
+        // add participant ADMIN
         $user = User::factory()->create(['name' => 'John']);
         $participant = $conversation->addParticipant($user);
         $participant->role = ParticipantRole::PARTICIPANT;
         $participant->save();
 
-        //send message
+        // send message
         $user->sendMessageTo($conversation, 'Hello');
 
-        //Turn off permission
+        // Turn off permission
         $group = $conversation->group;
         $group->allow_members_to_send_messages = false;
         $group->save();
 
-        //test
+        // test
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSee('Only admins can send messages')
             ->assertDontSeeHtml('id="chat-footer"')
             ->assertDontSeeHtml('dusk="message_actions"');
     });
 
-    //todo: dispatch refresh event after updating permissions
+    // todo: dispatch refresh event after updating permissions
 
 });
 
 describe('Sending messages ', function () {
 
-    //message
+    // message
     test('it renders new message to chatbox when it is sent', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1086,10 +1211,10 @@ describe('Sending messages ', function () {
 
         $auth = User::factory()->create();
 
-        //create group
+        // create group
         $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
-        //add members
+        // add members
         for ($i = 0; $i < 20; $i++) {
             $conversation->addParticipant(User::factory()->create());
         }
@@ -1107,12 +1232,12 @@ describe('Sending messages ', function () {
 
         $auth = User::factory()->create();
 
-        //create group
+        // create group
         $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
-        //add members
+        // add members
 
-        //add user and exit conversation
+        // add user and exit conversation
         $user = User::factory()->create();
         $conversation->addParticipant($user);
 
@@ -1121,7 +1246,7 @@ describe('Sending messages ', function () {
         }
 
         //   $user->sendMessageTo($conversation, 'hi');
-        $user->exitConversation($conversation); //exit here
+        $user->exitConversation($conversation); // exit here
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('body', 'New message')
@@ -1130,66 +1255,6 @@ describe('Sending messages ', function () {
         //    Carbon::setTestNow(now()->addSeconds(6));
 
         Event::assertDispatchedTimes(NotifyParticipant::class, 20);
-    });
-
-    test('user cannot access conversation after exiting', function () {
-        Event::fake();
-        // Queue::fake();
-
-        $auth = User::factory()->create();
-
-        //create group
-        $conversation = $auth->createGroup(name: 'New group', description: 'description');
-
-        //add user and exit conversation
-        $user = User::factory()->create();
-        $conversation->addParticipant($user);
-        $user->sendMessageTo($conversation, 'hi');
-        $user->exitConversation($conversation); //exit here
-
-        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertStatus(403);
-    });
-
-    test('it redirects after exiting conversation to chats', function () {
-        Event::fake();
-        // Queue::fake();
-
-        $auth = User::factory()->create();
-
-        //create group
-        $conversation = $auth->createGroup(name: 'New group', description: 'description');
-
-        //add user and exit conversation
-        $user = User::factory()->create();
-        $conversation->addParticipant($user);
-        $user->sendMessageTo($conversation, 'hi');
-
-        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('exitConversation')
-            ->assertRedirect(route(WireChat::indexRouteName()));
-    });
-
-    test('owner cannot exit conversation', function () {
-        //    Event::fake();
-        // Queue::fake();
-
-        $auth = User::factory()->create();
-
-        //create group
-        $conversation = $auth->createGroup(name: 'New group', description: 'description');
-        $auth->sendMessageTo($conversation, 'hi');
-
-        //add user and exit conversation
-        $user = User::factory()->create();
-        $conversation->addParticipant($user);
-        $user->sendMessageTo($conversation, 'hi');
-
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('exitConversation')
-            ->assertStatus(403, 'Owner cannot exit conversation');
-
-        expect($auth->belongsToConversation($conversation))->toBe(true);
     });
 
     test('it does not broadcasts event "MessageCreated" if it is SelfConversation', function () {
@@ -1225,13 +1290,13 @@ describe('Sending messages ', function () {
 
         // Move the time forward slightly for the 61st message
         Carbon::setTestNow(Carbon::now()->addSeconds(4));
-        //on 61 abort
+        // on 61 abort
         $request->set('body', 'New message')->call('sendMessage');
 
         $request->assertStatus(429);
     });
 
-    //sending like
+    // sending like
     test('it renders heart(❤️) to chatbox when it sendLike is called', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1474,7 +1539,7 @@ describe('Sending messages ', function () {
         $request->assertStatus(429);
     });
 
-    //attchements
+    // attchements
     test('it saves image to databse when created & clears files properties when done', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1484,7 +1549,7 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('media', $file)
             ->call('sendMessage')
-            //now assert that media is back to empty
+            // now assert that media is back to empty
             ->assertSet('media', []);
 
         $messageExists = Attachment::all();
@@ -1500,7 +1565,7 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('media', $file)
             ->call('sendMessage')
-            //now assert that media is back to empty
+            // now assert that media is back to empty
             ->assertSet('media', []);
 
         $message = $conversation->messages()->first();
@@ -1520,7 +1585,7 @@ describe('Sending messages ', function () {
             ->set('media', $file)
             ->call('sendMessage')
             ->assertSeeHtml('<img ')
-            //now assert that media is back to empty
+            // now assert that media is back to empty
             ->assertSet('media', []);
 
         // $messageExists = Attachment::all();
@@ -1528,7 +1593,7 @@ describe('Sending messages ', function () {
 
     });
 
-    //video
+    // video
     test('it saves video to databse when created', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1576,7 +1641,7 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('files', $file)
             ->call('sendMessage')
-            //now assert that file is back to empty
+            // now assert that file is back to empty
             ->assertSet('files', []);
 
         $messageExists = Attachment::all();
@@ -1591,22 +1656,22 @@ describe('Sending messages ', function () {
             ->withParticipants([$auth, $receiver])
             ->create();
 
-        //assert no message yet
+        // assert no message yet
         $chatListComponet = Livewire::actingAs($auth)->test(ChatList::class)->assertDontSee('new message');
 
-        //send message
+        // send message
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('body', 'new message')
             ->call('sendMessage');
 
-        //assert message created
+        // assert message created
         $chatListComponet->dispatch('refresh')->assertSee('new message');
     });
 });
 
 describe('Sending reply', function () {
 
-    //reply messages
+    // reply messages
 
     test('it returns abort(403) when replying if message does not belong to this conversation or is not owned by any participant', function () {
         $auth = User::factory()->create();
@@ -1616,10 +1681,10 @@ describe('Sending reply', function () {
             ->withParticipants([$auth, $receiver])
             ->create();
 
-        //send message
+        // send message
         $auth->sendMessageTo($receiver, message: 'How are you');
 
-        //create random message not belonging to auth user
+        // create random message not belonging to auth user
         $randomMessage = Message::factory()->create();
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
@@ -1635,7 +1700,7 @@ describe('Sending reply', function () {
             ->withParticipants([$auth, $receiver])
             ->create();
 
-        //send messages
+        // send messages
         $message = $auth->sendMessageTo($receiver, message: 'How are you');
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -1649,14 +1714,14 @@ describe('Sending reply', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = $auth->createConversationWith($receiver);
 
-        //send messages
+        // send messages
         $message = $auth->sendMessageTo($receiver, message: 'How are you');
 
         // dd($conversation->id,$message->conversation_id);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('setReply', $message->id)
             ->call('$refresh')
-            //we test seprate because the text is not in same HTML tag
+            // we test seprate because the text is not in same HTML tag
             ->assertSee('Replying to')
             ->assertSee('Yourself');
     });
@@ -1668,7 +1733,7 @@ describe('Sending reply', function () {
             ->withParticipants([$auth, $receiver])
             ->create();
 
-        //send messages
+        // send messages
         $message = $auth->sendMessageTo($receiver, message: 'How are you');
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -1684,7 +1749,7 @@ describe('Sending reply', function () {
             ->withParticipants([$auth, $receiver])
             ->create();
 
-        //send messages
+        // send messages
         $message = $auth->sendMessageTo($receiver, message: 'How are you');
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -1701,12 +1766,12 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
         $auth->sendMessageTo($receiver, message: '3');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '4');
         $receiver->sendMessageTo($auth, message: '5');
         $receiver->sendMessageTo($auth, message: '5');
@@ -1726,11 +1791,11 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
@@ -1739,10 +1804,10 @@ describe('Deleting Conversation', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteConversation');
 
-        //assert chatbox
+        // assert chatbox
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertStatus(200);
 
-        //assert chat route
+        // assert chat route
         $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
     });
 
@@ -1753,11 +1818,11 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
@@ -1766,13 +1831,13 @@ describe('Deleting Conversation', function () {
 
         Carbon::setTestNow(now()->addSeconds(4));
 
-        //let receiver send a new message
+        // let receiver send a new message
         $receiver->sendMessageTo($auth, message: '5');
 
-        //assert conversation will be null
+        // assert conversation will be null
         expect($auth->conversations()->first())->not->toBe(null);
 
-        //also assert that user receives 403 forbidden
+        // also assert that user receives 403 forbidden
         $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
     });
 
@@ -1783,11 +1848,11 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
@@ -1795,13 +1860,13 @@ describe('Deleting Conversation', function () {
         $request->call('deleteConversation');
 
         Carbon::setTestNow(now()->addSeconds(4));
-        //let auth send a new message to conversation after deleting
+        // let auth send a new message to conversation after deleting
         $auth->sendMessageTo($receiver, message: '5');
 
-        //assert conversation will be null
+        // assert conversation will be null
         expect($auth->conversations()->first())->not->toBe(null);
 
-        //also assert that user receives 403 forbidden
+        // also assert that user receives 403 forbidden
         $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
     });
 
@@ -1812,16 +1877,16 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //$conversation->deleteFor($auth);
+        // $conversation->deleteFor($auth);
 
         //  $conversation = Conversation::all();
-        //dd($conversation);
+        // dd($conversation);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3');
         $receiver->sendMessageTo($auth, message: '4');
 
@@ -1839,36 +1904,36 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
         $auth->sendMessageTo($receiver, message: '2 message');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3 message');
         $receiver->sendMessageTo($auth, message: '4 message');
 
-        //begin
+        // begin
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         Carbon::setTestNow(now()->addMinute(4));
         $request->call('deleteConversation');
 
         Auth::logout();
-        //send new message in order to gain access to converstion
+        // send new message in order to gain access to converstion
         Carbon::setTestNow(now()->addMinute(20));
         $auth->sendMessageTo($receiver, message: '5 message');
 
-        //open conversation again
+        // open conversation again
         $request2 = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //assert user can't see previous messages
+        // assert user can't see previous messages
         $request2
             ->assertDontSee('1 message')
             ->assertDontSee('2 message')
             ->assertDontSee('3 message')
             ->assertDontSee('4 message');
 
-        //assert user can see new messages
+        // assert user can see new messages
         $request2
             ->assertSee('5 message');
     });
@@ -1880,15 +1945,15 @@ describe('Deleting Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
         $auth->sendMessageTo($receiver, message: '2 message');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3 message');
         $receiver->sendMessageTo($auth, message: '4 message');
 
-        ///reqeust for $auth to delete conversation
+        // /reqeust for $auth to delete conversation
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteConversation');
 
@@ -1899,55 +1964,152 @@ describe('Deleting Conversation', function () {
         $auth->sendMessageTo($receiver, message: '5 message');
         // dd($message,$conversation);
 
-        ///request for $receiver to access conversation
+        // /request for $receiver to access conversation
         $request = Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //assert receiver can see previous messages
+        // assert receiver can see previous messages
         $request
             ->assertSee('1 message')
             ->assertSee('2 message')
             ->assertSee('3 message')
             ->assertSee('4 message');
 
-        //assert user can see new messages
+        // assert user can see new messages
         $request->assertSee('5 message');
     });
 
     test('it resets conversation_deleted_at value of auth-particiapant if new message is added to conversation by other user and user opens chat ', function () {
 
-        $auth = User::factory()->create();
+        $auth = User::factory()->create(['name' => 'Mike']);
         $receiver = User::factory()->create(['name' => 'John']);
 
-        $conversation = $auth->createConversationWith($receiver);
+        Carbon::setTestNow(now()->subMinutes(20));
+
+        $conversation = $auth->createConversationWith($receiver, 'hi');
+
+        Carbon::setTestNow(now()->addMinutes(4));
+
+        // /load and delete conversation
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteConversation');
+
+        // send message from receiver && reset TIME
+
+        Carbon::setTestNow(now()->addMinutes(10));
+
+        $message = $auth->sendMessageTo($conversation, message: '4 message');
+
+        // load again
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
+
+        // assert
 
         $authParticipant = $conversation->participant($auth);
 
-        //auth -> receiver
-        $auth->sendMessageTo($receiver, message: '1 message');
-        $auth->sendMessageTo($receiver, message: '2 message');
-
-        //receiver -> auth
-        $receiver->sendMessageTo($auth, message: '3 message');
-        $receiver->sendMessageTo($auth, message: '4 message');
-
-        ///load and delete conversation
-        Carbon::setTestNow(now()->addSeconds(4));
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->call('deleteConversation');
-
-        //assert not null
-        $authParticipant->refresh();
-        expect($authParticipant->conversation_deleted_at)->not->toBe(null);
-
-        //send message from receiver
-        Carbon::setTestNow(now()->addSeconds(20));
-        $receiver->sendMessageTo($auth, message: '4 message');
-
-        //load again
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
-
-        //assert
-        $authParticipant->refresh();
+        //  dd(['message'=>$message->created_at->toString(),'participant'=>$authParticipant->conversation_deleted_at->toString(),'conversation'=>$conversation->updated_at->toString()]);
         expect($authParticipant->conversation_deleted_at)->toBe(null);
+    });
+
+    describe('IsWidget:--', function () {
+
+        test('it does not redirects to chats route after deleting conversation', function () {
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver);
+
+            // auth -> receiver
+            $auth->sendMessageTo($receiver, message: '1');
+            $auth->sendMessageTo($receiver, message: '2');
+            $auth->sendMessageTo($receiver, message: '3');
+
+            // receiver -> auth
+            $receiver->sendMessageTo($auth, message: '4');
+            $receiver->sendMessageTo($auth, message: '5');
+            $receiver->sendMessageTo($auth, message: '5');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('deleteConversation')
+                ->assertStatus(200)
+                ->assertNoRedirect();
+        });
+
+        test('it dispatches "close-chat" evnt after deleting conversation', function () {
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver);
+
+            // auth -> receiver
+            $auth->sendMessageTo($receiver, message: '1');
+            $auth->sendMessageTo($receiver, message: '2');
+            $auth->sendMessageTo($receiver, message: '3');
+
+            // receiver -> auth
+            $receiver->sendMessageTo($auth, message: '4');
+            $receiver->sendMessageTo($auth, message: '5');
+            $receiver->sendMessageTo($auth, message: '5');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('deleteConversation')
+                ->assertDispatched('close-chat');
+        });
+
+        test('it dispatches "chat-deleted" event after Deleting conversation', function () {
+
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver);
+
+            // auth -> receiver
+            $auth->sendMessageTo($receiver, message: '1');
+            $auth->sendMessageTo($receiver, message: '2');
+            $auth->sendMessageTo($receiver, message: '3');
+
+            // receiver -> auth
+            $receiver->sendMessageTo($auth, message: '4');
+            $receiver->sendMessageTo($auth, message: '5');
+            $receiver->sendMessageTo($auth, message: '5');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('deleteConversation')
+                ->assertDispatched('chat-deleted');
+        });
+
+        test('Deleted chat should no longer appea in Chats componnet when "chat-deleted" event is dispacted after Deleting conversation', function () {
+
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver, 'Hello my message');
+
+            // Open chats list
+            $CHATLIST = Livewire::actingAs($auth)->test(Chatlist::class);
+
+            // Assert conversation is visible
+            $CHATLIST->assertViewHas('conversations', function ($conversation) {
+                return count($conversation) == 1;
+            });
+
+            // login into chat component
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('deleteConversation')
+                ->assertDispatched('chat-deleted');
+
+            // Assert conversation no longer visible in chats after claring chat
+            $CHATLIST->dispatch('chat-deleted', $conversation->id)->assertViewHas('conversations', function ($conversation) {
+                return count($conversation) == 0;
+            });
+        });
     });
 
     // test('it does not also resets conversation_deleted_at value of auth-particiapant they send new message from Chat within component to conversation themselves ', function () {
@@ -1998,24 +2160,24 @@ describe('Clearing Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
         $auth->sendMessageTo($receiver, message: '2 message');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3 message');
         $receiver->sendMessageTo($auth, message: '4 message');
 
-        //begin
+        // begin
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call('clearConversation');
 
         Auth::logout();
-        //send new message in order to gain access to converstion
+        // send new message in order to gain access to converstion
         // Carbon::setTestNow(now()->addMinute(20));
         $auth->sendMessageTo($receiver, message: '5 message');
 
-        //open conversation again
+        // open conversation again
         $request2 = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
     });
 
@@ -2026,34 +2188,34 @@ describe('Clearing Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1 message');
         $auth->sendMessageTo($receiver, message: '2 message');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '3 message');
         $receiver->sendMessageTo($auth, message: '4 message');
 
-        //begin
+        // begin
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call('clearConversation');
 
         Auth::logout();
-        //send new message in order to gain access to converstion
+        // send new message in order to gain access to converstion
         Carbon::setTestNow(now()->addMinute(20));
         $auth->sendMessageTo($receiver, message: '5 message');
 
-        //open conversation again
+        // open conversation again
         $request2 = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //assert user can't see previous messages
+        // assert user can't see previous messages
         $request2
             ->assertDontSee('1 message')
             ->assertDontSee('2 message')
             ->assertDontSee('3 message')
             ->assertDontSee('4 message');
 
-        //assert user can see new messages
+        // assert user can see new messages
         $request2
             ->assertSee('5 message');
     });
@@ -2064,12 +2226,12 @@ describe('Clearing Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
         $auth->sendMessageTo($receiver, message: '3');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '4');
         $receiver->sendMessageTo($auth, message: '5');
         $receiver->sendMessageTo($auth, message: '5');
@@ -2088,12 +2250,12 @@ describe('Clearing Conversation', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: '1');
         $auth->sendMessageTo($receiver, message: '2');
         $auth->sendMessageTo($receiver, message: '3');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: '4');
         $receiver->sendMessageTo($auth, message: '5');
         $receiver->sendMessageTo($auth, message: '5');
@@ -2103,8 +2265,226 @@ describe('Clearing Conversation', function () {
         $request
             ->call('clearConversation');
 
-        //assert
+        // assert
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertOk();
+    });
+
+    describe('IsWidget:', function () {
+
+        test('it does not redirects to chats route after deleting conversation', function () {
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver);
+
+            // auth -> receiver
+            $auth->sendMessageTo($receiver, message: '1');
+            $auth->sendMessageTo($receiver, message: '2');
+            $auth->sendMessageTo($receiver, message: '3');
+
+            // receiver -> auth
+            $receiver->sendMessageTo($auth, message: '4');
+            $receiver->sendMessageTo($auth, message: '5');
+            $receiver->sendMessageTo($auth, message: '5');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('clearConversation')
+                ->assertStatus(200)
+                ->assertNoRedirect();
+        });
+
+        test('it dispatches "close-chat" event after clearing conversation', function () {
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver);
+
+            // auth -> receiver
+            $auth->sendMessageTo($receiver, message: '1');
+            $auth->sendMessageTo($receiver, message: '2');
+            $auth->sendMessageTo($receiver, message: '3');
+
+            // receiver -> auth
+            $receiver->sendMessageTo($auth, message: '4');
+            $receiver->sendMessageTo($auth, message: '5');
+            $receiver->sendMessageTo($auth, message: '5');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('clearConversation')
+                ->assertDispatched('close-chat');
+        });
+
+        test('it dispatches "refresh" event after Clearing conversation', function () {
+
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver);
+
+            // auth -> receiver
+            $auth->sendMessageTo($receiver, message: '1');
+            $auth->sendMessageTo($receiver, message: '2');
+            $auth->sendMessageTo($receiver, message: '3');
+
+            // receiver -> auth
+            $receiver->sendMessageTo($auth, message: '4');
+            $receiver->sendMessageTo($auth, message: '5');
+            $receiver->sendMessageTo($auth, message: '5');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('clearConversation')
+                ->assertDispatched('refresh');
+        });
+
+        test('message is cleared/updated in Chats componnet when refresh "refresh" event is dispacted after Clearing conversation', function () {
+
+            $auth = User::factory()->create();
+            $receiver = User::factory()->create(['name' => 'John']);
+
+            $conversation = $auth->createConversationWith($receiver, 'Hello my message');
+
+            // Open chats list
+            $CHATLIST = Livewire::actingAs($auth)->test(Chatlist::class);
+            // Assert messsage is visible
+            $CHATLIST->assertSee('Hello my message');
+
+            // login into chat component
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('clearConversation')
+                ->assertDispatched('refresh');
+
+            // Assert message no longer visible in chats after claring chat
+            $CHATLIST->dispatch('refresh')->assertDontSee('Hello my message');
+        });
+    });
+});
+
+describe('Exiting Conversation', function () {
+
+    test('user cannot access conversation after exiting', function () {
+        Event::fake();
+        // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        // create group
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+
+        // add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation, 'hi');
+        $user->exitConversation($conversation); // exit here
+
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertStatus(403);
+    });
+
+    test('it redirects after exiting conversation to chats', function () {
+        Event::fake();
+        // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        // create group
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+
+        // add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation, 'hi');
+
+        Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('exitConversation')
+            ->assertRedirect(route(WireChat::indexRouteName()));
+    });
+
+    test('owner cannot exit conversation', function () {
+        //    Event::fake();
+        // Queue::fake();
+
+        $auth = User::factory()->create();
+
+        // create group
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+        $auth->sendMessageTo($conversation, 'hi');
+
+        // add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+        $user->sendMessageTo($conversation, 'hi');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('exitConversation')
+            ->assertStatus(403, 'Owner cannot exit conversation');
+
+        expect($auth->belongsToConversation($conversation))->toBe(true);
+    });
+
+    test('Throws error if user tries to exit priveat or self conversation', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = $auth->createConversationWith($receiver, 'hello');
+
+        // login as user not auth (Owner)
+        Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('exitConversation')
+            ->assertStatus(403, 'Cannot exit self or private conversation');
+
+        expect($auth->belongsToConversation($conversation))->toBe(true);
+    });
+
+    describe('IsWidget:', function () {
+
+        test('it does not redirects to chats route after Exiting Group conversation', function () {
+            $auth = User::factory()->create();
+
+            // create group
+            $conversation = $auth->createGroup(name: 'New group', description: 'description');
+            $auth->sendMessageTo($conversation, 'hi');
+
+            // add user and exit conversation
+            $user = User::factory()->create();
+            $conversation->addParticipant($user);
+            $user->sendMessageTo($conversation, 'hi');
+
+            // login as user not auth (Owner)
+            $request = Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('exitConversation')
+                ->assertStatus(200)
+                ->assertNoRedirect();
+        });
+
+        test('it dispatches "close-chat" evnt after Exiting Group conversation', function () {
+            $auth = User::factory()->create();
+
+            // create group
+            $conversation = $auth->createGroup(name: 'New group', description: 'description');
+            $auth->sendMessageTo($conversation, 'hi');
+
+            // add user and exit conversation
+            $user = User::factory()->create();
+            $conversation->addParticipant($user);
+            $user->sendMessageTo($conversation, 'hi');
+
+            // login as user not auth (Owner)
+            $request = Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+            $request
+                ->call('exitConversation')
+                ->assertStatus(200)
+                ->assertDispatched('close-chat');
+        });
     });
 });
 
@@ -2115,22 +2495,22 @@ describe('deleteMessage ForEveryone', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-        //auth -> receiver
+        // auth -> receiver
         $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $auth->sendMessageTo($receiver, message: 'message-2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: 'message-3');
         $otherUserMessage = $receiver->sendMessageTo($auth, message: 'message-4');
 
-        //run
+        // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteForEveryone', $otherUserMessage->id)
             ->assertStatus(403);
 
         $messageAvailable = Message::find($otherUserMessage->id);
 
-        ///assert message no longer visible
+        // /assert message no longer visible
         expect($messageAvailable)->not->toBe(null);
     });
 
@@ -2141,10 +2521,10 @@ describe('deleteMessage ForEveryone', function () {
 
         $conversation = $auth->createGroup('My Group');
 
-        //add admin
+        // add admin
         $conversation->addParticipant($admin, ParticipantRole::ADMIN);
 
-        //add participant and send messsage
+        // add participant and send messsage
 
         User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
@@ -2154,7 +2534,7 @@ describe('deleteMessage ForEveryone', function () {
 
         $messageAvailable = Message::find('1');
 
-        ///assert message no longer visible
+        // /assert message no longer visible
         expect($messageAvailable)->toBe(null);
     });
 
@@ -2165,25 +2545,25 @@ describe('deleteMessage ForEveryone', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: 'message-3');
         $receiver->sendMessageTo($auth, message: 'message-4');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //assert count 4
+        // assert count 4
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 4;
         });
 
-        //call deleteForMe
+        // call deleteForMe
         $request->call('deleteForEveryone', $authMessage->id);
 
-        //assert count no 3
+        // assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 3;
         });
@@ -2197,17 +2577,17 @@ describe('deleteMessage ForEveryone', function () {
         $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: 'message-3');
         $receiver->sendMessageTo($auth, message: 'message-4');
 
-        //run
+        // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteForMe', $authMessage->id);
 
         $messageAvailable = Message::find($authMessage->id);
 
-        ///assert message no longer visible
+        // /assert message no longer visible
         expect($messageAvailable)->toBe(null);
     });
 
@@ -2221,21 +2601,21 @@ describe('deleteMessage ForEveryone', function () {
 
         $file[] = UploadedFile::fake()->image('photo.png');
 
-        //run
+        // run
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            //add attachment
+            // add attachment
             ->set('media', $file)
             ->call('sendMessage');
 
-        ///lets make sure atttachemnt is present in database
+        // /lets make sure atttachemnt is present in database
 
         expect(count(Attachment::all()))->toBe(1);
 
-        //Now lets unsend message
-        //here assuming that the message ID is 1 since it is the first one
+        // Now lets unsend message
+        // here assuming that the message ID is 1 since it is the first one
         $request->call('deleteForEveryone', 1);
 
-        ///assert attachment no longer avaible in database
+        // /assert attachment no longer avaible in database
         expect(count(Attachment::all()))->toBe(0);
     });
 
@@ -2249,17 +2629,17 @@ describe('deleteMessage ForEveryone', function () {
 
         $file[] = UploadedFile::fake()->image('photo.png');
 
-        //run
+        // run
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            //add attachment
+            // add attachment
             ->set('media', $file)
             ->call('sendMessage');
 
         $attachmentModel = Attachment::first();
         $messageModel = Message::first();
 
-        //Now lets unsend message
-        //here assuming that the message ID is 1 since it is the first one
+        // Now lets unsend message
+        // here assuming that the message ID is 1 since it is the first one
         $request->call('deleteForMe', $messageModel->id);
 
         Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->assertMissing($attachmentModel->file_name);
@@ -2273,15 +2653,15 @@ describe('deleteMessage ForEveryone', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = $auth->createConversationWith($receiver, 'This is message');
 
-        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSeeText('This is message');
+        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSee('This is message');
 
-        //run
+        // run
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            //add attachment
+            // add attachment
             ->call('deleteForEveryone', 1)
             ->assertDispatched('refresh');
 
-        //assert
+        // assert
         $CHATLIST->dispatch('refresh')->assertDontSee('This is message');
     });
 
@@ -2294,16 +2674,16 @@ describe('deleteMessage ForEveryone', function () {
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //send reply
+        // send reply
         $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
 
-        //assert messsage visible
+        // assert messsage visible
         $request->assertSee('This is reply');
 
-        //call deleteForMe
+        // call deleteForMe
         $request->call('deleteForEveryone', '1');
 
-        //now assert still see 'This is message' message
+        // now assert still see 'This is message' message
         $request->assertSee('This is message');
     });
 
@@ -2317,11 +2697,11 @@ describe('deleteMessage ForEveryone', function () {
         $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: 'message-3');
         $receiver->sendMessageTo($auth, message: 'message-4');
 
-        //run
+        // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteForEveryone', $authMessage->id);
 
@@ -2338,22 +2718,22 @@ describe('deletForMe', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-        //auth -> receiver
+        // auth -> receiver
         $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $auth->sendMessageTo($receiver, message: 'message-2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: 'message-3');
         $otherUserMessage = $receiver->sendMessageTo($auth, message: 'message-4');
 
-        //run
+        // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteForMe', $otherUserMessage->id)
             ->assertStatus(200);
 
         $messageAvailable = Message::find($otherUserMessage->id);
 
-        ///assert message no longer visible
+        // /assert message no longer visible
         expect($messageAvailable)->toBe(null);
     });
 
@@ -2364,25 +2744,25 @@ describe('deletForMe', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        //auth -> receiver
+        // auth -> receiver
         $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: 'message-3');
         $receiver->sendMessageTo($auth, message: 'message-4');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //assert count 4
+        // assert count 4
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 4;
         });
 
-        //call deleteForMe
+        // call deleteForMe
         $request->call('deleteForMe', $authMessage->id);
 
-        //assert count no 3
+        // assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 3;
         });
@@ -2395,20 +2775,20 @@ describe('deletForMe', function () {
 
         $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
 
-        //dd($conversation);
+        // dd($conversation);
         $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
 
-        //receiver -> auth
+        // receiver -> auth
         $receiver->sendMessageTo($auth, message: 'message-3');
         $receiver->sendMessageTo($auth, message: 'message-4');
 
-        //run
+        // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteForMe', $authMessage->id);
 
         $messageAvailable = Message::withoutGlobalScopes()->find($authMessage->id);
 
-        ///assert message no longer visible
+        // /assert message no longer visible
         expect($messageAvailable)->not->toBe(null);
     });
 
@@ -2419,15 +2799,15 @@ describe('deletForMe', function () {
 
         $conversation = $auth->createConversationWith($receiver, 'This is message');
 
-        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSeeText('This is message');
+        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSee('This is message');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //call deleteForMe
+        // call deleteForMe
         $request->call('deleteForMe', '1')
             ->assertDispatched('refresh');
 
-        //assert
+        // assert
         $CHATLIST->dispatch('refresh')->assertDontSee('This is message');
     });
 
@@ -2440,16 +2820,16 @@ describe('deletForMe', function () {
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
-        //send reply
+        // send reply
         $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
 
-        //assert messsage visible
+        // assert messsage visible
         $request->assertSee('This is reply');
 
-        //call deleteForMe
+        // call deleteForMe
         $request->call('deleteForMe', '1')->assertDispatched('refresh');
 
-        //now assert still see 'This is message' message
+        // now assert still see 'This is message' message
         $request->assertSee('This is message');
     });
 });

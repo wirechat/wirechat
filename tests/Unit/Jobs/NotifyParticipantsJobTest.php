@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Event;
 use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Models\Message;
+use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
 describe(' Data verifiction ', function () {
@@ -48,6 +49,7 @@ describe(' Data verifiction ', function () {
         });
 
     });
+
 });
 
 describe('Actions', function () {
@@ -60,18 +62,18 @@ describe('Actions', function () {
 
         $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
-        //add user and exit conversation
+        // add user and exit conversation
         for ($i = 0; $i < 20; $i++) {
             $conversation->addParticipant(User::factory()->create());
         }
 
         $message = $auth->sendMessageTo($conversation, 'hello');
 
-        //Create Job in database
+        // Create Job in database
         $job = (new NotifyParticipants($conversation, $message));
 
-        //Travel future JUst 5 seconds
-        $this->travelTo(now()->addSeconds(5)); //VALID
+        // Travel future JUst 5 seconds
+        $this->travelTo(now()->addSeconds(5)); // VALID
 
         $job->handle();
 
@@ -87,7 +89,7 @@ describe('Actions', function () {
 
         $conversation = $auth->createGroup(name: 'New group', description: 'description');
 
-        //add user and exit conversation
+        // add user and exit conversation
         for ($i = 0; $i <= 20; $i++) {
             $conversation->addParticipant(User::factory()->create());
         }
@@ -95,10 +97,10 @@ describe('Actions', function () {
         Carbon::setTestNowAndTimezone(now()->subSeconds(200));
         $message = $auth->sendMessageTo($conversation, 'hello');
 
-        //Create Job instance
+        // Create Job instance
         $job = (new NotifyParticipants($conversation, $message));
 
-        //Travel future
+        // Travel future
         Carbon::setTestNowAndTimezone(now()->subSeconds(139));
 
         $job->handle();
@@ -106,4 +108,67 @@ describe('Actions', function () {
         Event::assertDispatchedTimes(NotifyParticipant::class, 0);
 
     });
+
+    test('it dispatches NotifyParticipant to the right number of participnats  except the Auth', function () {
+
+        // Bus::fake();
+        Bus::fake();
+        Event::fake();
+        $auth = User::factory()->create();
+
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+
+        // add user and exit conversation
+        for ($i = 0; $i < 20; $i++) {
+            $conversation->addParticipant(User::factory()->create());
+        }
+
+        $message = $auth->sendMessageTo($conversation, 'hello');
+
+        // Create Job in database
+        $job = (new NotifyParticipants($conversation, $message));
+
+        $job->handle();
+
+        Event::assertDispatchedTimes(NotifyParticipant::class, 20);
+
+        Event::assertNotDispatched(NotifyParticipant::class, function ($event) use ($auth) {
+
+            return $event->participant->participantable_id == $auth->id && $event->participant->participantable_type == $auth->getMorphClass();
+        });
+
+    });
+
+    test('it dispatches NotifyParticipant to the right number of MIXED MODEL participnats  except the Auth', function () {
+
+        // Bus::fake();
+        Bus::fake();
+        Event::fake();
+        $auth = User::factory()->create();
+
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+
+        // add user and exit conversation
+        for ($i = 0; $i < 10; $i++) {
+            $conversation->addParticipant(User::factory()->create());
+            $conversation->addParticipant(Admin::factory()->create());
+
+        }
+
+        $message = $auth->sendMessageTo($conversation, 'hello');
+
+        // Create Job in database
+        $job = (new NotifyParticipants($conversation, $message));
+
+        $job->handle();
+
+        Event::assertDispatchedTimes(NotifyParticipant::class, 20);
+
+        Event::assertNotDispatched(NotifyParticipant::class, function ($event) use ($auth) {
+
+            return $event->participant->participantable_id == $auth->id && $event->participant->participantable_type == $auth->getMorphClass();
+        });
+
+    });
+
 });

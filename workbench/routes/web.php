@@ -1,11 +1,8 @@
 <?php
 
-use App\Livewire\Test;
 use Illuminate\Support\Facades\Route;
-use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\Chats;
-use Namu\WireChat\Livewire\Chat\Index;
-use Namu\WireChat\Livewire\Chat\View;
+use Namu\WireChat\Livewire\Pages\Chat;
+use Namu\WireChat\Livewire\Pages\Chats;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,31 +15,19 @@ use Namu\WireChat\Livewire\Chat\View;
 |
 */
 
+// Needed for testing purposes
 Route::get('/', function () {
-    return view('welcome');
+    return 'welcome';
 });
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-//Route::get('/test',Test::class);
-
-// Route::middleware(['auth'])->group(function (){
-
-// Route::get('/chats',Chats::class)->name('wirechat');
-// Route::get('/chats/{chat}',Chat::class)->name('wirechat.chat');
-
-// });
+// Needed for testing purposes
 Route::middleware('guest')->get('/login', function () {
-
     return 'login page';
-
 })->name('login');
 
 Route::middleware(config('wirechat.routes.middleware'))
     ->prefix(config('wirechat.routes.prefix'))
     ->group(function () {
-        Route::get('/', Index::class)->name('chats');
-        Route::get('/{conversation_id}', View::class)->name('chat');
+        Route::get('/', Chats::class)->name('chats');
+        Route::get('/{conversation}', Chat::class)->middleware('belongsToConversation')->name('chat');
     });

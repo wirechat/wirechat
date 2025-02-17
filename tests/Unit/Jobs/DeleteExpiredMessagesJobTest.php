@@ -9,7 +9,7 @@ use Workbench\App\Models\User;
 
 test('expired_messages_are_deleted', function () {
 
-    //**Use subHours()  because  future dates causes negative diffInSeconds()
+    // **Use subHours()  because  future dates causes negative diffInSeconds()
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 
@@ -33,7 +33,7 @@ test('expired_messages_are_deleted', function () {
 
     //  dd($oldMessage->created_at->diffInSeconds());
     // Assert the cutoff time is as expected (to help debug)
-    //dd(['Duration expired'=>$oldMessage->created_at->diffInSeconds() > $conversation->disappearing_duration]);
+    // dd(['Duration expired'=>$oldMessage->created_at->diffInSeconds() > $conversation->disappearing_duration]);
 
     // Run the job to delete expired messages
     $job = new DeleteExpiredMessagesJob;
@@ -44,7 +44,7 @@ test('expired_messages_are_deleted', function () {
 });
 
 test('it doesnt delete messages not expired', function () {
-    //**Use subHours()  because  future dates causes negative diffInSeconds()
+    // **Use subHours()  because  future dates causes negative diffInSeconds()
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 
@@ -79,7 +79,7 @@ test('it doesnt delete messages created before the "disappearing_started_at"', f
         'disappearing_started_at' => Carbon::now()->today(), // Started 2 days ago
     ]);
 
-    //message created long time ago
+    // message created long time ago
     Carbon::setTestNow(now()->subDays(7));
     $recentMessage = Message::factory()->sender($auth)->create([
         'conversation_id' => $conversation->id,
@@ -98,7 +98,7 @@ test('it doesnt delete messages created before the "disappearing_started_at"', f
 test('it also deletes SoftDeleted messages that are expired and are kept ', function () {
     // Set up a conversation with disappearing messages
 
-    //**Use subHours()  because  future dates causes negative diffInSeconds()
+    // **Use subHours()  because  future dates causes negative diffInSeconds()
     $auth = User::factory()->create();
 
     Carbon::setTestNowAndTimezone(now());
@@ -125,7 +125,7 @@ test('it also deletes SoftDeleted messages that are expired and are kept ', func
 
 test('SoftDeleted messages that are expired but not kept are Deleted ', function () {
 
-    //**Use subHours()  because  future dates causes negative diffInSeconds()
+    // **Use subHours()  because  future dates causes negative diffInSeconds()
     $auth = User::factory()->create();
 
     Carbon::setTestNowAndTimezone(Carbon::now());
@@ -150,7 +150,7 @@ test('SoftDeleted messages that are expired but not kept are Deleted ', function
 
 test('messages WITHOUT delete Actions, that are expired, but not kept are Deleted ', function () {
 
-    //**Use subHours()  because  future dates causes negative diffInSeconds()
+    // **Use subHours()  because  future dates causes negative diffInSeconds()
     $auth = User::factory()->create();
 
     Carbon::setTestNowAndTimezone(now());
@@ -178,7 +178,7 @@ test('messages WITHOUT delete Actions, that are expired, but not kept are Delete
 
 test('messages WITH delete Actions, that are expired, and kept are Deleted ', function () {
 
-    //**Use subHours()  because  future dates causes negative diffInSeconds()
+    // **Use subHours()  because  future dates causes negative diffInSeconds()
     // Set up a conversation with disappearing messages
     $auth = User::factory()->create();
 

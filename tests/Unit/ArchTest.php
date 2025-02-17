@@ -16,10 +16,14 @@ arch('Make sure Actionable is used in Conversation Model')
     ->expect('Namu\\WireChat\\Traits\\Actionable')
     ->toBeUsedIn('Namu\WireChat\Models\Conversation');
 
-arch('Make sure Actionable is used in Message Model')
-    ->expect('Namu\\WireChat\\Traits\\Actionable')
-    ->toBeUsedIn('Namu\WireChat\Models\Message');
-
-arch('Make sure Actionable is used in Participant Model')
-    ->expect('Namu\\WireChat\\Traits\\Actionable')
-    ->toBeUsedIn('Namu\WireChat\Models\Participant');
+arch('Ensure Widget Trait is used in Components')
+    ->expect('Namu\\WireChat\\Livewire\\Concerns\Widget')
+    ->toBeUsedIn([
+        'Namu\WireChat\Livewire\Chat\Chat',
+        'Namu\WireChat\Livewire\Chats\Chats',
+        'Namu\WireChat\Livewire\New\Chat',
+        'Namu\WireChat\Livewire\New\Group',
+        // 'Namu\WireChat\Livewire\Chat\Group\AddMembers',
+        'Namu\WireChat\Livewire\Chat\Info',
+        'Namu\WireChat\Livewire\Chat\Group\Members',
+    ]);

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
@@ -120,7 +121,7 @@ class Participant extends Model
     /**
      * Check if participant is admin
      **/
-    public function isAdmin()
+    public function isAdmin(): bool
     {
         return $this->role == ParticipantRole::OWNER || $this->role == ParticipantRole::ADMIN;
     }
@@ -128,7 +129,7 @@ class Participant extends Model
     /**
      * Check if participant is owner of conversation
      **/
-    public function isOwner()
+    public function isOwner(): bool
     {
 
         return $this->role == ParticipantRole::OWNER;
@@ -141,13 +142,13 @@ class Participant extends Model
      */
     public function exitConversation(): bool
     {
-        //make sure conversation is not private
+        // make sure conversation is not private
         abort_if($this->conversation->isPrivate(), 403, 'Participant cannot exit a private conversation');
 
-        //make sure owner if group cannot be removed from chat
+        // make sure owner if group cannot be removed from chat
         abort_if($this->isOwner(), 403, 'Owner cannot exit conversation');
 
-        //update Role to Participant
+        // update Role to Participant
         $this->role = ParticipantRole::PARTICIPANT;
         $this->save();
 
@@ -201,42 +202,61 @@ class Participant extends Model
                 'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
             ]);
         }
-        //update Role to Participant
+        // update Role to Participant
         $this->role = ParticipantRole::PARTICIPANT;
         $this->save();
     }
 
     /**
-     * Determine if the user has deleted this conversation and if the deletion is still "valid."
+     * Check if the user has deleted the conversation and if the deletion is still valid.
      *
-     * This function checks the `conversation_deleted_at` timestamp to see if the conversation
-     * was deleted by the user. Optionally, it can check if this deletion has "expired" by
-     * comparing it to the last `updated_at` timestamp of the conversation.
+     * This method checks if the user has marked the conversation as deleted by looking at the `conversation_deleted_at` timestamp.
+     * Optionally, it can check if the deletion is still valid by comparing the deletion time with the last update time of the conversation.
      *
-     * - If `$checkDeletionExpired` is true, this method checks if the deletion has expired. A deletion is expired
-     *   if the conversation was updated after the user deleted it, meaning new messages or changes were made.
-     * - If `$checkDeletionExpired` is false, the method only checks if the conversation is deleted,
-     *   without considering updates.
+     * - If `$checkDeletionExpired` is true, the method checks if the deletion is still valid. A deletion is considered expired
+     *   if the conversation has been updated after the user deleted it (e.g., new messages).
+     * - If `$checkDeletionExpired` is false, it only checks if the conversation has been deleted, regardless of updates.
      *
-     * @param  bool  $checkDeletionExpired  Whether to check if the deletion is expired.
-     * @return bool True if the conversation is deleted (and expired if `$checkDeletionExpired` is true), false otherwise.
+     * @param  bool  $checkDeletionExpired  Whether to check if the deletion is still valid.
+     * @return bool True if the conversation is deleted (and valid if `$checkDeletionExpired` is true), false otherwise.
      */
     public function hasDeletedConversation(bool $checkDeletionExpired = false): bool
     {
-        // Check if `conversation_deleted_at` is null, which means no deletion
+        // If no deletion timestamp is set, the conversation isn't deleted
         if ($this->conversation_deleted_at === null) {
             return false;
         }
 
-        // Refresh conversation instance to ensure `updated_at` is current
+        // loadMissing Conversation
+        $this->loadMissing('conversation');
+
+        // Get the latest updated_at timestamp for the conversation
         $conversation = $this->conversation;
 
+        // Expited conversation means hasDeletedConversation should return FALSE
         if ($checkDeletionExpired) {
-            // If checking expiration, return true only if deletion timestamp is older than updated timestamp
-            return $this->conversation_deleted_at < $conversation->updated_at;
+            // Check if the deletion timestamp is older than the last update timestamp (i.e., check if deletion is expired)
+            return $conversation->updated_at > $this->conversation_deleted_at ? false : true;
         }
 
-        // Otherwise, return true if deletion is recent compared to updated timestamp
+        // If not checking expiration, simply return true if the conversation is marked as deleted
         return true;
+    }
+
+    /**
+     * Exclude participant passed as parameter
+     */
+    public function scopeWithoutParticipantable($query, Model $user): Builder
+    {
+
+        return $query->where(function ($query) use ($user) {
+            $query->where('participantable_id', '<>', $user->id)
+                ->orWhere('participantable_type', '<>', $user->getMorphClass());
+        });
+
+        //  return $query->where(function ($query) use ($user) {
+        //      $query->whereNot('participantable_id', $user->id)
+        //            ->orWhereNot('participantable_type', $user->getMorphClass());
+        //  });
     }
 }

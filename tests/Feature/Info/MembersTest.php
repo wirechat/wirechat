@@ -6,7 +6,7 @@ use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\Info\Members;
+use Namu\WireChat\Livewire\Chat\Group\Members;
 use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Participant;
@@ -49,7 +49,7 @@ describe('presence test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
 
-        //* since converstaion already have one user which is the auth then default is 1
+        // * since converstaion already have one user which is the auth then default is 1
         $request
             ->assertSee('Members');
     });
@@ -63,16 +63,17 @@ describe('presence test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
 
-        //* since converstaion already have one user which is the auth then default is 1
-        $request
-            ->assertSeeHtml('dusk="close_modal_button"');
+        // * since converstaion already have one user which is the auth then default is 1
+        $request->assertSeeHtml('dusk="close_modal_button"');
+        $request->assertContainsBladeComponent('wirechat::actions.close-modal');
+
     });
 
     test('it loads members', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participants
+        // add participants
         $conversation->addParticipant(User::factory()->create(['name' => 'John']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Lemon']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Cold']));
@@ -88,7 +89,7 @@ describe('presence test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participants
+        // add participants
         $conversation->addParticipant(User::factory()->create(['name' => 'John']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Lemon']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Cold']));
@@ -101,7 +102,7 @@ describe('presence test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participants
+        // add participants
         Participant::factory(20)->create(['conversation_id' => $conversation->id]);
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
@@ -113,22 +114,22 @@ describe('presence test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participants
+        // add participants
         Participant::factory(5)->create(['conversation_id' => $conversation->id]);
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->assertDontSee('Load more');
     });
 
-    //testing for Owner
+    // testing for Owner
     test('Even if auth is owner, it doesnt show  "Dismiss As Admin" & "Make Admin" & "Remove" plus their wired methods wired if participant is owner in loop', function () {
         $auth = User::factory()->create(['name' => 'Participant']);
         $conversation = $auth->createGroup('My Group');
 
-        //at this point only one user is present and is owner
+        // at this point only one user is present and is owner
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Participant')
             ->assertDontSee('Make Admin')
             ->assertPropertyNotWired('makeAdmin')
@@ -143,19 +144,19 @@ describe('presence test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $user = User::factory()->create(['name' => 'Participant']);
         $participant = $conversation->addParticipant($user);
 
-        //at this point only one user is present and is owner
+        // at this point only one user is present and is owner
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Participant')
             ->assertSee('Make Admin')
             ->assertMethodWired('makeAdmin')
 
-                 //here this one won't show since participnat is not admin
+                 // here this one won't show since participnat is not admin
             ->assertDontSee('Dismiss As Admin')
             ->assertMethodNotWired('dismissAdmin')
             ->assertSee('Remove')
@@ -167,14 +168,14 @@ describe('presence test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $notOwner = User::factory()->create(['name' => 'Participant']);
         $participant = $conversation->addParticipant($notOwner);
 
-        //log in as $notOwner
+        // log in as $notOwner
         $request = Livewire::actingAs($notOwner)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Participant')
             ->assertDontSee('Make Admin')
             ->assertPropertyNotWired('makeAdmin')
@@ -182,25 +183,25 @@ describe('presence test', function () {
             ->assertPropertyNotWired('dismissAdmin');
     });
 
-    //testing for admin
+    // testing for admin
 
     test('Admins can see "Remove" plus the wired method if participant role is Participant ', function () {
         $auth = User::factory()->create(['name' => 'owner']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $conversation->addParticipant($roleParticipant);
 
-        //create Admin and update role
+        // create Admin and update role
         $roleAdmin = User::factory()->create(['name' => 'John cush']);
         $participant = $conversation->addParticipant($roleAdmin);
         $participant->update(['role' => ParticipantRole::ADMIN]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleAdmin)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Participant')
             ->assertSeeText('Remove')
             ->assertMethodWired('removeFromGroup');
@@ -210,25 +211,25 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'owner']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $participant = $conversation->addParticipant($roleParticipant);
         $participant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //create Admin
+        // create Admin
         $roleAdmin = User::factory()->create(['name' => 'John cush']);
         $adminParticipant = $conversation->addParticipant($roleAdmin);
         $adminParticipant->update(['role' => ParticipantRole::ADMIN]);
 
-        //create Admin2
+        // create Admin2
         $roleAdmin2 = User::factory()->create(['name' => 'Bradly']);
         $adminParticipant2 = $conversation->addParticipant($roleAdmin2);
         $adminParticipant2->update(['role' => ParticipantRole::ADMIN]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleAdmin)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Bradly')
             ->assertDontSee('Remove')
             ->assertPropertyNotWired('removeFromGroup');
@@ -238,25 +239,25 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'owner']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $participant = $conversation->addParticipant($roleParticipant);
         $participant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //create Admin
+        // create Admin
         $roleAdmin = User::factory()->create(['name' => 'John cush']);
         $adminParticipant = $conversation->addParticipant($roleAdmin);
         $adminParticipant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //create Admin2
+        // create Admin2
         $roleAdmin2 = User::factory()->create(['name' => 'Bradly']);
         $adminParticipant2 = $conversation->addParticipant($roleAdmin2);
         $adminParticipant2->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleAdmin)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'owner')
             ->assertDontSee('Remove')
             ->assertPropertyNotWired('removeFromGroup');
@@ -266,44 +267,44 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'owner']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $participant = $conversation->addParticipant($roleParticipant);
         $participant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //create Admin
+        // create Admin
         $roleAdmin = User::factory()->create(['name' => 'John cush']);
         $adminParticipant = $conversation->addParticipant($roleAdmin);
         $adminParticipant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleAdmin)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'John cush')
             ->assertDontSee('Remove')
             ->assertPropertyNotWired('removeFromGroup');
     });
 
-    //testing for Participants
+    // testing for Participants
 
     test('Participants can see "Dismiss As Admin" & "Make Admin" & "Remove" plus their wired methods if participant role is Participant in loop ', function () {
         $auth = User::factory()->create(['name' => 'owner']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $conversation->addParticipant($roleParticipant);
 
-        //create Admin and update role
+        // create Admin and update role
         $roleAdmin = User::factory()->create(['name' => 'Admin1']);
         $participant = $conversation->addParticipant($roleAdmin);
         $participant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleParticipant)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Participant')
             ->assertDontSee('Make Admin')
             ->assertPropertyNotWired('makeAdmin')
@@ -317,19 +318,19 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'Owner']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $conversation->addParticipant($roleParticipant);
 
-        //create Admin and update role
+        // create Admin and update role
         $roleAdmin = User::factory()->create(['name' => 'Admin1']);
         $participant = $conversation->addParticipant($roleAdmin);
         $participant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleParticipant)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Owner')
             ->assertDontSee('Make Admin')
             ->assertPropertyNotWired('makeAdmin')
@@ -343,19 +344,19 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'Owner']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $conversation->addParticipant($roleParticipant);
 
-        //create Admin and update role
+        // create Admin and update role
         $roleAdmin = User::factory()->create(['name' => 'Admin1']);
         $participant = $conversation->addParticipant($roleAdmin);
         $participant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleParticipant)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Admin1')
             ->assertDontSee('Make Admin')
             ->assertPropertyNotWired('makeAdmin')
@@ -372,19 +373,19 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'John']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $conversation->addParticipant($roleParticipant);
 
-        //create Admin and update role
+        // create Admin and update role
         $roleAdmin = User::factory()->create(['name' => 'Admin1']);
         $participant = $conversation->addParticipant($roleAdmin);
         $participant->update(['role' => ParticipantRole::PARTICIPANT]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleParticipant)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'John')
             ->assertSee('Owner');
     });
@@ -393,19 +394,19 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'John']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $conversation->addParticipant($roleParticipant);
 
-        //create Admin and update role
+        // create Admin and update role
         $roleAdmin = User::factory()->create(['name' => 'Parcel']);
         $participant = $conversation->addParticipant($roleAdmin);
         $participant->update(['role' => ParticipantRole::ADMIN]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleParticipant)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Parcel')
             ->assertSee('Admin');
     });
@@ -414,19 +415,19 @@ describe('presence test', function () {
         $auth = User::factory()->create(['name' => 'John']);
         $conversation = $auth->createGroup('My Group');
 
-        //give him name participant
+        // give him name participant
         $roleParticipant = User::factory()->create(['name' => 'Participant']);
         $conversation->addParticipant($roleParticipant);
 
-        //create Admin and update role
+        // create Admin and update role
         $roleAdmin = User::factory()->create(['name' => 'Parcel']);
         $participant = $conversation->addParticipant($roleAdmin);
         $participant->update(['role' => ParticipantRole::ADMIN]);
 
-        //log in as $roleAdmin
+        // log in as $roleAdmin
         $request = Livewire::actingAs($roleParticipant)->test(Members::class, ['conversation' => $conversation]);
         $request
-                //search so we can only get one user to test information
+                // search so we can only get one user to test information
             ->set('search', 'Participant')
             ->assertDontSee('Admin')
             ->assertDontSee('Owner');
@@ -441,7 +442,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $conversation->addParticipant(User::factory()->create(['name' => 'Micheal']));
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
@@ -450,48 +451,71 @@ describe('actions test', function () {
             ->assertSee('Micheal');
     });
 
-    test('can send message to user when sendMessage is called', function () {
-        $auth = User::factory()->create();
-        $conversation = $auth->createGroup('My Group');
+    describe('sendMessage: ', function () {
+        test('it redirects to chat route and does not dispatch "closeWireChatModal" & "open-chat"  & "close-chat" event when componnet is not Wdiget route after creating conversation ', function () {
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
 
-        //add participant
-        $user = User::factory()->create(['name' => 'Micheal']);
-        $participant = $conversation->addParticipant($user);
+            // add participant
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
 
-        $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
-        $request
-            ->call('sendMessage', $participant->id)
-            ->assertRedirect(route(WireChat::viewRouteName(), 2));
-    });
+            $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+            $request
+                ->call('sendMessage', $participant->id)
+                ->assertRedirect(route(WireChat::viewRouteName(), 2))
+                ->assertNotDispatched('close-chat')
+                ->assertNotDispatched('closeWireChatModal')
+                ->assertNotDispatched('open-chat');
+        });
 
-    test('it create conversation between auth and user after calling sendMessage', function () {
-        $auth = User::factory()->create();
-        $conversation = $auth->createGroup('My Group');
+        test('it dispatches "closeWireChatModal" & "open-chat"  & "close-chat" event and does not redirects to chat route and does not when componnet  is Wdiget route after creating conversation ', function () {
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
 
-        //add participant
-        $user = User::factory()->create(['name' => 'Micheal']);
-        $participant = $conversation->addParticipant($user);
+            // add participant
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
 
-        //assert before
-        expect($auth->hasConversationWith($user))->toBe(false);
+            $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'widget' => true]);
+            $request
+                ->call('sendMessage', $participant->id)
+                ->assertNoRedirect(route(WireChat::viewRouteName(), 2))
+                ->assertDispatched('open-chat')
+                ->assertDispatched('closeWireChatModal')
+                ->assertNotDispatched('close-chat');
 
-        $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
-        $request
-            ->call('sendMessage', $participant->id);
+        });
 
-        //assert after
-        expect($auth->hasConversationWith($user))->toBe(true);
+        test('it create conversation between auth and user after calling sendMessage', function () {
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+
+            // add participant
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            // assert before
+            expect($auth->hasConversationWith($user))->toBe(false);
+
+            $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+            $request
+                ->call('sendMessage', $participant->id);
+
+            // assert after
+            expect($auth->hasConversationWith($user))->toBe(true);
+        });
     });
 
     test('calling makeAdmin will make participan admin', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($user);
 
-        //assert before
+        // assert before
         expect($participant->isAdmin())->toBe(false);
         expect($user->isAdminIn($conversation->group))->toBe(false);
 
@@ -501,7 +525,7 @@ describe('actions test', function () {
         $participant = $participant->refresh();
         $user = $user->refresh();
 
-        //assert after
+        // assert after
         expect($participant->isAdmin())->toBe(true);
         expect($user->isAdminIn($conversation->group))->toBe(true);
     });
@@ -510,7 +534,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($user);
 
@@ -519,7 +543,7 @@ describe('actions test', function () {
         $participant = $participant->refresh();
         $user = $user->refresh();
 
-        //assert before
+        // assert before
         expect($participant->isAdmin())->toBe(true);
         expect($user->isAdminIn($conversation->group))->toBe(true);
 
@@ -529,7 +553,7 @@ describe('actions test', function () {
         $participant = $participant->refresh();
         $user = $user->refresh();
 
-        //assert after
+        // assert after
         expect($participant->isAdmin())->toBe(false);
         expect($user->isAdminIn($conversation->group))->toBe(false);
     });
@@ -538,7 +562,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
 
         $participant = $conversation->participants->first();
@@ -549,7 +573,7 @@ describe('actions test', function () {
 
         $participant = $participant->refresh();
 
-        //make sure participant is still owner
+        // make sure participant is still owner
         expect($participant->isOwner())->toBe(true);
     });
 
@@ -557,7 +581,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
 
         $participant = $conversation->participants->first();
@@ -568,7 +592,7 @@ describe('actions test', function () {
 
         $participant = $participant->refresh();
 
-        //make sure participant is still owner
+        // make sure participant is still owner
         expect($participant->isOwner())->toBe(true);
     });
 
@@ -595,7 +619,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
 
         $participant = $conversation->participants->first();
@@ -609,7 +633,7 @@ describe('actions test', function () {
 
         $participant = $participant->refresh();
 
-        //make sure participant is still owner
+        // make sure participant is still owner
         expect($participant->isOwner())->toBe(true);
         expect($participant->participantable->belongsToConversation($conversation))->toBe(true);
 
@@ -619,7 +643,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $randomUser = User::factory()->create(['name' => 'Micheal']);
 
         $otherConversation = $randomUser->createConversationWith(User::factory()->create());
@@ -636,7 +660,7 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $randomUser = User::factory()->create(['name' => 'Micheal']);
         $conversation->addParticipant($randomUser);
 
@@ -653,17 +677,17 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($user);
 
-        //assert before
+        // assert before
         expect($participant->participantable->belongsToConversation($conversation))->toBe(true);
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id);
 
-        //assert removed
+        // assert removed
         $removed = Action::where('actionable_id', $participant->id)
             ->where('actionable_type', Participant::class)
             ->where('type', Actions::REMOVED_BY_ADMIN)
@@ -677,17 +701,17 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($user);
 
-        //assert before
+        // assert before
         expect($user->belongsToConversation($conversation))->toBe(true);
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id);
 
-        //assert removed
+        // assert removed
         $conversation = $conversation->refresh();
 
         expect($user->belongsToConversation($conversation))->toBe(false);
@@ -697,22 +721,22 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($user);
 
-        //assert before
+        // assert before
         expect($participant->participantable->belongsToConversation($conversation))->toBe(true);
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
 
-        //assert
+        // assert
         $request->assertSee($participant->display_name);
 
-        //action
+        // action
         $request->call('removeFromGroup', $participant->id);
 
-        //assert after
+        // assert after
         $request->assertDontSee($participant->display_name);
 
     });
@@ -721,13 +745,13 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        //add participant
+        // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $participant = $conversation->addParticipant($user);
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
 
-        //action
+        // action
         $request->call('removeFromGroup', $participant->id);
 
         $request->assertDispatched('participantsCountUpdated');

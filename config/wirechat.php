@@ -42,7 +42,17 @@ return [
     'routes' => [
         'prefix' => '/chats',
         'middleware' => ['web', 'auth'],
+        'guards' => ['web'],
     ],
+
+    /**
+     * Layout:
+     * Specifies the view that will be used as the layout when rendering Wirechat components
+     * via the default routes (e.g., /chats and /chats/{id}).
+     * The returned view will serve as the parent layout, where the component content
+     * will be rendered into the $slot.
+     */
+    'layout' => 'wirechat::layouts.app',
 
     /**
      * Features:
