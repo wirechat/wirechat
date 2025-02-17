@@ -51,6 +51,19 @@
                 /* Larger size for desktop */
             }
         }
+        /* Dark mode using prefers-color-scheme */
+        @media (prefers-color-scheme: dark) {
+            emoji-picker {
+                --background: #1f2937 !important;
+                --input-border-color: #374151;
+                --outline-color: none;
+                --outline-size: 1px;
+                --border-color: none;
+                --input-font-color: white;
+                --indicator-color: #9ca3af;
+                --button-hover-background: #9ca3af;
+            }
+        }
 
 
         /* Ensure dark mode takes precedence */
