@@ -50,9 +50,9 @@ class Helper
 
         $groupKey = '';
         if ($messageDate->isToday()) {
-            $groupKey = 'Today';
+            $groupKey = __('Today');
         } elseif ($messageDate->isYesterday()) {
-            $groupKey = 'Yesterday';
+            $groupKey = __('Yesterday');
         } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
             $groupKey = $messageDate->format('l');
         } else {

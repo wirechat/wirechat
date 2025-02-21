@@ -147,10 +147,10 @@
 
 
                                     <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
-                                        {{ $message?->ownedBy($this->auth) ? 'You ' : $message->sendable?->display_name ?? 'User' }}
+                                        {{ $message?->ownedBy($this->auth) ? __('You').' ' : $message->sendable?->display_name ?? __('User') }}
                                         replied to
 
-                                        {{ $parent?->ownedBy($this->auth) ? ($message?->ownedBy($this->auth) ? 'Yourself' : ' You'):($message?->ownedBy($parent->sendable) ? 'Themself' : $parent->sendable?->display_name) }}
+                                        {{ $parent?->ownedBy($this->auth) ? __($message?->ownedBy($this->auth) ? 'Yourself' : ' You'):($message?->ownedBy($parent->sendable) ? __('Themself') : $parent->sendable?->display_name) }}
                                     </h6>
 
                                     <div @class([
@@ -160,7 +160,7 @@
                                     ])>
                                         <p
                                             class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm  rounded-full max-w-fit   px-3 py-1 ">
-                                            {{ $parent?->body != '' ? $parent?->body : ($parent->hasAttachment() ? 'Attachment' : '') }}
+                                            {{ $parent?->body != '' ? $parent?->body : ($parent->hasAttachment() ? __('Attachment') : '') }}
                                         </p>
                                     </div>
 
@@ -209,9 +209,9 @@
 
                                             @if ($message->ownedBy($this->auth)|| ($authParticipant->isAdmin() && $isGroup))
                                                 <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ $message->id }}')"
-                                                    wire:confirm="Are you sure?" class="w-full text-start">
+                                                    wire:confirm="{{ __('Are you sure?') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
-                                                        Delete for everyone
+                                                        @lang('Delete for everyone')
                                                     </x-wirechat::dropdown-link>
                                                 </button>
                                             @endif
@@ -220,9 +220,9 @@
                                             {{-- Dont show delete for me if is group --}}
                                             @if (!$isGroup) 
                                             <button dusk="delete_message_for_me" wire:click="deleteForMe('{{ $message->id }}')"
-                                                wire:confirm="Are you sure?" class="w-full text-start">
+                                                wire:confirm="{{ __('Are you sure?') }}" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
-                                                    Delete for me
+                                                    @lang('Delete for me')
                                                 </x-wirechat::dropdown-link>
                                             </button>
                                             @endif
@@ -230,7 +230,7 @@
 
                                             <button dusk="reply_to_message_button" wire:click="setReply('{{ $message->id }}')"class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
-                                                    Reply
+                                                    @lang('Reply')
                                                 </x-wirechat::dropdown-link>
                                             </button>
 

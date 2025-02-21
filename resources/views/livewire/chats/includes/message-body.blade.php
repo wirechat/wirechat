@@ -20,7 +20,7 @@
         'font-normal text-gray-600' =>
             $isReadByAuth && $lastMessage?->ownedBy($this->auth),
     ])>
-        {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->isAttachment() ? '📎 Attachment' : '') }}
+        {{ $lastMessage->body != '' ? $lastMessage->body : __($lastMessage->isAttachment() ? '📎 Attachment' : '') }}
     </p>
 
     <span class="font-medium px-1 text-xs shrink-0 text-gray-800 dark:text-gray-50">

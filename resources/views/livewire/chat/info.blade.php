@@ -14,7 +14,7 @@
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg> </button>
-        <h3>{{ $group ? 'Group' : 'Chat' }} Info</h3>
+        <h3>{{ __(($group ? 'Group' : 'Chat').' Info') }}</h3>
     </section>
     {{-- Details --}}
     <header>
@@ -121,7 +121,7 @@
                         </form>
 
                     {{-- Members count --}}
-                    <p class="mx-auto"> Members {{ $totalParticipants }} </p>
+                    <p class="mx-auto"> @lang('Members') {{ $totalParticipants }} </p>
 
                 </div>
 
@@ -135,7 +135,7 @@
                             <span class="col-span-11">
                                 <div x-show="!editing">
                                     @if (empty($description))
-                                        <p class="text-sm" style="color: var(--wirechat-primary-color)">Add a group description
+                                        <p class="text-sm" style="color: var(--wirechat-primary-color)">@lang('Add a group description')
                                         </p>
                                     @else
                                         <p class="font-medium break-all   whitespace-pre-line ">{{ $description }}
@@ -187,7 +187,7 @@
             <div @dusk="non_editable_group_information_section" class="flex  flex-col items-center gap-5 py-5 px-4  ">
                 <x-wirechat::avatar src="{{ $cover_url }}" class=" h-32 w-32 mx-auto" />
                 <h4 @dusk="group_name" class="font-medium  break-all   whitespace-pre-line   text-2xl "> {{ $groupName }} </h4>
-                <p class="mx-auto"> Members {{ $totalParticipants }} </p>
+                <p class="mx-auto"> @lang('Members') {{ $totalParticipants }} </p>
                 <p class="font-medium break-all   whitespace-pre-line ">{{ $description }} </p>
             </div>
             @endif
@@ -231,7 +231,7 @@
             <x-wirechat::actions.open-modal  component="wirechat.chat.group.members"  conversation="{{ $conversation?->id }}" widget="{{$this->isWidget()}}">
             {{-- Members count --}}
             <button class="flex w-full justify-between items-center px-8 focus:outline-none ">
-                <span class="text-gray-600 dark:text-gray-300"> Members {{ $totalParticipants }}</span>
+                <span class="text-gray-600 dark:text-gray-300"> @lang('Members') {{ $totalParticipants }}</span>
                 {{-- Search icon --}}
                 <span>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -254,7 +254,7 @@
                         d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
                 </svg>
 
-                <span>Add Members</span>
+                <span>@lang('Add Members')</span>
             </button>
             </x-wirechat::actions.open-modal>
             @endif
@@ -278,7 +278,7 @@
                     <path fill-rule="evenodd"
                         d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
                 </svg>
-                <span>Exit Group</span>
+                <span>@lang('Exit Group')</span>
             </button>
         @endif
 
@@ -295,10 +295,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                         </svg>
-                        <span>Delete Group</span>
+                        <span>@lang('Delete Group')</span>
                     </div>
 
-                    <p class="dark:text-white/60 text-sm text-gray-600/80">Before you can delete the group, you need to remove all group members</p>
+                    <p class="dark:text-white/60 text-sm text-gray-600/80">@lang('Before you can delete the group, you need to remove all group members')</p>
                 </button>
             </div>
 
@@ -314,7 +314,7 @@
                                 d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077 1.41-.513m14.095-5.13 1.41-.513M5.106 17.785l1.15-.964m11.49-9.642 1.149-.964M7.501 19.795l.75-1.3m7.5-12.99.75-1.3m-6.063 16.658.26-1.477m2.605-14.772.26-1.477m0 17.726-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205 12 12m6.894 5.785-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495" />
                         </svg>
 
-                        <span>Group Permissions</span>
+                        <span>@lang('Group Permissions')</span>
                     </div>
                 </button>
                 </x-wirechat::actions.open-chat-drawer>
@@ -332,7 +332,7 @@
                         d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                 </svg>
 
-                <span>Delete Chat</span>
+                <span>@lang('Delete Chat')</span>
             </button>
         @endif
 

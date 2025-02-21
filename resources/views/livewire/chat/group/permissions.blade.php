@@ -5,7 +5,7 @@
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg> </button>
-        <h3>Permissions</h3>
+        <h3>@lang('Permissions')</h3>
     </section>
 
 
@@ -13,7 +13,7 @@
         <section >
 
             <h5 class="w-full text-start py-4 bg-gray-50 dark:bg-gray-950 px-50 px-4">
-                Members can:
+                @lang('Members can:')
             </h5>
 
             <ul class="space-y-2">
@@ -29,8 +29,8 @@
                     </span>
 
                     <span class="w-full text-start">
-                        <h5 class="font-medium">Edit Group Information</h5>
-                        <p>This includes the name, icon and description</p>
+                        <h5 class="font-medium">@lang('Edit Group Information')</h5>
+                        <p>@lang('This includes the name, icon and description')</p>
                     </span>
 
 
@@ -61,7 +61,7 @@
                     </span>
 
                     <span class="w-full text-start">
-                        <h5 class="font-medium">Send messages</h5>
+                        <h5 class="font-medium">@lang('Send messages')</h5>
                     </span>
 
 
@@ -93,7 +93,7 @@
                     </span>
 
                     <span class="w-full text-start">
-                        <h5 class="font-medium">Add other members</h5>
+                        <h5 class="font-medium">@lang('Add other members')</h5>
                     </span>
 
 

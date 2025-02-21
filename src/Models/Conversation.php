@@ -152,7 +152,7 @@ class Conversation extends Model
             abort_if(
                 $participant->hasExited(),
                 403,
-                'Cannot add '.$user->display_name.' because they left the group.'
+                __('Cannot add :name because they left the group.', ['name' => $user->display_name])
             );
 
             // Check if the participant was removed by an admin or owner
@@ -161,7 +161,7 @@ class Conversation extends Model
                 abort_if(
                     ! $undoAdminRemovalAction,
                     403,
-                    'Cannot add '.$user->display_name.' because they were removed from the group by an Admin.'
+                    __('Cannot add :name because they were removed from the group by an Admin.', ['name' => $user->display_name])
                 );
 
                 // If undoAdminRemovalAction is true, remove admin removal actions and return the participant
@@ -173,7 +173,7 @@ class Conversation extends Model
             }
 
             // Abort if the participant is already in the group and has not exited
-            abort(422, 'Participant is already in the conversation.');
+            abort(422, __('Participant is already in the conversation.'));
         }
 
         // Validate participant limits for private or self conversations
@@ -181,7 +181,7 @@ class Conversation extends Model
             abort_if(
                 $this->participants()->count() >= 2,
                 422,
-                'Private conversations cannot have more than two participants.'
+                __('Private conversations cannot have more than two participants.')
             );
         }
 
@@ -189,7 +189,7 @@ class Conversation extends Model
             abort_if(
                 $this->participants()->count() >= 1,
                 422,
-                'Self conversations cannot have more than one participant.'
+                __('Self conversations cannot have more than one participant.')
             );
         }
 
@@ -536,7 +536,7 @@ class Conversation extends Model
     {
         // Validate that the duration is not negative and is at least 1 hour
         if ($durationInSeconds < 3600) {
-            throw new \InvalidArgumentException('Disappearing messages duration must be at least 1 hour (3600 seconds).');
+            throw new \InvalidArgumentException(__('Disappearing messages duration must be at least 1 hour (3600 seconds).'));
         }
 
         $this->update([
@@ -565,7 +565,7 @@ class Conversation extends Model
     public function deleteFor(Model $user)
     {
         // Ensure the participant belongs to the conversation
-        abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
+        abort_unless($user->belongsToConversation($this), 403, __('User does not belong to conversation'));
 
         // Clear conversation history for this user
         $this->clearFor($user);
@@ -615,7 +615,7 @@ class Conversation extends Model
     public function clearFor(Model $user)
     {
         // Ensure the participant belongs to the conversation
-        abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
+        abort_unless($user->belongsToConversation($this), 403, __('User does not belong to conversation'));
 
         // Update the participant's `conversation_cleared_at` to the current timestamp
         $this->participant($user)->update(['conversation_cleared_at' => now()]);

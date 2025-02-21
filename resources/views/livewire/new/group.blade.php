@@ -40,9 +40,9 @@
 
                         <div class=" my-auto">
 
-                            <label for="name">Group Name</label>
+                            <label for="name">@lang('Group Name')</label>
 
-                            <input id='name' type="text" wire:model='name' autofocus placeholder="Enter name"
+                            <input id='name' type="text" wire:model='name' autofocus placeholder="{{ __('Enter name') }}"
                                 class=" w-full border-0 px-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
 
                             <span class="text-red-500 text-sm ">
@@ -67,9 +67,9 @@
                 <main class="my-5">
                     <div class=" my-auto space-y-2">
 
-                        <label for="description">Description</label>
+                        <label for="description">@lang('Description')</label>
 
-                        <textarea id='description' type="text" wire:model='description' placeholder="Optional" rows="4"
+                        <textarea id='description' type="text" wire:model='description' placeholder="{{ __('Optional') }}" rows="4"
                             class=" w-full resize-none rounded-lg border-gray-200 focus:border-gray-200 dark:border-gray-700   bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
                     </textarea>
 
@@ -85,16 +85,17 @@
                 </main>
 
                 <footer class="flex gap-4 justify-end mt-auto">
+
                     <x-wirechat::actions.close-modal>
                         <button type="button" dusk="cancel_create_new_group_button"class="font-bold dark:hover:bg-gray-700 p-3 px-4 rounded-xl ">
-                            Cancel
+                            @lang('Cancel')
                         </button>
                     </x-wirechat::actions.close-modal>
 
                     <button type="submit" :disabled="!($wire.name?.trim()?.length)" dusk="next_button"
                         :class="{ 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit opacity-70': !($wire.name?.trim()?.length) }"
                         class="font-bold transition dark:hover:bg-gray-700 p-3 px-4 rounded-xl ">
-                        Next
+                        @lang('Next')
                     </button>
                 </footer>
             </form>
@@ -121,14 +122,14 @@
 
                     </button>
 
-                    <h3 class="text-sm mx-auto font-semibold "><span>Add Members</span> {{count($selectedMembers)}} / {{$maxGroupMembers}}</h3>
+                    <h3 class="text-sm mx-auto font-semibold "><span>@lang('Add Members')</span> {{count($selectedMembers)}} / {{$maxGroupMembers}}</h3>
 
                     <button 
                         wire:click="create"
                         wire:loading.attr="disabled"
                         wire:target='create'
                         class="p-2 disabled:cursor-not-allowed  ml-0 text-gray-600 dark:text-gray-300 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
-                        Create
+                        @lang('Create')
                     </button>
 
                 </div>
@@ -142,12 +143,12 @@
                   "
                  class="text-red-500 text-sm mx-auto ">
                    <span x-transition x-show="showError">
-                    Members cannot exceed {{$maxGroupMembers}}
+                    {{ __('Members cannot exceed :maxGroupMembers', ['maxGroupMembers' => $maxGroupMembers]) }}
                    </span>
                 </div>
                 <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
                     <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
-                        placeholder="Search"
+                        placeholder="{{ __('Search') }}"
                         class=" w-full border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
                 </section>
 
@@ -175,7 +176,7 @@
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                                 stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                                         </svg>
-                                        <span class="sr-only">Remove badge</span>
+                                        <span class="sr-only">@lang('Remove badge')</span>
 
                                     </button>
                                 </li>

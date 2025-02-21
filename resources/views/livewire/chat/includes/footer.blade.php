@@ -193,7 +193,7 @@
                         <div class="flex justify-between items-center dark:text-white">
                             <h6 class="text-sm">Replying to
                                 <span class="font-bold">
-                                    {{ $replyMessage?->ownedBy($this->auth) ? ' Yourself' : $replyMessage->sendable?->name }}
+                                    {{ $replyMessage?->ownedBy($this->auth) ? __('Yourself') : $replyMessage->sendable?->name }}
                                 </span>
                             </h6>
                             <button wire:loading.attr="disabled" wire:click="removeReply()"
@@ -207,7 +207,7 @@
 
                         {{-- Message being replies to --}}
                         <p class="truncate text-sm text-gray-500 dark:text-gray-200 max-w-md">
-                            {{ $replyMessage->body != '' ? $replyMessage->body : ($replyMessage->hasAttachment() ? 'Attachment' : '') }}
+                            {{ $replyMessage->body != '' ? $replyMessage->body :($replyMessage->hasAttachment() ? __('Attachment') : '') }}
                         </p>
 
                     </section>
@@ -379,7 +379,7 @@
                                             </span>
 
                                             <span class=" dark:text-white">
-                                                Photos & Videos
+                                                {{__('Photos & Videos')}}
                                             </span>
                                         </div>
                                     </label>

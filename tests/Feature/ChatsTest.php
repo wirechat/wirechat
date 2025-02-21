@@ -411,7 +411,7 @@ describe('List', function () {
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('Test')
-            ->assertSee('(You)')
+            ->assertSee(__('You'))
             ->assertViewHas('conversations', function ($conversations) {
                 return count($conversations) == 1;
             });

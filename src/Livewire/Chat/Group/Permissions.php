@@ -62,11 +62,11 @@ class Permissions extends ModalComponent
     public function mount()
     {
         abort_unless(auth()->check(), 401);
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'You do not have permission to access this resource');
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, __('You do not have permission to access this resource'));
 
-        abort_unless($this->conversation->isOwner(auth()->user()), 403, 'You do not have permission to edit group permissions');
+        abort_unless($this->conversation->isOwner(auth()->user()), 403, __('You do not have permission to edit group permissions'));
 
-        abort_if($this->conversation->isPrivate(), 403, 'This feature is only available for groups');
+        abort_if($this->conversation->isPrivate(), 403, __('This feature is only available for groups'));
 
         $this->group = $this->conversation->group;
 

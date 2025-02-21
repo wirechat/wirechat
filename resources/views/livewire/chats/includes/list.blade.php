@@ -73,7 +73,7 @@
                         </h6>
 
                         @if ($conversation->isSelfConversation())
-                            <span class="font-medium dark:text-white">(You)</span>
+                            <span class="font-medium dark:text-white">{{__('You')}}</span>
                         @endif
 
                     </div>

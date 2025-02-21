@@ -85,7 +85,7 @@ class AddMembers extends ModalComponent
         if ($model) {
 
             // abort if member already belong to conversation
-            abort_if($model->belongsToConversation($this->conversation), 403, $model->display_name.' Is already a member');
+            abort_if($model->belongsToConversation($this->conversation), 403, __(':name Is already a member', ['name' => $model->display_name]));
 
             if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
                 // Remove member if they are already selected
@@ -102,14 +102,14 @@ class AddMembers extends ModalComponent
                 $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
 
                 // abort if member already exited group
-                abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->display_name.' because they left the group');
+                abort_if($participant?->hasExited(), 403, __('Cannot add :name because they left the group', ['name' => $model->display_name]));
 
                 // check if is removed - if true then
                 // abort if non admin member tries to add a participant previously removed by admin
                 if ($participant?->isRemovedByAdmin()) {
                     $authParticipant = $this->conversation->participant(auth()->user());
 
-                    abort_unless($authParticipant?->isAdmin(), 403, 'Cannot add '.$model->display_name.' because they were removed from the group by an Admin.');
+                    abort_unless($authParticipant?->isAdmin(), 403, __('Cannot add :name because they were removed from the group by an Admin.', ['name' => $model->display_name]));
 
                 }
 
@@ -149,7 +149,7 @@ class AddMembers extends ModalComponent
         abort_unless(auth()->check(), 401);
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
-        abort_if($this->conversation->isPrivate(), 403, 'Cannot add members to private conversation');
+        abort_if($this->conversation->isPrivate(), 403, __('Cannot add members to private conversation'));
 
         // Load participants and get the count
         $this->conversation->loadCount('participants');

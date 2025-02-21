@@ -7,7 +7,7 @@
     <header class=" sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
         <div class="flex justify-between items-center justify-between pb-2">
 
-            <h3 class="text-lg font-semibold">New Chat</h3>
+            <h3 class="text-lg font-semibold">@lang('New Chat')</h3>
 
             <x-wirechat::actions.close-modal>
             <button
@@ -25,7 +25,7 @@
         
         <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
             <input  dusk="search_users_field" autofocus type="search" id="users-search-field"
-                wire:model.live.debounce='search' autocomplete="off"  placeholder="Search"
+                wire:model.live.debounce='search' autocomplete="off"  placeholder="{{ __('Search') }}"
                 class=" w-full border-0 w-auto px-0 dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
 
         </section>
@@ -47,7 +47,7 @@
                 </svg>
             </span>
 
-            <p class="dark:text-white">New group</p>
+            <p class="dark:text-white">@lang('New group')</p>
         </button>
        </x-wirechat::actions.new-group>
      @endif

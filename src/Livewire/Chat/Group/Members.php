@@ -128,11 +128,12 @@ class Members extends ModalComponent
 
         // Load missing relationship in case of strict models types
         $participant->loadMissing('participantable');
+
         // abort if user does not belong to conversation
-        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, __('This user does not belong to conversation'));
 
         // abort if user participants is owner
-        abort_if($participant->isOwner(), 403, 'Owner role cannot be changed');
+        abort_if($participant->isOwner(), 403, __('Owner role cannot be changed'));
 
         // toggle
         if ($participant->isAdmin()) {
@@ -197,14 +198,15 @@ class Members extends ModalComponent
 
         // Load missing relationship in case of strict models types
         $participant->loadMissing('participantable');
+
         // abort if user does not belong to conversation
-        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, __('This user does not belong to conversation'));
 
         // abort if auth is not admin
-        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, __('You do not have permission to perform this action in this group. Only admins can proceed.'));
 
         // abort if user participants is owner
-        abort_if($participant->isOwner(), 403, 'Owner cannot be removed from group');
+        abort_if($participant->isOwner(), 403, __('Owner cannot be removed from group'));
 
         // remove from group
         // Create the 'remove' action record in the actions table
@@ -253,7 +255,7 @@ class Members extends ModalComponent
 
         $this->totalMembersCount = $this->conversation->participants_count ?? 0;
 
-        abort_if($this->conversation->isPrivate(), 403, 'This is a private conversation');
+        abort_if($this->conversation->isPrivate(), 403, __('This is a private conversation'));
 
         $this->participants = collect();
         $this->loadParticipants();

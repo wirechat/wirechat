@@ -14,7 +14,7 @@
         </button>
         </x-wirechat::actions.close-modal>
 
-        <h3  class="text-sm mx-auto font-semibold "  ><span>Add Members</span> {{$newTotalCount}} / {{$maxGroupMembers}}</h3>
+        <h3  class="text-sm mx-auto font-semibold "  ><span>@lang('Add Members')</span> {{$newTotalCount}} / {{$maxGroupMembers}}</h3>
 
         <button 
             wire:click="save"
@@ -26,7 +26,7 @@
                 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit hover:bg-inherit  opacity-70'=>count($selectedMembers)==0
             ])
             class="">
-            Save
+            @lang('Save')
         </button>
 
     </div>
@@ -40,13 +40,13 @@
       "
        class="text-red-500 text-sm mx-auto ">
        <span x-transition x-show="showError">
-        Members cannot exceed {{$maxGroupMembers}}
+           {{ __('Members cannot exceed :maxGroupMembers', ['maxGroupMembers' => $maxGroupMembers]) }}
        </span>
     </div>
 
     <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
         <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
-            placeholder="Search"
+            placeholder="{{ __('Search') }}"
             class=" w-full border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
     </section>
 
@@ -71,7 +71,7 @@
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                     stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                             </svg>
-                            <span class="sr-only">Remove badge</span>
+                            <span class="sr-only">@lang('Remove badge')</span>
 
                         </button>
                     </li>
@@ -104,7 +104,7 @@
                          @if (!$isAlreadyAParticipant)
                          wire:click="toggleMember('{{ $user->id }}', {{ json_encode(get_class($user)) }})"
                          @endif
-        
+
                             class="flex cursor-pointer gap-2 items-center w-full">
                             <x-wirechat::avatar src="{{$user->cover_url}}" class="w-10 h-10" />
 
@@ -113,10 +113,10 @@
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
                                 {{ $user->display_name }}</p>
 
-                             <span 
+                             <span
                              @class(['text-gray-600 dark:text-gray-400 text-sm'])>
                                 @if ($isAlreadyAParticipant)
-                                Already added to group
+                                    @lang('Already added to group')
                                 @endif
                              </span>
                            </div>

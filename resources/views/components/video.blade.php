@@ -18,7 +18,7 @@
 
         <video x-ref="player" src="{{$source}}" @play="playing=true" @pause="playing=false"
               class="  w-auto dark:bg-gray-600    border rounded-xl  border-gray-50 dark:border-gray-700 rounded-xl {{$cover==true?'object-cover':''}} {{$height}}">
-            your browser does not support html5 video 
+            @lang('Your browser does not support html5 video')
         </video>
 
         @if ($controls==true)

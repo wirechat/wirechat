@@ -143,10 +143,10 @@ class Participant extends Model
     public function exitConversation(): bool
     {
         // make sure conversation is not private
-        abort_if($this->conversation->isPrivate(), 403, 'Participant cannot exit a private conversation');
+        abort_if($this->conversation->isPrivate(), 403, __('Participant cannot exit a private conversation'));
 
         // make sure owner if group cannot be removed from chat
-        abort_if($this->isOwner(), 403, 'Owner cannot exit conversation');
+        abort_if($this->isOwner(), 403, __('Owner cannot exit conversation'));
 
         // update Role to Participant
         $this->role = ParticipantRole::PARTICIPANT;

@@ -23,7 +23,7 @@
             </button>
             </x-wirechat::actions.close-modal>
 
-            <h3 class=" mx-auto font-semibold ">Members</h3>
+            <h3 class=" mx-auto font-semibold ">@lang('Members')</h3>
 
 
 
@@ -32,7 +32,7 @@
         {{-- Member limit error --}}
         <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
             <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
-                placeholder="Search Members"
+                placeholder="{{ __('Search Members') }}"
                 class=" w-full border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
         </section>
 
@@ -65,10 +65,10 @@
 
                                 <div class="grid grid-cols-12 w-full ">
                                     <h6 @class(['transition-all truncate group-hover:underline col-span-10' ])>
-                                        {{ $loopParticipantIsAuth ? 'You' : $participant->participantable->display_name }}</h6>
+                                        {{ $loopParticipantIsAuth ? __('You') : $participant->participantable->display_name }}</h6>
                                         @if ($participant->isOwner()|| $participant->isAdmin())
                                         <span  style="background-color: var(--wirechat-primary-color);" class=" flex items-center col-span-2 text-white text-xs font-medium ml-auto px-2.5 py-px rounded ">
-                                            {{$participant->isOwner()? "Owner":"Admin"}}
+                                            {{ __($participant->isOwner() ? 'Owner' : 'Admin') }}
                                         </span>
                                         @endif
 
@@ -82,8 +82,8 @@
 
                                     <x-wirechat::dropdown-button wire:click="sendMessage('{{ $participant->id }}')"
                                         class="truncate dark:hover:bg-gray-700 dark:focus:bg-gray-700">
-                                        Message
-                                        {{ $loopParticipantIsAuth ? 'Yourself' : $participant->participantable->display_name }}
+                                        @lang('Message')
+                                        {{ $loopParticipantIsAuth ? __('Yourself') : $participant->participantable->display_name }}
                                     </x-wirechat::dropdown-button>
 
                                     @if ($authIsAdminInGroup || $authIsOwner)
@@ -93,16 +93,16 @@
                                             @if ($participant->isAdmin())
                                                 <x-wirechat::dropdown-button
                                                     wire:click="dismissAdmin('{{ $participant->id }}')"
-                                                    wire:confirm="Are you sure you want to dismiss {{$participant->participantable?->display_name }} as Admin ?"
+                                                    wire:confirm="{{ __('Are you sure you want to dismiss :name as Admin ?', ['name' => $participant->participantable?->display_name]) }}"
                                                     class=" dark:hover:bg-gray-700 ">
-                                                    Dismiss As Admin
+                                                    @lang('Dismiss As Admin')
                                                 </x-wirechat::dropdown-button>
                                             @else
                                                 <x-wirechat::dropdown-button
                                                     wire:click="makeAdmin('{{ $participant->id }}')"
-                                                    wire:confirm="Are you sure you want to make {{$participant->participantable?->display_name }} an Admin ?"
+                                                    wire:confirm="{{ __('Are you sure you want to make :name an Admin ?', ['name' => $participant->participantable?->display_name]) }}"
                                                     class=" dark:hover:bg-gray-700 ">
-                                                    Make Admin
+                                                    @lang('Make Admin')
                                                 </x-wirechat::dropdown-button>
                                             @endif
                                         @endif
@@ -111,9 +111,9 @@
                                                 @if (!$participant->isOwner() && !$loopParticipantIsAuth && !$participant->isAdmin())
                                                 <x-wirechat::dropdown-button
                                                     wire:click="removeFromGroup('{{ $participant->id }}')"
-                                                    wire:confirm="Are you sure you want to remove {{$participant->participantable?->display_name }} from Group ?"
+                                                    wire:confirm="{{ __('Are you sure you want to remove :name from Group ?', ['name' => $participant->participantable?->display_name]) }}"
                                                     class="text-red-500 dark:text-red-500 dark:hover:bg-gray-700">
-                                                    Remove
+                                                    @lang('Remove')
                                                 </x-wirechat::dropdown-button>
                                                 @endif
 
@@ -138,7 +138,7 @@
                     <section class="w-full justify-center flex my-3">
                         <button dusk="loadMoreButton" @click="$wire.loadMore()"
                             class=" text-sm dark:text-white hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
-                            Load more
+                            @lang('Load more')
                         </button>
                     </section>
                 @endif

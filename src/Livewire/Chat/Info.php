@@ -76,7 +76,7 @@ class Info extends ModalComponent
 
         $this->validate(
             ['description' => 'max:500|nullable'],
-            ['description.max' => 'Description cannot exceed 500 characters.']
+            ['description.max' => __('Description cannot exceed 500 characters.')]
         );
 
         $this->conversation->group?->updateOrCreate(['conversation_id' => $this->conversation->id], ['description' => $value]);
@@ -91,8 +91,8 @@ class Info extends ModalComponent
         $this->validate(
             ['groupName' => 'required|max:120|nullable'],
             [
-                'groupName.required' => 'The Group name cannot be empty',
-                'groupName.max' => 'Group name cannot exceed 120 characters.',
+                'groupName.required' => __('The Group name cannot be empty'),
+                'groupName.max' => __('Group name cannot exceed 120 characters.'),
 
             ]
         );
@@ -167,7 +167,7 @@ class Info extends ModalComponent
         abort_unless(auth()->check(), 401);
 
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
-        abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
+        abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, __('This operation is not available for Groups.'));
 
         // delete conversation
         $this->conversation->deleteFor(auth()->user());
@@ -191,11 +191,11 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, __('Forbidden: You do not have permission to delete this group.'));
 
-        abort_if($this->conversation->isPrivate(), 403, 'Operation not allowed: Private chats cannot be deleted.');
+        abort_if($this->conversation->isPrivate(), 403, __('Operation not allowed: Private chats cannot be deleted.'));
 
-        abort_unless(auth()->user()->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless(auth()->user()->isOwnerOf($this->conversation), 403, __('Forbidden: You do not have permission to delete this group.'));
 
         // Ensure all participants are removed before deleting the group
         $participantCount = $this->conversation->participants()
@@ -203,7 +203,7 @@ class Info extends ModalComponent
             ->where('role', '!=', ParticipantRole::OWNER)
             ->count();
 
-        abort_unless($participantCount == 0, 403, 'Cannot delete group: Please remove all members before attempting to delete the group.');
+        abort_unless($participantCount == 0, 403, __('Cannot delete group: Please remove all members before attempting to delete the group.'));
 
         // handle widget termination
         $this->handleComponentTermination(
@@ -230,7 +230,7 @@ class Info extends ModalComponent
         $auth = auth()->user();
 
         // make sure owner if group cannot be removed from chat
-        abort_if($auth->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
+        abort_if($auth->isOwnerOf($this->conversation), 403, __('Owner cannot exit conversation'));
 
         // delete conversation
         $auth->exitConversation($this->conversation);

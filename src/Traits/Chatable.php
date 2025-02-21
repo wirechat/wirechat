@@ -208,7 +208,7 @@ trait Chatable
         if (! $model instanceof Conversation) {
             // Ensure the model has the required trait
             if (! in_array(Chatable::class, class_uses($model))) {
-                abort(403, 'The provided model does not support chat functionality.');
+                abort(403, __('The provided model does not support chat functionality.'));
             }
             // Create or get a private conversation with the recipient
             $conversation = $this->createConversationWith($model);
@@ -218,7 +218,7 @@ trait Chatable
 
             // Optionally, check that the current model is part of the conversation
             if (! $this->belongsToConversation($conversation)) {
-                abort(403, 'You do not have access to this conversation.'); // Exit if not a participant
+                abort(403, __('You do not have access to this conversation.')); // Exit if not a participant
             }
         }
 
