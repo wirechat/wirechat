@@ -16,6 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+---
+
+
+## [Unreleased]  
+### Added  
+- New `notifications` key to wirechat configuration
+- Add notifications balde to wirechatAssets
+
+### Updated
+- Wrapped @wirechatAssets blade inside auth check
+
+---
+
+
 ## [v0.1.0](https://github.com/namumakwembo/wirechat/releases/tag/0.1.0) - 2025-02-16
 
 ### Added

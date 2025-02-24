@@ -12,6 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphClassResolver;
+use Namu\WireChat\Http\Resources\MessageResource;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
 
@@ -37,8 +38,10 @@ class NotifyParticipant implements ShouldBroadcastNow
 
         //  $this->dontBroadcastToCurrentUser();
 
+        $message->load('conversation.group','sendable','attachment');
+
         // dd($message->conversation->isPrivate());
-        //  Log::info($participant);
+        //  Log::info(['message Resource from NotifyParticipant'=> (new MessageResource($this->message))]);
 
     }
 
@@ -72,10 +75,8 @@ class NotifyParticipant implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'message' => [
-                'id' => $this->message->id,
-                'conversation_id' => $this->message->conversation_id,
-            ],
+            'message' =>new MessageResource($this->message),
+            'redirect_url' => route(WireChat::viewRouteName(), [$this->message->conversation_id]),
         ];
     }
 }

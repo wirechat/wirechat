@@ -128,4 +128,22 @@ class WireChatService
     {
         return 'chat';
     }
+
+
+
+   /**
+    *----------------------------------------------------
+    * Notificatons 
+    *
+    **/
+
+    /**
+     * Get wirechat storage disk
+     */
+    public static function notificationsEnabled(): bool
+    {
+        return (bool) config('wirechat.notifications.enabled', false);
+    }
+    
+
 }

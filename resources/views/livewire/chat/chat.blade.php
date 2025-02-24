@@ -106,9 +106,10 @@
         initializing = false;
         $wire.dispatch('focus-input-field');
         loadEmojiPicker();
-        if (isWidget) {
+        {{-- if (isWidget) { --}}
+            //NotifyListeners about chat opened
             $wire.dispatch('chat-opened',{conversation:conversationId});
-        }
+        {{-- } --}}
     });
 }, 120);"
     class="w-full transition bg-white/95 dark:bg-gray-900 overflow-hidden h-full relative" style="contain:content">

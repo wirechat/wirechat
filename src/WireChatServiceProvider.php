@@ -125,17 +125,18 @@ class WireChatServiceProvider extends ServiceProvider
 
     }
 
-    // load assets
-    protected function loadAssets(): void
-    {
-
-        Blade::directive('wirechatAssets', function () {
-            return "<?php 
+   protected function loadAssets(): void
+{
+    Blade::directive('wirechatAssets', function () {
+        return "<?php if(auth()->check()): ?>
+            <?php 
                 echo Blade::render('@livewire(\'wirechat.modal\')');
                 echo Blade::render('<x-wirechat::toast/>');
-                ?>";
-        });
-    }
+                echo Blade::render('<x-wirechat::notification/>');
+            ?>
+        <?php endif; ?>";
+    });
+}
 
     // load assets
     protected function loadStyles(): void

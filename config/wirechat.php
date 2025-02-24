@@ -64,6 +64,19 @@ return [
     'allow_media_attachments' => true,
     'allow_file_attachments' => true,
 
+
+    /**
+     * --------------------------------------------
+     * Notifications:
+     * --------------------------------------------
+     */
+
+     'notifications'=>[
+        'enabled'=>true,
+        'main_sw_script' => 'sw.js',  // Path to the main service worker,usually in the public root folder
+     ],
+
+
     /**
      * User Searchable Fields:
      * Fields to query when searching for users in Wirechat.
