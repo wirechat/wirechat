@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Namu\WireChat\Console\Commands\InstallWireChat;
+use Namu\WireChat\Console\Commands\SetupNotifications;
 use Namu\WireChat\Facades\WireChat as FacadesWireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Drawer;
@@ -33,6 +34,7 @@ class WireChatServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallWireChat::class,
+                SetupNotifications::class
             ]);
         }
 
@@ -125,18 +127,18 @@ class WireChatServiceProvider extends ServiceProvider
 
     }
 
-   protected function loadAssets(): void
-{
-    Blade::directive('wirechatAssets', function () {
-        return "<?php if(auth()->check()): ?>
-            <?php 
-                echo Blade::render('@livewire(\'wirechat.modal\')');
-                echo Blade::render('<x-wirechat::toast/>');
-                echo Blade::render('<x-wirechat::notification/>');
-            ?>
-        <?php endif; ?>";
-    });
-}
+    protected function loadAssets(): void
+    {
+        Blade::directive('wirechatAssets', function () {
+            return "<?php if(auth()->check()): ?>
+                        <?php 
+                            echo Blade::render('@livewire(\'wirechat.modal\')');
+                            echo Blade::render('<x-wirechat::toast/>');
+                            echo Blade::render('<x-wirechat::notification/>');
+                        ?>
+                <?php endif; ?>";
+        });
+    }
 
     // load assets
     protected function loadStyles(): void
