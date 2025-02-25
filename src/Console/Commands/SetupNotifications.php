@@ -16,6 +16,7 @@ class SetupNotifications extends Command
         $publicSW = public_path('sw.js');
         $wirechatSW = public_path('js/wirechat/sw.js');
 
+        
 
         $wirechatServiceWorkerStub= 'ServiceWorkerJsScript.stub';
         $mainServiceWorkerStub = 'MainServiceWorkerJsScript.stub';
