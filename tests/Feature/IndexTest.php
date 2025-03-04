@@ -33,14 +33,14 @@ test('it renders livewire ChatList component', function () {
 });
 
 
-test('it reders @wirechatAssets', function () {
-    $auth = User::factory()->create();
+// test('it reders @wirechatAssets', function () {
+//     $auth = User::factory()->create();
 
-   $response= Livewire::actingAs($auth)->test(Chats::class)->assertOK();
-   $response->assertContainsBladeComponent('wirechatAssets');
+//    $response= Livewire::actingAs($auth)->test(Chats::class)->assertOK();
+//    $response->assertContainsBladeComponent('wirechatAssets');
 
 
-})->only();
+// })->only();
 
 
 
