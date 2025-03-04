@@ -1,8 +1,10 @@
 <?php
 
+use Livewire\Livewire;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
+use Namu\WireChat\Livewire\Pages\Chats;
 use Workbench\App\Models\User;
 
 // /Auth checks
@@ -29,6 +31,18 @@ test('it renders livewire ChatList component', function () {
     $response->assertSeeLivewire(Chatlist::class);
 
 });
+
+
+test('it reders @wirechatAssets', function () {
+    $auth = User::factory()->create();
+
+   $response= Livewire::actingAs($auth)->test(Chats::class)->assertOK();
+   $response->assertContainsBladeComponent('wirechatAssets');
+
+
+})->only();
+
+
 
 test('it doest not render livewire ChatBox component', function () {
     $auth = User::factory()->create();

@@ -1,5 +1,6 @@
 
 @use('Namu\WireChat\Facades\WireChat')
+
 @if(auth()->check() && WireChat::notificationsEnabled())
 
    <div dusk="notification_manager"

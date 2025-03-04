@@ -52,7 +52,7 @@ class SetupNotifications extends Command
             $this->warn('To use Wirechat notifications, add the following at the top of your service worker file:');
             $this->line("`importScripts('/js/wirechat/sw.js');`\n");
         } else {
-            File::put($publicSW, $this->getStub($wirechatServiceWorkerStub));
+            File::put($publicSW, $this->getStub($mainServiceWorkerStub));
             $this->info('✅ Created `sw.js` in the public directory.');
         }
     
