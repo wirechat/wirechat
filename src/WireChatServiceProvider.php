@@ -34,7 +34,7 @@ class WireChatServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallWireChat::class,
-                SetupNotifications::class
+                SetupNotifications::class,
             ]);
         }
 

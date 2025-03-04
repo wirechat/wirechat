@@ -32,17 +32,13 @@ test('it renders livewire ChatList component', function () {
 
 });
 
-
 // test('it reders @wirechatAssets', function () {
 //     $auth = User::factory()->create();
 
 //    $response= Livewire::actingAs($auth)->test(Chats::class)->assertOK();
 //    $response->assertContainsBladeComponent('wirechatAssets');
 
-
 // })->only();
-
-
 
 test('it doest not render livewire ChatBox component', function () {
     $auth = User::factory()->create();

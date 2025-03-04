@@ -129,13 +129,11 @@ class WireChatService
         return 'chat';
     }
 
-
-
-   /**
-    *----------------------------------------------------
-    * Notificatons 
-    *
-    **/
+    /**
+     *----------------------------------------------------
+     * Notificatons
+     *
+     **/
 
     /**
      * Get wirechat storage disk
@@ -144,6 +142,4 @@ class WireChatService
     {
         return (bool) config('wirechat.notifications.enabled', false);
     }
-    
-
 }

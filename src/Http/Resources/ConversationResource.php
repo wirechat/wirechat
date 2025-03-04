@@ -14,10 +14,10 @@ class ConversationResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-         return [
+        return [
             'id' => $this->id,
             'type' => $this->type,
-            'group' => $this->whenLoaded('group',fn()=> new GroupResource($this->group)),
+            'group' => $this->whenLoaded('group', fn () => new GroupResource($this->group)),
             'is_group' => $this->isGroup(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

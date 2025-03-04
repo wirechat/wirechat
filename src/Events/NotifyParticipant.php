@@ -38,7 +38,7 @@ class NotifyParticipant implements ShouldBroadcastNow
 
         //  $this->dontBroadcastToCurrentUser();
 
-        $message->load('conversation.group','sendable','attachment');
+        $message->load('conversation.group', 'sendable', 'attachment');
 
         // dd($message->conversation->isPrivate());
         //  Log::info(['message Resource from NotifyParticipant'=> (new MessageResource($this->message))]);
@@ -75,7 +75,7 @@ class NotifyParticipant implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'message' =>new MessageResource($this->message),
+            'message' => new MessageResource($this->message),
             'redirect_url' => route(WireChat::viewRouteName(), [$this->message->conversation_id]),
         ];
     }

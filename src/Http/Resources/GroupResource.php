@@ -14,11 +14,11 @@ class GroupResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-         return [
+        return [
             'id' => $this->id,
             'conversation_id' => $this->conversation_id,
             'name' => $this->name,
-            'cover_url' =>$this->cover_url
+            'cover_url' => $this->cover_url,
         ];
     }
 }

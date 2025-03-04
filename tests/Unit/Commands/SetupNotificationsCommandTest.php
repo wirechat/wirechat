@@ -1,6 +1,5 @@
 <?php
 
-
 use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
@@ -11,7 +10,7 @@ beforeEach(function () {
     if (File::exists(public_path('sw.js'))) {
         File::delete(public_path('sw.js'));
     }
-    if (!File::exists(public_path('js/wirechat'))) {
+    if (! File::exists(public_path('js/wirechat'))) {
         File::makeDirectory(public_path('js/wirechat'), 0755, true);
     }
 });
@@ -19,17 +18,15 @@ beforeEach(function () {
 // Test that files are created if they don't exist
 it('creates the Wirechat and main service worker files when they do not exist', function () {
     // For testing, simulate stub file content
-    
+
     // Create dummy stub files
-    $mainStubPath = __DIR__ . '/../../../stubs/MainServiceWorkerJsScript.stub';
-    $serviceStubPath = __DIR__ . '/../../../stubs/ServiceWorkerJsScript.stub';
+    $mainStubPath = __DIR__.'/../../../stubs/MainServiceWorkerJsScript.stub';
+    $serviceStubPath = __DIR__.'/../../../stubs/ServiceWorkerJsScript.stub';
 
     $mainStubContent = File::get($mainStubPath);
     $serviceStubContent = File::get($serviceStubPath);
-    
 
-
-    if (!File::exists(dirname($mainStubPath))) {
+    if (! File::exists(dirname($mainStubPath))) {
         File::makeDirectory(dirname($mainStubPath), 0755, true);
     }
     File::put($mainStubPath, $mainStubContent);
@@ -41,9 +38,8 @@ it('creates the Wirechat and main service worker files when they do not exist', 
 
     expect(File::exists(public_path('js/wirechat/sw.js')))->toBeTrue();
     expect(File::exists(public_path('sw.js')))->toBeTrue();
-    //expect(File::get(public_path('js/wirechat/sw.js')))->toEqual($serviceStubContent);
-   // expect(File::get(public_path('sw.js')))->toEqual($mainStubContent);
-
+    // expect(File::get(public_path('js/wirechat/sw.js')))->toEqual($serviceStubContent);
+    // expect(File::get(public_path('sw.js')))->toEqual($mainStubContent);
 
 });
 
@@ -51,7 +47,7 @@ it('creates the Wirechat and main service worker files when they do not exist', 
 it('does not overwrite the existing Wirechat service worker file when user declines', function () {
     // Arrange: create a dummy file with known content
     $originalContent = 'original service worker content';
-    
+
     File::put(public_path('js/wirechat/sw.js'), $originalContent);
 
     $this->artisan('wirechat:setup-notifications')
@@ -72,14 +68,13 @@ it('overwrites the existing Wirechat service worker file when user confirms', fu
 
     // Create dummy stub file for ServiceWorkerJsScript.stub
 
-    $stubPath = __DIR__ . '/../../../stubs/ServiceWorkerJsScript.stub';
+    $stubPath = __DIR__.'/../../../stubs/ServiceWorkerJsScript.stub';
 
     $stubContent = File::get($stubPath);
-    if (!File::exists(dirname($stubPath))) {
+    if (! File::exists(dirname($stubPath))) {
         File::makeDirectory(dirname($stubPath), 0755, true);
     }
     File::put($stubPath, $stubContent);
-
 
     $this->artisan('wirechat:setup-notifications')
         ->expectsConfirmation(
@@ -90,14 +85,13 @@ it('overwrites the existing Wirechat service worker file when user confirms', fu
 
     expect(File::get(public_path('js/wirechat/sw.js')))->toEqual($stubContent);
 
-
 });
 
 // Test that if the main service worker file already exists, it is not overwritten
 it('does not overwrite the existing main service worker file (sw.js)', function () {
     // Arrange: create a dummy sw.js file with known content
 
-    $stubPath = __DIR__ . '/../../../stubs/MainServiceWorkerJsScript.stub';
+    $stubPath = __DIR__.'/../../../stubs/MainServiceWorkerJsScript.stub';
 
     $originalContent = File::get($stubPath);
     File::put(public_path('sw.js'), $originalContent);

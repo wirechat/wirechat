@@ -14,11 +14,11 @@ class ChatableResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-         return [
+        return [
             'id' => $this->id,
             'type' => $this->getMorphClass(),
             'display_name' => $this->display_name,
-            'cover_url' => $this->cover_url
+            'cover_url' => $this->cover_url,
         ];
     }
 }
