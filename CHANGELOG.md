@@ -16,16 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
----
 
-
-## [Unreleased]  
+## [v0.1.11](https://github.com/namumakwembo/wirechat/releases/tag/0.1.11) - 2025-03-04
 ### Added  
+- Introduced native notifications feature for new messages
 - New `notifications` key to wirechat configuration
-- Add notifications balde to wirechatAssets
-
-### Updated
-- Wrapped @wirechatAssets blade inside auth check
+ ```php
+     'notifications'=>[
+        'enabled'=>true,
+        'main_sw_script' => 'sw.js',  // Relative to the public folder
+     ],
+```
+-Added docs about notification
 
 ---
 
