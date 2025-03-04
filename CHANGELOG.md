@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         'main_sw_script' => 'sw.js',  // Relative to the public folder
      ],
 ```
--Added docs about notification
+- Added docs about notification
 
 ---
 
