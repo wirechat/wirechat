@@ -2,8 +2,10 @@
 
 namespace Namu\WireChat\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Facades\WireChat;
 
 class Attachment extends Model
@@ -27,6 +29,21 @@ class Attachment extends Model
     protected static function newFactory()
     {
         return \Namu\WireChat\Workbench\Database\Factories\AttachmentFactory::new();
+    }
+
+    /**
+     * Get the full URL of the attachment based on the configured storage disk.
+     *
+     * This attribute dynamically generates the correct file URL, whether stored locally
+     * or on an external disk like S3. If the file path is not set, it returns null.
+     */
+    protected function url(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => isset($attributes['file_path'])
+                    ? Storage::disk(config('wirechat.storage_disk'))->url($attributes['file_path'])
+                    : null,
+        );
     }
 
     public function attachable()

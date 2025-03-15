@@ -200,7 +200,7 @@ class Chats extends Component
                 'lastMessage.sendable',
                 'authParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at'),
                 'receiverParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with('participantable'),
-                'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id'),
+                'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
             ])
             ->when(trim($this->search ?? '') != '', fn ($query) => $this->applySearchConditions($query)) // Apply search.
             ->when(trim($this->search ?? '') == '', fn ($query) => $query->withoutDeleted()->withoutBlanks()) // Exclude blanks & deleted.
@@ -238,7 +238,7 @@ class Chats extends Component
                 'lastMessage',
                 'authParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with('actions'),
                 'receiverParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with('participantable', 'actions'),
-                'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id'),
+                'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
             ]);
         });
     }
