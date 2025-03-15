@@ -373,7 +373,7 @@ class Chat extends Component
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
                     'mime_type' => $attachment->getMimeType(),
-                    'url' => Storage::url($path),
+                    'url' => Storage::disk(config('wirechat.storage_disk'))->url($path), // Use disk and path
                 ]);
 
                 // append message to createdMessages
