@@ -37,7 +37,13 @@ x-init="
         popoverPositionCalculate();
     });
     $watch('popoverOpen', function(value){
-        if(value){ popoverPositionCalculate(); document.getElementById('width').focus();  }
+        if(value){
+            popoverPositionCalculate();
+            let el = document.getElementById('width');
+            if(el){
+                el.focus();
+            }
+        }
     });
 "
 class="relative overflow-visible">
