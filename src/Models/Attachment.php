@@ -40,9 +40,7 @@ class Attachment extends Model
     protected function url(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => isset($attributes['file_path'])
-                    ? Storage::disk(config('wirechat.storage_disk'))->url($attributes['file_path'])
-                    : null,
+            get: fn (mixed $value) => $value,
         );
     }
 
@@ -50,11 +48,6 @@ class Attachment extends Model
     {
         return $this->morphTo();
     }
-
-    // public function message()
-    // {
-    //     return $this->hasOne(Message::class);
-    // }
 
     public function getCleanMimeTypeAttribute()
     {

@@ -86,7 +86,7 @@
         registerServiceWorker() {
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register(`{{asset(config('wirechat.notifcations.main_sw_script','sw.js'))}}`)
-                        .then(reg => console.log('Wirechat Service Worker registered:', reg))
+                        .then(reg => console.log('Wirechat Service Worker registered'))
                         .catch(err => console.error('Wirechat Service Worker registration failed:', err));
                 }
             }

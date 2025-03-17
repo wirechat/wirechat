@@ -352,7 +352,10 @@ class Chat extends Component
                  */
 
                 // save photo to disk
-                $path = $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
+                $path = $attachment->store(
+                    path: WireChat::storageFolder(),
+                    options: ['disk' => WireChat::storageDisk(), 'visibility' => 'public']
+                );
 
                 // Determine the reply ID based on conditions
                 $replyId = ($key === 0 && $this->replyMessage) ? $this->replyMessage->id : null;
@@ -368,13 +371,15 @@ class Chat extends Component
                 ]);
 
                 // Create and associate the attachment with the message
-                $message->attachment()->create([
+                $attachment = $message->attachment()->create([
                     'file_path' => $path,
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
                     'mime_type' => $attachment->getMimeType(),
-                    'url' => Storage::disk(config('wirechat.storage_disk'))->url($path), // Use disk and path
+                    'url' => Storage::disk(WireChat::storageDisk())->url($path), // Use disk and path
                 ]);
+
+                // dd($attachment);
 
                 // append message to createdMessages
                 $createdMessages[] = $message;
@@ -702,6 +707,9 @@ class Chat extends Component
 
     public function mount($conversation = null)
     {
+        // dd(config('wirechat.attachments.storage_disk'));
+
+        // dd(Storage::disk()->url('/'));
 
         $this->initializeConversation($conversation);
         $this->initializeParticipants();
