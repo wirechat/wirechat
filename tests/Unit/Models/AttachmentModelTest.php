@@ -13,7 +13,9 @@ it('tests attachment URL generation with custom test_disk', function () {
         'url' => env('APP_URL').'/storage/test_disk', // Custom URL for the test disk
         'visibility' => 'public',
     ]);
-    $this->app['config']->set('filesystems.default', 'test_disk'); // Set the test disk as default for this test
+
+    // Set the test disk as default for this    test
+    $this->app['config']->set('wirechat.attachments.storage_disk', 'test_disk');
 
     // Create two users (one will act as the sender)
     $auth = User::factory()->create();
