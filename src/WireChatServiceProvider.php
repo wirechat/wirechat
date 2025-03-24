@@ -65,6 +65,9 @@ class WireChatServiceProvider extends ServiceProvider
         /* Load channel routes */
         $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
 
+        //load translations
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'wirechat-translations');
+
         // load assets
         $this->loadAssets();
 
