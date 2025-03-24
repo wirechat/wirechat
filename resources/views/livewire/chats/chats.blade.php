@@ -18,7 +18,7 @@
     @endphp
 
     {{-- include header --}}
-    @includeWhen($showHeader, 'wirechat::livewire.chats.includes.header')
+    @includeWhen($showHeader, 'wirechat::livewire.chats.partials.header')
 
     <main x-data
         @scroll.self.debounce="
@@ -41,11 +41,11 @@
 
         @if (count($conversations) > 0)
             {{-- include list item --}}
-            @include('wirechat::livewire.chats.includes.list')
+            @include('wirechat::livewire.chats.partials.list')
 
 
             {{-- include load more if true --}}
-            @includeWhen($canLoadMore, 'wirechat::livewire.chats.includes.load-more-button')
+            @includeWhen($canLoadMore, 'wirechat::livewire.chats.partials.load-more-button')
         @else
             <div class="w-full flex items-center h-full justify-center">
                 <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet</h6>

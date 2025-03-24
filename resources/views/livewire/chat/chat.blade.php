@@ -118,15 +118,15 @@
         {{-- ---------- --}}
         {{-- --Header-- --}}
         {{-- ---------- --}}
-        @include('wirechat::livewire.chat.includes.header', [ 'conversation' => $conversation, 'receiver' => $receiver])
+        @include('wirechat::livewire.chat.partials.header', [ 'conversation' => $conversation, 'receiver' => $receiver])
         {{-- ---------- --}}
         {{-- -Body----- --}}
         {{-- ---------- --}}
-        @include('wirechat::livewire.chat.includes.body', [ 'conversation' => $conversation, 'authParticipant' => $authParticipant, 'loadedMessages' => $loadedMessages, 'isPrivate' => $conversation->isPrivate(), 'isGroup' => $conversation->isGroup(), 'receiver' => $receiver])
+        @include('wirechat::livewire.chat.partials.body', [ 'conversation' => $conversation, 'authParticipant' => $authParticipant, 'loadedMessages' => $loadedMessages, 'isPrivate' => $conversation->isPrivate(), 'isGroup' => $conversation->isGroup(), 'receiver' => $receiver])
         {{-- ---------- --}}
         {{-- -Footer--- --}}
         {{-- ---------- --}}
-        @include('wirechat::livewire.chat.includes.footer', [ 'conversation' => $conversation, 'authParticipant' => $authParticipant, 'media' => $media, 'files' => $files, 'replyMessage' => $replyMessage])
+        @include('wirechat::livewire.chat.partials.footer', [ 'conversation' => $conversation, 'authParticipant' => $authParticipant, 'media' => $media, 'files' => $files, 'replyMessage' => $replyMessage])
 
     </div>
 

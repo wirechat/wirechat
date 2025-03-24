@@ -262,7 +262,7 @@
                                         @endif
                                         {{-- Attachemnt is Application/ --}}
                                         @if (str()->startsWith($attachment->mime_type, 'application/'))
-                                            @include('wirechat::livewire.chat.includes.file', [ 'attachment' => $attachment ])
+                                            @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
                                         @endif
 
                                         {{-- Attachemnt is Video/ --}}
@@ -272,7 +272,7 @@
 
                                         {{-- Attachemnt is image/ --}}
                                         @if (str()->startsWith($attachment->mime_type, 'image/'))
-                                            @include('wirechat::livewire.chat.includes.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
+                                            @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
                                         @endif
                                     @endif
 
@@ -289,7 +289,7 @@
                                     {{-- -------------------- --}}
 
                                     @if ($message->body && !$isEmoji)
-                                    @include('wirechat::livewire.chat.includes.message', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'isGroup' => $isGroup, 'attachment' => $attachment])
+                                    @include('wirechat::livewire.chat.partials.message', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'isGroup' => $isGroup, 'attachment' => $attachment])
                                     @endif
 
                                 </div>

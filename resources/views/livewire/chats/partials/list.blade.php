@@ -80,7 +80,7 @@
 
                     {{-- Message body --}}
                     @if ($lastMessage != null)
-                        @include('wirechat::livewire.chats.includes.message-body')
+                        @include('wirechat::livewire.chats.partials.message-body')
                     @endif
 
                 </div>
