@@ -263,10 +263,10 @@ class Chat extends Component
 
         // make sure conversation is neigher self nor private
 
-        abort_unless($this->conversation->isGroup(), 403, 'Cannot exit self or private conversation');
+        abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.messages.cannot_exit_self_or_private_conversation'));
 
         // make sure owner if group cannot be removed from chat
-        abort_if($auth->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
+        abort_if($auth->isOwnerOf($this->conversation), 403,__('wirechat::chat.messages.owner_cannot_exit_conversation'));
 
         // delete conversation
         $auth->exitConversation($this->conversation);
@@ -286,7 +286,7 @@ class Chat extends Component
 
         if (RateLimiter::tooManyAttempts('send-message:'.auth()->id(), $perMinute)) {
 
-            return abort(429, 'Too many attempts!, Please slow down');
+            return abort(429,  __('wirechat::chat.messages.rate_limit'));
         }
 
         RateLimiter::increment('send-message:'.auth()->id());
@@ -524,9 +524,9 @@ class Chat extends Component
         $messageDate = $message->created_at;
         $groupKey = '';
         if ($messageDate->isToday()) {
-            $groupKey = 'Today';
+            $groupKey = __('wirechat::chat.message_groups.today');
         } elseif ($messageDate->isYesterday()) {
-            $groupKey = 'Yesterday';
+            $groupKey = __('wirechat::chat.message_groups.yesterday');
         } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
             $groupKey = $messageDate->format('l'); // Day name
         } else {
@@ -560,7 +560,7 @@ class Chat extends Component
     {
         $this->loadedMessages = $this->loadedMessages->map(function ($group) {
             return $group->map(function ($message) {
-                return $message->loadMissing('sendable', 'parent', 'attachment');
+                return $message->loadMissing('sendable', 'parent.sendable', 'attachment');
             });
         });
     }
@@ -683,7 +683,7 @@ class Chat extends Component
 
         // Fetch paginated messages
         $messages = $this->conversation->messages()
-            ->with('sendable', 'parent', 'attachment')
+            ->with('sendable',  'parent.sendable', 'attachment')
             ->orderBy('created_at', 'asc')
             ->skip($this->totalMessageCount - $this->paginate_var)
             ->take($this->paginate_var)
@@ -730,12 +730,12 @@ class Chat extends Component
             $this->conversation = Conversation::find($conversationId);
 
             if (! $this->conversation) {
-                abort(404, 'Conversation not found.'); // Custom error response
+                abort(404, __('wirechat::chat.messages.conversation_not_found')); // Custom error response
             }
         } elseif (is_null($conversation)) {
-            abort(422, 'A conversation id is required'); // Custom error for missing input
+            abort(422, __('wirechat::chat.messages.conversation_id_required')); // Custom error for missing input
         } else {
-            return abort(422, 'Invalid conversation input.'); // Handle invalid input types
+            return abort(422,  __('wirechat::chat.messages.invalid_conversation_input')); // Handle invalid input types
         }
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));

@@ -65,9 +65,8 @@ class WireChatServiceProvider extends ServiceProvider
         /* Load channel routes */
         $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
 
-        //load translations
-        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'wirechat-translations');
-
+      
+  
         // load assets
         $this->loadAssets();
 
@@ -77,6 +76,10 @@ class WireChatServiceProvider extends ServiceProvider
         // load middleware
         $this->registerMiddlewares();
 
+               //load translations
+    $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
+
+
     }
 
     public function register()
@@ -85,7 +88,8 @@ class WireChatServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../config/wirechat.php', 'wirechat'
         );
-
+      
+   
         // register facades
         $this->app->singleton('wirechat', function ($app) {
             return new WireChatService;

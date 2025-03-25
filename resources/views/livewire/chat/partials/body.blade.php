@@ -145,13 +145,29 @@
                                 ])>
 
 
+                                    @php
+                                    $sender = $message?->ownedBy($this->auth) 
+                                        ? __('wirechat::chat.labels.you') 
+                                        : ($message->sendable?->display_name ?? __('wirechat::chat.labels.user'));
 
-                                    <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2 ">
-                                        {{ $message?->ownedBy($this->auth) ? 'You ' : $message->sendable?->display_name ?? 'User' }}
-                                        replied to
+                                    $receiver = $parent?->ownedBy($this->auth) 
+                                        ? __('wirechat::chat.labels.you') 
+                                        : ($parent->sendable?->display_name ?? __('wirechat::chat.labels.user'));
+                                    @endphp
 
-                                        {{ $parent?->ownedBy($this->auth) ? ($message?->ownedBy($this->auth) ? 'Yourself' : ' You'):($message?->ownedBy($parent->sendable) ? 'Themself' : $parent->sendable?->display_name) }}
+                                    <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2">
+                                        @if ($parent?->ownedBy($this->auth) && $message?->ownedBy($this->auth))
+                                            {{ __('wirechat::chat.labels.you_replied_to_yourself') }}
+                                        @elseif ($parent?->ownedBy($this->auth))
+                                            {{ __('wirechat::chat.labels.participant_replied_to_you', ['sender' => $sender]) }}
+                                        @elseif ($message?->ownedBy($parent->sendable))
+                                            {{ __('wirechat::chat.labels.participant_replied_to_themself', ['sender' => $sender]) }}
+                                        @else
+                                            {{ __('wirechat::chat.labels.participant_replied_other_participant', ['sender' => $sender, 'receiver' => $receiver]) }}
+                                        @endif
                                     </h6>
+
+
 
                                     <div @class([
                                         'px-1 dark:border-gray-500 overflow-hidden ',
@@ -209,9 +225,9 @@
 
                                             @if ($message->ownedBy($this->auth)|| ($authParticipant->isAdmin() && $isGroup))
                                                 <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ $message->id }}')"
-                                                    wire:confirm="Are you sure?" class="w-full text-start">
+                                                    wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
-                                                        Delete for everyone
+                                                        @lang('wirechat::chat.actions.delete_for_everyone.label')
                                                     </x-wirechat::dropdown-link>
                                                 </button>
                                             @endif
@@ -220,9 +236,9 @@
                                             {{-- Dont show delete for me if is group --}}
                                             @if (!$isGroup) 
                                             <button dusk="delete_message_for_me" wire:click="deleteForMe('{{ $message->id }}')"
-                                                wire:confirm="Are you sure?" class="w-full text-start">
+                                                wire:confirm="{{ __('wirechat::chat.actions.delete_for_me.confirmation_message') }}" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
-                                                    Delete for me
+                                                    @lang('wirechat::chat.actions.delete_for_me.label')
                                                 </x-wirechat::dropdown-link>
                                             </button>
                                             @endif

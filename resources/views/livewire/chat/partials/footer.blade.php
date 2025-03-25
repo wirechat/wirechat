@@ -191,10 +191,8 @@
                 @if ($replyMessage != null)
                     <section class="p-px py-1 w-full col-span-12">
                         <div class="flex justify-between items-center dark:text-white">
-                            <h6 class="text-sm">Replying to
-                                <span class="font-bold">
-                                    {{ $replyMessage?->ownedBy($this->auth) ? ' Yourself' : $replyMessage->sendable?->name }}
-                                </span>
+                            <h6 class="text-sm">
+                                    {{ $replyMessage?->ownedBy($this->auth) ? __('wirechat::chat.labels.replying_to_yourself'): __('wirechat::chat.labels.replying_to',['participant'=>$replyMessage->sendable?->name])  }}
                             </h6>
                             <button wire:loading.attr="disabled" wire:click="removeReply()"
                                 class="disabled:cursor-progress">
@@ -205,7 +203,7 @@
                             </button>
                         </div>
 
-                        {{-- Message being replies to --}}
+                        {{-- Message being replied to --}}
                         <p class="truncate text-sm text-gray-500 dark:text-gray-200 max-w-md">
                             {{ $replyMessage->body != '' ? $replyMessage->body : ($replyMessage->hasAttachment() ? 'Attachment' : '') }}
                         </p>
@@ -346,7 +344,7 @@
                                             </span>
 
                                             <span class=" dark:text-white">
-                                                File
+                                               @lang('wirechat::chat.actions.upload_file.label')
                                             </span>
                                         </div>
                                     </label>
@@ -379,7 +377,7 @@
                                             </span>
 
                                             <span class=" dark:text-white">
-                                                Photos & Videos
+                                               @lang('wirechat::chat.actions.upload_media.label')
                                             </span>
                                         </div>
                                     </label>
@@ -397,7 +395,7 @@
                     <div @class(['flex gap-2 sm:px-2 w-full'])>
                         <textarea @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' x-ref="body"
                             wire:loading.delay.longest.attr="disabled" wire:target="sendMessage" id="chat-input-field" autofocus
-                            type="text" name="message" placeholder="Message" maxlength="1700" rows="1"
+                            type="text" name="message" placeholder="{{ __('wirechat::chat.labels.type_a_message') }}" maxlength="1700" rows="1"
                             @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
                             @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
