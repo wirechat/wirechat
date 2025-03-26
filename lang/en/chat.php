@@ -81,19 +81,58 @@ return [
 
 
     /**-------------------------
-    * Info
-    *------------------------*/
+     * Info Component
+     *------------------------*/
 
-    'info'=>[
-        'heading'=>'Chat Info',
+    'info' => [
+        'heading' => [
+            'label' => 'Chat Info'
+        ],
         'actions' => [
             'delete_chat' => [
                 'label' => 'Delete Chat',
                 'confirmation_message' => 'Are you sure you want to delete this chat? This will only remove the chat from your side and will not delete it for other participants.',
-            ]    
+            ]
+        ],
+        'messages' => [
+            'invalid_conversation_type_error' => 'Only private and self conversations allowed'
+        ],
+
+
+    ],
+
+
+    /**-------------------------
+     * Group Folder
+     *------------------------*/
+
+    'group' => [
+
+
+
+        #Group info component
+        'info' => [
+            'heading' => [
+                'label' => 'Group Info'
+            ],
+            'actions' => [
+                'delete_group' => [
+                    'label' => 'Delete Group',
+                    'confirmation_message' => 'Are you sure you want to delete this Group?',
+                ]
+            ],
+            'messages' => [
+
+                'invalid_conversation_type_error' => 'Only group conversations allowed'
+            ],
+
+
         ]
 
+
+
     ]
+
 
 
 

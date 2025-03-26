@@ -8,7 +8,7 @@ use Livewire\Livewire;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\DeleteConversationJob;
-use Namu\WireChat\Livewire\Chat\Info;
+use Namu\WireChat\Livewire\Chat\Group\Info;
 use Namu\WireChat\Livewire\Chats\Chats;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
@@ -34,41 +34,40 @@ test('aborts if user doest not belog to conversation', function () {
 test('authenticaed user can access info ', function () {
     $auth = User::factory()->create();
 
-    $conversation = Conversation::factory()->withParticipants([$auth])->create();
+
+    $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
 
     Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
         ->assertStatus(200);
 });
 
+
+test('aborts if conversation is NOT group ', function () {
+
+    $auth = User::factory()->create(['id' => '34567833']);
+    $receiver = User::factory()->create(['name' => 'Musa']);
+
+
+    $conversation = $auth->createConversationWith($receiver, 'hello');
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertStatus(403,__('wirechat::chat.group.info.messages.invalid_conversation_type_error'));
+});
+
 describe('presence test', function () {
 
-    test('it shows receiver name if conversaton is private', function () {
+    test('it shows heading', function () {
+
         $auth = User::factory()->create(['id' => '345678']);
         $receiver = User::factory()->create(['name' => 'Musa']);
 
-        $conversation = $auth->createConversationWith($receiver, 'hello');
+        $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        $conversation->addParticipant($receiver);
+        $conversation->addParticipant(User::factory()->create());
 
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertSee('Musa');
-    });
-
-    test('it shows receiver name if conversaton is private and Mixed Model', function () {
-        $auth = User::factory()->create(['id' => '345678']);
-        $receiver = Admin::factory()->create(['name' => 'Musa']);
-
-        $conversation = $auth->createConversationWith($receiver, 'hello');
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertSee('Musa');
-    });
-
-    test('it shows receiver name if conversaton is self', function () {
-        $auth = User::factory()->create(['id' => '345678', 'name' => 'John']);
-
-        $conversation = $auth->createConversationWith($auth, 'hello');
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertSee('John');
+            ->assertSee(__('wirechat::chat.group.info.heading.label'));
     });
 
     test('it shows group name if conversaton is group', function () {
@@ -82,6 +81,7 @@ describe('presence test', function () {
         $conversation->addParticipant(User::factory()->create());
 
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertSeeHtml('dusk="form_group_name_when_not_editing"')
             ->assertSee('My Group');
     });
 
@@ -191,18 +191,10 @@ describe('presence test', function () {
 
         $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertSee('Add Member');
+            ->assertSee('Add Members');
     });
 
-    test('it doesnt shows "add member" if is not group', function () {
-
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver);
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertDontSee('Add Members');
-    });
+  
 
     test('it shows "Exit Group" and method wired if is group', function () {
 
@@ -247,17 +239,6 @@ describe('presence test', function () {
             ->assertMethodNotWired('exitConversation');
     });
 
-    test('it shows "Delete Chat" if is not group', function () {
-
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver);
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertSee('Delete Chat')
-            ->assertMethodWired('deleteChat');
-    });
 
     test('it shows "Delete Group" and method wired if is group and auth is Owner', function () {
 
@@ -770,128 +751,6 @@ describe('updating group name and description', function () {
     });
 });
 
-describe('Deleting Chat', function () {
-
-    test('it redirects to index route and Does NOT dispatch  "close-chat"  & "chat-deleted" events after deleting Private conversation when isNotWidget', function () {
-
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver);
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation, 'widget' => false])
-            ->call('deleteChat')
-            ->assertStatus(200)
-            ->assertRedirect(route(WireChat::indexRouteName()))
-            ->assertNotDispatched('close-chat')
-            ->assertNotDispatched('chat-deleted');
-
-    });
-
-    test('it does not push DeleteConversationJob', function () {
-        Queue::fake();
-
-        Carbon::setTestNow(now()->subMinutes(4));
-
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver, 'hello');
-
-        Carbon::setTestNow();
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->call('deleteChat')
-            ->assertStatus(200);
-
-        Queue::assertNotPushed(DeleteConversationJob::class, function ($job) use ($conversation) {
-
-            return $job->conversation->id == $conversation->id;
-        });
-
-    });
-
-    test('Deleted chat should no longer appear in Chats component when after deleteing Chat', function () {
-
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver, 'hello');
-
-        // Load Chats component
-        $CHATLIST = Livewire::actingAs($auth)->test(Chats::class);
-
-        // Assert conversation is visible
-        $CHATLIST->assertViewHas('conversations', function ($conversation) {
-            return count($conversation) == 1;
-        });
-
-        // Load Info component
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->call('deleteChat')
-            ->assertStatus(200);
-
-        // Assert conversation no longer visible
-        $CHATLIST->dispatch('chat-deleted', $conversation->id)->assertViewHas('conversations', function ($conversation) {
-            return count($conversation) == 0;
-        });
-    });
-
-    test('when isWidget it dispatches  "close-chat" & "chat-deleted" events  and Does NOT redirects to index route after deleting Private conversation', function () {
-
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver);
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation, 'widget' => true])
-            ->call('deleteChat')
-            ->assertStatus(200)
-            ->assertNoRedirect()
-            ->assertDispatched('close-chat')
-            ->assertDispatched('chat-deleted');
-
-    });
-
-    test('it redirects to index route and Does NOT dispatch "close-chat"  & "chat-deleted" events after deleting Self conversation  when isNotWidget', function () {
-
-        $auth = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($auth);
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation, 'widget' => false])
-            ->call('deleteChat')
-            ->assertStatus(200)
-            ->assertNotDispatched('close-chat')
-            ->assertNotDispatched('chat-deleted')
-            ->assertRedirect(route(WireChat::indexRouteName()));
-    });
-
-    test('when isWidget it dispatches "close-chat"  & "chat-deleted" events and Does NOT redirects to index route   after deleting Self conversation', function () {
-
-        $auth = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($auth);
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation, 'widget' => 'true'])
-            ->call('deleteChat')
-            ->assertStatus(200)
-            ->assertDispatched('close-chat')
-            ->assertDispatched('chat-deleted')
-            ->assertNoRedirect(route(WireChat::indexRouteName()));
-    });
-
-    test('it aborts if conversation is Group', function () {
-
-        $auth = User::factory()->create();
-
-        $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->call('deleteChat')
-            ->assertStatus(403, 'This operation is not available for Groups.');
-    });
-});
-
 describe('Deleting Group', function () {
 
     test('it deletes group from database after delete is successful', function () {
@@ -1012,19 +871,6 @@ describe('Deleting Group', function () {
             ->assertNoRedirect(route(WireChat::indexRouteName()))
             ->assertDispatched('close-chat')
             ->assertDispatched('chat-deleted');
-    });
-
-    test('it aborts if conversation is private ', function () {
-
-        $auth = User::factory()->create();
-        $receiver = User::factory()->create();
-
-        $conversation = $auth->createConversationWith($receiver);
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->call('deleteGroup')
-            ->assertStatus(403, 'Operation not allowed: Private chats cannot be deleted.')
-            ->assertNoRedirect();
     });
 
     test('it removes group from chats list when group is deleted when Info is NOT widget', function () {
