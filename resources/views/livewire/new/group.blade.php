@@ -40,9 +40,9 @@
 
                         <div class=" my-auto">
 
-                            <label for="name">Group Name</label>
+                            <label for="name">@lang('wirechat::new.group.inputs.name.label')</label>
 
-                            <input id='name' type="text" wire:model='name' autofocus placeholder="Enter name"
+                            <input id='name' type="text" wire:model='name' autofocus placeholder="{{__('wirechat::new.group.inputs.name.placeholder') }}"
                                 class=" w-full border-0 px-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
 
                             <span class="text-red-500 text-sm ">
@@ -67,9 +67,9 @@
                 <main class="my-5">
                     <div class=" my-auto space-y-2">
 
-                        <label for="description">Description</label>
+                        <label for="description">@lang('wirechat::new.group.inputs.description.label')</label>
 
-                        <textarea id='description' type="text" wire:model='description' placeholder="Optional" rows="4"
+                        <textarea id='description' type="text" wire:model='description' placeholder="{{__('wirechat::new.group.inputs.description.placeholder')}}" rows="4"
                             class=" w-full resize-none rounded-lg border-gray-200 focus:border-gray-200 dark:border-gray-700   bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
                     </textarea>
 
@@ -87,14 +87,14 @@
                 <footer class="flex gap-4 justify-end mt-auto">
                     <x-wirechat::actions.close-modal>
                         <button type="button" dusk="cancel_create_new_group_button"class="font-bold dark:hover:bg-gray-700 p-3 px-4 rounded-xl ">
-                            Cancel
+                            @lang('wirechat::new.group.actions.cancel.label')
                         </button>
                     </x-wirechat::actions.close-modal>
 
                     <button type="submit" :disabled="!($wire.name?.trim()?.length)" dusk="next_button"
                         :class="{ 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit opacity-70': !($wire.name?.trim()?.length) }"
                         class="font-bold transition dark:hover:bg-gray-700 p-3 px-4 rounded-xl ">
-                        Next
+                        @lang('wirechat::new.group.actions.next.label')
                     </button>
                 </footer>
             </form>
@@ -121,14 +121,15 @@
 
                     </button>
 
-                    <h3 class="text-sm mx-auto font-semibold "><span>Add Members</span> {{count($selectedMembers)}} / {{$maxGroupMembers}}</h3>
+                    <h3 class="text-sm mx-auto font-semibold "><span>@lang('wirechat::new.group.labels.add_members')</span> {{count($selectedMembers)}} / {{$maxGroupMembers}}</h3>
 
                     <button 
                         wire:click="create"
                         wire:loading.attr="disabled"
                         wire:target='create'
                         class="p-2 disabled:cursor-not-allowed  ml-0 text-gray-600 dark:text-gray-300 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
-                        Create
+                        @lang('wirechat::new.group.actions.create.label')
+
                     </button>
 
                 </div>
@@ -142,12 +143,13 @@
                   "
                  class="text-red-500 text-sm mx-auto ">
                    <span x-transition x-show="showError">
-                    Members cannot exceed {{$maxGroupMembers}}
+                    @lang('wirechat::new.group.messages.members_limit_error',['count'=>$maxGroupMembers])
                    </span>
                 </div>
+                {{-- Search input --}}
                 <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
                     <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
-                        placeholder="Search"
+                        placeholder="{{__('wirechat::new.group.inputs.search.placeholder')}}"
                         class=" w-full border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
                 </section>
 
@@ -191,13 +193,12 @@
             </header>
 
 
+            {{-- Search --}}
             <div class="relative w-full">
                 {{-- <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5> --}}
-                <section class="my-4">
-                    @if ($users)
-
+                <section class="my-4 grid">
+                    @if (count($users)!=0)
                         <ul class="overflow-auto flex flex-col">
-
                             @foreach ($users as $key => $user)
                                 <li class="flex cursor-pointer group gap-2 items-center p-2">
 
@@ -231,12 +232,12 @@
 
                                 </li>
                             @endforeach
-
-
-
                         </ul>
+                    @else
+                        @if (!empty($search))
+                        <span class="m-auto">@lang('wirechat::new.group.messages.empty_search_result')</span>
+                        @endif
                     @endif
-
                 </section>
             </div>
         </section>

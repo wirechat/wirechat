@@ -11,7 +11,7 @@ class Chat extends ModalComponent
 {
     use Widget;
 
-    public $users=[];
+    public $users = [];
 
     public $search;
 
@@ -35,7 +35,7 @@ class Chat extends ModalComponent
         // Make sure it's not empty
         if (blank($this->search)) {
 
-            $this->users = [ ];
+            $this->users = [];
         } else {
 
             $this->users = auth()->user()->searchChatables($this->search);

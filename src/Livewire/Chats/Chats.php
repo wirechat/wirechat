@@ -319,7 +319,7 @@ class Chats extends Component
         $showNewChatModalButton = null,
         $allowChatsSearch = null,
         $showHomeRouteButton = null,
-        $title = null,
+        ?string $title = null,
     ) {
         // If a value is passed, use it; otherwise fallback to WireChat defaults.
         $this->showNewChatModalButton = isset($showNewChatModalButton) ? $showNewChatModalButton : WireChat::showNewChatModalButton();

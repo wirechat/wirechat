@@ -73,10 +73,10 @@
 
                 </ul>
             @else
-            @if (!empty($search))
-                
-            <span class="m-auto">@lang('wirechat::new.chat.messages.empty_search_result')</span>
-            @endif
+                @if (!empty($search))
+                    
+                <span class="m-auto">@lang('wirechat::new.chat.messages.empty_search_result')</span>
+                @endif
             @endif
 
         </section>

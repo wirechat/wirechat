@@ -1,17 +1,9 @@
 <?php
 
-
-
 return [
 
-
-    #new-chat component
+    // new-chat component
     'chat' => [
-
-
-        /**-------------------------
-         * new Chat
-         *------------------------*/
         'labels' => [
             'heading' => ' New Chat',
             'you' => 'You',
@@ -28,21 +20,56 @@ return [
         'actions' => [
             'new_group' => [
                 'label' => 'New group',
-            ]
+            ],
 
         ],
 
         'messages' => [
 
-            'empty_search_result' => 'No users found matching your search.'
+            'empty_search_result' => 'No users found matching your search.',
+        ],
+    ],
 
-        ]
-    ]
+    // new-group component
+    'group' => [
+        'labels' => [
+            'heading' => ' New Chat',
+            'add_members' => ' Add Members',
 
-    #new-group component
+        ],
 
+        'inputs' => [
+            'name' => [
+                'label' => 'Group Name',
+                'placeholder' => 'Enter name',
+            ],
+            'description' => [
+                'label' => 'Description',
+                'placeholder' => 'Optional',
+            ],
+            'search' => [
+                'label' => 'Search',
+                'placeholder' => 'Search',
+            ],
+        ],
 
+        'actions' => [
+            'cancel' => [
+                'label' => 'Cancel',
+            ],
+            'next' => [
+                'label' => 'Next',
+            ],
+            'create' => [
+                'label' => 'Create',
+            ],
 
+        ],
 
+        'messages' => [
+            'members_limit_error' => 'Members cannot exceed  :count',
+            'empty_search_result' => 'No users found matching your search.',
+        ],
+    ],
 
 ];

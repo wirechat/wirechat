@@ -14,7 +14,7 @@
 
     @php
         /* Show header if any of these conditions are true  */
-        $showHeader = $showNewChatModalButton || $allowChatsSearch || $showHomeRouteButton || $title != null;
+        $showHeader = $showNewChatModalButton || $allowChatsSearch || $showHomeRouteButton || !empty($title);
     @endphp
 
     {{-- include header --}}
@@ -48,7 +48,7 @@
             @includeWhen($canLoadMore, 'wirechat::livewire.chats.partials.load-more-button')
         @else
             <div class="w-full flex items-center h-full justify-center">
-                <h6 class=" font-bold text-gray-700 dark:text-white">No conversations yet</h6>
+                <h6 class=" font-bold text-gray-700 dark:text-white">{{ __('wirechat::chats.labels.no_conversations_yet')  }}</h6>
             </div>
         @endif
     </main>

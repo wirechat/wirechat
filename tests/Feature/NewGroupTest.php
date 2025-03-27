@@ -127,8 +127,7 @@ describe('Validations', function () {
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request->set('name', null)
             ->call('validateDetails')
-            ->assertHasErrors('name', 'Please provide a group name.')
-            ->assertSee('Please provide a group name.');
+            ->assertHasErrors('name', 'required');
     });
 
     test('Name is max 120', function () {
@@ -136,8 +135,7 @@ describe('Validations', function () {
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request->set('name', str()->random(150))
             ->call('validateDetails')
-            ->assertHasErrors('name', 'Name cannot exceed 120 characters.')
-            ->assertSee('Name cannot exceed 120 characters.');
+            ->assertHasErrors('name', 'max');
     });
 
     test('Description is max 500', function () {
@@ -145,8 +143,7 @@ describe('Validations', function () {
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request->set('description', str()->random(501))
             ->call('validateDetails')
-            ->assertHasErrors('description', 'Description cannot exceed 500 characters.')
-            ->assertSee('Description cannot exceed 500 characters.');
+            ->assertHasErrors('description');
     });
 
     test('it sets add members to true after validations passed', function () {
@@ -240,7 +237,7 @@ describe('Add members page', function () {
             ->call('addMember', $member1->id, $member1->getMorphClass())
             ->call('addMember', $member2->id, $member2->getMorphClass())
             ->call('addMember', $member3->id, $member3->getMorphClass())
-            ->assertSee('Members cannot exceed 2');
+            ->assertSee(__('wirechat::new.group.messages.members_limit_error', ['count' => 2]));
     });
 
 });

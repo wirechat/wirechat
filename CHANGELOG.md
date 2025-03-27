@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added  
 - Language files translation 
 - Seperate group info page for grou
+- Empty search results message for new chat component
+- More Tests
 
 ---
 

@@ -30,8 +30,8 @@ describe('Presence check', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSeeHtml('dusk="title"')
-            ->assertSet('title', 'Chats')
-            ->assertSee('Chats');
+            ->assertSet('title', __('wirechat::chats.labels.heading'))
+            ->assertSee(__('wirechat::chats.labels.heading'));
     });
 
     test('chat title can be set manually', function () {
@@ -39,15 +39,23 @@ describe('Presence check', function () {
         Livewire::actingAs($auth)->test(Chatlist::class, ['title' => 'Messages'])
             ->assertSee('Messages')
             ->assertSeeHtml('dusk="title"')
-            ->assertDontSee('Chats');
+            ->assertDontSee(__('wirechat::chats.labels.heading'));
     });
 
-    test('chat title can be set to Null', function () {
+    it('shows default title when title param is set to null', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class, ['title' => null])
-            ->assertDontSee('Chats')
-            ->assertDontSeeHtml('dusk="title"')
-            ->assertset('title', null);
+            ->assertSee(__('wirechat::chats.labels.heading'))
+            ->assertSeeHtml('dusk="title"')
+            ->assertset('title', __('wirechat::chats.labels.heading'));
+    });
+
+    test('doesnt show title but loads element  when set to empty string', function () {
+        $auth = User::factory()->create();
+        Livewire::actingAs($auth)->test(Chatlist::class, ['title' => ''])
+            ->assertDontSee(__('wirechat::chats.labels.heading'))
+            ->assertSeeHtml('dusk="title"')
+            ->assertset('title', '');
     });
 
     it('shows_redirect_button', function () {
@@ -64,14 +72,14 @@ describe('Presence check', function () {
             ->assertSeeHtml('dusk="header"');
     });
 
-    it('shows DOESNT show header when showNewChatModalButton && allowChatsSearch && showHomeRouteButton are false && title is NULL ', function () {
+    it('shows DOESNT show header when showNewChatModalButton && allowChatsSearch && showHomeRouteButton are false && title is emtpy ', function () {
 
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class, [
             'showNewChatModalButton' => false,
             'allowChatsSearch' => false,
             'showHomeRouteButton' => false,
-            'title' => null,
+            'title' => '',
         ])
             ->assertDontSeeHtml('dusk="header"');
     });

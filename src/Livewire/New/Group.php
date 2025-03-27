@@ -14,18 +14,18 @@ class Group extends ModalComponent
     use Widget;
     use WithFileUploads;
 
-    public $users;
+    public $users = [];
 
     public $search;
 
     public $selectedMembers;
 
-    #[Validate('required', message: 'Please provide a group name.')]
-    #[Validate('max:120', message: 'Name cannot exceed 120 characters.')]
+    #[Validate('required')]
+    #[Validate('max:120')]
     public $name;
 
     #[Validate('nullable')]
-    #[Validate('max:500', message: 'Description cannot exceed 500 characters.')]
+    #[Validate('max:500')]
     public $description;
 
     #[Validate('image|max:12024|nullable')] // 1MB Max
@@ -63,7 +63,7 @@ class Group extends ModalComponent
         // Make sure it's not empty
         if (blank($this->search)) {
 
-            $this->users = null;
+            $this->users = [];
         } else {
 
             $this->users = auth()->user()->searchChatables($this->search);
