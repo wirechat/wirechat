@@ -12,6 +12,7 @@ use Namu\WireChat\Facades\WireChat as FacadesWireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Drawer;
 use Namu\WireChat\Livewire\Chat\Group\AddMembers;
+use Namu\WireChat\Livewire\Chat\Group\Info as GroupInfo;
 use Namu\WireChat\Livewire\Chat\Group\Members;
 use Namu\WireChat\Livewire\Chat\Group\Permissions;
 use Namu\WireChat\Livewire\Chat\Info;
@@ -65,8 +66,6 @@ class WireChatServiceProvider extends ServiceProvider
         /* Load channel routes */
         $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
 
-      
-  
         // load assets
         $this->loadAssets();
 
@@ -76,9 +75,8 @@ class WireChatServiceProvider extends ServiceProvider
         // load middleware
         $this->registerMiddlewares();
 
-               //load translations
-    $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
-
+        // load translations
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
 
     }
 
@@ -88,8 +86,7 @@ class WireChatServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../config/wirechat.php', 'wirechat'
         );
-      
-   
+
         // register facades
         $this->app->singleton('wirechat', function ($app) {
             return new WireChatService;
@@ -116,6 +113,7 @@ class WireChatServiceProvider extends ServiceProvider
         // Chat/Group related components
         Livewire::component('wirechat.chat', Chat::class);
         Livewire::component('wirechat.chat.info', Info::class);
+        Livewire::component('wirechat.chat.group.info', GroupInfo::class);
         Livewire::component('wirechat.chat.drawer', Drawer::class);
         Livewire::component('wirechat.chat.group.add-members', AddMembers::class);
         Livewire::component('wirechat.chat.group.members', Members::class);

@@ -59,6 +59,69 @@ test('returns 403(Forbidden) if user doesnt not bleong to conversation', functio
 
 describe('Presense', function () {
 
+    describe('header', function () {
+
+        test('it_shows_suffix_you_in_user_name_if_user_has_self_conversation', function () {
+
+            $auth = User::factory()->create(['name' => 'Test']);
+
+            // Create-conversation with user1
+            $conversation = $auth->createConversationWith($auth, 'hello');
+
+            // dd($conversation);
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+            // Assert-both-conversations visible before typing
+            $request
+                ->assertSee('Test')
+                ->assertSee('(You)');
+        });
+
+        test('it shows "show_chat_info" and doesnt show "show_group_info"  if is private conversation', function () {
+
+            $auth = User::factory()->create(['name' => 'Test']);
+
+            // create conversation with user1
+            $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+            // Assert both conversations visible before typing
+            $request->assertSeeHtml('dusk="show_chat_info"');
+            $request->assertDontSeeHtml('dusk="show_group_info"');
+        });
+
+        test('it shows "show_chat_info" and doesnt show "show_group_info"  if is self conversation', function () {
+
+            $auth = User::factory()->create(['name' => 'Test']);
+
+            // create conversation with user1
+            $conversation = $auth->createConversationWith($auth, 'hello');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+            // Assert both conversations visible before typing
+            $request->assertSeeHtml('dusk="show_chat_info"');
+            $request->assertDontSeeHtml('dusk="show_group_info"');
+        });
+
+        test('it  shows "show_group_info" and doesnt show "show_chat_info"  if is group', function () {
+
+            $auth = User::factory()->create(['name' => 'Test']);
+
+            // create conversation with user1
+            $conversation = $auth->createGroup('My Group');
+
+            $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+            // Assert both conversations visible before typing
+            $request->assertDontSeeHtml('dusk="show_chat_info"');
+            $request->assertSeeHtml('dusk="show_group_info"');
+        });
+
+    });
+
     test('it_can_show_correctly_formatted_time', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -116,23 +179,6 @@ describe('Presense', function () {
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
             ->assertSee('Older message');
-    });
-
-    test('it_shows_suffix_you_in_user_name_if_user_has_self_conversation', function () {
-
-        $auth = User::factory()->create(['name' => 'Test']);
-
-        // Create-conversation with user1
-        $conversation = $auth->createConversationWith($auth, 'hello');
-
-        // dd($conversation);
-
-        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
-
-        // Assert-both-conversations visible before typing
-        $request
-            ->assertSee('Test')
-            ->assertSee('(You)');
     });
 
     test('it_doesnt_show_upload_trigger_if_attachments_not_enabled', function () {

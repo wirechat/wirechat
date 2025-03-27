@@ -1,4 +1,4 @@
-<div id="info-modal" class="bg-white dark:bg-gray-900     min-h-screen">
+<div id="group-info-modal" class="bg-white dark:bg-gray-900     min-h-screen">
 
 
     @php
@@ -118,7 +118,7 @@
                     </form>
 
                     {{-- Members count --}}
-                    <p class="mx-auto"> Members {{ $totalParticipants }} </p>
+                    <p class="mx-auto">  {{ __('wirechat::chat.group.info.labels.members') }} {{  $totalParticipants }} </p>
 
                 </div>
 
@@ -132,7 +132,7 @@
                         <span class="col-span-11">
                             <div x-show="!editing">
                                 @if (empty($description))
-                                    <p class="text-sm" style="color: var(--wirechat-primary-color)">Add a group description </p>
+                                    <p class="text-sm" style="color: var(--wirechat-primary-color)">{{ __('wirechat::chat.group.info.labels.add_description') }}  </p>
                                 @else
                                     <p class="font-medium break-all   whitespace-pre-line ">{{ $description }}
                                     </p>
@@ -184,7 +184,7 @@
             <div @dusk="non_editable_group_information_section" class="flex  flex-col items-center gap-5 py-5 px-4  ">
                 <x-wirechat::avatar src="{{ $cover_url }}" class=" h-32 w-32 mx-auto" />
                 <h4 dusk="group_name" class="font-medium  break-all   whitespace-pre-line   text-2xl ">{{ $groupName }} </h4>
-                <p class="mx-auto"> Members {{ $totalParticipants }} </p>
+                <p class="mx-auto">{{ __('wirechat::chat.group.info.labels.members') }}  {{ $totalParticipants }} </p>
                 <p class="font-medium break-all   whitespace-pre-line ">{{ $description }} </p>
             </div>
         @endif
@@ -204,7 +204,7 @@
             conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
             {{-- Members count --}}
             <button class="flex w-full justify-between items-center px-8 focus:outline-none ">
-                <span class="text-gray-600 dark:text-gray-300"> Members {{ $totalParticipants }}</span>
+                <span class="text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.info.labels.members') }}  {{ $totalParticipants }}</span>
                 {{-- Search icon --}}
                 <span>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -228,7 +228,7 @@
                             d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
                     </svg>
 
-                    <span>Add Members</span>
+                    <span>{{ __('wirechat::chat.group.info.actions.add_members.label') }}</span>
                 </button>
             </x-wirechat::actions.open-modal>
         @endif
@@ -256,7 +256,7 @@
                     <span>{{ __('wirechat::chat.group.info.actions.delete_group.label') }}</span>
                 </div>
 
-                <p class="dark:text-white/60 text-sm text-gray-600/80">Before you can delete the group, you need to remove all group members</p>
+                <p class="dark:text-white/60 text-sm text-gray-600/80">@lang('wirechat::chat.group.info.actions.delete_group.helper_text')</p>
             </button>
             {{-- Permissions --}}
             <div>
@@ -272,14 +272,14 @@
                                     d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077 1.41-.513m14.095-5.13 1.41-.513M5.106 17.785l1.15-.964m11.49-9.642 1.149-.964M7.501 19.795l.75-1.3m7.5-12.99.75-1.3m-6.063 16.658.26-1.477m2.605-14.772.26-1.477m0 17.726-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205 12 12m6.894 5.785-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495" />
                             </svg>
 
-                            <span>Group Permissions</span>
+                            <span>@lang('wirechat::chat.group.info.actions.group_permissions.label')</span>
                         </div>
                     </button>
                 </x-wirechat::actions.open-chat-drawer>
             </div>
         @else
         {{-- Exit Group --}}
-            <button wire:confirm="Are you sure you want to exit Group ?" wire:click="exitConversation"
+            <button wire:confirm="{{ __('wirechat::chat.group.info.actions.exit_group.confirmation_message') }}" wire:click="exitConversation"
                 class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-700 flex gap-3 items-center text-red-500">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                     class="bi bi-box-arrow-right w-5 h-5" viewBox="0 0 16 16">
@@ -288,7 +288,7 @@
                     <path fill-rule="evenodd"
                         d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
                 </svg>
-                <span>Exit Group</span>
+                <span>@lang('wirechat::chat.group.info.actions.exit_group.label')</span>
             </button>
         @endif
 

@@ -1,16 +1,12 @@
 <?php
 
 use Carbon\Carbon;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\DeleteConversationJob;
 use Namu\WireChat\Livewire\Chat\Info;
 use Namu\WireChat\Livewire\Chats\Chats;
-use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
@@ -31,16 +27,14 @@ test('aborts if user doest not belog to conversation', function () {
         ->assertStatus(403);
 });
 
-
 test('aborts if conversation is group ', function () {
 
     $auth = User::factory()->create(['id' => '34567833']);
 
+    $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
 
-        $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
-
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertStatus(403,__('wirechat::chat.info.messages.invalid_conversation_type_error'));
+    Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+        ->assertStatus(403, __('wirechat::chat.info.messages.invalid_conversation_type_error'));
 });
 
 test('authenticaed user can access info ', function () {
@@ -95,12 +89,7 @@ describe('presence test', function () {
             ->assertMethodWired('deleteChat');
     });
 
-     
- 
-
 });
-
- 
 
 describe('Deleting Chat', function () {
 
@@ -213,8 +202,4 @@ describe('Deleting Chat', function () {
             ->assertNoRedirect(route(WireChat::indexRouteName()));
     });
 
- 
 });
-
- 
- 

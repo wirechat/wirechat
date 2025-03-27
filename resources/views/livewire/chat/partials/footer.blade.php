@@ -395,7 +395,7 @@
                     <div @class(['flex gap-2 sm:px-2 w-full'])>
                         <textarea @focus-input-field.window="$el.focus()" autocomplete="off" x-model='body' x-ref="body"
                             wire:loading.delay.longest.attr="disabled" wire:target="sendMessage" id="chat-input-field" autofocus
-                            type="text" name="message" placeholder="{{ __('wirechat::chat.labels.type_a_message') }}" maxlength="1700" rows="1"
+                            type="text" name="message" placeholder="{{ __('wirechat::chat.inputs.message.placeholder') }}" maxlength="1700" rows="1"
                             @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
                             @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""

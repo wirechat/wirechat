@@ -2,12 +2,8 @@
 
 namespace Namu\WireChat\Livewire\Chat;
 
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
-use Livewire\WithFileUploads;
-use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Jobs\DeleteConversationJob;
 use Namu\WireChat\Livewire\Chats\Chats;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
 use Namu\WireChat\Livewire\Concerns\Widget;
@@ -20,16 +16,14 @@ class Info extends ModalComponent
     #[Locked]
     public Conversation $conversation;
 
- 
     public static function closeModalOnEscapeIsForceful(): bool
     {
         return false;
     }
-  
-   
+
     /**
      * -----------------------------
-     * Delete Chat 
+     * Delete Chat
      * */
     public function deleteChat()
     {
@@ -54,7 +48,6 @@ class Info extends ModalComponent
 
     }
 
- 
     public function placeholder()
     {
         return <<<'HTML'
@@ -73,7 +66,7 @@ class Info extends ModalComponent
         abort_unless(auth()->check(), 401);
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
-        abort_if($this->conversation->isGroup(),403,__('wirechat::chat.info.messages.invalid_conversation_type_error'));
+        abort_if($this->conversation->isGroup(), 403, __('wirechat::chat.info.messages.invalid_conversation_type_error'));
 
     }
 
@@ -81,10 +74,11 @@ class Info extends ModalComponent
     {
 
         $cover_url = $this->conversation->getReceiver()?->cover_url;
+
         // Pass data to the view
         return view('wirechat::livewire.chat.info', [
             'receiver' => $this->conversation?->getReceiver(),
-            'cover_url'=>$cover_url
+            'cover_url' => $cover_url,
         ]);
     }
 }

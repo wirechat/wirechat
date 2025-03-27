@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [Unreleased]  
+### Added  
+- Language files translation 
+- Seperate group info page for grou
+
+---
+
 
 ## [v0.1.11](https://github.com/namumakwembo/wirechat/releases/tag/0.1.11) - 2025-03-04
 ### Added  

@@ -34,24 +34,21 @@ test('aborts if user doest not belog to conversation', function () {
 test('authenticaed user can access info ', function () {
     $auth = User::factory()->create();
 
-
     $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
 
     Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
         ->assertStatus(200);
 });
 
-
 test('aborts if conversation is NOT group ', function () {
 
     $auth = User::factory()->create(['id' => '34567833']);
     $receiver = User::factory()->create(['name' => 'Musa']);
 
-
     $conversation = $auth->createConversationWith($receiver, 'hello');
 
-        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertStatus(403,__('wirechat::chat.group.info.messages.invalid_conversation_type_error'));
+    Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+        ->assertStatus(403, __('wirechat::chat.group.info.messages.invalid_conversation_type_error'));
 });
 
 describe('presence test', function () {
@@ -194,8 +191,6 @@ describe('presence test', function () {
             ->assertSee('Add Members');
     });
 
-  
-
     test('it shows "Exit Group" and method wired if is group', function () {
 
         $auth = User::factory()->create();
@@ -238,7 +233,6 @@ describe('presence test', function () {
             ->assertDontSee('Exit Group')
             ->assertMethodNotWired('exitConversation');
     });
-
 
     test('it shows "Delete Group" and method wired if is group and auth is Owner', function () {
 

@@ -78,8 +78,8 @@ describe('Presence check', function () {
         $conversation->addParticipant($receiver);
 
         Livewire::actingAs($auth)->test(Permissions::class, ['conversation' => $conversation])
-            ->assertSee('Edit Group Information')
-            ->assertSee('This includes the name, icon and description')
+            ->assertSee(__('wirechat::chat.group.permisssions.actions.edit_group_information.label'))
+            ->assertSee(__('wirechat::chat.group.permisssions.actions.edit_group_information.helper_text'))
             ->assertPropertyWired('allow_members_to_edit_group_info');
     });
 
@@ -92,7 +92,7 @@ describe('Presence check', function () {
         $conversation->addParticipant($receiver);
 
         Livewire::actingAs($auth)->test(Permissions::class, ['conversation' => $conversation])
-            ->assertSee('Send messages')
+            ->assertSee(__('wirechat::chat.group.permisssions.actions.send_messages.label'))
             ->assertPropertyWired('allow_members_to_send_messages');
     });
 
@@ -105,7 +105,7 @@ describe('Presence check', function () {
         $conversation->addParticipant($receiver);
 
         Livewire::actingAs($auth)->test(Permissions::class, ['conversation' => $conversation])
-            ->assertSee('Add other members')
+            ->assertSee(__('wirechat::chat.group.permisssions.actions.add_other_members.label'))
             ->assertPropertyWired('allow_members_to_add_others');
     });
 });

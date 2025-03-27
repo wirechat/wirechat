@@ -266,7 +266,7 @@ class Chat extends Component
         abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.messages.cannot_exit_self_or_private_conversation'));
 
         // make sure owner if group cannot be removed from chat
-        abort_if($auth->isOwnerOf($this->conversation), 403,__('wirechat::chat.messages.owner_cannot_exit_conversation'));
+        abort_if($auth->isOwnerOf($this->conversation), 403, __('wirechat::chat.messages.owner_cannot_exit_conversation'));
 
         // delete conversation
         $auth->exitConversation($this->conversation);
@@ -286,7 +286,7 @@ class Chat extends Component
 
         if (RateLimiter::tooManyAttempts('send-message:'.auth()->id(), $perMinute)) {
 
-            return abort(429,  __('wirechat::chat.messages.rate_limit'));
+            return abort(429, __('wirechat::chat.messages.rate_limit'));
         }
 
         RateLimiter::increment('send-message:'.auth()->id());
@@ -683,7 +683,7 @@ class Chat extends Component
 
         // Fetch paginated messages
         $messages = $this->conversation->messages()
-            ->with('sendable',  'parent.sendable', 'attachment')
+            ->with('sendable', 'parent.sendable', 'attachment')
             ->orderBy('created_at', 'asc')
             ->skip($this->totalMessageCount - $this->paginate_var)
             ->take($this->paginate_var)
@@ -735,7 +735,7 @@ class Chat extends Component
         } elseif (is_null($conversation)) {
             abort(422, __('wirechat::chat.messages.conversation_id_required')); // Custom error for missing input
         } else {
-            return abort(422,  __('wirechat::chat.messages.invalid_conversation_input')); // Handle invalid input types
+            return abort(422, __('wirechat::chat.messages.invalid_conversation_input')); // Handle invalid input types
         }
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));

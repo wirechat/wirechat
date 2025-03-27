@@ -4,7 +4,7 @@
     'widget' => false
 ])
 
-<div  onclick="Livewire.dispatch('openChatDrawer', { 
+<div {{ $attributes }}  onclick="Livewire.dispatch('openChatDrawer', { 
         component: '{{ $component }}', 
         arguments: { 
             conversation: {{$conversation ?? 'null' }}, 

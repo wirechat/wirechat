@@ -232,11 +232,10 @@ class Info extends ModalComponent
         abort_if(empty($this->conversation), 404);
 
         abort_unless(auth()->check(), 401);
-        abort_unless($this->conversation->isGroup(),403,__('wirechat::chat.info.group.messages.invalid_conversation_type_error'));
+        abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.info.group.messages.invalid_conversation_type_error'));
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
         $this->conversation = $this->conversation->load('group.conversation', 'group.cover')->loadCount('participants');
-
 
         $this->totalParticipants = $this->conversation->participants_count;
         $this->group = $this->conversation->group;

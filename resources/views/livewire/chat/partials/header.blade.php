@@ -28,21 +28,36 @@
         {{-- Receiver wirechat::Avatar --}}
         <section class="grid grid-cols-12 w-full">
             <div class="shrink-0 col-span-11 w-full truncate overflow-h-hidden relative">
-                
-                <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}" widget="{{$this->isWidget()}}">
-                    <div class="flex items-center gap-2 cursor-pointer ">
-                        <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
-                            group="{{ $conversation->isGroup() }}"
-                            src="{{ $group ? $group?->cover_url : $receiver?->cover_url ?? null }}"
-                            class="h-8 w-8 lg:w-10 lg:h-10 " />
-                        <h6 class="font-bold text-base text-gray-800 dark:text-white w-full truncate">
-                            {{ $group ? $group?->name : $receiver?->display_name }} @if ($conversation->isSelfConversation())
-                                (You)
-                            @endif
-                        </h6>
-                    </div>
-              </x-wirechat::actions.show-chat-info>
 
+                {{-- Group --}}
+                @if ($conversation->isGroup())
+                    <x-wirechat::actions.show-group-info conversation="{{ $conversation->id }}"
+                        widget="{{ $this->isWidget() }}">
+                        <div class="flex items-center gap-2 cursor-pointer ">
+                            <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
+                                group="true" src="{{ $group?->cover_url ?? null }}"
+                                class="h-8 w-8 lg:w-10 lg:h-10 " />
+                            <h6 class="font-bold text-base text-gray-800 dark:text-white w-full truncate">
+                                {{ $group?->name }}
+                            </h6>
+                        </div>
+                    </x-wirechat::actions.show-group-info>
+                @else
+                    {{-- Not Group --}}
+                    <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}"
+                        widget="{{ $this->isWidget() }}">
+                        <div class="flex items-center gap-2 cursor-pointer ">
+                            <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
+                                group="false" src="{{ $receiver?->cover_url ?? null }}"
+                                class="h-8 w-8 lg:w-10 lg:h-10 " />
+                            <h6 class="font-bold text-base text-gray-800 dark:text-white w-full truncate">
+                                {{ $receiver?->display_name }} @if ($conversation->isSelfConversation())
+                                    ({{ __('wirechat::chat.labels.you') }})
+                                @endif
+                            </h6>
+                        </div>
+                    </x-wirechat::actions.show-chat-info>
+                @endif
 
 
             </div>
@@ -62,18 +77,33 @@
                     </x-slot>
                     <x-slot name="content">
 
-                        {{-- Open chat info button --}}
-                        <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}" widget="{{$this->isWidget()}}">
-                        <button class="w-full text-start">
-                            <x-wirechat::dropdown-link>
-                                {{ $conversation->isGroup() ? __('wirechat::chat.actions.open_group_info.label') : __('wirechat::chat.actions.open_chat_info.label') }} 
-                            </x-wirechat::dropdown-link>
-                        </button>
-                        </x-wirechat::actions.show-chat-info>
+
+                        @if ($conversation->isGroup())
+                            {{-- Open group info button --}}
+                            <x-wirechat::actions.show-group-info conversation="{{ $conversation->id }}"
+                                widget="{{ $this->isWidget() }}">
+                                <button class="w-full text-start">
+                                    <x-wirechat::dropdown-link>
+                                        {{ __('wirechat::chat.actions.open_group_info.label') }}
+                                    </x-wirechat::dropdown-link>
+                                </button>
+                            </x-wirechat::actions.show-group-info>
+                        @else
+                            {{-- Open chat info button --}}
+                            <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}"
+                                widget="{{ $this->isWidget() }}">
+                                <button class="w-full text-start">
+                                    <x-wirechat::dropdown-link>
+                                        {{ __('wirechat::chat.actions.open_chat_info.label') }}
+                                    </x-wirechat::dropdown-link>
+                                </button>
+                            </x-wirechat::actions.show-chat-info>
+                        @endif
 
 
                         @if ($this->isWidget())
-                            <x-wirechat::dropdown-link @click="$dispatch('close-chat',{conversation: {{ $conversation->id }}})"> 
+                            <x-wirechat::dropdown-link
+                                @click="$dispatch('close-chat',{conversation: {{ $conversation->id }}})">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @else
@@ -89,7 +119,7 @@
                                 wire:confirm="{{ __('wirechat::chat.actions.clear_chat.confirmation_message') }}">
 
                                 <x-wirechat::dropdown-link>
-                                   @lang('wirechat::chat.actions.clear_chat.label')
+                                    @lang('wirechat::chat.actions.clear_chat.label')
                                 </x-wirechat::dropdown-link>
                             </button>
 
@@ -98,7 +128,7 @@
                                 class="w-full text-start">
 
                                 <x-wirechat::dropdown-link class="text-red-500 dark:text-red-500">
-                                   @lang('wirechat::chat.actions.delete_chat.label')
+                                    @lang('wirechat::chat.actions.delete_chat.label')
                                 </x-wirechat::dropdown-link>
 
                             </button>
@@ -106,11 +136,12 @@
 
 
                         @if ($conversation->isGroup() && !$this->auth->isOwnerOf($conversation))
-                            <button wire:click="exitConversation" wire:confirm="{{ __('wirechat::chat.actions.exit_group.confirmation_message') }}"
+                            <button wire:click="exitConversation"
+                                wire:confirm="{{ __('wirechat::chat.actions.exit_group.confirmation_message') }}"
                                 class="w-full text-start ">
 
                                 <x-wirechat::dropdown-link class="text-red-500 dark:text-gray-500">
-                                   @lang('wirechat::chat.actions.exit_group.label')
+                                    @lang('wirechat::chat.actions.exit_group.label')
                                 </x-wirechat::dropdown-link>
 
                             </button>
