@@ -319,13 +319,13 @@ class Chats extends Component
         $showNewChatModalButton = null,
         $allowChatsSearch = null,
         $showHomeRouteButton = null,
-        $title = 'Chats',
+        $title = null,
     ) {
         // If a value is passed, use it; otherwise fallback to WireChat defaults.
         $this->showNewChatModalButton = isset($showNewChatModalButton) ? $showNewChatModalButton : WireChat::showNewChatModalButton();
         $this->allowChatsSearch = isset($allowChatsSearch) ? $allowChatsSearch : WireChat::allowChatsSearch();
         $this->showHomeRouteButton = isset($showHomeRouteButton) ? $showHomeRouteButton : ! $this->widget;
-        $this->title = isset($title) ? $title : null;
+        $this->title = isset($title) ? $title : __('wirechat::chats.labels.heading');
 
         abort_unless(auth()->check(), 401);
         $this->selectedConversationId = request()->conversation;
