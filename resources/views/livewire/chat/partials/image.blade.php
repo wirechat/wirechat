@@ -40,4 +40,4 @@
         'rounded-bl-2xl' => ($isNotSameAsNext && !$belongsToAuth),
         ]) 
         
-        loading="lazy" src="{{$attachment?->url}}" alt="attachment">
+        loading="lazy" src="{{$attachment?->url}}" alt="{{  __('wirechat::chat.labels.attachment') }}">

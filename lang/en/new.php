@@ -41,7 +41,7 @@ return [
         'inputs' => [
             'name' => [
                 'label' => 'Group Name',
-                'placeholder' => 'Enter name',
+                'placeholder' => 'Enter Name',
             ],
             'description' => [
                 'label' => 'Description',
@@ -50,6 +50,9 @@ return [
             'search' => [
                 'label' => 'Search',
                 'placeholder' => 'Search',
+            ],
+            'photo' => [
+                'label' => 'Photo',
             ],
         ],
 

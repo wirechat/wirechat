@@ -558,10 +558,10 @@ describe('updating group name and description', function () {
         $request->set('groupName', null)
             ->call('updateGroupName')
             ->assertHasErrors('groupName')
-            ->assertSee('The Group name cannot be empty');
+            ->assertSee(__('wirechat::validation.required', ['attribute' => __('wirechat::chat.group.info.inputs.name.label')]));
     });
 
-    test('group name cannot exceed 500 chars', function () {
+    test('group name cannot exceed 120 chars', function () {
 
         $auth = User::factory()->create(['id' => '345678']);
         $conversation = $auth->createGroup(name: 'My Group');
@@ -573,7 +573,8 @@ describe('updating group name and description', function () {
         $request->set('groupName', $text)
             ->call('updateGroupName')
             ->assertHasErrors('groupName')
-            ->assertSee('Group name cannot exceed 120 characters.');
+            ->assertSee(__('wirechat::validation.max.string', ['attribute' => __('wirechat::chat.group.info.inputs.name.label'), 'max' => 120]));
+
     });
 
     test('it udpates group name in blade', function () {
@@ -590,7 +591,7 @@ describe('updating group name and description', function () {
             ->assertSee('New Name');
     });
 
-    test('it saved ne group name to database', function () {
+    test('it saved the group name to database', function () {
 
         $auth = User::factory()->create(['id' => '345678']);
 
@@ -621,7 +622,7 @@ describe('updating group name and description', function () {
 
     // Description
 
-    test('description cannot exceed 500 chars', function () {
+    test('description cannot exceed 500 characters', function () {
 
         $auth = User::factory()->create(['id' => '345678']);
         $conversation = $auth->createGroup(name: 'My Group');
@@ -632,7 +633,7 @@ describe('updating group name and description', function () {
         $text = str()->random(501);
         $request->set('description', $text)
             ->assertHasErrors('description')
-            ->assertSee('Description cannot exceed 500 characters.');
+            ->assertSee(__('wirechat::validation.max.string', ['attribute' => __('wirechat::chat.group.info.inputs.description.label'), 'max' => 500]));
     });
 
     test('it udpates description in blade', function () {

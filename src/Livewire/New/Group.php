@@ -28,10 +28,22 @@ class Group extends ModalComponent
     #[Validate('max:500')]
     public $description;
 
-    #[Validate('image|max:12024|nullable')] // 1MB Max
+    #[Validate('image|max:12024|nullable|mimes:png,jpg,jpeg,webp')] // 1MB Max
     public $photo = null;
 
     public bool $showAddMembers = false;
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => __('wirechat::validation.required', ['attribute' => __('wirechat::chat.group.info.inputs.name.label')]),
+            'name.max' => __('wirechat::validation.max.string', ['attribute' => __('wirechat::chat.group.info.inputs.name.label')]),
+            'description.max' => __('wirechat::validation.max.string', ['attribute' => __('wirechat::chat.group.info.inputs.description.label')]),
+            'photo.max' => __('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.group.info.inputs.photo.label')]),
+            'photo.image' => __('wirechat::validation.image', ['attribute' => __('wirechat::chat.group.info.inputs.photo.label')]),
+            'photo.mimes' => __('wirechat::validation.mimes', ['attribute' => __('wirechat::chat.group.info.inputs.photo.label')]),
+        ];
+    }
 
     public function deletePhoto()
     {

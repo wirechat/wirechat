@@ -176,7 +176,7 @@
                                     ])>
                                         <p
                                             class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm  rounded-full max-w-fit   px-3 py-1 ">
-                                            {{ $parent?->body != '' ? $parent?->body : ($parent->hasAttachment() ? 'Attachment' : '') }}
+                                            {{ $parent?->body != '' ? $parent?->body : ($parent->hasAttachment() ?  __('wirechat::chat.labels.attachment') : '') }}
                                         </p>
                                     </div>
 
@@ -246,7 +246,7 @@
 
                                             <button dusk="reply_to_message_button" wire:click="setReply('{{ $message->id }}')"class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
-                                                    Reply
+                                                    @lang('wirechat::chat.actions.reply.label')
                                                 </x-wirechat::dropdown-link>
                                             </button>
 

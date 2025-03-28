@@ -611,7 +611,7 @@ describe('List', function () {
         ]);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSeeText('now');
+            ->assertSeeText(__('wirechat::chats.labels.now'));
     });
 
     it('shows message time AS "shortAbsoluteDiffForHumans"  if more than a minute old', function () {

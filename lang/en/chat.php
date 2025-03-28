@@ -119,6 +119,19 @@ return [
                 'members' => 'Members',
                 'add_description' => 'Add a group description',
             ],
+            'inputs' => [
+                'name' => [
+                    'label' => 'Group name',
+                    'placeholder' => 'Enter Name',
+                ],
+                'description' => [
+                    'label' => 'Description',
+                    'placeholder' => 'Optional',
+                ],
+                'photo' => [
+                    'label' => 'Photo',
+                ],
+            ],
             'actions' => [
                 'delete_group' => [
                     'label' => 'Delete Group',

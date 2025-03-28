@@ -43,7 +43,6 @@ class Info extends ModalComponent
     public function participantsCountUpdated(int $newCount)
     {
 
-        // dd($newCount);
         return $this->totalParticipants = $newCount;
 
     }
@@ -54,6 +53,18 @@ class Info extends ModalComponent
         $this->groupName = $this->group?->name;
         $this->cover_url = $this->conversation?->group?->cover_url;
 
+    }
+
+    public function messages(): array
+    {
+        return [
+            'groupName.required' => __('wirechat::validation.required', ['attribute' => __('wirechat::chat.group.info.inputs.name.label')]),
+            'groupName.max' => __('wirechat::validation.max.string', ['attribute' => __('wirechat::chat.group.info.inputs.name.label')]),
+            'description.max' => __('wirechat::validation.max.string', ['attribute' => __('wirechat::chat.group.info.inputs.description.label')]),
+            'photo.max' => __('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.group.info.inputs.photo.label')]),
+            'photo.image' => __('wirechat::validation.image', ['attribute' => __('wirechat::chat.group.info.inputs.photo.label')]),
+            'photo.mimes' => __('wirechat::validation.mimes', ['attribute' => __('wirechat::chat.group.info.inputs.photo.label')]),
+        ];
     }
 
     public static function closeModalOnEscapeIsForceful(): bool
@@ -72,8 +83,7 @@ class Info extends ModalComponent
         // dd($value,str($value)->length() );
 
         $this->validate(
-            ['description' => 'max:500|nullable'],
-            ['description.max' => 'Description cannot exceed 500 characters.']
+            ['description' => 'max:500|nullable']
         );
 
         $this->conversation->group?->updateOrCreate(['conversation_id' => $this->conversation->id], ['description' => $value]);
@@ -86,12 +96,7 @@ class Info extends ModalComponent
         abort_unless($this->conversation->isGroup(), 405);
 
         $this->validate(
-            ['groupName' => 'required|max:120|nullable'],
-            [
-                'groupName.required' => 'The Group name cannot be empty',
-                'groupName.max' => 'Group name cannot exceed 120 characters.',
-
-            ]
+            ['groupName' => 'required|max:120|nullable']
         );
 
         $this->conversation->group?->updateOrCreate(['conversation_id' => $this->conversation->id], ['name' => $this->groupName]);

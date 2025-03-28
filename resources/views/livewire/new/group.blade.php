@@ -22,6 +22,7 @@
                             <div class="relative  w-28 h-28 overflow-clip rounded-full">
                                 <x-wirechat::avatar :src="$photo->temporaryUrl()" class="w-28 h-28" />
                                 <button
+                                    type="button"
                                     class="bottom-0 inset-x-0 bg-white/40 text-red-800 flex items-center justify-center  absolute "
                                     wire:click="deletePhoto">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

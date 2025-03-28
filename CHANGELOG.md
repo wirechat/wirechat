@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Seperate group info page for grou
 - Empty search results message for new chat component
 - More Tests
+### Fixed
+- Delete photo button acting as submit while creating group
 
 ---
 
