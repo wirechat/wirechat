@@ -35,8 +35,6 @@ return [
     |
     */
 
-    'custom' => [
-        'error' => 'message',
-    ],
+    'custom' => [ ],
 
 ];
