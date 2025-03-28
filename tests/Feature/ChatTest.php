@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\MessageType;
@@ -398,6 +399,133 @@ describe('mount()', function () {
         $request
             ->assertOK()
             ->assertSeeHtml('$wire.dispatch(\'chat-opened\',{conversation:conversationId})');
+    });
+
+});
+
+describe('Validation', function () {
+
+    test('message body is required', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        $file[] = UploadedFile::fake()->image('photo.png');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('body', null)
+            ->call('sendMessage')
+            // now assert that media is back to empty
+            ->assertHasErrors('body', 'required');
+
+    });
+
+    test('file attachment count must not exceed value specified in config && it dispatces wirechat-toast error', function () {
+
+        //set config value
+        Config::set('wirechat.attachments.max_uploads',13);
+
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        //Add 12 files
+        $files =[];
+        for ($i=0; $i < 15; $i++) { 
+            # code...
+           $files[] = UploadedFile::fake()->create('document.pdf');
+        }
+        $this->withoutExceptionHandling();
+      //  dd($files);
+      $request=  Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('files', $files)
+            ->call('sendMessage')
+             ->assertHasErrors(['files'=>__('wirechat::validation.max.array', ['attribute' => __('wirechat::chat.inputs.files.label'), 'max' => 13])]);
+            
+       $request->assertDispatched('wirechat-toast');
+       //     dd($request->errors());
+
+    });
+
+    test('file  size must not exceed value specified in config && it dispatces wirechat-toast error', function () {
+
+        //set config value
+
+        Config::set('wirechat.attachments.media_max_upload_size',125);
+        Config::set('wirechat.attachments.file_max_upload_size',125);
+        $values= ['pdf'];
+        Config::set('wirechat.attachments.file_mimes',$values);
+        //
+        Config::set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:200']);
+
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        //Add 12 files
+        $files[]= UploadedFile::fake()->create('document.pdf',140);
+
+
+       //  dd($files);
+       $request=  Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('files', $files)
+            ->call('sendMessage')
+            ->assertHasErrors(['files.0'=>__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.files.label'),'max'=>'125'])]);
+
+        //    $request->assertDispatched('wirechat-toast');
+         //  dd($request->errors());
+
+    }) ;
+    test('media size(KB) must not exceed value specified in config && it dispatces wirechat-toast error', function () {
+
+        //set config value
+        Config::set('wirechat.attachments.media_max_upload_size',125);
+        Config::set('wirechat.attachments.file_max_upload_size',125);
+
+        //
+        Config::set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:150']);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        //Add 12 files
+        $files[]= UploadedFile::fake()->create('document.png',150);
+
+        //dd($files);
+        $request=  Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                             ->set('media',$files)
+                             ->call('sendMessage')
+                             ->assertHasErrors(['media.0'=>__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>'125'])]);
+                            
+       //$request->assertDispatched('wirechat-toast');
+      //  dd($request->errors());
+
+    }) ;
+
+    test('media  Mimes must be the ones  specified in config && it dispatces wirechat-toast error', function () {
+
+        //set config value
+
+        $values= ['png'];
+        Config::set('wirechat.attachments.media_mimes',$values);
+
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        //Add PDF
+        $files[]= UploadedFile::fake()->create('document.jpg',120);
+
+        $request=  Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('media', $files)
+            ->call('sendMessage')
+            ->assertHasErrors('media.0');
+       //  ->assertHasErrors(['media.0'=>__('wirechat::validation.mimes', ['attribute' => __('wirechat::chat.inputs.media.label'),'values'=>'png'])]);
+
+
     });
 
 });

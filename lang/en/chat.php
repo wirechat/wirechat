@@ -23,6 +23,14 @@ return [
             'label' => 'Message',
             'placeholder' => 'Type a message',
         ],
+        'media' => [
+            'label' => 'Media',
+            'placeholder' => 'Media',
+        ],
+        'files' => [
+            'label' => 'Files',
+            'placeholder' => 'Files',
+        ],
     ],
 
     'message_groups' => [

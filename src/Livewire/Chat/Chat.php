@@ -255,6 +255,21 @@ class Chat extends Component
         );
     }
 
+
+    public function messages(): array
+    {
+        return [
+            'body.required' => __('wirechat::validation.required', ['attribute' => __('wirechat::chat.inputs.message.label')]),
+            'media.max' => __('wirechat::validation.max.array', ['attribute' => __('wirechat::chat.inputs.media.label')]),
+            'media.*.max' => __('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label')]),
+            'media.*.mimes' => __('wirechat::validation.mimes', ['attribute' => __('wirechat::chat.inputs.media.label')]),
+            'files.max' => __('wirechat::validation.max.array', ['attribute' => __('wirechat::chat.inputs.files.label')]),
+            'files.*.max' => __('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.files.label')]),
+            'files.*.mimes' => __('wirechat::validation.mimes', ['attribute' => __('wirechat::chat.inputs.files.label')]),
+
+        ];
+    }
+
     public function exitConversation()
     {
         abort_unless(auth()->check(), 401);
@@ -317,28 +332,37 @@ class Chat extends Component
 
             // Validation
 
+          //  dd($attachments);
             // Retrieve maxUploads count
             $maxUploads = config('wirechat.attachments.max_uploads');
 
             // Files
             $fileMimes = implode(',', config('wirechat.attachments.file_mimes'));
-            $fileMaxUploadSize = config('wirechat.attachments.file_max_upload_size');
+            $fileMaxUploadSize = (int) config('wirechat.attachments.file_max_upload_size');
 
             // media
             $mediaMimes = implode(',', config('wirechat.attachments.media_mimes'));
-            $mediaMaxUploadSize = config('wirechat.attachments.media_max_upload_size');
+            $mediaMaxUploadSize = (int) config('wirechat.attachments.media_max_upload_size');
 
             try {
-                // $this->js("alert('message')");
+
+                
                 $this->validate([
-                    'files' => "max:$maxUploads|nullable",
-                    'files.*' => "mimes:$fileMimes|max:$fileMaxUploadSize",
-                    'media' => "max:$maxUploads|nullable",
+                    'files' => "array|max:$maxUploads|nullable",
+                    'files.*' => "max:$fileMaxUploadSize|mimes:$fileMimes",
+                    'media' => "array|max:$maxUploads|nullable",
                     'media.*' => "max:$mediaMaxUploadSize|mimes:$mediaMimes",
 
                 ]);
+
+
             } catch (\Illuminate\Validation\ValidationException $th) {
 
+
+                $errors = $th->errors();
+                foreach ($errors as $field => $messages) {
+                    $this->addError($field, $messages[0]);
+                }
                 return $this->dispatch('wirechat-toast', type: 'warning', message: $th->getMessage());
             }
 
