@@ -16,12 +16,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [Unreleased]  
+##  [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/0.2.3) - 2025-03-28 
 ### Added  
 - Language files translation 
 - Seperate group info page for grou
 - Empty search results message for new chat component
 - More Tests
+
+---
+
+
+## [v0.2.2](https://github.com/namumakwembo/wirechat/releases/tag/0.2.2) - 2025-03-15
+### Updated  
+- Storeage url to use storage:disk()->url() instead of static url from database
+
+---
+
+## [v0.2.1](https://github.com/namumakwembo/wirechat/releases/tag/0.2.1) - 2025-03-15
+### Fixed  
+- Storage disk to support dynamic storage 
+### Added 
+- Tests for multiple storage support
+
+---
+
+## [v0.2.0](https://github.com/namumakwembo/wirechat/releases/tag/0.2.0) - 2025-03-06
+### Added  
+- Support for Laravel 12
 
 ---
 
