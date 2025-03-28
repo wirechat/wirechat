@@ -255,7 +255,6 @@ class Chat extends Component
         );
     }
 
-
     public function messages(): array
     {
         return [
@@ -332,7 +331,7 @@ class Chat extends Component
 
             // Validation
 
-          //  dd($attachments);
+            //  dd($attachments);
             // Retrieve maxUploads count
             $maxUploads = config('wirechat.attachments.max_uploads');
 
@@ -346,7 +345,6 @@ class Chat extends Component
 
             try {
 
-                
                 $this->validate([
                     'files' => "array|max:$maxUploads|nullable",
                     'files.*' => "max:$fileMaxUploadSize|mimes:$fileMimes",
@@ -355,14 +353,13 @@ class Chat extends Component
 
                 ]);
 
-
             } catch (\Illuminate\Validation\ValidationException $th) {
-
 
                 $errors = $th->errors();
                 foreach ($errors as $field => $messages) {
                     $this->addError($field, $messages[0]);
                 }
+
                 return $this->dispatch('wirechat-toast', type: 'warning', message: $th->getMessage());
             }
 

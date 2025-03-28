@@ -44,16 +44,6 @@ class WireChatServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
 
-        // publish config
-        $this->publishes([
-            __DIR__.'/../config/wirechat.php' => config_path('wirechat.php'),
-        ], 'wirechat-config');
-
-        // publish migrations
-        $this->publishes([
-            __DIR__.'/../database/migrations' => database_path('migrations'),
-        ], 'wirechat-migrations');
-
         // publish views
         if ($this->app->runningInConsole()) {
             // Publish views
@@ -61,6 +51,20 @@ class WireChatServiceProvider extends ServiceProvider
                 __DIR__.'/../resources/views' => resource_path('views/vendor/wirechat'),
             ], 'wirechat-views');
 
+            // Publish language files
+            $this->publishes([
+                __DIR__.'/../lang' => lang_path('vendor/wirechat'),
+            ], 'wirechat-translations');
+
+            // publish config
+            $this->publishes([
+                __DIR__.'/../config/wirechat.php' => config_path('wirechat.php'),
+            ], 'wirechat-config');
+
+            // publish migrations
+            $this->publishes([
+                __DIR__.'/../database/migrations' => database_path('migrations'),
+            ], 'wirechat-migrations');
         }
 
         /* Load channel routes */
@@ -77,21 +81,20 @@ class WireChatServiceProvider extends ServiceProvider
 
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
-
     }
 
     public function register()
     {
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/wirechat.php', 'wirechat'
+            __DIR__.'/../config/wirechat.php',
+            'wirechat'
         );
 
         // register facades
         $this->app->singleton('wirechat', function ($app) {
             return new WireChatService;
         });
-
     }
 
     // custom methods for livewire components
@@ -121,7 +124,6 @@ class WireChatServiceProvider extends ServiceProvider
 
         // stand alone widget component
         Livewire::component('wirechat', WireChat::class);
-
     }
 
     protected function registerMiddlewares(): void
@@ -129,7 +131,6 @@ class WireChatServiceProvider extends ServiceProvider
 
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
-
     }
 
     protected function loadAssets(): void
