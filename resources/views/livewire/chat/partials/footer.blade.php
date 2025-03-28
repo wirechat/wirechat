@@ -583,8 +583,6 @@
                             );
                         },
 
-
-
                         // Remove an uploaded file from Livewire
                         removeUpload(filename) {
                             $wire.removeUpload(this.wireModel, filename);
@@ -600,7 +598,7 @@
                                 count); // Limit files to the allowed number
                                 $dispatch('wirechat-toast', {
                                     type: 'warning',
-                                    message: `File limit exceeded, allowed ${this.MAXFILES}`
+                                    message: @js(__('wirechat::validation.max.array', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>config('wirechat.attachments.max_uploads', 5)]))
                                 });
                             }
 
@@ -623,13 +621,15 @@
                                     if (file.size > this.maxSize) {
                                         $dispatch('wirechat-toast', {
                                             type: 'warning',
-                                            message: `File size exceeds the maximum limit (${this.maxSize / 1024 / 1024}MB): ${file.name}`
+                                            message: @js(__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>config('wirechat.attachments.media_max_upload_size', 12288)]))
+                                         //   message: `File size exceeds the maximum limit (${this.maxSize / 1024 / 1024}MB): ${file.name}`
                                         });
                                     } else {
                                         const extension = file.name.split('.').pop().toLowerCase();
                                         $dispatch('wirechat-toast', {
                                             type: 'warning',
-                                            message: `One or more Files not uploaded: .${extension} (type not allowed)`
+                                            message: @js(__('wirechat::validation.mimes', [ 'attribute' => __('wirechat::chat.inputs.media.label'), 'values' => implode(', ', config('wirechat.attachments.media_mimes')) ]))
+                                           // message: `One or more Files not uploaded: .${extension} (type not allowed)`
                                         });
 
                                     }
