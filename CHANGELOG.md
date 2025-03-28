@@ -15,16 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/0.2.3) - 2025-03-28  
 
-##  [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/0.2.3) - 2025-03-28 
 ### Added  
-- Language files translation keys for labels
-- Built in Validation translation keys 
-- Seperate group info page for grou
-- Empty search results message for new chat component
-- More Tests
-### Fixed
-- Delete photo button acting as submit while creating group
+- Language file translation keys for labels  
+- Built-in validation translation keys  
+- Separate group info page for groups  
+- Empty search results message for the new chat component  
+- More tests  
+
+### Fixed  
+- Delete photo button incorrectly acting as a submit button while creating a group  
 
 ---
 
