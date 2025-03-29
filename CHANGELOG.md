@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/0.2.3) - 2025-03-28  
+## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/0.2.3) - 2025-03-29  
 
 ### Added  
 - Language file translation keys for labels  
@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed  
 - Delete photo button incorrectly acting as a submit button while creating a group  
+
+### Updated  
+- includes folder to partials  in chats and chat directories
 
 ---
 
