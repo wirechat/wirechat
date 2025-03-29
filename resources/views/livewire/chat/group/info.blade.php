@@ -139,7 +139,7 @@
                                 @endif
                             </div>
 
-                            <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur-sm='description'
+                            <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur='description'
                                 class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
                             </textarea>
 
