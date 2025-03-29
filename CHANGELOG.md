@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.2.4](https://github.com/namumakwembo/wirechat/releases/tag/0.2.4) - 2025-03-30  
+
+### Added  
+- support for Tailwind v4 
+---
+
 ## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/0.2.3) - 2025-03-29  
 
 ### Added  
