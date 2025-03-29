@@ -65,9 +65,9 @@ class="relative overflow-visible">
     <div 
     
     
-    x-ref="popoverInner" x-show="popoverOpen" class="w-full p-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-sm border-neutral-200/70">
-        <div x-show="popoverArrow && popoverPosition == 'bottom'" class="absolute top-0 inline-block w-5 mt-px overflow-hidden -translate-x-2 -translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-bottom-left transform rotate-45 bg-white border-t border-l rounded-sm"></div></div>
-        <div x-show="popoverArrow  && popoverPosition == 'top'" class="absolute bottom-0 inline-block w-5 mb-px overflow-hidden -translate-x-2 translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-top-left transform -rotate-45 bg-white border-b border-l rounded-sm"></div></div>
+    x-ref="popoverInner" x-show="popoverOpen" class="w-full p-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-xs border-neutral-200/70">
+        <div x-show="popoverArrow && popoverPosition == 'bottom'" class="absolute top-0 inline-block w-5 mt-px overflow-hidden -translate-x-2 -translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-bottom-left transform rotate-45 bg-white border-t border-l rounded-xs"></div></div>
+        <div x-show="popoverArrow  && popoverPosition == 'top'" class="absolute bottom-0 inline-block w-5 mb-px overflow-hidden -translate-x-2 translate-y-2.5 left-1/2"><div class="w-2.5 h-2.5 origin-top-left transform -rotate-45 bg-white border-b border-l rounded-xs"></div></div>
         <div class="grid gap-4">
             {{$slot}}
         </div>

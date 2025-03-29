@@ -12,7 +12,7 @@
             <x-wirechat::actions.close-modal>
             <button
              dusk="close_modal_button"
-                class="p-2  text-gray-600 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
+                class="p-2  text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -26,7 +26,7 @@
         <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
             <input  dusk="search_users_field" autofocus type="search" id="users-search-field"
                 wire:model.live.debounce='search' autocomplete="off"  placeholder="{{__('wirechat::new.chat.inputs.search.placeholder')}}"
-                class=" w-full border-0 w-auto px-0 dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
+                class=" w-full border-0 w-auto px-0 dark:bg-gray-800 outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
 
         </section>
     </header>

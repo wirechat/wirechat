@@ -52,7 +52,7 @@
         @else
         wire:navigate href="{{ route(WireChat::viewRouteName(), $conversation->id) }}" @endif
             @style(['border-color:var(--wirechat-primary-color)' => $selectedConversationId == $conversation?->id])
-            class="py-3 flex gap-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-sm transition-colors duration-150  relative w-full cursor-pointer px-2"
+            class="py-3 flex gap-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xs transition-colors duration-150  relative w-full cursor-pointer px-2"
             :class="$wire.selectedConversationId == conversationID &&
                 'bg-gray-50 dark:bg-gray-800 border-r-4  border-opacity-20 border-[var(--wirechat-primary-color)]'">
 

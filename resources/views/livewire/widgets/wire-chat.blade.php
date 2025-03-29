@@ -195,7 +195,7 @@
            x-on:keydown.escape.stop.window="closeChatWidgetOnEscape({ modalType: 'ChatWidget', event: $event });"
            aria-modal="true"
            tabindex="0"
-           class="w-full h-full min-h-full grid relative grow  focus:outline-none focus:border-none"
+           class="w-full h-full min-h-full grid relative grow  focus:outline-hidden focus:border-none"
            :class="!chatIsOpen && 'hidden md:grid'"
            style="contain:content;">
             <div 

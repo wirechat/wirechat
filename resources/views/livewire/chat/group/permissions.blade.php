@@ -1,6 +1,6 @@
 <div class="bg-white dark:bg-inherit overfo opaticy-100   min-h-screen w-full">
-    <section class="flex gap-4 z-[10]  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
-        <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-none"> <svg class="w-7 h-7"
+    <section class="flex gap-4 z-10  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
+        <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-hidden"> <svg class="w-7 h-7"
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -40,9 +40,9 @@
 
                         <label class="inline-flex items-center cursor-pointer">
                             <input wire:model.live.debounce="allow_members_to_edit_group_info" type="checkbox"  class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 
+                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer dark:bg-gray-700 
                             peer-checked:bg-[var(--wirechat-primary-color)] peer-checked:border-[var(--wirechat-primary-color)] 
-                            peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full 
+                            peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
                             peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] 
                             after:start-[2px] after:bg-white after:border-gray-300 after:border 
                             after:rounded-full after:h-5 after:w-5 after:transition-all">
@@ -70,9 +70,9 @@
 
                         <label class="inline-flex items-center cursor-pointer">
                             <input wire:model.live.debounce="allow_members_to_send_messages" type="checkbox" class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 
+                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer dark:bg-gray-700 
                             peer-checked:bg-[var(--wirechat-primary-color)] peer-checked:border-[var(--wirechat-primary-color)] 
-                            peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full 
+                            peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
                             peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] 
                             after:start-[2px] after:bg-white after:border-gray-300 after:border 
                             after:rounded-full after:h-5 after:w-5 after:transition-all">
@@ -103,9 +103,9 @@
 
                         <label class="inline-flex items-center cursor-pointer">
                             <input wire:model.live.debounce="allow_members_to_add_others" type="checkbox"  class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 
+                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer dark:bg-gray-700 
                                    peer-checked:bg-[var(--wirechat-primary-color)] peer-checked:border-[var(--wirechat-primary-color)] 
-                                   peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full 
+                                   peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
                                    peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] 
                                    after:start-[2px] after:bg-white after:border-gray-300 after:border 
                                    after:rounded-full after:h-5 after:w-5 after:transition-all">

@@ -8,8 +8,8 @@
         $group = $conversation?->group;
     @endphp
 
-    <section class="flex gap-4 z-[10]  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
-        <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-none"> <svg class="w-7 h-7"
+    <section class="flex gap-4 z-10  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
+        <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-hidden"> <svg class="w-7 h-7"
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -83,7 +83,7 @@
 
                             <input x-cloak maxlength="110" x-show="editing" id='groupName' type="text"
                                 wire:model='groupName'
-                                class="resize-none text-2xl font-medium  border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
+                                class="resize-none text-2xl font-medium  border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
 
 
                             @error('groupName')
@@ -139,8 +139,8 @@
                                 @endif
                             </div>
 
-                            <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur='description'
-                                class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
+                            <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur-sm='description'
+                                class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
                             </textarea>
 
                             @error('description')
@@ -203,7 +203,7 @@
         <x-wirechat::actions.open-modal component="wirechat.chat.group.members"
             conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
             {{-- Members count --}}
-            <button class="flex w-full justify-between items-center px-8 focus:outline-none ">
+            <button class="flex w-full justify-between items-center px-8 focus:outline-hidden ">
                 <span class="text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.info.labels.members') }}  {{ $totalParticipants }}</span>
                 {{-- Search icon --}}
                 <span>
@@ -221,7 +221,7 @@
             <x-wirechat::actions.open-modal component="wirechat.chat.group.add-members"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
                 <button @dusk="open_add_members_modal_button"
-                    class=" w-full py-5 px-8 hover:bg-gray-200 focus:outline-none transition dark:hover:bg-gray-800 flex gap-3 items-center">
+                    class=" w-full py-5 px-8 hover:bg-gray-200 focus:outline-hidden transition dark:hover:bg-gray-800 flex gap-3 items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                         class="size-6 w-5 h-5">
                         <path

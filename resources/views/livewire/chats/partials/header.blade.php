@@ -20,7 +20,7 @@
             @if ($showNewChatModalButton)
             
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}">
-                <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-none">
+                <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
                     <svg class="w-8 h-8 -mb-1 text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"
                         xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor">
@@ -78,7 +78,7 @@
 
                 <input id="chats-search-field" name="chats_search" maxlength="100" type="search" wire:model.live.debounce='search'
                     placeholder="{{ __('wirechat::chats.inputs.search.placeholder')  }}" autocomplete="off"
-                    class=" col-span-11 border-0  bg-inherit dark:text-white outline-none w-full focus:outline-none  focus:ring-0 hover:ring-0">
+                    class=" col-span-11 border-0  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
           
                 </div>
 

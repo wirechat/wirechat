@@ -14,7 +14,7 @@
 
             <x-wirechat::actions.close-modal>
             <button  dusk="close_modal_button"
-                class="p-2 ml-0 text-gray-600 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
+                class="p-2 ml-0 text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class=" w-5 w-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
@@ -33,7 +33,7 @@
         <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
             <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
                 placeholder="{{__('wirechat::chat.group.members.inputs.search.placeholder')}}"
-                class=" w-full border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
+                class=" w-full border-0 w-auto dark:bg-gray-800 outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
         </section>
 
     </header>
@@ -70,7 +70,7 @@
                                     <h6 @class(['transition-all truncate group-hover:underline col-span-10' ])>
                                         {{ $loopParticipantIsAuth ? 'You' : $participant->participantable->display_name }}</h6>
                                         @if ($participant->isOwner()|| $participant->isAdmin())
-                                        <span  style="background-color: var(--wirechat-primary-color);" class=" flex items-center col-span-2 text-white text-xs font-medium ml-auto px-2.5 py-px rounded ">
+                                        <span  style="background-color: var(--wirechat-primary-color);" class=" flex items-center col-span-2 text-white text-xs font-medium ml-auto px-2.5 py-px rounded-sm ">
                                             {{$participant->isOwner()? __('wirechat::chat.group.members.labels.owner'): __('wirechat::chat.group.members.labels.admin')}}
                                         </span>
                                         @endif
@@ -78,7 +78,7 @@
                                 </div>
 
                                 <div x-show="open" x-anchor.bottom-end="$refs.button"
-                                    class="ml-auto bg-gray-50 dark:bg-gray-800 dark:border-gray-600 py-4 shadow border rounded-md grid space-y-2 w-52">
+                                    class="ml-auto bg-gray-50 dark:bg-gray-800 dark:border-gray-600 py-4 shadow-sm border rounded-md grid space-y-2 w-52">
                                     {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-600 dark:text-gray-300  w-6 h-6">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>   --}}

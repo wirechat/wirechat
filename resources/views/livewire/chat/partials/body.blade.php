@@ -68,7 +68,7 @@
     
 
     x-cloak
-     class='flex flex-col h-full  relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  flex-grow  overscroll-contain overflow-x-hidden w-full my-auto'
+     class='flex flex-col h-full  relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  grow  overscroll-contain overflow-x-hidden w-full my-auto'
     style="contain: content" >
 
 
@@ -88,7 +88,7 @@
         @foreach ($loadedMessages as $date => $messageGroup)
 
             {{-- Date  --}}
-            <div  class="sticky top-0 uppercase p-2 shadow-sm px-2.5 z-[50] rounded-xl border border-gray-100/50 dark:border-slate-700/20 text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
+            <div  class="sticky top-0 uppercase p-2 shadow-xs px-2.5 z-50 rounded-xl border border-gray-100/50 dark:border-slate-700/20 text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
                 {{ $date }}
             </div>
 

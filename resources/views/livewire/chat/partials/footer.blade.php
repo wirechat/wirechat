@@ -10,7 +10,7 @@
         </div>
     @else
         <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
-            class=" px-3 md:px-1 border-t shadow   dark:bg-gray-800 bg-gray-50 z-[50]    dark:border-gray-800/80  flex flex-col gap-3 items-center  w-full   mx-auto">
+            class=" px-3 md:px-1 border-t shadow-sm   dark:bg-gray-800 bg-gray-50 z-50    dark:border-gray-800/80  flex flex-col gap-3 items-center  w-full   mx-auto">
 
             {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
             <section wire:ignore x-cloak x-show="openEmojiPicker" x-transition:enter="transition  ease-out duration-180 transform"
@@ -24,7 +24,7 @@
             </section>
             {{-- form and detail section  --}}
             <section
-                class=" py-2 sm:px-4 py-1.5    z-[50]  bg-gray-50 dark:bg-gray-800   flex flex-col gap-3 items-center  w-full mx-auto">
+                class=" py-2 sm:px-4 py-1.5    z-50  bg-gray-50 dark:bg-gray-800   flex flex-col gap-3 items-center  w-full mx-auto">
 
                 {{-- Media preview section --}}
                 <section x-show="$wire.media.length>0 ||$wire.files.length>0" x-cloak
@@ -54,7 +54,7 @@
                                 {{-- Loop through media for preview --}}
                                 @foreach ($media as $key => $mediaItem)
                                     @if (str()->startsWith($mediaItem->getMimeType(), 'image/'))
-                                        <div class="relative h-24 sm:h-36 aspect-[4/3] ">
+                                        <div class="relative h-24 sm:h-36 aspect-4/3 ">
                                             {{-- Delete image --}}
                                             <button wire:loading.attr="disabled"
                                                 class="disabled:cursor-progress absolute -top-2 -right-2  z-10 dark:text-gray-50"
@@ -400,7 +400,7 @@
                             @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                             @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
-                            class="w-full disabled:cursor-progress resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-none   "
+                            class="w-full disabled:cursor-progress resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-hidden   "
                             x-init="document.querySelector('emoji-picker')
                                 .addEventListener('emoji-click', event => {
                                     const emoji = event.detail['unicode'];

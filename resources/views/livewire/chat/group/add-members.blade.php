@@ -5,7 +5,7 @@
 
         <x-wirechat::actions.close-modal>
         <button 
-            class="p-2 ml-0 text-gray-600 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
+            class="p-2 ml-0 text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class=" w-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -22,7 +22,7 @@
             wire:target='save'
             @disabled(count($selectedMembers)==0)
             @class([
-                'p-2 disabled:cursor-not-allowed  disabled:hover:bg-inherit ml-0 text-gray-600 dark:text-gray-300 hover:dark:bg-gray-700 hover:dark:text-white rounded-full hover:text-gray-800 hover:bg-gray-50',
+                'p-2 disabled:cursor-not-allowed  disabled:hover:bg-inherit ml-0 text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white rounded-full hover:text-gray-800 hover:bg-gray-50',
                 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit hover:bg-inherit  opacity-70'=>count($selectedMembers)==0
             ])
             class="">
@@ -47,7 +47,7 @@
     <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
         <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
             placeholder="{{ __('wirechat::chat.group.add_members.inputs.search.placeholder') }}"
-            class=" w-full border-0 w-auto dark:bg-gray-800 outline-none focus:outline-none bg-none rounded-lg focus:ring-0 hover:ring-0">
+            class=" w-full border-0 w-auto dark:bg-gray-800 outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
     </section>
 
 
@@ -59,12 +59,12 @@
             @if ($selectedMembers)
 
                 @foreach ($selectedMembers as $key => $member)
-                    <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded dark:bg-gray-700 dark:text-gray-300"
+                    <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded-sm dark:bg-gray-700 dark:text-gray-300"
                         wire:key="selected-member-{{ $member->id }}">
                         {{ $member->display_name }}
                         <button type="button"
                             wire:click="toggleMember('{{ $member->id }}',{{ json_encode(get_class($member)) }})"
-                            class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-sm hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300"
+                            class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300"
                             aria-label="Remove">
                             <svg class="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 14 14">
