@@ -98,7 +98,8 @@
                     $belongsToAuth = $message->belongsToAuth();
                     $parent = $message->parent ?? null;
                     $attachment = $message->attachment ?? null;
-                    $isEmoji = mb_ereg('^(?:\X(?=\p{Emoji}))*\X$', $message->body ?? '');
+                    $isEmoji = $message->isEmoji();
+
 
                     // keep track of previous message
                     // The ($key -1 ) will get the previous message from loaded

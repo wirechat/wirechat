@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Helpers\Helper;
 use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
 use Namu\WireChat\Traits\Actionable;
 
@@ -249,5 +250,18 @@ class Message extends Model
             $message->forceDelete();
         }
 
+    }
+
+    /**
+     * Check if the message body contains only emojis.
+     */
+    public function isEmoji(): bool
+    {
+        if ($this->body == null) {
+            return false;
+        }
+
+        // Use the isEmoji helper method to check if the message body contains only emojis
+        return Helper::isEmoji($this->body);
     }
 }
