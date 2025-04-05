@@ -41,7 +41,7 @@
     @wirechatStyles
 </head>
 
-<body class="font-sans antialiased">
+<body  x-data x-cloak class="font-sans antialiased">
     <div class="min-h-screen bg-white dark:bg-gray-900">
 
         <!-- Page Content -->
@@ -53,6 +53,12 @@
 
     @livewireScripts
     @wirechatAssets
+    <script>
+      document.addEventListener('livewire:navigated', () => {
+          const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          updateTheme(darkModeMediaQuery.matches);  // Re-apply the theme based on system preference
+      });
+    </script>
 
 </body>
 
