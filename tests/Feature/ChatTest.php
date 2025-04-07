@@ -1317,16 +1317,11 @@ describe('Sending messages ', function () {
         // Queue::fake();
 
         $auth = User::factory()->create();
-        $receiver = User::factory()->create(['name' => 'John']);
-        $conversation = Conversation::factory()
-            ->withParticipants([$auth])
-            ->create();
+        $conversation = $auth->createConversationWith($auth);
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('body', 'New message')
             ->call('sendMessage');
-
-        $message = Message::first();
 
         Queue::assertNotPushed(NotifyParticipants::class);
     });

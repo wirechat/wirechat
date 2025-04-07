@@ -608,14 +608,14 @@ class Chat extends Component
     }
 
     // used to broadcast message sent to receiver
-    protected function dispatchMessageCreatedEvent(Message $message)
+    protected function dispatchMessageCreatedEvent(Message $message):void
     {
 
         // Dont dispatch if it is a selfConversation
 
-        if ($this->conversation->isSelfConversation($this->auth)) {
+        if ($this->conversation->isSelf()) {
 
-            return null;
+            return ;
         }
 
         // send broadcast message only to others
@@ -631,22 +631,10 @@ class Chat extends Component
             // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
-            // if conversation is private then Notify particpant immediately
-            if ($this->conversation->isPrivate() || $this->conversation->isSelf()) {
-
-                if ($this->conversation->isPrivate() && $this->receiverParticipant) {
-
-                    //   broadcast(new NotifyParticipant($this->receiverParticipant, $message))->toOthers();
-
-                    // dd('broadcasting');
-                    NotifyParticipants::dispatch($this->conversation, $message);
-                    //    Notification::send($this->receiver, new NewMessageNotification($message));
-
-                }
-            } else {
-                // code...
+            // notify participants if conversation is NOT self
+            if (!$this->conversation->isSelf()) {
                 NotifyParticipants::dispatch($this->conversation, $message);
-            }
+            } 
         } catch (\Throwable $th) {
 
             Log::error($th->getMessage());
