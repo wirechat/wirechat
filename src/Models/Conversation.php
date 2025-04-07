@@ -329,10 +329,12 @@ class Conversation extends Model
             ? collect($this->participants) // Convert to collection if already loaded
             : $this->participants()->get(); // Fetch as a collection
 
+        //If is set then return references's participant
         if ($this->isSelf()) {
             return $participants->where('participantable_id', $reference->id)->where('participantable_type', $reference->getMorphClass())->first();
         }
 
+        //else return participant who is not the reference
         return $participants->reject(fn ($participant) => $participant->participantable_id == $reference->id &&
             $participant->participantable_type == $reference->getMorphClass()
         )->first();
@@ -368,6 +370,7 @@ class Conversation extends Model
     /**
      * Get receiver Participant for Private Conversation
      * will return null for Self Conversation
+     * @deprecated
      */
     public function receiverParticipant(): HasOne
     {
@@ -384,6 +387,7 @@ class Conversation extends Model
     /**
      * Get Auth Participant all types Private Conversation
      * will return Auth for Self Conversation
+     * @deprecated
      */
     public function authParticipant(): HasOne
     {

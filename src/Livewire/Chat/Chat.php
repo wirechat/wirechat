@@ -627,6 +627,7 @@ class Chat extends Component
 
             // !remove the receiver from the messageCreated and add it to the job instead
             // !also do not forget to exlude auth user or message owner from particpants
+            // todo: maybe also broadcast for self conversation , incase user is using multiple devices 
             // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
@@ -782,12 +783,12 @@ class Chat extends Component
     private function initializeParticipants()
     {
         if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
-            $this->conversation->load('participants');
+            $this->conversation->load('participants.participantable');
             $participants = $this->conversation->participants();
 
             $this->authParticipant = $participants->whereParticipantable($this->auth)->first();
 
-            $this->receiverParticipant = $this->conversation->receiverParticipant;
+            $this->receiverParticipant = $this->conversation->peerParticipant($this->auth);
 
             // If conversation is self then receiver is auth;
             if ($this->conversation->type == ConversationType::SELF) {

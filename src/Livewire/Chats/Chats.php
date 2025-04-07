@@ -189,37 +189,43 @@ class Chats extends Component
      */
     protected function loadConversations()
     {
-        // Calculate the offset based on the current page and the number of items per page.
-        $perPage = 10; // Number of items per "page".
+        $perPage = 10;
         $offset = ($this->page - 1) * $perPage;
-
+    
         $additionalConversations = $this->auth->conversations()
             ->with([
-                // 'lastMessage' ,//=> fn($query) => $query->select('id', 'sendable_id','sendable_type', 'created_at'),
-                // 'participants',
                 'lastMessage.sendable',
-                'authParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at'),
-                'receiverParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with('participantable'),
                 'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
             ])
-            ->when(trim($this->search ?? '') != '', fn ($query) => $this->applySearchConditions($query)) // Apply search.
-            ->when(trim($this->search ?? '') == '', fn ($query) => $query->withoutDeleted()->withoutBlanks()) // Exclude blanks & deleted.
+            ->when(trim($this->search ?? '') != '', fn ($query) => $this->applySearchConditions($query))
+            ->when(trim($this->search ?? '') == '', fn ($query) => $query->withoutDeleted()->withoutBlanks())
             ->latest('updated_at')
             ->skip($offset)
             ->take($perPage)
-            ->get(); // Fetch only required fields.
+            ->get();
 
-        // Check if there are more conversations for the next page.
+        // Set participants manually where needed
+        $additionalConversations->each(function ($conversation) {
+            if ($conversation->isPrivate() || $conversation->isSelf()) {
+                // Manually load participants (only 2 expected in private/self)
+                $participants = $conversation->participants()->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with('participantable')->get();
+                $conversation->setRelation('participants', $participants);
+    
+                // Set peer and auth participants
+                $conversation->auth_participant = $conversation->participant($this->auth);
+                $conversation->peer_participant = $conversation->peerParticipant($this->auth);
+            }
+        });
+
         $this->canLoadMore = $additionalConversations->count() === $perPage;
-
-        // Merge and sort conversations.
+    
         $this->conversations = collect($this->conversations)
-            ->concat($additionalConversations) // Append new conversations.
-            ->unique('id') // Ensure unique conversation IDs.
-            ->sortByDesc('updated_at') // Sort by updated_at in descending order.
-            ->values(); // Reset the array keys.
+            ->concat($additionalConversations)
+            ->unique('id')
+            ->sortByDesc('updated_at')
+            ->values();
     }
-
+    
     /**
      * Eager loads additional conversation relationships.
      *
@@ -228,20 +234,24 @@ class Chats extends Component
     public function hydrateConversations()
     {
         $this->conversations->map(function ($conversation) {
-            if (! $conversation->isGroup()) {
-                // $conversation->loadMissing('participants.participantable');
+            // Only load participants manually if not a group
+            if (!$conversation->isGroup()) {
+                $participants = $conversation->participants()->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with(['participantable', 'actions'])->get();
+    
+                $conversation->setRelation('participants', $participants);
+    
+                  //Set peer and auth participants
+                  $conversation->auth_participant = $conversation->participant($this->auth);
+                  $conversation->peer_participant = $conversation->peerParticipant(reference:$this->auth);
             }
-
+    
             return $conversation->loadMissing([
-                // 'lastMessage' ,//=> fn($query) => $query->select('id', 'sendable_id','sendable_type', 'created_at'),
-                // 'messages',
                 'lastMessage',
-                'authParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with('actions'),
-                'receiverParticipant' => fn ($query) => $query->select('id', 'participantable_id', 'participantable_type', 'conversation_id', 'conversation_read_at')->with('participantable', 'actions'),
                 'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
             ]);
         });
     }
+    
 
     /**
      * Returns the authenticated user.

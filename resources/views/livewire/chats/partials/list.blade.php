@@ -6,11 +6,11 @@
     @php
     //$receiver =$conversation->getReceiver();
     $group = $conversation->isGroup() ? $conversation->group : null;
-    $receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->receiverParticipant?->participantable : $this->auth);
+    $receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peer_participant?->participantable : $this->auth);
     //$receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peerParticipant()?->participantable : $this->auth);
     $lastMessage = $conversation->lastMessage;
     //mark isReadByAuth true if user has chat opened
-    $isReadByAuth = $conversation?->readBy($conversation->authParticipant??$this->auth) || $selectedConversationId == $conversation->id;
+    $isReadByAuth = $conversation?->readBy($conversation->auth_participant??$this->auth) || $selectedConversationId == $conversation->id;
     $belongsToAuth = $lastMessage?->belongsToAuth();
 
 
