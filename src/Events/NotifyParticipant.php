@@ -9,7 +9,6 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphClassResolver;
 use Namu\WireChat\Http\Resources\MessageResource;

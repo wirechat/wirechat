@@ -608,14 +608,14 @@ class Chat extends Component
     }
 
     // used to broadcast message sent to receiver
-    protected function dispatchMessageCreatedEvent(Message $message):void
+    protected function dispatchMessageCreatedEvent(Message $message): void
     {
 
         // Dont dispatch if it is a selfConversation
 
         if ($this->conversation->isSelf()) {
 
-            return ;
+            return;
         }
 
         // send broadcast message only to others
@@ -627,14 +627,14 @@ class Chat extends Component
 
             // !remove the receiver from the messageCreated and add it to the job instead
             // !also do not forget to exlude auth user or message owner from particpants
-            // todo: maybe also broadcast for self conversation , incase user is using multiple devices 
+            // todo: maybe also broadcast for self conversation , incase user is using multiple devices
             // sleep(3);
             broadcast(new MessageCreated($message))->toOthers();
 
             // notify participants if conversation is NOT self
-            if (!$this->conversation->isSelf()) {
+            if (! $this->conversation->isSelf()) {
                 NotifyParticipants::dispatch($this->conversation, $message);
-            } 
+            }
         } catch (\Throwable $th) {
 
             Log::error($th->getMessage());

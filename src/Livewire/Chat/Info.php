@@ -68,17 +68,20 @@ class Info extends ModalComponent
 
         abort_if($this->conversation->isGroup(), 403, __('wirechat::chat.info.messages.invalid_conversation_type_error'));
 
+        // load participants
+        $this->conversation->load('participants.participantable');
+
     }
 
     public function render()
     {
 
-        $cover_url = $this->conversation->getReceiver()?->cover_url;
+        $receiver = $this->conversation?->peerParticipant(auth()->user())?->participantable;
 
         // Pass data to the view
         return view('wirechat::livewire.chat.info', [
-            'receiver' => $this->conversation?->getReceiver(),
-            'cover_url' => $cover_url,
+            'receiver' => $receiver,
+            'cover_url' => $receiver?->cover_url,
         ]);
     }
 }
