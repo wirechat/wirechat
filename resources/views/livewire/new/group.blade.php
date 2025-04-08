@@ -66,9 +66,9 @@
                 </header>
 
                 <main class="my-5">
-                    <div class=" my-auto space-y-2">
+                    <div class=" my-auto flex flex-col gap-y-2">
 
-                        <label for="description">@lang('wirechat::new.group.inputs.description.label')</label>
+                        <label class="my-2" for="description">@lang('wirechat::new.group.inputs.description.label')</label>
 
                         <textarea id='description' type="text" wire:model='description' placeholder="{{__('wirechat::new.group.inputs.description.placeholder')}}" rows="4"
                             class=" w-full resize-none rounded-lg border-gray-200 focus:border-gray-200 dark:border-gray-700   bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">

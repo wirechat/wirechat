@@ -12,7 +12,7 @@
     <div class="">
         <section >
 
-            <h5 class="w-full text-start py-4 bg-gray-50 dark:bg-gray-950 px-50 px-4">
+            <h5 class="w-full text-start py-4 bg-gray-50 dark:bg-gray-950 px-4">
                 
                 {{__('wirechat::chat.group.permisssions.labels.members_can')}}:
             </h5>
