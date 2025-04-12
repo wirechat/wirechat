@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Namu\WireChat\Enums\ConversationType;
+use Namu\WireChat\Enums\GroupType;
 use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Models\Action;
@@ -819,7 +820,7 @@ describe('createGroup', function () {
         expect($group->name)->toBe('New group');
         expect($group->description)->toBe('description');
         expect($group->cover)->not->toBe(null);
-        expect($group->type)->toBe('private');
+        expect($group->type)->toBe(GroupType::PRIVATE);
 
     });
 

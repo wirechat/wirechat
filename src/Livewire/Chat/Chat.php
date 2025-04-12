@@ -23,6 +23,13 @@ use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
 
+/**
+ * Chat Component
+ *
+ * Handles group, private and self conversations .
+ *
+ * @property \Illuminate\Contracts\Auth\Authenticatable|null $auth
+ */
 class Chat extends Component
 {
     use Widget;
@@ -198,21 +205,6 @@ class Chat extends Component
     {
 
         $this->resetErrorBag(['media', 'files']);
-    }
-
-    public function listenBroadcastedMessage($event)
-    {
-
-        // dd('reached');
-        $this->dispatch('scroll-bottom');
-        $newMessage = Message::find($event['message_id']);
-
-        // push message
-        $this->pushMessage($newMessage);
-
-        // mark as read
-        $newMessage->read_at = now();
-        $newMessage->save();
     }
 
     /**
@@ -510,7 +502,7 @@ class Chat extends Component
         abort_unless($message->ownedBy($this->auth) || ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
 
         // make sure user belongs to conversation from the message
-        // We are checking the $message->conversation for extra security because the param might be tempered with
+        // We are checking the $message->conversation for extra security because the  might be tempered with
         abort_unless($this->auth->belongsToConversation($message->conversation), 403);
 
         // remove message from collection
@@ -520,7 +512,7 @@ class Chat extends Component
         $this->dispatch('refresh')->to(Chats::class);
 
         try {
-            MessageDeleted::dispatch($message, $this->conversation);
+            MessageDeleted::dispatch($message);
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }
@@ -632,7 +624,7 @@ class Chat extends Component
             broadcast(new MessageCreated($message))->toOthers();
 
             // notify participants if conversation is NOT self
-            if (! $this->conversation->isSelf()) {
+            if ($this->conversation->isSelf() === false) {
                 NotifyParticipants::dispatch($this->conversation, $message);
             }
         } catch (\Throwable $th) {

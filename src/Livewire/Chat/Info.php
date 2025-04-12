@@ -76,7 +76,7 @@ class Info extends ModalComponent
     public function render()
     {
 
-        $receiver = $this->conversation?->peerParticipant(auth()->user())?->participantable;
+        $receiver = $this->conversation->peerParticipant(auth()->user())?->participantable;
 
         // Pass data to the view
         return view('wirechat::livewire.chat.info', [

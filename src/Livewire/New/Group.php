@@ -152,6 +152,7 @@ class Group extends ModalComponent
         $this->validate();
 
         // create group
+        /* @var $conversation */
         $conversation = auth()->user()->createGroup($this->name, $this->description, $this->photo);
 
         // Add participants

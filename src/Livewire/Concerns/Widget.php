@@ -82,8 +82,6 @@ trait Widget
 
     /**
      * A method to dispatch close chat widget
-     *
-     * @param null
      */
     public function closeChat(): void
     {

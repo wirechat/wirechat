@@ -2,24 +2,42 @@
 
 namespace Namu\WireChat\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Facades\WireChat;
 
 /**
  * @property int $id
- * @property string $attachable_id
  * @property string $attachable_type
+ * @property int $attachable_id
  * @property string $file_path
  * @property string $file_name
  * @property string $original_name
  * @property string $url
  * @property string $mime_type
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $attachable
+ * @property-read string $clean_mime_type
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereAttachableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereAttachableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereFileName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereFilePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereMimeType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereOriginalName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Attachment whereUrl($value)
+ *
+ * @mixin \Eloquent
  */
 class Attachment extends Model
 {
@@ -57,12 +75,12 @@ class Attachment extends Model
         );
     }
 
-    public function attachable()
+    public function attachable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function getCleanMimeTypeAttribute()
+    public function getCleanMimeTypeAttribute(): string
     {
         return explode('/', $this->mime_type)[1] ?? 'unknown';
     }

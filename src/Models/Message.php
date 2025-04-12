@@ -2,11 +2,11 @@
 
 namespace Namu\WireChat\Models;
 
-use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,16 +21,44 @@ use Namu\WireChat\Traits\Actionable;
 
 /**
  * @property int $id
- * @property string $sendable_type
+ * @property int|null $conversation_id
  * @property int $sendable_id
- * @property int $conversation_id
- * @property int $reply_id
- * @property string $body
+ * @property string $sendable_type
+ * @property int|null $reply_id
+ * @property string|null $body
  * @property MessageType $type
- * @property Carbon $kept_at
- * @property Carbon $created_at
- * @property Carbon $updated_at
- * @property-read \Namu\WireChat\Models\Conversation $conversation
+ * @property \Illuminate\Support\Carbon|null $kept_at filled when a message is kept from disappearing
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Action> $actions
+ * @property-read int|null $actions_count
+ * @property-read \Namu\WireChat\Models\Attachment|null $attachment
+ * @property-read \Namu\WireChat\Models\Conversation|null $conversation
+ * @property-read Message|null $parent
+ * @property-read Message|null $reply
+ * @property-read Model|\Eloquent $sendable
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|Message newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Message newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Message onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Message query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereBody($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereConversationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereIsNotOwnedBy(\Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable $user)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereKeptAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereReplyId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereSendableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereSendableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Message withoutTrashed()
+ *
+ * @mixin \Eloquent
  */
 class Message extends Model
 {
@@ -157,13 +185,13 @@ class Message extends Model
     }
 
     // Relationship for the parent message
-    public function parent()
+    public function parent(): belongsTo
     {
         return $this->belongsTo(Message::class, 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
     }
 
     // Relationship for the reply
-    public function reply()
+    public function reply(): HasOne
     {
         return $this->hasOne(Message::class, 'reply_id');
     }
@@ -198,6 +226,8 @@ class Message extends Model
     /**
      * Delete for
      * This will delete the message only for the auth user meaning other participants will be able to see it
+     *
+     * @return bool|null
      */
     public function deleteFor(Model|Authenticatable $user)
     {
@@ -209,9 +239,8 @@ class Message extends Model
 
         // If conversation is self, then delete permanently directly
         if ($conversation->isSelf()) {
-            $this->forceDelete();
+            return $this->forceDelete();
 
-            return;
         }
 
         // Try to create an action
@@ -237,9 +266,11 @@ class Message extends Model
             }
 
             if ($deletedByBothParticipants) {
-                $this->forceDelete();
+                return $this->forceDelete();
             }
         }
+
+        return null;
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace Namu\WireChat\Models;
 
-use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,27 +18,43 @@ use Namu\WireChat\Traits\Actionable;
 /**
  * @property int $id
  * @property int $conversation_id
+ * @property ParticipantRole $role
  * @property int $participantable_id
  * @property string $participantable_type
- * @property ParticipantRole $role
- * @property Carbon $exited_at
- * @property Carbon $conversation_deleted_at
- * @property Carbon $conversation_deleted_at
- * @property Carbon $conversation_read_at
- * @property Carbon $last_active_at
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property \Illuminate\Support\Carbon|null $exited_at
+ * @property \Illuminate\Support\Carbon|null $last_active_at
+ * @property \Illuminate\Support\Carbon|null $conversation_cleared_at
+ * @property \Illuminate\Support\Carbon|null $conversation_deleted_at
+ * @property \Illuminate\Support\Carbon|null $conversation_read_at
+ * @property string|null $deleted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Action> $actions
+ * @property-read int|null $actions_count
  * @property-read \Namu\WireChat\Models\Conversation $conversation
- * @property-read \Illuminate\Database\Eloquent\Model $participantable
- * @method void removeByAdmin(\Illuminate\Contracts\Auth\Authenticatable|\Illuminate\Database\Eloquent\Model $admin)
- * @method bool exitConversation()
- * @method bool hasDeletedConversation(bool $checkDeletionExpired = false)
- * @method bool isRemovedByAdmin()
- * @method bool hasExited()
- * @method bool hasExited()
- * @method bool isOwner()
- * @method bool isAdmin()
- * @method static \Illuminate\Database\Eloquent\Builder withoutParticipantable(\Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable $user)
+ * @property-read Model|\Eloquent $participantable
+ *
+ * @method static Builder|Participant newModelQuery()
+ * @method static Builder|Participant newQuery()
+ * @method static Builder|Participant query()
+ * @method static Builder|Participant whereConversationClearedAt($value)
+ * @method static Builder|Participant whereConversationDeletedAt($value)
+ * @method static Builder|Participant whereConversationId($value)
+ * @method static Builder|Participant whereConversationReadAt($value)
+ * @method static Builder|Participant whereCreatedAt($value)
+ * @method static Builder|Participant whereDeletedAt($value)
+ * @method static Builder|Participant whereExitedAt($value)
+ * @method static Builder|Participant whereId($value)
+ * @method static Builder|Participant whereLastActiveAt($value)
+ * @method static Builder|Participant whereParticipantable(\Illuminate\Database\Eloquent\Model $model)
+ * @method static Builder|Participant whereParticipantableId($value)
+ * @method static Builder|Participant whereParticipantableType($value)
+ * @method static Builder|Participant whereRole($value)
+ * @method static Builder|Participant whereUpdatedAt($value)
+ * @method static Builder|Participant withExited()
+ * @method static Builder|Participant withoutParticipantable(\Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable $user)
+ *
+ * @mixin \Eloquent
  */
 class Participant extends Model
 {
@@ -118,7 +133,7 @@ class Participant extends Model
     /**
      * Scope for filtering by participantable model.
      *
-     * @template T of \Illuminate\Database\Eloquent\Model
+     * @template T of \Illuminate\Database\Eloquent\Model|Authenticatable
      *
      * @param  T  $model
      */
@@ -205,6 +220,7 @@ class Participant extends Model
 
     /**
      * Remove a participant and log the action if not already logged.
+     *
      * @param  Model  $admin  The admin model removing the participant.
      */
     public function removeByAdmin(Model|Authenticatable $admin): void
@@ -266,9 +282,8 @@ class Participant extends Model
         return true;
     }
 
-
     /**
-     * @param \Illuminate\Database\Eloquent\Builder<static> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
     public function scopeWithoutParticipantable($query, Model|Authenticatable $user): Builder

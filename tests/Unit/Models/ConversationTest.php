@@ -618,10 +618,8 @@ describe('deleteFor()', function () {
 
         $participant = $conversation->participant($auth);
 
-          dd($participant);
-
         expect($participant->conversation_deleted_at)->not->toBe(null);
-    })->only();
+    });
 
     it('it does not exludes deleted conversation from query if not new message is available', function () {
 

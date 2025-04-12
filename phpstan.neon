@@ -5,7 +5,7 @@ includes:
 parameters:
 
     paths:
-        - src/
+        - src/Livewire/
 
     # Level 10 is the highest level
     level: 5
@@ -14,7 +14,7 @@ parameters:
     ignoreErrors:
 #        - '#PHPDoc tag @var#'
         # Ignore errors for properties |method in ChatableTrait related to display_name, cover_url, and profile_url
-        - '#Access to an undefined property .*display_name#'
+        # - '#Access to an undefined property .*display_name#'
         - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withoutParticipantable#'
         # - '#Access to an undefined property .*cover_url#'
         #- '#Access to an undefined property .*profile_url#'

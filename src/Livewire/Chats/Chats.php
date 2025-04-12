@@ -16,6 +16,8 @@ use Namu\WireChat\Models\Conversation;
  * Chats Component
  *
  * Handles chat conversations, search, and real-time updates.
+ *
+ * @property \Illuminate\Contracts\Auth\Authenticatable|null $auth
  */
 class Chats extends Component
 {
@@ -78,7 +80,7 @@ class Chats extends Component
     {
         $user = $this->auth;
         $encodedType = MorphClassResolver::encode($user?->getMorphClass());
-        $userId = $user?->id;
+        $userId = $user?->getKey();
 
         // dd($encodedType,$userId);
         return [
@@ -267,16 +269,15 @@ class Chats extends Component
      * Applies search conditions to the conversations query.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query  The query builder instance.
-     * @return void
      */
-    protected function applySearchConditions($query)
+    protected function applySearchConditions($query): \Illuminate\Database\Eloquent\Builder
     {
         $searchableFields = WireChat::searchableFields();
         $groupSearchableFields = ['name', 'description'];
         $columnCache = [];
 
         // Use withDeleted to reverse withoutDeleted in order to make deleted chats appear in search.
-        $query->withDeleted()->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
+        return $query->withDeleted()->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
             // Search in participants' participantable fields.
             $query->whereHas('participants', function ($subquery) use ($searchableFields, &$columnCache) {
                 $subquery->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
@@ -292,7 +293,7 @@ class Chats extends Component
             });
 
             // Search in group fields directly.
-            $query->orWhereHas('group', function ($groupQuery) use ($groupSearchableFields) {
+            return $query->orWhereHas('group', function ($groupQuery) use ($groupSearchableFields) {
                 $groupQuery->where(function ($query4) use ($groupSearchableFields) {
                     foreach ($groupSearchableFields as $field) {
                         $query4->orWhere($field, 'LIKE', '%'.$this->search.'%');

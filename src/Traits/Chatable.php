@@ -293,10 +293,6 @@ trait Chatable
 
     /**
      * Define the relationship to the conversation.
-     *
-     * @param \Namu\WireChat\Models\Conversation $conversation
-     * @param bool $withoutGlobalScopes
-     * @return bool
      */
     public function belongsToConversation(Conversation $conversation, bool $withoutGlobalScopes = false): bool
     {
@@ -330,7 +326,6 @@ trait Chatable
 
     /**
      * Delete a conversation
-     * @param \Namu\WireChat\Models\Conversation $conversation
      */
     public function deleteConversation(Conversation $conversation): void
     {
@@ -341,7 +336,6 @@ trait Chatable
 
     /**
      * Clear a conversation
-     * @param \Namu\WireChat\Models\Conversation $conversation
      */
     public function clearConversation(Conversation $conversation)
     {

@@ -90,6 +90,7 @@ class WireChat extends Component
         }
 
         if (enum_exists($parameterClassName)) {
+            /* @phpstan-ignore staticMethod.notFound */
             $enum = $parameterClassName::tryFrom($parameterValue);
 
             if ($enum !== null) {
@@ -106,6 +107,10 @@ class WireChat extends Component
         return $model;
     }
 
+    /**
+     * @param  object  $component
+     * @return \Illuminate\Support\Collection<string|null>
+     */
     public function getPublicPropertyTypes($component): Collection
     {
         $types = collect($component->all())

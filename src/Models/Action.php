@@ -2,10 +2,10 @@
 
 namespace Namu\WireChat\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Facades\WireChat;
 
@@ -15,10 +15,29 @@ use Namu\WireChat\Facades\WireChat;
  * @property string $actionable_type
  * @property int $actor_id
  * @property string $actor_type
- * @property string $type
- * @property string $data
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property Actions $type
+ * @property string|null $data Some additional information about the action
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $actionable
+ * @property-read Model|\Eloquent $actor
+ *
+ * @method static Builder|Action newModelQuery()
+ * @method static Builder|Action newQuery()
+ * @method static Builder|Action query()
+ * @method static Builder|Action whereActionableId($value)
+ * @method static Builder|Action whereActionableType($value)
+ * @method static Builder|Action whereActor(\Illuminate\Database\Eloquent\Model $actor)
+ * @method static Builder|Action whereActorId($value)
+ * @method static Builder|Action whereActorType($value)
+ * @method static Builder|Action whereCreatedAt($value)
+ * @method static Builder|Action whereData($value)
+ * @method static Builder|Action whereId($value)
+ * @method static Builder|Action whereType($value)
+ * @method static Builder|Action whereUpdatedAt($value)
+ * @method static Builder|Action withoutActor(\Illuminate\Database\Eloquent\Model $user)
+ *
+ * @mixin \Eloquent
  */
 class Action extends Model
 {
@@ -56,13 +75,13 @@ class Action extends Model
     }
 
     // Polymorphic relationship to the entity being acted upon (message, conversation, etc.)
-    public function actionable()
+    public function actionable(): MorphTo
     {
         return $this->morphTo(null, 'actionable_type', 'actionable_id', 'id');
     }
 
     // Polymorphic relationship to the actor (User, Admin, etc.)
-    public function actor()
+    public function actor(): MorphTo
     {
         return $this->morphTo('actor', 'actor_type', 'actor_id', 'id');
     }

@@ -51,7 +51,7 @@ class Info extends ModalComponent
     {
         $this->description = $this->group?->description;
         $this->groupName = $this->group?->name;
-        $this->cover_url = $this->conversation?->group?->cover_url;
+        $this->cover_url = $this->conversation->group?->cover_url;
 
     }
 
@@ -251,13 +251,13 @@ class Info extends ModalComponent
     public function render()
     {
 
-        $participant = $this->conversation?->participant(auth()->user());
+        $participant = $this->conversation->participant(auth()->user());
 
         //  dd($this->isWidget(),$participant);
 
         // Pass data to the view
         return view('wirechat::livewire.chat.group.info', [
-            'receiver' => $this->conversation?->getReceiver(),
+            'receiver' => $this->conversation->getReceiver(),
             'participant' => $participant,
         ]);
     }

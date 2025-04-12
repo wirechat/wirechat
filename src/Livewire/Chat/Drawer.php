@@ -79,6 +79,7 @@ class Drawer extends Component
         }
 
         if (enum_exists($parameterClassName)) {
+            /* @phpstan-ignore staticMethod.notFound */
             $enum = $parameterClassName::tryFrom($parameterValue);
 
             if ($enum !== null) {
