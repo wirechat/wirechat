@@ -2,12 +2,25 @@
 
 namespace Namu\WireChat\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Facades\WireChat;
 
+/**
+ * @property int $id
+ * @property string $attachable_id
+ * @property string $attachable_type
+ * @property string $file_path
+ * @property string $file_name
+ * @property string $original_name
+ * @property string $url
+ * @property string $mime_type
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class Attachment extends Model
 {
     use HasFactory;

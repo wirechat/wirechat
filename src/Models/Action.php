@@ -2,12 +2,24 @@
 
 namespace Namu\WireChat\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Facades\WireChat;
 
+/**
+ * @property int $id
+ * @property int $actionable_id
+ * @property string $actionable_type
+ * @property int $actor_id
+ * @property string $actor_type
+ * @property string $type
+ * @property string $data
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class Action extends Model
 {
     use HasFactory;
@@ -59,7 +71,7 @@ class Action extends Model
     public function scopeWhereActor(Builder $query, Model $actor)
     {
 
-        $query->where('actor_id', $actor->id)->where('actor_type', $actor->getMorphClass());
+        $query->where('actor_id', $actor->getKey())->where('actor_type', $actor->getMorphClass());
 
     }
 
@@ -70,7 +82,7 @@ class Action extends Model
     {
 
         return $query->where(function ($query) use ($user) {
-            $query->where('actor_id', '<>', $user->id)
+            $query->where('actor_id', '<>', $user->getKey())
                 ->orWhere('actor_type', '<>', $user->getMorphClass());
         });
 

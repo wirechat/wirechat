@@ -2,17 +2,45 @@
 
 namespace Namu\WireChat\Models;
 
+use Carbon\Carbon;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Scopes\WithoutRemovedActionScope;
 use Namu\WireChat\Traits\Actionable;
 
+/**
+ * @property int $id
+ * @property int $conversation_id
+ * @property int $participantable_id
+ * @property string $participantable_type
+ * @property ParticipantRole $role
+ * @property Carbon $exited_at
+ * @property Carbon $conversation_deleted_at
+ * @property Carbon $conversation_deleted_at
+ * @property Carbon $conversation_read_at
+ * @property Carbon $last_active_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read \Namu\WireChat\Models\Conversation $conversation
+ * @property-read \Illuminate\Database\Eloquent\Model $participantable
+ * @method void removeByAdmin(\Illuminate\Contracts\Auth\Authenticatable|\Illuminate\Database\Eloquent\Model $admin)
+ * @method bool exitConversation()
+ * @method bool hasDeletedConversation(bool $checkDeletionExpired = false)
+ * @method bool isRemovedByAdmin()
+ * @method bool hasExited()
+ * @method bool hasExited()
+ * @method bool isOwner()
+ * @method bool isAdmin()
+ * @method static \Illuminate\Database\Eloquent\Builder withoutParticipantable(\Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable $user)
+ */
 class Participant extends Model
 {
     use Actionable;
@@ -82,26 +110,24 @@ class Participant extends Model
     /**
      * Polymorphic relation to the participantable model.
      */
-    public function participantable()
+    public function participantable(): MorphTo
     {
         return $this->morphTo();
     }
 
     /**
      * Scope for filtering by participantable model.
-     */
-    /**
-     * Scope for filtering by participantable model.
+     *
+     * @template T of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  T  $model
      */
     public function scopeWhereParticipantable(Builder $query, Model $model): void
     {
-        $query->where('participantable_id', $model->id)
+        $query->where('participantable_id', $model->getKey())
             ->where('participantable_type', $model->getMorphClass());
     }
 
-    /**
-     * Scope for filtering by participantable model.
-     */
     /**
      * Remove global scope withoutExited.
      */
@@ -113,7 +139,7 @@ class Participant extends Model
     /**
      * Define a relationship to fetch the conversation.
      */
-    public function conversation()
+    public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);
     }
@@ -123,7 +149,7 @@ class Participant extends Model
      **/
     public function isAdmin(): bool
     {
-        return $this->role == ParticipantRole::OWNER || $this->role == ParticipantRole::ADMIN;
+        return $this->role === ParticipantRole::OWNER || $this->role === ParticipantRole::ADMIN;
     }
 
     /**
@@ -132,13 +158,11 @@ class Participant extends Model
     public function isOwner(): bool
     {
 
-        return $this->role == ParticipantRole::OWNER;
+        return $this->role === ParticipantRole::OWNER;
     }
 
     /**
      * Mark the participant as exited from the conversation.
-     *
-     * @param null
      */
     public function exitConversation(): bool
     {
@@ -181,10 +205,9 @@ class Participant extends Model
 
     /**
      * Remove a participant and log the action if not already logged.
-     *
      * @param  Model  $admin  The admin model removing the participant.
      */
-    public function removeByAdmin(Model $admin): void
+    public function removeByAdmin(Model|Authenticatable $admin): void
     {
         // Check if a remove action already exists for this participant
         $exists = Action::where('actionable_id', $this->id)
@@ -197,7 +220,7 @@ class Participant extends Model
             Action::create([
                 'actionable_id' => $this->id,
                 'actionable_type' => Participant::class,
-                'actor_id' => $admin->id,  // The admin who performed the action
+                'actor_id' => $admin->getKey(),  // The admin who performed the action
                 'actor_type' => $admin->getMorphClass(),  // Assuming 'User' is the actor model
                 'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
             ]);
@@ -243,14 +266,16 @@ class Participant extends Model
         return true;
     }
 
+
     /**
-     * Exclude participant passed as parameter
+     * @param \Illuminate\Database\Eloquent\Builder<static> $query
+     * @return \Illuminate\Database\Eloquent\Builder<static>
      */
-    public function scopeWithoutParticipantable($query, Model $user): Builder
+    public function scopeWithoutParticipantable($query, Model|Authenticatable $user): Builder
     {
 
         return $query->where(function ($query) use ($user) {
-            $query->where('participantable_id', '<>', $user->id)
+            $query->where('participantable_id', '<>', $user->getKey())
                 ->orWhere('participantable_type', '<>', $user->getMorphClass());
         });
 

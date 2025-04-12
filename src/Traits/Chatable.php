@@ -16,11 +16,9 @@ use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
 
 /**
- * Trait Chatable
- *
- * This trait defines the behavior for models that can participate in conversations within the WireChat system.
- * It provides methods to establish relationships with conversations, define cover images for avatars,
- * and specify the route for redirecting to the user's profile page.
+ * @property-read string|null $cover_url
+ * @property-read string|null $display_name
+ * @property-read string|null $profile_url
  */
 trait Chatable
 {
@@ -294,7 +292,11 @@ trait Chatable
     }
 
     /**
-     * Check if the user belongs to a conversation.
+     * Define the relationship to the conversation.
+     *
+     * @param \Namu\WireChat\Models\Conversation $conversation
+     * @param bool $withoutGlobalScopes
+     * @return bool
      */
     public function belongsToConversation(Conversation $conversation, bool $withoutGlobalScopes = false): bool
     {
@@ -328,14 +330,19 @@ trait Chatable
 
     /**
      * Delete a conversation
+     * @param \Namu\WireChat\Models\Conversation $conversation
      */
-    public function deleteConversation(Conversation $conversation)
+    public function deleteConversation(Conversation $conversation): void
     {
 
         // use already created methods inside conversation model
         $conversation->deleteFor($this);
     }
 
+    /**
+     * Clear a conversation
+     * @param \Namu\WireChat\Models\Conversation $conversation
+     */
     public function clearConversation(Conversation $conversation)
     {
 
@@ -349,7 +356,7 @@ trait Chatable
     public function hasConversationWith(Model $user): bool
     {
 
-        $participantId = $user->id;
+        $participantId = $user->getKey();
         $participantType = $user->getMorphClass();
 
         $authenticatedUserId = $this->id;

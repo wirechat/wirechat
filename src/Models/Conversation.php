@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,19 @@ use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
 use Namu\WireChat\Traits\Actionable;
 
+/**
+ * @property int $id
+ * @property ConversationType $type
+ * @property bool $disappearing_started_at
+ * @property int $disappearing_duration
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Participant> $participants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Message> $messages
+ * @method static \Illuminate\Database\Eloquent\Builder|Conversation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Conversation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Conversation query()
+ */
 class Conversation extends Model
 {
     use Actionable;
@@ -101,7 +115,7 @@ class Conversation extends Model
     /**
      * Define a relationship to fetch participants for this conversation.
      */
-    public function participants()
+    public function participants(): HasMany
     {
         return $this->hasMany(Participant::class, 'conversation_id', 'id');
     }
@@ -112,7 +126,7 @@ class Conversation extends Model
      * If participants are already loaded, it fetches from the collection.
      * Otherwise, it queries dynamically via the `participants()` relationship.
      *
-     * @param  Model|Authenticatable  $user  The user instance.
+     * @param  Model|\Illuminate\Contracts\Auth\Authenticatable  $user  The user instance.
      * @param  bool  $withoutGlobalScopes  Whether to ignore global scopes in the query.
      * @return Participant|null The corresponding participant or null if not found.
      */
@@ -126,27 +140,32 @@ class Conversation extends Model
             $query = $query->withoutGlobalScopes();
         }
 
-        return $query->where('participantable_id', $user->id)
+         /** 
+         * @var Participant|null $participant
+         * */
+        $participant= $query->where('participantable_id', $user->getKey())
             ->where('participantable_type', $user->getMorphClass())
             ->first();
+        return $participant;
     }
 
     /**
      * Add a new participant to the conversation.
      *
-     * @param Model user the creator of group
-     * @param ParticipantRole  a ParticipanRole enum to assign to member
+     * @param Model $user the creator of group
+     * @param ParticipantRole  $role enum to assign to member
      * @param  bool  $undoAdminRemovalAction  If the user was recently removed by admin, allow re-adding.
      */
     public function addParticipant(Model $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
     {
-        // Check if the participant already exists (with or without global scopes)
+        /** @var Participant|null $participant */
         $participant = $this->participants()
-            ->withoutGlobalScopes()
-            ->where('participantable_id', $user->id)
-            ->where('participantable_type', $user->getMorphClass())
-            ->first();
-
+        ->withoutGlobalScopes()
+        ->where('participantable_id', $user->getKey())
+        ->where('participantable_type', $user->getMorphClass())
+        ->first();
+        
+        # Check if the participant already exists (with or without global scopes)
         if ($participant) {
             // Abort if the participant exited themselves
             abort_if(
@@ -193,20 +212,22 @@ class Conversation extends Model
             );
         }
 
-        // Add a new participant
-        return $this->participants()->create([
-            'participantable_id' => $user->id,
+        /** @var Participant|null $participant */
+        $participant= $this->participants()->create([
+            'participantable_id' => $user->getKey(),
             'participantable_type' => $user->getMorphClass(),
             'role' => $role,
         ]);
+
+        return $participant;
     }
 
-    public function messages()
+    public function messages(): hasMany
     {
         return $this->hasMany(Message::class);
     }
 
-    public function lastMessage()
+    public function lastMessage() :hasOne
     {
         return $this->hasOne(Message::class, 'conversation_id')->latestOfMany();
     }
@@ -310,7 +331,7 @@ class Conversation extends Model
      * This method retrieves the other participant in a private conversation
      * or returns the given reference user for self conversations.
      *
-     * @param  Model  $reference  The reference user/model to exclude.
+     * @param  Model|\Illuminate\Contracts\Auth\Authenticatable   $reference  The reference user/model to exclude.
      * @return Participant|null The other participant or null if not applicable.
      */
     public function peerParticipant(Model|Authenticatable $reference): ?Participant
@@ -331,13 +352,17 @@ class Conversation extends Model
 
         // If is set then return references's participant
         if ($this->isSelf()) {
-            return $participants->where('participantable_id', $reference->id)->where('participantable_type', $reference->getMorphClass())->first();
+            /** @var Participant|null $self */
+            $self= $participants->where('participantable_id', $reference->getKey())->where('participantable_type', $reference->getMorphClass())->first();
+            return $self;
         }
 
         // else return participant who is not the reference
-        return $participants->reject(fn ($participant) => $participant->participantable_id == $reference->id &&
+        /** @var Participant|null $peer */
+        $peer= $participants->reject(fn ($participant) => $participant->participantable_id == $reference->getKey() &&
             $participant->participantable_type == $reference->getMorphClass()
         )->first();
+        return $peer;
     }
 
     /**
@@ -358,12 +383,13 @@ class Conversation extends Model
 
         // Check if 'participants' relationship is already loaded
         if ($this->relationLoaded('participants')) {
-            return collect($this->participants)->reject(fn ($participant) => $participant->participantable_id == $reference->id &&
+            return collect($this->participants)->reject(fn ($participant) => $participant->participantable_id == $reference->getKey() &&
                 $participant->participantable_type == $reference->getMorphClass()
             );
         }
 
         // If not loaded, use the query scope
+
         return $this->participants()->withoutParticipantable($reference)->get();
     }
 
@@ -402,8 +428,6 @@ class Conversation extends Model
 
     /**
      * Get the receiver of the private conversation
-     *
-     * @param null
      * */
     public function getReceiver()
     {
@@ -470,15 +494,17 @@ class Conversation extends Model
     /**
      * Retrieve unread messages in this conversation for a specific user.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param \Illuminate\Database\Eloquent\Model $user
+     * @return \Illuminate\Database\Eloquent\Collection<int,\Namu\WireChat\Models\Message>
      */
-    public function unreadMessages(Model $user)
+    public function unreadMessages(Model|Authenticatable $user): \Illuminate\Database\Eloquent\Collection
     {
         $participant = $this->participant($user);
 
         if (! $participant) {
             // If the participant is not found, return an empty collection
-            return collect();
+             return new \Illuminate\Database\Eloquent\Collection();
+
         }
 
         $lastReadAt = $participant->conversation_read_at;
@@ -489,7 +515,7 @@ class Conversation extends Model
             return $this->messages->filter(function ($message) use ($lastReadAt, $user) {
                 // If lastReadAt is null, consider all messages as unread
                 // Also, exclude messages that belong to the user
-                return (! $lastReadAt || $message->created_at > $lastReadAt) && ! $message->ownedBy($user);
+                return ($lastReadAt==null || $message->created_at > $lastReadAt) && ! $message->ownedBy($user);
             });
         }
 
@@ -497,6 +523,7 @@ class Conversation extends Model
         $query = $this->messages();
 
         // WORKING
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Message> $messages */
         $messages = $query->whereIsNotOwnedBy($user)->when($lastReadAt, function ($query) use ($lastReadAt) {
 
             $query->where('created_at', '>', $lastReadAt);
@@ -528,7 +555,7 @@ class Conversation extends Model
      */
     public function hasDisappearingTurnedOn(): bool
     {
-        return ! is_null($this->disappearing_duration) && $this->disappearing_duration > 0 && ! is_null($this->disappearing_started_at);
+        return $this->disappearing_duration > 0 && $this->disappearing_started_at !== null;
     }
 
     /**
@@ -536,7 +563,7 @@ class Conversation extends Model
      *
      * @param  int  $durationInSeconds  The duration for disappearing messages in seconds.
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function turnOnDisappearing(int $durationInSeconds): void
     {
@@ -565,10 +592,10 @@ class Conversation extends Model
     /**
      * Delete all messages for the given participant and check if the conversation can be deleted.
      *
-     * @param  Model  $participant  The participant whose messages are to be deleted.
-     * @return void|null Returns null if the other participant cannot be found in a private conversation.
+     * @param  Model|Authenticatable  $user  The participant whose messages are to be deleted.
+     * @return bool|null 
      */
-    public function deleteFor(Model $user)
+    public function deleteFor(Model|Authenticatable $user): bool|null
     {
         // Ensure the participant belongs to the conversation
         abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
@@ -603,9 +630,11 @@ class Conversation extends Model
 
             // If all participants have deleted the conversation, force delete it
             if ($deletedByBothParticipants) {
-                $this->forceDelete();
+           return     $this->forceDelete();
             }
         }
+
+        return null;
     }
 
     /**

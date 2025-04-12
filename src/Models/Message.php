@@ -2,8 +2,13 @@
 
 namespace Namu\WireChat\Models;
 
+use Carbon\Carbon;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +19,19 @@ use Namu\WireChat\Helpers\Helper;
 use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
 use Namu\WireChat\Traits\Actionable;
 
+/**
+ * @property int $id
+ * @property string $sendable_type
+ * @property int $sendable_id
+ * @property int $conversation_id
+ * @property int $reply_id
+ * @property string $body
+ * @property MessageType $type
+ * @property Carbon $kept_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read \Namu\WireChat\Models\Conversation $conversation
+ */
 class Message extends Model
 {
     use Actionable;
@@ -44,13 +62,13 @@ class Message extends Model
 
     /* relationship */
 
-    public function conversation()
+    public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);
     }
 
     /* Polymorphic relationship for the sender */
-    public function sendable()
+    public function sendable(): MorphTo
     {
         return $this->morphTo();
     }
@@ -76,7 +94,7 @@ class Message extends Model
             if ($message->attachment?->exists()) {
 
                 // delete attachment
-                $message->attachment?->delete();
+                $message->attachment->delete();
 
                 // also delete from storage
                 if (Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->exists($message->attachment->file_path)) {
@@ -92,7 +110,7 @@ class Message extends Model
         });
     }
 
-    public function attachment()
+    public function attachment(): MorphOne
     {
         return $this->morphOne(Attachment::class, 'attachable');
     }
@@ -104,7 +122,7 @@ class Message extends Model
 
     public function isAttachment(): bool
     {
-        return $this->type == MessageType::ATTACHMENT;
+        return $this->type === MessageType::ATTACHMENT;
     }
 
     /**
@@ -128,14 +146,14 @@ class Message extends Model
             return false;
         }
 
-        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->id;
+        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->getKey();
     }
 
     public function belongsToAuth(): bool
     {
         $user = auth()->user();
 
-        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->id;
+        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->getKey();
     }
 
     // Relationship for the parent message
@@ -162,11 +180,11 @@ class Message extends Model
         return $this->parent()->exists();
     }
 
-    public function scopeWhereIsNotOwnedBy($query, $user)
+    public function scopeWhereIsNotOwnedBy($query, Model|Authenticatable $user)
     {
 
         $query->where(function ($query) use ($user) {
-            $query->where('sendable_id', '<>', $user->id)
+            $query->where('sendable_id', '<>', $user->getKey())
                 ->orWhere('sendable_type', '<>', $user->getMorphClass());
         });
 
@@ -181,11 +199,8 @@ class Message extends Model
      * Delete for
      * This will delete the message only for the auth user meaning other participants will be able to see it
      */
-    public function deleteFor($user)
+    public function deleteFor(Model|Authenticatable $user)
     {
-        if (! $user || ! ($user instanceof \Illuminate\Database\Eloquent\Model)) {
-            return false;
-        }
 
         $conversation = $this->conversation;
 
@@ -201,7 +216,7 @@ class Message extends Model
 
         // Try to create an action
         $this->actions()->create([
-            'actor_id' => $user->id,
+            'actor_id' => $user->getKey(),
             'actor_type' => $user->getMorphClass(),
             'type' => Actions::DELETE,
         ]);
@@ -229,7 +244,7 @@ class Message extends Model
 
     /**
      * Deleting message for everyone   */
-    public function deleteForEveryone(Model $user)
+    public function deleteForEveryone(Model $user): void
     {
 
         $conversation = $this->conversation;
