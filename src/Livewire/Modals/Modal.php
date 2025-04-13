@@ -93,6 +93,7 @@ class Modal extends Component
     {
         return collect($component->all())
             ->map(function ($value, $name) use ($component) {
+                /* @phpstan-ignore argument.type */
                 return Reflector::getParameterClassName(new \ReflectionProperty($component, $name));
             })
             ->filter();

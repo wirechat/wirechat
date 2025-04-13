@@ -9,7 +9,7 @@ class WireChatService
     /**
      * Get the color used to be used in as themse
      */
-    public static function getColor()
+    public static function getColor(): string
     {
         return config('wirechat.color', '#3b82f6');
     }
@@ -37,20 +37,31 @@ class WireChatService
         return $fieldsToCheck ?: null;
     }
 
-    // Get table prefix from congif
+    /**
+     * Get the table prefix from the configuration.
+     *
+     * @return string|null The table prefix or null if not set.
+     */
     public static function tablePrefix(): ?string
     {
         return config('wirechat.table_prefix');
     }
 
-    // return a formatted tabel name
-    public static function formatTableName($table): string
+    /**
+     * Format the table name with the table prefix.
+     *
+     * @param  string  $table  The table name to format.
+     * @return string The formatted table name.
+     */
+    public static function formatTableName(string $table): string
     {
         return config('wirechat.table_prefix').$table;
     }
 
     /**
-     * Checks if new group modal button can be shown
+     * Check if the new group modal button can be shown.
+     *
+     * @return bool True if the new group modal button can be shown, false otherwise.
      */
     public static function showNewGroupModalButton(): bool
     {
@@ -58,7 +69,9 @@ class WireChatService
     }
 
     /**
-     * Checks if new group modal button can be shown
+     * Check if chat search is allowed.
+     *
+     * @return bool True if chat search is allowed, false otherwise.
      */
     public static function allowChatsSearch(): bool
     {
@@ -66,7 +79,9 @@ class WireChatService
     }
 
     /**
-     * Checks if new chat modal button can be shown
+     * Check if the new chat modal button can be shown.
+     *
+     * @return bool True if the new chat modal button can be shown, false otherwise.
      */
     public static function showNewChatModalButton(): bool
     {
@@ -74,7 +89,9 @@ class WireChatService
     }
 
     /**
-     * Maximum members allowed per group
+     * Get the maximum number of members allowed per group.
+     *
+     * @return int The maximum number of members.
      */
     public static function maxGroupMembers(): int
     {
@@ -82,7 +99,9 @@ class WireChatService
     }
 
     /**
-     * Get wirechat storage disk
+     * Get the wirechat storage disk from the configuration.
+     *
+     * @return string The storage disk.
      */
     public static function storageDisk(): string
     {
@@ -90,7 +109,9 @@ class WireChatService
     }
 
     /**
-     * Get wirechat storage folder
+     * Get the wirechat storage folder from the configuration.
+     *
+     * @return string The storage folder.
      */
     public static function storageFolder(): string
     {
@@ -98,7 +119,9 @@ class WireChatService
     }
 
     /**
-     * Get wirechat storage disk
+     * Get the wirechat messages queue from the configuration.
+     *
+     * @return string The messages queue.
      */
     public static function messagesQueue(): string
     {
@@ -106,7 +129,9 @@ class WireChatService
     }
 
     /**
-     * Get wirechat storage disk
+     * Get the wirechat notifications queue from the configuration.
+     *
+     * @return string The notifications queue.
      */
     public static function notificationsQueue(): string
     {
@@ -114,7 +139,9 @@ class WireChatService
     }
 
     /**
-     * Get route name for index
+     * Get the route name for the index page.
+     *
+     * @return string The index route name.
      */
     public static function indexRouteName(): string
     {
@@ -122,7 +149,9 @@ class WireChatService
     }
 
     /**
-     * Get route name for chat view
+     * Get the route name for the chat view page.
+     *
+     * @return string The chat view route name.
      */
     public static function viewRouteName(): string
     {
@@ -130,13 +159,9 @@ class WireChatService
     }
 
     /**
-     *----------------------------------------------------
-     * Notificatons
+     * Check if notifications are enabled for Wirechat.
      *
-     **/
-
-    /**
-     * Get wirechat storage disk
+     * @return bool True if notifications are enabled, false otherwise.
      */
     public static function notificationsEnabled(): bool
     {

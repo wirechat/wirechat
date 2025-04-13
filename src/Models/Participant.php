@@ -34,6 +34,10 @@ use Namu\WireChat\Traits\Actionable;
  * @property-read \Namu\WireChat\Models\Conversation $conversation
  * @property-read Model|\Eloquent $participantable
  *
+ * @method bool hasDeletedConversation(bool $checkDeletionExpired = false)
+ *
+ * @property-read \Illuminate\Database\Eloquent\Model|null $participantable
+ *
  * @method static Builder|Participant newModelQuery()
  * @method static Builder|Participant newQuery()
  * @method static Builder|Participant query()
@@ -116,6 +120,8 @@ class Participant extends Model
      * since you have a non-standard namespace;
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
+     *
+     * @return \Namu\WireChat\Workbench\Database\Factories\ParticipantFactory
      */
     protected static function newFactory()
     {
@@ -124,6 +130,8 @@ class Participant extends Model
 
     /**
      * Polymorphic relation to the participantable model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model,covariant $this>
      */
     public function participantable(): MorphTo
     {
@@ -133,18 +141,18 @@ class Participant extends Model
     /**
      * Scope for filtering by participantable model.
      *
-     * @template T of \Illuminate\Database\Eloquent\Model|Authenticatable
-     *
-     * @param  T  $model
+     * @param  Builder<Model>  $query
      */
-    public function scopeWhereParticipantable(Builder $query, Model $model): void
+    public function scopeWhereParticipantable(Builder $query, Model|Authenticatable $model): void
     {
         $query->where('participantable_id', $model->getKey())
             ->where('participantable_type', $model->getMorphClass());
     }
 
     /**
-     * Remove global scope withoutExited.
+     * Remove the "withoutExited" global scope to include exited participants.
+     *
+     * @param  Builder<\Namu\WireChat\Models\Participant>  $query
      */
     public function scopeWithExited(Builder $query): void
     {
@@ -152,7 +160,9 @@ class Participant extends Model
     }
 
     /**
-     * Define a relationship to fetch the conversation.
+     * Get the conversation this participant belongs to.
+     *
+     * @return BelongsTo<Conversation, covariant $this>
      */
     public function conversation(): BelongsTo
     {

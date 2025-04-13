@@ -200,7 +200,10 @@ class Chats extends Component
                 'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
             ])
             ->when(trim($this->search ?? '') != '', fn ($query) => $this->applySearchConditions($query))
-            ->when(trim($this->search ?? '') == '', fn ($query) => $query->withoutDeleted()->withoutBlanks())
+            ->when(trim($this->search ?? '') == '', function ($query) {
+                /** @phpstan-ignore-next-line */
+                return $query->withoutDeleted()->withoutBlanks();
+            })
             ->latest('updated_at')
             ->skip($offset)
             ->take($perPage)
@@ -277,6 +280,7 @@ class Chats extends Component
         $columnCache = [];
 
         // Use withDeleted to reverse withoutDeleted in order to make deleted chats appear in search.
+        /** @phpstan-ignore-next-line */
         return $query->withDeleted()->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
             // Search in participants' participantable fields.
             $query->whereHas('participants', function ($subquery) use ($searchableFields, &$columnCache) {

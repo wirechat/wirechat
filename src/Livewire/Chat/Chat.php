@@ -2,6 +2,7 @@
 
 namespace Namu\WireChat\Livewire\Chat;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
@@ -61,10 +62,11 @@ class Chat extends Component
 
     public array $files = [];
 
-    public ?Participant $authParticipant;
+    /** @var \Namu\WireChat\Models\Participant&\Namu\WireChat\Traits\Chatable */
+    public Participant|Model|null $authParticipant;
 
     // #[Locked]
-    public ?Participant $receiverParticipant = null;
+    public Participant|Model|null $receiverParticipant = null;
 
     // Theme
     public $replyMessage = null;
@@ -530,10 +532,8 @@ class Chat extends Component
         }
     }
 
-    // Helper method to get group key
     private function messageGroupKey(Message $message): string
     {
-
         $messageDate = $message->created_at;
         $groupKey = '';
         if ($messageDate->isToday()) {
@@ -624,7 +624,9 @@ class Chat extends Component
             broadcast(new MessageCreated($message))->toOthers();
 
             // notify participants if conversation is NOT self
-            if ($this->conversation->isSelf() === false) {
+            $isSelf = $this->conversation->isSelf();
+            /** @var bool $isSelf */
+            if (! $isSelf) {
                 NotifyParticipants::dispatch($this->conversation, $message);
             }
         } catch (\Throwable $th) {
@@ -684,6 +686,7 @@ class Chat extends Component
         // Get total message count
 
         // Fetch paginated messages
+        /* @var Message $message */
         $messages = $this->conversation->messages()
             ->with('sendable', 'parent.sendable', 'attachment')
             ->orderBy('created_at', 'asc')
@@ -694,7 +697,10 @@ class Chat extends Component
         // Calculate whether more messages can be loaded
         // Group the messages
         $this->loadedMessages = $messages
-            ->groupBy(fn ($message) => $this->messageGroupKey($message))  // Grouping by custom logic
+            ->groupBy(function ($message) {
+                /** @var \Namu\WireChat\Models\Message $message */
+                return $this->messageGroupKey($message);
+            })
             ->map->values();  // Re-index each group
 
         $this->canLoadMore = $this->totalMessageCount > $messages->count();
@@ -775,9 +781,13 @@ class Chat extends Component
                 $this->receiverParticipant = $this->authParticipant;
             }
 
-            $this->receiver = $this->receiverParticipant
-                ? $this->receiverParticipant->participantable
+            /** @var \Namu\WireChat\Models\Participant|null $participant */
+            $participant = $this->receiverParticipant;
+
+            $this->receiver = $participant
+                ? $participant->participantable
                 : null;
+
         } else {
             $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
             $this->receiver = null;

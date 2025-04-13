@@ -28,7 +28,7 @@ use Namu\WireChat\Services\WireChatService;
 
 class WireChatServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
 
         // Register the command if we are using the application via the CLI

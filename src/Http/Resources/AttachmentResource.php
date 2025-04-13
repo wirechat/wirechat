@@ -5,6 +5,9 @@ namespace Namu\WireChat\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \Namu\WireChat\Models\Attachment
+ */
 class AttachmentResource extends JsonResource
 {
     /**

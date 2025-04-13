@@ -35,6 +35,7 @@ use Namu\WireChat\Traits\Actionable;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Participant> $participants
  * @property-read int|null $participants_count
  *
+ * @method bool isSelf()
  * @method static Builder|Conversation newModelQuery()
  * @method static Builder|Conversation newQuery()
  * @method static Builder|Conversation query()
@@ -243,6 +244,9 @@ class Conversation extends Model
         return $participant;
     }
 
+    /**
+     * Define a relationship to fetch messages for this conversation.
+     */
     public function messages(): hasMany
     {
         return $this->hasMany(Message::class);
@@ -538,6 +542,7 @@ class Conversation extends Model
             return $this->messages->filter(function ($message) use ($lastReadAt, $user) {
                 // If lastReadAt is null, consider all messages as unread
                 // Also, exclude messages that belong to the user
+                /** @var \Namu\WireChat\Models\Message $message */
                 return ($lastReadAt == null || $message->created_at > $lastReadAt) && ! $message->ownedBy($user);
             });
         }
@@ -631,7 +636,7 @@ class Conversation extends Model
         $participant->save();
 
         // Then force delete it
-        if ($this->isSelfConversation($user)) {
+        if ($this->isSelfConversation()) {
             return $this->forceDelete();
         }
 
@@ -662,14 +667,14 @@ class Conversation extends Model
     /**
      * Check if a given user has deleted all messages in the conversation using the deleteForMe
      */
-    public function hasBeenDeletedBy(Model $user): bool
+    public function hasBeenDeletedBy(Model|Authenticatable $user): bool
     {
         $participant = $this->participant($user);
 
         return $participant->hasDeletedConversation(checkDeletionExpired: true);
     }
 
-    public function clearFor(Model $user)
+    public function clearFor(Model|Authenticatable $user)
     {
         // Ensure the participant belongs to the conversation
         abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
@@ -681,7 +686,7 @@ class Conversation extends Model
     /**
      * Check if the conversation is a self conversations
      */
-    public function isSelfConversation(?Model $participant = null): bool
+    public function isSelfConversation(): bool
     {
 
         return $this->isSelf();
@@ -703,11 +708,17 @@ class Conversation extends Model
         return $this->type == ConversationType::PRIVATE;
     }
 
+    /**
+     * Check if conversation type is SELF
+     */
     public function isSelf(): bool
     {
         return $this->type == ConversationType::SELF;
     }
 
+    /**
+     * Check if conversation type is GROUP
+     */
     public function isGroup(): bool
     {
         return $this->type == ConversationType::GROUP;

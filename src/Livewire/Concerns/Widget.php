@@ -8,6 +8,8 @@ use Namu\WireChat\Livewire\Chat\Chats;
 
 /**
  * Trait Actionable
+ *
+ * @property \Namu\WireChat\Models\Conversation|null $conversation
  */
 trait Widget
 {

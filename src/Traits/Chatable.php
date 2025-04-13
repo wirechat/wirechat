@@ -19,6 +19,8 @@ use Namu\WireChat\Models\Participant;
  * @property-read string|null $cover_url
  * @property-read string|null $display_name
  * @property-read string|null $profile_url
+ *
+ * @method string displayName()
  */
 trait Chatable
 {

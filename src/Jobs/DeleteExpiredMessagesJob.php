@@ -2,9 +2,11 @@
 
 namespace Namu\WireChat\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -17,6 +19,14 @@ use Namu\WireChat\Models\Message;
 class DeleteExpiredMessagesJob implements ShouldQueue
 {
     use Batchable,Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * Safely access the created_at property of the message.
+     */
+    private function getCreatedAt(Message|Model $message): ?Carbon
+    {
+        return $message->created_at ?? null;
+    }
 
     /**
      * Create a new job instance.
@@ -58,14 +68,14 @@ class DeleteExpiredMessagesJob implements ShouldQueue
 
             foreach ($messages as $message) {
 
-                if ($message->created_at->isFuture()) {
+                $createdAt = $this->getCreatedAt($message);
+
+                if ($createdAt && $createdAt->isFuture()) {
                     continue; // Skip processing this message
                 }
-
-                if ($message->created_at->diffInSeconds(now()) > $conversation->disappearing_duration) {
+                if ($createdAt && $createdAt->diffInSeconds(now()) > $conversation->disappearing_duration) {
                     $message->forceDelete(); // Permanently delete the message
                 }
-
             }
         }
 

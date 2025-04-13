@@ -13,7 +13,6 @@ class Helper
      * and formats them with leading dots and comma separators for use in the 'accept'
      * attribute of an HTML input element.
      *
-     * @param  array  $fileExtensions  The array of file extensions to format.
      * @return string The formatted string for the 'accept' attribute.
      */
     public static function formattedMediaMimesForAcceptAttribute(): string
@@ -30,7 +29,6 @@ class Helper
      * and formats them with leading dots and comma separators for use in the 'accept'
      * attribute of an HTML input element.
      *
-     * @param  array  $fileExtensions  The array of file extensions to format.
      * @return string The formatted string for the 'accept' attribute.
      */
     public static function formattedFileMimesForAcceptAttribute(): string

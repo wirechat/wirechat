@@ -41,7 +41,7 @@ class MessageCreated implements ShouldBroadcast
     public function broadcastWhen(): bool
     {
         // Check if the message is not older than 1 minutes
-        $isNotExpired = Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinute(1));
+        $isNotExpired = Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinute());
 
         return $isNotExpired;
     }
