@@ -17,8 +17,7 @@ jobs:
     strategy:
       matrix:
         php: [8.2, 8.3, 8.4]
-        laravel: [10.*, 11.*, 12.*]
-        larastan: ["^2.0", "^3.0", "^3.0"]
+        laravel: [10.*, 11.*,12.*]
         dependency-version: [prefer-lowest, prefer-stable]
         include:
           - laravel: 10.*
@@ -26,57 +25,48 @@ jobs:
             pest: ^2.34
             pest-plugin: ^2.4
             php: 8.2
-            larastan: "^2.0"
           - laravel: 10.*
             testbench: 8.*
             pest: ^2.34
             pest-plugin: ^2.4
             php: 8.3
-            larastan: "^2.0"
           - laravel: 10.*
             testbench: 8.*
             pest: ^2.34
             pest-plugin: ^2.4
             php: 8.4
-            larastan: "^2.0"
           - laravel: 11.*
             testbench: 9.*
             pest: ^3.7.4
             pest-plugin: ^3.0
             php: 8.2
-            larastan: "^3.0"
           - laravel: 11.*
             testbench: 9.*
             pest: ^3.7.4
             pest-plugin: ^3.0
             php: 8.3
-            larastan: "^3.0"
           - laravel: 11.*
             testbench: 9.*
             pest: ^3.7.4
             pest-plugin: ^3.0
             php: 8.4
-            larastan: "^3.0"
           - laravel: 12.*
             testbench: 10.*
             pest: ^3.7.4
             pest-plugin: ^3.0
             php: 8.2
-            larastan: "^3.0"
           - laravel: 12.*
             testbench: 10.*
             pest: ^3.7.4
             pest-plugin: ^3.0
             php: 8.3
-            larastan: "^3.0"
           - laravel: 12.*
             testbench: 10.*
             pest: ^3.7.4
             pest-plugin: ^3.0
             php: 8.4
-            larastan: "^3.0"
 
-    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }} - Pest-Plugin${{ matrix.pest-plugin }} - ${{ matrix.dependency-version }}
+    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }}  - Pest-Plugin${{ matrix.pest-plugin }} -  ${{ matrix.dependency-version }}
 
     steps:
       - name: Checkout code
@@ -96,7 +86,6 @@ jobs:
             "orchestra/testbench:${{ matrix.testbench }}" \
             "pestphp/pest:${{ matrix.pest }}" \
             "pestphp/pest-plugin-laravel:${{ matrix.pest-plugin }}" \
-            "larastan/larastan:${{ matrix.larastan }}" \
             --no-interaction --no-update
 
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
@@ -122,7 +111,7 @@ jobs:
       - name: Run Pint for linting
         run: vendor/bin/pint --test
 
-  phpstan:
+  phpstan-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -137,6 +126,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction
 
-      - name: Run Larastan (PHPStan) Analysis
-        run: |
-          vendor/bin/phpstan analyse --configuration=phpstan.neon
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse
+

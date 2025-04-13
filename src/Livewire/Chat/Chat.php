@@ -62,7 +62,6 @@ class Chat extends Component
 
     public array $files = [];
 
-    /** @var \Namu\WireChat\Models\Participant&\Namu\WireChat\Traits\Chatable */
     public Participant|Model|null $authParticipant;
 
     // #[Locked]
