@@ -40,7 +40,7 @@
         "pestphp/pest-plugin-laravel": "^2.4|^3.0.0",
         "christophrumpel/missing-livewire-assertions": "^2.8",
         "laravel/pint": "^1.18",
-        "larastan/larastan": "^3.0"
+        "larastan/larastan": "^2.0|^3.0"
     },
     "scripts": {
     "post-autoload-dump": [
