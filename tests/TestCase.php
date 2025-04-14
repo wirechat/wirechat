@@ -63,6 +63,13 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             // Setup queue database connections.
             $config->set('queue.batching.database', 'testbench');
             $config->set('queue.failed.database', 'testbench');
+
+            // file systems
+            $config->set('filesystems.default', 'public');
+
+            /** Set Livewire config */
+            $config->set('livewire.temporary_file_upload.disk', 'public');
+
         });
 
         if (! app()->runningInConsole()) {

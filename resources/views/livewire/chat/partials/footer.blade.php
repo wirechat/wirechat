@@ -440,7 +440,7 @@
                         <button
                             x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
                             wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
-                            id="sendMessageButton" class=" ml-auto disabled:cursor-progress font-bold">
+                            id="sendMessageButton" class=" hover:text-[var(--wirechat-primary-color)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
 
                             <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
                                 width="36" height="36" viewBox="0 0 24 24" fill="none"
@@ -523,66 +523,36 @@
                         },
 
                         // Upload files using Livewire's upload
-                        // uploadFiles(files) {
-                        //     this.isUploading = true;
-                        //     this.progress = 0;
-
-                        //     // Initialize per-file progress tracking
-                        //     const fileProgress = Array.from(files).map(() => 0);
-                        //     files.forEach((file, index) => {
-                        //         $wire.upload(
-                        //             `${this.wireModel}`, // Livewire model
-                        //             file, // Single file
-                        //             () => {
-                        //                 fileProgress[index] = 100; // Mark this file as complete
-                        //                 // this.isUploading = false;
-                        //                 this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length);
-                        //             },
-                        //             (error) => {
-                        //                 // this.isUploading = false;
-                        //                 fileProgress[index] = -1; // Mark as failed
-                        //                 $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` });
-                        //             },
-                        //             (event) => {
-                        //                 fileProgress[index] = event.detail.progress; // Update per-file progress
-                        //                 this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length); // Overall progress
-                        //             }
-                        //         );
-                        //     });
-                        // },
-
-                        // Upload files using Livewire's uploadMultiple method
                         uploadFiles(files) {
-                            this.isUploading = true; // Set uploading state to true
-                            this.progress = 0; // Reset progress bar
+                            this.isUploading = true;
+                            this.progress = 0;
 
-                            // Call Livewire's uploadMultiple with callbacks for progress, success, and error
-                            $wire.uploadMultiple(
-                                `${this.wireModel}`, // The Livewire model name
-                                files, // The array of files to upload
-                                (success) => {
-                                    // Success callback
-                                    console.log('Upload complete:', success);
-                                    this.isUploading = false; // Reset uploading state
-                                    this.progress = 0; // Reset progress
-                                },
-                                (error) => {
-                                    // Error callback
-                                    console.log('Upload error:', error);
-                                    $dispatch('wirechat-toast', {
-                                        type: 'error',
-                                        message: `Validation error: ${error}`
-                                    }); // Show error message
-                                    this.isUploading = false; // Reset uploading state
-                                    this.progress = 0; // Reset progress
-                                },
-                                (event) => {
-                                    // Progress callback
-                                    this.progress = event.detail.progress; // Update progress bar
-                                }
-                            );
+                            // Initialize per-file progress tracking
+                            const fileProgress = Array.from(files).map(() => 0);
+                            files.forEach((file, index) => {
+                                $wire.upload(
+                                    `${this.wireModel}`, // Livewire model
+                                    file, // Single file
+                                    () => {
+                                        fileProgress[index] = 100; // Mark this file as complete
+                                        // this.isUploading = false;
+                                        this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length);
+                                    },
+                                    (error) => {
+                                        // this.isUploading = false;
+                                        fileProgress[index] = -1; // Mark as failed
+                                        $dispatch('wirechat-toast', { type: 'error', message: `Validation error: ${error}` });
+                                    },
+                                    (event) => {
+                                        fileProgress[index] = event.detail.progress; // Update per-file progress
+                                        this.progress = Math.round((fileProgress.reduce((a, b) => a + b, 0)) / files.length); // Overall progress
+                                    }
+                                );
+                            });
                         },
 
+                        // Upload files using Livewire's uploadMultiple method
+                        
                         // Remove an uploaded file from Livewire
                         removeUpload(filename) {
                             $wire.removeUpload(this.wireModel, filename);
