@@ -93,6 +93,7 @@ return [
     'attachments' => [
         'storage_folder' => 'attachments',
         'storage_disk' => 'public',
+        'disk_visibility'   => 'public', // set to 'private' to always generate temporary URL
         'max_uploads' => 10,
 
         // Media Config

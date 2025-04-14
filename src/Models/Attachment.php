@@ -71,9 +71,28 @@ class Attachment extends Model
     protected function url(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => isset($attributes['file_path']) ? Storage::disk(WireChat::storageDisk())->url($attributes['file_path']) : null,
+            get: fn($value, array $attributes) => $this->generateUrl($attributes['file_path'] ?? null)
         );
     }
+    
+    protected function generateUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+    
+        $disk   = Storage::disk(WireChat::storageDisk());
+        
+        $config = config('wirechat.attachments');
+    
+        // If the disk is set to private, generate a temporary URL
+        if (($config['disk_visibility'] ?? 'public') === 'private') {
+            return $disk->temporaryUrl($path, now()->addMinutes(5));
+        }
+    
+        return $disk->url($path);
+    }
+    
 
     public function attachable(): MorphTo
     {
