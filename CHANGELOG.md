@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.2.5](https://github.com/namumakwembo/wirechat/releases/tag/0.2.5) - 2025-04-15 
+
+### Added  
+- new wirechat.attachments.disk_visibility key to config in order to determine if temporary urls should be created when viewing files
+
+### Updated  
+- atttacment upload to use single file upload instead of multiple in order to support s3 storage not allowing multiple file to be uploaded at once ie when using livewire temporary_uploaded_files for preview
+---
+
 ## [v0.2.4](https://github.com/namumakwembo/wirechat/releases/tag/0.2.4) - 2025-03-30  
 
 ### Added  
