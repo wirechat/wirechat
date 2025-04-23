@@ -365,11 +365,18 @@ class Chat extends Component
                  * todo: Add url to table
                  */
 
-                 // save photo to disk
-                 $path = $attachment->store(
-                    WireChat::storageFolder(),
-                    WireChat::storageDisk()
-                );
+                // save attachment to disk
+                if ((config('wirechat.attachments.disk_visibility') ?? 'public') === 'public') {
+                    $path = $attachment->storePublicly(
+                        WireChat::storageFolder(),
+                        WireChat::storageDisk()
+                    );
+                } else {
+                    $path = $attachment->store(
+                        WireChat::storageFolder(),
+                        WireChat::storageDisk()
+                    );
+                }
 
                 // Determine the reply ID based on conditions
                 $replyId = ($key === 0 && $this->replyMessage) ? $this->replyMessage->id : null;
