@@ -1,5 +1,5 @@
 
-<div class="flex items-center group overflow-hidden border dark:border-gray-700 rounded-xl">
+<div class="flex items-center group overflow-hidden border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] rounded-xl">
     <span class=" p-2">
         {{-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-pdf-fill w-11 h-11 text-gray-600" viewBox="0 0 16 16">
             <path d="M5.523 10.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.035.012a.3.3 0 0 1-.026-.044c-.056-.11-.054-.216.04-.36.106-.165.319-.354.647-.548m2.455-1.647q-.178.037-.356.078a21 21 0 0 0 .5-1.05 12 12 0 0 0 .51.858q-.326.048-.654.114m2.525.939a4 4 0 0 1-.435-.41q.344.007.612.054c.317.057.466.147.518.209a.1.1 0 0 1 .026.064.44.44 0 0 1-.06.2.3.3 0 0 1-.094.124.1.1 0 0 1-.069.015c-.09-.003-.258-.066-.498-.256M8.278 4.97c-.04.244-.108.524-.2.829a5 5 0 0 1-.089-.346c-.076-.353-.087-.63-.046-.822.038-.177.11-.248.196-.283a.5.5 0 0 1 .145-.04c.013.03.028.092.032.198q.008.183-.038.465z"/>
@@ -20,7 +20,7 @@
     </p>
 
 
-    <button class="px-3 bg-gray-50 dark:bg-gray-800 group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors ease-in-out dark:hover:text-blue-500  hover:text-blue-500  dark:text-white  p-1 mt-auto   h-full">
+    <button class="px-3 bg-gray-50 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] transition-colors ease-in-out dark:hover:text-blue-500  hover:text-blue-500  dark:text-white  p-1 mt-auto   h-full">
         <a download="{{$attachment->original_name}}" href="{{$attachment?->url}}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download w-5 h-5 " viewBox="0 0 16 16">
             <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>

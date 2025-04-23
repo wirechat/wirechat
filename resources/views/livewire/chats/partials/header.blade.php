@@ -66,7 +66,7 @@
     {{-- Search input --}}
     @if ($allowChatsSearch)
         <section class="mt-4">
-            <div class="px-2 rounded-lg dark:bg-gray-800 bg-gray-100  grid grid-cols-12 items-center">
+            <div class="px-2 rounded-lg dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)]  grid grid-cols-12 items-center">
 
                 <label for="chats-search-field" class="col-span-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

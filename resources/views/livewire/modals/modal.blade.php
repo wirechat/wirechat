@@ -176,7 +176,7 @@
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0" class="fixed inset-0 transition-all transform">
-                <div class="absolute inset-0 bg-gray-500 dark:bg-gray-800 opacity-75"></div>
+                <div class="absolute inset-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] opacity-75"></div>
             </div>
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen " aria-hidden="true">&#8203;</span>

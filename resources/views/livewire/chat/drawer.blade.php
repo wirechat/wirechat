@@ -172,7 +172,7 @@
     x-data="ChatDrawer()" x-on:close.stop="setShowPropertyTo(false)"
          x-on:keydown.escape.stop="closeChatDrawerOnEscape({ modalType: 'ChatDrawer', event: $event }); "
          x-show="show"
-         class="fixed dark:bg-gray-900  dark:text-white opacity-100 inset-0 z-50 h-full overflow-y-auto" style="display: none;"
+         class="fixed bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  dark:text-white opacity-100 inset-0 z-50 h-full overflow-y-auto" style="display: none;"
          aria-modal="true"
          tabindex="0"
     

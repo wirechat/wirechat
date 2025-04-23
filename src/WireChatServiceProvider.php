@@ -156,6 +156,17 @@ class WireChatServiceProvider extends ServiceProvider
                 <style>
                     :root {
                         --wirechat-primary-color: {$primaryColor};
+                        --wc-color: #f59e0b;
+                        
+                        --wc-light-primary: #fff;  /* white */
+                        --wc-light-secondary: oklch(0.985 0.002 247.839);/* --color-gray-100 */
+                        --wc-light-accent: oklch(0.985 0.002 247.839);/* --color-gray-50 */
+                        --wc-light-border: oklch(0.928 0.006 264.531);/* --color-gray-200 */
+
+                        --wc-dark-primary: oklch(0.21 0.006 285.885); /* --color-zinc-900 */
+                        --wc-dark-secondary: oklch(0.274 0.006 286.033);/* --color-zinc-800 */
+                        --wc-dark-accent: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
+                        --wc-dark-border: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
                     }
                     [x-cloak] {
                         display: none !important;

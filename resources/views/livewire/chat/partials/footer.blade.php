@@ -5,26 +5,26 @@
     {{-- Check if group allows :sending messages --}}
     @if ($conversation->isGroup() && !$conversation->group?->allowsMembersToSendMessages() && !$authParticipant->isAdmin())
         <div
-            class="bg-gray-50 w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 dark:bg-gray-800">
+            class="dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)] w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 ">
             Only admins can send messages
         </div>
     @else
         <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
-            class=" px-3 md:px-1 border-t shadow-sm   dark:bg-gray-800 bg-gray-50 z-50    dark:border-gray-800/80  flex flex-col gap-3 items-center  w-full   mx-auto">
+            class=" px-3 md:px-1 border-t shadow-sm bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
 
             {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
             <section wire:ignore x-cloak x-show="openEmojiPicker" x-transition:enter="transition  ease-out duration-180 transform"
                 x-transition:enter-start=" translate-y-full" x-transition:enter-end=" translate-y-0"
                 x-transition:leave="transition ease-in duration-180 transform" x-transition:leave-start=" translate-y-0"
                 x-transition:leave-end="translate-y-full"
-                class="w-full flex hidden sm:flex   py-2 sm:px-4 py-1.5 border-b dark:border-gray-700  h-96 min-w-full">
+                class="w-full flex hidden sm:flex   py-2 sm:px-4 py-1.5 border-b border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)]  h-96 min-w-full">
 
                 <emoji-picker  dusk="emoji-picker" style="width: 100%"
                     class=" flex w-full h-full rounded-xl"></emoji-picker>
             </section>
             {{-- form and detail section  --}}
             <section
-                class=" py-2 sm:px-4 py-1.5    z-50  bg-gray-50 dark:bg-gray-800   flex flex-col gap-3 items-center  w-full mx-auto">
+                class=" py-2 sm:px-4 py-1.5    z-50  dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)]   flex flex-col gap-3 items-center  w-full mx-auto">
 
                 {{-- Media preview section --}}
                 <section x-show="$wire.media.length>0 ||$wire.files.length>0" x-cloak
@@ -95,7 +95,7 @@
 
 
                                 <label wire:loading.class="cursor-progress"
-                                    class="shrink-0 cursor-pointer relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 flex text-center justify-center border dark:border-gray-700 border-gray-50">
+                                    class="shrink-0 cursor-pointer relative w-16 h-14 rounded-lg  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-primary)]   hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  flex text-center justify-center ">
                                     <input wire:loading.attr="disabled"
                                         @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
                                         accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only">
@@ -142,7 +142,7 @@
 
                                     {{-- File details --}}
                                     <div
-                                        class="flex items-center group overflow-hidden border dark:border-gray-600 rounded-xl">
+                                        class="flex items-center group overflow-hidden bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]   hover:border-[var(--wc-light-primary)] dark:hover:border-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] rounded-xl">
                                         <span class=" p-2">
                                             {{-- document svg:HI --}}
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -164,7 +164,7 @@
                             {{-- Add more files --}}
                             {{-- TODO @if "( count($media)< $MAXFILES )" to hide upload button when maz files exceeded --}}
                             <label wire:loading.class="cursor-progress"
-                                class="cursor-pointer shrink-0 relative w-16 h-14 rounded-lg bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors   flex text-center justify-center border dark:border-gray-800 border-gray-50">
+                                class="cursor-pointer shrink-0 relative w-16 h-14 rounded-lg bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]   hover:border-[var(--wc-light-primary)] dark:hover:border-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  transition-colors   flex text-center justify-center  ">
                                 <input wire:loading.attr="disabled"
                                     @change="handleFileSelect(event,{{ count($files) }})" type="file" multiple
                                     accept="{{ Helper::formattedFileMimesForAcceptAttribute() }}" class="sr-only"
@@ -267,11 +267,11 @@
                     <div class="w-10 hidden sm:flex max-w-fit  items-center">
                         <button wire:loading.attr="disabled" type="button" dusk="emoji-trigger-button"
                             @click="openEmojiPicker = ! openEmojiPicker" x-ref="emojibutton"
-                            class=" disabled:cursor-progress rounded-full p-px dark:border-gray-700">
+                            class="cursor-pointer hover:scale-105 transition-transform disabled:cursor-progress rounded-full p-px dark:border-gray-700">
                             <svg x-bind:style="openEmojiPicker && { color: 'var(--wirechat-primary-color)' }"
                                 viewBox="0 0 24 24" height="24" width="24"
                                 preserveAspectRatio="xMidYMid meet"
-                                class="w-7 h-7 text-gray-700 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]"
+                                class="w-7 h-7 text-gray-600 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]"
                                 version="1.1" x="0px" y="0px" enable-background="new 0 0 24 24">
                                 <title>smiley</title>
                                 <path fill="currentColor"
@@ -308,7 +308,7 @@
                                           </svg> --}}
                                     <svg class="size-6 w-7 h-7 text-gray-600 dark:text-white/60"
                                         xmlns="http://www.w3.org/2000/svg" width="36" height="36"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"
                                         stroke-linecap="round" stroke-linejoin="round" class="ai ai-Attach">
                                         <path
                                             d="M6 7.91V16a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V6a4 4 0 0 0-4-4v0a4 4 0 0 0-4 4v9.182a2 2 0 0 0 2 2v0a2 2 0 0 0 2-2V8" />
@@ -332,7 +332,7 @@
                                             class="sr-only" style="display: none">
 
                                         <div
-                                            class="w-full  flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                            class="w-full  flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] cursor-pointer">
 
                                             <span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -364,7 +364,7 @@
                                             class="sr-only" style="display: none">
 
                                         <div
-                                            class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                            class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] cursor-pointer">
 
                                             <span class="">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -440,7 +440,7 @@
                         <button
                             x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
                             wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
-                            id="sendMessageButton" class=" hover:text-[var(--wirechat-primary-color)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
+                            id="sendMessageButton" class="cursor-pointer hover:text-[var(--wirechat-primary-color)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
 
                             <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
                                 width="36" height="36" viewBox="0 0 24 24" fill="none"
@@ -458,7 +458,7 @@
                         <button
                             x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )"
                             wire:loading.attr="disabled" wire:target="sendMessage" wire:click='sendLike()'
-                            type="button" class="group disabled:cursor-progress">
+                            type="button" class="hover:scale-105 transition-transform cursor-pointer group disabled:cursor-progress">
 
                             <!-- outlined heart -->
                             <span class=" group-hover:hidden transition">

@@ -88,7 +88,7 @@
         @foreach ($loadedMessages as $date => $messageGroup)
 
             {{-- Date  --}}
-            <div  class="sticky top-0 uppercase p-2 shadow-xs px-2.5 z-50 rounded-xl border border-gray-100/50 dark:border-slate-700/20 text-sm flex text-center justify-center  bg-gray-50  dark:bg-gray-800 dark:text-white  w-28 mx-auto ">
+            <div  class="sticky top-0 uppercase p-2 shadow-xs px-2.5 z-50 rounded-xl border dark:border-[var(--wc-dark-primary)] border-[var(--wc-light-primary)] text-sm flex text-center justify-center  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white  w-28 mx-auto ">
                 {{ $date }}
             </div>
 
@@ -176,7 +176,7 @@
                                         ' border-l-4 mr-auto ' => !$belongsToAuth,
                                     ])>
                                         <p
-                                            class=" bg-gray-100 dark:text-white  dark:bg-gray-600 text-black line-clamp-1 text-sm  rounded-full max-w-fit   px-3 py-1 ">
+                                            class=" bg-[var(--wc-light-secondary)] dark:text-white  dark:bg-[var(--wc-dark-secondary)] text-black line-clamp-1 text-sm  rounded-full max-w-fit   px-3 py-1 ">
                                             {{ $parent?->body != '' ? $parent?->body : ($parent->hasAttachment() ?  __('wirechat::chat.labels.attachment') : '') }}
                                         </p>
                                     </div>

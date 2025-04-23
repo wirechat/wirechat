@@ -10,7 +10,7 @@
              conversationElement.scrollIntoView({ behavior: 'smooth' });
          }
      }, 200);"
-    class="flex flex-col bg-white/95 dark:bg-gray-900 transition-all h-full overflow-hidden w-full sm:p-3">
+    class="flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full sm:p-3">
 
     @php
         /* Show header if any of these conditions are true  */

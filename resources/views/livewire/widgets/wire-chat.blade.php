@@ -184,8 +184,8 @@
 
         }
     }"
-     class ='w-full h-full bg-white dark:bg-gray-900 border dark:border-gray-700 flex overflow-hidden rounded-lg'>
-      <div :class="chatIsOpen && 'hidden md:grid'" class="relative  w-full h-full sm:border-r dark:border-gray-700    md:w-[360px] lg:w-[400px] xl:w-[450px] shrink-0 overflow-y-auto  ">
+     class ='w-full h-full bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] flex overflow-hidden rounded-lg'>
+      <div :class="chatIsOpen && 'hidden md:grid'" class="relative  w-full h-full sm:border-r border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]    md:w-[360px] lg:w-[400px] xl:w-[450px] shrink-0 overflow-y-auto  ">
           <livewire:wirechat.chats :widget="true" />
       </div>
       <main
@@ -217,7 +217,7 @@
 
             <div  x-show="!show && !chatIsOpen " class="m-auto  justify-center flex gap-3 flex-col  items-center ">
 
-                <h4 class="font-medium p-2 px-3 rounded-full font-semibold bg-gray-50 dark:bg-gray-800 dark:text-white dark:font-normal">@lang('wirechat::widgets.wirechat.messages.welcome')</h4>
+                <h4 class="font-medium p-2 px-3 rounded-full font-semibold bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white dark:font-normal">@lang('wirechat::widgets.wirechat.messages.welcome')</h4>
   
             </div>
 

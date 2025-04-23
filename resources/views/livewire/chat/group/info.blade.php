@@ -1,4 +1,4 @@
-<div id="group-info-modal" class="bg-white dark:bg-gray-900     min-h-screen">
+<div id="group-info-modal" class="bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]     min-h-screen">
 
 
     @php
@@ -8,7 +8,7 @@
         $group = $conversation?->group;
     @endphp
 
-    <section class="flex gap-4 z-10  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
+    <section class="cursor-pointer flex gap-4 z-10  items-center p-5 sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  ">
         <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-hidden"> <svg class="w-7 h-7"
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor">
@@ -83,7 +83,7 @@
 
                             <input x-cloak maxlength="110" x-show="editing" id='groupName' type="text"
                                 wire:model='groupName'
-                                class="resize-none text-2xl font-medium  border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
+                                class="resize-none text-2xl font-medium  border-0 px-0 py-0 py-0 border-b border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
 
 
                             @error('groupName')
@@ -140,7 +140,7 @@
                             </div>
 
                             <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur='description'
-                                class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b dark:border-gray-700  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
+                                class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
                             </textarea>
 
                             @error('description')
@@ -203,7 +203,7 @@
         <x-wirechat::actions.open-modal component="wirechat.chat.group.members"
             conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
             {{-- Members count --}}
-            <button class="flex w-full justify-between items-center px-8 focus:outline-hidden ">
+            <button class="cursor-pointer flex w-full justify-between items-center px-8 focus:outline-hidden ">
                 <span class="text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.info.labels.members') }}  {{ $totalParticipants }}</span>
                 {{-- Search icon --}}
                 <span>
@@ -221,7 +221,7 @@
             <x-wirechat::actions.open-modal component="wirechat.chat.group.add-members"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
                 <button @dusk="open_add_members_modal_button"
-                    class=" w-full py-5 px-8 hover:bg-gray-200 focus:outline-hidden transition dark:hover:bg-gray-800 flex gap-3 items-center">
+                    class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition  flex gap-3 items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                         class="size-6 w-5 h-5">
                         <path
@@ -245,7 +245,7 @@
 
             {{-- Delete group --}}
             <button wire:confirm="{{ __('wirechat::chat.group.info.actions.delete_group.confirmation_message') }}" wire:click="deleteGroup"
-                class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-700 text-start space-y-2   gap-3   text-red-500">
+                class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] transition text-start space-y-2   gap-3   text-red-500">
                 <div class="flex gap-3 items-center ">
 
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -264,7 +264,7 @@
                 <x-wirechat::actions.open-chat-drawer component='wirechat.chat.group.permissions'
                     conversation="{{ $conversation?->id }}">
                     <button
-                        class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-700 text-start space-y-2   gap-3   dark:text-white/90">
+                        class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] transition text-start space-y-2   gap-3   dark:text-white/90">
                         <div class="flex gap-3 items-center ">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5 dark:text-gray-400">
@@ -280,7 +280,7 @@
         @else
         {{-- Exit Group --}}
             <button wire:confirm="{{ __('wirechat::chat.group.info.actions.exit_group.confirmation_message') }}" wire:click="exitConversation"
-                class=" w-full py-5 px-8 hover:bg-gray-200 transition dark:hover:bg-gray-700 flex gap-3 items-center text-red-500">
+                class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] transition flex gap-3 items-center text-red-500">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                     class="bi bi-box-arrow-right w-5 h-5" viewBox="0 0 16 16">
                     <path fill-rule="evenodd"

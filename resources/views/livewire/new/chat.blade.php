@@ -2,9 +2,9 @@
 <div id="new-chat-modal ">
 
     <div 
-    class="relative w-full h-96  border mx-auto  dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800 dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
+    class="relative w-full h-96  border mx-auto border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
 
-    <header class=" sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
+    <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 py-2">
         <div class="flex justify-between items-center justify-between pb-2">
 
             <h3 class="text-lg font-semibold">{{__('wirechat::new.chat.labels.heading') }}</h3>
@@ -12,8 +12,8 @@
             <x-wirechat::actions.close-modal>
             <button
              dusk="close_modal_button"
-                class="p-2  text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
-                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                class="p-2  text-gray-600 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] dark:hover:text-white rounded-full hover:text-gray-800 ">
+                <svg class="w-5 h-5 cursor-pointer" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M6 18L18 6M6 6l12 12" />
@@ -23,10 +23,10 @@
 
         </div>
         
-        <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
+        <section class="flex flex-wrap items-center px-0 border-b border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]">
             <input  dusk="search_users_field" autofocus type="search" id="users-search-field"
                 wire:model.live.debounce='search' autocomplete="off"  placeholder="{{__('wirechat::new.chat.inputs.search.placeholder')}}"
-                class=" w-full border-0 w-auto px-0 dark:bg-gray-800 outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
+                class=" w-full border-0 w-auto px-0 dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-light-primary)] rounded-lg focus:ring-0 hover:ring-0">
 
         </section>
     </header>
@@ -38,7 +38,7 @@
 
         {{-- Buton to trigger opening of new grop modal --}}
         <x-wirechat::actions.new-group widget="{{$this->isWidget()}}">
-        <button  @dusk="open_new_group_modal_button"  class="flex items-center gap-3 my-4  rounded-lg p-2 w-full border hover:border-gray-300 transition-colors  dark:border-gray-800 dark:hover:border-gray-700 " >
+        <button  @dusk="open_new_group_modal_button"  class="flex items-center gap-3 my-4  rounded-lg p-2 w-full border  transition-colors border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)] hover:border-[var(--wc-light-secondary)] dark:hover:border-[var(--wc-dark-secondary)]" >
             <span style=" color: var(--wirechat-primary-color); " class="p-1 bg-gray-100  rounded-full ">
 
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class=" w-5 h-5">

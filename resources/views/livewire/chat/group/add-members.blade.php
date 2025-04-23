@@ -1,11 +1,11 @@
-<div class="h-[calc(100vh_-_10rem)]  sm:h-[450px] bg-white dark:bg-gray-800 dark:text-white border dark:border-gray-700 overflow-y-auto overflow-x-hidden  ">
+<div class="h-[calc(100vh_-_10rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] overflow-y-auto overflow-x-hidden  ">
  
-<header class=" sticky top-0 bg-white  dark:bg-gray-800 z-10 p-2">
+<header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
     <div class="flex items-center pb-2">
 
         <x-wirechat::actions.close-modal>
         <button 
-            class="p-2 ml-0 text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white rounded-full hover:text-gray-800 hover:bg-gray-50">
+            class="p-2 ml-0 text-gray-600  hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] dark:hover:text-white rounded-full hover:text-gray-800">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class=" w-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -22,7 +22,7 @@
             wire:target='save'
             @disabled(count($selectedMembers)==0)
             @class([
-                'p-2 disabled:cursor-not-allowed  disabled:hover:bg-inherit ml-0 text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white rounded-full hover:text-gray-800 hover:bg-gray-50',
+                'p-2 disabled:cursor-not-allowed curosr-pointer disabled:hover:bg-inherit ml-0 text-gray-600 dark:text-gray-300  hover:bg-[var(--wc-light-secondary)] hover:dark:bg-[var(--wc-dark-secondary)] dark:hover:text-white rounded-full hover:text-gray-800',
                 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit hover:bg-inherit  opacity-70'=>count($selectedMembers)==0
             ])
             class="">
@@ -44,10 +44,10 @@
        </span>
     </div>
 
-    <section class="flex flex-wrap items-center px-0 border-b dark:border-gray-700">
+    <section class="flex flex-wrap items-center px-0 border-b border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]">
         <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
             placeholder="{{ __('wirechat::chat.group.add_members.inputs.search.placeholder') }}"
-            class=" w-full border-0 w-auto dark:bg-gray-800 outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
+            class=" w-full border-0 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
     </section>
 
 
@@ -59,7 +59,7 @@
             @if ($selectedMembers)
 
                 @foreach ($selectedMembers as $key => $member)
-                    <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded-sm dark:bg-gray-700 dark:text-gray-300"
+                    <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-[var(--wc-light-secondary)] rounded-sm dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300"
                         wire:key="selected-member-{{ $member->id }}">
                         {{ $member->display_name }}
                         <button type="button"

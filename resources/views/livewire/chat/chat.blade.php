@@ -54,14 +54,14 @@
         /* Dark mode using prefers-color-scheme */
         @media (prefers-color-scheme: dark) {
             emoji-picker {
-                --background: #1f2937 !important;
-                --input-border-color: #374151;
+                --background: none !important;
+                --input-border-color: var(--wc-dark-border);
                 --outline-color: none;
                 --outline-size: 1px;
                 --border-color: none;
                 --input-font-color: white;
-                --indicator-color: #9ca3af;
-                --button-hover-background: #9ca3af;
+                --indicator-color: var(--wc-dark-accent);
+                --button-hover-background: var(--wc-dark-accent);
             }
         }
 
@@ -69,13 +69,13 @@
         /* Ensure dark mode takes precedence */
         .dark emoji-picker {
             --background: none !important;
-            --input-border-color: #374151;
+            --input-border-color: var(--wc-dark-border);
             --outline-color: none;
             --outline-size: 1px;
             --border-color: none;
             --input-font-color: white;
-            --indicator-color: #9ca3af;
-            --button-hover-background: #9ca3af
+            --indicator-color: var(--wc-dark-accent);
+            --button-hover-background: var(--wc-dark-accent);
         }
     </style>
 
@@ -112,7 +112,7 @@
         {{-- } --}}
     });
 }, 120);"
-    class="w-full transition bg-white/95 dark:bg-gray-900 overflow-hidden h-full relative" style="contain:content">
+    class="w-full transition bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] overflow-hidden h-full relative" style="contain:content">
 
     <div class=" flex flex-col  grow h-full   relative ">
         {{-- ---------- --}}

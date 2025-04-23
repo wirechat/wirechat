@@ -1,5 +1,5 @@
-<div class="bg-white dark:bg-inherit overfo opaticy-100   min-h-screen w-full">
-    <section class="flex gap-4 z-10  items-center p-5 sticky top-0 bg-white dark:bg-gray-900  ">
+<div class="bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  overfo opaticy-100   min-h-screen w-full">
+    <section class="flex gap-4 z-10  items-center p-5 sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]   ">
         <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-hidden"> <svg class="w-7 h-7"
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor">
@@ -12,7 +12,7 @@
     <div class="">
         <section >
 
-            <h5 class="w-full text-start py-4 bg-gray-50 dark:bg-gray-950 px-4">
+            <h5 class="w-full text-start py-4 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] px-4">
                 
                 {{__('wirechat::chat.group.permisssions.labels.members_can')}}:
             </h5>
@@ -40,12 +40,18 @@
 
                         <label class="inline-flex items-center cursor-pointer">
                             <input wire:model.live.debounce="allow_members_to_edit_group_info" type="checkbox"  class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer dark:bg-gray-700 
-                            peer-checked:bg-[var(--wirechat-primary-color)] peer-checked:border-[var(--wirechat-primary-color)] 
+                            <div class="relative w-11 h-6  peer-focus:outline-hidden rounded-full peer 
+                            bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]
+                            shadow-2xs
+                            peer-checked:border-[var(--wc-color)] 
                             peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
-                            peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] 
-                            after:start-[2px] after:bg-white after:border-gray-300 after:border 
-                            after:rounded-full after:h-5 after:w-5 after:transition-all">
+                            peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)]
+                            after:content-[''] after:absolute after:top-[2px] 
+                            after:start-[2px]  after:bg-white dark:after:bg-gray-100 after:shadow 
+                            peer-checked:after:bg-[var(--wc-color)] peer-checked:dark:after:bg-[var(--wc-color)] 
+                            peer-checked:after:border-[var(--wc-color)] peer-checked:dark:after:border-[var(--wc-color)]
+                            dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border 
+                            after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out">
                      </div>
                         </label>
 
@@ -70,12 +76,18 @@
 
                         <label class="inline-flex items-center cursor-pointer">
                             <input wire:model.live.debounce="allow_members_to_send_messages" type="checkbox" class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer dark:bg-gray-700 
-                            peer-checked:bg-[var(--wirechat-primary-color)] peer-checked:border-[var(--wirechat-primary-color)] 
+                            <div class="relative w-11 h-6  peer-focus:outline-hidden rounded-full peer 
+                            bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]
+                            shadow-2xs
+                            peer-checked:border-[var(--wc-color)] 
                             peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
-                            peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] 
-                            after:start-[2px] after:bg-white after:border-gray-300 after:border 
-                            after:rounded-full after:h-5 after:w-5 after:transition-all">
+                            peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)]
+                            after:content-[''] after:absolute after:top-[2px] 
+                            after:start-[2px]  after:bg-white dark:after:bg-gray-100 after:shadow 
+                            peer-checked:after:bg-[var(--wc-color)] peer-checked:dark:after:bg-[var(--wc-color)] 
+                            peer-checked:after:border-[var(--wc-color)] peer-checked:dark:after:border-[var(--wc-color)]
+                            dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border 
+                            after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out">
                      </div>
                         </label>
 
@@ -103,12 +115,18 @@
 
                         <label class="inline-flex items-center cursor-pointer">
                             <input wire:model.live.debounce="allow_members_to_add_others" type="checkbox"  class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer dark:bg-gray-700 
-                                   peer-checked:bg-[var(--wirechat-primary-color)] peer-checked:border-[var(--wirechat-primary-color)] 
-                                   peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
-                                   peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] 
-                                   after:start-[2px] after:bg-white after:border-gray-300 after:border 
-                                   after:rounded-full after:h-5 after:w-5 after:transition-all">
+                            <div class="relative w-11 h-6  peer-focus:outline-hidden rounded-full peer 
+                            bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]
+                            shadow-2xs
+                            peer-checked:border-[var(--wc-color)] 
+                            peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
+                            peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)]
+                            after:content-[''] after:absolute after:top-[2px] 
+                            after:start-[2px]  after:bg-white dark:after:bg-gray-100 after:shadow 
+                            peer-checked:after:bg-[var(--wc-color)] peer-checked:dark:after:bg-[var(--wc-color)] 
+                            peer-checked:after:border-[var(--wc-color)] peer-checked:dark:after:border-[var(--wc-color)]
+                            dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border 
+                            after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out">
                             </div>
                         
                         
