@@ -155,8 +155,7 @@ class WireChatServiceProvider extends ServiceProvider
             return "<?php echo <<<EOT
                 <style>
                     :root {
-                        --wirechat-primary-color: {$primaryColor};
-                        --wc-color: #f59e0b;
+                        --wc-brand-primary: {$primaryColor};
                         
                         --wc-light-primary: #fff;  /* white */
                         --wc-light-secondary: oklch(0.985 0.002 247.839);/* --color-gray-100 */

@@ -2,7 +2,7 @@
 
 
     <section class="flex gap-4 z-10  items-center p-5 sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]   ">
-        <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-hidden"> <svg class="w-7 h-7"
+        <button wire:click="$dispatch('closeChatDrawer')" class="focus:outline-hidden cursor-pointer"> <svg class="w-7 h-7"
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -43,7 +43,7 @@
 
         {{-- Only show if is not group --}}
             <button wire:confirm="{{ __('wirechat::chat.info.actions.delete_chat.confirmation_message') }}" wire:click="deleteChat"
-                class=" w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] transition  flex gap-3 items-center text-red-500">
+                class=" w-full cursor-pointer py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] transition  flex gap-3 items-center text-red-500">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-6 w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round"

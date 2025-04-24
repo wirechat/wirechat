@@ -43,13 +43,13 @@
                             <div class="relative w-11 h-6  peer-focus:outline-hidden rounded-full peer 
                             bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]
                             shadow-2xs
-                            peer-checked:border-[var(--wc-color)] 
+                            peer-checked:border-[var(--wc-brand-primary)] 
                             peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
                             peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)]
                             after:content-[''] after:absolute after:top-[2px] 
                             after:start-[2px]  after:bg-white dark:after:bg-gray-100 after:shadow 
-                            peer-checked:after:bg-[var(--wc-color)] peer-checked:dark:after:bg-[var(--wc-color)] 
-                            peer-checked:after:border-[var(--wc-color)] peer-checked:dark:after:border-[var(--wc-color)]
+                            peer-checked:after:bg-[var(--wc-brand-primary)] peer-checked:dark:after:bg-[var(--wc-brand-primary)] 
+                            peer-checked:after:border-[var(--wc-brand-primary)] peer-checked:dark:after:border-[var(--wc-brand-primary)]
                             dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border 
                             after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out">
                      </div>
@@ -79,13 +79,13 @@
                             <div class="relative w-11 h-6  peer-focus:outline-hidden rounded-full peer 
                             bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]
                             shadow-2xs
-                            peer-checked:border-[var(--wc-color)] 
+                            peer-checked:border-[var(--wc-brand-primary)] 
                             peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
                             peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)]
                             after:content-[''] after:absolute after:top-[2px] 
                             after:start-[2px]  after:bg-white dark:after:bg-gray-100 after:shadow 
-                            peer-checked:after:bg-[var(--wc-color)] peer-checked:dark:after:bg-[var(--wc-color)] 
-                            peer-checked:after:border-[var(--wc-color)] peer-checked:dark:after:border-[var(--wc-color)]
+                            peer-checked:after:bg-[var(--wc-brand-primary)] peer-checked:dark:after:bg-[var(--wc-brand-primary)] 
+                            peer-checked:after:border-[var(--wc-brand-primary)] peer-checked:dark:after:border-[var(--wc-brand-primary)]
                             dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border 
                             after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out">
                      </div>
@@ -118,13 +118,13 @@
                             <div class="relative w-11 h-6  peer-focus:outline-hidden rounded-full peer 
                             bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]
                             shadow-2xs
-                            peer-checked:border-[var(--wc-color)] 
+                            peer-checked:border-[var(--wc-brand-primary)] 
                             peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full 
                             peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)]
                             after:content-[''] after:absolute after:top-[2px] 
                             after:start-[2px]  after:bg-white dark:after:bg-gray-100 after:shadow 
-                            peer-checked:after:bg-[var(--wc-color)] peer-checked:dark:after:bg-[var(--wc-color)] 
-                            peer-checked:after:border-[var(--wc-color)] peer-checked:dark:after:border-[var(--wc-color)]
+                            peer-checked:after:bg-[var(--wc-brand-primary)] peer-checked:dark:after:bg-[var(--wc-brand-primary)] 
+                            peer-checked:after:border-[var(--wc-brand-primary)] peer-checked:dark:after:border-[var(--wc-brand-primary)]
                             dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border 
                             after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out">
                             </div>

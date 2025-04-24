@@ -171,7 +171,7 @@
 
 
                                     <div @class([
-                                        'px-1 dark:border-gray-500 overflow-hidden ',
+                                        'px-1 border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-accent)] overflow-hidden ',
                                         ' border-r-4 ml-auto' => $belongsToAuth,
                                         ' border-l-4 mr-auto ' => !$belongsToAuth,
                                     ])>
@@ -269,7 +269,7 @@
                                     {{-- -------------------- --}}
                                     @if ($attachment)
                                         @if (!$belongsToAuth && $isGroup)
-                                            <div style="color:  var(--wirechat-primary-color);" @class([
+                                            <div style="color:  var(--wc-brand-primary);" @class([
                                                 'shrink-0 font-medium text-sm sm:text-base',
                                                 // Hide avatar if the next message is from the same user
                                                 'hidden' => $message?->sendable?->is($previousMessage?->sendable),

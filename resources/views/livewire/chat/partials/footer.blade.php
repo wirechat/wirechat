@@ -268,7 +268,7 @@
                         <button wire:loading.attr="disabled" type="button" dusk="emoji-trigger-button"
                             @click="openEmojiPicker = ! openEmojiPicker" x-ref="emojibutton"
                             class="cursor-pointer hover:scale-105 transition-transform disabled:cursor-progress rounded-full p-px dark:border-gray-700">
-                            <svg x-bind:style="openEmojiPicker && { color: 'var(--wirechat-primary-color)' }"
+                            <svg x-bind:style="openEmojiPicker && { color: 'var(--wc-brand-primary)' }"
                                 viewBox="0 0 24 24" height="24" width="24"
                                 preserveAspectRatio="xMidYMid meet"
                                 class="w-7 h-7 text-gray-600 dark:text-gray-300 srtoke-[1.3] dark:stroke-[1.2]"
@@ -336,7 +336,7 @@
 
                                             <span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                    fill="currentColor" style="color: var(--wirechat-primary-color);"
+                                                    fill="currentColor" style="color: var(--wc-brand-primary);"
                                                     class="bi bi-folder-fill w-6 h-6" viewBox="0 0 16 16">
                                                     <path
                                                         d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3m-8.322.12q.322-.119.684-.12h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981z" />
@@ -369,7 +369,7 @@
                                             <span class="">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                     fill="currentColor" class="w-6 h-6"
-                                                    style="color: var(--wirechat-primary-color);">
+                                                    style="color: var(--wc-brand-primary);">
                                                     <path fill-rule="evenodd"
                                                         d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
                                                         clip-rule="evenodd" />
@@ -440,7 +440,7 @@
                         <button
                             x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
                             wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
-                            id="sendMessageButton" class="cursor-pointer hover:text-[var(--wirechat-primary-color)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
+                            id="sendMessageButton" class="cursor-pointer hover:text-[var(--wc-brand-primary)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
 
                             <svg class="w-7 h-7   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
                                 width="36" height="36" viewBox="0 0 24 24" fill="none"

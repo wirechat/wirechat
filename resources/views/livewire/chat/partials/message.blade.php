@@ -14,7 +14,7 @@
 
 {{-- We use style here to make it easy for dynamic and safe injection --}}
 @style([
-'background-color:var(--wirechat-primary-color)' => $belongsToAuth==true
+'background-color:var(--wc-brand-primary)' => $belongsToAuth==true
 ])
 
 @class([
