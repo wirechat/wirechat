@@ -8,9 +8,10 @@
 
     <title>{{ $title ?? config('app.name', 'Laravel') }}</title>
 
-      <!-- JavaScript to prevent flickering -->
+      <!--THEME:--ADD TO TOP OT PREVENT FLICKERING -->
       <script>
-        // Function to apply or remove the dark theme
+
+         /* Function to apply or remove the dark theme */
         function updateTheme(isDark) {
             if (isDark) {
                 document.documentElement.classList.add('dark');
@@ -19,14 +20,20 @@
             }
         }
     
-        // Check the initial theme preference
+        /* Check the initial theme preference */ 
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         updateTheme(darkModeMediaQuery.matches);
     
-        // Listen for changes in the theme preference
+        /* listen to changed in (prefers-color-scheme: dark) */
         darkModeMediaQuery.addEventListener('change', (event) => {
             updateTheme(event.matches);
         });
+
+        /* Add This to update theme when page is wire navigated */
+        document.addEventListener('livewire:navigated', () => {
+          const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          updateTheme(darkModeMediaQuery.matches);  // Re-apply the theme based on system preference
+         });
       </script>
     
     <!-- Fonts -->
@@ -36,7 +43,6 @@
    
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     @livewireStyles
     @wirechatStyles
 </head>
@@ -53,13 +59,6 @@
 
     @livewireScripts
     @wirechatAssets
-    <script>
-      document.addEventListener('livewire:navigated', () => {
-          const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-          updateTheme(darkModeMediaQuery.matches);  // Re-apply the theme based on system preference
-      });
-    </script>
-
 </body>
 
 </html>
