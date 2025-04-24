@@ -119,7 +119,6 @@ describe('Presense', function () {
             $request->assertDontSeeHtml('dusk="show_chat_info"');
             $request->assertSeeHtml('dusk="show_group_info"');
         });
-
     });
 
     test('it_can_show_correctly_formatted_time', function () {
@@ -399,7 +398,6 @@ describe('mount()', function () {
             ->assertOK()
             ->assertSeeHtml('$wire.dispatch(\'chat-opened\',{conversation:conversationId})');
     });
-
 });
 
 describe('Validation', function () {
@@ -414,7 +412,6 @@ describe('Validation', function () {
             ->call('sendMessage')
             // now assert that media is back to empty
             ->assertHasErrors('body', 'required');
-
     });
 
     test('file attachment count must not exceed value specified in config && it dispatces wirechat-toast error', function () {
@@ -520,7 +517,6 @@ describe('Validation', function () {
         //  ->assertHasErrors(['media.0'=>__('wirechat::validation.mimes', ['attribute' => __('wirechat::chat.inputs.media.label'),'values'=>'png'])]);
 
     });
-
 });
 
 describe('Box presence test: ', function () {
@@ -1449,7 +1445,6 @@ describe('Sending messages ', function () {
 
         for ($i = 0; $i < 60; $i++) {
             \Illuminate\Support\Facades\RateLimiter::increment('send-message:'.$auth->id);
-
         }
 
         // Move the time forward slightly for the 61st message
@@ -1697,7 +1692,6 @@ describe('Sending messages ', function () {
 
         for ($i = 0; $i < 60; $i++) {
             \Illuminate\Support\Facades\RateLimiter::increment('send-message:'.$auth->id);
-
         }
 
         // Test that the rate limit is hit
@@ -1706,7 +1700,7 @@ describe('Sending messages ', function () {
     });
 
     // attchements
-    test('it saves image to databse when created & clears files properties when done', function () {
+    test('it saves image record to databse when created & clears files properties when done', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
@@ -1720,6 +1714,73 @@ describe('Sending messages ', function () {
 
         $messageExists = Attachment::all();
         expect(count($messageExists))->toBe(1);
+    });
+
+    test('it saves image to storage when created & clears files properties when done', function () {
+        Storage::fake('public');
+
+        Config::set('wirechat.attachments.storage_disk', 'public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        $file[] = UploadedFile::fake()->image('photo.png');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('media', $file)
+            ->call('sendMessage')
+            // now assert that media is back to empty
+            ->assertSet('media', []);
+
+        $attachment = Attachment::first();
+        Storage::disk('public')->assertExists(WireChat::storageFolder().'/'.$attachment->file_anme);
+    });
+
+    test('it saves file visibility as public when storage_disk is public', function () {
+        Storage::fake('public');
+
+        Config::set('wirechat.attachments.storage_disk', 'public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        $file[] = UploadedFile::fake()->image('photo.png');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('media', $file)
+            ->call('sendMessage')
+            // now assert that media is back to empty
+            ->assertSet('media', []);
+
+        $attachment = Attachment::first();
+        $visibility = Storage::disk('public')->getVisibility(WireChat::storageFolder().'/'.$attachment->file_anme);
+
+        expect($visibility)->toBe('public');
+
+    });
+
+    test('it saves file visibility as public when storage_disk is s3', function () {
+        Storage::fake('s3');
+
+        Config::set('wirechat.attachments.storage_disk', 's3');
+        Config::set('wirechat.attachments.disk_visibility', 'private');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        $file[] = UploadedFile::fake()->image('photo.png');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('media', $file)
+            ->call('sendMessage')
+            // now assert that media is back to empty
+            ->assertSet('media', []);
+
+        $attachment = Attachment::first();
+        $visibility = Storage::disk('s3')->getVisibility(WireChat::storageFolder().'/'.$attachment->file_anme);
+
+        expect($visibility)->toBe('public');
+
     });
 
     test('it saves image: message type as attachemnt ', function () {
@@ -1776,6 +1837,26 @@ describe('Sending messages ', function () {
         expect(count($messageExists))->toBe(1);
     });
 
+    test('it saves video to storage when created', function () {
+        Storage::fake('public');
+
+        Config::set('wirechat.attachments.storage_disk', 'public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $file = UploadedFile::fake()->create('sample.mp4', '1000', 'video/mp4');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('media', $file)
+            ->call('sendMessage');
+
+        $attachment = Attachment::first();
+        Storage::disk('public')->assertExists(WireChat::storageFolder().'/'.$attachment->file_anme);
+    });
+
     test('it saves video: message type as attachemnt', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1813,6 +1894,27 @@ describe('Sending messages ', function () {
         $messageExists = Attachment::all();
 
         expect(count($messageExists))->toBe(1);
+    });
+
+    test('it saves file to storage when created & clears files properties when done', function () {
+
+        config::set('wirechat.attachments.storage_disk', 'public');
+        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $file[] = UploadedFile::fake()->create('photo.pdf', '400', 'application/pdf');
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('files', $file)
+            ->call('sendMessage')
+            // now assert that file is back to empty
+            ->assertSet('files', []);
+
+        $attachment = Attachment::first();
+        Storage::disk('public')->assertExists(WireChat::storageFolder().'/'.$attachment->file_anme);
     });
 
     test('dispatched event is listened to in chatlist after message is created', function () {
