@@ -214,7 +214,7 @@ describe('Presence check', function () {
 
         // dd($conversation->hasDisappearingTurnedOn());
         Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id])
-            ->assertSeeHtml('dusk="disappearing_messages_icon" ');
+            ->assertSeeHtml('dusk="disappearing_messages_icon"');
     });
 
     test('it doesnt shows dusk="disappearing_messages_icon" if disappearingTurnedOFF for conversation', function () {
