@@ -305,7 +305,6 @@ describe('Presence check', function () {
             Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id, 'widget' => true, 'showHomeRouteButton' => true])
                 ->assertSeeHtml('id="redirect-button"');
         });
-
     });
 });
 
@@ -726,11 +725,12 @@ describe('Search', function () {
         // create conversation with user2
         $auth->createConversationWith($user2, 'how are you doing');
 
-        Livewire::actingAs($auth)->test(Chatlist::class)
-            ->set('search', 'John')
-            ->assertSee('John')
-            ->assertDontSee('Mary');
+        $request = Livewire::actingAs($auth)->test(Chatlist::class);
 
+        $request->set('search', 'John');
+
+        $request->assertSee('John');
+        $request->assertDontSee('Mary');
     });
 
     test('deleted conversation should  appear when searched', function () {
