@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Changelog tag links missing prefix 'v'
 - Style: in new-group button to use correct/updated css variable 
+- Failing tests
 
 
 ---
