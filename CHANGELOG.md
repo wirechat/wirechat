@@ -15,6 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.2.6] (https://github.com/namumakwembo/wirechat/releases/tag/0.2.6)- 2025-04-25
+
+### Added
+- New **Theme** documentation page.
+- Support for defining CSS variables directly in a single `theme` configuration entry.
+
+### Updated
+- Theme system now uses the new CSS variable-based theming approach.
+- Improved file storage logic to better support S3 and disk visibility handling.
+
+---
+
 ## [v0.2.5](https://github.com/namumakwembo/wirechat/releases/tag/0.2.5) - 2025-04-15
 
 ### Added  
