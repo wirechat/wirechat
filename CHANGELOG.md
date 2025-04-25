@@ -9,13 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]  
+
 ### Added  
 - Initial changelog setup.  
 - Placeholder for upcoming features.
 
+
 ---
 
-## [v0.2.6](https://github.com/namumakwembo/wirechat/releases/tag/0.2.6) - 2025-04-25
+## [v0.2.7](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.7) - 2025-04-25
+
+### Fixed
+- Changelog tag links missing prefix 'v'
+- Style: in new-group button to use correct/updated css variable 
+
+
+---
+
+## [v0.2.6](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.6) - 2025-04-25
 
 ### Added
 - New **Theme** documentation page.
@@ -27,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.2.5](https://github.com/namumakwembo/wirechat/releases/tag/0.2.5) - 2025-04-15
+## [v0.2.5](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.5) - 2025-04-15
 
 ### Added  
 - `wirechat.attachments.disk_visibility` config option to determine if temporary URLs should be generated for private storage disks
@@ -40,13 +51,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.2.4](https://github.com/namumakwembo/wirechat/releases/tag/0.2.4) - 2025-03-30  
+## [v0.2.4](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.4) - 2025-03-30  
 
 ### Added  
 - support for Tailwind v4 
 ---
 
-## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/0.2.3) - 2025-03-29  
+## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.3) - 2025-03-29  
 
 ### Added  
 - Language file translation keys for labels  
@@ -64,13 +75,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [v0.2.2](https://github.com/namumakwembo/wirechat/releases/tag/0.2.2) - 2025-03-15
+## [v0.2.2](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.2) - 2025-03-15
 ### Updated  
 - Storeage url to use storage:disk()->url() instead of static url from database
 
 ---
 
-## [v0.2.1](https://github.com/namumakwembo/wirechat/releases/tag/0.2.1) - 2025-03-15
+## [v0.2.1](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.1) - 2025-03-15
 ### Fixed  
 - Storage disk to support dynamic storage 
 ### Added 
@@ -78,14 +89,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.2.0](https://github.com/namumakwembo/wirechat/releases/tag/0.2.0) - 2025-03-06
+## [v0.2.0](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.0) - 2025-03-06
 ### Added  
 - Support for Laravel 12
 
 ---
 
 
-## [v0.1.11](https://github.com/namumakwembo/wirechat/releases/tag/0.1.11) - 2025-03-04
+## [v0.1.11](https://github.com/namumakwembo/wirechat/releases/tag/v0.1.11) - 2025-03-04
 ### Added  
 - Introduced native notifications feature for new messages
 - New `notifications` key to wirechat configuration
@@ -100,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [v0.1.0](https://github.com/namumakwembo/wirechat/releases/tag/0.1.0) - 2025-02-16
+## [v0.1.0](https://github.com/namumakwembo/wirechat/releases/tag/v0.1.0) - 2025-02-16
 
 ### Added
 - New config variables:
@@ -149,7 +160,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.0.7](https://github.com/namumakwembo/wirechat/releases/tag/0.0.7) - 2024-12-20  
+## [v0.0.7](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.7) - 2024-12-20  
 ### Added  
 - Introduced `Actor` and `Actionable` traits for improved polymorphic relationship handling.  
   - Added tests for `Actor` and `Actionable` traits.
@@ -164,21 +175,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.0.6](https://github.com/namumakwembo/wirechat/releases/tag/0.0.6) - 2024-12-16  
+## [v0.0.6](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.6) - 2024-12-16  
 ### Fixed  
 - Fixed error caused by missing import in chat blade due to typo.  
   **Note:** Running `php artisan view:clear` may be required to ensure the changes take effect.
 
 ---
 
-## [v0.0.5](https://github.com/namumakwembo/wirechat/releases/tag/0.0.5) - 2024-12-11  
+## [v0.0.5](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.5) - 2024-12-11  
 ### Fixed  
 - Fixed unread messages dot not appearing correctly.  
   **Note:** Running `php artisan view:clear` may be required to ensure the changes take effect.
 
 ---
 
-## [v0.0.4](https://github.com/namumakwembo/wirechat/releases/tag/0.0.4) - 2024-12-8  
+## [v0.0.4](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.4) - 2024-12-8  
 ### Added  
 - Issue template  
 - MIT license  
@@ -186,7 +197,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.0.1](https://github.com/namumakwembo/wirechat/releases/tag/0.0.1) - 2024-12-8  
+## [v0.0.1](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.1) - 2024-12-8  
 ### Added  
 - Introduced `WireChat` package with the following features:  
   - Basic chat functionality for private conversations.  
