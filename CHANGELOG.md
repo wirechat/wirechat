@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.2.6] (https://github.com/namumakwembo/wirechat/releases/tag/0.2.6)- 2025-04-25
+## [v0.2.6](https://github.com/namumakwembo/wirechat/releases/tag/0.2.6) - 2025-04-25
 
 ### Added
 - New **Theme** documentation page.
