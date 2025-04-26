@@ -153,9 +153,23 @@ class Chat extends Component
 
     /**
      * Set replyMessage as Message Model
+     *
      *  */
-    public function setReply(Message $message)
+    public function setReply(string $id): void
     {
+        // descrypt
+
+        $messageId = null;
+        try {
+            $messageId = decrypt($id);
+
+        } catch (\Throwable $th) {
+
+            throw $th;
+        }
+
+        $message = Message::where('id', $messageId)->firstOrFail();
+
         // check if user belongs to message
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
 
@@ -465,8 +479,19 @@ class Chat extends Component
      * Delete for me means any participant of the conversation  can delete the message
      * and this will hide the message from them but other participants can still access/see it
      **/
-    public function deleteForMe(Message $message)
+    public function deleteForMe(string $id): void
     {
+        // descrypt
+        $messageId = null;
+        try {
+            $messageId = decrypt($id);
+
+        } catch (\Throwable $th) {
+
+            throw $th;
+        }
+
+        $message = Message::where('id', $messageId)->firstOrFail();
 
         // make sure user is authenticated
         abort_unless(auth()->check(), 401);
@@ -490,9 +515,19 @@ class Chat extends Component
      * and this will completely delete the message from the database
      * Unless it has a foreign key child or parent :then it i will be soft deleted
      **/
-    public function deleteForEveryone(Message $message)
+    public function deleteForEveryone(string $id): void
     {
+        // descrypt
+        $messageId = null;
+        try {
+            $messageId = decrypt($id);
 
+        } catch (\Throwable $th) {
+
+            throw $th;
+        }
+
+        $message = Message::where('id', $messageId)->firstOrFail();
         $authParticipant = $this->conversation->participant($this->auth);
 
         // make sure user is authenticated

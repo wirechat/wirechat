@@ -1756,7 +1756,6 @@ describe('Sending messages ', function () {
         $visibility = Storage::disk('public')->getVisibility(WireChat::storageFolder().'/'.$attachment->file_anme);
 
         expect($visibility)->toBe('public');
-
     });
 
     test('it saves file visibility as public when storage_disk is s3', function () {
@@ -1780,7 +1779,6 @@ describe('Sending messages ', function () {
         $visibility = Storage::disk('s3')->getVisibility(WireChat::storageFolder().'/'.$attachment->file_anme);
 
         expect($visibility)->toBe('public');
-
     });
 
     test('it saves image: message type as attachemnt ', function () {
@@ -1941,7 +1939,38 @@ describe('Sending reply', function () {
 
     // reply messages
 
-    test('it returns abort(403) when replying if message does not belong to this conversation or is not owned by any participant', function () {
+    test('it throws Payload DecryptException error if id is not encrypted', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        // send messages
+        $message = $auth->sendMessageTo($receiver, message: 'How are you');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+        $request->call('setReply', $message->id)
+            ->assertStatus(500);
+    })->throws(\Illuminate\Contracts\Encryption\DecryptException::class);
+
+    test('it doesnt throw DecryptException invalid error if id is encrypted', function () {
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        // send messages
+        $message = $auth->sendMessageTo($receiver, message: 'How are you');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+        $request->call('setReply', encrypt($message->id));
+    })->throwsNoExceptions();
+
+    test('it returns abort(404) when replying if message does not belong to this conversation or is not owned by any participant', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
@@ -1949,16 +1978,18 @@ describe('Sending reply', function () {
             ->withParticipants([$auth, $receiver])
             ->create();
 
+        // create random message not belonging to auth user
+        $randomuser = User::factory()->create();
+        $randomUSer2 = User::factory()->create();
+        $randomMessage = $randomuser->sendMessageTo($randomUSer2, message: 'How are you');
+
         // send message
         $auth->sendMessageTo($receiver, message: 'How are you');
 
-        // create random message not belonging to auth user
-        $randomMessage = Message::factory()->create();
-
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
-        $request->call('setReply', $randomMessage)
-            ->assertStatus(403);
-    });
+        $request->call('setReply', encrypt($randomMessage->id))
+            ->assertStatus(404);
+    })->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
 
     test('it can set reply message when setReply is called', function () {
         $auth = User::factory()->create();
@@ -1972,8 +2003,9 @@ describe('Sending reply', function () {
         $message = $auth->sendMessageTo($receiver, message: 'How are you');
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('setReply', $message)
-            ->assertSet('replyMessage', $message);
+            ->call('setReply', encrypt($message->id))
+            ->assertSet('replyMessage.id', $message->id);
+
     });
 
     test('it shows "replying to yourself" when auth is replying to own message ', function () {
@@ -1987,7 +2019,7 @@ describe('Sending reply', function () {
 
         // dd($conversation->id,$message->conversation_id);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('setReply', $message->id)
+            ->call('setReply', encrypt($message->id))
             ->call('$refresh')
             // we test seprate because the text is not in same HTML tag
             ->assertSee('Replying to')
@@ -2005,7 +2037,7 @@ describe('Sending reply', function () {
         $message = $auth->sendMessageTo($receiver, message: 'How are you');
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('setReply', $message)
+            ->call('setReply', encrypt($message->id))
             ->assertDispatched('focus-input-field');
     });
 
@@ -2773,7 +2805,7 @@ describe('deleteMessage ForEveryone', function () {
 
         // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('deleteForEveryone', $otherUserMessage->id)
+            ->call('deleteForEveryone', encrypt($otherUserMessage->id))
             ->assertStatus(403);
 
         $messageAvailable = Message::find($otherUserMessage->id);
@@ -2797,7 +2829,7 @@ describe('deleteMessage ForEveryone', function () {
         User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'user']);
 
         Livewire::actingAs($admin)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('deleteForEveryone', '1')
+            ->call('deleteForEveryone', encrypt('1'))
             ->assertStatus(200);
 
         $messageAvailable = Message::find('1');
@@ -2829,13 +2861,64 @@ describe('deleteMessage ForEveryone', function () {
         });
 
         // call deleteForMe
-        $request->call('deleteForEveryone', $authMessage->id);
+        $request->call('deleteForEveryone', encrypt($authMessage->id));
 
         // assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
             return count($messages->flatten()) == 3;
         });
     });
+    test('it throws DecryptException if id is not Encrypted', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        // auth -> receiver
+        $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
+
+        // receiver -> auth
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $receiver->sendMessageTo($auth, message: 'message-4');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        // assert count 4
+        $request->assertViewHas('loadedMessages', function ($messages) {
+            return count($messages->flatten()) == 4;
+        });
+
+        // call deleteForMe
+        $request->call('deleteForEveryone', $authMessage->id);
+
+        // assert count no 3
+        $request->asssertStatus(500);
+    })->throws(\Illuminate\Contracts\Encryption\DecryptException::class);
+
+    test('it does Not throws DecryptException if id is Encrypted', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        // auth -> receiver
+        $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $authMessage = $auth->sendMessageTo($receiver, message: 'message-2');
+
+        // receiver -> auth
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $receiver->sendMessageTo($auth, message: 'message-4');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        // call deleteForMe
+        $request->call('deleteForEveryone', encrypt($authMessage->id));
+
+        // assert count no 3
+    })->throwsNoExceptions();
 
     test('deleted message is removed database', function () {
 
@@ -2851,7 +2934,7 @@ describe('deleteMessage ForEveryone', function () {
 
         // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('deleteForMe', $authMessage->id);
+            ->call('deleteForMe', encrypt($authMessage->id));
 
         $messageAvailable = Message::find($authMessage->id);
 
@@ -2881,7 +2964,7 @@ describe('deleteMessage ForEveryone', function () {
 
         // Now lets unsend message
         // here assuming that the message ID is 1 since it is the first one
-        $request->call('deleteForEveryone', 1);
+        $request->call('deleteForEveryone', encrypt(1));
 
         // /assert attachment no longer avaible in database
         expect(count(Attachment::all()))->toBe(0);
@@ -2908,7 +2991,7 @@ describe('deleteMessage ForEveryone', function () {
 
         // Now lets unsend message
         // here assuming that the message ID is 1 since it is the first one
-        $request->call('deleteForMe', $messageModel->id);
+        $request->call('deleteForMe', encrypt($messageModel->id));
 
         Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->assertMissing($attachmentModel->file_name);
     });
@@ -2926,7 +3009,7 @@ describe('deleteMessage ForEveryone', function () {
         // run
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             // add attachment
-            ->call('deleteForEveryone', 1)
+            ->call('deleteForEveryone', encrypt(1))
             ->assertDispatched('refresh');
 
         // assert
@@ -2943,13 +3026,13 @@ describe('deleteMessage ForEveryone', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // send reply
-        $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
+        $request->call('setReply', encrypt(1))->set('body', 'This is reply')->call('sendMessage');
 
         // assert messsage visible
         $request->assertSee('This is reply');
 
         // call deleteForMe
-        $request->call('deleteForEveryone', '1');
+        $request->call('deleteForEveryone', encrypt('1'));
 
         // now assert still see 'This is message' message
         $request->assertSee('This is message');
@@ -2971,7 +3054,7 @@ describe('deleteMessage ForEveryone', function () {
 
         // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('deleteForEveryone', $authMessage->id);
+            ->call('deleteForEveryone', encrypt($authMessage->id));
 
         Event::assertDispatched(MessageDeleted::class, function ($event) use ($authMessage) {
             return $event->message->id === $authMessage->id;
@@ -2981,7 +3064,7 @@ describe('deleteMessage ForEveryone', function () {
 
 describe('deletForMe', function () {
 
-    test('user can delete message that does not belong to them ', function () {
+    test('it throws DecryptException if message id is not Encrypted  ', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -2997,6 +3080,46 @@ describe('deletForMe', function () {
         // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('deleteForMe', $otherUserMessage->id)
+            ->assertStatus(500);
+
+    })->throws(\Illuminate\Contracts\Encryption\DecryptException::class);
+
+    test('it doesnt throws DecryptException if message id is Encrypted  ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        // auth -> receiver
+        $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $auth->sendMessageTo($receiver, message: 'message-2');
+
+        // receiver -> auth
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $otherUserMessage = $receiver->sendMessageTo($auth, message: 'message-4');
+
+        // run
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForMe', encrypt($otherUserMessage->id))
+            ->assertStatus(200);
+
+    });
+
+    test('user can delete-for-me message that does not belong to them ', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        // auth -> receiver
+        $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $auth->sendMessageTo($receiver, message: 'message-2');
+
+        // receiver -> auth
+        $receiver->sendMessageTo($auth, message: 'message-3');
+        $otherUserMessage = $receiver->sendMessageTo($auth, message: 'message-4');
+
+        // run
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForMe', encrypt($otherUserMessage->id))
             ->assertStatus(200);
 
         $messageAvailable = Message::find($otherUserMessage->id);
@@ -3028,7 +3151,7 @@ describe('deletForMe', function () {
         });
 
         // call deleteForMe
-        $request->call('deleteForMe', $authMessage->id);
+        $request->call('deleteForMe', encrypt($authMessage->id));
 
         // assert count no 3
         $request->assertViewHas('loadedMessages', function ($messages) {
@@ -3052,7 +3175,7 @@ describe('deletForMe', function () {
 
         // run
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->call('deleteForMe', $authMessage->id);
+            ->call('deleteForMe', encrypt($authMessage->id));
 
         $messageAvailable = Message::withoutGlobalScopes()->find($authMessage->id);
 
@@ -3072,7 +3195,7 @@ describe('deletForMe', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // call deleteForMe
-        $request->call('deleteForMe', '1')
+        $request->call('deleteForMe', encrypt('1'))
             ->assertDispatched('refresh');
 
         // assert
@@ -3089,13 +3212,13 @@ describe('deletForMe', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // send reply
-        $request->call('setReply', 1)->set('body', 'This is reply')->call('sendMessage');
+        $request->call('setReply', encrypt(1))->set('body', 'This is reply')->call('sendMessage');
 
         // assert messsage visible
         $request->assertSee('This is reply');
 
         // call deleteForMe
-        $request->call('deleteForMe', '1')->assertDispatched('refresh');
+        $request->call('deleteForMe', encrypt('1'))->assertDispatched('refresh');
 
         // now assert still see 'This is message' message
         $request->assertSee('This is message');
