@@ -142,7 +142,7 @@ class Info extends ModalComponent
             $this->group?->cover?->delete();
             // save photo to disk
             $path = $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
-            $url = Storage::url($path);
+            $url = Storage::disk(WireChat::storageDisk())->url($path);
             // create attachment
             $this->conversation->group?->cover()?->create([
                 'file_path' => $path,

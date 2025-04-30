@@ -166,7 +166,7 @@ trait Chatable
                 'file_name' => basename($path),
                 'original_name' => $photo->getClientOriginalName(),
                 'mime_type' => $photo->getMimeType(),
-                'url' => Storage::url($path),
+                'url' => Storage::disk(WireChat::storageDisk())->url($path),
             ]);
         }
 
