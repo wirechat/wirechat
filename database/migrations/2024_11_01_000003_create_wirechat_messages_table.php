@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 
@@ -13,10 +14,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create((new Message)->getTable(), function (Blueprint $table) {
+        $usesUuid = WireChat::usesUuid();
+        Schema::create((new Message)->getTable(), function (Blueprint $table) use ($usesUuid) {
             $table->id();
 
-            $table->unsignedBigInteger('conversation_id')->nullable();
+            if ($usesUuid) {
+                $table->uuid('conversation_id');
+            } else {
+                $table->unsignedBigInteger('conversation_id');
+            }
             $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
 
             $table->unsignedBigInteger('sendable_id');

@@ -10,7 +10,7 @@
     <div class="  flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
 
         {{-- Return --}}
-        <a @if ($this->isWidget()) @click="$dispatch('close-chat',{conversation: {{ $conversation->id }}})"
+        <a @if ($this->isWidget()) @click="$dispatch('close-chat',{conversation: @js($conversation->id)})"
             dusk="return_to_home_button_dispatch"
         @else
             href="{{ route(WireChat::indexRouteName(), $conversation->id) }}"
@@ -103,7 +103,7 @@
 
                         @if ($this->isWidget())
                             <x-wirechat::dropdown-link
-                                @click="$dispatch('close-chat',{conversation: {{ $conversation->id }}})">
+                                @click="$dispatch('close-chat',{conversation: @js($conversation->id)})">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @else

@@ -47,8 +47,8 @@
         <a @if ($widget) tabindex="0" 
         role="button" 
         dusk="openChatWidgetButton"
-        @click="$dispatch('open-chat',{conversation:'@json($conversation->id)'})"
-        @keydown.enter="$dispatch('open-chat',{conversation:'@json($conversation->id)'})"
+        @click="$dispatch('open-chat',{conversation:@js($conversation->id)})"
+        @keydown.enter="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @else
         wire:navigate href="{{ route(WireChat::viewRouteName(), $conversation->id) }}" @endif
             @style(['border-color:var(--wc-brand-primary)' => $selectedConversationId == $conversation?->id])

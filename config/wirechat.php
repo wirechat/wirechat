@@ -3,6 +3,11 @@
 return [
 
     /**
+     * Use UUID's for Conversation
+     */
+    'use_uuid' => false,
+
+    /**
      * Table Prefix:
      * Sets the prefix for Wirechat database tables.
      */

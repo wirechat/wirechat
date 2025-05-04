@@ -766,9 +766,9 @@ class Chat extends Component
         // Handle different input scenarios
         if ($conversation instanceof Conversation) {
             $this->conversation = $conversation;
-        } elseif (is_numeric($conversation)) {
+        } elseif (is_numeric($conversation) || is_string($conversation)) {
             // Cast to integer if numeric (handles numeric strings too)
-            $conversationId = (int) $conversation;
+            $conversationId = $conversation;
             $this->conversation = Conversation::find($conversationId);
 
             if (! $this->conversation) {

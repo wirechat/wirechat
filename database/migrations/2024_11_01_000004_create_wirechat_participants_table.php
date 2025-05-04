@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Participant;
 
@@ -13,12 +14,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        Schema::create((new Participant)->getTable(), function (Blueprint $table) {
+        $usesUuid = WireChat::usesUuid();
+        Schema::create((new Participant)->getTable(), function (Blueprint $table) use ($usesUuid) {
             $table->id();
 
             // Foreign key for conversation
-            $table->unsignedBigInteger('conversation_id');
+            if ($usesUuid) {
+                $table->uuid('conversation_id');
+            } else {
+                $table->unsignedBigInteger('conversation_id');
+            }
             $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
 
             $table->string('role');

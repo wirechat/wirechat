@@ -16,6 +16,7 @@ use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Models\Concerns\HasDynamicIds;
 use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
 use Namu\WireChat\Traits\Actionable;
 
@@ -56,6 +57,7 @@ use Namu\WireChat\Traits\Actionable;
 class Conversation extends Model
 {
     use Actionable;
+    use HasDynamicIds;
     use HasFactory;
 
     protected $fillable = [

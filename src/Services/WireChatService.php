@@ -167,4 +167,12 @@ class WireChatService
     {
         return (bool) config('wirechat.notifications.enabled', false);
     }
+
+    /**
+     * Check if application preferes to use UUID instead of incremental primary ID for conversation table
+     */
+    public static function usesUuid(): bool
+    {
+        return (bool) config('wirechat.use_uuid', false);
+    }
 }

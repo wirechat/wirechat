@@ -2,7 +2,7 @@
 <div id="new-chat-modal ">
 
     <div 
-    class="relative w-full h-96  border mx-auto border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
+    class="relative w-full h-96  border mx-auto border-[var(--wc-light-secondary)]  dark:border-[var(--wc-dark-secondary)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
 
     <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 py-2">
         <div class="flex justify-between items-center justify-between pb-2">

@@ -323,7 +323,7 @@ describe('mount()', function () {
 
         $conversation = $auth->createConversationWith($receiver);
 
-        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => 'randmo..']);
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => []]);
 
         $request->assertStatus(422);
     });
