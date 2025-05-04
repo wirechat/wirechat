@@ -173,6 +173,6 @@ class WireChatService
      */
     public static function usesUuid(): bool
     {
-        return (bool) config('wirechat.use_uuid', false);
+        return (bool) config('wirechat.uuids', false);
     }
 }
