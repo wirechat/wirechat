@@ -19,9 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.2.8](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.8) - 2025-05-04
 
-### added
-- uuids key in config 
+### Added
+- `uuids` configuration option to toggle UUIDs for new installations
 
+### Fixed
+- Improved handling of storage URLs when saving attachments
+
+### Updated
+- Encrypted parameter keys for Blade method actions to enhance security
 
 ---
 
