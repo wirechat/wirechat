@@ -18,7 +18,7 @@
 
         /* Emoji picker configuration */
         emoji-picker {
-            --background: #f9fafb;
+            --background: none !important;
             --border-radius: 12px;
             --input-border-color: rgb(229 229 229);
             --input-padding: 0.45rem;
