@@ -7,7 +7,7 @@
 
 
 <div x-ref="members"
-    class="h-[calc(100vh_-_6rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border dark:border-gray-700 overflow-y-auto overflow-x-hidden  ">
+    class="h-[calc(100vh_-_6rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  overflow-y-auto overflow-x-hidden  ">
 
     <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
         <div class="flex items-center justify-center pb-2">

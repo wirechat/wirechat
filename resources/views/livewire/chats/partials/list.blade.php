@@ -43,7 +43,7 @@
     id="conversation-{{ $conversation->id }}" 
         wire:key="conversation-em-{{ $conversation->id }}-{{ $conversation->updated_at->timestamp }}"
         x-on:chat-opened.window="handleChatOpened($event)"
-        x-on:chat-closed.window="handleChatClosed($event)"
+        x-on:chat-closed.window="handleChatClosed($event)">
         <a @if ($widget) tabindex="0" 
         role="button" 
         dusk="openChatWidgetButton"
