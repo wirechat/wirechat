@@ -103,7 +103,7 @@
 
                         @if ($this->isWidget())
                             <x-wirechat::dropdown-link
-                                @click="$dispatch('close-chat',{conversation: @js($conversation->id)})">
+                                @click="$dispatch('close-chat',{conversation: {{ $conversation->id }}})">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @else
