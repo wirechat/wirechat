@@ -17,6 +17,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.2.10](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.10) - 2025-05-22
+
+### Fixed
+- Fixed close button not working correctly when chat component is widget  
+
+-----
+
+## [v0.2.9](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.9) - 2025-05-15
+
+### Fixed
+- Added misssing closing tag in chat-list component 
+
+------
+
 ## [v0.2.8](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.8) - 2025-05-04
 
 ### Added
