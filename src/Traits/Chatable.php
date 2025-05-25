@@ -533,7 +533,7 @@ trait Chatable
      */
     public function canCreateGroups(): bool
     {
-        return $this->hasVerifiedEmail();
+        return true;
     }
 
     /**
@@ -541,6 +541,6 @@ trait Chatable
      */
     public function canCreateChats(): bool
     {
-        return $this->hasVerifiedEmail();
+        return true;
     }
 }
