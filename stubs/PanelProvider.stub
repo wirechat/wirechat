@@ -1,0 +1,23 @@
+<?php
+
+namespace {{ namespace }};
+
+use Namu\WireChat\Panel;
+use Namu\WireChat\PanelProvider;
+
+class {{ className }} extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->id('{{ panelId }}')
+            ->path('{{ panelId }}')
+            ->routePrefix('{{ panelId }}')
+            ->middleware(['web'])
+            ->features([
+                'search' => true,
+                'notifications' => true,
+            ])
+            ->default();
+    }
+}

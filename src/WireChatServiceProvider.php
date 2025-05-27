@@ -6,6 +6,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use Namu\WireChat\Console\Commands\MakePanelCommand;
 use Namu\WireChat\Console\Commands\InstallWireChat;
 use Namu\WireChat\Console\Commands\SetupNotifications;
 use Namu\WireChat\Facades\WireChat as FacadesWireChat;
@@ -36,8 +37,13 @@ class WireChatServiceProvider extends ServiceProvider
             $this->commands([
                 InstallWireChat::class,
                 SetupNotifications::class,
+                MakePanelCommand::class
             ]);
         }
+
+        // Trigger auto-discovery
+        app('wirechatPanelRegistry')->autoDiscover();
+        logger('WireChatServiceProvider booted, auto-discovery completed');
 
         $this->loadLivewireComponents();
 
@@ -81,6 +87,8 @@ class WireChatServiceProvider extends ServiceProvider
 
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
+
+
     }
 
     public function register()
@@ -91,11 +99,21 @@ class WireChatServiceProvider extends ServiceProvider
             'wirechat'
         );
 
+
         // register facades
         $this->app->singleton('wirechat', function ($app) {
             return new WireChatService;
         });
+
+        // Register PanelRegistry with auto-discovery
+        // Bind PanelRegistry to the container
+        // Bind PanelRegistry to the container
+        $this->app->singleton('wirechatPanelRegistry', function () {
+            logger('Binding wirechatPanelRegistry');
+            return new PanelRegistry();
+        });
     }
+
 
     // custom methods for livewire components
     protected function loadLivewireComponents(): void
@@ -137,7 +155,7 @@ class WireChatServiceProvider extends ServiceProvider
     {
         Blade::directive('wirechatAssets', function () {
             return "<?php if(auth()->check()): ?>
-                        <?php 
+                        <?php
                             echo Blade::render('@livewire(\'wirechat.modal\')');
                             echo Blade::render('<x-wirechat::toast/>');
                             echo Blade::render('<x-wirechat::notification/>');
@@ -156,7 +174,7 @@ class WireChatServiceProvider extends ServiceProvider
                 <style>
                     :root {
                         --wc-brand-primary: {$primaryColor};
-                        
+
                         --wc-light-primary: #fff;  /* white */
                         --wc-light-secondary: oklch(0.967 0.003 264.542);/* --color-gray-100 */
                         --wc-light-accent: oklch(0.985 0.002 247.839);/* --color-gray-50 */

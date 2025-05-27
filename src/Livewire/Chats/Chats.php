@@ -71,6 +71,8 @@ class Chats extends Component
      */
     public $selectedConversationId;
 
+
+
     /**
      * Returns an array of event listeners.
      *

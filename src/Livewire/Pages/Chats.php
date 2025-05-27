@@ -7,9 +7,12 @@ use Livewire\Component;
 
 class Chats extends Component
 {
+    public  $panel;
     #[Title('Chats')]
     public function render()
     {
+
+        dd($this->panel);
         return view('wirechat::livewire.pages.chats')
             ->layout(config('wirechat.layout', 'wirechat::layouts.app'));
 
