@@ -38,14 +38,14 @@
                 this.showUnreadStatus= false;
             }
     }
-    }"  
+    }"
 
-    id="conversation-{{ $conversation->id }}" 
+    id="conversation-{{ $conversation->id }}"
         wire:key="conversation-em-{{ $conversation->id }}-{{ $conversation->updated_at->timestamp }}"
         x-on:chat-opened.window="handleChatOpened($event)"
         x-on:chat-closed.window="handleChatClosed($event)">
-        <a @if ($widget) tabindex="0" 
-        role="button" 
+        <a @if ($widget) tabindex="0"
+        role="button"
         dusk="openChatWidgetButton"
         @click="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @keydown.enter="$dispatch('open-chat',{conversation:@js($conversation->id)})"

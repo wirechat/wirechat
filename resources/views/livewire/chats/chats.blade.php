@@ -2,14 +2,22 @@
 
 <div x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
     x-on:open-chat.window="selectedConversationId= $event.detail.conversation; $wire.selectedConversationId= $event.detail.conversation;"
-    x-init=" setTimeout(() => {
-         conversationElement = document.getElementById('conversation-' + selectedConversationId);
-    
-         // Scroll to the conversation element
-         if (conversationElement) {
-             conversationElement.scrollIntoView({ behavior: 'smooth' });
-         }
-     }, 200);"
+     x-init="
+         let scrollToConversation = () => {
+             let conversationElement = document.getElementById('conversation-' + selectedConversationId);
+             if (conversationElement) {
+                 conversationElement.scrollIntoView({ behavior: 'smooth' });
+             }
+         };
+
+         setTimeout(scrollToConversation, 200);
+
+             document.addEventListener('livewire:navigated', () => {
+             setTimeout(() => {
+                 scrollToConversation();
+             }, 200);  // slight delay to wait for DOM update
+         });
+     "
     class="flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full sm:p-3">
 
     @php

@@ -42,17 +42,21 @@ Route::as('wirechat.')
 //                    Route::get('/{conversation}', function ($conversation) use ($panel) {
 //                        return new Chat(['panel' => $panel, 'conversation' => $conversation]);
 //                    })->middleware('belongsToConversation')->name('chat');
-                    Route::get('/',function()use ($panel){
+//                    Route::get('/',function()use ($panel){
+//
+//                        dd($panel);
+//
+//                        $component = app(Chats::class, ['panel' => $panel]);
+//                        return $component(['panel' => $panel]);
+//                    })->name('chats');
 
-                        dd($panel);
-
-                        $component = app(Chats::class, ['panel' => $panel]);
-                        return $component(['panel' => $panel]);
-                    })->name('chats');
+                     Route::view('/','wirechat::layouts.chat', ['panel' => $panel]);
+                     Route::view('/{conversation}','wirechat::layouts.chat', ['panel' => $panel])->name('chat');
 
 
 
-                    Route::get('/{conversation}', Chat::class)->middleware('belongsToConversation')->name('chat');
+
+               //     Route::get('/{conversation}', Chat::class)->middleware('belongsToConversation')->name('chat');
                 });
         }
     });
