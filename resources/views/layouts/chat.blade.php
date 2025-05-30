@@ -51,16 +51,31 @@
     <div class="min-h-screen bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]">
 
         <!-- Page Content -->
-        <main class="h-[calc(100vh_-_0.0rem)]">
+        <main class="h-[calc(100vh_-_0.0rem)] w-full">
+            @php
+            $conversation = request()->conversation;
+
+            @endphp
+
 
             <div class="w-full flex min-h-full h-full rounded-lg">
-                @persist('chats')
-                <div wire:scroll class="{{ request()->conversation ? 'hidden md:grid' : 'grid' }} bg-inherit border-r border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] dark:bg-inherit relative w-full h-full md:w-[360px] lg:w-[400px] xl:w-[500px] shrink-0 overflow-y-auto">
-                    <livewire:wirechat.chats />
-                </div>
-                @endpersist
 
-                <main class="{{ request()->conversation ? 'grid w-full grow' : 'hidden md:grid' }} h-full min-h-full {{ request()->route('conversation') ? '' : 'bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]' }} relative overflow-y-auto" style="contain:content">
+                <div wire:scroll
+                     x-persist="chats"
+                     @class([
+                        'bg-inherit border-r border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] dark:bg-inherit relative w-full  grow h-full md:w-[360px] lg:w-[400px] xl:w-[500px] shrink-0 overflow-y-auto',
+                        'hidden md:grid'=>$conversation,
+                        'grid'=>!$conversation,
+                    ])>
+                      <livewire:wirechat.chats />
+                </div>
+
+
+                <main @class([
+                        'bg-[var(--wc-light-primary)] grow w-full dark:bg-[var(--wc-dark-primary)] relative overflow-y-auto h-full min-h-full',
+                        'grid'=>$conversation,
+                        'hidden md:grid'=>!$conversation,
+                    ])  style="contain:content">
                     @if(request()->conversation)
                         <livewire:wirechat.chat conversation="{{ request()->conversation }}" />
                     @else
@@ -73,6 +88,7 @@
                 </main>
             </div>
         </main>
+
 
     </div>
 

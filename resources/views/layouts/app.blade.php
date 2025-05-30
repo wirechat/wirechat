@@ -52,7 +52,7 @@
 
         <!-- Page Content -->
         <main class="h-[calc(100vh_-_0.0rem)]">
-             @yield('content',$slot)
+             @yield('content',$slot??null)
         </main>
 
     </div>

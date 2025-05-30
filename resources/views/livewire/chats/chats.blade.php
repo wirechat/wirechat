@@ -1,24 +1,66 @@
 @use('Namu\WireChat\Facades\WireChat')
 
 <div x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
-    x-on:open-chat.window="selectedConversationId= $event.detail.conversation; $wire.selectedConversationId= $event.detail.conversation;"
+    x-on:open-chat.window="selectedConversationId= $event.detail.conversation; $wire.selectedConversationId= $event.detail.conversation;"Maybe on wirenagiat ei can get he height os the element then scroll to that elemtn inside the the container and make sure it is in te middle of the viewport
+
      x-init="
-         let scrollToConversation = () => {
-             let conversationElement = document.getElementById('conversation-' + selectedConversationId);
-             if (conversationElement) {
-                 conversationElement.scrollIntoView({ behavior: 'smooth' });
-             }
-         };
+    const container = document.getElementById('wirechat-chats-scrollable-container');
 
-         setTimeout(scrollToConversation, 200);
+    function scrollToConversation(attempts = 5, delay = 400) {
+        const el = document.getElementById('conversation-' + selectedConversationId);
 
-             document.addEventListener('livewire:navigated', () => {
-             setTimeout(() => {
-                 scrollToConversation();
-             }, 200);  // slight delay to wait for DOM update
-         });
-     "
-    class="flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full sm:p-3">
+        if (!container || !el || el.offsetParent === null || !selectedConversationId) {
+            if (attempts > 0) {
+                setTimeout(() => scrollToConversation(attempts - 1, delay), delay);
+            }
+            return;
+        }
+
+        container.style.overflowY = 'auto';
+
+        const containerHeight = container.clientHeight;
+        const containerScrollHeight = container.scrollHeight;
+        const elementTop = el.offsetTop;
+        const elementHeight = el.offsetHeight;
+
+        const offsetToCenter = (containerHeight - elementHeight) / 2;
+        let scrollOffset = elementTop - offsetToCenter;
+
+        if (scrollOffset + containerHeight > containerScrollHeight) {
+            scrollOffset = containerScrollHeight - containerHeight;
+        }
+
+        const maxScroll = containerScrollHeight - containerHeight;
+        const finalScroll = Math.max(0, Math.min(scrollOffset, maxScroll));
+
+        requestAnimationFrame(() => {
+            container.scrollTo({
+                top: finalScroll,
+                behavior: 'smooth'
+            });
+        });
+
+        console.log({
+            containerHeight,
+            containerScrollHeight,
+            elementTop,
+            elementHeight,
+            scrollOffset,
+            finalScroll
+        });
+    }
+
+    setTimeout(scrollToConversation, 400);
+
+    document.addEventListener('livewire:navigated', () => {
+        setTimeout(scrollToConversation, 400);
+    });
+"
+
+
+
+
+     class="flex flex-col bg-[var(--wc-light-primary)]  dark:bg-[var(--wc-dark-primary)]  transition-all h-full overflow-hidden w-full sm:p-3">
 
     @php
         /* Show header if any of these conditions are true  */
@@ -43,6 +85,7 @@
                 $wire.loadMore();
             }
             "
+          id="wirechat-chats-scrollable-container"
         class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">
 
         {{-- loading indicator --}}

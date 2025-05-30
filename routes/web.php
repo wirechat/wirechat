@@ -50,8 +50,8 @@ Route::as('wirechat.')
 //                        return $component(['panel' => $panel]);
 //                    })->name('chats');
 
-                     Route::view('/','wirechat::layouts.chat', ['panel' => $panel]);
-                     Route::view('/{conversation}','wirechat::layouts.chat', ['panel' => $panel])->name('chat');
+                     Route::view('/','wirechat::pages.chats', ['panel' => $panel]);
+                     Route::view('/{conversation}','wirechat::pages.chat', ['panel' => $panel])->name('chat');
 
 
 
