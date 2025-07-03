@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.3.0](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.0) - 2025-05-22
+
+### Fixed
+- Fixed close button not working correctly when chat component is widget
+
+### Changes
+- config value home_route to app_redirect_route
+
+--------
+
 ## [v0.2.10](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.10) - 2025-05-22
 
 ### Fixed

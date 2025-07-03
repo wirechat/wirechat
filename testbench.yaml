@@ -1,7 +1,7 @@
 providers:
-  - Namu\WireChat\WireChatServiceProvider
-  - Workbench\App\Providers\WorkbenchServiceProvider
-  - Livewire\LivewireServiceProvider
+#  - Livewire\LivewireServiceProvider
+#  - Namu\WireChat\WireChatServiceProvider
+#  - Workbench\App\Providers\WorkbenchServiceProvider
 
 migrations:
  # - workbench\database\migrations
@@ -23,13 +23,8 @@ workbench:
     commands: true
     components: true
     views: true
-  build: [
-      - drop-sqlite-db
-      - create-sqlite-db
-      #- vendor:publish --tag="wirechat-migrations"
-      #- migrate:refresh
+  build: [ "drop-sqlite-db", "create-sqlite-db" ]
 
-  ]
   assets: []
   sync: [
   ]
