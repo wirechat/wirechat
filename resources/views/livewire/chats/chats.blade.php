@@ -1,5 +1,4 @@
 @use('Namu\WireChat\Facades\WireChat')
-
 <div x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
     x-on:open-chat.window="selectedConversationId= $event.detail.conversation; $wire.selectedConversationId= $event.detail.conversation;"Maybe on wirenagiat ei can get he height os the element then scroll to that elemtn inside the the container and make sure it is in te middle of the viewport
 
@@ -103,7 +102,5 @@
             </div>
         @endif
     </main>
-
-
 
 </div>

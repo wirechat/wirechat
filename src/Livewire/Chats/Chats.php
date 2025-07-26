@@ -9,6 +9,7 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphClassResolver;
+use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\Widget;
 use Namu\WireChat\Models\Conversation;
 
@@ -21,7 +22,7 @@ use Namu\WireChat\Models\Conversation;
  */
 class Chats extends Component
 {
-    use Widget;
+    use Widget,HasPanel;
 
     /**
      * The search query.
@@ -41,16 +42,16 @@ class Chats extends Component
      * Features
      */
     #[Locked]
-    public bool $showNewChatModalButton;
+    public ?bool $showNewChatModalButton=null;
 
     #[Locked]
-    public bool $allowChatsSearch;
+    public ?bool $allowChatsSearch=null;
 
     #[Locked]
-    public bool $showHomeRouteButton;
+    public ?bool $showHomeRouteButton=null;
 
     #[Locked]
-    public ?string $title;
+    public ?string $title='';
 
     /**
      * Indicates if more conversations can be loaded.
@@ -331,22 +332,72 @@ class Chats extends Component
      *
      * @return void
      */
-    public function mount(
-        $showNewChatModalButton = null,
-        $allowChatsSearch = null,
-        $showHomeRouteButton = null,
-        ?string $title = null,
-    ) {
-        // If a value is passed, use it; otherwise fallback to WireChat defaults.
-        $this->showNewChatModalButton = isset($showNewChatModalButton) ? $showNewChatModalButton : WireChat::showNewChatModalButton();
-        $this->allowChatsSearch = isset($allowChatsSearch) ? $allowChatsSearch : WireChat::allowChatsSearch();
-        $this->showHomeRouteButton = isset($showHomeRouteButton) ? $showHomeRouteButton : ! $this->widget;
-        $this->title = isset($title) ? $title : __('wirechat::chats.labels.heading');
+    public function mount() {
+
 
         abort_unless(auth()->check(), 401);
         $this->selectedConversationId = request()->conversation;
         $this->conversations = collect();
+
     }
+
+
+//    protected function initialize()
+//    {
+//        $this->title = $this->panel()?->getHeading();
+//        $this->showNewChatModalButton = $this->panel()?->hasNewChatAction();
+//        $this->allowChatsSearch = $this->panel()?->hasChatsSearch();
+//        $this->showHomeRouteButton = $this->widget
+//            ? false
+//            : $this->panel()?->hasRedirectToHomeAction();
+//    }
+
+    protected function initialize()
+    {
+        // Grab the original class‐level defaults
+        $defaults = get_class_vars(static::class);
+
+        //
+        // TITLE
+        //
+        // If current ≠ original (''), the user passed something:
+        //   • null → explicit “no title”
+        //   • non‐empty string → custom title
+        //
+
+        if ($this->title !== $defaults['title']) {
+            // leave $this->title as-is (null or custom string)
+        } else {
+            // still '', so never set → pull from panel()
+
+            $this->title = $this->panel()?->getHeading();
+        }
+      //  dd($this->title , $defaults['title']);
+
+        //
+        // BOOLEAN FLAGS
+        //
+        // Their default is null, so:
+        //   • null → never set → fallback to panel()
+        //   • true/false → explicit override
+        //
+        if ($this->showNewChatModalButton === null) {
+            $this->showNewChatModalButton = $this->panel()?->hasNewChatAction();
+        }
+
+        if ($this->allowChatsSearch === null) {
+            $this->allowChatsSearch = $this->panel()?->hasChatsSearch();
+        }
+
+        if ($this->showHomeRouteButton === null) {
+            $this->showHomeRouteButton = $this->widget
+                ? false
+                : $this->panel()?->hasRedirectToHomeAction();
+        }
+    }
+
+
+
 
     /**
      * Loads conversations and renders the view.
@@ -356,6 +407,17 @@ class Chats extends Component
     public function render()
     {
         $this->loadConversations();
+
+
+        $this->initialize();
+
+//        dd([
+//            'showNewChatModalButton'=>$this->showNewChatModalButton,
+//            'allowChatsSearch'=>$this->allowChatsSearch,
+//            'showHomeRouteButton'=>$this->showHomeRouteButton,
+//            'title'=>$this->title,
+//        ]);
+
 
         return view('wirechat::livewire.chats.chats');
     }

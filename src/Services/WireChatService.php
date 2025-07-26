@@ -3,9 +3,44 @@
 namespace Namu\WireChat\Services;
 
 use Illuminate\Support\Facades\Schema;
+use Namu\WireChat\Exceptions\NoPanelProvidedException;
+use Namu\WireChat\Panel;
+use Namu\WireChat\PanelRegistry;
 
 class WireChatService
 {
+
+
+    protected PanelRegistry $registry;
+
+    public function __construct()
+    {
+        $this->registry = app('wirechatPanelRegistry');
+    }
+
+    /**
+     * Get a panel by ID or provider class, falling back to the default panel.
+     *
+     * @param string|null $idOrClass
+     * @return Panel|null
+     */
+    public function getPanel(?string $idOrClass = null): ?Panel
+    {
+        return $this->registry->get($idOrClass);
+    }
+
+    /**
+     * Get the default panel.
+     *
+     * @return Panel|null
+     * @throws NoPanelProvidedException
+     */
+    public function getDefaultPanel(): ?Panel
+    {
+        return $this->registry->getDefault();
+    }
+
+
     /**
      * Get the color used to be used in as themse
      */

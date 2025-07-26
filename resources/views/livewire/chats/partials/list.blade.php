@@ -49,7 +49,7 @@
         @click="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @keydown.enter="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @else
-        wire:navigate href="{{ route('wirechat.app.chat', $conversation->id) }}" @endif
+        wire:navigate href="{{ $this->panel()->route('chat',['conversation'=>$conversation->id])}}" @endif
             @style(['border-color:var(--wc-brand-primary)' => $selectedConversationId == $conversation?->id])
             class="py-3 flex gap-4 dark:hover:bg-[var(--wc-dark-secondary)]  hover:bg-[var(--wc-light-secondary)]  rounded-xs transition-colors duration-150  relative w-full cursor-pointer px-2"
             :class="$wire.selectedConversationId == conversationID &&

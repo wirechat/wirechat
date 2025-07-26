@@ -1,5 +1,4 @@
-
-@use('Namu\WireChat\Facades\WireChat')
+@use("Namu\WireChat\Facades\WireChat")
 
 <header class="px-3 z-10 sticky top-0 w-full py-2 " dusk="header">
 
@@ -9,7 +8,7 @@
 
         @if (isset($title))
             <div class="flex items-center gap-2 truncate  " wire:ignore>
-                <h2 class=" text-2xl font-bold dark:text-white"  dusk="title">{{$title}}</h2> 
+                <h2 class=" text-2xl font-bold dark:text-white"  dusk="title">{{$title}}</h2>
             </div>
         @endif
 
@@ -18,7 +17,7 @@
         <div class="flex gap-x-3 items-center  ">
 
             @if ($showNewChatModalButton)
-            
+
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}">
                 <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
                     <svg class="w-8 h-8 -mb-1 text-gray-500 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"
@@ -79,7 +78,7 @@
                 <input id="chats-search-field" name="chats_search" maxlength="100" type="search" wire:model.live.debounce='search'
                     placeholder="{{ __('wirechat::chats.inputs.search.placeholder')  }}" autocomplete="off"
                     class=" col-span-11 border-0  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
-          
+
                 </div>
 
         </section>

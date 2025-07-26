@@ -8,6 +8,7 @@ use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
+use Namu\WireChat\PanelRegistry;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -18,6 +19,10 @@ it('checks if users is authenticated before loading chatlist', function () {
 });
 
 test('authenticaed user can access chatlist ', function () {
+
+    // Mutate the registered test panel
+
+
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertStatus(200);
@@ -34,7 +39,7 @@ describe('Presence check', function () {
             ->assertSee(__('wirechat::chats.labels.heading'));
     });
 
-    test('chat title can be set manually', function () {
+    test('chat title can be set directly on compoenent', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class, ['title' => 'Messages'])
             ->assertSee('Messages')
@@ -42,17 +47,29 @@ describe('Presence check', function () {
             ->assertDontSee(__('wirechat::chats.labels.heading'));
     });
 
-    it('shows default title when title param is set to null', function () {
+    test('chat title can be set directly on via provider', function () {
+        testPanelProvider()->heading('new heading');
+
+        $auth = User::factory()->create();
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSee('new heading')
+            ->assertSeeHtml('dusk="title"')
+            ->assertDontSee(__('wirechat::chats.labels.heading'));
+    });
+
+    it('doesnt shows default heading when headiing  param is set to null at component level', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class, ['title' => null])
-            ->assertSee(__('wirechat::chats.labels.heading'))
-            ->assertSeeHtml('dusk="title"')
-            ->assertset('title', __('wirechat::chats.labels.heading'));
+            ->assertdontSee(__('wirechat::chats.labels.heading'))
+            ->assertdontSeeHtml('dusk="title"')
+            ->assertNotset('title', __('wirechat::chats.labels.heading'));
     });
 
     test('doesnt show title but loads element  when set to empty string', function () {
         $auth = User::factory()->create();
-        Livewire::actingAs($auth)->test(Chatlist::class, ['title' => ''])
+        testPanelProvider()->heading('');
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSee(__('wirechat::chats.labels.heading'))
             ->assertSeeHtml('dusk="title"')
             ->assertset('title', '');
@@ -72,21 +89,39 @@ describe('Presence check', function () {
             ->assertSeeHtml('dusk="header"');
     });
 
-    it('shows DOESNT show header when showNewChatModalButton && allowChatsSearch && showHomeRouteButton are false && title is emtpy ', function () {
+    it('shows DOESNT show header when newChatAction && chatsSearch && redirectToHomeAction are set false && heading is emtpy at component level', function () {
 
         $auth = User::factory()->create();
+
+
         Livewire::actingAs($auth)->test(Chatlist::class, [
             'showNewChatModalButton' => false,
             'allowChatsSearch' => false,
             'showHomeRouteButton' => false,
-            'title' => '',
+            'title' => null,
         ])
+            ->assertDontSeeHtml('dusk="header"');
+    });
+
+    it('shows DOESNT show header when panel values; newChatAction && chatsSearch && redirectToHomeAction are set false && heading is emtpy at Panel level', function () {
+
+        $auth = User::factory()->create();
+
+        testPanelProvider()
+            ->chatsSearch(false)
+            ->newChatAction(false)
+            ->redirectToHomeAction(false)
+            ->heading(null)
+        ;
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSeeHtml('dusk="header"');
     });
 
     it('doesnt shows search field if search is disabled in wirechat.config:tesiting Search placeholder', function () {
 
-        Config::set('wirechat.allow_chats_search', false);
+      //  Config::set('wirechat.allow_chats_search', false);
+        testPanelProvider()->chatsSearch(false);
 
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
@@ -95,12 +130,13 @@ describe('Presence check', function () {
             ->assertDontSeeHtml('id="chats-search-field"');
     });
 
-    it('doesnt shows search field if search MANUALLY disabled at widget level even if in wirechat.config.allow_chats_search is true', function () {
+    it('doesnt shows search field if search MANUALLY disabled', function () {
 
-        Config::set('wirechat.allow_chats_search', true);
+      //  Config::set('wirechat.allow_chats_search', true);
+        testPanelProvider()->chatsSearch(false);
 
         $auth = User::factory()->create();
-        Livewire::actingAs($auth)->test(Chatlist::class, ['allowChatsSearch' => false])
+        Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSee('Search')
             ->assertPropertyNotWired('search')
             ->assertDontSeeHtml('id="chats-search-field"');
@@ -108,7 +144,8 @@ describe('Presence check', function () {
 
     it('shows search field if search is enabled in wirechat.config.allow_chats_search Search placeholder', function () {
 
-        Config::set('wirechat.allow_chats_search', true);
+   //     Config::set('wirechat.allow_chats_search', true);
+        testPanelProvider()->chatsSearch(true);
 
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
@@ -119,7 +156,8 @@ describe('Presence check', function () {
 
     it('shows search field even if search is DISABLED in wirechat.config.allow_chats_search but ENABLED at component level', function () {
 
-        Config::set('wirechat.allow_chats_search', false);
+       // Config::set('wirechat.allow_chats_search', false);
+        testPanelProvider()->chatsSearch(false);
 
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class, ['allowChatsSearch' => true])
@@ -128,9 +166,12 @@ describe('Presence check', function () {
             ->assertSeeHtml('id="chats-search-field"');
     });
 
-    test('it_shows_new_chat_modal_button_if_enabled_in_config', function () {
+    test('it_shows_new_chat_modal_button_if_enabled_in_panel', function () {
 
-        Config::set('wirechat.show_new_chat_modal_button', true);
+        //Config::set('wirechat.show_new_chat_modal_button', true);
+
+        testPanelProvider()->newChatAction();
+
         $auth = User::factory()->create();
 
         Livewire::actingAs($auth)
@@ -138,9 +179,12 @@ describe('Presence check', function () {
             ->assertSeeHtml('id="open-new-chat-modal-button"');
     });
 
-    test('if "showNewChatModalButton" DISABLED  at component level it doesnt shows_new_chat_modal_button event if enabled_in_config', function () {
+    test('if "showNewChatModalButton" DISABLED  at component level it doesnt shows_new_chat_modal_button event if enabled_in_panel', function () {
 
-        Config::set('wirechat.show_new_chat_modal_button', true);
+      //  Config::set('wirechat.show_new_chat_modal_button', true);
+
+        testPanelProvider()->newChatAction();
+
         $auth = User::factory()->create();
 
         Livewire::actingAs($auth)
@@ -150,7 +194,8 @@ describe('Presence check', function () {
 
     test('it_does_not_show_new_chat_modal_button_if_not_enabled_in_config', function () {
 
-        Config::set('wirechat.show_new_chat_modal_button', false);
+        testPanelProvider()->newChatAction(false);
+
         $auth = User::factory()->create();
 
         Livewire::actingAs($auth)
@@ -158,9 +203,12 @@ describe('Presence check', function () {
             ->assertDontSeeHtml('id="open-new-chat-modal-button"');
     });
 
-    test('if "showNewChatModalButton" ENABLED  at component level it still shows_new_chat_modal_button_if_not enabled_in_config  ', function () {
+    test('if "showNewChatModalButton" ENABLED  at component level it still shows_new_chat_modal_button_if_not enabled_in_panel  ', function () {
 
-        Config::set('wirechat.show_new_chat_modal_button', false);
+    //    Config::set('wirechat.show_new_chat_modal_button', false);
+
+        testPanelProvider()->newChatAction(false);
+
         $auth = User::factory()->create();
         Livewire::actingAs($auth)
             ->test(Chatlist::class, ['showNewChatModalButton' => true])
@@ -553,7 +601,7 @@ describe('List', function () {
 
         // create conversation with user1
         $auth->createConversationWith($user1, message: 'How are you doing');
-        sleep(1);
+        // sleep(1);
         // here we delay the create messsage so that we can NOT have both messages with the same timestamp
         // now let's send message to auth
         $user1->sendMessageTo($auth, message: 'I am good');

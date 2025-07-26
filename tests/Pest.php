@@ -44,3 +44,8 @@ function something()
 {
     // ..
 }
+
+function testPanelProvider(): \Namu\WireChat\Panel
+{
+    return \Namu\WireChat\Facades\WireChat::getPanel('test');
+}
