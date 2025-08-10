@@ -12,18 +12,24 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Message;
+use Namu\WireChat\Panel;
+use Namu\WireChat\Traits\InteractsWithPanel;
 
 class MessageCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithQueue,InteractsWithSockets, Queueable ,SerializesModels;
+    use InteractsWithPanel;
 
     public $message;
     // public $receiver;
 
-    public function __construct(Message $message)
+    public function __construct(Message $message,Panel|string|null $panel=null)
     {
-        $this->onQueue(WireChat::messagesQueue());
         $this->message = $message->load([]);
+
+        $this->setPanel($panel);
+
+        $this->onQueue($this->panel->getMessagesQueue());
     }
 
     /**
@@ -33,9 +39,14 @@ class MessageCreated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('conversation.'.$this->message->conversation_id),
-        ];
+        $channels = [];
+
+        $panelId = $this->panel->getId();
+        $channels[] = "$panelId.conversation.{$this->message->conversation_id}";
+
+        return array_map(function ($channelName) {
+            return new PrivateChannel($channelName);
+        }, $channels);
     }
 
     public function broadcastWhen(): bool
@@ -51,7 +62,7 @@ class MessageCreated implements ShouldBroadcast
      */
     public function broadcastQueue(): string
     {
-        return WireChat::messagesQueue();
+        return $this->panel->getMessagesQueue();
     }
 
     /**

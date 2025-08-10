@@ -12,7 +12,7 @@ class TestPanelProvider extends PanelProvider
     {
         return $panel
             ->id('test')
-            ->path('wirechat')
+            ->path('test')
             ->chatsSearch(true)
             ->middleware(['web'])
             ->webPushNotifications(true)

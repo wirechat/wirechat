@@ -8,7 +8,7 @@
 
         <div x-persist="chats" class="relative  w-full h-full  border-r  border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]  md:w-[360px] lg:w-[400px] xl:w-[500px] shrink-0 overflow-y-auto  ">
 
-            <livewire:wirechat.chats :panel="$panel" />
+            <livewire:wirechat.chats  />
         </div>
 
 

@@ -65,32 +65,21 @@ use Namu\WireChat\Livewire\Pages\Chats;
 Route::name('wirechat.')
     ->group(function () {
         $panels = app('wirechatPanelRegistry')->all();
-
         if (empty($panels)) {
-            \Illuminate\Support\Facades\Log::warning('No panels registered in wirechatPanelRegistry');
+            \Log::warning('No panels registered in wirechatPanelRegistry');
             return;
         }
-
         foreach ($panels as $panel) {
-            /** @var Panel $panel */
             Route::prefix($panel->getRoutePrefix())
-                ->name("{$panel->getId()}.")
+                ->name("{$panel->getPath()}.")
                 ->middleware($panel->getMiddleware())
                 ->group(function () use ($panel) {
-                    // Register custom routes defined in the panel
-                    foreach ($panel->getRoutes() as $routeClosure) {
-                        if ($routeClosure instanceof Closure) {
-                            $routeClosure($panel);
-                        }
-                    }
-
-                    // Default routes
-                    Route::view('/', 'wirechat::pages.chats', ['panel' => $panel])
+                    Route::view('/', 'wirechat::pages.chats', ['panel' => $panel->getId()])
                         ->name('chats');
-
-                    Route::view('/{conversation}', 'wirechat::pages.chat', ['panel' => $panel])
+                    Route::view('/{conversation}', 'wirechat::pages.chat', ['panel' => $panel->getId()])
                         ->middleware('belongsToConversation')
                         ->name('chat');
+
                 });
         }
     });

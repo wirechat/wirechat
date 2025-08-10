@@ -773,9 +773,11 @@ describe('Box presence test: ', function () {
             // turn on disappearing
             $conversation->turnOffDisappearing();
 
+           $indexRoute= testPanelProvider()->chatsRoute();
+
             // dd($conversation);
             Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true])
-                ->assertDontSeeHtml('href="'.route(WireChat::indexRouteName()).'"')
+                ->assertDontSeeHtml('href="'.$indexRoute.'"')
                 ->assertSeeHtml('dusk="return_to_home_button_dispatch"')
                 ->assertDontSeeHtml('dusk="return_to_home_button_link"');
             //                ->assertMethodWired('$dispatch(\'close-chat\')');
@@ -789,10 +791,11 @@ describe('Box presence test: ', function () {
 
             // turn on disappearing
             $conversation->turnOffDisappearing();
+            $indexRoute= testPanelProvider()->chatsRoute();
 
             // dd($conversation);
             Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => false])
-                ->assertSeeHtml('href="'.route(WireChat::indexRouteName()).'"')
+                ->assertSeeHtml('href="'.$indexRoute.'"')
                 ->assertDontSeeHtml('dusk="return_to_home_button_dispatch"')
                 ->assertSeeHtml('dusk="return_to_home_button_link"')
                 ->assertDontSeeHtml('@click="$dispatch(\'close-chat\')"');
@@ -2081,7 +2084,7 @@ describe('Deleting Conversation', function () {
         $request
             ->call('deleteConversation')
             ->assertStatus(200)
-            ->assertRedirect(route(WireChat::indexRouteName()));
+            ->assertRedirect(testPanelProvider()->chatsRoute());
     });
 
     test('Logged in user can still access deleted conversation in chat route or chatbox', function () {
@@ -2108,7 +2111,7 @@ describe('Deleting Conversation', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->assertStatus(200);
 
         // assert chat route
-        $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
+        $this->actingAs($auth)->get(testPanelProvider()->chatRoute($conversation->id))->assertStatus(200);
     });
 
     test('user can regain access to deleted conversation if receiver/other user send a new message', function () {
@@ -2137,8 +2140,11 @@ describe('Deleting Conversation', function () {
         // assert conversation will be null
         expect($auth->conversations()->first())->not->toBe(null);
 
+        $route= testPanelProvider()->chatRoute($conversation);
+       // dd($route);
         // also assert that user receives 403 forbidden
-        $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
+      $response=  $this->actingAs($auth)->get($route)->assertStatus(200);
+
     });
 
     test('user can regain access to deleted conversation if they send a new message after deleting conversation', function () {
@@ -2167,7 +2173,7 @@ describe('Deleting Conversation', function () {
         expect($auth->conversations()->first())->not->toBe(null);
 
         // also assert that user receives 403 forbidden
-        $this->actingAs($auth)->get(route(WireChat::viewRouteName(), $conversation->id))->assertStatus(200);
+        $this->actingAs($auth)->get(testPanelProvider()->chatsRoute())->assertStatus(200);
     });
 
     test('deleted convesation should be available in database if only one user has deleted it', function () {
@@ -2541,7 +2547,8 @@ describe('Clearing Conversation', function () {
         $request
             ->call('clearConversation')
             ->assertStatus(200)
-            ->assertRedirect(route(WireChat::indexRouteName()));
+
+            ->assertRedirect(testPanelProvider()->chatsRoute());
     });
 
     test('user can still open conversatoin after clearing it ', function () {
@@ -2704,7 +2711,7 @@ describe('Exiting Conversation', function () {
 
         Livewire::actingAs($user)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('exitConversation')
-            ->assertRedirect(route(WireChat::indexRouteName()));
+            ->assertRedirect(testPanelProvider()->chatsRoute());
     });
 
     test('owner cannot exit conversation', function () {

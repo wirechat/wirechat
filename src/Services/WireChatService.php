@@ -26,7 +26,20 @@ class WireChatService
      */
     public function getPanel(?string $idOrClass = null): ?Panel
     {
+
         return $this->registry->get($idOrClass);
+
+    }
+
+    /**
+     * Get  panels
+     *
+     * @return array|null
+     */
+    public function panels():?array
+    {
+        return $this->registry->all();
+
     }
 
     /**

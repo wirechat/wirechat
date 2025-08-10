@@ -85,13 +85,22 @@ class Chats extends Component
         $encodedType = MorphClassResolver::encode($user?->getMorphClass());
         $userId = $user?->getKey();
 
-        // dd($encodedType,$userId);
-        return [
+        $listeners= [
             'refresh' => '$refresh',
-            'hardRefresh',
-            // Construct the channel name using the encoded type and user ID.
-            "echo-private:participant.{$encodedType}.{$userId},.Namu\\WireChat\\Events\\NotifyParticipant" => 'refreshComponent',
+            'hardRefresh'
         ];
+
+        if ($this->panel()==null) {
+            \Illuminate\Support\Facades\Log::warning('WireChat:No panels registered in Chat Component');
+        } else {
+            $panelId = $this->panel()->getId();
+            // Construct the channel name using the encoded type and user ID.
+            $channelName = "$panelId.participant.$encodedType.$userId";
+            $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\NotifyParticipant"] = 'refreshComponent';
+        }
+
+
+        return $listeners;
     }
 
     /**

@@ -7,16 +7,34 @@ trait HasMiddleware
     /**
      * @var array<string>
      */
-    protected array $middleware = [];
+    protected array $middleware = ['auth'];
 
     /**
      * @var array<string>
      */
-    protected array $authMiddleware = [];
-
+    protected array $authMiddleware = ['auth'];
 
     /**
-     * @param  array<string>  $middleware
+     * Sets middleware for the panel.
+     *
+     * @param array<string> $middleware
+     * @return static
+     */
+    public function middleware(array $middleware): static
+    {
+        $this->middleware = [
+            ...$this->middleware,
+            ...$middleware,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Sets authentication middleware for the panel.
+     *
+     * @param array<string> $middleware
+     * @return static
      */
     public function authMiddleware(array $middleware): static
     {
@@ -25,71 +43,26 @@ trait HasMiddleware
             ...$middleware,
         ];
 
-//        if ($isPersistent) {
-//            $this->persistentMiddleware($middleware);
-//        }
-
         return $this;
     }
 
-
     /**
-     * @param  array<string>  $middleware
-     */
-    public function middleware(array $middleware): static
-    {
-        $this->middleware = [
-            ...$this->middleware,
-            ...$middleware,
-        ];
-//
-//        if ($isPersistent) {
-//            $this->persistentMiddleware($middleware);
-//        }
-
-        return $this;
-    }
-
-    //todo:find out more about livewire persistant middleware
-    //    /**
-    //     * @param  array<string>  $middleware
-    //     */
-    //    public function persistentMiddleware(array $middleware): static
-    //    {
-    //        $this->livewirePersistentMiddleware = [
-    //            ...$this->livewirePersistentMiddleware,
-    //            ...$middleware,
-    //        ];
-    //
-    //        return $this;
-    //    }
-
-    /**
+     * Gets the middleware for the panel.
+     *
      * @return array<string>
      */
     public function getMiddleware(): array
     {
-        return [
-            "panel:{$this->getId()}",
-            ...$this->middleware,
-        ];
+        return $this->middleware;
     }
 
     /**
+     * Gets the authentication middleware for the panel.
+     *
      * @return array<string>
      */
     public function getAuthMiddleware(): array
     {
         return $this->authMiddleware;
     }
-
-    /**
-     * @return array<string>
-     */
-//    protected function registerLivewirePersistentMiddleware(): void
-//    {
-//        Livewire::addPersistentMiddleware($this->livewirePersistentMiddleware);
-//
-//        $this->livewirePersistentMiddleware = [];
-//    }
 }

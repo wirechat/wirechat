@@ -10,7 +10,7 @@ use Namu\WireChat\Panel;
 trait HasPanel
 {
     // Initialize with null to avoid uninitialized property error
-    public ?string $panel = null;
+    public Panel|string|null $panel = null;
 
     /**
      * Resolve and assign the panel ID during mount.
@@ -32,11 +32,13 @@ trait HasPanel
         if (! $this->panel || ! WireChat::getPanel($this->panel)) {
             throw NoPanelProvidedException::make();
         }
+
     }
 
     #[Computed(cache: true)]
     public function panel(): ?Panel
     {
         return $this->panel ? WireChat::getPanel($this->panel) : null;
+
     }
 }

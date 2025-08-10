@@ -17,6 +17,7 @@ class PanelRegistry
      */
     public function register(Panel $panel): void
     {
+
         $id = $panel->getId();
 
         if (isset($this->panels[$id])) {
@@ -42,6 +43,7 @@ class PanelRegistry
 
     public function autoDiscover(): void
     {
+
         $directory = $this->getProvidersPath();
 
         if (! File::isDirectory($directory)) {
@@ -52,6 +54,7 @@ class PanelRegistry
         $files = File::files($directory);
 
         foreach ($files as $file) {
+
             $className = str_replace('.php', '', $file->getFilename());
             $fullClass = 'App\\Providers\\WireChat\\' . $className;
 
@@ -69,6 +72,7 @@ class PanelRegistry
                 }
             }
         }
+
     }
 
     public function getDefault(): ?Panel
@@ -79,17 +83,31 @@ class PanelRegistry
         return $this->defaultPanel;
     }
 
+    /**
+     * Retrieves a panel by its ID or provider class.
+     *
+     * @param string $idOrClass The panel ID or provider class name.
+     * @return Panel|null The panel instance, or the default panel if not found.
+     * @throws NoPanelProvidedException If no default panel is set and the ID/class is invalid.
+     */
     public function get(string $idOrClass): ?Panel
     {
         if (isset($this->panels[$idOrClass])) {
             return $this->panels[$idOrClass];
         }
 
+        \Log::warning('Panel not found in registry', ['idOrClass' => $idOrClass]);
         $panel = $this->resolvePanelFromProvider($idOrClass);
         if ($panel) {
+            $this->register($panel); // Register the resolved panel
             return $panel;
         }
 
+        if ($this->defaultPanel === null) {
+            throw new NoPanelProvidedException('No default panel has been set.');
+        }
+
+        \Log::info('Returning default panel', ['id' => $this->defaultPanel->getId()]);
         return $this->defaultPanel;
     }
 

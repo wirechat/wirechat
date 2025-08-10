@@ -19,6 +19,7 @@ use Namu\WireChat\Events\MessageDeleted;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\NotifyParticipants;
 use Namu\WireChat\Livewire\Chats\Chats;
+use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\Widget;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
@@ -36,6 +37,7 @@ class Chat extends Component
     use Widget;
     use WithFileUploads;
     use WithPagination;
+    use HasPanel;
 
     // public ?Conversation $conversation;
     public $conversation;
@@ -72,16 +74,28 @@ class Chat extends Component
 
     public function getListeners()
     {
-        // dd($this->conversation);
         $conversationId = $this->conversation?->id;
 
-        return [
-            'refresh' => '$refresh',
-            'echo-private:conversation.'.$conversationId.',.Namu\\WireChat\\Events\\MessageCreated' => 'appendNewMessage',
-            'echo-private:conversation.'.$conversationId.',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
+        if (!$conversationId) {
+            return [
+                'refresh' => '$refresh',
+            ];
+        }
 
-            //  'echo-private:conversation.' .$this->conversation->id. ',.Namu\\WireChat\\Events\\MessageDeleted' => 'removeDeletedMessage',
+        $listeners = [
+            'refresh' => '$refresh',
         ];
+
+        if ($this->panel()==null) {
+            \Illuminate\Support\Facades\Log::warning('WireChat:No panels registered in Chat Component');
+        } else {
+                $panelId = $this->panel()->getId();
+                $channelName = "{$panelId}.conversation.{$conversationId}";
+                $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageCreated"] = 'appendNewMessage';
+                $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageDeleted"] = 'removeDeletedMessage';
+        }
+
+        return $listeners;
     }
 
     /**
@@ -232,7 +246,7 @@ class Chat extends Component
         $this->conversation->deleteFor($this->auth);
 
         $this->handleComponentTermination(
-            redirectRoute: route(WireChat::indexRouteName()),
+            redirectRoute: $this->panel()->route('chats'),
             events: [
                 'close-chat',
                 Chats::class => ['chat-deleted',  [$this->conversation->id]],
@@ -254,7 +268,7 @@ class Chat extends Component
         // Dispatach event instead if isWidget
 
         $this->handleComponentTermination(
-            redirectRoute: route(WireChat::indexRouteName()),
+            redirectRoute: $this->panel()->route('chats'),
             events: [
                 'close-chat',
                 Chats::class => 'refresh',
@@ -297,7 +311,7 @@ class Chat extends Component
             $this->dispatch('close-chat');
         } else {
             // redirect to chats page
-            $this->redirectRoute(WireChat::indexRouteName());
+            $this->redirect($this->panel()->route('chats'));
         }
     }
 

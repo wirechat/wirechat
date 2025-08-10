@@ -9,17 +9,22 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Message;
+use Namu\WireChat\Panel;
+use Namu\WireChat\Traits\InteractsWithPanel;
 
 class MessageDeleted implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+    use InteractsWithPanel;
 
     public $message;
     // public $receiver;
 
-    public function __construct(Message $message)
+    public function __construct(Message $message,Panel|string|null $panel=null)
     {
         $this->message = $message->load([]);
+        $this->setPanel($panel);
+
     }
 
     /**
@@ -29,9 +34,14 @@ class MessageDeleted implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('conversation.'.$this->message->conversation_id),
-        ];
+        $channels = [];
+
+        $panelId = $this->panel->getId();
+        $channels[] = "$panelId.conversation.{$this->message->conversation_id}";
+
+        return array_map(function ($channelName) {
+            return new PrivateChannel($channelName);
+        }, $channels);
     }
 
     /**
@@ -39,7 +49,7 @@ class MessageDeleted implements ShouldBroadcastNow
      */
     public function broadcastQueue(): string
     {
-        return WireChat::notificationsQueue();
+        return $this->panel->getMessagesQueue();
     }
 
     /**

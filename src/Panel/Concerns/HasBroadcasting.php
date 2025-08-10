@@ -8,9 +8,9 @@ trait HasBroadcasting
 {
     protected bool|Closure $hasBroadcasting = true;
 
-    protected string|Closure $messagesQueue = 'default';
+    protected string|Closure $messagesQueue = 'messages';
 
-    protected string|Closure $eventsQueue = 'events';
+    protected string|Closure $eventsQueue = 'default';
 
     public function broadcasting(bool|Closure $condition = true): static
     {
