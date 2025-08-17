@@ -9,6 +9,7 @@ use Namu\WireChat\Panel\Concerns\HasAttachments;
 use Namu\WireChat\Panel\Concerns\HasAuth;
 use Namu\WireChat\Panel\Concerns\HasBrandName;
 use Namu\WireChat\Panel\Concerns\HasBroadcasting;
+use Namu\WireChat\Panel\Concerns\HasChatMiddleware;
 use Namu\WireChat\Panel\Concerns\HasChatsSearch;
 use Namu\WireChat\Panel\Concerns\HasFavicon;
 use Namu\WireChat\Panel\Concerns\HasGroups;
@@ -25,6 +26,7 @@ class Panel
 {
     use EvaluatesClosures;
     use HasMiddleware;
+    use HasChatMiddleware;
     use HasRoutes;
     use HasId;
     use HasBrandName;

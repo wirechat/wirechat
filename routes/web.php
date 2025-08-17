@@ -77,7 +77,7 @@ Route::name('wirechat.')
                     Route::view('/', 'wirechat::pages.chats', ['panel' => $panel->getId()])
                         ->name('chats');
                     Route::view('/{conversation}', 'wirechat::pages.chat', ['panel' => $panel->getId()])
-                        ->middleware('belongsToConversation')
+                        ->middleware($panel->getChatMiddleware())
                         ->name('chat');
 
                 });

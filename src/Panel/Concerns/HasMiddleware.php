@@ -2,67 +2,41 @@
 
 namespace Namu\WireChat\Panel\Concerns;
 
+/**
+ * Trait HasMiddleware
+ *
+ * Provides the ability to define and retrieve middleware.
+ */
 trait HasMiddleware
 {
     /**
-     * @var array<string>
+     * @var array<string> Middleware to be applied.
      */
-    protected array $middleware = ['auth'];
+    protected array $middleware = [];
 
     /**
-     * @var array<string>
-     */
-    protected array $authMiddleware = ['auth'];
-
-    /**
-     * Sets middleware for the panel.
+     * Set middleware.
      *
      * @param array<string> $middleware
      * @return static
      */
     public function middleware(array $middleware): static
     {
-        $this->middleware = [
+        $this->middleware = array_values(array_unique([
             ...$this->middleware,
             ...$middleware,
-        ];
+        ]));
 
         return $this;
     }
 
     /**
-     * Sets authentication middleware for the panel.
-     *
-     * @param array<string> $middleware
-     * @return static
-     */
-    public function authMiddleware(array $middleware): static
-    {
-        $this->authMiddleware = [
-            ...$this->authMiddleware,
-            ...$middleware,
-        ];
-
-        return $this;
-    }
-
-    /**
-     * Gets the middleware for the panel.
+     * Get the middleware.
      *
      * @return array<string>
      */
     public function getMiddleware(): array
     {
         return $this->middleware;
-    }
-
-    /**
-     * Gets the authentication middleware for the panel.
-     *
-     * @return array<string>
-     */
-    public function getAuthMiddleware(): array
-    {
-        return $this->authMiddleware;
     }
 }
