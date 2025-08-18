@@ -103,7 +103,7 @@ describe('Deleting Chat', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation, 'widget' => false])
             ->call('deleteChat')
             ->assertStatus(200)
-            ->assertRedirect(route(WireChat::indexRouteName()))
+            ->assertRedirect(testPanelProvider()->chatsRoute())
             ->assertNotDispatched('close-chat')
             ->assertNotDispatched('chat-deleted');
 
@@ -185,7 +185,7 @@ describe('Deleting Chat', function () {
             ->assertStatus(200)
             ->assertNotDispatched('close-chat')
             ->assertNotDispatched('chat-deleted')
-            ->assertRedirect(route(WireChat::indexRouteName()));
+            ->assertRedirect(testPanelProvider()->chatsRoute());
     });
 
     test('when isWidget it dispatches "close-chat"  & "chat-deleted" events and Does NOT redirects to index route   after deleting Self conversation', function () {
@@ -199,7 +199,7 @@ describe('Deleting Chat', function () {
             ->assertStatus(200)
             ->assertDispatched('close-chat')
             ->assertDispatched('chat-deleted')
-            ->assertNoRedirect(route(WireChat::indexRouteName()));
+            ->assertNoRedirect();
     });
 
 });

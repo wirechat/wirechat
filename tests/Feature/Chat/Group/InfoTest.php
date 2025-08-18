@@ -92,7 +92,7 @@ describe('presence test', function () {
             ->assertPropertyWired('description');
     });
 
-    test('it doent show photo property wired if auth is not admin', function () {
+    test('it doesnt show photo property wired if auth is not admin', function () {
 
         $auth = User::factory()->create(['id' => '345678']);
 
@@ -848,7 +848,7 @@ describe('Deleting Group', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call('deleteGroup')
             ->assertStatus(200)
-            ->assertRedirect(route(WireChat::indexRouteName()))
+            ->assertRedirect(testPanelProvider()->chatsRoute())
             ->assertNotDispatched('close-chat')
             ->assertNotDispatched('chat-deleted');
     });
@@ -863,7 +863,7 @@ describe('Deleting Group', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation, 'widget' => true])
             ->call('deleteGroup')
             ->assertStatus(200)
-            ->assertNoRedirect(route(WireChat::indexRouteName()))
+            ->assertNoRedirect(testPanelProvider()->chatsRoute())
             ->assertDispatched('close-chat')
             ->assertDispatched('chat-deleted');
     });
@@ -1028,7 +1028,7 @@ describe('Exiting Chat', function () {
         Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation, 'widget' => false])
             ->call('exitConversation')
             ->assertStatus(200)
-            ->assertRedirect(route(WireChat::indexRouteName()))
+            ->assertRedirect(testPanelProvider()->chatsRoute())
             ->assertNotDispatched('close-chat')
             ->assertNotDispatched('chat-exited');
     });
@@ -1045,7 +1045,7 @@ describe('Exiting Chat', function () {
         Livewire::actingAs($user)->test(Info::class, ['conversation' => $conversation, 'widget' => true])
             ->call('exitConversation')
             ->assertStatus(200)
-            ->assertNoRedirect(route(WireChat::indexRouteName()))
+            ->assertNoRedirect(testPanelProvider()->chatsRoute())
             ->assertDispatched('close-chat')
             ->assertDispatched('chat-exited');
     });

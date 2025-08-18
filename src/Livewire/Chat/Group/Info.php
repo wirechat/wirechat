@@ -10,6 +10,7 @@ use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\DeleteConversationJob;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chats\Chats;
+use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
 use Namu\WireChat\Livewire\Concerns\Widget;
 use Namu\WireChat\Models\Conversation;
@@ -18,6 +19,7 @@ class Info extends ModalComponent
 {
     use Widget;
     use WithFileUploads;
+    use HasPanel;
 
     #[Locked]
     public Conversation $conversation;
@@ -141,8 +143,8 @@ class Info extends ModalComponent
             // remove current photo
             $this->group?->cover?->delete();
             // save photo to disk
-            $path = $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
-            $url = Storage::disk(WireChat::storageDisk())->url($path);
+            $path = $photo->store($this->panel()->getStorageFolder(),$this->panel()->getStorageDisk() );
+            $url = Storage::disk($this->panel()->getStorageDisk())->url($path);
             // create attachment
             $this->conversation->group?->cover()?->create([
                 'file_path' => $path,
@@ -184,7 +186,7 @@ class Info extends ModalComponent
 
         // handle widget termination
         $this->handleComponentTermination(
-            redirectRoute: route(WireChat::indexRouteName()),
+            redirectRoute: $this->panel()->chatsRoute(),
             events: [
                 ['close-chat',  ['conversation' => $this->conversation->id]],
                 Chats::class => ['chat-deleted',  [$this->conversation->id]],
@@ -213,7 +215,7 @@ class Info extends ModalComponent
         $auth->exitConversation($this->conversation);
 
         $this->handleComponentTermination(
-            redirectRoute: route(WireChat::indexRouteName()),
+            redirectRoute: $this->panel()->chatsRoute(),
             events: [
                 'close-chat',
                 Chats::class => ['chat-exited',  [$this->conversation->id]],
