@@ -43,7 +43,7 @@ describe('broadcastWith() Data verifiction ', function () {
         });
     });
 
-    it(' broadcasts on correct  private channnel', function () {
+    it(' broadcasts on correct  private channel and panel', function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -53,7 +53,7 @@ describe('broadcastWith() Data verifiction ', function () {
         broadcast(new MessageCreated($message))->toOthers();
         Event::assertDispatched(MessageCreated::class, function ($event) use ($message) {
             $broadcastOn = $event->broadcastOn();
-            expect($broadcastOn[0]->name)->toBe('private-conversation.'.$message->conversation_id);
+            expect($broadcastOn[0]->name)->toBe('private-'.testPanelProvider()->getId().'.conversation.'.$message->conversation_id);
 
             return $this;
         });

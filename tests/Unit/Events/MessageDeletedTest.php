@@ -43,7 +43,7 @@ describe(' Data verifiction ', function () {
         });
     });
 
-    it(' broadcasts on correct  private channnel', function () {
+    it(' broadcasts on correct  private channnel via panel ', function () {
         Event::fake();
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -51,9 +51,10 @@ describe(' Data verifiction ', function () {
         $message = Message::factory()->sender($auth)->create();
 
         MessageDeleted::dispatch($message);
+
         Event::assertDispatched(MessageDeleted::class, function ($event) use ($message) {
             $broadcastOn = $event->broadcastOn();
-            expect($broadcastOn[0]->name)->toBe('private-conversation.'.$message->conversation_id);
+            expect($broadcastOn[0]->name)->toBe('private-'.testPanelProvider()->getId().'.conversation.'.$message->conversation_id);
 
             return $this;
         });

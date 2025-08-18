@@ -66,7 +66,7 @@ describe(' Data verifiction ', function () {
 
             // resolve morphClass=
             $encodedType = MorphClassResolver::encode($participant->participantable_type);
-            expect($broadcastOn[0]->name)->toBe('private-participant.'.$encodedType.'.'.$participant->participantable_id);
+            expect($broadcastOn[0]->name)->toBe('private-'.testPanelProvider()->getId().'.participant.'.$encodedType.'.'.$participant->participantable_id);
 
             return $this;
         });
@@ -86,7 +86,7 @@ describe(' Data verifiction ', function () {
 
             // resolve morphClass=
             $encodedType = MorphClassResolver::encode($receiver->getMorphClass());
-            expect($broadcastOn[0]->name)->toBe('private-participant.'.$encodedType.'.'.$receiver->id);
+            expect($broadcastOn[0]->name)->toBe('private-'.testPanelProvider()->getId().'.participant.'.$encodedType.'.'.$receiver->id);
 
             return $this;
         });
@@ -106,7 +106,7 @@ describe(' Data verifiction ', function () {
 
             // resolve morphClass=
             $encodedType = MorphClassResolver::encode($receiver->getMorphClass());
-            expect($broadcastOn[0]->name)->toBe('private-participant.'.$encodedType.'.'.$receiver->id);
+            expect($broadcastOn[0]->name)->toBe('private-'.testPanelProvider()->getId().'.participant.'.$encodedType.'.'.$receiver->id);
 
             return $this;
         });
