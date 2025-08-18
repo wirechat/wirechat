@@ -5,6 +5,7 @@ namespace Namu\WireChat\Livewire\New;
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
 use Namu\WireChat\Livewire\Concerns\Widget;
 use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
@@ -13,6 +14,7 @@ class Group extends ModalComponent
 {
     use Widget;
     use WithFileUploads;
+    use HasPanel;
 
     public $users = [];
 
@@ -124,7 +126,7 @@ class Group extends ModalComponent
             } else {
 
                 // validte members count
-                if (count($this->selectedMembers) >= WireChat::maxGroupMembers()) {
+                if (count($this->selectedMembers) >= $this->panel()->getMaxGroupMembers()) {
                     return $this->dispatch('show-member-limit-error');
                 }
 
@@ -173,7 +175,7 @@ class Group extends ModalComponent
 
         // redirect to conversation
         $this->handleComponentTermination(
-            redirectRoute: route(WireChat::viewRouteName(), [$conversation->id]),
+            redirectRoute: $this->panel()->chatRoute($conversation->id),
             events: [
                 WidgetsWireChat::class => ['open-chat',  ['conversation' => $conversation->id]],
             ]
@@ -193,6 +195,6 @@ class Group extends ModalComponent
     public function render()
     {
 
-        return view('wirechat::livewire.new.group', ['maxGroupMembers' => WireChat::maxGroupMembers()]);
+        return view('wirechat::livewire.new.group', ['maxGroupMembers' => $this->panel()->getMaxGroupMembers()]);
     }
 }

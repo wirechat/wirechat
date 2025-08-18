@@ -389,7 +389,7 @@ class Chats extends Component
         // Their default is null, so:
         //   • null → never set → fallback to panel()
         //   • true/false → explicit override
-        //
+        // todo: update action names to match panel names
         if ($this->showNewChatModalButton === null) {
             $this->showNewChatModalButton = $this->panel()?->hasNewChatAction();
         }
