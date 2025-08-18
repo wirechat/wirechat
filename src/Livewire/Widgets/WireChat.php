@@ -8,10 +8,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
+use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Models\Conversation;
 
 class WireChat extends Component
 {
+
+    use HasPanel;
+
     public ?string $activeWireChatWidgetComponent = null;
 
     public $selectedConversationId = null;

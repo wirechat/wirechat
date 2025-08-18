@@ -1,13 +1,13 @@
 <div class="h-[calc(100vh_-_10rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] overflow-y-auto overflow-x-hidden  ">
- 
+
 <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
     <div class="flex items-center pb-2">
 
         <x-wirechat::actions.close-modal>
-        <button 
+        <button
             class="p-2 ml-0 text-gray-600  hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] dark:hover:text-white rounded-full hover:text-gray-800">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class=" w-5 w-5">
+                stroke="currentColor" class=" w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
             </svg>
@@ -16,7 +16,7 @@
 
         <h3  class="text-sm mx-auto font-semibold "  ><span>{{__('wirechat::chat.group.add_members.heading.label')}} </span> {{$newTotalCount}} / {{$maxGroupMembers}}</h3>
 
-        <button 
+        <button
             wire:click="save"
             wire:loading.attr="disabled"
             wire:target='save'
@@ -104,7 +104,7 @@
                          @if (!$isAlreadyAParticipant)
                          wire:click="toggleMember('{{ $user->id }}', {{ json_encode(get_class($user)) }})"
                          @endif
-        
+
                             class="flex cursor-pointer gap-2 items-center w-full">
                             <x-wirechat::avatar src="{{$user->cover_url}}" class="w-10 h-10" />
 
@@ -113,7 +113,7 @@
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
                                 {{ $user->display_name }}</p>
 
-                             <span 
+                             <span
                              @class(['text-gray-600 dark:text-gray-400 text-sm'])>
                                 @if ($isAlreadyAParticipant)
                                 {{__('wirechat::chat.group.add_members.messages.member_already_exists')}}

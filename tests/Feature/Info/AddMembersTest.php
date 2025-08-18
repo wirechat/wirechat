@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Namu\WireChat\Livewire\Chat\Group\AddMembers;
 use Namu\WireChat\Models\Conversation;
@@ -45,7 +44,7 @@ describe('presence test', function () {
 
     test('Add Members title is set', function () {
 
-        Config::set('wirechat.max_group_members', 1000);
+        testPanelProvider()->maxGroupMembers(1000);
 
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -104,7 +103,8 @@ describe('actions test', function () {
 
     test('it updated number when new members are added or removed', function () {
 
-        Config::set('wirechat.max_group_members', 1000);
+        testPanelProvider()->maxGroupMembers(1000);
+
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
