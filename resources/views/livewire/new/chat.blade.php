@@ -1,7 +1,7 @@
 @use('Namu\WireChat\Facades\WireChat')
 <div id="new-chat-modal ">
 
-    <div 
+    <div
     class="relative w-full h-96  border mx-auto border-[var(--wc-light-secondary)]  dark:border-[var(--wc-dark-secondary)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
 
     <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 py-2">
@@ -22,7 +22,7 @@
             </x-wirechat::actions.close-modal>
 
         </div>
-        
+
         <section class="flex flex-wrap items-center px-0 border-b border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]">
             <input  dusk="search_users_field" autofocus type="search" id="users-search-field"
                 wire:model.live.debounce='search' autocomplete="off"  placeholder="{{__('wirechat::new.chat.inputs.search.placeholder')}}"
@@ -34,7 +34,7 @@
     <div class="relative w-full">
 
         {{-- New Group button --}}
-        @if (WireChat::showNewGroupModalButton() && auth()->user()->canCreateGroups())
+        @if ($this->panel()->hasNewGroupAction() && auth()->user()->canCreateGroups())
 
         {{-- Buton to trigger opening of new grop modal --}}
         <x-wirechat::actions.new-group widget="{{$this->isWidget()}}">
@@ -74,7 +74,7 @@
                 </ul>
             @else
                 @if (!empty($search))
-                    
+
                 <span class="m-auto">@lang('wirechat::new.chat.messages.empty_search_result')</span>
                 @endif
             @endif

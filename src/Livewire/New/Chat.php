@@ -3,6 +3,7 @@
 namespace Namu\WireChat\Livewire\New;
 
 use Namu\WireChat\Facades\WireChat;
+use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
 use Namu\WireChat\Livewire\Concerns\Widget;
 use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
@@ -10,6 +11,7 @@ use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
 class Chat extends ModalComponent
 {
     use Widget;
+    use HasPanel;
 
     public $users = [];
 
@@ -38,6 +40,9 @@ class Chat extends ModalComponent
             $this->users = [];
         } else {
 
+            /**
+             * todo: migrate search chantable to channel
+             */
             $this->users = auth()->user()->searchChatables($this->search);
         }
     }
@@ -59,7 +64,7 @@ class Chat extends ModalComponent
 
                 // redirect to conversation
                 $this->handleComponentTermination(
-                    redirectRoute: route(WireChat::viewRouteName(), [$createdConversation->id]),
+                    redirectRoute: $this->panel()->chatRoute($createdConversation->id),
                     events: [
                         WidgetsWireChat::class => ['open-chat',  ['conversation' => $createdConversation->id]],
                     ]

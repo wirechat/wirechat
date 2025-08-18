@@ -79,7 +79,8 @@ it('shows New group if allowed', function () {
 
 it('doesnt shows New group if not allowed', function () {
 
-    Config::set('wirechat.show_new_group_modal_button', false);
+
+    testPanelProvider()->newGroupAction(false);
     $auth = ModelsUser::factory()->create();
 
     $request = Livewire::actingAs($auth)->test(NewChat::class);
@@ -170,7 +171,7 @@ describe('Creating conversation', function () {
 
         // assert redirect
         $request
-            ->assertRedirect(route(WireChat::viewRouteName(), $conversation->id))
+            ->assertRedirect(testPanelProvider()->chatRoute($conversation->id))
             ->assertNotDispatched('open-chat');
 
     });
@@ -193,8 +194,9 @@ describe('Creating conversation', function () {
         $conversation = $auth->conversations()->first();
 
         // assert redirect
+
         $request
-            ->assertNoRedirect(route(WireChat::viewRouteName(), $conversation->id))
+            ->assertNoRedirect()
             ->assertDispatched('open-chat');
 
     });
