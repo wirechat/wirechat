@@ -42,7 +42,9 @@ describe('presence test', function () {
 
     test(' Members title is set', function () {
 
-        Config::set('wirechat.max_group_members', 1000);
+
+        testPanelProvider()->maxGroupMembers(1000);
+
 
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -56,7 +58,8 @@ describe('presence test', function () {
 
     test('close_modal_button_is_set_correctly', function () {
 
-        Config::set('wirechat.max_group_members', 1000);
+        testPanelProvider()->maxGroupMembers(1000);
+
 
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -463,7 +466,7 @@ describe('actions test', function () {
             $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
             $request
                 ->call('sendMessage', $participant->id)
-                ->assertRedirect(route(WireChat::viewRouteName(), 2))
+                ->assertRedirect(testPanelProvider()->chatRoute(2))
                 ->assertNotDispatched('close-chat')
                 ->assertNotDispatched('closeWireChatModal')
                 ->assertNotDispatched('open-chat');
@@ -480,7 +483,7 @@ describe('actions test', function () {
             $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'widget' => true]);
             $request
                 ->call('sendMessage', $participant->id)
-                ->assertNoRedirect(route(WireChat::viewRouteName(), 2))
+                ->assertNoRedirect()
                 ->assertDispatched('open-chat')
                 ->assertDispatched('closeWireChatModal')
                 ->assertNotDispatched('close-chat');

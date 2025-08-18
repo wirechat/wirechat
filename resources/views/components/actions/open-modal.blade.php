@@ -1,15 +1,17 @@
 @props([
-    'component', 
+    'component',
     'conversation' => null,
-    'widget' => false
+    'widget' => false,
+    'panel'=>null,
 ])
 
-<div  onclick="Livewire.dispatch('openWireChatModal', { 
-        component: '{{ $component }}', 
-        arguments: { 
-            conversation:`{{$conversation ?? null }}`, 
-            widget: @js($widget)
-        } 
+<div  onclick="Livewire.dispatch('openWireChatModal', {
+        component: '{{ $component }}',
+        arguments: {
+            conversation:`{{$conversation ?? null }}`,
+            widget: @js($widget),
+            panel:@json($panel)
+        }
     })">
 
     {{ $slot }}

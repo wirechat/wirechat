@@ -9,22 +9,27 @@ use Namu\WireChat\Panel;
 
 trait HasPanel
 {
-    // Initialize with null to avoid uninitialized property error
     public Panel|string|null $panel = null;
 
     /**
      * Resolve and assign the panel ID during mount.
-     *
-     * @param mixed ...$params
      */
     public function mountHasPanel(...$params): void
     {
         $panelParam = collect($params)->first(fn ($param) => $param instanceof Panel || is_string($param));
+        $this->initializePanel($panelParam);
+    }
 
-        if ($panelParam instanceof Panel) {
-            $this->panel = $panelParam->getId();
-        } elseif (is_string($panelParam) && filled($panelParam)) {
-            $this->panel = $panelParam;
+    /**
+     * Initialize the panel manually (can be called anywhere).
+     * @throws NoPanelProvidedException
+     */
+    public function initializePanel(Panel|string|null $panelId = null): void
+    {
+        if ($panelId instanceof Panel) {
+            $this->panel = $panelId->getId();
+        } elseif (is_string($panelId) && filled($panelId)) {
+            $this->panel = $panelId;
         } else {
             $this->panel = WireChat::getDefaultPanel()?->getId();
         }
@@ -32,13 +37,11 @@ trait HasPanel
         if (! $this->panel || ! WireChat::getPanel($this->panel)) {
             throw NoPanelProvidedException::make();
         }
-
     }
 
     #[Computed(cache: true)]
     public function panel(): ?Panel
     {
         return $this->panel ? WireChat::getPanel($this->panel) : null;
-
     }
 }

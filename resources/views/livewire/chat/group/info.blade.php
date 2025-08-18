@@ -198,10 +198,9 @@
 
     {{-- Members section --}}
     <section class="my-4 text-left space-y-3">
-
         {{-- Actiion button to trigger opening members  modal --}}
         <x-wirechat::actions.open-modal component="wirechat.chat.group.members"
-            conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
+            conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
             {{-- Members count --}}
             <button class="cursor-pointer flex w-full justify-between items-center px-8 focus:outline-hidden ">
                 <span class="text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.info.labels.members') }}  {{ $totalParticipants }}</span>
