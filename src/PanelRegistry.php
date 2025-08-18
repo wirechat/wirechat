@@ -11,7 +11,7 @@ class PanelRegistry
 {
     protected array $panels = [];
     protected ?Panel $defaultPanel = null;
-
+    protected ?Panel $currentPanel = null;
     /**
      * @throws \Exception
      */
@@ -73,6 +73,16 @@ class PanelRegistry
             }
         }
 
+    }
+
+    public function setCurrent(string $panelId): void
+    {
+        $this->currentPanel = $this->panels[$panelId] ?? $this->defaultPanel;
+    }
+
+    public function getCurrent(): ?Panel
+    {
+        return $this->currentPanel ?? $this->defaultPanel;
     }
 
     public function getDefault(): ?Panel

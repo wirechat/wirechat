@@ -18,7 +18,7 @@ trait HasLayout
      *
      * @var string|Closure|null
      */
-    protected string|Closure|null $layout = null;
+    protected string|Closure|null $layout = 'wirechat::layouts.app';
 
     /**
      * Set the layout view.

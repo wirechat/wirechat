@@ -1,6 +1,7 @@
 <div class="h-full ">
 
-    @assets
+    @script
+    {{--todo:fix widget not opening chats correctly --}}
         <script>
             window.ChatWidget = () => {
                 return {
@@ -171,8 +172,12 @@
                     }
                 };
             }
+
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('ChatWidget', window.ChatWidget)
+            })
         </script>
-    @endassets
+    @endscript
 
 
     <div
@@ -207,8 +212,12 @@
                 class="fixed inset-0" id="chatwidget-container"
                 aria-modal="true">
                 @forelse($widgetComponents as $id => $component)
-                    <div  x-show.immediate="activeWidgetComponent == '{{ $id }}'" x-ref="{{ $id }}" wire:key="key-{{$id }}" class="h-full">
-                        @livewire($component['name'], ['conversation'=> $component['conversation'] ,'widget'=>true,'panel'=>$this->panel], key($id))
+                    <div x-show.immediate="activeWidgetComponent == @js($id)"
+                         x-ref="@js($id)"
+                         wire:key="key-{{$id }}"
+                         class="h-full">
+
+                    @livewire($component['name'], ['conversation'=> $component['conversation'] ,'widget'=>true,'panel'=>$this->panel], key($id))
                     </div>
                 @empty
                 @endforelse

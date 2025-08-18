@@ -25,6 +25,7 @@ use Namu\WireChat\Livewire\Pages\Chat as View;
 use Namu\WireChat\Livewire\Pages\Chats as Index;
 use Namu\WireChat\Livewire\Widgets\WireChat;
 use Namu\WireChat\Middleware\BelongsToConversation;
+use Namu\WireChat\Middleware\SetCurrentPanel;
 use Namu\WireChat\Services\WireChatService;
 
 class WireChatServiceProvider extends ServiceProvider
@@ -146,9 +147,10 @@ class WireChatServiceProvider extends ServiceProvider
 
     protected function registerMiddlewares(): void
     {
+        $router = $this->app->make(\Illuminate\Routing\Router::class);
 
-        $router = $this->app->make(Router::class);
         $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
+        $router->aliasMiddleware('wirechat.setPanel', SetCurrentPanel::class);
     }
 
     protected function loadAssets(): void

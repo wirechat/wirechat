@@ -42,6 +42,11 @@ class WireChatService
 
     }
 
+    public function currentPanel(): ?Panel
+    {
+        return $this->registry->getCurrent();
+    }
+
     /**
      * Get the default panel.
      *

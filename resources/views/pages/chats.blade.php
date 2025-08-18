@@ -1,9 +1,6 @@
 @extends('wirechat::layouts.app')
 
 @section('content')
-
-
-
     <div class="w-full h-full min-h-full flex rounded-lg" >
 
         <div x-persist="chats" class="relative  w-full h-full  border-r  border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]  md:w-[360px] lg:w-[400px] xl:w-[500px] shrink-0 overflow-y-auto  ">

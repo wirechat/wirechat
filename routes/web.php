@@ -72,7 +72,10 @@ Route::name('wirechat.')
         foreach ($panels as $panel) {
             Route::prefix($panel->getRoutePrefix())
                 ->name("{$panel->getPath()}.")
-                ->middleware($panel->getMiddleware())
+                ->middleware(array_merge(
+                    $panel->getMiddleware(),
+                    ["wirechat.setPanel:{$panel->getId()}"]
+                ))
                 ->group(function () use ($panel) {
                     Route::view('/', 'wirechat::pages.chats', ['panel' => $panel->getId()])
                         ->name('chats');
