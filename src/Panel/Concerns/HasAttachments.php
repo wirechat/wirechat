@@ -8,6 +8,10 @@ trait HasAttachments
 {
     protected bool|Closure|null $attachments = false;
 
+    protected bool|Closure|null $fileAttachments = false;
+
+    protected bool|Closure|null $mediaAttachments = false;
+
     protected string|Closure|null $storageFolder = 'attachments';
 
     protected string|Closure|null $storageDisk = 'public';
@@ -27,6 +31,34 @@ trait HasAttachments
     public function attachments(bool|Closure $condition = true): static
     {
         $this->attachments = $condition;
+
+        if ($condition){
+
+            $this->fileAttachments=true;
+            $this->mediaAttachments=true;
+        }
+
+        return $this;
+    }
+
+    public function fileAttachments(bool|Closure $condition = true): static
+    {
+        $this->fileAttachments = $condition;
+
+        if ($condition === true) {
+            $this->attachments = true;
+        }
+
+        return $this;
+    }
+
+    public function mediaAttachments(bool|Closure $condition = true): static
+    {
+        $this->mediaAttachments = $condition;
+
+        if ($condition === true) {
+            $this->attachments = true;
+        }
 
         return $this;
     }
@@ -87,11 +119,6 @@ trait HasAttachments
         return $this;
     }
 
-    public function getAttachments(): ?bool
-    {
-        return $this->evaluate($this->attachments);
-    }
-
     public function getStorageFolder(): ?string
     {
         return $this->evaluate($this->storageFolder);
@@ -134,24 +161,18 @@ trait HasAttachments
 
     public function hasAttachments(): bool
     {
-        return filled($this->getAttachments());
+        return $this->attachments === true
+            || $this->fileAttachments === true
+            || $this->mediaAttachments === true;
     }
 
     public function hasMediaAttachments(): bool
     {
-        if (! $this->hasAttachments()) {
-            return false;
-        }
-
-        return ! empty($this->getMediaMimes());
+        return $this->hasAttachments() && ! empty($this->mediaMimes) && $this->mediaAttachments === true;
     }
 
     public function hasFileAttachments(): bool
     {
-        if (! $this->hasAttachments()) {
-            return false;
-        }
-
-        return ! empty($this->getFileMimes());
+        return $this->hasAttachments() && ! empty($this->fileMimes) && $this->fileAttachments === true;
     }
 }

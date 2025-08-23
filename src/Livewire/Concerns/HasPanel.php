@@ -38,6 +38,9 @@ trait HasPanel
         if (! $this->panel || ! WireChat::getPanel($this->panel)) {
             throw NoPanelProvidedException::make();
         }
+
+        app('wirechatPanelRegistry')->setCurrent($this->panel);
+
     }
 
     #[Computed(cache: true)]

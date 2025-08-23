@@ -1,4 +1,3 @@
-@use('Namu\WireChat\Helpers\Helper')
 
 <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 
@@ -98,7 +97,8 @@
                                     class="shrink-0 cursor-pointer relative w-16 h-14 rounded-lg  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-primary)]   hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  flex text-center justify-center ">
                                     <input wire:loading.attr="disabled"
                                         @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
-                                        accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}" class="sr-only">
+                                           accept="{{ collect($this->panel()->getMediaMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
+                                           class="sr-only">
                                     <span class="m-auto ">
 
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -167,7 +167,9 @@
                                 class="cursor-pointer shrink-0 relative w-16 h-14 rounded-lg bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]   hover:border-[var(--wc-light-primary)] dark:hover:border-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  transition-colors   flex text-center justify-center  ">
                                 <input wire:loading.attr="disabled"
                                     @change="handleFileSelect(event,{{ count($files) }})" type="file" multiple
-                                    accept="{{ Helper::formattedFileMimesForAcceptAttribute() }}" class="sr-only"
+                                       accept="{{ collect($this->panel()->getFileMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
+
+                                       class="sr-only"
                                     hidden>
                                 <span class="  m-auto">
 
@@ -219,41 +221,41 @@
                         {{-- Get the current cursor position --}}
                         var startPos = textarea.selectionStart;
                         var endPos = textarea.selectionEnd;
-                
+
                         {{-- Insert a line break character at the cursor position --}}
                         var text = textarea.value;
                         var newText = text.substring(0, startPos) + '\n' + text.substring(endPos, text.length);
-                
+
                         {{-- Update the textarea value and cursor position --}}
                         textarea.value = newText;
                         textarea.selectionStart = startPos + 1; // Set cursor position after the inserted newline
                         textarea.selectionEnd = startPos + 1;
-                
+
                         {{-- update height of element smoothly --}}
                         textarea.style.height = 'auto';
                         textarea.style.height = textarea.scrollHeight + 'px';
-                
+
                     }
                 }" x-init="{{-- Emoji picture click event listener --}}
                 document.querySelector('emoji-picker')
                     .addEventListener('emoji-click', event => {
                         // Get the emoji unicode from the event
                         const emoji = event.detail['unicode'];
-                
+
                         // Get the current value and cursor position
                         const inputField = $refs.body;
                         const inputFieldValue = inputField._x_model.get() ?? '';
-                
+
                         const startPos = inputField.selectionStart;
                         const endPos = inputField.selectionEnd;
-                
+
                         // Insert the emoji at the current cursor position
                         const newValue = inputFieldValue.substring(0, startPos) + emoji + inputFieldValue.substring(endPos);
-                
+
                         // Update the value and move cursor after the emoji
                         inputField._x_model.set(newValue);
-                
-                
+
+
                         inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
                     });"
                     @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0)) ? $wire.sendMessage() : null"
@@ -283,9 +285,7 @@
 
                     {{-- Show  upload pop if media or file are empty --}}
                     {{-- Also only show  upload popup if allowed in configuration  --}}
-                    @if (count($this->media) == 0 &&
-                            count($this->files) == 0 &&
-                            (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
+                    @if (count($this->media) == 0 && count($this->files) == 0 && $this->panel()->hasAttachments())
                         <x-wirechat::popover position="top" popoverOffset="70">
 
                             <x-slot name="trigger" wire:loading.attr="disabled">
@@ -322,14 +322,17 @@
                             <div class="grid gap-2 w-full ">
 
                                 {{-- Upload Files --}}
-                                @if (config('wirechat.allow_file_attachments', true))
+                                @if ($this->panel()->hasFileAttachments())
                                     <label wire:loading.class="cursor-progress" x-data="attachments('files')"
                                         class="cursor-pointer">
                                         <input wire:loading.attr="disabled" wire:target="sendMessage"
                                             dusk="file-upload-input"
                                             @change="handleFileSelect(event, {{ count($files) }})" type="file"
-                                            multiple accept="{{ Helper::formattedFileMimesForAcceptAttribute() }}"
-                                            class="sr-only" style="display: none">
+                                            multiple
+
+                                               accept="{{ collect($this->panel()->getFileMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
+
+                                               class="sr-only" style="display: none">
 
                                         <div
                                             class="w-full  flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] cursor-pointer">
@@ -352,7 +355,7 @@
 
 
                                 {{-- Upload Media --}}
-                                @if (config('wirechat.allow_media_attachments', true))
+                                @if ($this->panel()->hasMediaAttachments())
                                     <label wire:loading.class="cursor-progress" x-data="attachments('media')"
                                         class="cursor-pointer">
 
@@ -360,8 +363,10 @@
                                         <input dusk="media-upload-input" wire:loading.attr="disabled"
                                             wire:target="sendMessage"
                                             @change="handleFileSelect(event, {{ count($media) }})" type="file"
-                                            multiple accept="{{ Helper::formattedMediaMimesForAcceptAttribute() }}"
-                                            class="sr-only" style="display: none">
+                                            multiple
+                                               accept="{{ collect($this->panel()->getMediaMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
+
+                                               class="sr-only" style="display: none">
 
                                         <div
                                             class="w-full flex items-center gap-3 px-1.5 py-2 rounded-md hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] cursor-pointer">
@@ -405,23 +410,23 @@
                                 .addEventListener('emoji-click', event => {
                                     const emoji = event.detail['unicode'];
                                     const inputField = $refs.body;
-                            
+
                                     // Get the current cursor position (start and end)
                                     const startPos = inputField.selectionStart;
                                     const endPos = inputField.selectionEnd;
-                            
+
                                     // Get current value of the input field
                                     const currentValue = inputField.value;
-                            
+
                                     // Insert the emoji at the cursor position, preserving line breaks and spaces
                                     const newValue = currentValue.substring(0, startPos) + emoji + currentValue.substring(endPos);
-                            
+
                                     // Update Alpine.js model (x-model='body') with the new value
                                     inputField._x_model.set(newValue);
-                            
+
                                     // Set the cursor position after the inserted emoji
                                     inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
-                            
+
                                     // Ensure the textarea resizes correctly after adding the emoji
                                     inputField.style.height = 'auto';
                                     inputField.style.height = inputField.scrollHeight + 'px';
@@ -495,10 +500,9 @@
                         isDropping: false, // Tracks if a file is being dragged over the drop area
                         type: type, // Type of file being uploaded (e.g., "media" or "file")
                         isUploading: false, // Indicates if files are currently uploading
-                        MAXFILES: @json(config('wirechat.attachments.max_uploads', 5)), // Maximum number of files allowed
-                        maxSize: @json(config('wirechat.attachments.media_max_upload_size', 12288)) * 1024, // Max size per file (in bytes)
-                        allowedFileTypes: type === 'media' ? @json(config('wirechat.attachments.media_mimes')) :
-                        @json(config('wirechat.attachments.file_mimes')), // Allowed MIME types based on type
+                        MAXFILES: @json($this->panel()->getMaxUploads()), // Maximum number of files allowed
+                        maxSize:  @json($this->panel()->getMediaMaxUploadSize()) * 1024, // Max size per file (in bytes)
+                        allowedFileTypes: type === 'media' ? @json($this->panel()->getMediaMimes()) :@json($this->panel()->getFileMimes()), // Allowed MIME types based on type
                         progress: 0, // Progress of the current upload (0-100)
                         wireModel: type, // The Livewire model to bind to
 
@@ -552,7 +556,7 @@
                         },
 
                         // Upload files using Livewire's uploadMultiple method
-                        
+
                         // Remove an uploaded file from Livewire
                         removeUpload(filename) {
                             $wire.removeUpload(this.wireModel, filename);
@@ -568,7 +572,7 @@
                                 count); // Limit files to the allowed number
                                 $dispatch('wirechat-toast', {
                                     type: 'warning',
-                                    message: @js(__('wirechat::validation.max.array', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>config('wirechat.attachments.max_uploads', 5)]))
+                                    message: @js(__('wirechat::validation.max.array', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>$this->panel()->getMaxUploads()]))
                                 });
                             }
 
@@ -591,14 +595,19 @@
                                     if (file.size > this.maxSize) {
                                         $dispatch('wirechat-toast', {
                                             type: 'warning',
-                                            message: @js(__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>config('wirechat.attachments.media_max_upload_size', 12288)]))
+                                            message:this.type===media?
+                                                    @js(__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>$this->panel()->getMediaMaxUploadSize()])):
+                                                    @js(__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>$this->panel()->getFileMaxUploadSize()]))
+
                                          //   message: `File size exceeds the maximum limit (${this.maxSize / 1024 / 1024}MB): ${file.name}`
                                         });
                                     } else {
                                         const extension = file.name.split('.').pop().toLowerCase();
                                         $dispatch('wirechat-toast', {
                                             type: 'warning',
-                                            message: @js(__('wirechat::validation.mimes', [ 'attribute' => __('wirechat::chat.inputs.media.label'), 'values' => implode(', ', config('wirechat.attachments.media_mimes')) ]))
+                                            message: this.type===media?
+                                                    @js(__('wirechat::validation.mimes', [ 'attribute' => __('wirechat::chat.inputs.media.label'), 'values' => implode(', ', $this->panel()->getMediaMimes()) ])):
+                                                    @js(__('wirechat::validation.mimes', [ 'attribute' => __('wirechat::chat.inputs.media.label'), 'values' => implode(', ', $this->panel()->getFileMimes()) ]))
                                            // message: `One or more Files not uploaded: .${extension} (type not allowed)`
                                         });
 

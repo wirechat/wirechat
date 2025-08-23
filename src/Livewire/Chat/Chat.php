@@ -341,7 +341,6 @@ class Chat extends Component
         // Combine media and files arrays
 
         $attachments = array_merge($this->media, $this->files);
-        //    dd(config('wirechat.file_mimes'));
 
         // If combined files array is empty, continue to validate body
         if (empty($attachments)) {
@@ -354,15 +353,17 @@ class Chat extends Component
 
             //  dd($attachments);
             // Retrieve maxUploads count
-            $maxUploads = config('wirechat.attachments.max_uploads');
+            $maxUploads = $this->panel()->getMaxUploads();
 
             // Files
-            $fileMimes = implode(',', config('wirechat.attachments.file_mimes'));
-            $fileMaxUploadSize = (int) config('wirechat.attachments.file_max_upload_size');
+            $fileMimes = implode(',', $this->panel()->getFileMimes());
+
+            $fileMaxUploadSize = (int) $this->panel()->getFileMaxUploadSize();
 
             // media
-            $mediaMimes = implode(',', config('wirechat.attachments.media_mimes'));
-            $mediaMaxUploadSize = (int) config('wirechat.attachments.media_max_upload_size');
+            $mediaMimes = implode(',', $this->panel()->getMediaMimes());
+
+            $mediaMaxUploadSize = (int) $this->panel()->getMediaMaxUploadSize();
 
             try {
 
@@ -763,10 +764,6 @@ class Chat extends Component
 
     public function mount($conversation = null)
     {
-        // dd(config('wirechat.attachments.storage_disk'));
-
-        // dd(Storage::disk()->url('/'));
-
         $this->initializeConversation($conversation);
         $this->initializeParticipants();
         $this->finalizeConversationState();

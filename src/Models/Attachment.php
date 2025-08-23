@@ -87,12 +87,14 @@ class Attachment extends Model
             return null;
         }
 
-        $disk = Storage::disk(WireChat::storageDisk());
+        $diskVisibility= WireChat::currentPanel()->getDiskVisibility();
+        $storageDisk= WireChat::currentPanel()->getStorageDisk();
 
-        $config = config('wirechat.attachments');
+        $disk = Storage::disk($storageDisk);
+
 
         // If the disk is set to private, generate a temporary URL
-        if (($config['disk_visibility'] ?? 'public') === 'private') {
+        if (($diskVisibility ?? 'public') === 'private') {
             return $disk->temporaryUrl($path, now()->addMinutes(5));
         }
 
