@@ -37,7 +37,7 @@
         @if ($this->panel()->hasNewGroupAction() && auth()->user()->canCreateGroups())
 
         {{-- Buton to trigger opening of new grop modal --}}
-        <x-wirechat::actions.new-group widget="{{$this->isWidget()}}">
+        <x-wirechat::actions.new-group widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
         <button  @dusk="open_new_group_modal_button"  class="flex items-center gap-3 my-4  rounded-lg p-2 w-full border  transition-colors border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)] hover:border-[var(--wc-light-secondary)] dark:hover:border-[var(--wc-dark-secondary)]" >
             <span style=" color: var(--wc-brand-primary); " class="p-1 bg-gray-100  rounded-full ">
 

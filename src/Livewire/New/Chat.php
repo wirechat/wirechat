@@ -42,7 +42,8 @@ class Chat extends ModalComponent
             /**
              * todo: migrate search chantable to channel
              */
-            $this->users = auth()->user()->searchChatables($this->search);
+
+            $this->users = $this->panel()->searchChatables($this->search);
         }
     }
 
@@ -81,6 +82,7 @@ class Chat extends ModalComponent
 
     public function render()
     {
+
         return view('wirechat::livewire.new.chat');
     }
 }

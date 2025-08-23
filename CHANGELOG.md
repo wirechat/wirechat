@@ -17,17 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ---
-## \[0.3x]
-Updad from config based to panel based settings for a clean and extensible way to define wirechat environments
-### Fixed
+## [0.3x]
+Update from config based to panel based settings for a clean and extensible way to define wirechat environments
 
-* Close button now works correctly when Chats component is used as a widget.
+### Fixed
 
 ### Changed
 
-* Renamed config key `home_route` to `app_redirect_route`.
 * updated attachment url to use currentPanel to get disk storage and visibility settings
-
+* improved avatar component to load svg when image fails
+* migrated `searchChatables` from user model to panel-based search for better flexibility and customization
 
 ---
 

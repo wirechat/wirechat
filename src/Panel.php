@@ -17,6 +17,7 @@ use Namu\WireChat\Panel\Concerns\HasId;
 use Namu\WireChat\Panel\Concerns\HasLayout;
 use Namu\WireChat\Panel\Concerns\HasMiddleware;
 use Namu\WireChat\Panel\Concerns\HasRoutes;
+use Namu\WireChat\Panel\Concerns\HasChatablesSearch;
 use Namu\WireChat\Panel\Concerns\HasSearchableFields;
 use Namu\WireChat\Panel\Concerns\HasSpaMode;
 use Namu\WireChat\Panel\Concerns\HasWebPushNotifications;
@@ -32,6 +33,7 @@ class Panel
     use HasBroadcasting;
     use HasChatMiddleware;
     use HasChatsSearch;
+    use HasChatablesSearch;
     use HasFavicon;
     use HasGroups;
     use HasHeading;

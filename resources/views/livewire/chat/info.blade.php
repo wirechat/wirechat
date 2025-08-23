@@ -10,9 +10,9 @@
         <h3>{{ __('wirechat::chat.info.heading.label') }}</h3>
     </section>
     {{-- Details --}}
-    
+
     <header>
- 
+
             <div class="flex  flex-col items-center gap-5 ">
 
                 <div class="mx-auto items-center justify-center grid">
@@ -37,7 +37,7 @@
 
     <x-wirechat::divider />
 
-   
+
     {{-- Footer section --}}
     <section class="flex flex-col justify-start w-full">
 

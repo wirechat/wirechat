@@ -9,8 +9,8 @@
         component: '{{ $component }}',
         arguments: {
             conversation:`{{$conversation ?? null }}`,
-            widget: @js($widget),
-            panel:@json($panel)
+            widget:@js($widget),
+            panel:@js($panel)
         }
     })">
 

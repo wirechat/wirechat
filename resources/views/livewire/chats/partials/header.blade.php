@@ -18,7 +18,7 @@
 
             @if ($showNewChatModalButton)
 
-            <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}">
+            <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
                 <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
                     <svg class="w-8 h-8 -mb-1 text-gray-500 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"
                         xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">

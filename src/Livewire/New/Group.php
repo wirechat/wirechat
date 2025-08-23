@@ -79,7 +79,7 @@ class Group extends ModalComponent
             $this->users = [];
         } else {
 
-            $this->users = auth()->user()->searchChatables($this->search);
+            $this->users = $this->panel()->searchChatables($this->search);
         }
     }
 

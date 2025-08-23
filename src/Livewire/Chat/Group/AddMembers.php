@@ -74,7 +74,7 @@ class AddMembers extends ModalComponent
             $this->users = null;
         } else {
 
-            $this->users = auth()->user()->searchChatables($this->search);
+            $this->users = $this->panel()->searchChatables($this->search);
         }
     }
 

@@ -184,9 +184,10 @@
 
         }
     }"
+
      class ='w-full h-full bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] flex overflow-hidden rounded-lg'>
       <div :class="chatIsOpen && 'hidden md:grid'" class="relative  w-full h-full sm:border-r border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]    md:w-[360px] lg:w-[400px] xl:w-[450px] shrink-0 overflow-y-auto  ">
-          <livewire:wirechat.chats :widget="true" />
+          <livewire:wirechat.chats :widget="true" :panel="$this->panel" />
       </div>
       <main
            x-data="ChatWidget()"

@@ -12,12 +12,12 @@ trait HasPanel
     public Panel|string|null $panel = null;
 
     /**
-     * Resolve and assign the panel ID during mount.
+     * Resolve and assign the panel during mount.
      */
-    public function mountHasPanel(...$params): void
+    public function mountHasPanel(): void
     {
-        $panelParam = collect($params)->first(fn ($param) => $param instanceof Panel || is_string($param));
-        $this->initializePanel($panelParam);
+        // If already set by Livewire/public property, use it
+        $this->initializePanel($this->panel);
     }
 
     /**
@@ -40,10 +40,9 @@ trait HasPanel
         }
 
         app('wirechatPanelRegistry')->setCurrent($this->panel);
-
     }
 
-    #[Computed(cache: true)]
+    #[Computed(cache: false)]
     public function panel(): ?Panel
     {
         return $this->panel ? WireChat::getPanel($this->panel) : null;
