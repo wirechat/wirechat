@@ -1,4 +1,4 @@
-# WireChat Changelog 
+****# WireChat Changelog 
 
 All notable changes to this project will be documented in this file.
 
@@ -17,8 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ---
-## \[Unreleased]
-
+## \[0.3x]
+Updad from config based to panel based settings for a clean and extensible way to define wirechat environments
 ### Fixed
 
 * Close button now works correctly when Chats component is used as a widget.
@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Renamed config key `home_route` to `app_redirect_route`.
+* updated attachment url to use currentPanel to get disk storage and visibility settings
+
 
 ---
 
