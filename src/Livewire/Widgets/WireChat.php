@@ -13,7 +13,6 @@ use Namu\WireChat\Models\Conversation;
 
 class WireChat extends Component
 {
-
     use HasPanel;
 
     public ?string $activeWireChatWidgetComponent = null;

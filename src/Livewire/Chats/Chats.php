@@ -22,7 +22,7 @@ use Namu\WireChat\Models\Conversation;
  */
 class Chats extends Component
 {
-    use Widget,HasPanel;
+    use HasPanel,Widget;
 
     /**
      * The search query.
@@ -42,16 +42,16 @@ class Chats extends Component
      * Features
      */
     #[Locked]
-    public ?bool $showNewChatModalButton=null;
+    public ?bool $showNewChatModalButton = null;
 
     #[Locked]
-    public ?bool $allowChatsSearch=null;
+    public ?bool $allowChatsSearch = null;
 
     #[Locked]
-    public ?bool $showHomeRouteButton=null;
+    public ?bool $showHomeRouteButton = null;
 
     #[Locked]
-    public ?string $title='';
+    public ?string $title = '';
 
     /**
      * Indicates if more conversations can be loaded.
@@ -72,8 +72,6 @@ class Chats extends Component
      */
     public $selectedConversationId;
 
-
-
     /**
      * Returns an array of event listeners.
      *
@@ -85,12 +83,12 @@ class Chats extends Component
         $encodedType = MorphClassResolver::encode($user?->getMorphClass());
         $userId = $user?->getKey();
 
-        $listeners= [
+        $listeners = [
             'refresh' => '$refresh',
-            'hardRefresh'
+            'hardRefresh',
         ];
 
-        if ($this->panel()==null) {
+        if ($this->panel() == null) {
             \Illuminate\Support\Facades\Log::warning('WireChat:No panels registered in Chat Component');
         } else {
             $panelId = $this->panel()->getId();
@@ -98,7 +96,6 @@ class Chats extends Component
             $channelName = "$panelId.participant.$encodedType.$userId";
             $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\NotifyParticipant"] = 'refreshComponent';
         }
-
 
         return $listeners;
     }
@@ -341,8 +338,8 @@ class Chats extends Component
      *
      * @return void
      */
-    public function mount() {
-
+    public function mount()
+    {
 
         abort_unless(auth()->check(), 401);
         $this->selectedConversationId = request()->conversation;
@@ -350,16 +347,15 @@ class Chats extends Component
 
     }
 
-
-//    protected function initialize()
-//    {
-//        $this->title = $this->panel()?->getHeading();
-//        $this->showNewChatModalButton = $this->panel()?->hasNewChatAction();
-//        $this->allowChatsSearch = $this->panel()?->hasChatsSearch();
-//        $this->showHomeRouteButton = $this->widget
-//            ? false
-//            : $this->panel()?->hasRedirectToHomeAction();
-//    }
+    //    protected function initialize()
+    //    {
+    //        $this->title = $this->panel()?->getHeading();
+    //        $this->showNewChatModalButton = $this->panel()?->hasNewChatAction();
+    //        $this->allowChatsSearch = $this->panel()?->hasChatsSearch();
+    //        $this->showHomeRouteButton = $this->widget
+    //            ? false
+    //            : $this->panel()?->hasRedirectToHomeAction();
+    //    }
 
     protected function initialize()
     {
@@ -381,7 +377,7 @@ class Chats extends Component
 
             $this->title = $this->panel()?->getHeading();
         }
-      //  dd($this->title , $defaults['title']);
+        //  dd($this->title , $defaults['title']);
 
         //
         // BOOLEAN FLAGS
@@ -405,9 +401,6 @@ class Chats extends Component
         }
     }
 
-
-
-
     /**
      * Loads conversations and renders the view.
      *
@@ -417,16 +410,14 @@ class Chats extends Component
     {
         $this->loadConversations();
 
-
         $this->initialize();
 
-//        dd([
-//            'showNewChatModalButton'=>$this->showNewChatModalButton,
-//            'allowChatsSearch'=>$this->allowChatsSearch,
-//            'showHomeRouteButton'=>$this->showHomeRouteButton,
-//            'title'=>$this->title,
-//        ]);
-
+        //        dd([
+        //            'showNewChatModalButton'=>$this->showNewChatModalButton,
+        //            'allowChatsSearch'=>$this->allowChatsSearch,
+        //            'showHomeRouteButton'=>$this->showHomeRouteButton,
+        //            'title'=>$this->title,
+        //        ]);
 
         return view('wirechat::livewire.chats.chats');
     }

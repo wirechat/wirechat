@@ -79,7 +79,6 @@ it('shows New group if allowed', function () {
 
 it('doesnt shows New group if not allowed', function () {
 
-
     testPanelProvider()->newGroupAction(false);
     $auth = ModelsUser::factory()->create();
 

@@ -15,27 +15,21 @@ trait HasLayout
 {
     /**
      * The layout view to use.
-     *
-     * @var string|Closure|null
      */
     protected string|Closure|null $layout = 'wirechat::layouts.app';
 
     /**
      * Set the layout view.
-     *
-     * @param  string|Closure|null  $layout
-     * @return static
      */
     public function layout(string|Closure|null $layout): static
     {
         $this->layout = $layout;
+
         return $this;
     }
 
     /**
      * Get the resolved layout view.
-     *
-     * @return string|null
      */
     public function getLayout(): ?string
     {
@@ -44,8 +38,6 @@ trait HasLayout
 
     /**
      * Check if a layout is set.
-     *
-     * @return bool
      */
     public function hasLayout(): bool
     {

@@ -8,7 +8,6 @@ use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
 use Namu\WireChat\Models\Attachment;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
-use Namu\WireChat\PanelRegistry;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -21,7 +20,6 @@ it('checks if users is authenticated before loading chatlist', function () {
 test('authenticaed user can access chatlist ', function () {
 
     // Mutate the registered test panel
-
 
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
@@ -93,7 +91,6 @@ describe('Presence check', function () {
 
         $auth = User::factory()->create();
 
-
         Livewire::actingAs($auth)->test(Chatlist::class, [
             'showNewChatModalButton' => false,
             'allowChatsSearch' => false,
@@ -111,8 +108,7 @@ describe('Presence check', function () {
             ->chatsSearch(false)
             ->newChatAction(false)
             ->redirectToHomeAction(false)
-            ->heading(null)
-        ;
+            ->heading(null);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSeeHtml('dusk="header"');
@@ -120,7 +116,7 @@ describe('Presence check', function () {
 
     it('doesnt shows search field if search is disabled in wirechat.config:tesiting Search placeholder', function () {
 
-      //  Config::set('wirechat.allow_chats_search', false);
+        //  Config::set('wirechat.allow_chats_search', false);
         testPanelProvider()->chatsSearch(false);
 
         $auth = User::factory()->create();
@@ -132,7 +128,7 @@ describe('Presence check', function () {
 
     it('doesnt shows search field if search MANUALLY disabled', function () {
 
-      //  Config::set('wirechat.allow_chats_search', true);
+        //  Config::set('wirechat.allow_chats_search', true);
         testPanelProvider()->chatsSearch(false);
 
         $auth = User::factory()->create();
@@ -144,7 +140,7 @@ describe('Presence check', function () {
 
     it('shows search field if search is enabled in wirechat.config.allow_chats_search Search placeholder', function () {
 
-   //     Config::set('wirechat.allow_chats_search', true);
+        //     Config::set('wirechat.allow_chats_search', true);
         testPanelProvider()->chatsSearch(true);
 
         $auth = User::factory()->create();
@@ -156,7 +152,7 @@ describe('Presence check', function () {
 
     it('shows search field even if search is DISABLED in wirechat.config.allow_chats_search but ENABLED at component level', function () {
 
-       // Config::set('wirechat.allow_chats_search', false);
+        // Config::set('wirechat.allow_chats_search', false);
         testPanelProvider()->chatsSearch(false);
 
         $auth = User::factory()->create();
@@ -168,7 +164,7 @@ describe('Presence check', function () {
 
     test('it_shows_new_chat_modal_button_if_enabled_in_panel', function () {
 
-        //Config::set('wirechat.show_new_chat_modal_button', true);
+        // Config::set('wirechat.show_new_chat_modal_button', true);
 
         testPanelProvider()->newChatAction();
 
@@ -181,7 +177,7 @@ describe('Presence check', function () {
 
     test('if "showNewChatModalButton" DISABLED  at component level it doesnt shows_new_chat_modal_button event if enabled_in_panel', function () {
 
-      //  Config::set('wirechat.show_new_chat_modal_button', true);
+        //  Config::set('wirechat.show_new_chat_modal_button', true);
 
         testPanelProvider()->newChatAction();
 
@@ -205,7 +201,7 @@ describe('Presence check', function () {
 
     test('if "showNewChatModalButton" ENABLED  at component level it still shows_new_chat_modal_button_if_not enabled_in_panel  ', function () {
 
-    //    Config::set('wirechat.show_new_chat_modal_button', false);
+        //    Config::set('wirechat.show_new_chat_modal_button', false);
 
         testPanelProvider()->newChatAction(false);
 

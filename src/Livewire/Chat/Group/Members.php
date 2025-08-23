@@ -9,7 +9,6 @@ use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Exceptions\NoPanelProvidedException;
 use Namu\WireChat\Livewire\Chat\Info;
 use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
@@ -21,10 +20,10 @@ use Namu\WireChat\Models\Participant;
 
 class Members extends ModalComponent
 {
+    use HasPanel;
     use Widget;
     use WithFileUploads;
     use WithPagination;
-    use HasPanel;
 
     #[Locked]
     public Conversation $conversation;
@@ -246,7 +245,6 @@ class Members extends ModalComponent
         $this->page++;
         $this->loadParticipants();
     }
-
 
     public function mount(Conversation $conversation)
     {

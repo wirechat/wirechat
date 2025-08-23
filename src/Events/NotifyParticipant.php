@@ -9,8 +9,6 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\MorphClassResolver;
 use Namu\WireChat\Http\Resources\MessageResource;
 use Namu\WireChat\Models\Message;
@@ -24,10 +22,10 @@ class NotifyParticipant implements ShouldBroadcastNow
     use InteractsWithPanel;
 
     public $participantType;
+
     public $participantId;
 
-
-    public function __construct(public Participant|Model $participant, public Message $message,Panel|string|null $panel=null)
+    public function __construct(public Participant|Model $participant, public Message $message, Panel|string|null $panel = null)
     {
         if ($participant instanceof Participant) {
             $this->participantType = $participant->participantable_type;
@@ -54,6 +52,7 @@ class NotifyParticipant implements ShouldBroadcastNow
     {
         // Check if the message is not older than 60 seconds
         $isNotExpired = Carbon::parse($this->message->created_at)->gt(Carbon::now()->subMinute());
+
         return $isNotExpired;
     }
 
@@ -61,7 +60,6 @@ class NotifyParticipant implements ShouldBroadcastNow
     {
         $encodedType = MorphClassResolver::encode($this->participantType);
         $channels = [];
-
 
         $panelId = $this->panel->getId();
         $channels[] = "$panelId.participant.$encodedType.$this->participantId";
@@ -76,7 +74,7 @@ class NotifyParticipant implements ShouldBroadcastNow
 
         return [
             'message' => new MessageResource($this->message),
-            'redirect_url' =>$this->panel->chatRoute($this->message->conversation_id),
+            'redirect_url' => $this->panel->chatRoute($this->message->conversation_id),
         ];
     }
 }

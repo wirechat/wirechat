@@ -15,6 +15,7 @@ trait HasBroadcasting
     public function broadcasting(bool|Closure $condition = true): static
     {
         $this->hasBroadcasting = $condition;
+
         return $this;
     }
 
@@ -36,12 +37,14 @@ trait HasBroadcasting
     public function messagesQueue(string|Closure $queue): static
     {
         $this->messagesQueue = $queue;
+
         return $this;
     }
 
     public function eventsQueue(string|Closure $queue): static
     {
         $this->eventsQueue = $queue;
+
         return $this;
     }
 }

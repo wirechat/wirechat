@@ -2,7 +2,6 @@
 
 namespace Namu\WireChat\Livewire\New;
 
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
 use Namu\WireChat\Livewire\Concerns\Widget;
@@ -10,8 +9,8 @@ use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
 
 class Chat extends ModalComponent
 {
-    use Widget;
     use HasPanel;
+    use Widget;
 
     public $users = [];
 

@@ -4,7 +4,6 @@ namespace Namu\WireChat\Livewire\New;
 
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
 use Namu\WireChat\Livewire\Concerns\Widget;
@@ -12,9 +11,9 @@ use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
 
 class Group extends ModalComponent
 {
+    use HasPanel;
     use Widget;
     use WithFileUploads;
-    use HasPanel;
 
     public $users = [];
 

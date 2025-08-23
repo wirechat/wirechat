@@ -7,7 +7,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 // use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chat\Info;
 use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
@@ -16,8 +15,8 @@ use Namu\WireChat\Models\Participant;
 
 class AddMembers extends ModalComponent
 {
-    use WithFileUploads;
     use HasPanel;
+    use WithFileUploads;
 
     #[Locked]
     public Conversation $conversation;
@@ -97,7 +96,7 @@ class AddMembers extends ModalComponent
             } else {
 
                 // validate members count
-                if ($this->newTotalCount >=  $this->panel()->getMaxGroupMembers()) {
+                if ($this->newTotalCount >= $this->panel()->getMaxGroupMembers()) {
                     return $this->dispatch('show-member-limit-error');
                 }
 
@@ -168,6 +167,6 @@ class AddMembers extends ModalComponent
     {
 
         // Pass data to the view
-        return view('wirechat::livewire.chat.group.add-members', ['maxGroupMembers' =>  $this->panel()->getMaxGroupMembers()]);
+        return view('wirechat::livewire.chat.group.add-members', ['maxGroupMembers' => $this->panel()->getMaxGroupMembers()]);
     }
 }

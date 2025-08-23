@@ -24,18 +24,16 @@ trait HasAuth
      * Set the guards to be used.
      *
      * @param  array<string>|Closure  $guards
-     * @return static
      */
     public function guards(array|Closure $guards): static
     {
         $this->guards = $guards;
+
         return $this;
     }
 
     /**
      * Get the configured guards.
-     *
-     * @return array
      */
     public function getGuards(): array
     {
@@ -44,8 +42,6 @@ trait HasAuth
 
     /**
      * Get the current authenticated user from one of the defined guards.
-     *
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
      */
     public function auth(): ?\Illuminate\Contracts\Auth\Authenticatable
     {
@@ -60,8 +56,6 @@ trait HasAuth
 
     /**
      * Check if at least one guard has an authenticated user.
-     *
-     * @return bool
      */
     public function authCheck(): bool
     {

@@ -21,9 +21,9 @@ trait EvaluatesClosures
      *
      * @template T
      *
-     * @param  T | callable(): T  $value The value to evaluate, which may be a Closure or static value.
-     * @param  array<string, mixed>  $namedInjections Explicitly provided named parameters for the Closure.
-     * @param  array<string, mixed>  $typedInjections Explicitly provided parameters for specific types.
+     * @param  T | callable(): T  $value  The value to evaluate, which may be a Closure or static value.
+     * @param  array<string, mixed>  $namedInjections  Explicitly provided named parameters for the Closure.
+     * @param  array<string, mixed>  $typedInjections  Explicitly provided parameters for specific types.
      * @return T The evaluated value, either the result of the Closure or the original value.
      *
      * @throws BindingResolutionException If a required Closure parameter cannot be resolved.
@@ -46,9 +46,9 @@ trait EvaluatesClosures
     /**
      * Resolves a single Closure parameter using named injections, typed injections, or Laravel's container.
      *
-     * @param  ReflectionParameter  $parameter The parameter to resolve.
-     * @param  array<string, mixed>  $namedInjections Explicitly provided named parameters.
-     * @param  array<string, mixed>  $typedInjections Explicitly provided parameters for specific types.
+     * @param  ReflectionParameter  $parameter  The parameter to resolve.
+     * @param  array<string, mixed>  $namedInjections  Explicitly provided named parameters.
+     * @param  array<string, mixed>  $typedInjections  Explicitly provided parameters for specific types.
      * @return mixed The resolved parameter value.
      *
      * @throws BindingResolutionException If the parameter cannot be resolved and is not optional.
@@ -105,7 +105,7 @@ trait EvaluatesClosures
     /**
      * Gets the class name of a typed parameter, handling 'self' and 'parent' keywords.
      *
-     * @param  ReflectionParameter  $parameter The parameter to inspect.
+     * @param  ReflectionParameter  $parameter  The parameter to inspect.
      * @return string|null The class name of the parameter type, or null if not a class type.
      */
     protected function getTypedParameterClassName(ReflectionParameter $parameter): ?string

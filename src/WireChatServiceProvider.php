@@ -2,12 +2,11 @@
 
 namespace Namu\WireChat;
 
-use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
-use Namu\WireChat\Console\Commands\MakePanelCommand;
 use Namu\WireChat\Console\Commands\InstallWireChat;
+use Namu\WireChat\Console\Commands\MakePanelCommand;
 use Namu\WireChat\Console\Commands\SetupNotifications;
 use Namu\WireChat\Facades\WireChat as FacadesWireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
@@ -38,7 +37,7 @@ class WireChatServiceProvider extends ServiceProvider
             $this->commands([
                 InstallWireChat::class,
                 SetupNotifications::class,
-                MakePanelCommand::class
+                MakePanelCommand::class,
             ]);
         }
 
@@ -89,7 +88,6 @@ class WireChatServiceProvider extends ServiceProvider
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
 
-
     }
 
     public function register()
@@ -99,7 +97,6 @@ class WireChatServiceProvider extends ServiceProvider
             __DIR__.'/../config/wirechat.php',
             'wirechat'
         );
-
 
         // register facades
         $this->app->singleton('wirechat', function ($app) {
@@ -111,10 +108,10 @@ class WireChatServiceProvider extends ServiceProvider
         // Bind PanelRegistry to the container
         $this->app->singleton('wirechatPanelRegistry', function () {
             logger('Binding wirechatPanelRegistry');
-            return new PanelRegistry();
+
+            return new PanelRegistry;
         });
     }
-
 
     // custom methods for livewire components
     protected function loadLivewireComponents(): void
@@ -155,22 +152,19 @@ class WireChatServiceProvider extends ServiceProvider
 
     protected function loadAssets(): void
     {
-        Blade::directive('wirechatAssets', function (Panel|string $panel=null)  {
+        Blade::directive('wirechatAssets', function (Panel|string|null $panel = null) {
 
-
-            //Check if panel param s set
-            if(isset($panel)){
-                $currentPanel= \Namu\WireChat\Facades\WireChat::getPanel($panel);
-            }
-            else{
-                $currentPanel = \Namu\WireChat\Facades\WireChat::currentPanel(); //This gets panel according to route or default
+            // Check if panel param s set
+            if (isset($panel)) {
+                $currentPanel = \Namu\WireChat\Facades\WireChat::getPanel($panel);
+            } else {
+                $currentPanel = \Namu\WireChat\Facades\WireChat::currentPanel(); // This gets panel according to route or default
             }
 
-
-            $hasWebPushNotifications= $currentPanel->hasWebPushNotifications();
-            $panelId     = \Namu\WireChat\Facades\WireChat::currentPanel()?->getId();
-            $userId      = auth()?->id();
-            $encodedType = \Namu\WireChat\Helpers\MorphClassResolver::encode(auth()?->user()?->getMorphClass());
+            $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
+            $panelId = \Namu\WireChat\Facades\WireChat::currentPanel()?->getId();
+            $userId = auth()->id();
+            $encodedType = \Namu\WireChat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
 
             $script = '';
 
@@ -259,7 +253,8 @@ class WireChatServiceProvider extends ServiceProvider
                              </script>
                           HTML;
             }
-         return <<<HTML
+
+            return <<<HTML
                 <?php if(auth()->check()): ?>
                     <?php
                         echo Blade::render('@livewire("wirechat.modal")');
@@ -274,10 +269,6 @@ class WireChatServiceProvider extends ServiceProvider
         HTML;
         });
     }
-
-
-
-
 
     // load assets
     protected function loadStyles(): void

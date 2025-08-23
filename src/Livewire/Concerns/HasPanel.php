@@ -22,6 +22,7 @@ trait HasPanel
 
     /**
      * Initialize the panel manually (can be called anywhere).
+     *
      * @throws NoPanelProvidedException
      */
     public function initializePanel(Panel|string|null $panelId = null): void

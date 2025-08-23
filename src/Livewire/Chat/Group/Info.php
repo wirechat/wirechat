@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
 use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\DeleteConversationJob;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chats\Chats;
@@ -17,9 +16,9 @@ use Namu\WireChat\Models\Conversation;
 
 class Info extends ModalComponent
 {
+    use HasPanel;
     use Widget;
     use WithFileUploads;
-    use HasPanel;
 
     #[Locked]
     public Conversation $conversation;
@@ -143,7 +142,7 @@ class Info extends ModalComponent
             // remove current photo
             $this->group?->cover?->delete();
             // save photo to disk
-            $path = $photo->store($this->panel()->getStorageFolder(),$this->panel()->getStorageDisk() );
+            $path = $photo->store($this->panel()->getStorageFolder(), $this->panel()->getStorageDisk());
             $url = Storage::disk($this->panel()->getStorageDisk())->url($path);
             // create attachment
             $this->conversation->group?->cover()?->create([

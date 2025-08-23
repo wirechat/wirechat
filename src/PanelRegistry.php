@@ -4,14 +4,17 @@ namespace Namu\WireChat;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use ReflectionClass;
 use Namu\WireChat\Exceptions\NoPanelProvidedException;
+use ReflectionClass;
 
 class PanelRegistry
 {
     protected array $panels = [];
+
     protected ?Panel $defaultPanel = null;
+
     protected ?Panel $currentPanel = null;
+
     /**
      * @throws \Exception
      */
@@ -28,7 +31,7 @@ class PanelRegistry
 
         if ($panel->isDefault()) {
             if ($this->defaultPanel !== null) {
-                throw new \Exception("Only one panel can be marked as default.");
+                throw new \Exception('Only one panel can be marked as default.');
             }
             $this->defaultPanel = $panel;
         }
@@ -48,6 +51,7 @@ class PanelRegistry
 
         if (! File::isDirectory($directory)) {
             Log::warning('WireChat providers directory not found', ['directory' => $directory]);
+
             return;
         }
 
@@ -56,7 +60,7 @@ class PanelRegistry
         foreach ($files as $file) {
 
             $className = str_replace('.php', '', $file->getFilename());
-            $fullClass = 'App\\Providers\\WireChat\\' . $className;
+            $fullClass = 'App\\Providers\\WireChat\\'.$className;
 
             if (! class_exists($fullClass)) {
                 continue;
@@ -65,7 +69,7 @@ class PanelRegistry
             $reflection = new ReflectionClass($fullClass);
             if ($reflection->isSubclassOf(PanelProvider::class) && $reflection->hasMethod('panel')) {
                 $method = $reflection->getMethod('panel');
-                if ($method->isPublic() && !$method->isStatic()) {
+                if ($method->isPublic() && ! $method->isStatic()) {
                     $provider = $reflection->newInstanceWithoutConstructor();
                     $panel = $method->invoke($provider, Panel::make());
                     $this->register($panel);
@@ -90,14 +94,16 @@ class PanelRegistry
         if ($this->defaultPanel === null) {
             throw new NoPanelProvidedException('No default panel has been set.');
         }
+
         return $this->defaultPanel;
     }
 
     /**
      * Retrieves a panel by its ID or provider class.
      *
-     * @param string $idOrClass The panel ID or provider class name.
+     * @param  string  $idOrClass  The panel ID or provider class name.
      * @return Panel|null The panel instance, or the default panel if not found.
+     *
      * @throws NoPanelProvidedException If no default panel is set and the ID/class is invalid.
      */
     public function get(string $idOrClass): ?Panel
@@ -110,6 +116,7 @@ class PanelRegistry
         $panel = $this->resolvePanelFromProvider($idOrClass);
         if ($panel) {
             $this->register($panel); // Register the resolved panel
+
             return $panel;
         }
 
@@ -118,6 +125,7 @@ class PanelRegistry
         }
 
         \Log::info('Returning default panel', ['id' => $this->defaultPanel->getId()]);
+
         return $this->defaultPanel;
     }
 
@@ -130,9 +138,10 @@ class PanelRegistry
         $reflection = new ReflectionClass($providerClass);
         if ($reflection->isSubclassOf(PanelProvider::class) && $reflection->hasMethod('panel')) {
             $method = $reflection->getMethod('panel');
-            if ($method->isPublic() && !$method->isStatic()) {
+            if ($method->isPublic() && ! $method->isStatic()) {
                 $provider = $reflection->newInstanceWithoutConstructor();
                 $panel = $method->invoke($provider, Panel::make());
+
                 return $panel;
             }
         }

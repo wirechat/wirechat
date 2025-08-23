@@ -7,7 +7,8 @@ use Livewire\Component;
 
 class Chats extends Component
 {
-    public  $panel;
+    public $panel;
+
     #[Title('Chats')]
     public function render()
     {

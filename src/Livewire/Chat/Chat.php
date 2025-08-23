@@ -34,10 +34,10 @@ use Namu\WireChat\Models\Participant;
  */
 class Chat extends Component
 {
+    use HasPanel;
     use Widget;
     use WithFileUploads;
     use WithPagination;
-    use HasPanel;
 
     // public ?Conversation $conversation;
     public $conversation;
@@ -76,7 +76,7 @@ class Chat extends Component
     {
         $conversationId = $this->conversation?->id;
 
-        if (!$conversationId) {
+        if (! $conversationId) {
             return [
                 'refresh' => '$refresh',
             ];
@@ -86,13 +86,13 @@ class Chat extends Component
             'refresh' => '$refresh',
         ];
 
-        if ($this->panel()==null) {
+        if ($this->panel() == null) {
             \Illuminate\Support\Facades\Log::warning('WireChat:No panels registered in Chat Component');
         } else {
-                $panelId = $this->panel()->getId();
-                $channelName = "{$panelId}.conversation.{$conversationId}";
-                $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageCreated"] = 'appendNewMessage';
-                $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageDeleted"] = 'removeDeletedMessage';
+            $panelId = $this->panel()->getId();
+            $channelName = "{$panelId}.conversation.{$conversationId}";
+            $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageCreated"] = 'appendNewMessage';
+            $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageDeleted"] = 'removeDeletedMessage';
         }
 
         return $listeners;

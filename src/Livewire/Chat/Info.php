@@ -3,7 +3,6 @@
 namespace Namu\WireChat\Livewire\Chat;
 
 use Livewire\Attributes\Locked;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chats\Chats;
 use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
@@ -12,8 +11,8 @@ use Namu\WireChat\Models\Conversation;
 
 class Info extends ModalComponent
 {
-    use Widget;
     use HasPanel;
+    use Widget;
 
     #[Locked]
     public Conversation $conversation;
@@ -41,7 +40,7 @@ class Info extends ModalComponent
         // Dispatach event instead if isWidget
         // handle widget termination
         $this->handleComponentTermination(
-            redirectRoute:  $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsRoute(),
             events: [
                 'close-chat',
                 Chats::class => ['chat-deleted',  [$this->conversation->id]],

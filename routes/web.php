@@ -5,8 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Namu\WireChat\Livewire\Pages\Chat;
 use Namu\WireChat\Livewire\Pages\Chats;
 
-
-//Route::middleware(config('wirechat.routes.middleware'))
+// Route::middleware(config('wirechat.routes.middleware'))
 //    ->prefix(config('wirechat.routes.prefix'))
 //    ->group(function () {
 //        Route::get('/', Chats::class)->name('chats');
@@ -14,7 +13,7 @@ use Namu\WireChat\Livewire\Pages\Chats;
 //    });
 //
 //
-//Route::middleware(config('wirechat.routes.middleware'))
+// Route::middleware(config('wirechat.routes.middleware'))
 //    ->prefix('chats')
 //    ->group(function () {
 //        Route::get('/', Chats::class)->name('chats');
@@ -22,7 +21,7 @@ use Namu\WireChat\Livewire\Pages\Chats;
 //    });
 
 //
-//Route::as('wirechat.')
+// Route::as('wirechat.')
 //    ->group(function () {
 //        $panels = app('wirechatPanelRegistry')->all();
 //        Log::info('WireChat panels registered:', ['panels' => array_keys($panels)]);
@@ -36,19 +35,19 @@ use Namu\WireChat\Livewire\Pages\Chats;
 //                ->name("{$panel->getId()}.")
 //                ->middleware($panel->getMiddleware())
 //                ->group(function () use ($panel) {
-////                    Route::get('/', function () use ($panel) {
-////                        return new Chats(['panel' => $panel]);
-////                    })->name('chats');
-////                    Route::get('/{conversation}', function ($conversation) use ($panel) {
-////                        return new Chat(['panel' => $panel, 'conversation' => $conversation]);
-////                    })->middleware('belongsToConversation')->name('chat');
-////                    Route::get('/',function()use ($panel){
-////
-////                        dd($panel);
-////
-////                        $component = app(Chats::class, ['panel' => $panel]);
-////                        return $component(['panel' => $panel]);
-////                    })->name('chats');
+// //                    Route::get('/', function () use ($panel) {
+// //                        return new Chats(['panel' => $panel]);
+// //                    })->name('chats');
+// //                    Route::get('/{conversation}', function ($conversation) use ($panel) {
+// //                        return new Chat(['panel' => $panel, 'conversation' => $conversation]);
+// //                    })->middleware('belongsToConversation')->name('chat');
+// //                    Route::get('/',function()use ($panel){
+// //
+// //                        dd($panel);
+// //
+// //                        $component = app(Chats::class, ['panel' => $panel]);
+// //                        return $component(['panel' => $panel]);
+// //                    })->name('chats');
 //
 //                     Route::view('/','wirechat::pages.chats', ['panel' => $panel]);
 //                     Route::view('/{conversation}','wirechat::pages.chat', ['panel' => $panel])->name('chat');
@@ -61,12 +60,12 @@ use Namu\WireChat\Livewire\Pages\Chats;
 //        }
 //    });
 
-
 Route::name('wirechat.')
     ->group(function () {
         $panels = app('wirechatPanelRegistry')->all();
         if (empty($panels)) {
             \Log::warning('No panels registered in wirechatPanelRegistry');
+
             return;
         }
         foreach ($panels as $panel) {

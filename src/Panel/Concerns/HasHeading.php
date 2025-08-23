@@ -14,12 +14,11 @@ use Closure;
  */
 trait HasHeading
 {
-
     /**
      * @var string|Closure|null|false
-     *  - false = not set
-     *  - null  = explicitly no heading
-     *  - string|Closure = custom heading
+     *                                - false = not set
+     *                                - null  = explicitly no heading
+     *                                - string|Closure = custom heading
      */
     protected string|Closure|null|false $heading = false;
 
@@ -30,21 +29,17 @@ trait HasHeading
 
     /**
      * Set the heading (string, Closure, or null) and mark as explicitly set.
-     *
-     * @param  string|Closure|null  $value
-     * @return static
      */
     public function heading(string|Closure|null $value): static
     {
         $this->headingWasSet = true;
         $this->heading = $value;
+
         return $this;
     }
 
     /**
      * Get the heading, or null if explicitly set to null, or fallback if not set.
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
@@ -58,6 +53,7 @@ trait HasHeading
             if ($this->heading === null) {
                 return null;
             }
+
             // custom string or Closure
             return $this->evaluate($this->heading);
         }

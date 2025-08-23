@@ -17,8 +17,7 @@ trait HasMiddleware
     /**
      * Set middleware.
      *
-     * @param array<string> $middleware
-     * @return static
+     * @param  array<string>  $middleware
      */
     public function middleware(array $middleware): static
     {

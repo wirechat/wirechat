@@ -6,14 +6,14 @@ use Closure;
 
 trait HasSpaMode
 {
-    protected bool | Closure $hasSpaMode = false;
+    protected bool|Closure $hasSpaMode = false;
 
     /**
      * @var array<string> | Closure
      */
-    protected array | Closure $spaModeUrlExceptions = [];
+    protected array|Closure $spaModeUrlExceptions = [];
 
-    public function spa(bool | Closure $condition = true): static
+    public function spa(bool|Closure $condition = true): static
     {
         $this->hasSpaMode = $condition;
 
@@ -23,7 +23,7 @@ trait HasSpaMode
     /**
      * @param  array<string>| Closure  $exceptions
      */
-    public function spaUrlExceptions(array | Closure $exceptions): static
+    public function spaUrlExceptions(array|Closure $exceptions): static
     {
         $this->spaModeUrlExceptions = $exceptions;
 

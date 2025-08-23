@@ -26,6 +26,7 @@ trait HasSearchableFields
     public function searchableFields(array|Closure $fields): static
     {
         $this->searchableFields = $fields;
+
         return $this;
     }
 

@@ -3,7 +3,6 @@
 namespace Namu\WireChat\Panel\Concerns;
 
 use Closure;
-use Illuminate\Support\Arr;
 use Laravel\SerializableClosure\Serializers\Native;
 
 /**
@@ -20,15 +19,11 @@ trait HasRoutes
 
     /**
      * The home URL for the panel, which can be a string, Closure, or null.
-     *
-     * @var string|Closure|null
      */
-    protected string | Closure | null $homeUrl = null;
+    protected string|Closure|null $homeUrl = null;
 
     /**
      * The base path for the panel's routes.
-     *
-     * @var string
      */
     protected string $path = '';
 
@@ -49,38 +44,38 @@ trait HasRoutes
     /**
      * Sets the home URL for the panel.
      *
-     * @param string|Closure|null $url The home URL or a Closure that returns it.
-     * @return static
+     * @param  string|Closure|null  $url  The home URL or a Closure that returns it.
      */
-    public function homeUrl(string | Closure | null $url): static
+    public function homeUrl(string|Closure|null $url): static
     {
         $this->homeUrl = $url;
+
         return $this;
     }
 
     /**
      * Sets the base path for the panel's routes.
      *
-     * @param string $path The base path for the panel's routes.
-     * @return static
+     * @param  string  $path  The base path for the panel's routes.
      */
     public function path(string $path): static
     {
         $this->path = $path;
+
         return $this;
     }
 
     /**
      * Registers a custom route Closure for the panel.
      *
-     * @param Closure|null $routes A Closure defining custom routes, or null to reset.
-     * @return static
+     * @param  Closure|null  $routes  A Closure defining custom routes, or null to reset.
      */
     public function routes(?Closure $routes): static
     {
         if ($routes) {
             $this->routes[] = $routes;
         }
+
         return $this;
     }
 
@@ -127,7 +122,7 @@ trait HasRoutes
     /**
      * Generates a fully qualified route name for the panel.
      *
-     * @param string $name The base route name (e.g., 'chats', 'chat').
+     * @param  string  $name  The base route name (e.g., 'chats', 'chat').
      * @return string //The fully qualified route name (e.g., 'wirechat.panel1.chats').
      */
     public function generateRouteName(string $name): string
@@ -160,9 +155,9 @@ trait HasRoutes
     /**
      * Generates a URL for a named route within the panel.
      *
-     * @param string $name The base route name (e.g., 'chats', 'chat').
-     * @param array $parameters Route parameters (e.g., ['conversation' => $id]).
-     * @param bool $absolute Whether to generate an absolute URL.
+     * @param  string  $name  The base route name (e.g., 'chats', 'chat').
+     * @param  array  $parameters  Route parameters (e.g., ['conversation' => $id]).
+     * @param  bool  $absolute  Whether to generate an absolute URL.
      * @return string The generated URL.
      */
     public function route(string $name, array $parameters = [], bool $absolute = true): string
@@ -174,7 +169,7 @@ trait HasRoutes
     /**
      * Generates a URL for the chats index route.
      *
-     * @param bool $absolute Whether to generate an absolute URL.
+     * @param  bool  $absolute  Whether to generate an absolute URL.
      * @return string The generated URL.
      */
     public function chatsRoute(bool $absolute = true): string
@@ -185,8 +180,8 @@ trait HasRoutes
     /**
      * Generates a URL for the chat show route.
      *
-     * @param mixed $conversation The conversation ID or model for the route.
-     * @param bool $absolute Whether to generate an absolute URL.
+     * @param  mixed  $conversation  The conversation ID or model for the route.
+     * @param  bool  $absolute  Whether to generate an absolute URL.
      * @return string The generated URL.
      */
     public function chatRoute(mixed $conversation, bool $absolute = true): string

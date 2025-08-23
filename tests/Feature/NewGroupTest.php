@@ -224,7 +224,6 @@ describe('Add members page', function () {
 
     test('show error if member limit is exceeded', function () {
 
-
         testPanelProvider()->maxGroupMembers(2);
 
         $auth = ModelsUser::factory()->create();

@@ -773,7 +773,7 @@ describe('Box presence test: ', function () {
             // turn on disappearing
             $conversation->turnOffDisappearing();
 
-           $indexRoute= testPanelProvider()->chatsRoute();
+            $indexRoute = testPanelProvider()->chatsRoute();
 
             // dd($conversation);
             Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true])
@@ -791,7 +791,7 @@ describe('Box presence test: ', function () {
 
             // turn on disappearing
             $conversation->turnOffDisappearing();
-            $indexRoute= testPanelProvider()->chatsRoute();
+            $indexRoute = testPanelProvider()->chatsRoute();
 
             // dd($conversation);
             Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => false])
@@ -2140,10 +2140,10 @@ describe('Deleting Conversation', function () {
         // assert conversation will be null
         expect($auth->conversations()->first())->not->toBe(null);
 
-        $route= testPanelProvider()->chatRoute($conversation);
-       // dd($route);
+        $route = testPanelProvider()->chatRoute($conversation);
+        // dd($route);
         // also assert that user receives 403 forbidden
-      $response=  $this->actingAs($auth)->get($route)->assertStatus(200);
+        $response = $this->actingAs($auth)->get($route)->assertStatus(200);
 
     });
 

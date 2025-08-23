@@ -14,16 +14,17 @@ use Namu\WireChat\WireChatServiceProvider;
 use Orchestra\Testbench\Concerns\WithLaravelMigrations;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Workbench\App\Providers\WireChat\TestPanelProvider;
-use function Orchestra\Testbench\package_path;
+
 use function Orchestra\Testbench\workbench_path;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
     use WithWorkbench;
-  //  use DatabaseTruncation; // Ensures migrations are run and database is refreshed for each test
-  //  use WithLaravelMigrations;
-    //use InteractsWithViews;
-   // use RefreshDatabase;
+
+    //  use DatabaseTruncation; // Ensures migrations are run and database is refreshed for each test
+    //  use WithLaravelMigrations;
+    // use InteractsWithViews;
+    // use RefreshDatabase;
     protected function getPackageProviders($app): array
     {
         return [
@@ -58,25 +59,23 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             $config->set('livewire.temporary_file_upload.disk', 'public');
         });
 
-        if (!app()->runningInConsole()) {
+        if (! app()->runningInConsole()) {
             Model::shouldBeStrict();
         }
 
-
     }
+
     protected function defineDatabaseMigrations()
     {
         $this->loadMigrationsFrom(__DIR__.'/../workbench/database/migrations');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-      //  $this->loadMigrationsFrom(workbench_path('database/migrations'));
+        //  $this->loadMigrationsFrom(workbench_path('database/migrations'));
 
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-
-
 
         $this->withoutVite();
     }

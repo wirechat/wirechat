@@ -10,7 +10,6 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Panel;
 use Namu\WireChat\Traits\InteractsWithPanel;
@@ -23,7 +22,7 @@ class MessageCreated implements ShouldBroadcast
     public $message;
     // public $receiver;
 
-    public function __construct(Message $message,Panel|string|null $panel=null)
+    public function __construct(Message $message, Panel|string|null $panel = null)
     {
         $this->message = $message->load([]);
 

@@ -20,8 +20,6 @@ trait HasWebPushNotifications
 {
     /**
      * Whether web push notifications are enabled.
-     *
-     * @var bool|Closure
      */
     protected bool|Closure $hasWebPushNotifications = false;
 
@@ -29,17 +27,12 @@ trait HasWebPushNotifications
      * Service worker path (absolute URL or asset helper), or a Closure returning it.
      * Set automatically to asset('sw.js') on first call to webPushNotifications()
      * unless explicitly overridden via serviceWorkerPath().
-     *
-     * @var string|Closure|null
      */
     protected string|Closure|null $serviceWorkerPath = null;
 
     /**
      * Enable/disable web push notifications.
      * Also sets a default service worker path to asset('sw.js') if none was set.
-     *
-     * @param  bool|Closure  $condition
-     * @return static
      */
     public function webPushNotifications(bool|Closure $condition = true): static
     {
@@ -47,7 +40,7 @@ trait HasWebPushNotifications
 
         // Set default SW path only once, unless previously overridden.
         if ($this->serviceWorkerPath === null) {
-            $this->serviceWorkerPath( asset('sw.js')) ;
+            $this->serviceWorkerPath(asset('sw.js'));
         }
 
         return $this;
@@ -55,8 +48,6 @@ trait HasWebPushNotifications
 
     /**
      * Check if web push notifications are enabled.
-     *
-     * @return bool
      */
     public function hasWebPushNotifications(): bool
     {
@@ -65,9 +56,6 @@ trait HasWebPushNotifications
 
     /**
      * Explicitly set/override the service worker path.
-     *
-     * @param  string|Closure  $path
-     * @return static
      */
     public function serviceWorkerPath(string|Closure $path): static
     {
@@ -82,7 +70,6 @@ trait HasWebPushNotifications
      * or that serviceWorkerPath() was explicitly set.
      *
      * @throws \RuntimeException|\Illuminate\Contracts\Container\BindingResolutionException if no path is available.
-     * @return string
      */
     public function getServiceWorkerPath(): string
     {

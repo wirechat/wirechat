@@ -1,11 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chat\Group\Members;
 use Namu\WireChat\Models\Action;
 use Namu\WireChat\Models\Conversation;
@@ -42,9 +40,7 @@ describe('presence test', function () {
 
     test(' Members title is set', function () {
 
-
         testPanelProvider()->maxGroupMembers(1000);
-
 
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -59,7 +55,6 @@ describe('presence test', function () {
     test('close_modal_button_is_set_correctly', function () {
 
         testPanelProvider()->maxGroupMembers(1000);
-
 
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');

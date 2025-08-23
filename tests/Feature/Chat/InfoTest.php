@@ -3,7 +3,6 @@
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\DeleteConversationJob;
 use Namu\WireChat\Livewire\Chat\Info;
 use Namu\WireChat\Livewire\Chats\Chats;

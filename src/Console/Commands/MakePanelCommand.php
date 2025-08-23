@@ -5,12 +5,14 @@ namespace Namu\WireChat\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use function Laravel\Prompts\text;
+
 use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\text;
 
 class MakePanelCommand extends Command
 {
     protected $signature = 'make:wirechat-panel {id?}';
+
     protected $description = 'Create a new WireChat panel provider';
 
     public function handle()
@@ -27,20 +29,21 @@ class MakePanelCommand extends Command
             'id' => [
                 'required',
                 'max:255',
-                'regex:/^[a-zA-Z][a-zA-Z0-9_]*$/'
-            ]
+                'regex:/^[a-zA-Z][a-zA-Z0-9_]*$/',
+            ],
         ], [
-            'id.regex' => 'The ID must start with a letter and contain only letters, numbers, or underscores.'
+            'id.regex' => 'The ID must start with a letter and contain only letters, numbers, or underscores.',
         ]);
 
         if ($validator->fails()) {
             $this->error($validator->errors()->first('id'));
+
             return 1; // Exit with error code
         }
 
         // Generate class name and file path
         $id = Str::kebab($id); // Ensure ID is kebab-case (e.g., 'admin')
-        $className = Str::studly($id) . 'PanelProvider';
+        $className = Str::studly($id).'PanelProvider';
         $namespace = 'App\\Providers\\WireChat';
         $path = app_path("Providers/WireChat/{$className}.php");
 
@@ -51,16 +54,18 @@ class MakePanelCommand extends Command
                 default: false
             );
 
-            if (!$overwrite) {
+            if (! $overwrite) {
                 $this->info('Operation cancelled.');
+
                 return 0;
             }
         }
 
         // Read the stub file
-        $stubPath = dirname(__DIR__, 3) . '/stubs/PanelProvider.stub';
-        if (!file_exists($stubPath)) {
+        $stubPath = dirname(__DIR__, 3).'/stubs/PanelProvider.stub';
+        if (! file_exists($stubPath)) {
             $this->error("Stub file not found at: $stubPath");
+
             return 1;
         }
         $stub = file_get_contents($stubPath);
@@ -72,7 +77,7 @@ class MakePanelCommand extends Command
 
         // Ensure the directory exists
         $directory = dirname($path);
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
@@ -88,11 +93,13 @@ class MakePanelCommand extends Command
                 unlink($path);
             }
             $this->error("Failed to register provider: {$e->getMessage()}");
+
             return 1;
         }
 
         // Output success message
         $this->info("Panel provider [{$path}] created successfully.");
+
         return 0;
     }
 
@@ -105,7 +112,7 @@ class MakePanelCommand extends Command
             $bootstrapPath = base_path('bootstrap/providers.php');
             $content = file_get_contents($bootstrapPath);
 
-            if (!Str::contains($content, $providerClass)) {
+            if (! Str::contains($content, $providerClass)) {
                 $content = str_replace(
                     "return [\n",
                     "return [\n    {$providerClass}::class,\n",
@@ -118,7 +125,7 @@ class MakePanelCommand extends Command
             $appConfigPath = config_path('app.php');
             $appConfig = file_get_contents($appConfigPath);
 
-            if (!Str::contains($appConfig, $providerClass)) {
+            if (! Str::contains($appConfig, $providerClass)) {
                 $appConfig = str_replace(
                     "'providers' => [\n",
                     "'providers' => [\n        {$providerClass}::class,\n",

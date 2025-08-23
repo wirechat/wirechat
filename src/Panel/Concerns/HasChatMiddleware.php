@@ -19,7 +19,6 @@ trait HasChatMiddleware
      * Append middleware for chat routes, keeping the default first.
      *
      * @param  array<string>  $middleware
-     * @return static
      */
     public function chatMiddleware(array $middleware): static
     {

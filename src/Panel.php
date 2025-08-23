@@ -14,35 +14,36 @@ use Namu\WireChat\Panel\Concerns\HasFavicon;
 use Namu\WireChat\Panel\Concerns\HasGroups;
 use Namu\WireChat\Panel\Concerns\HasHeading;
 use Namu\WireChat\Panel\Concerns\HasId;
+use Namu\WireChat\Panel\Concerns\HasLayout;
 use Namu\WireChat\Panel\Concerns\HasMiddleware;
-use Namu\WireChat\Panel\Concerns\HasWebPushNotifications;
 use Namu\WireChat\Panel\Concerns\HasRoutes;
 use Namu\WireChat\Panel\Concerns\HasSearchableFields;
 use Namu\WireChat\Panel\Concerns\HasSpaMode;
+use Namu\WireChat\Panel\Concerns\HasWebPushNotifications;
 use Namu\WireChat\Support\EvaluatesClosures;
 
 class Panel
 {
     use EvaluatesClosures;
-    use HasMiddleware;
-    use HasChatMiddleware;
-    use HasRoutes;
-    use HasId;
+    use HasActions;
+    use HasAttachments;
+    use HasAuth;
     use HasBrandName;
+    use HasBroadcasting;
+    use HasChatMiddleware;
+    use HasChatsSearch;
     use HasFavicon;
+    use HasGroups;
+    use HasHeading;
+    use HasId;
+    use HasLayout;
+    use HasMiddleware;
+    use HasRoutes;
+    use HasSearchableFields;
     use HasSpaMode;
     use HasWebPushNotifications;
-    use HasAttachments;
-    use HasGroups;
-    use HasBroadcasting;
-    use HasAuth;
-    use HasChatsSearch;
-    use HasActions;
-    use HasHeading;
-    use HasSearchableFields;
 
     protected bool|Closure $isDefault = false;
-
 
     public static function make(): static
     {
@@ -53,15 +54,14 @@ class Panel
     public function default(bool|Closure $condition = true): static
     {
         $this->isDefault = $condition;
+
         return $this;
     }
-
 
     public function isDefault(): bool
     {
         return $this->evaluate($this->isDefault);
     }
-
 
     protected function evaluate($value)
     {

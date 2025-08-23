@@ -2,7 +2,6 @@
 
 namespace Workbench\App\Providers\WireChat;
 
-
 use Namu\WireChat\Panel;
 use Namu\WireChat\PanelProvider;
 

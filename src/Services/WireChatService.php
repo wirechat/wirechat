@@ -9,8 +9,6 @@ use Namu\WireChat\PanelRegistry;
 
 class WireChatService
 {
-
-
     protected PanelRegistry $registry;
 
     public function __construct()
@@ -20,9 +18,6 @@ class WireChatService
 
     /**
      * Get a panel by ID or provider class, falling back to the default panel.
-     *
-     * @param string|null $idOrClass
-     * @return Panel|null
      */
     public function getPanel(?string $idOrClass = null): ?Panel
     {
@@ -33,10 +28,8 @@ class WireChatService
 
     /**
      * Get  panels
-     *
-     * @return array|null
      */
-    public function panels():?array
+    public function panels(): ?array
     {
         return $this->registry->all();
 
@@ -50,14 +43,12 @@ class WireChatService
     /**
      * Get the default panel.
      *
-     * @return Panel|null
      * @throws NoPanelProvidedException
      */
     public function getDefaultPanel(): ?Panel
     {
         return $this->registry->getDefault();
     }
-
 
     /**
      * Get the color used to be used in as themse

@@ -1,4 +1,5 @@
-@extends('wirechat::layouts.app')
+
+@extends(\Namu\WireChat\Facades\WireChat::currentPanel()->getLayout())
 
 @section('content')
     <div class="w-full h-full min-h-full flex rounded-lg" >

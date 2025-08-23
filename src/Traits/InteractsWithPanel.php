@@ -18,12 +18,12 @@ trait InteractsWithPanel
         if ($panel instanceof Panel) {
             $this->panel = $panel;
         } elseif (is_string($panel) && filled($panel)) {
-            $this->panel =  WireChat::getPanel($panel) ;
+            $this->panel = WireChat::getPanel($panel);
         } else {
             $this->panel = WireChat::getDefaultPanel();
         }
 
-        if (!$this->panel) {
+        if (! $this->panel) {
             throw NoPanelProvidedException::make();
         }
     }
@@ -35,5 +35,4 @@ trait InteractsWithPanel
     {
         return $this->panel;
     }
-
 }
