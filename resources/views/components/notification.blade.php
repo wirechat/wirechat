@@ -1,9 +1,8 @@
 @use('Namu\WireChat\Facades\WireChat')
+@props(['panel'=>null])
 
 
-@dd(WireChat::currentPanel());
-
-@if(auth()->check() && WireChat::notificationsEnabled())
+@if(auth()->check() && $panel->hasWebPushNotifications())
 
    <div dusk="notification_manager"
         x-data="{
@@ -98,9 +97,10 @@
 
         userId = @js(auth()->id());
         encodedType = @js(\Namu\WireChat\Helpers\MorphClassResolver::encode(auth()->user()->getMorphClass()));
+        panel = @json($panel->getId());
 
         {{-- We listen to notify participant event --}}
-        Echo.private(`participant.${encodedType}.${userId}`)
+           Echo.private(`${panel}.participant.${encodedType}.${userId}`)
             .listen('.Namu\\WireChat\\Events\\NotifyParticipant', (e) => {
 
                 {{--Ignore if user is currently open in the chat  --}}
@@ -121,6 +121,7 @@
 
         document.addEventListener('chat-opened', (event) => {
             const conversation = event.detail.conversation;
+             {{--Tag is set in wirechat chat page --}}
             const tag = 'wirechat-notification-' + conversation;
 
             if (navigator.serviceWorker.controller) {

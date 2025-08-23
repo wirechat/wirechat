@@ -155,16 +155,129 @@ class WireChatServiceProvider extends ServiceProvider
 
     protected function loadAssets(): void
     {
-        Blade::directive('wirechatAssets', function () {
-            return "<?php if(auth()->check()): ?>
-                        <?php
-                            echo Blade::render('@livewire(\'wirechat.modal\')');
-                            echo Blade::render('<x-wirechat::toast/>');
-                            echo Blade::render('<x-wirechat::notification/>');
-                        ?>
-                <?php endif; ?>";
+        Blade::directive('wirechatAssets', function (Panel|string $panel=null)  {
+
+
+            //Check if panel param s set
+            if(isset($panel)){
+                $currentPanel= \Namu\WireChat\Facades\WireChat::getPanel($panel);
+            }
+            else{
+                $currentPanel = \Namu\WireChat\Facades\WireChat::currentPanel(); //This gets panel according to route or default
+            }
+
+
+            $hasWebPushNotifications= $currentPanel->hasWebPushNotifications();
+            $panelId     = \Namu\WireChat\Facades\WireChat::currentPanel()?->getId();
+            $userId      = auth()?->id();
+            $encodedType = \Namu\WireChat\Helpers\MorphClassResolver::encode(auth()?->user()?->getMorphClass());
+
+            $script = '';
+
+            if ($hasWebPushNotifications) {
+                $script = <<<HTML
+                             <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+
+
+                                   if ('serviceWorker' in navigator) {
+                                        window.addEventListener('load', async () => {
+                                            try {
+                                                const registrations = await navigator.serviceWorker.getRegistrations();
+
+                                                // Remove any old Wirechat SW
+                                                const oldSw = registrations.find(reg =>
+                                                    reg.active?.scriptURL.includes("{$currentPanel->getServiceWorkerPath()}")
+                                                );
+                                                if (oldSw) await oldSw.unregister();
+
+                                                // Register the current SW
+                                                await navigator.serviceWorker.register("{$currentPanel->getServiceWorkerPath()}");
+                                                console.log('Wirechat Service Worker registered/updated');
+                                            } catch (err) {
+                                                console.error('Wirechat Service Worker registration failed:', err);
+                                            }
+                                        });
+                                    }
+
+
+
+
+
+                                    Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
+                                        .listen('.Namu\\\\WireChat\\\\Events\\\\NotifyParticipant', (e) => {
+
+                                            if (e.redirect_url !== window.location.href) {
+                                                if (Notification.permission === 'granted') {
+                                                    showNotification(e);
+                                                } else if (Notification.permission !== 'denied') {
+                                                    Notification.requestPermission().then(permission => {
+                                                        if (permission === 'granted') {
+                                                            showNotification(e);
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+
+                                    function showNotification(e) {
+                                        let title = e.message.sendable?.display_name || 'User';
+                                        let body  = e.message.body;
+                                        let icon  = e.message.sendable?.cover_url;
+
+                                        if (e.message.conversation.type === 'group') {
+                                            title = e.message.conversation?.group?.name;
+                                            body  = e.message.sendable?.display_name + ': ' + e.message.body;
+                                            icon  = e.message.conversation?.group?.cover_url;
+                                        }
+
+                                        const options = {
+                                            body: body,
+                                            icon: icon,
+                                            vibrate: [200, 100, 200],
+                                            tag: 'wirechat-notification-' + e.message.conversation_id,
+                                            renotify: true,
+                                            data: {
+                                                url: e.redirect_url,
+                                                type: 'SHOW_NOTIFICATION',
+                                                tab:`{$panelId}-wirechat-tab`,
+                                                tag: 'wirechat-notification-' + e.message.conversation_id
+                                            }
+                                        };
+
+                                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                                            navigator.serviceWorker.controller.postMessage({
+                                                type: 'SHOW_NOTIFICATION',
+                                                title: title,
+                                                options: options
+                                            });
+                                        } else {
+                                            new Notification(title, options);
+                                        }
+                                    }
+                                    });
+                             </script>
+                          HTML;
+            }
+         return <<<HTML
+                <?php if(auth()->check()): ?>
+                    <?php
+                        echo Blade::render('@livewire("wirechat.modal")');
+                        echo Blade::render('<x-wirechat::toast/>');
+                    ?>
+
+
+
+                    {$script}
+
+               <?php endif; ?>
+        HTML;
         });
     }
+
+
+
+
 
     // load assets
     protected function loadStyles(): void

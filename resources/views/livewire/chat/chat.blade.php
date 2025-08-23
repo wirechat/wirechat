@@ -1,4 +1,3 @@
-{{-- Import helper function to use in chatbox --}}
 @use('Namu\WireChat\Helpers\Helper')
 @use('Namu\WireChat\Facades\WireChat')
 
@@ -10,7 +9,7 @@
 
 @assets
     <style>
-     
+
         emoji-picker {
             width: 100% !important;
             height: 100%;
@@ -98,20 +97,25 @@
 
         return $wire.widget == true;
     }
-}" 
+}"
 
  x-init="setTimeout(() => {
 
-    requestAnimationFrame(() => {
-        initializing = false;
-        $wire.dispatch('focus-input-field');
-        loadEmojiPicker();
-        {{-- if (isWidget) { --}}
-            //NotifyListeners about chat opened
-            $wire.dispatch('chat-opened',{conversation:conversationId});
-        {{-- } --}}
-    });
-}, 120);"
+        requestAnimationFrame(() => {
+            initializing = false;
+            $wire.dispatch('focus-input-field');
+            loadEmojiPicker();
+            {{-- if (isWidget) { --}}
+                //NotifyListeners about chat opened
+                $wire.dispatch('chat-opened',{conversation:conversationId});
+            {{-- } --}}
+        });
+
+    }, 120);
+
+
+
+"
     class="w-full transition bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] overflow-hidden h-full relative" style="contain:content">
 
     <div class=" flex flex-col  grow h-full   relative ">
@@ -131,4 +135,20 @@
     </div>
 
     <livewire:wirechat.chat.drawer />
+
+    @script
+
+    <script>
+      {{-- These are handing in the public/wirechat/js/sw.js--}}
+        window.addEventListener('load', () => {
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'REGISTER_CHAT',
+                    tag: '{{$this->panel()->getId()}}-wirechat-tab'
+                });
+            }
+        });
+
+    </script>
+    @endscript
 </div>

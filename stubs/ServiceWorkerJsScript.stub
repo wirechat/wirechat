@@ -1,30 +1,56 @@
 
+const chatClients = new Map();
+
 self.addEventListener('message', event => {
-    if (event.data.type === 'SHOW_NOTIFICATION') {
+    if (event.data?.type === 'REGISTER_CHAT') {
+        chatClients.set(event.source.id, event.data.tag);
+    }
+
+    if (event.data?.type === 'SHOW_NOTIFICATION') {
         event.waitUntil(
             self.registration.showNotification(event.data.title, event.data.options)
-                .catch(error => {
-                    console.error('Wirechat Show Notification failed:', error);
-                })
+                .catch(error => console.error('Wirechat Show Notification failed:', error))
         );
     }
-    if (event.data.type === 'CLOSE_NOTIFICATION') {
+
+    if (event.data?.type === 'CLOSE_NOTIFICATION') {
         event.waitUntil(
             self.registration.getNotifications({ tag: event.data.tag })
-                .then(notifications => {
-                    notifications.forEach(notification => notification.close());
-                })
-                .catch(error => {
-                    console.error('Wirechat Close notifications failed:', error);
-                })
+                .then(notifications => notifications.forEach(n => n.close()))
+                .catch(error => console.error('Wirechat Close notifications failed:', error))
         );
     }
 });
 
+
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-    if (event.notification.data && event.notification.data.url) {
-        const windowName='wirechat-conversation';
-        event.waitUntil(clients.openWindow(event.notification.data.url,windowName));
+
+    if (event.notification.data?.url && event.notification.data?.tab) {
+        const targetUrl = new URL(event.notification.data.url, self.location.origin).href;
+        const targetTab = event.notification.data.tab;
+
+        event.waitUntil(
+            clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientList => {
+                for (const client of clientList) {
+                    if (chatClients.get(client.id) === targetTab) {
+                        // Case 1: Same URL → focus
+                        if (client.url === targetUrl && 'focus' in client) {
+                            return client.focus();
+                        }
+                        // Case 2: Different URL → navigate then focus
+                        if ('navigate' in client) {
+                            return client.navigate(targetUrl).then(() => client.focus());
+                        }
+                    }
+                }
+
+                // Case 3: No matching client → open new window
+                if (clients.openWindow) {
+                    return clients.openWindow(targetUrl);
+                }
+            })
+        );
     }
 });
+

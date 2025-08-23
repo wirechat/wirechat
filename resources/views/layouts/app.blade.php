@@ -48,7 +48,6 @@
 </head>
 
 <body  x-data x-cloak class="font-sans antialiased">
-
     <div class="min-h-screen bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]">
 
         <!-- Page Content -->
@@ -59,7 +58,7 @@
     </div>
 
     @livewireScripts
-    @wirechatAssets
+    @wirechatAssets(panel:$panel)
 </body>
 
 </html>

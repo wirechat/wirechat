@@ -11,7 +11,7 @@ trait HasChatsSearch
      *
      * @var bool|Closure
      */
-    protected bool|Closure $hasChatsSearch = true;
+    protected bool|Closure $hasChatsSearch = false;
 
     public function chatsSearch(bool|Closure $condition = true): static
     {

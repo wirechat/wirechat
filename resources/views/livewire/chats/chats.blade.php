@@ -1,60 +1,52 @@
 @use('Namu\WireChat\Facades\WireChat')
-<div x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
-    x-on:open-chat.window="selectedConversationId= $event.detail.conversation; $wire.selectedConversationId= $event.detail.conversation;"Maybe on wirenagiat ei can get he height os the element then scroll to that elemtn inside the the container and make sure it is in te middle of the viewport
-
+<div
+    x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
+     x-on:open-chat.window="selectedConversationId = $event.detail.conversation; $wire.selectedConversationId = $event.detail.conversation;"
      x-init="
-    const container = document.getElementById('wirechat-chats-scrollable-container');
+        const container = document.getElementById('wirechat-chats-scrollable-container');
 
-    function scrollToConversation(attempts = 5, delay = 400) {
-        const el = document.getElementById('conversation-' + selectedConversationId);
-
-        if (!container || !el || el.offsetParent === null || !selectedConversationId) {
-            if (attempts > 0) {
-                setTimeout(() => scrollToConversation(attempts - 1, delay), delay);
+        function scrollToConversation(attempts = 10, delay = 200) {
+            const el = document.getElementById('conversation-' + selectedConversationId);
+            if (!container || !el || !selectedConversationId) {
+                if (attempts > 0) {
+                    setTimeout(() => scrollToConversation(attempts - 1, delay), delay);
+                }
+                return;
             }
-            return;
-        }
 
-        container.style.overflowY = 'auto';
+            // Get element's position relative to container
+            const containerRect = container.getBoundingClientRect();
+            const elementRect = el.getBoundingClientRect();
+            const elementTop = elementRect.top - containerRect.top + container.scrollTop;
+            const elementHeight = elementRect.height;
 
-        const containerHeight = container.clientHeight;
-        const containerScrollHeight = container.scrollHeight;
-        const elementTop = el.offsetTop;
-        const elementHeight = el.offsetHeight;
+            const offsetToCenter = (container.clientHeight - elementHeight) / 2;
+            let scrollOffset = elementTop - offsetToCenter;
 
-        const offsetToCenter = (containerHeight - elementHeight) / 2;
-        let scrollOffset = elementTop - offsetToCenter;
+            const maxScroll = container.scrollHeight - container.clientHeight;
+            const finalScroll = Math.max(0, Math.min(scrollOffset, maxScroll));
 
-        if (scrollOffset + containerHeight > containerScrollHeight) {
-            scrollOffset = containerScrollHeight - containerHeight;
-        }
-
-        const maxScroll = containerScrollHeight - containerHeight;
-        const finalScroll = Math.max(0, Math.min(scrollOffset, maxScroll));
-
-        requestAnimationFrame(() => {
-            container.scrollTo({
-                top: finalScroll,
-                behavior: 'smooth'
+            // Animate scroll
+            requestAnimationFrame(() => {
+                container.scrollTo({ top: finalScroll, behavior: 'smooth' });
             });
+        }
+
+        // Initial scroll on load
+        setTimeout(() => scrollToConversation(), 400);
+
+        // Scroll after navigation
+        document.addEventListener('livewire:navigated', () => {
+            setTimeout(() => scrollToConversation(), 400);
         });
 
-        console.log({
-            containerHeight,
-            containerScrollHeight,
-            elementTop,
-            elementHeight,
-            scrollOffset,
-            finalScroll
+
+        // Optional: track scroll when more messages are prepended (Load More)
+        const observer = new MutationObserver(() => {
+            scrollToConversation();
         });
-    }
-
-    setTimeout(scrollToConversation, 400);
-
-    document.addEventListener('livewire:navigated', () => {
-        setTimeout(scrollToConversation, 400);
-    });
-"
+        observer.observe(container, { childList: true, subtree: true });
+    "
 
 
 

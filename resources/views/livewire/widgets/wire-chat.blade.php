@@ -1,7 +1,6 @@
 <div class="h-full ">
 
     @script
-    {{--todo:fix widget not opening chats correctly --}}
         <script>
             window.ChatWidget = () => {
                 return {
@@ -172,10 +171,6 @@
                     }
                 };
             }
-
-            document.addEventListener('alpine:init', () => {
-                Alpine.data('ChatWidget', window.ChatWidget)
-            })
         </script>
     @endscript
 
