@@ -5,7 +5,11 @@
     "autoload": {
         "psr-4": {
             "Namu\\WireChat\\": "src/"
-        }
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
+
     },
     "autoload-dev": {
         "psr-4": {
