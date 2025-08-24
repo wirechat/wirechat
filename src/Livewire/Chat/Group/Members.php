@@ -226,7 +226,7 @@ class Members extends ModalComponent
         // subtract one from total members and update chat list
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
-        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(Info::class);
+        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(\Namu\WireChat\Livewire\Chat\Group\Info::class);
         //  $this->dispatch('refresh')->self();
 
     }

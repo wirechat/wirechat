@@ -5,7 +5,7 @@
         class="relative w-full h-[410px] border  items-center justify-center border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white sm:max-w-lg sm:rounded-lg">
 
         {{--  Group Details --}}
-        <section x-show="$wire.showAddMembers==false" 
+        <section x-show="$wire.showAddMembers==false"
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
             x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0"
@@ -124,7 +124,7 @@
 
                     <h3 class="text-sm mx-auto font-semibold "><span>@lang('wirechat::new.group.labels.add_members')</span> {{count($selectedMembers)}} / {{$maxGroupMembers}}</h3>
 
-                    <button 
+                    <button
                         wire:click="create"
                         wire:loading.attr="disabled"
                         wire:target='create'
@@ -204,15 +204,15 @@
                                 <li class="flex cursor-pointer group gap-2 items-center p-2">
 
                                     <label
-                                        wire:click="toggleMember('{{ $user->id }}',{{ json_encode(get_class($user)) }})"
+                                        wire:click="toggleMember('{{ $user['id'] }}',{{ json_encode($user['type']) }})"
                                         class="flex cursor-pointer gap-2 items-center w-full">
-                                        <x-wirechat::avatar  src="{{ $user->cover_url }}" class="w-10 h-10" />
+                                        <x-wirechat::avatar  src="{{ $user['cover_url'] }}" class="w-10 h-10" />
 
                                         <p class="group-hover:underline transition-all truncate">
-                                            {{ $user->display_name }}</p>
+                                            {{ $user['display_name'] }}</p>
 
                                         <div class="ml-auto">
-                                            @if ($selectedMembers->contains(fn($member) => $member->id == $user->id && get_class($member) == get_class($user)))
+                                            @if ($selectedMembers->contains(fn($member) => $member->id == $user['id'] && $member->getMorphClass() == $user['type']))
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor"
                                                     class="bi bi-plus-square-fill w-6 h-6 text-green-500"

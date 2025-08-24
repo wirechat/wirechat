@@ -59,13 +59,13 @@
 
                     @foreach ($users as $key => $user)
                         <li wire:key="user-{{ $key }}"
-                            wire:click="createConversation('{{ $user->id }}',{{ json_encode(get_class($user)) }})"
+                            wire:click="createConversation('{{ $user['id'] }}',{{ json_encode($user['type']) }})"
                             class="flex cursor-pointer group gap-2 items-center p-2">
 
-                            <x-wirechat::avatar :src="$user->cover_url" class="w-10 h-10" />
+                            <x-wirechat::avatar :src="$user['cover_url']" class="w-10 h-10" />
 
                             <p class="group-hover:underline transition-all">
-                                {{ $user->display_name }}</p>
+                                {{ $user['display_name'] }}</p>
 
                         </li>
                     @endforeach

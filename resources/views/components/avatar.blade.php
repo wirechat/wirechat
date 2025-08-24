@@ -1,6 +1,6 @@
 @props(['src' => null, 'story' => null, 'group' => false, 'disappearing' => false])
 
-<div wire:ignore
+<div e
     {{ $attributes->merge([
             'class' => "shrink-0 inline-flex items-center justify-center relative transition
                         overflow-visible rounded-full border border-[var(--wc-light-secondary)] text-gray-300 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]

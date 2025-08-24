@@ -95,23 +95,23 @@
 
                 @foreach ($users as $key => $user)
                     @php
-                        $isAlreadyAParticipant= $user->belongsToConversation($conversation);
+                        $isAlreadyAParticipant= $user['belongsToConversation']
                     @endphp
                     <li wire:key="users-{{$key}}" class="flex cursor-pointer group gap-2 items-center p-2">
 
                         <label
                         {{-- The wire:click attribute is only rendered if $isAlreadyAParticipant is false. --}}
                          @if (!$isAlreadyAParticipant)
-                         wire:click="toggleMember('{{ $user->id }}', {{ json_encode(get_class($user)) }})"
+                         wire:click="toggleMember('{{ $user['id'] }}', {{ json_encode($user['type']) }})"
                          @endif
 
                             class="flex cursor-pointer gap-2 items-center w-full">
-                            <x-wirechat::avatar src="{{$user->cover_url}}" class="w-10 h-10" />
+                            <x-wirechat::avatar src="{{$user['cover_url']}}" class="w-10 h-10" />
 
                            <div @class(['opacity-70' => $isAlreadyAParticipant]) >
                             <p
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
-                                {{ $user->display_name }}</p>
+                                {{ $user['display_name'] }}</p>
 
                              <span
                              @class(['text-gray-600 dark:text-gray-400 text-sm'])>
@@ -122,7 +122,7 @@
                            </div>
 
                             <div class="ml-auto">
-                                @if ($selectedMembers->contains(fn($member) => $member->id == $user->id && get_class($member) == get_class($user)) || $isAlreadyAParticipant)
+                                @if ($selectedMembers->contains(fn($member) => $member->id == $user['id'] && get_class($member) == $user['type']) || $isAlreadyAParticipant)
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         fill="currentColor"
                                         class="bi bi-plus-square-fill w-6 h-6 text-green-500"

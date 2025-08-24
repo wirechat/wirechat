@@ -74,7 +74,25 @@ class AddMembers extends ModalComponent
             $this->users = null;
         } else {
 
-            $this->users = $this->panel()->search($this->search);
+
+            /**
+             * Update the users list based on the search term.
+             *
+             * Maps the panel search results to an array with:
+             * - id, type, display_name, cover_url
+             * - belongsToConversation flag for the current conversation
+             */
+            $this->users = $this->panel()->search($this->search)
+            ->map(function ($resource) {
+                $model = $resource->resource; // underlying model
+                return [
+                    'id' => $model->id,
+                    'type' => $model->getMorphClass(),
+                    'display_name' => $model->display_name,
+                    'cover_url' => $model->cover_url,
+                    'belongsToConversation' => $model->belongsToConversation($this->conversation),
+                ];
+            });
         }
     }
 
@@ -142,7 +160,7 @@ class AddMembers extends ModalComponent
 
         $this->closeWireChatModal();
 
-        $this->dispatch('participantsCountUpdated', $this->newTotalCount)->to(Info::class);
+        $this->dispatch('participantsCountUpdated', $this->newTotalCount)->to(\Namu\WireChat\Livewire\Chat\Group\Info::class);
     }
 
     public function mount()

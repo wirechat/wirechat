@@ -79,7 +79,8 @@ class Group extends ModalComponent
             $this->users = [];
         } else {
 
-            $this->users = $this->panel()->search($this->search);
+            $this->users = $this->panel()->search($this->search)->resolve();
+
         }
     }
 
@@ -120,7 +121,7 @@ class Group extends ModalComponent
             if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
                 // Remove member if they are already selected
                 $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                    return $member->id == $id && get_class($member) == $class;
+                    return $member->id == $id && $member->getMorphClass() == $class;
                 });
             } else {
 
