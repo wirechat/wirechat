@@ -1,6 +1,6 @@
 @props(['src' => null, 'story' => null, 'group' => false, 'disappearing' => false])
 
-<div e
+<div
     {{ $attributes->merge([
             'class' => "shrink-0 inline-flex items-center justify-center relative transition
                         overflow-visible rounded-full border border-[var(--wc-light-secondary)] text-gray-300 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]
@@ -11,6 +11,7 @@
 
     @if ($src)
         <img
+            x-cloak
             loading="lazy"
             class="shrink-0 w-full h-full object-cover object-center rounded-full"
             src="{{ $src }}"
@@ -19,7 +20,7 @@
         />
     @endif
 
-    <div style="{{ $src ? 'display:none;' : 'display:inline-flex;' }}"
+    <div  style="{{ $src ? 'display:none;' : 'display:inline-flex;' }}"
          class="shrink-0 w-full h-full items-center justify-center rounded-full">
         @if($group)
             <svg class="w-full h-full text-gray-400 dark:text-gray-300 bg-gray-100 dark:bg-[var(--wc-dark-secondary)] rounded-full"
