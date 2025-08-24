@@ -147,7 +147,7 @@ class Members extends ModalComponent
     protected function loadParticipants(): void
     {
 
-        $searchableFields = $this->panel()->getSearchableFields();
+        $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = []; // Initialize cache for column checks
         // Check if $this->participants is initialized
         $this->participants = $this->participants ?? collect();

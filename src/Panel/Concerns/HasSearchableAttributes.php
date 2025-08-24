@@ -11,21 +11,21 @@ use Closure;
  *
  * @method mixed evaluate(mixed $value)
  */
-trait HasSearchableFields
+trait HasSearchableAttributes
 {
     /**
      * Fields used to search models.
      *
      * @var array<string>|Closure|null
      */
-    protected array|Closure|null $searchableFields = null;
+    protected array|Closure|null $searchableAttributes = null;
 
     /**
      * Set the model’s searchable fields.
      */
-    public function searchableFields(array|Closure $fields): static
+    public function searchableAttributes(array|Closure $attributes): static
     {
-        $this->searchableFields = $fields;
+        $this->searchableAttributes = $attributes;
 
         return $this;
     }
@@ -33,8 +33,8 @@ trait HasSearchableFields
     /**
      * Get the model’s searchable fields.
      */
-    public function getSearchableFields(): array
+    public function getSearchableAttributes(): array
     {
-        return (array) $this->evaluate($this->searchableFields ?? ['name']);
+        return (array) $this->evaluate($this->searchableAttributes ?? ['name']);
     }
 }
