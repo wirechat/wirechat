@@ -11,7 +11,6 @@
 
     @if ($src)
         <img
-            x-cloak
             loading="lazy"
             class="shrink-0 w-full h-full object-cover object-center rounded-full"
             src="{{ $src }}"
