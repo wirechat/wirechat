@@ -3,6 +3,7 @@
 namespace Namu\WireChat;
 
 use Closure;
+use Namu\WireChat\Facades\WireChatColor;
 use Namu\WireChat\Panel\Concerns\HasActions;
 use Namu\WireChat\Panel\Concerns\HasAttachments;
 use Namu\WireChat\Panel\Concerns\HasAuth;
@@ -10,6 +11,7 @@ use Namu\WireChat\Panel\Concerns\HasBrandName;
 use Namu\WireChat\Panel\Concerns\HasBroadcasting;
 use Namu\WireChat\Panel\Concerns\HasChatMiddleware;
 use Namu\WireChat\Panel\Concerns\HasChatsSearch;
+use Namu\WireChat\Panel\Concerns\HasColors;
 use Namu\WireChat\Panel\Concerns\HasFavicon;
 use Namu\WireChat\Panel\Concerns\HasGroups;
 use Namu\WireChat\Panel\Concerns\HasHeading;
@@ -38,6 +40,7 @@ class Panel
     use HasGroups;
     use HasHeading;
     use HasId;
+    use HasColors;
     use HasLayout;
     use HasMiddleware;
     use HasRoutes;
@@ -64,6 +67,11 @@ class Panel
     {
         return $this->evaluate($this->isDefault);
     }
+    public function register(): void
+    {
+       // WireChatColor::register($this->getColors());
+    }
+
 
     protected function evaluate($value)
     {

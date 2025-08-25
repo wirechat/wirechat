@@ -5,6 +5,7 @@ namespace Namu\WireChat;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Exceptions\NoPanelProvidedException;
+use Namu\WireChat\Facades\WireChatColor;
 use ReflectionClass;
 
 class PanelRegistry
@@ -35,6 +36,9 @@ class PanelRegistry
             }
             $this->defaultPanel = $panel;
         }
+
+        #register panel
+        $panel->register();
 
         Log::info('Panel registered', ['id' => $id]);
     }
@@ -82,6 +86,12 @@ class PanelRegistry
     public function setCurrent(string $panelId): void
     {
         $this->currentPanel = $this->panels[$panelId] ?? $this->defaultPanel;
+
+
+        //Set the colors of this panel accesed
+        WireChatColor::register($this->currentPanel->getColors());
+
+    //    dd($this->currentPanel->getId());
     }
 
     public function getCurrent(): ?Panel

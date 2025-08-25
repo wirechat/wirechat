@@ -62,6 +62,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         if (! app()->runningInConsole()) {
             Model::shouldBeStrict();
         }
+        
 
     }
 

@@ -9,6 +9,7 @@ use Namu\WireChat\Console\Commands\InstallWireChat;
 use Namu\WireChat\Console\Commands\MakePanelCommand;
 use Namu\WireChat\Console\Commands\SetupNotifications;
 use Namu\WireChat\Facades\WireChat as FacadesWireChat;
+use Namu\WireChat\Facades\WireChatColor;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Drawer;
 use Namu\WireChat\Livewire\Chat\Group\AddMembers;
@@ -25,12 +26,18 @@ use Namu\WireChat\Livewire\Pages\Chats as Index;
 use Namu\WireChat\Livewire\Widgets\WireChat;
 use Namu\WireChat\Middleware\BelongsToConversation;
 use Namu\WireChat\Middleware\SetCurrentPanel;
+use Namu\WireChat\Services\ColorService;
 use Namu\WireChat\Services\WireChatService;
+use Namu\WireChat\Support\Color;
 
 class WireChatServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        /**
+         * Register default colors first so that when panel colors are registerd they would take presedence
+         */
+        $this->bootColors();
 
         // Register the command if we are using the application via the CLI
         if ($this->app->runningInConsole()) {
@@ -43,6 +50,8 @@ class WireChatServiceProvider extends ServiceProvider
 
         // Trigger auto-discovery
         app('wirechatPanelRegistry')->autoDiscover();
+
+
         logger('WireChatServiceProvider booted, auto-discovery completed');
 
         $this->loadLivewireComponents();
@@ -88,6 +97,20 @@ class WireChatServiceProvider extends ServiceProvider
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
 
+
+
+    }
+
+    protected  function bootColors(){
+
+        WireChatColor::register([
+            'primary' => Color::Blue,
+            'danger'  => Color::Red,
+            'success' => Color::Green,
+            'warning' => Color::Amber,
+            'info'    => Color::Blue,
+            'gray'    => Color::Zinc,
+        ]);
     }
 
     public function register()
@@ -102,6 +125,8 @@ class WireChatServiceProvider extends ServiceProvider
         $this->app->singleton('wirechat', function ($app) {
             return new WireChatService;
         });
+
+        $this->app->singleton(ColorService::class, fn () => new ColorService());
 
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container
