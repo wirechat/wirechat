@@ -163,6 +163,16 @@ class WireChatService
     }
 
     /**
+     * Get the wirechat disk visibility from the configuration.
+     *
+     * @return string The disk visibility.
+     */
+    public static function diskVisibility(): string
+    {
+        return (string) config('wirechat.attachments.disk_visibility', 'pubblic');
+    }
+
+    /**
      * Get the wirechat messages queue from the configuration.
      *
      * @return string The messages queue.

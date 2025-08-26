@@ -8,19 +8,20 @@ use Namu\WireChat\Panel;
 
 trait InteractsWithPanel
 {
-    public Panel|string|null $panel = null;
+    public ?string $panel;
 
     /**
      * Set the panel from provided value or default.
+     *
+     * @throws NoPanelProvidedException
+     * @throws \Exception
      */
-    public function setPanel(Panel|string|null $panel = null): void
+    public function resolvePanel(?string $panel = null): void
     {
-        if ($panel instanceof Panel) {
-            $this->panel = $panel;
-        } elseif (is_string($panel) && filled($panel)) {
-            $this->panel = WireChat::getPanel($panel);
+        if (is_string($panel) && filled($panel)) {
+            $this->panel = WireChat::getPanel($panel)->getId();
         } else {
-            $this->panel = WireChat::getDefaultPanel();
+            $this->panel = WireChat::getDefaultPanel()->getId();
         }
 
         if (! $this->panel) {
@@ -33,6 +34,6 @@ trait InteractsWithPanel
      */
     public function getPanel(): ?Panel
     {
-        return $this->panel;
+        return WireChat::getPanel($this->panel);
     }
 }

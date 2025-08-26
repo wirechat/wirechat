@@ -54,6 +54,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
             $config->set('queue.batching.database', 'testbench');
             $config->set('queue.failed.database', 'testbench');
+            $config->set(['queue.default', 'sync']);
 
             $config->set('filesystems.default', 'public');
             $config->set('livewire.temporary_file_upload.disk', 'public');
@@ -62,7 +63,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         if (! app()->runningInConsole()) {
             Model::shouldBeStrict();
         }
-        
 
     }
 

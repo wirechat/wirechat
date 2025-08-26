@@ -35,15 +35,15 @@ class Panel
     use HasBroadcasting;
     use HasChatMiddleware;
     use HasChatsSearch;
-    use HasSearch;
+    use HasColors;
     use HasFavicon;
     use HasGroups;
     use HasHeading;
     use HasId;
-    use HasColors;
     use HasLayout;
     use HasMiddleware;
     use HasRoutes;
+    use HasSearch;
     use HasSearchableAttributes;
     use HasSpaMode;
     use HasWebPushNotifications;
@@ -67,11 +67,11 @@ class Panel
     {
         return $this->evaluate($this->isDefault);
     }
+
     public function register(): void
     {
-       // WireChatColor::register($this->getColors());
+        // WireChatColor::register($this->getColors());
     }
-
 
     protected function evaluate($value)
     {

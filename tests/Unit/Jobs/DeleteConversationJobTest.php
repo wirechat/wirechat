@@ -22,7 +22,7 @@ test('it deletes conversation succesfully', function () {
     $this->assertDatabaseHas((new Conversation)->getTable(), ['id' => $conversation->id]);
 
     // Run the job to delete expired messages
-    DeleteConversationJob::dispatch($conversation);
+    DeleteConversationJob::dispatch($conversation, 'test');
     // $job = new DeleteExpiredMessagesJob;
     // $job->handle();
 

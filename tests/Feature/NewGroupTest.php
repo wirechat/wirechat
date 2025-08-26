@@ -15,7 +15,7 @@ use Workbench\App\Models\User as ModelsUser;
 
 beforeEach(function () {
 
-    Storage::fake(testPanelProvider()->getStorageDisk());
+    Storage::fake(WireChat::storageDisk());
 });
 
 it('user must be authenticated', function () {

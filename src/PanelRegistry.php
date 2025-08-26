@@ -37,7 +37,7 @@ class PanelRegistry
             $this->defaultPanel = $panel;
         }
 
-        #register panel
+        // register panel
         $panel->register();
 
         Log::info('Panel registered', ['id' => $id]);
@@ -87,11 +87,10 @@ class PanelRegistry
     {
         $this->currentPanel = $this->panels[$panelId] ?? $this->defaultPanel;
 
-
-        //Set the colors of this panel accesed
+        // Set the colors of this panel accesed
         WireChatColor::register($this->currentPanel->getColors());
 
-    //    dd($this->currentPanel->getId());
+        //    dd($this->currentPanel->getId());
     }
 
     public function getCurrent(): ?Panel

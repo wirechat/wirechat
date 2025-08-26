@@ -663,20 +663,20 @@ class Chat extends Component
         // we add try catch to avoid runtime error when broadcasting services are not connected
         // todo create a job to broadcast multiple messages
         try {
-
             // event(new BroadcastMessageEvent($message,$this->conversation));
 
             // !remove the receiver from the messageCreated and add it to the job instead
             // !also do not forget to exlude auth user or message owner from particpants
             // todo: maybe also broadcast for self conversation , incase user is using multiple devices
             // sleep(3);
-            broadcast(new MessageCreated($message))->toOthers();
+            broadcast(new MessageCreated($message, $this->panel()->getId()))->toOthers();
 
             // notify participants if conversation is NOT self
             $isSelf = $this->conversation->isSelf();
             /** @var bool $isSelf */
             if (! $isSelf) {
-                NotifyParticipants::dispatch($this->conversation, $message);
+
+                NotifyParticipants::dispatch($this->conversation, $message, $this->panel);
             }
         } catch (\Throwable $th) {
 

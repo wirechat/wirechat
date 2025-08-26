@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
 use Namu\WireChat\Enums\ParticipantRole;
+use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Jobs\DeleteConversationJob;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chats\Chats;
@@ -142,8 +143,8 @@ class Info extends ModalComponent
             // remove current photo
             $this->group?->cover?->delete();
             // save photo to disk
-            $path = $photo->store($this->panel()->getStorageFolder(), $this->panel()->getStorageDisk());
-            $url = Storage::disk($this->panel()->getStorageDisk())->url($path);
+            $path = $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
+            $url = Storage::disk(WireChat::storageDisk())->url($path);
             // create attachment
             $this->conversation->group?->cover()?->create([
                 'file_path' => $path,
@@ -197,7 +198,7 @@ class Info extends ModalComponent
 
         // Dispatch job to delete conversation in backgroud
         // This is done to not hold up page for user incase of long running prcoess and to also give time for widget to settle avoiding 404 livewire hydrate errors
-        DeleteConversationJob::dispatch($this->conversation);
+        DeleteConversationJob::dispatch($this->conversation, $this->panel);
 
     }
 

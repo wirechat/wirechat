@@ -17,8 +17,6 @@ if (! function_exists('wirechat')) {
 if (! function_exists('wirechatColor')) {
     /**
      * Get the WireChat Color service instance.
-     *
-     * @return ColorService
      */
     function wirechatColor(): ColorService
     {

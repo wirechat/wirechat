@@ -14,6 +14,7 @@ use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Group;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
+use Namu\WireChat\Panel;
 
 /**
  * @property-read string|null $cover_url
@@ -25,6 +26,7 @@ use Namu\WireChat\Models\Participant;
 trait Chatable
 {
     use Actor;
+    use InteractsWithPanel;
 
     /**
      * Establishes a relationship between the user and conversations.
@@ -137,7 +139,7 @@ trait Chatable
     /**
      * Create group
      */
-    public function createGroup(string $name, ?string $description = null, ?UploadedFile $photo = null): Conversation
+    public function createGroup(string $name, ?string $description = null, ?UploadedFile $photo = null, Panel|string|null $panel = null): Conversation
     {
 
         // abort if is not allowed to create new groups
@@ -456,29 +458,6 @@ trait Chatable
         })
             ->limit(20)
             ->get();
-    }
-
-    /**
-     * Retrieve the searchable fields defined in configuration
-     * and check if they exist in the database table schema.
-     *
-     * @return array|null The array of searchable fields or null if none found.
-     */
-    public function getWireSearchableFields(): ?array
-    {
-        // Define the fields specified as searchable in the configuration
-        $fieldsToCheck = config('wirechat.user_searchable_fields');
-
-        // Get the table name associated with the model
-        $tableName = $this->getTable();
-
-        // Get the list of columns in the database table
-        $tableColumns = Schema::getColumnListing($tableName);
-
-        // Filter the fields to include only those that exist in the table schema
-        $searchableFields = array_intersect($fieldsToCheck, $tableColumns);
-
-        return $searchableFields ?: null;
     }
 
     /* Checking roles in conversation */

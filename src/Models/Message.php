@@ -121,14 +121,17 @@ class Message extends Model
         // listen to deleted
         static::deleted(function ($message) {
 
+            $diskVisibility = WireChat::diskVisibility();
+            $storageDisk = WireChat::storageDisk();
+
             if ($message->attachment?->exists()) {
 
                 // delete attachment
                 $message->attachment->delete();
 
                 // also delete from storage
-                if (Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->exists($message->attachment->file_path)) {
-                    Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->delete($message->attachment->file_path);
+                if (Storage::disk($storageDisk)->exists($message->attachment->file_path)) {
+                    Storage::disk($storageDisk)->delete($message->attachment->file_path);
                 }
             }
 

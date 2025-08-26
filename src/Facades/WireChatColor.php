@@ -21,5 +21,4 @@ class WireChatColor extends Facade
     {
         return ColorService::class;
     }
-
 }

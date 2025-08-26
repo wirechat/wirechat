@@ -13,7 +13,6 @@ use Namu\WireChat\Helpers\MorphClassResolver;
 use Namu\WireChat\Http\Resources\MessageResource;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Panel;
 use Namu\WireChat\Traits\InteractsWithPanel;
 
 class NotifyParticipant implements ShouldBroadcastNow
@@ -25,7 +24,7 @@ class NotifyParticipant implements ShouldBroadcastNow
 
     public $participantId;
 
-    public function __construct(public Participant|Model $participant, public Message $message, Panel|string|null $panel = null)
+    public function __construct(public Participant|Model $participant, public Message $message, ?string $panel = null)
     {
         if ($participant instanceof Participant) {
             $this->participantType = $participant->participantable_type;
@@ -35,8 +34,7 @@ class NotifyParticipant implements ShouldBroadcastNow
             $this->participantId = $participant->getKey();
         }
 
-        $this->setPanel($panel);
-
+        $this->resolvePanel($panel);
         $message->load('conversation.group', 'sendable', 'attachment');
     }
 
@@ -45,7 +43,7 @@ class NotifyParticipant implements ShouldBroadcastNow
      */
     public function broadcastQueue(): string
     {
-        return $this->message->conversation->isPrivate() ? $this->panel->getMessagesQueue() : $this->panel->getEventsQueue();
+        return $this->message->conversation->isPrivate() ? $this->getPanel()->getMessagesQueue() : $this->getPanel()->getEventsQueue();
     }
 
     public function broadcastWhen(): bool
@@ -61,7 +59,7 @@ class NotifyParticipant implements ShouldBroadcastNow
         $encodedType = MorphClassResolver::encode($this->participantType);
         $channels = [];
 
-        $panelId = $this->panel->getId();
+        $panelId = $this->getPanel()->getId();
         $channels[] = "$panelId.participant.$encodedType.$this->participantId";
 
         return array_map(function ($channelName) {
@@ -74,7 +72,7 @@ class NotifyParticipant implements ShouldBroadcastNow
 
         return [
             'message' => new MessageResource($this->message),
-            'redirect_url' => $this->panel->chatRoute($this->message->conversation_id),
+            'redirect_url' => $this->getPanel()->chatRoute($this->message->conversation_id),
         ];
     }
 }

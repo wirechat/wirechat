@@ -51,7 +51,6 @@ class WireChatServiceProvider extends ServiceProvider
         // Trigger auto-discovery
         app('wirechatPanelRegistry')->autoDiscover();
 
-
         logger('WireChatServiceProvider booted, auto-discovery completed');
 
         $this->loadLivewireComponents();
@@ -97,19 +96,18 @@ class WireChatServiceProvider extends ServiceProvider
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
 
-
-
     }
 
-    protected  function bootColors(){
+    protected function bootColors()
+    {
 
         WireChatColor::register([
             'primary' => Color::Blue,
-            'danger'  => Color::Red,
+            'danger' => Color::Red,
             'success' => Color::Green,
             'warning' => Color::Amber,
-            'info'    => Color::Blue,
-            'gray'    => Color::Zinc,
+            'info' => Color::Blue,
+            'gray' => Color::Zinc,
         ]);
     }
 
@@ -126,7 +124,7 @@ class WireChatServiceProvider extends ServiceProvider
             return new WireChatService;
         });
 
-        $this->app->singleton(ColorService::class, fn () => new ColorService());
+        $this->app->singleton(ColorService::class, fn () => new ColorService);
 
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container

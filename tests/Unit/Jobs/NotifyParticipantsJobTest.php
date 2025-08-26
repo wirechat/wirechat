@@ -171,4 +171,62 @@ describe('Actions', function () {
 
     });
 
+    test('it does not broadcasts event "NotifyParticipant" to member who exited the group-meaning expect only 20 event not 21', function () {
+        Event::fake();
+        //  Queue::fake();
+
+        $auth = User::factory()->create();
+
+        // create group
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+
+        // add members
+
+        // add user and exit conversation
+        $user = User::factory()->create();
+        $conversation->addParticipant($user);
+
+        for ($i = 0; $i < 20; $i++) {
+            $conversation->addParticipant(User::factory()->create());
+        }
+
+        //   $user->sendMessageTo($conversation, 'hi');
+        $user->exitConversation($conversation); // exit here
+
+        $message = $auth->sendMessageTo($conversation, 'hello');
+
+        // Create Job in database
+        $job = (new NotifyParticipants($conversation, $message));
+
+        $job->handle();
+
+        //    Carbon::setTestNow(now()->addSeconds(6));
+
+        Event::assertDispatchedTimes(NotifyParticipant::class, 20);
+    });
+
+    test('it broadcasts event "NotifyParticipant" to all members of group-except owner of message when message is sent', function () {
+        Event::fake();
+        Queue::fake();
+
+        $auth = User::factory()->create();
+
+        // create group
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+
+        // add members
+        for ($i = 0; $i < 20; $i++) {
+            $conversation->addParticipant(User::factory()->create());
+        }
+
+        $message = $auth->sendMessageTo($conversation, 'hello');
+
+        // Create Job in database
+        $job = (new NotifyParticipants($conversation, $message));
+
+        $job->handle();
+
+        Event::assertDispatchedTimes(NotifyParticipant::class, 20);
+    });
+
 });

@@ -7,7 +7,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 // use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
-use Namu\WireChat\Livewire\Chat\Info;
 use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Livewire\Concerns\ModalComponent;
 use Namu\WireChat\Models\Conversation;
@@ -74,7 +73,6 @@ class AddMembers extends ModalComponent
             $this->users = null;
         } else {
 
-
             /**
              * Update the users list based on the search term.
              *
@@ -82,17 +80,19 @@ class AddMembers extends ModalComponent
              * - id, type, display_name, cover_url
              * - belongsToConversation flag for the current conversation
              */
-            $this->users = $this->panel()->search($this->search)
-            ->map(function ($resource) {
-                $model = $resource->resource; // underlying model
-                return [
-                    'id' => $model->id,
-                    'type' => $model->getMorphClass(),
-                    'display_name' => $model->display_name,
-                    'cover_url' => $model->cover_url,
-                    'belongsToConversation' => $model->belongsToConversation($this->conversation),
-                ];
-            });
+            $this->users = collect($this->panel()->searchChatables($this->search)->collection)
+                ->map(function ($resource) {
+                    $model = $resource->resource; // underlying model
+
+                    return [
+                        'id' => $model->id,
+                        'type' => $model->getMorphClass(),
+                        'display_name' => $model->display_name,
+                        'cover_url' => $model->cover_url,
+                        'belongsToConversation' => $model->belongsToConversation($this->conversation),
+                    ];
+                });
+
         }
     }
 

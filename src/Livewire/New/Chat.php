@@ -42,8 +42,7 @@ class Chat extends ModalComponent
             /**
              * todo: migrate search chantable to channel
              */
-
-            $this->users = $this->panel()->search($this->search)->resolve();
+            $this->users = $this->panel()->searchChatables($this->search)->resolve();
         }
     }
 

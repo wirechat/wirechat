@@ -12,12 +12,6 @@ trait HasAttachments
 
     protected bool|Closure|null $mediaAttachments = false;
 
-    protected string|Closure|null $storageFolder = 'attachments';
-
-    protected string|Closure|null $storageDisk = 'public';
-
-    protected string|Closure|null $diskVisibility = 'public';
-
     protected int|Closure|null $maxUploads = 10;
 
     protected array|Closure|null $mediaMimes = ['png', 'jpg', 'jpeg', 'gif', 'mov', 'mp4'];
@@ -32,10 +26,10 @@ trait HasAttachments
     {
         $this->attachments = $condition;
 
-        if ($condition){
+        if ($condition) {
 
-            $this->fileAttachments=true;
-            $this->mediaAttachments=true;
+            $this->fileAttachments = true;
+            $this->mediaAttachments = true;
         }
 
         return $this;
@@ -59,27 +53,6 @@ trait HasAttachments
         if ($condition === true) {
             $this->attachments = true;
         }
-
-        return $this;
-    }
-
-    public function storageFolder(string|Closure $folder): static
-    {
-        $this->storageFolder = $folder;
-
-        return $this;
-    }
-
-    public function storageDisk(string|Closure $disk): static
-    {
-        $this->storageDisk = $disk;
-
-        return $this;
-    }
-
-    public function diskVisibility(string|Closure $visibility): static
-    {
-        $this->diskVisibility = $visibility;
 
         return $this;
     }
@@ -117,21 +90,6 @@ trait HasAttachments
         $this->fileMaxUploadSize = $size;
 
         return $this;
-    }
-
-    public function getStorageFolder(): ?string
-    {
-        return $this->evaluate($this->storageFolder);
-    }
-
-    public function getStorageDisk(): ?string
-    {
-        return $this->evaluate($this->storageDisk);
-    }
-
-    public function getDiskVisibility(): ?string
-    {
-        return $this->evaluate($this->diskVisibility);
     }
 
     public function getMaxUploads(): ?int

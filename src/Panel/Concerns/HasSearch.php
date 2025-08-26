@@ -9,19 +9,19 @@ trait HasSearch
 {
     protected ?Closure $searchCallback = null;
 
-    public function searchUsing(Closure $callback): static
+    public function searchChatablesUsing(Closure $callback): static
     {
         $this->searchCallback = $callback;
+
         return $this;
     }
 
     /**
      * Search for chatable users and return a standardized JSON resource collection.
      *
-     * @param  string|null  $needle
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function search(?string $needle)
+    public function searchChatables(?string $needle)
     {
         return ChatableResource::collection(
             $this->runSearchCallback($needle)
@@ -31,7 +31,6 @@ trait HasSearch
     /**
      * Execute the search logic and return a collection of models.
      *
-     * @param  string|null  $needle
      * @return \Illuminate\Support\Collection
      */
     protected function runSearchCallback(?string $needle)
@@ -46,6 +45,7 @@ trait HasSearch
         }
 
         // Default search: limit 20 results and return a collection
+        // @phpstan-ignore-next-line
         return \App\Models\User::query()
             ->where(function ($q) use ($needle) {
                 foreach ($this->getSearchableAttributes() as $field) {

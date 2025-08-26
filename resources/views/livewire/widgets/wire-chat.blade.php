@@ -1,9 +1,4 @@
 <div class="h-full ">
-
-    @dump(
-        \Namu\WireChat\Facades\WireChatColor::primary(),
-        $this->panel()->getColors()
-    );
     @script
         <script>
             window.ChatWidget = () => {

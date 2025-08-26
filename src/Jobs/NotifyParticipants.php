@@ -11,14 +11,15 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Events\NotifyParticipant;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Conversation;
 use Namu\WireChat\Models\Message;
 use Namu\WireChat\Models\Participant;
+use Namu\WireChat\Traits\InteractsWithPanel;
 
 class NotifyParticipants implements ShouldQueue
 {
     use Batchable,Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use InteractsWithPanel;
 
     /**
      * Set a maximum time limit of 60 seconds for the job.
@@ -40,10 +41,12 @@ class NotifyParticipants implements ShouldQueue
 
         public Conversation $conversation,
         #[WithoutRelations]
-        public Message $message)
-    {
+        public Message $message,
+        ?string $panel = null
+    ) {
+        $this->resolvePanel($panel);
         //
-        $this->onQueue(WireChat::notificationsQueue());
+        $this->onQueue($this->getPanel()->getEventsQueue());
         //  $this->delay(now()->addSeconds(3)); // Delay
         $this->auth = $message->sendable;
 
@@ -55,21 +58,11 @@ class NotifyParticipants implements ShouldQueue
     }
 
     /**
-     * Get the middleware the job should pass through.
-     */
-    // public function middleware(): array
-    // {
-
-    //     return [
-    //         new SkipIfOlderThanSeconds(60), // You can pass a custom max age in seconds
-    //     ];
-    // }
-
-    /**
      * Execute the job.
      */
     public function handle(): void
     {
+
         // Check if the message is too old
         $messageAgeInSeconds = now()->diffInSeconds($this->message->created_at);
 
@@ -91,7 +84,7 @@ class NotifyParticipants implements ShouldQueue
             ->latest('last_active_at') // Prioritize active participants
             ->chunk(50, function ($participants) {
                 foreach ($participants as $key => $participant) {
-                    broadcast(new NotifyParticipant($participant, $this->message));
+                    broadcast(new NotifyParticipant($participant, $this->message, $this->getPanel()->getId()));
                 }
             });
 

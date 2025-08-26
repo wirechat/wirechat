@@ -13,7 +13,6 @@ use Namu\WireChat\Enums\MessageType;
 use Namu\WireChat\Enums\ParticipantRole;
 use Namu\WireChat\Events\MessageCreated;
 use Namu\WireChat\Events\MessageDeleted;
-use Namu\WireChat\Events\NotifyParticipant;
 use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Helpers\Helper;
 use Namu\WireChat\Jobs\BroadcastMessage;
@@ -198,8 +197,7 @@ describe('Presense', function () {
 
     test('it_shows_upload_trigger_if_any_one_of_attachments_is_enabled', function () {
 
-        Config::set('wirechat.allow_media_attachments', true);
-        Config::set('wirechat.allow_file_attachments', false);
+        testPanelProvider()->mediaAttachments();
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -214,8 +212,7 @@ describe('Presense', function () {
 
     test('it_shows_file_upload_input_if_enabled', function () {
 
-        Config::set('wirechat.allow_media_attachments', false);
-        Config::set('wirechat.allow_file_attachments', true);
+        testPanelProvider()->fileAttachments();
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -230,8 +227,7 @@ describe('Presense', function () {
 
     test('it_doesnt_show_file_upload_input_if_not_enabled', function () {
 
-        Config::set('wirechat.allow_media_attachments', true);
-        Config::set('wirechat.allow_file_attachments', false);
+        testPanelProvider()->fileAttachments(false);
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -246,8 +242,7 @@ describe('Presense', function () {
 
     test('it_shows_media_upload_input_if_enabled', function () {
 
-        Config::set('wirechat.allow_media_attachments', true);
-        Config::set('wirechat.allow_file_attachments', false);
+        testPanelProvider()->mediaAttachments();
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -262,8 +257,7 @@ describe('Presense', function () {
 
     test('it_doesnt_show_media_upload_input_if_not_enabled', function () {
 
-        Config::set('wirechat.allow_media_attachments', false);
-        Config::set('wirechat.allow_file_attachments', true);
+        testPanelProvider()->mediaAttachments(false);
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -277,9 +271,6 @@ describe('Presense', function () {
     });
 
     test('it_shows_emoji_trigger_button', function () {
-
-        Config::set('wirechat.allow_media_attachments', true);
-        Config::set('wirechat.allow_file_attachments', false);
 
         $auth = User::factory()->create(['name' => 'Test']);
 
@@ -445,10 +436,8 @@ describe('Validation', function () {
 
         // set config value
 
-        Config::set('wirechat.attachments.media_max_upload_size', 125);
-        Config::set('wirechat.attachments.file_max_upload_size', 125);
         $values = ['pdf'];
-        Config::set('wirechat.attachments.file_mimes', $values);
+        testPanelProvider()->mediaMaxUploadSize(125)->fileMaxUploadSize(125)->fileMimes($values);
         //
         Config::set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:200']);
 
@@ -472,8 +461,8 @@ describe('Validation', function () {
     test('media size(KB) must not exceed value specified in config && it dispatces wirechat-toast error', function () {
 
         // set config value
-        Config::set('wirechat.attachments.media_max_upload_size', 125);
-        Config::set('wirechat.attachments.file_max_upload_size', 125);
+
+        testPanelProvider()->mediaMaxUploadSize(125)->fileMaxUploadSize(125);
 
         //
         Config::set('livewire.temporary_file_upload.rules', ['required', 'file', 'max:150']);
@@ -501,7 +490,7 @@ describe('Validation', function () {
         // set config value
 
         $values = ['png'];
-        Config::set('wirechat.attachments.media_mimes', $values);
+        testPanelProvider()->mediaMimes($values);
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1347,9 +1336,9 @@ describe('Sending messages ', function () {
         });
     });
 
-    test('it broadcasts event "NotifyParticipant" when message is sent to private conversation', function () {
+    test('it pushed job "NotifyParticipants" when message is sent to private conversation', function () {
         Event::fake();
-        // Queue::fake();
+        Queue::fake();
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1361,61 +1350,9 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($receiver) {
-            return $event->participant->participantable_id == $receiver->id;
+        Queue::assertPushed(NotifyParticipants::class, function ($event) use ($conversation, $message) {
+            return $event->conversation->id === $message->id && $event->message->id === $conversation->id;
         });
-    });
-
-    test('it broadcasts event "NotifyParticipant" to all members of group-except owner of message when message is sent', function () {
-        Event::fake();
-        // Queue::fake();
-
-        $auth = User::factory()->create();
-
-        // create group
-        $conversation = $auth->createGroup(name: 'New group', description: 'description');
-
-        // add members
-        for ($i = 0; $i < 20; $i++) {
-            $conversation->addParticipant(User::factory()->create());
-        }
-
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->set('body', 'New message')
-            ->call('sendMessage');
-
-        Event::assertDispatchedTimes(NotifyParticipant::class, 20);
-    });
-
-    test('it does not broadcasts event "NotifyParticipant" to member who exited the group-meaning expect only 20 event not 21', function () {
-        Event::fake();
-        //  Queue::fake();
-
-        $auth = User::factory()->create();
-
-        // create group
-        $conversation = $auth->createGroup(name: 'New group', description: 'description');
-
-        // add members
-
-        // add user and exit conversation
-        $user = User::factory()->create();
-        $conversation->addParticipant($user);
-
-        for ($i = 0; $i < 20; $i++) {
-            $conversation->addParticipant(User::factory()->create());
-        }
-
-        //   $user->sendMessageTo($conversation, 'hi');
-        $user->exitConversation($conversation); // exit here
-
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->set('body', 'New message')
-            ->call('sendMessage');
-
-        //    Carbon::setTestNow(now()->addSeconds(6));
-
-        Event::assertDispatchedTimes(NotifyParticipant::class, 20);
     });
 
     test('it does not broadcasts event "MessageCreated" if it is SelfConversation', function () {
@@ -1626,9 +1563,8 @@ describe('Sending messages ', function () {
         Queue::assertNotPushed(NotifyParticipants::class);
     });
 
-    test('it broadcasts event "NotifyParticipant" when sendLike is called when conversation is PRIVATE', function () {
-        Event::fake();
-        // Queue::fake();
+    test('it pushed job "NotifyParticipants" when sendLike is called when conversation is PRIVATE', function () {
+        Queue::fake();
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1636,19 +1572,18 @@ describe('Sending messages ', function () {
             ->withParticipants([$auth, $receiver])
             ->create(['type' => ConversationType::PRIVATE]);
 
-        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        Livewire::actingAs($auth)
+            ->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('sendLike');
 
-        $message = Message::first();
-
-        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($receiver) {
-            return $event->participant->participantable_id == $receiver->id;
+        Queue::assertPushed(NotifyParticipants::class, function ($job) use ($conversation) {
+            return $job->conversation->id === $conversation->id;
         });
     });
 
-    test('it does not broadcasts event "NotifyParticipant" when sendLike is called when conversation is SELF', function () {
-        Event::fake();
-        // Queue::fake();
+    test('it does not broadcasts job "NotifyParticipants" when sendLike is called when conversation is SELF', function () {
+
+        Queue::fake();
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1661,12 +1596,14 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertNotDispatched(NotifyParticipant::class);
+        Queue::assertNotPushed(NotifyParticipants::class, function ($job) use ($conversation) {
+            return $job->conversation->id === $conversation->id;
+        });
     });
 
-    test('it does not broadcasts event "NotifyParticipant" when sendLike is called when conversation is GROUP', function () {
-        Event::fake();
-        // Queue::fake();
+    test('it pushed  job "NotifyParticipants" when sendLike is called when conversation is GROUP', function () {
+
+        Queue::fake();
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1679,7 +1616,9 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        Event::assertNotDispatched(NotifyParticipant::class);
+        Queue::assertPushed(NotifyParticipants::class, function ($job) use ($conversation) {
+            return $job->conversation->id === $conversation->id;
+        });
     });
 
     test('sending hearts(❤️) is rate limited by 50 in 60 seconds', function () {
