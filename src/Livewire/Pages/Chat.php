@@ -4,11 +4,14 @@ namespace Namu\WireChat\Livewire\Pages;
 
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Namu\WireChat\Livewire\Concerns\HasPanel;
 use Namu\WireChat\Models\Conversation;
 
 class Chat extends Component
 {
     public $conversation;
+
+    use HasPanel;
 
     public function mount()
     {
@@ -27,6 +30,6 @@ class Chat extends Component
     public function render()
     {
         return view('wirechat::livewire.pages.chat')
-            ->layout(config('wirechat.layout', 'wirechat::layouts.app'));
+            ->layout($this->panel()->getLayout());
     }
 }

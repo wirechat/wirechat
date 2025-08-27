@@ -15,36 +15,6 @@ use Namu\WireChat\Models\Conversation;
 | used to check if an authenticated user can listen to the channel.
 |
 */
-//
-// Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
-//
-//    $conversation = Conversation::find($conversationId);
-//
-//    if ($conversation) {
-//        // code...
-//        if ($user->belongsToConversation($conversation)) {
-//            return true; // Allow access to the channel
-//        }
-//    }
-//
-//    return false; // Deny access to the channel
-//
-// },
-//    [
-//        'guards' => config('wirechat.routes.guards', ['web']),
-//        'middleware' => config('wirechat.routes.middleware', ['web', 'auth']),
-//    ]
-// );
-//
-// Broadcast::channel('participant.{encodedType}.{id}', function ($user, $encodedType, $id) {
-//    // Decode the encoded type to get the raw value.
-//    $morphType = MorphClassResolver::decode($encodedType);
-//
-//    return $user->id == $id && $user->getMorphClass() == $morphType;
-// }, [
-//    'guards' => config('wirechat.routes.guards', ['web']),
-//    'middleware' => config('wirechat.routes.middleware', ['web', 'auth']),
-// ]);
 
 $panels = app('wirechatPanelRegistry')->all();
 

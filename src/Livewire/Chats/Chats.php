@@ -284,7 +284,7 @@ class Chats extends Component
      */
     protected function applySearchConditions($query): \Illuminate\Database\Eloquent\Builder
     {
-        $searchableFields = WireChat::searchableFields();
+        $searchableFields = $this->panel()->getSearchableAttributes();
         $groupSearchableFields = ['name', 'description'];
         $columnCache = [];
 

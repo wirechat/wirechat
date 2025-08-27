@@ -420,13 +420,28 @@ trait Chatable
      * such as limiting results to friends, followers, or other specific groups.
      *
      * @param  string  $query  The search term to match against user fields.
-     * @return Collection|null A collection of users matching the search criteria,
-     *                         or null if no matches are found.
+     * @return \Illuminate\Support\Collection|null A collection of users matching the search criteria,
+     *                                             or null if no matches are found.
+     *
+     * @deprecated Use {@see \Namu\WireChat\Panel::searchChatablesUsing()} in your panel provider instead.
+     *
+     * Example:
+     * ```php
+     * return $panel
+     *     ->searchChatablesUsing(function ($needle) {
+     *         return ChatableResource::collection(
+     *             User::query()
+     *             ->where('name', 'like', "%{$needle}%")
+     *             ->get();
+     *          );
+     *     });
+     * ```
      */
+
     public function searchChatables(string $query): ?Collection
     {
         // Retrieve the fields that are searchable for users.
-        $searchableFields = WireChat::searchableFields();
+        $searchableFields = ['name'];
 
         // Get the user model from the configuration, defaulting to App\Models\User.
         $userModel = app(config('wirechat.user_model', \App\Models\User::class));
