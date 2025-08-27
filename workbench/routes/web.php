@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Namu\WireChat\Livewire\Pages\Chat;
-use Namu\WireChat\Livewire\Pages\Chats;
 
 /*
 |--------------------------------------------------------------------------

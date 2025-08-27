@@ -58,7 +58,7 @@
     </div>
 
     @livewireScripts
-    @wirechatAssets(panel:$panel)
+    @wirechatAssets(panel: $panel)
 </body>
 
 </html>

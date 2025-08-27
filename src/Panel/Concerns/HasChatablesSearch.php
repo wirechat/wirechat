@@ -5,7 +5,7 @@ namespace Namu\WireChat\Panel\Concerns;
 use Closure;
 use Namu\WireChat\Http\Resources\ChatableResource;
 
-trait HasSearch
+trait HasChatablesSearch
 {
     protected ?Closure $searchCallback = null;
 

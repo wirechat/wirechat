@@ -437,7 +437,6 @@ trait Chatable
      *     });
      * ```
      */
-
     public function searchChatables(string $query): ?Collection
     {
         // Retrieve the fields that are searchable for users.

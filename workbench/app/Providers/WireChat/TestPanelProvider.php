@@ -27,7 +27,7 @@ class TestPanelProvider extends PanelProvider
                 );
 
             })
-            ->middleware(['web','auth'])
+            ->middleware(['web', 'auth'])
             ->webPushNotifications()
             ->default();
     }

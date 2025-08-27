@@ -8,7 +8,6 @@ use Namu\WireChat\Livewire\Concerns\HasPanel;
 
 class Chats extends Component
 {
-
     use HasPanel;
 
     #[Title('Chats')]
@@ -16,7 +15,7 @@ class Chats extends Component
     {
 
         return view('wirechat::livewire.pages.chats')
-               ->layout($this->panel()->getLayout());
+            ->layout($this->panel()->getLayout());
 
     }
 }

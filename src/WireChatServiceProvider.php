@@ -8,7 +8,6 @@ use Livewire\Livewire;
 use Namu\WireChat\Console\Commands\InstallWireChat;
 use Namu\WireChat\Console\Commands\MakePanelCommand;
 use Namu\WireChat\Console\Commands\SetupNotifications;
-use Namu\WireChat\Facades\WireChat as FacadesWireChat;
 use Namu\WireChat\Facades\WireChatColor;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chat\Drawer;
@@ -297,7 +296,7 @@ class WireChatServiceProvider extends ServiceProvider
     protected function loadStyles(): void
     {
 
-        Blade::directive('wirechatStyles',function (string|null $panel = null) {
+        Blade::directive('wirechatStyles', function (?string $panel = null) {
 
             // Check if panel param s set
             if (isset($panel)) {
@@ -306,7 +305,7 @@ class WireChatServiceProvider extends ServiceProvider
                 $currentPanel = \Namu\WireChat\Facades\WireChat::currentPanel(); // This gets panel according to route or default
             }
 
-           $primaryColor= isset( $currentPanel->getColors()['primary'])? $currentPanel->getColors()['primary'][500]:'oklch(0.623 0.214 259.815)';
+            $primaryColor = isset($currentPanel->getColors()['primary']) ? $currentPanel->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';
 
             return "<?php echo <<<EOT
                 <style>

@@ -1,7 +1,6 @@
 <?php
 
 use Livewire\Livewire;
-use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Livewire\Chat\Chat;
 use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
 use Namu\WireChat\Livewire\Pages\Chats;

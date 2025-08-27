@@ -10,7 +10,7 @@ parameters:
 
     # Level 10 is the highest level
     level: 5
-    
+
 
     ignoreErrors:
 #        - '#PHPDoc tag @var#'
@@ -23,6 +23,7 @@ parameters:
         - '#Call to an undefined method .*belongsToConversation#'
         - '#Trait Namu\\WireChat\\Traits\\Chatable is used zero times and is not analysed#'
         - '#Trait Namu\\WireChat\\Traits\\Actor is used zero times and is not analysed#'
+        - '#Trait .* is used zero times and is not analysed#'
 #
 #   excludePaths:
 #        - ./*/*/FileToBeExcluded.php

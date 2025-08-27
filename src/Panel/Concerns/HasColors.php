@@ -36,6 +36,4 @@ trait HasColors
 
         return $colors;
     }
-
-
 }
