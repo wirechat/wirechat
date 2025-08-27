@@ -44,7 +44,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    @wirechatStyles
+    @wirechatStyles(panel: $panel)
 </head>
 
 <body  x-data x-cloak class="font-sans antialiased">

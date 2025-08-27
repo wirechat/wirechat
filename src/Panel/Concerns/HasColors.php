@@ -28,11 +28,14 @@ trait HasColors
         foreach ($this->colors as $set) {
             $set = $this->evaluate($set);
 
-            foreach ($set as $name => $color) {
-                $colors[$name] = $color;
+            foreach ($set as $name => $palette) {
+                // Preserve numeric keys (50, 100, etc.) while merging
+                $colors[$name] = ($colors[$name] ?? []) + $palette;
             }
         }
 
         return $colors;
     }
+
+
 }

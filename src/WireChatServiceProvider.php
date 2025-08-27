@@ -297,8 +297,17 @@ class WireChatServiceProvider extends ServiceProvider
     protected function loadStyles(): void
     {
 
-        $primaryColor = FacadesWireChat::getColor();
-        Blade::directive('wirechatStyles', function () use ($primaryColor) {
+        Blade::directive('wirechatStyles',function (string|null $panel = null) {
+
+            // Check if panel param s set
+            if (isset($panel)) {
+                $currentPanel = \Namu\WireChat\Facades\WireChat::getPanel($panel);
+            } else {
+                $currentPanel = \Namu\WireChat\Facades\WireChat::currentPanel(); // This gets panel according to route or default
+            }
+
+           $primaryColor= isset( $currentPanel->getColors()['primary'])? $currentPanel->getColors()['primary'][500]:'oklch(0.623 0.214 259.815)';
+
             return "<?php echo <<<EOT
                 <style>
                     :root {
