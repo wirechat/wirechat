@@ -3,13 +3,13 @@
 namespace Namu\WireChat\Panel\Concerns;
 
 use Closure;
-use Namu\WireChat\Http\Resources\ChatableResource;
+use Namu\WireChat\Http\Resources\WireChatUserResource;
 
-trait HasChatablesSearch
+trait HasUsersSearch
 {
     protected ?Closure $searchCallback = null;
 
-    public function searchChatablesUsing(Closure $callback): static
+    public function searchUsersUsing(Closure $callback): static
     {
         $this->searchCallback = $callback;
 
@@ -21,9 +21,9 @@ trait HasChatablesSearch
      *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function searchChatables(?string $needle)
+    public function searchUsers(?string $needle)
     {
-        return ChatableResource::collection(
+        return WireChatUserResource::collection(
             $this->runSearchCallback($needle)
         );
     }

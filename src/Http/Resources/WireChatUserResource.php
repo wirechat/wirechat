@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin \Illuminate\Database\Eloquent\Model
  */
-class ChatableResource extends JsonResource
+class WireChatUserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

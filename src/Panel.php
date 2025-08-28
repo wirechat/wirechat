@@ -7,7 +7,7 @@ use Namu\WireChat\Panel\Concerns\HasActions;
 use Namu\WireChat\Panel\Concerns\HasAttachments;
 use Namu\WireChat\Panel\Concerns\HasAuth;
 use Namu\WireChat\Panel\Concerns\HasBroadcasting;
-use Namu\WireChat\Panel\Concerns\HasChatablesSearch;
+use Namu\WireChat\Panel\Concerns\HasUsersSearch;
 use Namu\WireChat\Panel\Concerns\HasChatMiddleware;
 use Namu\WireChat\Panel\Concerns\HasChatsSearch;
 use Namu\WireChat\Panel\Concerns\HasColors;
@@ -28,7 +28,7 @@ class Panel
     use HasAttachments;
     use HasAuth;
     use HasBroadcasting;
-    use HasChatablesSearch;
+    use HasUsersSearch;
     use HasChatMiddleware;
     use HasChatsSearch;
     use HasColors;

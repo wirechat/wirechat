@@ -80,7 +80,7 @@ class AddMembers extends ModalComponent
              * - id, type, display_name, cover_url
              * - belongsToConversation flag for the current conversation
              */
-            $this->users = collect($this->panel()->searchChatables($this->search)->collection)
+            $this->users = collect($this->panel()->searchUsers($this->search)->collection)
                 ->map(function ($resource) {
                     $model = $resource->resource; // underlying model
 

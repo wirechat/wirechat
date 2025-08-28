@@ -25,7 +25,7 @@ class MessageResource extends JsonResource
             'body' => $this->body,
             'type' => $this->type,
             'conversation' => $this->whenLoaded('conversation', fn () => new ConversationResource($this->conversation)),
-            'sendable' => $this->whenLoaded('sendable', fn () => new ChatableResource($this->sendable)),
+            'sendable' => $this->whenLoaded('sendable', fn () => new WireChatUserResource($this->sendable)),
             'has_attachment' => $this->hasAttachment(),
             'attachment' => $this->whenLoaded('attachment', fn () => new AttachmentResource($this->attachment)),
             'created_at' => $this->created_at,

@@ -17,7 +17,7 @@ trait HasGroups
     /**
      * Whether group functionality is enabled.
      */
-    protected bool|Closure $hasGroups = false;
+    protected bool|Closure $hasGroups = true;
 
     /**
      * The maximum number of members allowed in a group.

@@ -17,6 +17,8 @@ use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Panel;
 
 /**
+ *
+ * @deprecated since 0.0.x — use {@see \Namu\WireChat\Traits\InteractsWithWireChat} instead.
  * @property-read string|null $cover_url
  * @property-read string|null $display_name
  * @property-read string|null $profile_url
@@ -423,7 +425,7 @@ trait Chatable
      * @return \Illuminate\Support\Collection|null A collection of users matching the search criteria,
      *                                             or null if no matches are found.
      *
-     * @deprecated Use {@see \Namu\WireChat\Panel::searchChatablesUsing()} in your panel provider instead.
+     * @deprecated Use {@see \Namu\WireChat\Panel::searchUsersUsing()} in your panel provider instead.
      *
      * Example:
      * ```php
@@ -537,3 +539,6 @@ trait Chatable
         return true;
     }
 }
+
+
+
