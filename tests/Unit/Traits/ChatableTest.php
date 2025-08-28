@@ -238,7 +238,7 @@ describe('createConversationWith() ', function () {
 
 describe('sendMessageTo() ', function () {
 
-    it('aborts 403 is $model not extenting Chatable Trait ', function () {
+    it('aborts 403 if $model not extenting InteractsWithWireChat Trait ', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -250,7 +250,7 @@ describe('sendMessageTo() ', function () {
         // pass participant model - which does not use Triat Chatable
         $auth->sendMessageTo($participant, 'hello');
 
-    })->throws(Exception::class, 'The provided model does not support chat functionality.');
+    })->throws(Exception::class, 'The model must use `InteractsWithWireChat` trait and must implement WireChatUser');
 
     it('aborts 403 is user does not belong to conversation ', function () {
 

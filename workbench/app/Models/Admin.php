@@ -6,11 +6,14 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Namu\WireChat\Contracts\WireChatUser;
 use Namu\WireChat\Traits\Chatable;
+use Namu\WireChat\Traits\InteractsWithWireChat;
 
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements WireChatUser
 {
-    use Chatable;
+
+    use InteractsWithWireChat;
     use HasFactory, Notifiable;
 
     /**

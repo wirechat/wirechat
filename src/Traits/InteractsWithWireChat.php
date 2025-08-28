@@ -212,9 +212,21 @@ trait InteractsWithWireChat
         // Check if the recipient is a model (polymorphic) and not a conversation
         if (! $model instanceof Conversation) {
             // Ensure the model has the required trait
-            if (! in_array(InteractsWithWireChat::class, class_uses($model))) {
-                abort(403, 'The provided model does not support chat functionality.');
+            if (
+                ! in_array(InteractsWithWireChat::class, class_uses($model)) &&
+                ! in_array(Chatable::class, class_uses($model))
+            ) {
+                abort(403, 'The model must use `InteractsWithWireChat` trait and must implement WireChatUser');
             }
+
+// Deprecation notice if Chatable is still in use
+            if (in_array(Chatable::class, class_uses($model))) {
+                trigger_error(
+                    'The `Chatable` trait is deprecated. Please use `InteractsWithWireChat` instead.',
+                    E_USER_DEPRECATED
+                );
+            }
+
             // Create or get a private conversation with the recipient
             $conversation = $this->createConversationWith($model);
         } else {
@@ -287,7 +299,7 @@ trait InteractsWithWireChat
      * @return string
      *
      */
-    public function getWirechatNameAttribute(): string
+    public function getWirechatNameAttribute(): ?string
     {
         // fallback to old `display_name` for backward compatibility
         return $this->wirechat_name ?? ($this->display_name);
@@ -297,7 +309,7 @@ trait InteractsWithWireChat
      * Get Wirechat avatar url
      * @return string
      */
-    public function getWirechatAvatarUrlAttribute(): string
+    public function getWirechatAvatarUrlAttribute(): ?string
     {
         return $this->wirechat_avatar_url ?? $this->cover_url;
     }

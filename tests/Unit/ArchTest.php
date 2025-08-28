@@ -8,9 +8,9 @@ arch('Traits test ')
     ->expect('Namu\WireChat\Traits')
     ->toBeTraits();
 
-arch('Make sure Actor is only used in Chatable Trait')
+arch('Make sure Actor is only used in InteractsWithWireChat Trait')
     ->expect('Namu\WireChat\Traits\Actor')
-    ->toOnlyBeUsedIn('Namu\WireChat\Traits\Chatable');
+    ->toOnlyBeUsedIn('Namu\WireChat\Traits\InteractsWithWireChat');
 
 arch('Make sure Actionable is used in Conversation Model')
     ->expect('Namu\\WireChat\\Traits\\Actionable')

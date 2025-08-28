@@ -23,7 +23,5 @@ use Namu\WireChat\Panel;
  */
 trait Chatable
 {
-    use Actor;
-    use InteractsWithPanel;
     use InteractsWithWireChat;
 }
