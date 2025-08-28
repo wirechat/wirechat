@@ -148,7 +148,6 @@ trait InteractsWithWireChat
         // abort if is not allowed to create new groups
         abort_unless($this->canCreateGroups(), 403, 'You do not have permission to create groups.');
 
-        // create rooom
         // Otherwise, create a new conversation
         $conversation = new Conversation;
         $conversation->type = ConversationType::GROUP;
@@ -307,7 +306,7 @@ trait InteractsWithWireChat
 
     /**
      * Get Wirechat avatar url
-     * @return string
+     * @return string|null
      */
     public function getWirechatAvatarUrlAttribute(): ?string
     {
@@ -317,9 +316,9 @@ trait InteractsWithWireChat
     /**
      * Get Wirechat Profile Url
      * Customize this based on your routing or profile setup.
-     * @return string
+     * @return string|null
      */
-    public function getWirechatProfileUrlAttribute(): string
+    public function getWirechatProfileUrlAttribute(): ?string
     {
         return $this->wirechat_profile_url?? $this->profile_url ;
     }
@@ -470,7 +469,7 @@ trait InteractsWithWireChat
 
     /**
      * Check if the user is an admin in a specific conversation.
-     * Or if if owner , because owner can also be admin
+     * Or if is owner , because owner can also be admin
      */
     public function isAdminIn(Group|Conversation $entity): bool
     {
@@ -502,7 +501,7 @@ trait InteractsWithWireChat
 
             $conversation = $entity->conversation;
         }
-        // means it is group to get Parent Relationship
+        // means it is grouped to get Parent Relationship
         else {
 
             $conversation = $entity;
