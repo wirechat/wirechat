@@ -17,8 +17,8 @@ use Namu\WireChat\Models\Participant;
 use Namu\WireChat\Panel;
 
 /**
- *
  * @deprecated since 0.0.x — use {@see \Namu\WireChat\Traits\InteractsWithWireChat} instead.
+ *
  * @property-read string|null $cover_url
  * @property-read string|null $display_name
  * @property-read string|null $profile_url
@@ -539,6 +539,3 @@ trait Chatable
         return true;
     }
 }
-
-
-

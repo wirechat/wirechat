@@ -7,7 +7,6 @@ use Namu\WireChat\Panel\Concerns\HasActions;
 use Namu\WireChat\Panel\Concerns\HasAttachments;
 use Namu\WireChat\Panel\Concerns\HasAuth;
 use Namu\WireChat\Panel\Concerns\HasBroadcasting;
-use Namu\WireChat\Panel\Concerns\HasUsersSearch;
 use Namu\WireChat\Panel\Concerns\HasChatMiddleware;
 use Namu\WireChat\Panel\Concerns\HasChatsSearch;
 use Namu\WireChat\Panel\Concerns\HasColors;
@@ -18,6 +17,7 @@ use Namu\WireChat\Panel\Concerns\HasLayout;
 use Namu\WireChat\Panel\Concerns\HasMiddleware;
 use Namu\WireChat\Panel\Concerns\HasRoutes;
 use Namu\WireChat\Panel\Concerns\HasSearchableAttributes;
+use Namu\WireChat\Panel\Concerns\HasUsersSearch;
 use Namu\WireChat\Panel\Concerns\HasWebPushNotifications;
 use Namu\WireChat\Support\EvaluatesClosures;
 
@@ -28,7 +28,6 @@ class Panel
     use HasAttachments;
     use HasAuth;
     use HasBroadcasting;
-    use HasUsersSearch;
     use HasChatMiddleware;
     use HasChatsSearch;
     use HasColors;
@@ -39,6 +38,7 @@ class Panel
     use HasMiddleware;
     use HasRoutes;
     use HasSearchableAttributes;
+    use HasUsersSearch;
     use HasWebPushNotifications;
 
     protected bool|Closure $isDefault = false;
