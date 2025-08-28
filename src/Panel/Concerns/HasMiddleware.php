@@ -12,7 +12,7 @@ trait HasMiddleware
     /**
      * @var array<string> Middleware to be applied.
      */
-    protected array $middleware = [];
+    protected array $middleware = ['auth'];
 
     /**
      * Set middleware.

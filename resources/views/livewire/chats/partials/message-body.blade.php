@@ -7,7 +7,7 @@
         </span>
     @elseif(!$belongsToAuth && $group !== null)
         <span class="font-bold text-xs dark:text-white/80 dark:font-normal">
-            {{ $lastMessage->sendable?->display_name }}:
+            {{ $lastMessage->sendable?->wirechat_name }}:
         </span>
     @endif
 

@@ -58,7 +58,7 @@
             <div class="shrink-0">
                 <x-wirechat::avatar wire:key="chatslist-key-{{uniqid()}}" disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                     group="{{ $conversation->isGroup() }}"
-                    :src="$group ? $group?->cover_url : $receiver?->cover_url ?? null" class="w-12 h-12" />
+                    :src="$group ? $group?->cover_url : $receiver?->wirechat_avatar_url ?? null" class="w-12 h-12" />
             </div>
 
             <aside class="grid  grid-cols-12 w-full">
@@ -68,7 +68,7 @@
                     {{-- name --}}
                     <div class="flex gap-1 mb-1 w-full items-center">
                         <h6 class="truncate font-medium text-gray-900 dark:text-white">
-                            {{ $group ? $group?->name : $receiver?->display_name }}
+                            {{ $group ? $group?->name : $receiver?->wirechat_name }}
                         </h6>
 
                         @if ($conversation->isSelfConversation())
