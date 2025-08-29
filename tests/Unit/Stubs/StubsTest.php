@@ -1,4 +1,73 @@
-const chatClients = new Map();
+<?php
+
+
+use Illuminate\Support\Facades\File;
+
+it('ensure MainServiceWorkerJsScript.stub exists', function () {
+
+    $file_path=dirname(__DIR__, 3) . '/stubs/MainServiceWorkerJsScript.stub';
+
+    $expectedContent=
+"// In host's sw.js
+importScripts('/js/wirechat/sw.js');
+
+
+// Example: Custom event listener in main SW
+self.addEventListener('install', event => {
+    console.log('Main Service Worker Installed');
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+    console.log('Main Service Worker Activated');
+    event.waitUntil(self.clients.claim());
+});
+";
+
+
+    expect(File::exists($file_path))->toBeTrue();
+    expect(File::get($file_path))->toBe($expectedContent);
+
+});
+
+
+it('ensure PanelProvider.stub exists', function () {
+
+    $file_path=dirname(__DIR__, 3) . '/stubs/PanelProvider.stub';
+
+    $expectedContent=
+'<?php
+
+namespace {{ namespace }};
+
+use Namu\WireChat\Panel;
+use Namu\WireChat\PanelProvider;
+
+class {{ className }} extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->id(\'{{ panelId }}\')
+            ->path(\'{{ panelId }}\')
+            ->middleware([\'auth\',\'web\'])
+            {{ defaultFlag }};
+    }
+}
+';
+
+
+    expect(File::exists($file_path))->toBeTrue();
+    expect(File::get($file_path))->toBe($expectedContent);
+
+});
+
+it('ensure ServiceWorkerJsScript.stub exists', function () {
+
+    $file_path=dirname(__DIR__, 3) . '/stubs/ServiceWorkerJsScript.stub';
+
+    $expectedContent=
+"const chatClients = new Map();
 
 self.addEventListener('message', event => {
     if (event.data?.type === 'REGISTER_CHAT') {
@@ -51,4 +120,11 @@ self.addEventListener('notificationclick', event => {
             })
         );
     }
+});
+";
+
+
+    expect(File::exists($file_path))->toBeTrue();
+    expect(File::get($file_path))->toBe($expectedContent);
+
 });
