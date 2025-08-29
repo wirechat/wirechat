@@ -17,15 +17,15 @@
 
                 <div class="mx-auto items-center justify-center grid">
 
-                    <a href="{{ $receiver?->profile_url }}">
-                        <x-wirechat::avatar :src="$cover_url" class=" h-32 w-32 mx-auto" />
+                    <a href="{{ $receiver?->wirechat_profile_url }}">
+                        <x-wirechat::avatar :src="$wirechat_avatar_url" class=" h-32 w-32 mx-auto" />
                     </a>
                 </div>
 
                 <div class=" grid  ">
 
-                    <a class="px-8 py-5 " @dusk="receiver_name" href="{{ $receiver?->profile_url }}">
-                        <h5 class="text-2xl">{{ $receiver?->display_name }}</h5>
+                    <a class="px-8 py-5 " @dusk="receiver_name" href="{{ $receiver?->wirechat_profile_url }}">
+                        <h5 class="text-2xl">{{ $receiver?->wirechat_name }}</h5>
                     </a>
                 </div>
 

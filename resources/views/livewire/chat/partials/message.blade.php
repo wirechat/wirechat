@@ -52,13 +52,13 @@
 ])
 >
 @if (!$belongsToAuth && $isGroup)
-<div    
+<div
     @class([
         'shrink-0 font-medium text-purple-500',
         // Hide avatar if the next message is from the same user
         'hidden' => $isSameAsPrevious
     ])>
-    {{ $message?->sendable?->display_name }}
+    {{ $message?->sendable?->wirechat_name }}
 </div>
 @endif
 

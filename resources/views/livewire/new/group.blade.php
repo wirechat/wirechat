@@ -168,7 +168,7 @@
                             @foreach ($selectedMembers as $key => $member)
                                 <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] rounded-sm  dark:text-gray-300"
                                     wire:key="selected-member-{{ $member->id }}">
-                                    {{ $member->display_name }}
+                                    {{ $member->wirechat_name }}
                                     <button type="button"
                                         wire:click="toggleMember('{{ $member->id }}',{{ json_encode(get_class($member)) }})"
                                         class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)]  hover:text-gray-900  dark:hover:text-gray-300"
@@ -206,10 +206,10 @@
                                     <label
                                         wire:click="toggleMember('{{ $user['id'] }}',{{ json_encode($user['type']) }})"
                                         class="flex cursor-pointer gap-2 items-center w-full">
-                                        <x-wirechat::avatar  src="{{ $user['cover_url'] }}" class="w-10 h-10" />
+                                        <x-wirechat::avatar  src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10" />
 
                                         <p class="group-hover:underline transition-all truncate">
-                                            {{ $user['display_name'] }}</p>
+                                            {{ $user['wirechat_name'] }}</p>
 
                                         <div class="ml-auto">
                                             @if ($selectedMembers->contains(fn($member) => $member->id == $user['id'] && $member->getMorphClass() == $user['type']))

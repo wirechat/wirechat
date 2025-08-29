@@ -154,7 +154,7 @@ describe('actions test', function () {
                 // first add member
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal')
-            ->assertStatus(403, $user->display_name.' is already a member');
+            ->assertStatus(403, $user->wirechat_name.' is already a member');
     });
 
     test('it aborts if admin tries to add a member who exited the group', function () {
@@ -172,7 +172,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
         $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
-            ->assertStatus(403, "Cannot add {$participant->participantable->display_name} because they left the group");
+            ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they left the group");
 
     });
 
@@ -192,7 +192,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
         $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
-            ->assertStatus(403, "Cannot add {$participant->participantable->display_name} because they were removed from the group by an Admin.");
+            ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they were removed from the group by an Admin.");
 
     });
 

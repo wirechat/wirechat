@@ -20,20 +20,20 @@
 
     }
 
-    }"  
+    }"
         x-init="
 
         setTimeout(() => {
 
                 requestAnimationFrame(() => {
-                    
+
                     this.height = $el.scrollHeight;
                     $el.scrollTop = this.height;
                 });
 
-            }, 300); //! Add delay so height can be update at right time 
+            }, 300); //! Add delay so height can be update at right time
 
-     
+
         "
     @scroll ="
         scrollTop= $el.scrollTop;
@@ -59,13 +59,13 @@
             {{-- scroll the element down --}}
             $el.scrollTop = $el.scrollHeight;
 
-            {{-- After updating the chat height, overflowY is set back to 'auto', 
-                which allows the browser to determine whether to display the scrollbar 
+            {{-- After updating the chat height, overflowY is set back to 'auto',
+                which allows the browser to determine whether to display the scrollbar
                 based on the content height.  --}}
                $el.style.overflowY='auto';
         });
     "
-    
+
 
     x-cloak
      class='flex flex-col h-full  relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  grow  overscroll-contain overflow-x-hidden w-full my-auto'
@@ -76,7 +76,7 @@
     <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore" class="invisible transition-all duration-300 ">
         <x-wirechat::loading-spin />
     </div>
- 
+
     {{-- Define previous message outside the loop --}}
     @php
         $previousMessage = null;
@@ -125,7 +125,7 @@
                                 $previousMessage &&
                                 $message?->sendable?->is($previousMessage?->sendable),
                         ])>
-                            <x-wirechat::avatar src="{{ $message->sendable?->cover_url ?? null }}" class="h-8 w-8" />
+                            <x-wirechat::avatar src="{{ $message->sendable?->wirechat_avatar_url ?? null }}" class="h-8 w-8" />
                         </div>
                     @endif
 
@@ -147,13 +147,13 @@
 
 
                                     @php
-                                    $sender = $message?->ownedBy($this->auth) 
-                                        ? __('wirechat::chat.labels.you') 
-                                        : ($message->sendable?->display_name ?? __('wirechat::chat.labels.user'));
+                                    $sender = $message?->ownedBy($this->auth)
+                                        ? __('wirechat::chat.labels.you')
+                                        : ($message->sendable?->wirechat_name ?? __('wirechat::chat.labels.user'));
 
-                                    $receiver = $parent?->ownedBy($this->auth) 
-                                        ? __('wirechat::chat.labels.you') 
-                                        : ($parent->sendable?->display_name ?? __('wirechat::chat.labels.user'));
+                                    $receiver = $parent?->ownedBy($this->auth)
+                                        ? __('wirechat::chat.labels.you')
+                                        : ($parent->sendable?->wirechat_name ?? __('wirechat::chat.labels.user'));
                                     @endphp
 
                                     <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2">
@@ -199,7 +199,7 @@
                                     {{-- reply button --}}
                                     <button wire:click="setReply('{{ encrypt($message->id) }}')"
                                         class=" invisible  group-hover:visible hover:scale-110 transition-transform">
-                                    
+
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                             fill="currentColor" class="bi bi-reply-fill w-4 h-4 dark:text-white"
                                             viewBox="0 0 16 16">
@@ -235,7 +235,7 @@
 
 
                                             {{-- Dont show delete for me if is group --}}
-                                            @if (!$isGroup) 
+                                            @if (!$isGroup)
                                             <button dusk="delete_message_for_me" wire:click="deleteForMe('{{ encrypt($message->id) }}')"
                                                 wire:confirm="{{ __('wirechat::chat.actions.delete_for_me.confirmation_message') }}" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
@@ -251,7 +251,7 @@
                                                 </x-wirechat::dropdown-link>
                                             </button>
 
-                                      
+
                                         </x-slot>
                                     </x-wirechat::dropdown>
 
@@ -274,7 +274,7 @@
                                                 // Hide avatar if the next message is from the same user
                                                 'hidden' => $message?->sendable?->is($previousMessage?->sendable),
                                             ])>
-                                                {{ $message->sendable?->display_name }}
+                                                {{ $message->sendable?->wirechat_name }}
                                             </div>
                                         @endif
                                         {{-- Attachemnt is Application/ --}}

@@ -77,7 +77,7 @@ class AddMembers extends ModalComponent
              * Update the users list based on the search term.
              *
              * Maps the panel search results to an array with:
-             * - id, type, display_name, cover_url
+             * - id, type, wirechat_name, wirechat_avatar_url
              * - belongsToConversation flag for the current conversation
              */
             $this->users = collect($this->panel()->searchUsers($this->search)->collection)
@@ -87,8 +87,8 @@ class AddMembers extends ModalComponent
                     return [
                         'id' => $model->id,
                         'type' => $model->getMorphClass(),
-                        'display_name' => $model->display_name,
-                        'cover_url' => $model->cover_url,
+                        'wirechat_name' => $model->wirechat_name,
+                        'wirechat_avatar_url' => $model->wirechat_avatar_url,
                         'belongsToConversation' => $model->belongsToConversation($this->conversation),
                     ];
                 });
@@ -104,7 +104,7 @@ class AddMembers extends ModalComponent
         if ($model) {
 
             // abort if member already belong to conversation
-            abort_if($model->belongsToConversation($this->conversation), 403, $model->display_name.' Is already a member');
+            abort_if($model->belongsToConversation($this->conversation), 403, $model->wirechat_name.' Is already a member');
 
             if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
                 // Remove member if they are already selected
@@ -121,14 +121,14 @@ class AddMembers extends ModalComponent
                 $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
 
                 // abort if member already exited group
-                abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->display_name.' because they left the group');
+                abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->wirechat_name.' because they left the group');
 
                 // check if is removed - if true then
                 // abort if non admin member tries to add a participant previously removed by admin
                 if ($participant?->isRemovedByAdmin()) {
                     $authParticipant = $this->conversation->participant(auth()->user());
 
-                    abort_unless($authParticipant?->isAdmin(), 403, 'Cannot add '.$model->display_name.' because they were removed from the group by an Admin.');
+                    abort_unless($authParticipant?->isAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were removed from the group by an Admin.');
 
                 }
 

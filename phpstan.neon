@@ -14,12 +14,12 @@ parameters:
 
     ignoreErrors:
 #        - '#PHPDoc tag @var#'
-        # Ignore errors for properties |method in ChatableTrait related to display_name, cover_url, and profile_url
-        - '#Access to an undefined property .*display_name#'
+        # Ignore errors for properties |method in ChatableTrait related to wirechat_name, wirechat_avatar_url, and wirechat_profile_url
+        - '#Access to an undefined property .*wirechat_name#'
         - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withoutParticipantable#'
         - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Model::hasDeletedConversation#'
-        - '#Access to an undefined property .*cover_url#'
-        #- '#Access to an undefined property .*profile_url#'
+        - '#Access to an undefined property .*wirechat_avatar_url#'
+        #- '#Access to an undefined property .*wirechat_profile_url#'
         - '#Call to an undefined method .*belongsToConversation#'
         - '#Trait Namu\\WireChat\\Traits\\Chatable is used zero times and is not analysed#'
         - '#Trait Namu\\WireChat\\Traits\\Actor is used zero times and is not analysed#'

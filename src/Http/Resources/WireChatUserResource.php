@@ -20,8 +20,8 @@ class WireChatUserResource extends JsonResource
         return [
             'id' => $this->id,
             'type' => $this->getMorphClass(),
-            'display_name' => $this->display_name,
-            'cover_url' => $this->cover_url,
+            'wirechat_name' => $this->wirechat_name,
+            'wirechat_avatar_url' => $this->wirechat_avatar_url,
         ];
     }
 }

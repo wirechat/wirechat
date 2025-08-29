@@ -82,7 +82,7 @@ class Info extends ModalComponent
         // Pass data to the view
         return view('wirechat::livewire.chat.info', [
             'receiver' => $receiver,
-            'cover_url' => $receiver?->cover_url,
+            'wirechat_avatar_url' => $receiver?->wirechat_avatar_url,
         ]);
     }
 }

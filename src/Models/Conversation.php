@@ -195,7 +195,7 @@ class Conversation extends Model
             abort_if(
                 $participant->hasExited(),
                 403,
-                'Cannot add '.$user->display_name.' because they left the group.'
+                'Cannot add '.$user->wirechat_name.' because they left the group.'
             );
 
             // Check if the participant was removed by an admin or owner
@@ -204,7 +204,7 @@ class Conversation extends Model
                 abort_if(
                     ! $undoAdminRemovalAction,
                     403,
-                    'Cannot add '.$user->display_name.' because they were removed from the group by an Admin.'
+                    'Cannot add '.$user->wirechat_name.' because they were removed from the group by an Admin.'
                 );
 
                 // If undoAdminRemovalAction is true, remove admin removal actions and return the participant

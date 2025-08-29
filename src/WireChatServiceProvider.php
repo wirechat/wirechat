@@ -234,13 +234,13 @@ class WireChatServiceProvider extends ServiceProvider
                                         });
 
                                     function showNotification(e) {
-                                        let title = e.message.sendable?.display_name || 'User';
+                                        let title = e.message.sendable?.wirechat_name || 'User';
                                         let body  = e.message.body;
-                                        let icon  = e.message.sendable?.cover_url;
+                                        let icon  = e.message.sendable?.wirechat_avatar_url;
 
                                         if (e.message.conversation.type === 'group') {
                                             title = e.message.conversation?.group?.name;
-                                            body  = e.message.sendable?.display_name + ': ' + e.message.body;
+                                            body  = e.message.sendable?.wirechat_name + ': ' + e.message.body;
                                             icon  = e.message.conversation?.group?.cover_url;
                                         }
 

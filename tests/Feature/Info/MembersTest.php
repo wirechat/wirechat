@@ -729,13 +729,13 @@ describe('actions test', function () {
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
 
         // assert
-        $request->assertSee($participant->display_name);
+        $request->assertSee($participant->wirechat_name);
 
         // action
         $request->call('removeFromGroup', $participant->id);
 
         // assert after
-        $request->assertDontSee($participant->display_name);
+        $request->assertDontSee($participant->wirechat_name);
 
     });
 

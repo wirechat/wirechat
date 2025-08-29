@@ -62,10 +62,10 @@
                             wire:click="createConversation('{{ $user['id'] }}',{{ json_encode($user['type']) }})"
                             class="flex cursor-pointer group gap-2 items-center p-2">
 
-                            <x-wirechat::avatar :src="$user['cover_url']" class="w-10 h-10" />
+                            <x-wirechat::avatar :src="$user['wirechat_avatar_url']" class="w-10 h-10" />
 
                             <p class="group-hover:underline transition-all">
-                                {{ $user['display_name'] }}</p>
+                                {{ $user['wirechat_name'] }}</p>
 
                         </li>
                     @endforeach
