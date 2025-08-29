@@ -1,26 +1,39 @@
 @props(['src' => null, 'story' => null, 'group' => false, 'disappearing' => false])
 
 <div
+    x-data="{ loaded: false }"
+    x-init="
+        if('{{ $src }}') {
+            let img = new Image();
+            img.src = '{{ $src }}';
+            img.onload = () => loaded = true;
+            img.onerror = () => loaded = false;
+        }
+    "
     {{ $attributes->merge([
-            'class' => "shrink-0 inline-flex items-center justify-center relative transition
-                        overflow-visible rounded-full border border-[var(--wc-light-secondary)] text-gray-300 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]
-                        dark:border-[var(--wc-dark-secondary)] text-base",
-        ])->class(
-            $story ? 'bg-linear-to-r p-[2px] ring-2 ring-white from-purple-400 via-pink-500 to-red-500 rounded-full' : ' ',
-        ) }}>
-
+        'class' => "shrink-0 inline-flex items-center justify-center relative transition
+                    overflow-visible rounded-full border border-[var(--wc-light-secondary)] text-gray-300 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]
+                    dark:border-[var(--wc-dark-secondary)] text-base",
+    ])->class(
+        $story ? 'bg-linear-to-r p-[2px] ring-2 ring-white from-purple-400 via-pink-500 to-red-500 rounded-full' : ' ',
+    ) }}
+>
+    {{-- Image --}}
     @if ($src)
         <img
-            loading="lazy"
+            x-show="loaded"
+            x-transition.opacity
             class="shrink-0 w-full h-full object-cover object-center rounded-full"
             src="{{ $src }}"
             alt="avatar"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
         />
     @endif
 
-    <div  style="{{ $src ? 'display:none;' : 'display:inline-flex;' }}"
-         class="shrink-0 w-full h-full items-center justify-center rounded-full">
+    {{-- Fallback (initials/icon/group) --}}
+    <div
+        x-show="!loaded"
+        class="shrink-0 w-full h-full items-center justify-center rounded-full flex"
+    >
         @if($group)
             <svg class="w-full h-full text-gray-400 dark:text-gray-300 bg-gray-100 dark:bg-[var(--wc-dark-secondary)] rounded-full"
                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

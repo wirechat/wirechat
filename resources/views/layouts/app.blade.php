@@ -59,6 +59,30 @@
 
     @livewireScripts
     @wirechatAssets(panel: $panel)
+
+    <script>
+        document.addEventListener('livewire:updated', function () {
+            document.querySelectorAll('img[src]').forEach(img => {
+                const src = img.getAttribute('src');
+                const svg = img.nextElementSibling;
+                if (src) {
+                    const preloadImg = new Image();
+                    preloadImg.src = src;
+                    preloadImg.onload = () => {
+                        img.style.display = 'inline-flex';
+                        svg.style.display = 'none';
+                    };
+                    preloadImg.onerror = () => {
+                        img.style.display = 'none';
+                        svg.style.display = 'inline-flex';
+                    };
+                } else {
+                    img.style.display = 'none';
+                    svg.style.display = 'inline-flex';
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
