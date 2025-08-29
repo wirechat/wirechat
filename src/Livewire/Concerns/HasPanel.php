@@ -39,7 +39,7 @@ trait HasPanel
             throw NoPanelProvidedException::make();
         }
 
-        app('wirechatPanelRegistry')->setCurrent($this->panel);
+        app(\Namu\WireChat\PanelRegistry::class)->setCurrent($this->panel);
     }
 
     #[Computed(cache: false)]

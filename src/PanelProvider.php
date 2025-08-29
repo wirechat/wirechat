@@ -13,6 +13,6 @@ abstract class PanelProvider extends ServiceProvider
     {
         $panel = $this->panel(Panel::make());
         Log::info('Registering panel via provider', ['id' => $panel->getId()]);
-        app('wirechatPanelRegistry')->register($panel);
+        app(PanelRegistry::class)->register($panel);
     }
 }

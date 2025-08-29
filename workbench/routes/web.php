@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Namu\WireChat\PanelRegistry;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +26,7 @@ Route::middleware('guest')->get('/login', function () {
 
 Route::name('wirechat.')
     ->group(function () {
-        $panels = app('wirechatPanelRegistry')->all();
+        $panels = app(PanelRegistry::class)->all();
         if (empty($panels)) {
             \Log::warning('No panels registered in wirechatPanelRegistry');
 

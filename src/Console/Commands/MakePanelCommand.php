@@ -3,9 +3,12 @@
 namespace Namu\WireChat\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 
+use Namu\WireChat\Facades\WireChat;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
 
@@ -15,6 +18,14 @@ class MakePanelCommand extends Command
 
     protected $description = 'Create a new WireChat panel provider';
 
+    protected  bool $isLaravel11OrHigherWithBootstrapFile;
+    public string $stubPath; // Add protected property
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->stubPath = dirname(__DIR__, 3) . '/stubs/PanelProvider.stub'; // Default value
+    }
     public function handle()
     {
         // Get the panel ID from argument or prompt
@@ -47,33 +58,40 @@ class MakePanelCommand extends Command
         $namespace = 'App\\Providers\\WireChat';
         $path = app_path("Providers/WireChat/{$className}.php");
 
-        // Check if file exists and ask to overwrite
+       // Make it relative to the app path for cleaner output
+        $displayPath =  Str::after($path, base_path() . DIRECTORY_SEPARATOR);
+
         if (file_exists($path)) {
             $overwrite = confirm(
-                label: "The file {$path} already exists. Do you want to overwrite it?",
+                label: "The file [{$displayPath}] already exists. Do you want to overwrite it?",
                 default: false
             );
 
             if (! $overwrite) {
                 $this->info('Operation cancelled.');
-
                 return 0;
             }
         }
-
         // Read the stub file
-        $stubPath = dirname(__DIR__, 3).'/stubs/PanelProvider.stub';
-        if (! file_exists($stubPath)) {
-            $this->error("Stub file not found at: $stubPath");
-
+        if (! file_exists($this->stubPath)) {
+            $this->error("Stub file not found at: $this->stubPath");
             return 1;
         }
-        $stub = file_get_contents($stubPath);
+        $stub = file_get_contents($this->stubPath);
+
+        // Check registry for an existing default panel
+        $panels = WireChat::panels();
+        $hasDefault = collect($panels)->contains(fn ($panel) => $panel->isDefault());
+
+        // If no default exists, set this one as default
+        $defaultFlag = $hasDefault ? '' : '->default()';
+
 
         // Replace placeholders
         $stub = str_replace('{{ namespace }}', $namespace, $stub);
         $stub = str_replace('{{ className }}', $className, $stub);
         $stub = str_replace('{{ panelId }}', $id, $stub);
+        $stub = str_replace('{{ defaultFlag }}', $defaultFlag, $stub);
 
         // Ensure the directory exists
         $directory = dirname($path);
@@ -83,6 +101,10 @@ class MakePanelCommand extends Command
 
         // Write the file
         file_put_contents($path, $stub);
+
+        $this->isLaravel11OrHigherWithBootstrapFile = version_compare(App::version(), '11.0', '>=') &&
+            /** @phpstan-ignore-next-line */
+            file_exists(App::getBootstrapProvidersPath());
 
         // Register the provider automatically
         try {
@@ -97,43 +119,46 @@ class MakePanelCommand extends Command
             return 1;
         }
 
-        // Output success message
-        $this->info("Panel provider [{$path}] created successfully.");
+        if ($this->isLaravel11OrHigherWithBootstrapFile) {
+            $this->warn("We’ve tried to add [{$displayPath}] into your [bootstrap/providers.php] file.If you encounter errors accessing your panel, the automatic registration may have failed. In that case, please add it manually to the returned array.");
+        } else {
+            $this->warn("We’ve attempted to register [{$displayPath}] in your [config/app.php] providers list. If you run into issues, the change might not have applied correctly — you can always insert it yourself in the 'providers' array.");
+        }
 
         return 0;
     }
 
-    protected function registerProvider(string $namespace, string $className)
+    protected function registerProvider(string $namespace, string $className): void
     {
         $providerClass = "{$namespace}\\{$className}";
-        $isLaravel11OrHigher = version_compare(app()->version(), '11.0', '>=') && file_exists(base_path('bootstrap/providers.php'));
 
-        if ($isLaravel11OrHigher) {
-            $bootstrapPath = base_path('bootstrap/providers.php');
-            $content = file_get_contents($bootstrapPath);
 
-            if (! Str::contains($content, $providerClass)) {
-                $content = str_replace(
-                    "return [\n",
-                    "return [\n    {$providerClass}::class,\n",
-                    $content
-                );
-                file_put_contents($bootstrapPath, $content);
-                $this->info("Registered provider [{$providerClass}] in bootstrap/providers.php.");
-            }
+
+        if ($this->isLaravel11OrHigherWithBootstrapFile) {
+            $bootstrapPath = App::getBootstrapProvidersPath();
+            // Use Laravel's built-in helper for bootstrap/providers.php
+            /** @phpstan-ignore-next-line */
+            ServiceProvider::addProviderToBootstrapFile($providerClass, $bootstrapPath);
+
         } else {
             $appConfigPath = config_path('app.php');
             $appConfig = file_get_contents($appConfigPath);
 
             if (! Str::contains($appConfig, $providerClass)) {
-                $appConfig = str_replace(
-                    "'providers' => [\n",
-                    "'providers' => [\n        {$providerClass}::class,\n",
-                    $appConfig
+                file_put_contents(
+                    $appConfigPath,
+                    str_replace(
+                        "App\\Providers\\RouteServiceProvider::class,",
+                        "{$providerClass}::class," . PHP_EOL . '        App\\Providers\\RouteServiceProvider::class,',
+                        $appConfig
+                    )
                 );
-                file_put_contents($appConfigPath, $appConfig);
-                $this->info("Registered provider [{$providerClass}] in config/app.php.");
+
             }
         }
+        $this->info("WireChat panel [{$providerClass}] created successfully.");
+
+
     }
+
 }

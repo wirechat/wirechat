@@ -13,7 +13,7 @@ class WireChatService
 
     public function __construct()
     {
-        $this->registry = app('wirechatPanelRegistry');
+        $this->registry = app(PanelRegistry::class);
     }
 
     /**

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Namu\WireChat\Helpers\MorphClassResolver;
 use Namu\WireChat\Models\Conversation;
+use Namu\WireChat\PanelRegistry;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +17,7 @@ use Namu\WireChat\Models\Conversation;
 |
 */
 
-$panels = app('wirechatPanelRegistry')->all();
+$panels = app(PanelRegistry::class)->all();
 
 if (empty($panels)) {
     \Illuminate\Support\Facades\Log::warning('No panels registered in wirechatPanelRegistry for channels');

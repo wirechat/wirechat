@@ -48,7 +48,7 @@ class WireChatServiceProvider extends ServiceProvider
         }
 
         // Trigger auto-discovery
-        app('wirechatPanelRegistry')->autoDiscover();
+        app(\Namu\WireChat\PanelRegistry::class)->autoDiscover();
 
         logger('WireChatServiceProvider booted, auto-discovery completed');
 
@@ -127,11 +127,8 @@ class WireChatServiceProvider extends ServiceProvider
 
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container
-        // Bind PanelRegistry to the container
-        $this->app->singleton('wirechatPanelRegistry', function () {
-            logger('Binding wirechatPanelRegistry');
-
-            return new PanelRegistry;
+        $this->app->singleton(PanelRegistry::class, function ($app) {
+            return new PanelRegistry();
         });
     }
 

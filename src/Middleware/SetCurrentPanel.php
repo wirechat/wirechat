@@ -12,7 +12,7 @@ class SetCurrentPanel
      */
     public function handle(Request $request, Closure $next, string $panelId)
     {
-        app('wirechatPanelRegistry')->setCurrent($panelId);
+        app(\Namu\WireChat\PanelRegistry::class)->setCurrent($panelId);
 
         return $next($request);
     }

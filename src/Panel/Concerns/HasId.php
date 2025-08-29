@@ -8,6 +8,9 @@ trait HasId
 {
     protected string $id;
 
+    /**
+     * @throws Exception
+     */
     public function id(string $id): static
     {
         if (isset($this->id)) {
