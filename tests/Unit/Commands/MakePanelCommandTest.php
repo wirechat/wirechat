@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\File;
-
 use Namu\WireChat\Console\Commands\MakePanelCommand;
+
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
@@ -10,11 +10,10 @@ beforeEach(function () {
     $this->className = 'TestPanelPanelProvider';
     $this->namespace = 'App\\Providers\\WireChat';
     $this->filePath = app_path("Providers/WireChat/{$this->className}.php");
-    $this->displayPath= Str::after($this->filePath, base_path() . DIRECTORY_SEPARATOR);
-    $this->providerClass='App\\Providers\\WireChat\\'.$this->className;
+    $this->displayPath = Str::after($this->filePath, base_path().DIRECTORY_SEPARATOR);
+    $this->providerClass = 'App\\Providers\\WireChat\\'.$this->className;
     // Just reference the existing stub; no need to overwrite it
-    $this->stubPath = dirname(__DIR__, 3) . '/stubs/PanelProvider.stub';
-
+    $this->stubPath = dirname(__DIR__, 3).'/stubs/PanelProvider.stub';
 
     $this->isLaravel11OrHigherWithBootstrapFile = version_compare(App::version(), '11.0', '>=') &&
         /** @phpstan-ignore-next-line */
@@ -23,31 +22,27 @@ beforeEach(function () {
 
 });
 
-afterEach(function () {
-});
+afterEach(function () {});
 
 it('creates a new wirechat panel provider using a fresh ID', function () {
 
     // Ensure file doesn't exist before test
 
-
-    $id='temp';
+    $id = 'temp';
     $className = 'TempPanelProvider';
-    $providerClass='App\\Providers\\WireChat\\'.$className;
+    $providerClass = 'App\\Providers\\WireChat\\'.$className;
     $filePath = app_path("Providers/WireChat/{$className}.php");
-    $displayPath= Str::after($filePath, base_path() . DIRECTORY_SEPARATOR);
+    $displayPath = Str::after($filePath, base_path().DIRECTORY_SEPARATOR);
 
-    $artisan= artisan('make:wirechat-panel',['id'=>$id])
+    $artisan = artisan('make:wirechat-panel', ['id' => $id])
         ->assertExitCode(0)
         ->expectsOutput("WireChat panel [$providerClass] created successfully.");
-
 
     if ($this->isLaravel11OrHigherWithBootstrapFile) {
         $artisan->expectsOutput("We’ve tried to add [{$displayPath}] into your [bootstrap/providers.php] file.If you encounter errors accessing your panel, the automatic registration may have failed. In that case, please add it manually to the returned array.");
     } else {
         $artisan->expectsOutput("We’ve attempted to register [{$displayPath}] in your [config/app.php] providers list. If you run into issues, the change might not have applied correctly — you can always insert it yourself in the 'providers' array.");
     }
-
 
     expect(file_exists($filePath))->toBeTrue()
         ->and(File::get($filePath))
@@ -110,12 +105,12 @@ it('shows validation error for invalid ID', function () {
 it('shows error when stub file is missing', function () {
     File::delete($this->filePath);
     // Mock panel doesnt exists  facade for stub path
-//    File::shouldReceive('exists')
-//        ->with($this->filePath)
-//        ->andReturn(false);
+    //    File::shouldReceive('exists')
+    //        ->with($this->filePath)
+    //        ->andReturn(false);
 
     // Set stubPath to match command's default
-    $command = new MakePanelCommand();
+    $command = new MakePanelCommand;
 
     // Set a fake, non-existent stub path
     $fakeStubPath = '/non/existent/path/PanelProvider.stub';
@@ -126,7 +121,7 @@ it('shows error when stub file is missing', function () {
         return $command;
     });
 
-    $this->artisan('make:wirechat-panel',['id'=>$this->id])
+    $this->artisan('make:wirechat-panel', ['id' => $this->id])
         ->expectsOutput("Stub file not found at: {$fakeStubPath}")
         ->assertExitCode(1);
 });

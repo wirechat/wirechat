@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-
 use Namu\WireChat\Facades\WireChat;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
 
@@ -18,14 +18,16 @@ class MakePanelCommand extends Command
 
     protected $description = 'Create a new WireChat panel provider';
 
-    protected  bool $isLaravel11OrHigherWithBootstrapFile;
+    protected bool $isLaravel11OrHigherWithBootstrapFile;
+
     public string $stubPath; // Add protected property
 
     public function __construct()
     {
         parent::__construct();
-        $this->stubPath = dirname(__DIR__, 3) . '/stubs/PanelProvider.stub'; // Default value
+        $this->stubPath = dirname(__DIR__, 3).'/stubs/PanelProvider.stub'; // Default value
     }
+
     public function handle()
     {
         // Get the panel ID from argument or prompt
@@ -58,8 +60,8 @@ class MakePanelCommand extends Command
         $namespace = 'App\\Providers\\WireChat';
         $path = app_path("Providers/WireChat/{$className}.php");
 
-       // Make it relative to the app path for cleaner output
-        $displayPath =  Str::after($path, base_path() . DIRECTORY_SEPARATOR);
+        // Make it relative to the app path for cleaner output
+        $displayPath = Str::after($path, base_path().DIRECTORY_SEPARATOR);
 
         if (file_exists($path)) {
             $overwrite = confirm(
@@ -69,12 +71,14 @@ class MakePanelCommand extends Command
 
             if (! $overwrite) {
                 $this->info('Operation cancelled.');
+
                 return 0;
             }
         }
         // Read the stub file
         if (! file_exists($this->stubPath)) {
             $this->error("Stub file not found at: $this->stubPath");
+
             return 1;
         }
         $stub = file_get_contents($this->stubPath);
@@ -85,7 +89,6 @@ class MakePanelCommand extends Command
 
         // If no default exists, set this one as default
         $defaultFlag = $hasDefault ? '' : '->default()';
-
 
         // Replace placeholders
         $stub = str_replace('{{ namespace }}', $namespace, $stub);
@@ -103,7 +106,6 @@ class MakePanelCommand extends Command
         file_put_contents($path, $stub);
 
         $this->isLaravel11OrHigherWithBootstrapFile = version_compare(App::version(), '11.0', '>=') &&
-            /** @phpstan-ignore-next-line */
             file_exists(App::getBootstrapProvidersPath());
 
         // Register the provider automatically
@@ -132,12 +134,9 @@ class MakePanelCommand extends Command
     {
         $providerClass = "{$namespace}\\{$className}";
 
-
-
         if ($this->isLaravel11OrHigherWithBootstrapFile) {
             $bootstrapPath = App::getBootstrapProvidersPath();
             // Use Laravel's built-in helper for bootstrap/providers.php
-            /** @phpstan-ignore-next-line */
             ServiceProvider::addProviderToBootstrapFile($providerClass, $bootstrapPath);
 
         } else {
@@ -148,8 +147,8 @@ class MakePanelCommand extends Command
                 file_put_contents(
                     $appConfigPath,
                     str_replace(
-                        "App\\Providers\\RouteServiceProvider::class,",
-                        "{$providerClass}::class," . PHP_EOL . '        App\\Providers\\RouteServiceProvider::class,',
+                        'App\\Providers\\RouteServiceProvider::class,',
+                        "{$providerClass}::class,".PHP_EOL.'        App\\Providers\\RouteServiceProvider::class,',
                         $appConfig
                     )
                 );
@@ -158,7 +157,5 @@ class MakePanelCommand extends Command
         }
         $this->info("WireChat panel [{$providerClass}] created successfully.");
 
-
     }
-
 }

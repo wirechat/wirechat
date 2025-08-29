@@ -10,11 +10,11 @@ use Namu\WireChat\Contracts\WireChatUser;
 use Namu\WireChat\Traits\Chatable;
 use Namu\WireChat\Traits\InteractsWithWireChat;
 
-class User extends Authenticatable implements  WireChatUser
+class User extends Authenticatable implements WireChatUser
 {
-  // use Chatable;
-    use InteractsWithWireChat;
     use HasFactory, Notifiable;
+    // use Chatable;
+    use InteractsWithWireChat;
 
     /**
      * The attributes that are mass assignable.

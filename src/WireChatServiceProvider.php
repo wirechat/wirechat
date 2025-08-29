@@ -128,7 +128,7 @@ class WireChatServiceProvider extends ServiceProvider
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container
         $this->app->singleton(PanelRegistry::class, function ($app) {
-            return new PanelRegistry();
+            return new PanelRegistry;
         });
     }
 

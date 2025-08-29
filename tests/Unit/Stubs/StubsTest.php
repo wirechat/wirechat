@@ -1,13 +1,12 @@
 <?php
 
-
 use Illuminate\Support\Facades\File;
 
 it('ensure MainServiceWorkerJsScript.stub exists', function () {
 
-    $file_path=dirname(__DIR__, 3) . '/stubs/MainServiceWorkerJsScript.stub';
+    $file_path = dirname(__DIR__, 3).'/stubs/MainServiceWorkerJsScript.stub';
 
-    $expectedContent=
+    $expectedContent =
 "// In host's sw.js
 importScripts('/js/wirechat/sw.js');
 
@@ -24,18 +23,16 @@ self.addEventListener('activate', event => {
 });
 ";
 
-
     expect(File::exists($file_path))->toBeTrue();
     expect(File::get($file_path))->toBe($expectedContent);
 
 });
 
-
 it('ensure PanelProvider.stub exists', function () {
 
-    $file_path=dirname(__DIR__, 3) . '/stubs/PanelProvider.stub';
+    $file_path = dirname(__DIR__, 3).'/stubs/PanelProvider.stub';
 
-    $expectedContent=
+    $expectedContent =
 '<?php
 
 namespace {{ namespace }};
@@ -56,7 +53,6 @@ class {{ className }} extends PanelProvider
 }
 ';
 
-
     expect(File::exists($file_path))->toBeTrue();
     expect(File::get($file_path))->toBe($expectedContent);
 
@@ -64,9 +60,9 @@ class {{ className }} extends PanelProvider
 
 it('ensure ServiceWorkerJsScript.stub exists', function () {
 
-    $file_path=dirname(__DIR__, 3) . '/stubs/ServiceWorkerJsScript.stub';
+    $file_path = dirname(__DIR__, 3).'/stubs/ServiceWorkerJsScript.stub';
 
-    $expectedContent=
+    $expectedContent =
 "const chatClients = new Map();
 
 self.addEventListener('message', event => {
@@ -122,7 +118,6 @@ self.addEventListener('notificationclick', event => {
     }
 });
 ";
-
 
     expect(File::exists($file_path))->toBeTrue();
     expect(File::get($file_path))->toBe($expectedContent);

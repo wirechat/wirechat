@@ -5,7 +5,6 @@ namespace Namu\WireChat\Traits;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Namu\WireChat\Enums\ConversationType;
 use Namu\WireChat\Enums\ParticipantRole;
@@ -218,7 +217,7 @@ trait InteractsWithWireChat
                 abort(403, 'The model must use `InteractsWithWireChat` trait and must implement WireChatUser');
             }
 
-// Deprecation notice if Chatable is still in use
+            // Deprecation notice if Chatable is still in use
             if (in_array(Chatable::class, class_uses($model))) {
                 trigger_error(
                     'The `Chatable` trait is deprecated. Please use `InteractsWithWireChat` instead.',
@@ -265,6 +264,7 @@ trait InteractsWithWireChat
     /**
      * Accessor returns the URL for the user's cover image (used as an avatar).
      * Customize this based on your avatar field.
+     *
      * @deprecated since 0.3.0 — use {@see getWirechatAvatarUrlAttribute()} instead.
      */
     public function getCoverUrlAttribute(): ?string
@@ -275,6 +275,7 @@ trait InteractsWithWireChat
     /**
      * Accessor returns the URL for the user's profile page.
      * Customize this based on your routing or profile setup.
+     *
      * @deprecated since 0.3.0 — use {@see getWirechatProfileUrlAttribute()} instead.
      */
     public function getProfileUrlAttribute(): ?string
@@ -285,6 +286,7 @@ trait InteractsWithWireChat
     /**
      * Accessor returns the display name for the user.
      * Customize this based on your display name field.
+     *
      * @deprecated since 0.3.0 — use {@see getWirechatNameAttribute()} instead.
      */
     public function getDisplayNameAttribute(): ?string
@@ -292,11 +294,8 @@ trait InteractsWithWireChat
         return $this->name ?? 'user';  // Adjust 'name' field if needed
     }
 
-
     /**
      * Get Wirechat name
-     * @return string
-     *
      */
     public function getWirechatNameAttribute(): ?string
     {
@@ -306,7 +305,6 @@ trait InteractsWithWireChat
 
     /**
      * Get Wirechat avatar url
-     * @return string|null
      */
     public function getWirechatAvatarUrlAttribute(): ?string
     {
@@ -316,14 +314,11 @@ trait InteractsWithWireChat
     /**
      * Get Wirechat Profile Url
      * Customize this based on your routing or profile setup.
-     * @return string|null
      */
     public function getWirechatProfileUrlAttribute(): ?string
     {
-        return $this->wirechat_profile_url?? $this->profile_url ;
+        return $this->wirechat_profile_url ?? $this->profile_url;
     }
-
-
 
     /**
      * Get unread messages count for the user, across all conversations or within a specific conversation.
@@ -464,7 +459,6 @@ trait InteractsWithWireChat
         return $this->hasDeletedConversation($conversation, true);
     }
 
-
     /* Checking roles in conversation */
 
     /**
@@ -511,6 +505,4 @@ trait InteractsWithWireChat
 
         return (bool) $pariticipant?->isOwner();
     }
-
-
 }
