@@ -24,6 +24,7 @@ use Namu\WireChat\Livewire\Pages\Chat as View;
 use Namu\WireChat\Livewire\Pages\Chats as Index;
 use Namu\WireChat\Livewire\Widgets\WireChat;
 use Namu\WireChat\Middleware\BelongsToConversation;
+use Namu\WireChat\Middleware\EnsureWireChatPanelAccess;
 use Namu\WireChat\Middleware\SetCurrentPanel;
 use Namu\WireChat\Services\ColorService;
 use Namu\WireChat\Services\WireChatService;
@@ -167,6 +168,7 @@ class WireChatServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
         $router->aliasMiddleware('wirechat.setPanel', SetCurrentPanel::class);
+        $router->aliasMiddleware('wirechat.panelAccess', EnsureWireChatPanelAccess::class);
     }
 
     protected function loadAssets(): void

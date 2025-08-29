@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Namu\WireChat\Contracts\WireChatUser;
+use Namu\WireChat\Panel;
 use Namu\WireChat\Traits\InteractsWithWireChat;
 
 class Admin extends Authenticatable implements WireChatUser
@@ -81,5 +82,10 @@ class Admin extends Authenticatable implements WireChatUser
     public function canCreateChats(): bool
     {
         return $this->hasVerifiedEmail() == true;
+    }
+    public function canAccessWireChatPanel(Panel $panel): bool
+    {
+        return   $this->hasVerifiedEmail();
+
     }
 }

@@ -2,6 +2,7 @@
 
 <div
     x-data="{ loaded: false }"
+
     x-init="
         if('{{ $src }}') {
             let img = new Image();

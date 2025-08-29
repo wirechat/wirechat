@@ -37,9 +37,13 @@ Route::name('wirechat.')
                 ->name("{$panel->getPath()}.")
                 ->middleware(array_merge(
                     $panel->getMiddleware(),
-                    ["wirechat.setPanel:{$panel->getId()}"]
+                    [
+                        "wirechat.setPanel:{$panel->getId()}",
+                        "wirechat.panelAccess:{$panel->getId()}",
+                    ]
                 ))
                 ->group(function () use ($panel) {
+
                     Route::view('/', 'wirechat::pages.chats', ['panel' => $panel->getId()])
                         ->name('chats');
                     Route::view('/{conversation}', 'wirechat::pages.chat', ['panel' => $panel->getId()])
