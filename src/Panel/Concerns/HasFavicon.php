@@ -15,6 +15,11 @@ trait HasFavicon
         return $this;
     }
 
+    public function hasFavicon(): bool
+    {
+        return filled($this->evaluate($this->favicon));
+    }
+
     public function getFavicon(): ?string
     {
         return $this->evaluate($this->favicon);

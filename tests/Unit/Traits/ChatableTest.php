@@ -957,33 +957,26 @@ describe('Exit conversation', function () {
 
 });
 
-
 describe('canAccessWireChatPanel', function () {
 
-    test('it returns true if canAccessWireChatPanel() returns false',function (){
-
+    test('it returns true if canAccessWireChatPanel() returns false', function () {
 
         $auth = User::factory()->create();
 
-
-        $testPanelProvider= testPanelProvider();
+        $testPanelProvider = testPanelProvider();
 
         expect($auth->canAccessWireChatPanel($testPanelProvider))->toBeTrue();
 
     });
 
-    test('it returns false if canAccessWireChatPanel() returns false',function (){
-
+    test('it returns false if canAccessWireChatPanel() returns false', function () {
 
         $auth = User::factory()->create(['email_verified_at' => null]);
 
-
-        $testPanelProvider= testPanelProvider();
+        $testPanelProvider = testPanelProvider();
 
         expect($auth->canAccessWireChatPanel($testPanelProvider))->toBeFalse();
 
     });
 
-
-})->only();
-
+});

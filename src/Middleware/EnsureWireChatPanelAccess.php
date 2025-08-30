@@ -26,7 +26,7 @@ class EnsureWireChatPanelAccess
 
         $user = Auth::user();
 
-        if (! $user || ! method_exists($user, 'canAccessWireChatPanel') || ! $user->canAccessWireChatPanel($panel)) {
+        if (! $user || ! $user->canAccessWireChatPanel($panel)) {
             abort(404);
         }
 

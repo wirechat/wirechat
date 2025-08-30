@@ -42,10 +42,10 @@
 
 
         // Optional: track scroll when more messages are prepended (Load More)
-        const observer = new MutationObserver(() => {
-            scrollToConversation();
-        });
-        observer.observe(container, { childList: true, subtree: true });
+        //const observer = new MutationObserver(() => {
+        //    scrollToConversation();
+        //});
+        //observer.observe(container, { childList: true, subtree: true });
     "
 
 

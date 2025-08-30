@@ -14,6 +14,7 @@ use Namu\WireChat\Traits\InteractsWithWireChat;
 class User extends Authenticatable implements WireChatUser
 {
     use HasFactory, Notifiable;
+
     // use Chatable;
     use InteractsWithWireChat;
 
@@ -85,9 +86,10 @@ class User extends Authenticatable implements WireChatUser
     {
         return $this->hasVerifiedEmail() == true;
     }
+
     public function canAccessWireChatPanel(Panel $panel): bool
     {
-        return   $this->hasVerifiedEmail();
+        return $this->hasVerifiedEmail();
 
     }
 }

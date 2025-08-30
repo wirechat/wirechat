@@ -10,6 +10,7 @@ use Namu\WireChat\Panel\Concerns\HasBroadcasting;
 use Namu\WireChat\Panel\Concerns\HasChatMiddleware;
 use Namu\WireChat\Panel\Concerns\HasChatsSearch;
 use Namu\WireChat\Panel\Concerns\HasColors;
+use Namu\WireChat\Panel\Concerns\HasFavicon;
 use Namu\WireChat\Panel\Concerns\HasGroups;
 use Namu\WireChat\Panel\Concerns\HasHeading;
 use Namu\WireChat\Panel\Concerns\HasId;
@@ -31,6 +32,7 @@ class Panel
     use HasChatMiddleware;
     use HasChatsSearch;
     use HasColors;
+    use HasFavicon;
     use HasGroups;
     use HasHeading;
     use HasId;

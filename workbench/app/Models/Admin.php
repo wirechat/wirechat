@@ -83,9 +83,10 @@ class Admin extends Authenticatable implements WireChatUser
     {
         return $this->hasVerifiedEmail() == true;
     }
+
     public function canAccessWireChatPanel(Panel $panel): bool
     {
-        return   $this->hasVerifiedEmail();
+        return $this->hasVerifiedEmail();
 
     }
 }

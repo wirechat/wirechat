@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" >
-
+@php
+    $currentPanel= \Namu\WireChat\Facades\WireChat::currentPanel();
+@endphp
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,6 +38,11 @@
          });
       </script>
 
+    {{--Set up Favicon--}}
+    @if($currentPanel->hasFavicon())
+        <link rel="icon" href="{{ $currentPanel->getFavicon() }}" />
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -60,29 +67,29 @@
     @livewireScripts
     @wirechatAssets(panel: $panel)
 
-    <script>
-        document.addEventListener('livewire:updated', function () {
-            document.querySelectorAll('img[src]').forEach(img => {
-                const src = img.getAttribute('src');
-                const svg = img.nextElementSibling;
-                if (src) {
-                    const preloadImg = new Image();
-                    preloadImg.src = src;
-                    preloadImg.onload = () => {
-                        img.style.display = 'inline-flex';
-                        svg.style.display = 'none';
-                    };
-                    preloadImg.onerror = () => {
-                        img.style.display = 'none';
-                        svg.style.display = 'inline-flex';
-                    };
-                } else {
-                    img.style.display = 'none';
-                    svg.style.display = 'inline-flex';
-                }
-            });
-        });
-    </script>
+{{--    <script>--}}
+{{--        document.addEventListener('livewire:updated', function () {--}}
+{{--            document.querySelectorAll('img[src]').forEach(img => {--}}
+{{--                const src = img.getAttribute('src');--}}
+{{--                const svg = img.nextElementSibling;--}}
+{{--                if (src) {--}}
+{{--                    const preloadImg = new Image();--}}
+{{--                    preloadImg.src = src;--}}
+{{--                    preloadImg.onload = () => {--}}
+{{--                        img.style.display = 'inline-flex';--}}
+{{--                        svg.style.display = 'none';--}}
+{{--                    };--}}
+{{--                    preloadImg.onerror = () => {--}}
+{{--                        img.style.display = 'none';--}}
+{{--                        svg.style.display = 'inline-flex';--}}
+{{--                    };--}}
+{{--                } else {--}}
+{{--                    img.style.display = 'none';--}}
+{{--                    svg.style.display = 'inline-flex';--}}
+{{--                }--}}
+{{--            });--}}
+{{--        });--}}
+{{--    </script>--}}
 </body>
 
 </html>
