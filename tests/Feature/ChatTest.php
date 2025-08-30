@@ -407,8 +407,8 @@ describe('Validation', function () {
 
     test('file attachment count must not exceed value specified in config && it dispatces wirechat-toast error', function () {
 
-        // set config value
-        Config::set('wirechat.attachments.max_uploads', 13);
+        // set config value;
+        testPanelProvider()->maxUploads(13);
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1661,7 +1661,7 @@ describe('Sending messages ', function () {
     test('it saves image to storage when created & clears files properties when done', function () {
         Storage::fake('public');
 
-        Config::set('wirechat.attachments.storage_disk', 'public');
+        Config::set('wirechat.storage.disk', 'public');
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1681,7 +1681,7 @@ describe('Sending messages ', function () {
     test('it saves file visibility as public when storage_disk is public', function () {
         Storage::fake('public');
 
-        Config::set('wirechat.attachments.storage_disk', 'public');
+        Config::set('wirechat.storage.disk', 'public');
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1703,8 +1703,8 @@ describe('Sending messages ', function () {
     test('it saves file visibility as public when storage_disk is s3', function () {
         Storage::fake('s3');
 
-        Config::set('wirechat.attachments.storage_disk', 's3');
-        Config::set('wirechat.attachments.disk_visibility', 'private');
+        Config::set('wirechat.storage.disk', 's3');
+        Config::set('wirechat.storage.visibility', 'private');
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1780,7 +1780,7 @@ describe('Sending messages ', function () {
     test('it saves video to storage when created', function () {
         Storage::fake('public');
 
-        Config::set('wirechat.attachments.storage_disk', 'public');
+        Config::set('wirechat.storage.disk', 'public');
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1816,8 +1816,8 @@ describe('Sending messages ', function () {
 
     test('it saves file to databse when created & clears files properties when done', function () {
 
-        config::set('wirechat.attachments.storage_disk', 'public');
-        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        config::set('wirechat.storage.disk', 'public');
+        Storage::fake(config('wirechat.storage.disk', 'public'));
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
@@ -1838,8 +1838,8 @@ describe('Sending messages ', function () {
 
     test('it saves file to storage when created & clears files properties when done', function () {
 
-        config::set('wirechat.attachments.storage_disk', 'public');
-        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        config::set('wirechat.storage.disk', 'public');
+        Storage::fake(config('wirechat.storage.disk', 'public'));
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
@@ -2890,7 +2890,7 @@ describe('deleteMessage ForEveryone', function () {
 
     test('it deletes attachment from database when message is deleted ', function () {
 
-        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        Storage::fake(config('wirechat.storage.disk', 'public'));
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -2918,7 +2918,7 @@ describe('deleteMessage ForEveryone', function () {
 
     test('it deletes attachment file from folder when message is deleted ', function () {
 
-        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        Storage::fake(config('wirechat.storage.disk', 'public'));
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -2939,12 +2939,12 @@ describe('deleteMessage ForEveryone', function () {
         // here assuming that the message ID is 1 since it is the first one
         $request->call('deleteForMe', encrypt($messageModel->id));
 
-        Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->assertMissing($attachmentModel->file_name);
+        Storage::disk(config('wirechat.storage.disk', 'public'))->assertMissing($attachmentModel->file_name);
     });
 
     test('it disptaches refresh event and removes deleted message from chatlist', function () {
 
-        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        Storage::fake(config('wirechat.storage.disk', 'public'));
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);

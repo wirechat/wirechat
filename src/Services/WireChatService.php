@@ -143,33 +143,70 @@ class WireChatService
     }
 
     /**
+     * @deprecated Use WireChat::storage()->disk() instead.
+     *
      * Get the wirechat storage disk from the configuration.
      *
      * @return string The storage disk.
      */
     public static function storageDisk(): string
     {
-        return (string) config('wirechat.attachments.storage_disk', 'public');
+        return (string) config('wirechat.storage.disk')
+            ?: config('wirechat.attachments.storage_disk', 'public');
     }
 
     /**
+     * @deprecated Use WireChat::storage()->directory() instead.
+     *
      * Get the wirechat storage folder from the configuration.
      *
      * @return string The storage folder.
      */
     public static function storageFolder(): string
     {
-        return (string) config('wirechat.attachments.storage_folder', 'attachments');
+        return (string) config('wirechat.storage.directory')
+            ?: config('wirechat.attachments.storage_folder', 'attachments');
     }
 
     /**
+     * @deprecated Use WireChat::storage()->visibility() instead.
+     *
      * Get the wirechat disk visibility from the configuration.
      *
      * @return string The disk visibility.
      */
     public static function diskVisibility(): string
     {
-        return (string) config('wirechat.attachments.disk_visibility', 'pubblic');
+        return (string) config('wirechat.storage.visibility')
+            ?: config('wirechat.attachments.disk_visibility', 'public');
+    }
+
+    /**
+     * Get the configured storage directory for WireChat.
+     *
+     * Uses `wirechat.storage.directory` as the new location.
+     * Falls back to `wirechat.attachments.storage_folder`.
+     *
+     * @return string The storage directory path.
+     */
+    public static function storageDirectory(): string
+    {
+        return (string) config('wirechat.storage.directory')
+            ?: config('wirechat.attachments.storage_folder', 'attachments');
+    }
+
+    /**
+     * Get the configured storage visibility for WireChat.
+     *
+     * Reads from `wirechat.storage.visibility`.
+     * Falls back to `wirechat.attachments.disk_visibility`.
+     *
+     * @return string Either 'public' or 'private'.
+     */
+    public static function storageVisibility(): string
+    {
+        return (string) config('wirechat.storage.visibility')
+            ?: config('wirechat.attachments.disk_visibility', 'public');
     }
 
     /**

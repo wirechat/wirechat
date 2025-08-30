@@ -28,11 +28,11 @@ it('returns user when sendable is called ', function () {
 it('returns correct attachment ', function () {
     $auth = User::factory()->create();
 
-    Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+    Storage::fake(config('wirechat.storage.disk', 'public'));
     $attachment = UploadedFile::fake()->image('file.png');
 
     // save photo to disk
-    $path = $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
+    $path = $attachment->store(config('wirechat.storage.directory', 'attachments'), config('wirechat.storage.disk', 'public'));
 
     // create message
     $message = Message::factory()->sender($auth)->create();
@@ -111,11 +111,11 @@ describe('DeleteFor Everyone', function () {
     it('deletes attachment from database when message is deleted', function () {
         $auth = User::factory()->create();
 
-        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        Storage::fake(config('wirechat.storage.disk', 'public'));
         $attachment = UploadedFile::fake()->image('file.png');
 
         // save photo to disk
-        $path = $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
+        $path = $attachment->store(config('wirechat.storage.directory', 'attachments'), config('wirechat.storage.disk', 'public'));
 
         // create attachment
 
@@ -143,11 +143,11 @@ describe('DeleteFor Everyone', function () {
     it('deletes attachment from storage when message is deleted', function () {
         $auth = User::factory()->create();
 
-        Storage::fake(config('wirechat.attachments.storage_disk', 'public'));
+        Storage::fake(config('wirechat.storage.disk', 'public'));
         $attachment = UploadedFile::fake()->image('file.png');
 
         // save photo to disk
-        $path = $attachment->store(config('wirechat.attachments.storage_folder', 'attachments'), config('wirechat.attachments.storage_disk', 'public'));
+        $path = $attachment->store(config('wirechat.storage.directory', 'attachments'), config('wirechat.storage.disk', 'public'));
 
         $this->actingAs($auth);
         // create attachment
@@ -166,7 +166,7 @@ describe('DeleteFor Everyone', function () {
         ]);
 
         // Assert the file was stored...
-        Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->assertExists($attachment->file_path);
+        Storage::disk(config('wirechat.storage.disk', 'public'))->assertExists($attachment->file_path);
 
         // assert
         expect($message->attachment->id)->toBe($attachment->id);
@@ -179,7 +179,7 @@ describe('DeleteFor Everyone', function () {
         expect(Message::where('conversation_id', $message->conversation_id)->withoutGlobalScopes()->count())->toBe(0);
         expect($message->attachment()->count())->toBe(0);
         // assert
-        Storage::disk(config('wirechat.attachments.storage_disk', 'public'))->assertMissing($attachment->file_path);
+        Storage::disk(config('wirechat.storage.disk', 'public'))->assertMissing($attachment->file_path);
     });
 
     it('aborts 403 AND does not delete message if user does not belong to conversation  before deletingForEveryone', function () {
