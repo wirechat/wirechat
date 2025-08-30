@@ -6,11 +6,11 @@ use Closure;
 
 trait HasActions
 {
-    protected bool|Closure $newChatAction = true;
+    protected bool|Closure $newChatAction = false;
 
-    protected bool|Closure $newGroupAction = true;
+    protected bool|Closure $newGroupAction = false;
 
-    protected bool|Closure $redirectToHomeAction = true;
+    protected bool|Closure $redirectToHomeAction = false;
 
     public function newChatAction(bool|Closure $condition = true): static
     {
