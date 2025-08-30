@@ -2,7 +2,6 @@
 
 namespace Namu\WireChat\Models;
 
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +18,7 @@ use Namu\WireChat\Facades\WireChat;
 use Namu\WireChat\Models\Concerns\HasDynamicIds;
 use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
 use Namu\WireChat\Traits\Actionable;
+use Namu\WireChat\Workbench\Database\Factories\ConversationFactory;
 
 /**
  * @property int $id
@@ -29,14 +29,13 @@ use Namu\WireChat\Traits\Actionable;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Action> $actions
  * @property-read int|null $actions_count
- * @property-read \Namu\WireChat\Models\Group|null $group
- * @property-read \Namu\WireChat\Models\Message|null $lastMessage
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Message> $messages
+ * @property-read Group|null $group
+ * @property-read Message|null $lastMessage
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Message> $messages
  * @property-read int|null $messages_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Participant> $participants
  * @property-read int|null $participants_count
  *
- * @method bool isSelf()
  * @method static Builder|Conversation newModelQuery()
  * @method static Builder|Conversation newQuery()
  * @method static Builder|Conversation query()
@@ -51,8 +50,6 @@ use Namu\WireChat\Traits\Actionable;
  * @method static Builder|Conversation withoutBlanks()
  * @method static Builder|Conversation withoutCleared()
  * @method static Builder|Conversation withoutDeleted()
- *
- * @mixin \Eloquent
  */
 class Conversation extends Model
 {
@@ -111,7 +108,7 @@ class Conversation extends Model
         //     $baseId = substr(base_convert($model->id, 10, 36), 0, 6); // 6 characters
         //     dd($baseId);
         //     // Generate a random alphanumeric string of 6 characters
-        //     $randomString = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 6); // 6 characters
+        //     $randomString = substr(str_shuffle('#abcdefghilkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 6); // 6 characters
         //     // Combine to ensure total length is 12 characters
         //     $model->unique_id = $baseId . $randomString; // Combine them
         //     $model->saveQuietly(); // Save without triggering model events
@@ -128,11 +125,11 @@ class Conversation extends Model
     /**
      * since you have a non-standard namespace;
      * the resolver cannot guess the correct namespace for your Factory class.
-     * so we exlicilty tell it the correct namespace
+     * so we explicitly tell it the correct namespace
      */
     protected static function newFactory()
     {
-        return \Namu\WireChat\Workbench\Database\Factories\ConversationFactory::new();
+        return ConversationFactory::new();
     }
 
     /**
@@ -273,7 +270,7 @@ class Conversation extends Model
 
     /**
      * Exclude blank conversations that have no messages at all,
-     * including those that where deleted by the user- meaning .
+     * including those that where deleted by the user-meaning .
      */
     public function scopeWithoutBlanks(Builder $builder): void
     {
@@ -281,7 +278,7 @@ class Conversation extends Model
         if ($user) {
 
             $builder->whereHas('messages', function ($q) use ($user) {
-                /* !we only exclude one scope not all because we dont want to check aginast soft delete messages */
+                /* !we only exclude one scope not all because we don't want to check aginast soft delete messages */
                 $q->withoutGlobalScope(WithoutRemovedMessages::class)->whereDoesntHave('actions', function ($q) use ($user) {
                     $q->whereActor($user)
                         ->where('type', Actions::DELETE);
@@ -291,7 +288,7 @@ class Conversation extends Model
     }
 
     /**
-     * Scope a query to only include conversation where user cleraed all messsages users.
+     * Scope a query to only include conversation where user cleared all messages users.
      */
     public function scopeWithoutCleared(Builder $builder): void
     {
@@ -377,7 +374,7 @@ class Conversation extends Model
             ? collect($this->participants) // Convert to collection if already loaded
             : $this->participants()->get(); // Fetch as a collection
 
-        // If is set then return references's participant
+        // If is set then return reference's participant
         if ($this->isSelf()) {
             /** @var Participant|null $self */
             $self = $participants->where('participantable_id', $reference->getKey())->where('participantable_type', $reference->getMorphClass())->first();
@@ -487,7 +484,7 @@ class Conversation extends Model
      * Mark the conversation as read for the current authenticated user.
      *
      * @param  Model  $user||null
-     *                             If not user is passed ,it will attempt to user auth(),if not avaible then will return null
+     *                             If not user is passed ,it will attempt to user auth(),if not available then will return null
      */
     public function markAsRead(?Model $user = null)
     {
@@ -524,7 +521,7 @@ class Conversation extends Model
      * Retrieve unread messages in this conversation for a specific user.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $user
-     * @return \Illuminate\Database\Eloquent\Collection<int,\Namu\WireChat\Models\Message>
+     * @return \Illuminate\Database\Eloquent\Collection<int,Message>
      */
     public function unreadMessages(Model|Authenticatable $user): \Illuminate\Database\Eloquent\Collection
     {
@@ -544,7 +541,7 @@ class Conversation extends Model
             return $this->messages->filter(function ($message) use ($lastReadAt, $user) {
                 // If lastReadAt is null, consider all messages as unread
                 // Also, exclude messages that belong to the user
-                /** @var \Namu\WireChat\Models\Message $message */
+                /** @var Message $message */
                 return ($lastReadAt == null || $message->created_at > $lastReadAt) && ! $message->ownedBy($user);
             });
         }
@@ -553,7 +550,7 @@ class Conversation extends Model
         $query = $this->messages();
 
         // WORKING
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Message> $messages */
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Message> $messages */
         $messages = $query->whereIsNotOwnedBy($user)->when($lastReadAt, function ($query) use ($lastReadAt) {
 
             $query->where('created_at', '>', $lastReadAt);
@@ -649,7 +646,7 @@ class Conversation extends Model
             $deletedByBothParticipants = true;
 
             // Get Participants
-            // !use make sure to get new query() otherwise participants wont be retrieved correctly
+            // !use make sure to get new query() otherwise participants won't be retrieved correctly
             $participants = $this->participants()->get();
 
             // Check if all participants have deleted the conversation
@@ -734,9 +731,9 @@ class Conversation extends Model
     public function isOwner(Model|Authenticatable $model): bool
     {
 
-        $pariticipant = $this->participant($model);
+        $participant = $this->participant($model);
 
-        return $pariticipant->isOwner();
+        return $participant->isOwner();
     }
 
     /**
@@ -747,8 +744,8 @@ class Conversation extends Model
     public function isAdmin(Model|Authenticatable $model): bool
     {
 
-        $pariticipant = $this->participant($model);
+        $participant = $this->participant($model);
 
-        return $pariticipant->isAdmin();
+        return $participant->isAdmin();
     }
 }
