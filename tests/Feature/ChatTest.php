@@ -270,18 +270,6 @@ describe('Presense', function () {
         $request->assertDontSeeHtml('dusk="media-upload-input"');
     });
 
-    test('it_shows_emoji_trigger_button', function () {
-
-        $auth = User::factory()->create(['name' => 'Test']);
-
-        // create conversation with user1
-        $conversation = $auth->createConversationWith($auth, 'hello');
-
-        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
-
-        // Assert both conversations visible before typing
-        $request->assertSeeHtml('dusk="emoji-trigger-button"');
-    });
 });
 
 describe('mount()', function () {
@@ -814,6 +802,36 @@ describe('Box presence test: ', function () {
     //         ->assertSee('Yesterday');
     // })->skip();
 
+});
+
+describe('Emoji', function () {
+    test('it doesnt show emoji picker is not enabled in chat', function () {
+
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        // turn on disappearing
+        $conversation->turnOffDisappearing();
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertDontSeeHtml('dusk="emoji-trigger-button"');
+    });
+
+    test('it_shows_emoji_trigger_button', function () {
+
+        $auth = User::factory()->create(['name' => 'Test']);
+
+        testPanelProvider()->emojiPicker();
+
+        // create conversation with user1
+        $conversation = $auth->createConversationWith($auth, 'hello');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        // Assert both conversations visible before typing
+        $request->assertSeeHtml('dusk="emoji-trigger-button"');
+    });
 });
 
 describe('Message actions: Viewing Private Chat', function () {

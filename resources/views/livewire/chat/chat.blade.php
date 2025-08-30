@@ -2,14 +2,14 @@
 @use('Namu\WireChat\Facades\WireChat')
 
 @php
-    $primaryColor = WireChat::getColor();
+$primaryColor = isset($this->panel()->getColors()['primary']) ? $this->panel()->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';
+$hasEmojiPicker= $this->panel()->hasEmojiPicker();
 @endphp
 
 
-
+@if($hasEmojiPicker)
 @assets
     <style>
-
         emoji-picker {
             width: 100% !important;
             height: 100%;
@@ -79,6 +79,7 @@
     </style>
 
 @endassets
+@endif
 
 <div x-data="{
     initializing: true,
@@ -104,7 +105,9 @@
         requestAnimationFrame(() => {
             initializing = false;
             $wire.dispatch('focus-input-field');
+            @if($hasEmojiPicker)
             loadEmojiPicker();
+            @endif
             {{-- if (isWidget) { --}}
                 //NotifyListeners about chat opened
                 $wire.dispatch('chat-opened',{conversation:conversationId});

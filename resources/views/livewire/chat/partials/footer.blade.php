@@ -1,4 +1,7 @@
+@php
 
+    $hasEmojiPicker= $this->panel()->hasEmojiPicker();
+@endphp
 <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 
     {{-- Check if group allows :sending messages --}}
@@ -12,6 +15,7 @@
             class=" px-3 md:px-1 border-t shadow-sm bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
 
             {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
+            @if($hasEmojiPicker)
             <section wire:ignore x-cloak x-show="openEmojiPicker" x-transition:enter="transition  ease-out duration-180 transform"
                 x-transition:enter-start=" translate-y-full" x-transition:enter-end=" translate-y-0"
                 x-transition:leave="transition ease-in duration-180 transform" x-transition:leave-start=" translate-y-0"
@@ -21,6 +25,8 @@
                 <emoji-picker  dusk="emoji-picker" style="width: 100%"
                     class=" flex w-full h-full rounded-xl"></emoji-picker>
             </section>
+            @endif
+
             {{-- form and detail section  --}}
             <section
                 class=" py-2 sm:px-4 py-1.5    z-50  dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)]   flex flex-col gap-3 items-center  w-full mx-auto">
@@ -236,7 +242,9 @@
                         textarea.style.height = textarea.scrollHeight + 'px';
 
                     }
-                }" x-init="{{-- Emoji picture click event listener --}}
+                }" x-init="
+                    @if($hasEmojiPicker)
+                {{-- Emoji picture click event listener --}}
                 document.querySelector('emoji-picker')
                     .addEventListener('emoji-click', event => {
                         // Get the emoji unicode from the event
@@ -257,7 +265,9 @@
 
 
                         inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
-                    });"
+                    });
+                @endif
+                    "
                     @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0)) ? $wire.sendMessage() : null"
                     method="POST" autocapitalize="off" @class(['flex items-center col-span-12 w-full  gap-2 gap-5'])>
                     @csrf
@@ -265,6 +275,7 @@
                     <input type="hidden" autocomplete="false" style="display: none">
 
 
+                    @if($hasEmojiPicker)
                     {{-- Emoji Triggger icon --}}
                     <div class="w-10 hidden sm:flex max-w-fit  items-center">
                         <button wire:loading.attr="disabled" type="button" dusk="emoji-trigger-button"
@@ -282,6 +293,7 @@
                             </svg>
                         </button>
                     </div>
+                    @endif
 
                     {{-- Show  upload pop if media or file are empty --}}
                     {{-- Also only show  upload popup if allowed in configuration  --}}
@@ -406,7 +418,9 @@
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                             @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
                             class="w-full disabled:cursor-progress resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-hidden   "
-                            x-init="document.querySelector('emoji-picker')
+                            x-init="
+                              @if($hasEmojiPicker)
+                            document.querySelector('emoji-picker')
                                 .addEventListener('emoji-click', event => {
                                     const emoji = event.detail['unicode'];
                                     const inputField = $refs.body;
@@ -430,7 +444,11 @@
                                     // Ensure the textarea resizes correctly after adding the emoji
                                     inputField.style.height = 'auto';
                                     inputField.style.height = inputField.scrollHeight + 'px';
-                                });"></textarea>
+                                });
+                            @endif
+                                "
+
+                        ></textarea>
 
 
                     </div>
