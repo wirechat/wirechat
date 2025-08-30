@@ -237,7 +237,7 @@ return [
             ],
         ],
         // permissions component
-        'permisssions' => [
+        'permissions' => [
             'heading' => [
                 'label' => 'Permissions',
             ],
