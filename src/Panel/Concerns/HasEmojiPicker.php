@@ -3,17 +3,39 @@
 namespace Namu\WireChat\Panel\Concerns;
 
 use Closure;
+use Namu\WireChat\Support\Enums\EmojiPickerPosition;
 
 trait HasEmojiPicker
 {
     /**
-     * Enable or disable emoji picker .
+     * Enable or disable emoji picker.
      */
     protected bool|Closure $hasEmojiPicker = false;
 
-    public function emojiPicker(bool|Closure $condition = true): static
-    {
+    /**
+     * Emoji picker position (docked or floating).
+     */
+    protected EmojiPickerPosition|Closure|null $emojiPickerPosition = null;
+
+    /**
+     * Configure emoji picker.
+     *
+     * @param bool|Closure $condition
+     * @param EmojiPickerPosition|string|Closure|null $position
+     */
+    public function emojiPicker(
+        bool|Closure $condition = true,
+        EmojiPickerPosition|string|Closure|null $position = EmojiPickerPosition::Floating
+    ): static {
         $this->hasEmojiPicker = $condition;
+
+        // Convert string to enum if needed
+        if (is_string($position)) {
+            $enum = EmojiPickerPosition::tryFrom($position);
+            $this->emojiPickerPosition = $enum ?? EmojiPickerPosition::Floating;
+        } else {
+            $this->emojiPickerPosition = $position;
+        }
 
         return $this;
     }
@@ -22,4 +44,10 @@ trait HasEmojiPicker
     {
         return (bool) $this->evaluate($this->hasEmojiPicker);
     }
+
+    public function emojiPickerPosition(): ?EmojiPickerPosition
+    {
+        return $this->evaluate($this->emojiPickerPosition);
+    }
+
 }

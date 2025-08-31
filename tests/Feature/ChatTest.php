@@ -832,6 +832,39 @@ describe('Emoji', function () {
         // Assert both conversations visible before typing
         $request->assertSeeHtml('dusk="emoji-trigger-button"');
     });
+
+    test('it show dusk="floating-emojipicker" if position floating and doesn show dusk="docked-emojipicker"', function () {
+
+        $auth = User::factory()->create(['name' => 'Test']);
+
+        testPanelProvider()->emojiPicker(position: \Namu\WireChat\Support\Enums\EmojiPickerPosition::Floating);
+
+        // create conversation with user1
+        $conversation = $auth->createConversationWith($auth, 'hello');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        // Assert both conversations visible before typing
+        $request->assertSeeHtml('dusk="floating-emojipicker"')
+                ->assertDontSeeHtml('dusk="docked-emojipicker"');
+    });
+
+
+    test('it show dusk="docked-emojipicker" if position floating and doesn show dusk="floating-emojipicker"', function () {
+
+        $auth = User::factory()->create(['name' => 'Test']);
+
+        testPanelProvider()->emojiPicker(position: \Namu\WireChat\Support\Enums\EmojiPickerPosition::Docked);
+
+        // create conversation with user1
+        $conversation = $auth->createConversationWith($auth, 'hello');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        // Assert both conversations visible before typing
+        $request->assertSeeHtml('dusk="docked-emojipicker"')
+            ->assertDontSeeHtml('dusk="floating-emojipicker"');
+    });
 });
 
 describe('Message actions: Viewing Private Chat', function () {

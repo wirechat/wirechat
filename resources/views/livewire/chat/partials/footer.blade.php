@@ -1,6 +1,7 @@
 @php
 
     $hasEmojiPicker= $this->panel()->hasEmojiPicker();
+    $floatingEmojiPicker=$this->panel()->emojiPickerPosition()===\Namu\WireChat\Support\Enums\EmojiPickerPosition::Floating;
 @endphp
 <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 
@@ -12,19 +13,61 @@
         </div>
     @else
         <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
-            class=" px-3 md:px-1 border-t shadow-sm bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
+            class=" px-3 md:px-1 border-t  shadow-sm bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
 
             {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
             @if($hasEmojiPicker)
-            <section wire:ignore x-cloak x-show="openEmojiPicker" x-transition:enter="transition  ease-out duration-180 transform"
-                x-transition:enter-start=" translate-y-full" x-transition:enter-end=" translate-y-0"
-                x-transition:leave="transition ease-in duration-180 transform" x-transition:leave-start=" translate-y-0"
-                x-transition:leave-end="translate-y-full"
-                class="w-full flex hidden sm:flex   py-2 sm:px-4 py-1.5 border-b border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)]  h-96 min-w-full">
+            {{--    If emoji picker is floading -wrap the emoji picke element into a teleport blade in order to allow proper render --}}
+            {{--  --START-- TELEPORT --}}
+            @if($floatingEmojiPicker) @teleport('body') @endif
+            {{--  --END-- TELEPORT --}}
+                <section wire:ignore  x-cloak x-show="openEmojiPicker"
+                         @click.outside="openEmojiPicker=false"
 
-                <emoji-picker  dusk="emoji-picker" style="width: 100%"
-                    class=" flex w-full h-full rounded-xl"></emoji-picker>
-            </section>
+                    @if($floatingEmojiPicker)
+                     x-anchor.top.offset.20="document.getElementById('emojipickerbutton')"
+                     x-transition:enter="transition ease-out duration-180 transform"
+                     x-transition:enter-start="opacity-0 translate-y-4 scale-90"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-180 transform"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-4 scale-90"
+                         dusk="floating-emojipicker"
+
+                         @else
+                    x-transition:enter="transition  ease-out duration-180 transform"
+                    x-transition:enter-start=" translate-y-full" x-transition:enter-end=" translate-y-0"
+                    x-transition:leave="transition ease-in duration-180 transform" x-transition:leave-start=" translate-y-0"
+                    x-transition:leave-end="translate-y-full"
+                         dusk="docked-emojipicker"
+                    @endif
+                    @class([
+                            "max-w-xl z-50 shadow-xl bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]   rounded-xl  h-[490px]"=>$floatingEmojiPicker,
+                            "min-w-full  border-b  h-96 border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] "=>!$floatingEmojiPicker,
+                            "w-full flex hidden sm:flex  inset-x-auto py-2 sm:px-4 py-1.5  "])>
+
+                    <emoji-picker  dusk="emoji-picker" style="width: 100%"
+                        class=" flex w-full h-full rounded-xl"></emoji-picker>
+
+                    {{-- Clip-Arrow--}}
+                    <div
+                        style="
+                            position: absolute;
+                            top: -6px;  /* place above picker box */
+                            left: 50%;  /* center horizontally */
+                            transform: translateX(-50%);
+                            width: 12px;
+                            height: 6px;
+                            z-index: 50;
+                            background: transparent;
+                            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+                            /* You can also use an SVG instead of clip-path */
+                        "
+                    ></div>
+                </section>
+            {{--  --START-- TELEPORT --}}
+            @if($floatingEmojiPicker) @endteleport @endif
+            {{--  --END-- TELEPORT --}}
             @endif
 
             {{-- form and detail section  --}}
@@ -279,7 +322,8 @@
                     {{-- Emoji Triggger icon --}}
                     <div class="w-10 hidden sm:flex max-w-fit  items-center">
                         <button wire:loading.attr="disabled" type="button" dusk="emoji-trigger-button"
-                            @click="openEmojiPicker = ! openEmojiPicker" x-ref="emojibutton"
+                                x-on:keydown.escape.stop=" openEmojiPicker=false"
+                            @click="openEmojiPicker = ! openEmojiPicker" id="emojipickerbutton"
                             class="cursor-pointer hover:scale-105 transition-transform disabled:cursor-progress rounded-full p-px dark:border-gray-700">
                             <svg x-bind:style="openEmojiPicker && { color: 'var(--wc-brand-primary)' }"
                                 viewBox="0 0 24 24" height="24" width="24"
