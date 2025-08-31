@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Namu\WireChat\Console\Commands\InstallWireChat;
 use Namu\WireChat\Console\Commands\MakePanelCommand;
+use Namu\WireChat\Console\Commands\MigrateConfigToPanelCommand;
 use Namu\WireChat\Console\Commands\SetupNotifications;
 use Namu\WireChat\Facades\WireChatColor;
 use Namu\WireChat\Livewire\Chat\Chat;
@@ -45,6 +46,7 @@ class WireChatServiceProvider extends ServiceProvider
                 InstallWireChat::class,
                 SetupNotifications::class,
                 MakePanelCommand::class,
+                MigrateConfigToPanelCommand::class
             ]);
         }
 

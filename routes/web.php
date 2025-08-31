@@ -8,13 +8,13 @@ Route::name('wirechat.')
         $panels = app(PanelRegistry::class)->all();
         if (empty($panels)) {
             \Log::warning('No panels registered in wirechatPanelRegistry');
-
             return;
         }
         foreach ($panels as $panel) {
             Route::prefix($panel->getRoutePrefix())
                 ->name("{$panel->getPath()}.")
                 ->middleware(array_merge(
+                    ['web'],
                     $panel->getMiddleware(),
                     [
                         "wirechat.setPanel:{$panel->getId()}",
