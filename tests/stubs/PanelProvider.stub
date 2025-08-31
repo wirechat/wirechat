@@ -12,7 +12,9 @@ class {{ className }} extends PanelProvider
         return $panel
             ->id('{{ panelId }}')
             ->path('{{ panelId }}')
-            ->middleware(['auth','web'])
+            ->middleware(['web','auth'])
+            ->emojiPicker()
+            ->attachments()
             {{ defaultFlag }};
     }
 }
