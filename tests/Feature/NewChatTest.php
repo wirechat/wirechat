@@ -66,6 +66,7 @@ test('close_modal_button_is_set_correctly', function () {
 });
 
 it('shows New group if allowed', function () {
+    testPanelProvider()->newChatAction()->newGroupAction();
 
     Config::set('wirechat.show_new_group_modal_button', true);
     $auth = ModelsUser::factory()->create();
@@ -90,6 +91,7 @@ it('doesnt shows New group if not allowed', function () {
 });
 
 test('it shows new group button if user canCreateNewGroups==TRUE (email is verified)', function () {
+    testPanelProvider()->newChatAction()->newGroupAction();
 
     $auth = ModelsUser::factory()->create(['email_verified_at' => now()]);
     $request = Livewire::actingAs($auth)->test(NewChat::class);

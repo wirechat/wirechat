@@ -19,9 +19,6 @@ trait HasEmojiPicker
 
     /**
      * Configure emoji picker.
-     *
-     * @param bool|Closure $condition
-     * @param EmojiPickerPosition|string|Closure|null $position
      */
     public function emojiPicker(
         bool|Closure $condition = true,
@@ -49,5 +46,4 @@ trait HasEmojiPicker
     {
         return $this->evaluate($this->emojiPickerPosition);
     }
-
 }

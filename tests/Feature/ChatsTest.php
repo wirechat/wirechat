@@ -74,6 +74,7 @@ describe('Presence check', function () {
     });
 
     it('shows_redirect_button', function () {
+        testPanelProvider()->redirectToHomeAction();
 
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
@@ -303,6 +304,7 @@ describe('Presence check', function () {
         });
 
         test('it shows redirect home button when chats is NOT widget', function () {
+            testPanelProvider()->redirectToHomeAction();
 
             $auth = User::factory()->create(['name' => 'Namu']);
             $conversation = $auth->createGroup('My Group');

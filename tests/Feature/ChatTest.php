@@ -846,9 +846,8 @@ describe('Emoji', function () {
 
         // Assert both conversations visible before typing
         $request->assertSeeHtml('dusk="floating-emojipicker"')
-                ->assertDontSeeHtml('dusk="docked-emojipicker"');
+            ->assertDontSeeHtml('dusk="docked-emojipicker"');
     });
-
 
     test('it show dusk="docked-emojipicker" if position floating and doesn show dusk="floating-emojipicker"', function () {
 

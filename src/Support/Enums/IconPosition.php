@@ -2,7 +2,6 @@
 
 namespace Namu\WireChat\Support\Enums;
 
-
 enum IconPosition: string
 {
     case Before = 'before';

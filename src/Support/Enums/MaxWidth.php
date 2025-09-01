@@ -2,8 +2,6 @@
 
 namespace Namu\WireChat\Support\Enums;
 
-
-
 enum MaxWidth: string
 {
     case ExtraSmall = 'xs';

@@ -2,7 +2,6 @@
 
 namespace Namu\WireChat\Support\Enums;
 
-
 enum ActionSize: string
 {
     case ExtraSmall = 'xs';

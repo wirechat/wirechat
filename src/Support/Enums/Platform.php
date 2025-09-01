@@ -2,7 +2,6 @@
 
 namespace Namu\WireChat\Support\Enums;
 
-
 enum Platform
 {
     case Windows;
