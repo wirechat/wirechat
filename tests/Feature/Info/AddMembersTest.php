@@ -1,8 +1,8 @@
 <?php
 
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Chat\Group\AddMembers;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
+use Wirechat\Wirechat\Models\Conversation;
 use Workbench\App\Models\User;
 
 test('user must be authenticated', function () {
@@ -274,7 +274,7 @@ describe('actions test', function () {
 
     });
 
-    test('it dispatches closeWireChatModal event after saving ', function () {
+    test('it dispatches closeWirechatModal event after saving ', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -287,7 +287,7 @@ describe('actions test', function () {
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
-        $request->assertDispatched('closeWireChatModal');
+        $request->assertDispatched('closeWirechatModal');
 
     });
 

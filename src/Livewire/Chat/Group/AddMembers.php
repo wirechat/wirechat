@@ -1,16 +1,16 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group;
 
 use App\Models\User;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 // use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\ModalComponent;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Participant;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Participant;
 
 class AddMembers extends ModalComponent
 {
@@ -158,9 +158,9 @@ class AddMembers extends ModalComponent
             }
         }
 
-        $this->closeWireChatModal();
+        $this->closeWirechatModal();
 
-        $this->dispatch('participantsCountUpdated', $this->newTotalCount)->to(\Namu\WireChat\Livewire\Chat\Group\Info::class);
+        $this->dispatch('participantsCountUpdated', $this->newTotalCount)->to(\Wirechat\Wirechat\Livewire\Chat\Group\Info::class);
     }
 
     public function mount()

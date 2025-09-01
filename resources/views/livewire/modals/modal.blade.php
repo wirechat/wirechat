@@ -1,7 +1,7 @@
 <div>
 
     <script>
-        window.WireChatModal = () => {
+        window.WirechatModal = () => {
             return {
                 show: false,
                 showActiveModalComponent: true,
@@ -17,7 +17,7 @@
                 closeModalOnEscape(trigger) {
 
                     ///Only proceed if the trigger is for ChatModal
-                   if (trigger.modalType != 'WireChatModal'){ return;}
+                   if (trigger.modalType != 'WirechatModal'){ return;}
                     //check if canCloseOnEsp
                    if (this.closeOnEscape === false) { return; }
                    if (!this.closingModal('closingModalOnEscape')) { return; }
@@ -65,7 +65,7 @@
                     //Check if should completley destroy component on close 
                     //Meaning state won't be retained if component is opened again
                     if (this.destroyOnClose === true) {
-                        Livewire.dispatch('destroyWireChatModal', {
+                        Livewire.dispatch('destroyWirechatModal', {
                             id: this.activeModalComponent
                         });
                     }
@@ -144,14 +144,14 @@
                 init() {
 
                     this.listeners.push(
-                        Livewire.on('closeWireChatModal', (data) => {
+                        Livewire.on('closeWirechatModal', (data) => {
                             this.closeModal(data?.force ?? false, data?.skipPreviousModals ?? 0, data
                                 ?.destroySkipped ?? false);
                         })
                     );
 
                     this.listeners.push(
-                        Livewire.on('activeWireChatModalComponentChanged', ({
+                        Livewire.on('activeWirechatModalComponentChanged', ({
                             id
                         }) => {
                             this.setActiveModalComponent(id);
@@ -167,8 +167,8 @@
         }
     </script>
 
-    <div x-data="WireChatModal()" x-on:close.stop="setShowPropertyTo(false)"
-           x-on:keydown.escape.stop="closeModalOnEscape({modalType: 'WireChatModal', event: $event })"
+    <div x-data="WirechatModal()" x-on:close.stop="setShowPropertyTo(false)"
+           x-on:keydown.escape.stop="closeModalOnEscape({modalType: 'WirechatModal', event: $event })"
             tabindex="0"
            x-show="show" class="fixed  inset-0 z-50 overflow-y-auto" style="display: none;">
         <div class="flex items-end  justify-center min-h-screen px-4 pt-4 pb-10 text-center sm:block sm:p-0">

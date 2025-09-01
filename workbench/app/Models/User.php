@@ -6,17 +6,17 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Namu\WireChat\Contracts\WireChatUser;
-use Namu\WireChat\Panel;
-use Namu\WireChat\Traits\Chatable;
-use Namu\WireChat\Traits\InteractsWithWireChat;
+use Wirechat\Wirechat\Contracts\WirechatUser;
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\Traits\Chatable;
+use Wirechat\Wirechat\Traits\InteractsWithWirechat;
 
-class User extends Authenticatable implements WireChatUser
+class User extends Authenticatable implements WirechatUser
 {
     use HasFactory, Notifiable;
 
     // use Chatable;
-    use InteractsWithWireChat;
+    use InteractsWithWirechat;
 
     /**
      * The attributes that are mass assignable.
@@ -56,7 +56,7 @@ class User extends Authenticatable implements WireChatUser
      */
     protected static function newFactory()
     {
-        return \Namu\WireChat\Workbench\Database\Factories\UserFactory::new();
+        return \Wirechat\Wirechat\Workbench\Database\Factories\UserFactory::new();
     }
 
     public function getCoverUrlAttribute(): ?string
@@ -87,7 +87,7 @@ class User extends Authenticatable implements WireChatUser
         return $this->hasVerifiedEmail() == true;
     }
 
-    public function canAccessWireChatPanel(Panel $panel): bool
+    public function canAccessWirechatPanel(Panel $panel): bool
     {
         return $this->hasVerifiedEmail();
 

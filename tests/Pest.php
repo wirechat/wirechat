@@ -1,6 +1,6 @@
 <?php
 
-use Namu\WireChat\Tests\TestCase;
+use Wirechat\Wirechat\Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,7 +45,7 @@ function something()
     // ..
 }
 
-function testPanelProvider(): \Namu\WireChat\Panel
+function testPanelProvider(): \Wirechat\Wirechat\Panel
 {
-    return \Namu\WireChat\Facades\WireChat::getPanel('test');
+    return \Wirechat\Wirechat\Facades\Wirechat::getPanel('test');
 }

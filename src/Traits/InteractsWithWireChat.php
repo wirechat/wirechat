@@ -1,19 +1,19 @@
 <?php
 
-namespace Namu\WireChat\Traits;
+namespace Wirechat\Wirechat\Traits;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Group;
-use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Panel;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Panel;
 
 /**
  * @property-read string|null $cover_url
@@ -25,7 +25,7 @@ use Namu\WireChat\Panel;
  *
  * @method string displayName()
  */
-trait InteractsWithWireChat
+trait InteractsWithWirechat
 {
     use Actor;
     use InteractsWithPanel;
@@ -161,7 +161,7 @@ trait InteractsWithWireChat
         // create and save photo is present
         if ($photo) {
             // save photo to disk
-            $path = $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
+            $path = $photo->store(Wirechat::storageFolder(), Wirechat::storageDisk());
 
             // create attachment
             $group->cover()->create([
@@ -169,7 +169,7 @@ trait InteractsWithWireChat
                 'file_name' => basename($path),
                 'original_name' => $photo->getClientOriginalName(),
                 'mime_type' => $photo->getMimeType(),
-                'url' => Storage::disk(WireChat::storageDisk())->url($path),
+                'url' => Storage::disk(Wirechat::storageDisk())->url($path),
             ]);
         }
 
@@ -211,16 +211,16 @@ trait InteractsWithWireChat
         if (! $model instanceof Conversation) {
             // Ensure the model has the required trait
             if (
-                ! in_array(InteractsWithWireChat::class, class_uses($model)) &&
+                ! in_array(InteractsWithWirechat::class, class_uses($model)) &&
                 ! in_array(Chatable::class, class_uses($model))
             ) {
-                abort(403, 'The model must use `InteractsWithWireChat` trait and must implement WireChatUser');
+                abort(403, 'The model must use `InteractsWithWirechat` trait and must implement WirechatUser');
             }
 
             // Deprecation notice if Chatable is still in use
             if (in_array(Chatable::class, class_uses($model))) {
                 trigger_error(
-                    'The `Chatable` trait is deprecated. Please use `InteractsWithWireChat` instead.',
+                    'The `Chatable` trait is deprecated. Please use `InteractsWithWirechat` instead.',
                     E_USER_DEPRECATED
                 );
             }

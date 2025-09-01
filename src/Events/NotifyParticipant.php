@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Events;
+namespace Wirechat\Wirechat\Events;
 
 use Carbon\Carbon;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -9,11 +9,11 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Namu\WireChat\Helpers\MorphClassResolver;
-use Namu\WireChat\Http\Resources\MessageResource;
-use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Traits\InteractsWithPanel;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
+use Wirechat\Wirechat\Http\Resources\MessageResource;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class NotifyParticipant implements ShouldBroadcastNow
 {

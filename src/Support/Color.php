@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Support;
+namespace Wirechat\Wirechat\Support;
 
 class Color
 {

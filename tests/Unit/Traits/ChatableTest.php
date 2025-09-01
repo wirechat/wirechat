@@ -2,14 +2,14 @@
 
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Enums\GroupType;
-use Namu\WireChat\Enums\MessageType;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Models\Action;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Group;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\GroupType;
+use Wirechat\Wirechat\Enums\MessageType;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -238,7 +238,7 @@ describe('createConversationWith() ', function () {
 
 describe('sendMessageTo() ', function () {
 
-    it('aborts 403 if $model not extenting InteractsWithWireChat Trait ', function () {
+    it('aborts 403 if $model not extenting InteractsWithWirechat Trait ', function () {
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -250,7 +250,7 @@ describe('sendMessageTo() ', function () {
         // pass participant model - which does not use Triat Chatable
         $auth->sendMessageTo($participant, 'hello');
 
-    })->throws(Exception::class, 'The model must use `InteractsWithWireChat` trait and must implement WireChatUser');
+    })->throws(Exception::class, 'The model must use `InteractsWithWirechat` trait and must implement WirechatUser');
 
     it('aborts 403 is user does not belong to conversation ', function () {
 
@@ -957,25 +957,25 @@ describe('Exit conversation', function () {
 
 });
 
-describe('canAccessWireChatPanel', function () {
+describe('canAccessWirechatPanel', function () {
 
-    test('it returns true if canAccessWireChatPanel() returns false', function () {
+    test('it returns true if canAccessWirechatPanel() returns false', function () {
 
         $auth = User::factory()->create();
 
         $testPanelProvider = testPanelProvider();
 
-        expect($auth->canAccessWireChatPanel($testPanelProvider))->toBeTrue();
+        expect($auth->canAccessWirechatPanel($testPanelProvider))->toBeTrue();
 
     });
 
-    test('it returns false if canAccessWireChatPanel() returns false', function () {
+    test('it returns false if canAccessWirechatPanel() returns false', function () {
 
         $auth = User::factory()->create(['email_verified_at' => null]);
 
         $testPanelProvider = testPanelProvider();
 
-        expect($auth->canAccessWireChatPanel($testPanelProvider))->toBeFalse();
+        expect($auth->canAccessWirechatPanel($testPanelProvider))->toBeFalse();
 
     });
 

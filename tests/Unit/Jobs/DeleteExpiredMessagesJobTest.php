@@ -1,10 +1,10 @@
 <?php
 
 use Carbon\Carbon;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Jobs\DeleteExpiredMessagesJob;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Jobs\DeleteExpiredMessagesJob;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
 
 test('expired_messages_are_deleted', function () {

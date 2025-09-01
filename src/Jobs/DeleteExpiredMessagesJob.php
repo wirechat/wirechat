@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Jobs;
+namespace Wirechat\Wirechat\Jobs;
 
 use Carbon\Carbon;
 use Illuminate\Bus\Batchable;
@@ -11,10 +11,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Message;
 
 class DeleteExpiredMessagesJob implements ShouldQueue
 {
@@ -34,7 +34,7 @@ class DeleteExpiredMessagesJob implements ShouldQueue
     public function __construct()
     {
         //
-        // $this->onQueue(WireChat::notificationsQueue());
+        // $this->onQueue(Wirechat::notificationsQueue());
 
         //   Log::info($this->queue);
 

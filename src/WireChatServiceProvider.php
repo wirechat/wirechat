@@ -1,37 +1,37 @@
 <?php
 
-namespace Namu\WireChat;
+namespace Wirechat\Wirechat;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
-use Namu\WireChat\Console\Commands\InstallWireChat;
-use Namu\WireChat\Console\Commands\MakePanelCommand;
-use Namu\WireChat\Console\Commands\MigrateConfigToPanelCommand;
-use Namu\WireChat\Console\Commands\SetupNotifications;
-use Namu\WireChat\Facades\WireChatColor;
-use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chat\Drawer;
-use Namu\WireChat\Livewire\Chat\Group\AddMembers;
-use Namu\WireChat\Livewire\Chat\Group\Info as GroupInfo;
-use Namu\WireChat\Livewire\Chat\Group\Members;
-use Namu\WireChat\Livewire\Chat\Group\Permissions;
-use Namu\WireChat\Livewire\Chat\Info;
-use Namu\WireChat\Livewire\Chats\Chats;
-use Namu\WireChat\Livewire\Modals\Modal;
-use Namu\WireChat\Livewire\New\Chat as NewChat;
-use Namu\WireChat\Livewire\New\Group as NewGroup;
-use Namu\WireChat\Livewire\Pages\Chat as View;
-use Namu\WireChat\Livewire\Pages\Chats as Index;
-use Namu\WireChat\Livewire\Widgets\WireChat;
-use Namu\WireChat\Middleware\BelongsToConversation;
-use Namu\WireChat\Middleware\EnsureWireChatPanelAccess;
-use Namu\WireChat\Middleware\SetCurrentPanel;
-use Namu\WireChat\Services\ColorService;
-use Namu\WireChat\Services\WireChatService;
-use Namu\WireChat\Support\Color;
+use Wirechat\Wirechat\Console\Commands\InstallWirechat;
+use Wirechat\Wirechat\Console\Commands\MakePanelCommand;
+use Wirechat\Wirechat\Console\Commands\MigrateConfigToPanelCommand;
+use Wirechat\Wirechat\Console\Commands\SetupNotifications;
+use Wirechat\Wirechat\Facades\WirechatColor;
+use Wirechat\Wirechat\Livewire\Chat\Chat;
+use Wirechat\Wirechat\Livewire\Chat\Drawer;
+use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
+use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members;
+use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
+use Wirechat\Wirechat\Livewire\Chat\Info;
+use Wirechat\Wirechat\Livewire\Chats\Chats;
+use Wirechat\Wirechat\Livewire\Modals\Modal;
+use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
+use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
+use Wirechat\Wirechat\Livewire\Pages\Chat as View;
+use Wirechat\Wirechat\Livewire\Pages\Chats as Index;
+use Wirechat\Wirechat\Livewire\Widgets\Wirechat;
+use Wirechat\Wirechat\Middleware\BelongsToConversation;
+use Wirechat\Wirechat\Middleware\EnsureWirechatPanelAccess;
+use Wirechat\Wirechat\Middleware\SetCurrentPanel;
+use Wirechat\Wirechat\Services\ColorService;
+use Wirechat\Wirechat\Services\WirechatService;
+use Wirechat\Wirechat\Support\Color;
 
-class WireChatServiceProvider extends ServiceProvider
+class WirechatServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
@@ -43,7 +43,7 @@ class WireChatServiceProvider extends ServiceProvider
         // Register the command if we are using the application via the CLI
         if ($this->app->runningInConsole()) {
             $this->commands([
-                InstallWireChat::class,
+                InstallWirechat::class,
                 SetupNotifications::class,
                 MakePanelCommand::class,
                 MigrateConfigToPanelCommand::class,
@@ -51,9 +51,9 @@ class WireChatServiceProvider extends ServiceProvider
         }
 
         // Trigger auto-discovery
-        app(\Namu\WireChat\PanelRegistry::class)->autoDiscover();
+        app(\Wirechat\Wirechat\PanelRegistry::class)->autoDiscover();
 
-        logger('WireChatServiceProvider booted, auto-discovery completed');
+        logger('WirechatServiceProvider booted, auto-discovery completed');
 
         $this->loadLivewireComponents();
 
@@ -103,7 +103,7 @@ class WireChatServiceProvider extends ServiceProvider
     protected function bootColors()
     {
 
-        WireChatColor::register([
+        WirechatColor::register([
             'primary' => Color::Blue,
             'danger' => Color::Red,
             'success' => Color::Green,
@@ -123,7 +123,7 @@ class WireChatServiceProvider extends ServiceProvider
 
         // register facades
         $this->app->singleton('wirechat', function ($app) {
-            return new WireChatService;
+            return new WirechatService;
         });
 
         $this->app->singleton(ColorService::class, fn () => new ColorService);
@@ -161,7 +161,7 @@ class WireChatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.permissions', Permissions::class);
 
         // stand alone widget component
-        Livewire::component('wirechat', WireChat::class);
+        Livewire::component('wirechat', Wirechat::class);
     }
 
     protected function registerMiddlewares(): void
@@ -170,7 +170,7 @@ class WireChatServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
         $router->aliasMiddleware('wirechat.setPanel', SetCurrentPanel::class);
-        $router->aliasMiddleware('wirechat.panelAccess', EnsureWireChatPanelAccess::class);
+        $router->aliasMiddleware('wirechat.panelAccess', EnsureWirechatPanelAccess::class);
     }
 
     protected function loadAssets(): void
@@ -179,15 +179,15 @@ class WireChatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = \Namu\WireChat\Facades\WireChat::getPanel($panel);
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = \Namu\WireChat\Facades\WireChat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = \Namu\WireChat\Facades\WireChat::currentPanel()?->getId();
+            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
             $userId = auth()->id();
-            $encodedType = \Namu\WireChat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
+            $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
 
             $script = '';
 
@@ -222,7 +222,7 @@ class WireChatServiceProvider extends ServiceProvider
 
 
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
-                                        .listen('.Namu\\\\WireChat\\\\Events\\\\NotifyParticipant', (e) => {
+                                        .listen('.Namu\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
 
                                             if (e.redirect_url !== window.location.href) {
                                                 if (Notification.permission === 'granted') {
@@ -301,9 +301,9 @@ class WireChatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = \Namu\WireChat\Facades\WireChat::getPanel($panel);
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = \Namu\WireChat\Facades\WireChat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $primaryColor = isset($currentPanel->getColors()['primary']) ? $currentPanel->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';

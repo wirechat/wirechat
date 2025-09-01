@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Event;
-use Namu\WireChat\Events\MessageDeleted;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
 
 describe(' Data verifiction ', function () {

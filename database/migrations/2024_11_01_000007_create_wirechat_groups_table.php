@@ -3,9 +3,9 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Group;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
 
 return new class extends Migration
 {
@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $usesUuid = WireChat::usesUuid();
+        $usesUuid = Wirechat::usesUuid();
         Schema::create((new Group)->getTable(), function (Blueprint $table) use ($usesUuid) {
             $table->id();
 

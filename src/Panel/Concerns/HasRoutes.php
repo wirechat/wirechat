@@ -1,12 +1,12 @@
 <?php
 
-namespace Namu\WireChat\Panel\Concerns;
+namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
 use Laravel\SerializableClosure\Serializers\Native;
 
 /**
- * Provides route-related functionality for WireChat panels, including route registration and URL generation.
+ * Provides route-related functionality for Wirechat panels, including route registration and URL generation.
  */
 trait HasRoutes
 {

@@ -1,19 +1,19 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group;
 
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Jobs\DeleteConversationJob;
-use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chats\Chats;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\ModalComponent;
-use Namu\WireChat\Livewire\Concerns\Widget;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Jobs\DeleteConversationJob;
+use Wirechat\Wirechat\Livewire\Chat\Chat;
+use Wirechat\Wirechat\Livewire\Chats\Chats;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Models\Conversation;
 
 class Info extends ModalComponent
 {
@@ -143,8 +143,8 @@ class Info extends ModalComponent
             // remove current photo
             $this->group?->cover?->delete();
             // save photo to disk
-            $path = $photo->store(WireChat::storageFolder(), WireChat::storageDisk());
-            $url = Storage::disk(WireChat::storageDisk())->url($path);
+            $path = $photo->store(Wirechat::storageFolder(), Wirechat::storageDisk());
+            $url = Storage::disk(Wirechat::storageDisk())->url($path);
             // create attachment
             $this->conversation->group?->cover()?->create([
                 'file_path' => $path,

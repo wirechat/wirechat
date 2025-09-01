@@ -1,13 +1,13 @@
 <?php
 
-namespace Namu\WireChat\Console\Commands;
+namespace Wirechat\Wirechat\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Namu\WireChat\Facades\WireChat;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;
@@ -16,7 +16,7 @@ class MakePanelCommand extends Command
 {
     protected $signature = 'make:wirechat-panel {id?}';
 
-    protected $description = 'Create a new WireChat panel provider';
+    protected $description = 'Create a new Wirechat panel provider';
 
     protected bool $isLaravel11OrHigherWithBootstrapFile;
 
@@ -57,8 +57,8 @@ class MakePanelCommand extends Command
         // Generate class name and file path
         $id = Str::kebab($id); // Ensure ID is kebab-case (e.g., 'admin')
         $className = Str::studly($id).'PanelProvider';
-        $namespace = 'App\\Providers\\WireChat';
-        $path = app_path("Providers/WireChat/{$className}.php");
+        $namespace = 'App\\Providers\\Wirechat';
+        $path = app_path("Providers/Wirechat/{$className}.php");
 
         // Make it relative to the app path for cleaner output
         $displayPath = Str::after($path, base_path().DIRECTORY_SEPARATOR);
@@ -84,7 +84,7 @@ class MakePanelCommand extends Command
         $stub = file_get_contents($this->stubPath);
 
         // Check registry for an existing default panel
-        $panels = WireChat::panels();
+        $panels = Wirechat::panels();
         $hasDefault = collect($panels)->contains(fn ($panel) => $panel->isDefault());
 
         // If no default exists, set this one as default
@@ -155,7 +155,7 @@ class MakePanelCommand extends Command
 
             }
         }
-        $this->info("WireChat panel [{$providerClass}] created successfully.");
+        $this->info("Wirechat panel [{$providerClass}] created successfully.");
 
     }
 }

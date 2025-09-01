@@ -1,14 +1,14 @@
 <?php
 
-namespace Namu\WireChat\Events;
+namespace Wirechat\Wirechat\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Namu\WireChat\Models\Message;
-use Namu\WireChat\Traits\InteractsWithPanel;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class MessageDeleted implements ShouldBroadcastNow
 {

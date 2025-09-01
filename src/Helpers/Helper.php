@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Helpers;
+namespace Wirechat\Wirechat\Helpers;
 
 use Carbon\Carbon;
 

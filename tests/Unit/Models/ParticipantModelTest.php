@@ -1,10 +1,10 @@
 <?php
 
 use Carbon\Carbon;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Models\Action;
-use Namu\WireChat\Models\Participant;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Participant;
 use Workbench\App\Models\User;
 
 describe('Delete Permanently', function () {

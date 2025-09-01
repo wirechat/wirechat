@@ -1,10 +1,10 @@
 <?php
 
-namespace Namu\WireChat\Models\Concerns;
+namespace Wirechat\Wirechat\Models\Concerns;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
-use Namu\WireChat\Facades\WireChat;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 trait HasDynamicIds
 {
@@ -15,7 +15,7 @@ trait HasDynamicIds
      */
     public function initializeHasDynamicIds()
     {
-        $this->usesUniqueIds = WireChat::usesUuid();
+        $this->usesUniqueIds = Wirechat::usesUuid();
     }
 
     /**
@@ -25,7 +25,7 @@ trait HasDynamicIds
      */
     public function newUniqueId()
     {
-        if (WireChat::usesUuid()) {
+        if (Wirechat::usesUuid()) {
             /** @phpstan-ignore-next-line */
             if (method_exists(\Illuminate\Support\Str::class, 'uuid7')) {
                 return (string) Str::uuid7();
@@ -44,7 +44,7 @@ trait HasDynamicIds
      */
     protected function isValidUniqueId($value): bool
     {
-        if (WireChat::usesUuid()) {
+        if (Wirechat::usesUuid()) {
             return Str::isUuid($value);
         }
 
@@ -92,7 +92,7 @@ trait HasDynamicIds
      */
     public function getKeyType()
     {
-        return WireChat::usesUuid() ? 'string' : 'int';
+        return Wirechat::usesUuid() ? 'string' : 'int';
     }
 
     /**
@@ -102,7 +102,7 @@ trait HasDynamicIds
      */
     public function getIncrementing()
     {
-        return ! WireChat::usesUuid();
+        return ! Wirechat::usesUuid();
     }
 
     /**
@@ -124,7 +124,7 @@ trait HasDynamicIds
      */
     protected static function bootHasDynamicIds()
     {
-        if (WireChat::usesUuid()) {
+        if (Wirechat::usesUuid()) {
             static::creating(function ($model) {
                 if (! $model->getKey()) {
                     $model->{$model->getKeyName()} = $model->newUniqueId();

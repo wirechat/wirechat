@@ -3,10 +3,10 @@
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
-use Namu\WireChat\Jobs\DeleteConversationJob;
-use Namu\WireChat\Livewire\Chat\Info;
-use Namu\WireChat\Livewire\Chats\Chats;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Jobs\DeleteConversationJob;
+use Wirechat\Wirechat\Livewire\Chat\Info;
+use Wirechat\Wirechat\Livewire\Chats\Chats;
+use Wirechat\Wirechat\Models\Conversation;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 

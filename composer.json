@@ -4,7 +4,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Namu\\WireChat\\": "src/"
+            "Wirechat\\Wirechat\\": "src/"
         },
         "files": [
             "src/Support/helpers.php"
@@ -13,10 +13,10 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Namu\\WireChat\\Tests\\": "tests/",
+            "Wirechat\\Wirechat\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/",
-            "Namu\\WireChat\\Workbench\\Database\\Factories\\": "workbench/database/factories/",
-            "Namu\\WireChat\\Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+            "Wirechat\\Wirechat\\Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Wirechat\\Wirechat\\Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         }
     },
     "authors": [
@@ -27,7 +27,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Namu\\WireChat\\WireChatServiceProvider"
+                "Wirechat\\Wirechat\\WirechatServiceProvider"
             ]
         }
     },

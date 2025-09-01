@@ -1,25 +1,25 @@
 <?php
 
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Facades\WireChatColor;
-use Namu\WireChat\Services\ColorService;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Facades\WirechatColor;
+use Wirechat\Wirechat\Services\ColorService;
 
 if (! function_exists('wirechat')) {
     /**
-     * Get the WireChat service instance.
+     * Get the Wirechat service instance.
      */
-    function wirechat(): WireChat
+    function wirechat(): Wirechat
     {
-        return WireChat::getFacadeRoot();
+        return Wirechat::getFacadeRoot();
     }
 }
 
 if (! function_exists('wirechatColor')) {
     /**
-     * Get the WireChat Color service instance.
+     * Get the Wirechat Color service instance.
      */
     function wirechatColor(): ColorService
     {
-        return WireChatColor::getFacadeRoot();
+        return WirechatColor::getFacadeRoot();
     }
 }

@@ -1,4 +1,4 @@
-@extends(\Namu\WireChat\Facades\WireChat::currentPanel()->getLayout())
+@extends(\Wirechat\Wirechat\Facades\Wirechat::currentPanel()->getLayout())
 
 @section('content')
 

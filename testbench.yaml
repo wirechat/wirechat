@@ -1,6 +1,6 @@
 providers:
   - Livewire\LivewireServiceProvider
-  - Namu\WireChat\WireChatServiceProvider
+  - Wirechat\Wirechat\WirechatServiceProvider
   - Workbench\App\Providers\WorkbenchServiceProvider
 
 migrations:

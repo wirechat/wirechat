@@ -1,10 +1,10 @@
 <?php
 
-namespace Namu\WireChat\Workbench\Database\Factories;
+namespace Wirechat\Wirechat\Workbench\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
 
 /**

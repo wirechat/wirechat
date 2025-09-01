@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Config as FacadesConfig;
 use Illuminate\Support\Facades\Storage;
-use Namu\WireChat\Models\Attachment;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
 
 it('tests attachment URL generation with custom test_disk', function () {

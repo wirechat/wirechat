@@ -3,11 +3,11 @@
 use App\Livewire\Test;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\group;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\group;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 

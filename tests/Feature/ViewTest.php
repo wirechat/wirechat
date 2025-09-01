@@ -1,8 +1,8 @@
 <?php
 
-use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Livewire\Chat\Chat;
+use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
+use Wirechat\Wirechat\Models\Conversation;
 use Workbench\App\Models\User;
 
 it('redirects to login page if guest user tries to access chats page ', function () {

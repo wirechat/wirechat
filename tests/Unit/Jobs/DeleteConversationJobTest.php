@@ -2,11 +2,11 @@
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Jobs\DeleteConversationJob;
-use Namu\WireChat\Jobs\DeleteExpiredMessagesJob;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Jobs\DeleteConversationJob;
+use Wirechat\Wirechat\Jobs\DeleteExpiredMessagesJob;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
 
 test('it deletes conversation succesfully', function () {

@@ -1,10 +1,10 @@
 <?php
 
-namespace Namu\WireChat\Facades;
+namespace Wirechat\Wirechat\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class WireChat extends Facade
+class Wirechat extends Facade
 {
     protected static function getFacadeAccessor()
     {

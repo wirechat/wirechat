@@ -1,10 +1,10 @@
 <?php
 
-namespace Workbench\App\Providers\WireChat;
+namespace Workbench\App\Providers\Wirechat;
 
-use Namu\WireChat\Http\Resources\WireChatUserResource;
-use Namu\WireChat\Panel;
-use Namu\WireChat\PanelProvider;
+use Wirechat\Wirechat\Http\Resources\WirechatUserResource;
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelProvider;
 use Workbench\App\Models\User;
 
 class TestPanelProvider extends PanelProvider
@@ -16,7 +16,7 @@ class TestPanelProvider extends PanelProvider
             ->path('test')
             ->chatsSearch(true)
             ->searchUsersUsing(function ($needle) {
-                return WireChatUserResource::collection(
+                return WirechatUserResource::collection(
                     User::query()
                         ->where(function ($q) use ($needle) {
                             foreach (['name'] as $field) {

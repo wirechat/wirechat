@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Namu\WireChat\Models\Action;
+use Wirechat\Wirechat\Models\Action;
 
 return new class extends Migration
 {

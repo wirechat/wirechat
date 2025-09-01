@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Support\Enums;
+namespace Wirechat\Wirechat\Support\Enums;
 
 enum Platform
 {

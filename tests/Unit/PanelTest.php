@@ -4,7 +4,7 @@ use Workbench\App\Models\User;
 
 describe('Chats Route', function () {
 
-    test('return 404 if user canAccessWireChatPanel() returns false on chats route', function () {
+    test('return 404 if user canAccessWirechatPanel() returns false on chats route', function () {
 
         $auth = User::factory()->create(['email_verified_at' => null]);
 
@@ -12,7 +12,7 @@ describe('Chats Route', function () {
 
     });
 
-    test('it 200 OK  if canAccessWireChatPanel() returns true on chats route', function () {
+    test('it 200 OK  if canAccessWirechatPanel() returns true on chats route', function () {
 
         $auth = User::factory()->create();
 
@@ -24,7 +24,7 @@ describe('Chats Route', function () {
 
 describe('Chat Route', function () {
 
-    test('return 404 if user canAccessWireChatPanel() returns false on chats route', function () {
+    test('return 404 if user canAccessWirechatPanel() returns false on chats route', function () {
 
         $auth = User::factory()->create(['email_verified_at' => null]);
 
@@ -36,7 +36,7 @@ describe('Chat Route', function () {
 
     });
 
-    test('it 200 OK  if canAccessWireChatPanel() returns true on chat route', function () {
+    test('it 200 OK  if canAccessWirechatPanel() returns true on chat route', function () {
 
         $auth = User::factory()->create();
 

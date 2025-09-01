@@ -1,12 +1,12 @@
 <?php
 
-namespace Namu\WireChat\Console\Commands;
+namespace Wirechat\Wirechat\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 
-class InstallWireChat extends Command
+class InstallWirechat extends Command
 {
     protected $signature = 'wirechat:install';
 
@@ -58,7 +58,7 @@ class InstallWireChat extends Command
     private function publishConfiguration($forcePublish = false)
     {
         $params = [
-            '--provider' => "Namu\WireChat\WireChatServiceProvider",
+            '--provider' => "Wirechat\Wirechat\WirechatServiceProvider",
             '--tag' => 'wirechat-config',
         ];
 
@@ -71,7 +71,7 @@ class InstallWireChat extends Command
     private function publishMigrations()
     {
         $this->call('vendor:publish', [
-            '--provider' => "Namu\WireChat\WireChatServiceProvider",
+            '--provider' => "Wirechat\Wirechat\WirechatServiceProvider",
             '--tag' => 'wirechat-migrations',
         ]);
     }

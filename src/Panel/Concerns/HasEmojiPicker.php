@@ -1,9 +1,9 @@
 <?php
 
-namespace Namu\WireChat\Panel\Concerns;
+namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
-use Namu\WireChat\Support\Enums\EmojiPickerPosition;
+use Wirechat\Wirechat\Support\Enums\EmojiPickerPosition;
 
 trait HasEmojiPicker
 {

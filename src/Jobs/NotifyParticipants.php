@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Jobs;
+namespace Wirechat\Wirechat\Jobs;
 
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -10,11 +10,11 @@ use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Namu\WireChat\Events\NotifyParticipant;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Traits\InteractsWithPanel;
+use Wirechat\Wirechat\Events\NotifyParticipant;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class NotifyParticipants implements ShouldQueue
 {

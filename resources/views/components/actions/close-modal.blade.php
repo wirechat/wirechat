@@ -1,4 +1,4 @@
 
-<div  onclick="Livewire.dispatch('closeWireChatModal')">
+<div  onclick="Livewire.dispatch('closeWirechatModal')">
     {{ $slot }}
 </div>

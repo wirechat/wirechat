@@ -1,9 +1,9 @@
 <?php
 
-namespace Namu\WireChat\Traits;
+namespace Wirechat\Wirechat\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Namu\WireChat\Models\Action;
+use Wirechat\Wirechat\Models\Action;
 
 /**
  * Trait Actionable

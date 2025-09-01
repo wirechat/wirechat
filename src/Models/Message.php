@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Models;
+namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,12 +12,12 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Enums\MessageType;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Helpers\Helper;
-use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
-use Namu\WireChat\Traits\Actionable;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Enums\MessageType;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Helpers\Helper;
+use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
+use Wirechat\Wirechat\Traits\Actionable;
 
 /**
  * @property int $id
@@ -31,10 +31,10 @@ use Namu\WireChat\Traits\Actionable;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Action> $actions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
  * @property-read int|null $actions_count
- * @property-read \Namu\WireChat\Models\Attachment|null $attachment
- * @property-read \Namu\WireChat\Models\Conversation|null $conversation
+ * @property-read \Wirechat\Wirechat\Models\Attachment|null $attachment
+ * @property-read \Wirechat\Wirechat\Models\Conversation|null $conversation
  * @property-read Message|null $parent
  * @property-read Message|null $reply
  * @property-read Model|\Eloquent $sendable
@@ -85,7 +85,7 @@ class Message extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = WireChat::formatTableName('messages');
+        $this->table = Wirechat::formatTableName('messages');
 
         parent::__construct($attributes);
     }
@@ -110,7 +110,7 @@ class Message extends Model
      */
     protected static function newFactory()
     {
-        return \Namu\WireChat\Workbench\Database\Factories\MessageFactory::new();
+        return \Wirechat\Wirechat\Workbench\Database\Factories\MessageFactory::new();
     }
 
     protected static function booted()
@@ -121,8 +121,8 @@ class Message extends Model
         // listen to deleted
         static::deleted(function ($message) {
 
-            $diskVisibility = WireChat::diskVisibility();
-            $storageDisk = WireChat::storageDisk();
+            $diskVisibility = Wirechat::diskVisibility();
+            $storageDisk = Wirechat::storageDisk();
 
             if ($message->attachment?->exists()) {
 

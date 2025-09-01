@@ -2,8 +2,8 @@
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
-use Namu\WireChat\Events\MessageCreated;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Events\MessageCreated;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
 
 describe('broadcastWith() Data verifiction ', function () {

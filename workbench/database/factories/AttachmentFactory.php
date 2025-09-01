@@ -1,9 +1,9 @@
 <?php
 
-namespace Namu\WireChat\Workbench\Database\Factories;
+namespace Wirechat\Wirechat\Workbench\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Namu\WireChat\Models\Attachment;
+use Wirechat\Wirechat\Models\Attachment;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Attachment>

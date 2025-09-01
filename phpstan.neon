@@ -21,8 +21,8 @@ parameters:
         - '#Access to an undefined property .*wirechat_avatar_url#'
         #- '#Access to an undefined property .*wirechat_profile_url#'
         - '#Call to an undefined method .*belongsToConversation#'
-        - '#Trait Namu\\WireChat\\Traits\\Chatable is used zero times and is not analysed#'
-        - '#Trait Namu\\WireChat\\Traits\\Actor is used zero times and is not analysed#'
+        - '#Trait Wirechat\Wirechat\\Traits\\Chatable is used zero times and is not analysed#'
+        - '#Trait Wirechat\Wirechat\\Traits\\Actor is used zero times and is not analysed#'
         - '#Trait .* is used zero times and is not analysed#'
 #
 #   excludePaths:

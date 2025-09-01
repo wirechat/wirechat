@@ -1,10 +1,10 @@
 <?php
 
-namespace Namu\WireChat\Traits;
+namespace Wirechat\Wirechat\Traits;
 
-use Namu\WireChat\Exceptions\NoPanelProvidedException;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Panel;
+use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Panel;
 
 trait InteractsWithPanel
 {
@@ -19,9 +19,9 @@ trait InteractsWithPanel
     public function resolvePanel(?string $panel = null): void
     {
         if (is_string($panel) && filled($panel)) {
-            $this->panel = WireChat::getPanel($panel)->getId();
+            $this->panel = Wirechat::getPanel($panel)->getId();
         } else {
-            $this->panel = WireChat::getDefaultPanel()->getId();
+            $this->panel = Wirechat::getDefaultPanel()->getId();
         }
 
         if (! $this->panel) {
@@ -34,6 +34,6 @@ trait InteractsWithPanel
      */
     public function getPanel(): ?Panel
     {
-        return WireChat::getPanel($this->panel);
+        return Wirechat::getPanel($this->panel);
     }
 }

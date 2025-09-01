@@ -6,16 +6,16 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\New\Group as NewGroup;
-use Namu\WireChat\Models\Attachment;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Conversation;
 use Workbench\App\Models\User as ModelsUser;
 
 beforeEach(function () {
 
-    Storage::fake(WireChat::storageDisk());
+    Storage::fake(Wirechat::storageDisk());
 });
 
 it('user must be authenticated', function () {
@@ -335,7 +335,7 @@ describe('Creteing group', function () {
 
         $attachment = Attachment::first();
         expect($attachment)->not->toBe(null);
-        Storage::disk(WireChat::storageDisk())->assertExists($attachment->file_path);
+        Storage::disk(Wirechat::storageDisk())->assertExists($attachment->file_path);
 
         expect($conversation->group->cover)->not->toBe(null);
 
@@ -370,7 +370,7 @@ describe('Creteing group', function () {
         expect($conversation->participants->count())->toBe(4);
     });
 
-    it('dispataches Livewire events "closeWireChatModal" event after creating Group', function () {
+    it('dispataches Livewire events "closeWirechatModal" event after creating Group', function () {
 
         testPanelProvider()->maxGroupMembers(3);
 
@@ -396,7 +396,7 @@ describe('Creteing group', function () {
                 // create group
             ->call('create');
 
-        $request->assertDispatched('closeWireChatModal');
+        $request->assertDispatched('closeWirechatModal');
 
     });
 

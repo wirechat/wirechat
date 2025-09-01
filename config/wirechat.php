@@ -35,7 +35,7 @@ return [
      | Storage
      |--------------------------------------------------------------------------
      |
-     | Global configuration for WireChat file storage. Defines the disk,
+     | Global configuration for Wirechat file storage. Defines the disk,
      | directory, and visibility used for saving attachments.
      |
      */

@@ -1,8 +1,8 @@
 <?php
 
-namespace Namu\WireChat\Traits;
+namespace Wirechat\Wirechat\Traits;
 
-use Namu\WireChat\Models\Action;
+use Wirechat\Wirechat\Models\Action;
 
 /**
  * Trait Actionable

@@ -3,9 +3,9 @@
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
-use Namu\WireChat\Events\NotifyParticipant;
-use Namu\WireChat\Jobs\NotifyParticipants;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Events\NotifyParticipant;
+use Wirechat\Wirechat\Jobs\NotifyParticipants;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 

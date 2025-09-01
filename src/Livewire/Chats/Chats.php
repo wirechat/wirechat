@@ -1,16 +1,16 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Chats;
+namespace Wirechat\Wirechat\Livewire\Chats;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Namu\WireChat\Helpers\MorphClassResolver;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\Widget;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Models\Conversation;
 
 /**
  * Chats Component
@@ -88,12 +88,12 @@ class Chats extends Component
         ];
 
         if ($this->panel() == null) {
-            \Illuminate\Support\Facades\Log::warning('WireChat:No panels registered in Chat Component');
+            \Illuminate\Support\Facades\Log::warning('Wirechat:No panels registered in Chat Component');
         } else {
             $panelId = $this->panel()->getId();
             // Construct the channel name using the encoded type and user ID.
             $channelName = "$panelId.participant.$encodedType.$userId";
-            $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\NotifyParticipant"] = 'refreshComponent';
+            $listeners["echo-private:{$channelName},.Namu\\Wirechat\\Events\\NotifyParticipant"] = 'refreshComponent';
         }
 
         return $listeners;

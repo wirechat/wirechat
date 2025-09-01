@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Tests;
+namespace Wirechat\Wirechat\Tests;
 
 use Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider;
 use Illuminate\Config\Repository;
@@ -10,10 +10,10 @@ use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\View;
 use Livewire\LivewireServiceProvider;
-use Namu\WireChat\WireChatServiceProvider;
+use Wirechat\Wirechat\WirechatServiceProvider;
 use Orchestra\Testbench\Concerns\WithLaravelMigrations;
 use Orchestra\Testbench\Concerns\WithWorkbench;
-use Workbench\App\Providers\WireChat\TestPanelProvider;
+use Workbench\App\Providers\Wirechat\TestPanelProvider;
 
 use function Orchestra\Testbench\workbench_path;
 
@@ -29,7 +29,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     {
         return [
             LivewireServiceProvider::class,
-            WireChatServiceProvider::class,
+            WirechatServiceProvider::class,
             MissingLivewireAssertionsServiceProvider::class,
             TestPanelProvider::class,
         ];

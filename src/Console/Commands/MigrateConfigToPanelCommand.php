@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Console\Commands;
+namespace Wirechat\Wirechat\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
@@ -10,16 +10,16 @@ class MigrateConfigToPanelCommand extends Command
 {
     protected $signature = 'wirechat:upgrade-to-v0.3x {--dry-run : Show what would be done without making changes}';
 
-    protected $description = 'Upgrade WireChat by creating a panel provider and migrating old config values';
+    protected $description = 'Upgrade Wirechat by creating a panel provider and migrating old config values';
 
     public function handle()
     {
-        $this->info('Starting WireChat upgrade to panel...');
+        $this->info('Starting Wirechat upgrade to panel...');
 
         $id = 'chats';
         $className = Str::studly($id).'PanelProvider';
-        $namespace = 'App\\Providers\\WireChat';
-        $path = app_path("Providers/WireChat/{$className}.php");
+        $namespace = 'App\\Providers\\Wirechat';
+        $path = app_path("Providers/Wirechat/{$className}.php");
         $displayPath = Str::after($path, base_path().DIRECTORY_SEPARATOR);
 
         // Exit if panel file already exists
@@ -128,9 +128,9 @@ class MigrateConfigToPanelCommand extends Command
 
 namespace '.$namespace.";
 
-use Namu\WireChat\Panel;
-use Namu\WireChat\PanelProvider;
-use Namu\WireChat\Support\Color;
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelProvider;
+use Wirechat\Wirechat\Support\Color;
 
 class ".$className.' extends PanelProvider
 {
@@ -163,7 +163,7 @@ class ".$className.' extends PanelProvider
         // Register provider
         $this->registerProvider($namespace, $className);
 
-        $this->info('WireChat upgrade complete! Review the panel for any custom logic.');
+        $this->info('Wirechat upgrade complete! Review the panel for any custom logic.');
     }
 
     protected function registerProvider(string $namespace, string $className)

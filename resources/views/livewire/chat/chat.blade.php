@@ -1,5 +1,5 @@
-@use('Namu\WireChat\Helpers\Helper')
-@use('Namu\WireChat\Facades\WireChat')
+@use('Wirechat\Wirechat\Helpers\Helper')
+@use('Wirechat\Wirechat\Facades\Wirechat')
 
 @php
 $primaryColor = isset($this->panel()->getColors()['primary']) ? $this->panel()->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';

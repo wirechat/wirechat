@@ -1,9 +1,9 @@
 <?php
 
-namespace Namu\WireChat\Panel\Concerns;
+namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
-use Namu\WireChat\Http\Resources\WireChatUserResource;
+use Wirechat\Wirechat\Http\Resources\WirechatUserResource;
 
 trait HasUsersSearch
 {
@@ -23,7 +23,7 @@ trait HasUsersSearch
      */
     public function searchUsers(?string $needle)
     {
-        return WireChatUserResource::collection(
+        return WirechatUserResource::collection(
             $this->runSearchCallback($needle)
         );
     }

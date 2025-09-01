@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Enums;
+namespace Wirechat\Wirechat\Enums;
 
 enum MessageType: string
 {

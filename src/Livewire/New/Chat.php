@@ -1,11 +1,11 @@
 <?php
 
-namespace Namu\WireChat\Livewire\New;
+namespace Wirechat\Wirechat\Livewire\New;
 
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\ModalComponent;
-use Namu\WireChat\Livewire\Concerns\Widget;
-use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 
 class Chat extends ModalComponent
 {
@@ -59,13 +59,13 @@ class Chat extends ModalComponent
             if ($createdConversation) {
 
                 // close dialog
-                $this->closeWireChatModal();
+                $this->closeWirechatModal();
 
                 // redirect to conversation
                 $this->handleComponentTermination(
                     redirectRoute: $this->panel()->chatRoute($createdConversation->id),
                     events: [
-                        WidgetsWireChat::class => ['open-chat',  ['conversation' => $createdConversation->id]],
+                        WidgetsWirechat::class => ['open-chat',  ['conversation' => $createdConversation->id]],
                     ]
                 );
 

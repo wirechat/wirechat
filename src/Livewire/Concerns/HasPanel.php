@@ -1,11 +1,11 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Concerns;
+namespace Wirechat\Wirechat\Livewire\Concerns;
 
 use Livewire\Attributes\Computed;
-use Namu\WireChat\Exceptions\NoPanelProvidedException;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Panel;
+use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Panel;
 
 trait HasPanel
 {
@@ -32,19 +32,19 @@ trait HasPanel
         } elseif (is_string($panelId) && filled($panelId)) {
             $this->panel = $panelId;
         } else {
-            $this->panel = WireChat::getDefaultPanel()?->getId();
+            $this->panel = Wirechat::getDefaultPanel()?->getId();
         }
 
-        if (! $this->panel || ! WireChat::getPanel($this->panel)) {
+        if (! $this->panel || ! Wirechat::getPanel($this->panel)) {
             throw NoPanelProvidedException::make();
         }
 
-        app(\Namu\WireChat\PanelRegistry::class)->setCurrent($this->panel);
+        app(\Wirechat\Wirechat\PanelRegistry::class)->setCurrent($this->panel);
     }
 
     #[Computed(cache: false)]
     public function panel(): ?Panel
     {
-        return $this->panel ? WireChat::getPanel($this->panel) : null;
+        return $this->panel ? Wirechat::getPanel($this->panel) : null;
     }
 }

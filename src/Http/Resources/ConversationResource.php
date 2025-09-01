@@ -1,12 +1,12 @@
 <?php
 
-namespace Namu\WireChat\Http\Resources;
+namespace Wirechat\Wirechat\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \Namu\WireChat\Models\Conversation
+ * @mixin \Wirechat\Wirechat\Models\Conversation
  */
 class ConversationResource extends JsonResource
 {

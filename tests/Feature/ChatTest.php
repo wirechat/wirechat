@@ -8,20 +8,20 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Enums\MessageType;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Events\MessageCreated;
-use Namu\WireChat\Events\MessageDeleted;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Helpers\Helper;
-use Namu\WireChat\Jobs\BroadcastMessage;
-use Namu\WireChat\Jobs\NotifyParticipants;
-use Namu\WireChat\Livewire\Chat\Chat as ChatBox;
-use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
-use Namu\WireChat\Models\Attachment;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageType;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Events\MessageCreated;
+use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Helpers\Helper;
+use Wirechat\Wirechat\Jobs\BroadcastMessage;
+use Wirechat\Wirechat\Jobs\NotifyParticipants;
+use Wirechat\Wirechat\Livewire\Chat\Chat as ChatBox;
+use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -837,7 +837,7 @@ describe('Emoji', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        testPanelProvider()->emojiPicker(position: \Namu\WireChat\Support\Enums\EmojiPickerPosition::Floating);
+        testPanelProvider()->emojiPicker(position: \Wirechat\Wirechat\Support\Enums\EmojiPickerPosition::Floating);
 
         // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
@@ -853,7 +853,7 @@ describe('Emoji', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        testPanelProvider()->emojiPicker(position: \Namu\WireChat\Support\Enums\EmojiPickerPosition::Docked);
+        testPanelProvider()->emojiPicker(position: \Wirechat\Wirechat\Support\Enums\EmojiPickerPosition::Docked);
 
         // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
@@ -1725,7 +1725,7 @@ describe('Sending messages ', function () {
             ->assertSet('media', []);
 
         $attachment = Attachment::first();
-        Storage::disk('public')->assertExists(WireChat::storageFolder().'/'.$attachment->file_anme);
+        Storage::disk('public')->assertExists(Wirechat::storageFolder().'/'.$attachment->file_anme);
     });
 
     test('it saves file visibility as public when storage_disk is public', function () {
@@ -1745,7 +1745,7 @@ describe('Sending messages ', function () {
             ->assertSet('media', []);
 
         $attachment = Attachment::first();
-        $visibility = Storage::disk('public')->getVisibility(WireChat::storageFolder().'/'.$attachment->file_anme);
+        $visibility = Storage::disk('public')->getVisibility(Wirechat::storageFolder().'/'.$attachment->file_anme);
 
         expect($visibility)->toBe('public');
     });
@@ -1768,7 +1768,7 @@ describe('Sending messages ', function () {
             ->assertSet('media', []);
 
         $attachment = Attachment::first();
-        $visibility = Storage::disk('s3')->getVisibility(WireChat::storageFolder().'/'.$attachment->file_anme);
+        $visibility = Storage::disk('s3')->getVisibility(Wirechat::storageFolder().'/'.$attachment->file_anme);
 
         expect($visibility)->toBe('public');
     });
@@ -1844,7 +1844,7 @@ describe('Sending messages ', function () {
             ->call('sendMessage');
 
         $attachment = Attachment::first();
-        Storage::disk('public')->assertExists(WireChat::storageFolder().'/'.$attachment->file_anme);
+        Storage::disk('public')->assertExists(Wirechat::storageFolder().'/'.$attachment->file_anme);
     });
 
     test('it saves video: message type as attachemnt', function () {
@@ -1904,7 +1904,7 @@ describe('Sending messages ', function () {
             ->assertSet('files', []);
 
         $attachment = Attachment::first();
-        Storage::disk('public')->assertExists(WireChat::storageFolder().'/'.$attachment->file_anme);
+        Storage::disk('public')->assertExists(Wirechat::storageFolder().'/'.$attachment->file_anme);
     });
 
     test('dispatched event is listened to in chatlist after message is created', function () {

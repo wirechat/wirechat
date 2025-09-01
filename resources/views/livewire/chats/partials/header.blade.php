@@ -1,4 +1,4 @@
-@use("Namu\WireChat\Facades\WireChat")
+@use("Wirechat\Wirechat\Facades\Wirechat")
 
 <header class="px-3 z-10 sticky top-0 w-full py-2 " dusk="header">
 

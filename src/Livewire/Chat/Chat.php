@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Chat;
+namespace Wirechat\Wirechat\Livewire\Chat;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -12,18 +12,18 @@ use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Enums\MessageType;
-use Namu\WireChat\Events\MessageCreated;
-use Namu\WireChat\Events\MessageDeleted;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Jobs\NotifyParticipants;
-use Namu\WireChat\Livewire\Chats\Chats;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\Widget;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Participant;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageType;
+use Wirechat\Wirechat\Events\MessageCreated;
+use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Jobs\NotifyParticipants;
+use Wirechat\Wirechat\Livewire\Chats\Chats;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
 
 /**
  * Chat Component
@@ -87,12 +87,12 @@ class Chat extends Component
         ];
 
         if ($this->panel() == null) {
-            \Illuminate\Support\Facades\Log::warning('WireChat:No panels registered in Chat Component');
+            \Illuminate\Support\Facades\Log::warning('Wirechat:No panels registered in Chat Component');
         } else {
             $panelId = $this->panel()->getId();
             $channelName = "{$panelId}.conversation.{$conversationId}";
-            $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageCreated"] = 'appendNewMessage';
-            $listeners["echo-private:{$channelName},.Namu\\WireChat\\Events\\MessageDeleted"] = 'removeDeletedMessage';
+            $listeners["echo-private:{$channelName},.Namu\\Wirechat\\Events\\MessageCreated"] = 'appendNewMessage';
+            $listeners["echo-private:{$channelName},.Namu\\Wirechat\\Events\\MessageDeleted"] = 'removeDeletedMessage';
         }
 
         return $listeners;
@@ -396,8 +396,8 @@ class Chat extends Component
 
                 // save attachment to disk
                 $path = $attachment->store(
-                    WireChat::storageFolder(),
-                    WireChat::storageDisk()
+                    Wirechat::storageFolder(),
+                    Wirechat::storageDisk()
                 );
 
                 // Determine the reply ID based on conditions
@@ -419,7 +419,7 @@ class Chat extends Component
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
                     'mime_type' => $attachment->getMimeType(),
-                    'url' => Storage::disk(WireChat::storageDisk())->url($path), // Use disk and path
+                    'url' => Storage::disk(Wirechat::storageDisk())->url($path), // Use disk and path
                 ]);
 
                 // dd($attachment);
@@ -747,7 +747,7 @@ class Chat extends Component
         // Group the messages
         $this->loadedMessages = $messages
             ->groupBy(function ($message) {
-                /** @var \Namu\WireChat\Models\Message $message */
+                /** @var \Wirechat\Wirechat\Models\Message $message */
                 return $this->messageGroupKey($message);
             })
             ->map->values();  // Re-index each group
@@ -826,7 +826,7 @@ class Chat extends Component
                 $this->receiverParticipant = $this->authParticipant;
             }
 
-            /** @var \Namu\WireChat\Models\Participant|null $participant */
+            /** @var \Wirechat\Wirechat\Models\Participant|null $participant */
             $participant = $this->receiverParticipant;
 
             $this->receiver = $participant

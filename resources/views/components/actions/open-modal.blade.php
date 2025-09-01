@@ -5,7 +5,7 @@
     'panel'=>null,
 ])
 
-<div  onclick="Livewire.dispatch('openWireChatModal', {
+<div  onclick="Livewire.dispatch('openWirechatModal', {
         component: '{{ $component }}',
         arguments: {
             conversation:`{{$conversation ?? null }}`,

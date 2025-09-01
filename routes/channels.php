@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
-use Namu\WireChat\Helpers\MorphClassResolver;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\PanelRegistry;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\PanelRegistry;
 
 /*
 |--------------------------------------------------------------------------

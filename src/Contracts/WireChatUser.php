@@ -1,10 +1,10 @@
 <?php
 
-namespace Namu\WireChat\Contracts;
+namespace Wirechat\Wirechat\Contracts;
 
-use Namu\WireChat\Panel;
+use Wirechat\Wirechat\Panel;
 
-interface WireChatUser
+interface WirechatUser
 {
     /**
      * Determine if the user can create new groups.
@@ -19,5 +19,5 @@ interface WireChatUser
     /**
      * Determine if the user can access wirechat panel.
      */
-    public function canAccessWireChatPanel(Panel $panel): bool;
+    public function canAccessWirechatPanel(Panel $panel): bool;
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace Namu\WireChat\Livewire\New;
+namespace Wirechat\Wirechat\Livewire\New;
 
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\ModalComponent;
-use Namu\WireChat\Livewire\Concerns\Widget;
-use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 
 class Group extends ModalComponent
 {
@@ -171,13 +171,13 @@ class Group extends ModalComponent
         // close dialog
         // The froce close is importnat because it will close all dialogs including parents or children
         $this->forceClose();
-        $this->closeWireChatModal();
+        $this->closeWirechatModal();
 
         // redirect to conversation
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatRoute($conversation->id),
             events: [
-                WidgetsWireChat::class => ['open-chat',  ['conversation' => $conversation->id]],
+                WidgetsWirechat::class => ['open-chat',  ['conversation' => $conversation->id]],
             ]
         );
 

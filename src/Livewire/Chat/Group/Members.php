@@ -1,21 +1,21 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
 // use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\ModalComponent;
-use Namu\WireChat\Livewire\Concerns\Widget;
-use Namu\WireChat\Livewire\Widgets\WireChat as WidgetsWireChat;
-use Namu\WireChat\Models\Action;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Participant;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Participant;
 
 class Members extends ModalComponent
 {
@@ -86,14 +86,14 @@ class Members extends ModalComponent
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatRoute($conversation->id),
             events: [
-                WidgetsWireChat::class => ['open-chat',  ['conversation' => $conversation->id]],
-                'closeWireChatModal',
+                WidgetsWirechat::class => ['open-chat',  ['conversation' => $conversation->id]],
+                'closeWirechatModal',
             ]
         );
 
         // $this->closeModalWithEvents([
-        //   //  WidgetsWireChat::class => ['close-chat'],
-        //     WidgetsWireChat::class => ['open-chat',  ['conversation' => $conversation->id]],
+        //   //  WidgetsWirechat::class => ['close-chat'],
+        //     WidgetsWirechat::class => ['open-chat',  ['conversation' => $conversation->id]],
         //    // 'closeChatDrawer',
         // ]);
         // $this->dispatch('closeChatDrawer');
@@ -225,7 +225,7 @@ class Members extends ModalComponent
         // subtract one from total members and update chat list
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
-        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(\Namu\WireChat\Livewire\Chat\Group\Info::class);
+        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(\Wirechat\Wirechat\Livewire\Chat\Group\Info::class);
         //  $this->dispatch('refresh')->self();
 
     }

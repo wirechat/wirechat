@@ -1,13 +1,13 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Chat;
+namespace Wirechat\Wirechat\Livewire\Chat;
 
 use Livewire\Attributes\Locked;
-use Namu\WireChat\Livewire\Chats\Chats;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Livewire\Concerns\ModalComponent;
-use Namu\WireChat\Livewire\Concerns\Widget;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Livewire\Chats\Chats;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Models\Conversation;
 
 class Info extends ModalComponent
 {

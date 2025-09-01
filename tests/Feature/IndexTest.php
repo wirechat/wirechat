@@ -1,9 +1,9 @@
 <?php
 
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Chat\Chat;
-use Namu\WireChat\Livewire\Chats\Chats as Chatlist;
-use Namu\WireChat\Livewire\Pages\Chats;
+use Wirechat\Wirechat\Livewire\Chat\Chat;
+use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
+use Wirechat\Wirechat\Livewire\Pages\Chats;
 use Workbench\App\Models\User;
 
 // /Auth checks

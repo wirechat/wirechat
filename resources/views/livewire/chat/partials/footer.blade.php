@@ -1,7 +1,7 @@
 @php
 
     $hasEmojiPicker= $this->panel()->hasEmojiPicker();
-    $floatingEmojiPicker=$this->panel()->emojiPickerPosition()===\Namu\WireChat\Support\Enums\EmojiPickerPosition::Floating;
+    $floatingEmojiPicker=$this->panel()->emojiPickerPosition()===\Wirechat\Wirechat\Support\Enums\EmojiPickerPosition::Floating;
 @endphp
 <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 

@@ -1,29 +1,29 @@
 <?php
 
 arch('app')
-    ->expect('Namu\WireChat')
+    ->expect('Wirechat\Wirechat')
     ->not->toUse(['die', 'dd', 'dump']);
 
 arch('Traits test ')
-    ->expect('Namu\WireChat\Traits')
+    ->expect('Wirechat\Wirechat\Traits')
     ->toBeTraits();
 
-arch('Make sure Actor is only used in InteractsWithWireChat Trait')
-    ->expect('Namu\WireChat\Traits\Actor')
-    ->toOnlyBeUsedIn('Namu\WireChat\Traits\InteractsWithWireChat');
+arch('Make sure Actor is only used in InteractsWithWirechat Trait')
+    ->expect('Wirechat\Wirechat\Traits\Actor')
+    ->toOnlyBeUsedIn('Wirechat\Wirechat\Traits\InteractsWithWirechat');
 
 arch('Make sure Actionable is used in Conversation Model')
-    ->expect('Namu\\WireChat\\Traits\\Actionable')
-    ->toBeUsedIn('Namu\WireChat\Models\Conversation');
+    ->expect('Wirechat\\Wirechat\\Traits\\Actionable')
+    ->toBeUsedIn('Wirechat\Wirechat\Models\Conversation');
 
 arch('Ensure Widget Trait is used in Components')
-    ->expect('Namu\\WireChat\\Livewire\\Concerns\Widget')
+    ->expect('Wirechat\\Wirechat\\Livewire\\Concerns\Widget')
     ->toBeUsedIn([
-        'Namu\WireChat\Livewire\Chat\Chat',
-        'Namu\WireChat\Livewire\Chats\Chats',
-        'Namu\WireChat\Livewire\New\Chat',
-        'Namu\WireChat\Livewire\New\Group',
-        // 'Namu\WireChat\Livewire\Chat\Group\AddMembers',
-        'Namu\WireChat\Livewire\Chat\Info',
-        'Namu\WireChat\Livewire\Chat\Group\Members',
+        'Wirechat\Wirechat\Livewire\Chat\Chat',
+        'Wirechat\Wirechat\Livewire\Chats\Chats',
+        'Wirechat\Wirechat\Livewire\New\Chat',
+        'Wirechat\Wirechat\Livewire\New\Group',
+        // 'Wirechat\Wirechat\Livewire\Chat\Group\AddMembers',
+        'Wirechat\Wirechat\Livewire\Chat\Info',
+        'Wirechat\Wirechat\Livewire\Chat\Group\Members',
     ]);

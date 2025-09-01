@@ -1,11 +1,11 @@
 <?php
 
-namespace Namu\WireChat;
+namespace Wirechat\Wirechat;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Namu\WireChat\Exceptions\NoPanelProvidedException;
-use Namu\WireChat\Facades\WireChatColor;
+use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\Facades\WirechatColor;
 use ReflectionClass;
 
 class PanelRegistry
@@ -45,7 +45,7 @@ class PanelRegistry
 
     public function getProvidersPath(): string
     {
-        return app_path('Providers/WireChat');
+        return app_path('Providers/Wirechat');
     }
 
     public function autoDiscover(): void
@@ -54,7 +54,7 @@ class PanelRegistry
         $directory = $this->getProvidersPath();
 
         if (! File::isDirectory($directory)) {
-            Log::warning('WireChat providers directory not found', ['directory' => $directory]);
+            Log::warning('Wirechat providers directory not found', ['directory' => $directory]);
 
             return;
         }
@@ -64,7 +64,7 @@ class PanelRegistry
         foreach ($files as $file) {
 
             $className = str_replace('.php', '', $file->getFilename());
-            $fullClass = 'App\\Providers\\WireChat\\'.$className;
+            $fullClass = 'App\\Providers\\Wirechat\\'.$className;
 
             if (! class_exists($fullClass)) {
                 continue;
@@ -88,7 +88,7 @@ class PanelRegistry
         $this->currentPanel = $this->panels[$panelId] ?? $this->defaultPanel;
 
         // Set the colors of this panel accesed
-        WireChatColor::register($this->currentPanel->getColors());
+        WirechatColor::register($this->currentPanel->getColors());
 
         //    dd($this->currentPanel->getId());
     }

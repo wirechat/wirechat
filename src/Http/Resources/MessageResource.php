@@ -1,12 +1,12 @@
 <?php
 
-namespace Namu\WireChat\Http\Resources;
+namespace Wirechat\Wirechat\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \Namu\WireChat\Models\Message
+ * @mixin \Wirechat\Wirechat\Models\Message
  */
 class MessageResource extends JsonResource
 {
@@ -25,7 +25,7 @@ class MessageResource extends JsonResource
             'body' => $this->body,
             'type' => $this->type,
             'conversation' => $this->whenLoaded('conversation', fn () => new ConversationResource($this->conversation)),
-            'sendable' => $this->whenLoaded('sendable', fn () => new WireChatUserResource($this->sendable)),
+            'sendable' => $this->whenLoaded('sendable', fn () => new WirechatUserResource($this->sendable)),
             'has_attachment' => $this->hasAttachment(),
             'attachment' => $this->whenLoaded('attachment', fn () => new AttachmentResource($this->attachment)),
             'created_at' => $this->created_at,

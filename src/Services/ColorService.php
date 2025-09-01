@@ -1,8 +1,8 @@
 <?php
 
-namespace Namu\WireChat\Services;
+namespace Wirechat\Wirechat\Services;
 
-use Namu\WireChat\Facades\WireChat;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 class ColorService
 {
@@ -52,7 +52,7 @@ class ColorService
      */
     public function all(): array
     {
-        $panel = WireChat::currentPanel();
+        $panel = Wirechat::currentPanel();
 
         if ($panel) {
             // panel colors override colors

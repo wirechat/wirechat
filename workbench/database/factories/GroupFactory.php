@@ -1,9 +1,9 @@
 <?php
 
-namespace Namu\WireChat\Workbench\Database\Factories;
+namespace Wirechat\Wirechat\Workbench\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Namu\WireChat\Models\Group;
+use Wirechat\Wirechat\Models\Group;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\RoomSetting>

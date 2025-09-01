@@ -1,13 +1,13 @@
 <?php
 
 use Livewire\Livewire;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Livewire\Chat\Group\Members;
-use Namu\WireChat\Models\Action;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Models\Participant;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members;
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Participant;
 use Workbench\App\Models\User;
 
 test('user must be authenticated', function () {
@@ -450,7 +450,7 @@ describe('actions test', function () {
     });
 
     describe('sendMessage: ', function () {
-        test('it redirects to chat route and does not dispatch "closeWireChatModal" & "open-chat"  & "close-chat" event when componnet is not Wdiget route after creating conversation ', function () {
+        test('it redirects to chat route and does not dispatch "closeWirechatModal" & "open-chat"  & "close-chat" event when componnet is not Wdiget route after creating conversation ', function () {
             $auth = User::factory()->create();
             $conversation = $auth->createGroup('My Group');
 
@@ -463,11 +463,11 @@ describe('actions test', function () {
                 ->call('sendMessage', $participant->id)
                 ->assertRedirect(testPanelProvider()->chatRoute(2))
                 ->assertNotDispatched('close-chat')
-                ->assertNotDispatched('closeWireChatModal')
+                ->assertNotDispatched('closeWirechatModal')
                 ->assertNotDispatched('open-chat');
         });
 
-        test('it dispatches "closeWireChatModal" & "open-chat"  & "close-chat" event and does not redirects to chat route and does not when componnet  is Wdiget route after creating conversation ', function () {
+        test('it dispatches "closeWirechatModal" & "open-chat"  & "close-chat" event and does not redirects to chat route and does not when componnet  is Wdiget route after creating conversation ', function () {
             $auth = User::factory()->create();
             $conversation = $auth->createGroup('My Group');
 
@@ -480,7 +480,7 @@ describe('actions test', function () {
                 ->call('sendMessage', $participant->id)
                 ->assertNoRedirect()
                 ->assertDispatched('open-chat')
-                ->assertDispatched('closeWireChatModal')
+                ->assertDispatched('closeWirechatModal')
                 ->assertNotDispatched('close-chat');
 
         });

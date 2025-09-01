@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Widgets;
+namespace Wirechat\Wirechat\Livewire\Widgets;
 
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -8,14 +8,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Models\Conversation;
 
-class WireChat extends Component
+class Wirechat extends Component
 {
     use HasPanel;
 
-    public ?string $activeWireChatWidgetComponent = null;
+    public ?string $activeWirechatWidgetComponent = null;
 
     public $selectedConversationId = null;
 
@@ -24,7 +24,7 @@ class WireChat extends Component
     public function resetState(): void
     {
         $this->widgetComponents = [];
-        $this->activeWireChatWidgetComponent = null;
+        $this->activeWirechatWidgetComponent = null;
         $this->selectedConversationId = null;
     }
 
@@ -63,7 +63,7 @@ class WireChat extends Component
             ],
         ];
 
-        $this->activeWireChatWidgetComponent = $id;
+        $this->activeWirechatWidgetComponent = $id;
 
         // Set the selected conversationId
         $this->selectedConversationId = $conversation;

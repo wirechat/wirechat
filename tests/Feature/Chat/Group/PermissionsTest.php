@@ -1,8 +1,8 @@
 <?php
 
 use Livewire\Livewire;
-use Namu\WireChat\Livewire\Chat\Group\Permissions;
-use Namu\WireChat\Models\Conversation;
+use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
+use Wirechat\Wirechat\Models\Conversation;
 use Workbench\App\Models\User;
 
 test('user must be authenticated', function () {

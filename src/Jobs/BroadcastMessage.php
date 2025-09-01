@@ -1,16 +1,16 @@
 <?php
 
-namespace Namu\WireChat\Jobs;
+namespace Wirechat\Wirechat\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Namu\WireChat\Events\MessageCreated;
-use Namu\WireChat\Models\Message;
-use Namu\WireChat\Models\Participant;
-use Namu\WireChat\Traits\InteractsWithPanel;
+use Wirechat\Wirechat\Events\MessageCreated;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class BroadcastMessage implements ShouldQueue
 {

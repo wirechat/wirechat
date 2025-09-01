@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'class_namespace' => 'Namu\\WireChat\\Livewire',
+    'class_namespace' => 'Namu\\Wirechat\\Livewire',
 
     /*
     |---------------------------------------------------------------------------

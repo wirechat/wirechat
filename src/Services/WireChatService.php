@@ -1,13 +1,13 @@
 <?php
 
-namespace Namu\WireChat\Services;
+namespace Wirechat\Wirechat\Services;
 
 use Illuminate\Support\Facades\Schema;
-use Namu\WireChat\Exceptions\NoPanelProvidedException;
-use Namu\WireChat\Panel;
-use Namu\WireChat\PanelRegistry;
+use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelRegistry;
 
-class WireChatService
+class WirechatService
 {
     protected PanelRegistry $registry;
 
@@ -143,7 +143,7 @@ class WireChatService
     }
 
     /**
-     * @deprecated Use WireChat::storage()->disk() instead.
+     * @deprecated Use Wirechat::storage()->disk() instead.
      *
      * Get the wirechat storage disk from the configuration.
      *
@@ -156,7 +156,7 @@ class WireChatService
     }
 
     /**
-     * @deprecated Use WireChat::storage()->directory() instead.
+     * @deprecated Use Wirechat::storage()->directory() instead.
      *
      * Get the wirechat storage folder from the configuration.
      *
@@ -169,7 +169,7 @@ class WireChatService
     }
 
     /**
-     * @deprecated Use WireChat::storage()->visibility() instead.
+     * @deprecated Use Wirechat::storage()->visibility() instead.
      *
      * Get the wirechat disk visibility from the configuration.
      *
@@ -182,7 +182,7 @@ class WireChatService
     }
 
     /**
-     * Get the configured storage directory for WireChat.
+     * Get the configured storage directory for Wirechat.
      *
      * Uses `wirechat.storage.directory` as the new location.
      * Falls back to `wirechat.attachments.storage_folder`.
@@ -196,7 +196,7 @@ class WireChatService
     }
 
     /**
-     * Get the configured storage visibility for WireChat.
+     * Get the configured storage visibility for Wirechat.
      *
      * Reads from `wirechat.storage.visibility`.
      * Falls back to `wirechat.attachments.disk_visibility`.

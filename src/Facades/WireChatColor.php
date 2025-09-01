@@ -1,9 +1,9 @@
 <?php
 
-namespace Namu\WireChat\Facades;
+namespace Wirechat\Wirechat\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Namu\WireChat\Services\ColorService;
+use Wirechat\Wirechat\Services\ColorService;
 
 /**
  * @method static string|null primary(int $shade = 500)
@@ -15,7 +15,7 @@ use Namu\WireChat\Services\ColorService;
  * @method static array|null palette(string $name)
  * @method static void register(array $map)
  */
-class WireChatColor extends Facade
+class WirechatColor extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

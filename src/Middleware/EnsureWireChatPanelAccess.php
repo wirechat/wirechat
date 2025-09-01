@@ -1,15 +1,15 @@
 <?php
 
-namespace Namu\WireChat\Middleware;
+namespace Wirechat\Wirechat\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
-use Namu\WireChat\Exceptions\NoPanelProvidedException;
-use Namu\WireChat\PanelRegistry;
+use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\PanelRegistry;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class EnsureWireChatPanelAccess
+class EnsureWirechatPanelAccess
 {
     /**
      * @throws ContainerExceptionInterface
@@ -26,7 +26,7 @@ class EnsureWireChatPanelAccess
 
         $user = Auth::user();
 
-        if (! $user || ! $user->canAccessWireChatPanel($panel)) {
+        if (! $user || ! $user->canAccessWirechatPanel($panel)) {
             abort(404);
         }
 

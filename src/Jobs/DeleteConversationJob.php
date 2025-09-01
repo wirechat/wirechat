@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Jobs;
+namespace Wirechat\Wirechat\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -8,8 +8,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Namu\WireChat\Models\Conversation;
-use Namu\WireChat\Traits\InteractsWithPanel;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class DeleteConversationJob implements ShouldQueue
 {

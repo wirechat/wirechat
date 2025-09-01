@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Events;
+namespace Wirechat\Wirechat\Events;
 
 use Carbon\Carbon;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -10,8 +10,8 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Namu\WireChat\Models\Message;
-use Namu\WireChat\Traits\InteractsWithPanel;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class MessageCreated implements ShouldBroadcast
 {

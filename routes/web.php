@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Namu\WireChat\PanelRegistry;
+use Wirechat\Wirechat\PanelRegistry;
 
 Route::name('wirechat.')
     ->group(function () {

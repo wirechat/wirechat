@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Support;
+namespace Wirechat\Wirechat\Support;
 
 use Closure;
 use Illuminate\Contracts\Container\BindingResolutionException;

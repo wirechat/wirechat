@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Concerns;
+namespace Wirechat\Wirechat\Livewire\Concerns;
 
 use Livewire\Component;
 
@@ -41,9 +41,9 @@ abstract class ModalComponent extends Component
         return $this;
     }
 
-    public function closeWireChatModal(): void
+    public function closeWirechatModal(): void
     {
-        $this->dispatch('closeWireChatModal', force: $this->forceClose, skipPreviousModals: $this->skipModals, destroySkipped: $this->destroySkipped);
+        $this->dispatch('closeWirechatModal', force: $this->forceClose, skipPreviousModals: $this->skipModals, destroySkipped: $this->destroySkipped);
     }
 
     public function closeChatDrawer(): void
@@ -55,7 +55,7 @@ abstract class ModalComponent extends Component
     {
         $this->emitModalEvents($events);
         // $this->closeModal();
-        $this->closeWireChatModal();
+        $this->closeWirechatModal();
         $this->closeChatDrawer();
     }
 

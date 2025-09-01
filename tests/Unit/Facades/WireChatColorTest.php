@@ -1,6 +1,6 @@
 <?php
 
-use Namu\WireChat\Support\Color;
+use Wirechat\Wirechat\Support\Color;
 
 test('it returns default colors after boot', function () {
 
@@ -13,13 +13,13 @@ test('it returns default colors after boot', function () {
         'gray' => Color::Zinc,
     ];
 
-    expect(\Namu\WireChat\Facades\WireChatColor::all())->toBe($colors);
+    expect(\Wirechat\Wirechat\Facades\WirechatColor::all())->toBe($colors);
 
 });
 
 test('it returns blue as primary color', function () {
 
-    expect(\Namu\WireChat\Facades\WireChatColor::primary())->toBe(Color::Blue['500']);
+    expect(\Wirechat\Wirechat\Facades\WirechatColor::primary())->toBe(Color::Blue['500']);
 
 });
 
@@ -29,6 +29,6 @@ test('panel color can override default color when color is updated in panel', fu
         'primary' => Color::Red,
     ]);
 
-    expect(\Namu\WireChat\Facades\WireChatColor::primary())->toBe(Color::Red['500']);
+    expect(\Wirechat\Wirechat\Facades\WirechatColor::primary())->toBe(Color::Red['500']);
 
 });

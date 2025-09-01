@@ -1,11 +1,11 @@
 <?php
 
-namespace Namu\WireChat\Models\Scopes;
+namespace Wirechat\Wirechat\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
-use Namu\WireChat\Enums\Actions;
+use Wirechat\Wirechat\Enums\Actions;
 
 class WithoutRemovedActionScope implements Scope
 {

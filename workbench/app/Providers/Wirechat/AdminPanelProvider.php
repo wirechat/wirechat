@@ -1,9 +1,9 @@
 <?php
 
-namespace Workbench\App\Providers\WireChat;
+namespace Workbench\App\Providers\Wirechat;
 
-use Namu\WireChat\Panel;
-use Namu\WireChat\PanelProvider;
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelProvider;
 
 class AdminPanelProvider extends PanelProvider
 {

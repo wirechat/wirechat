@@ -2,8 +2,8 @@
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
-use Namu\WireChat\Events\NotifyParticipant;
-use Namu\WireChat\Helpers\MorphClassResolver;
+use Wirechat\Wirechat\Events\NotifyParticipant;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 

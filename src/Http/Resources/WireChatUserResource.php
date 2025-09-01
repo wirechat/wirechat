@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Http\Resources;
+namespace Wirechat\Wirechat\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin \Illuminate\Database\Eloquent\Model
  */
-class WireChatUserResource extends JsonResource
+class WirechatUserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

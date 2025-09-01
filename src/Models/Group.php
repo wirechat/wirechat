@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Models;
+namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Storage;
-use Namu\WireChat\Enums\GroupType;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Facades\WireChat;
+use Wirechat\Wirechat\Enums\GroupType;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 /**
  * @property int $id
@@ -26,8 +26,8 @@ use Namu\WireChat\Facades\WireChat;
  * @property string|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Namu\WireChat\Models\Conversation $conversation
- * @property-read \Namu\WireChat\Models\Attachment|null $cover
+ * @property-read \Wirechat\Wirechat\Models\Conversation $conversation
+ * @property-read \Wirechat\Wirechat\Models\Attachment|null $cover
  * @property-read string|null $cover_url
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Group newModelQuery()
@@ -68,7 +68,7 @@ class Group extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = WireChat::formatTableName('groups');
+        $this->table = Wirechat::formatTableName('groups');
         parent::__construct($attributes);
     }
 
@@ -85,8 +85,8 @@ class Group extends Model
                 $group->cover->delete();
 
                 // also delete from storage
-                if (Storage::disk(WireChat::storageDisk())->exists($group->cover->file_path)) {
-                    Storage::disk(WireChat::storageDisk())->delete($group->cover->file_path);
+                if (Storage::disk(Wirechat::storageDisk())->exists($group->cover->file_path)) {
+                    Storage::disk(Wirechat::storageDisk())->delete($group->cover->file_path);
                 }
             }
 
@@ -100,7 +100,7 @@ class Group extends Model
      */
     protected static function newFactory()
     {
-        return \Namu\WireChat\Workbench\Database\Factories\GroupFactory::new();
+        return \Wirechat\Wirechat\Workbench\Database\Factories\GroupFactory::new();
     }
 
     public function conversation(): BelongsTo

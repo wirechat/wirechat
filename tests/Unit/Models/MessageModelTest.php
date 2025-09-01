@@ -3,9 +3,9 @@
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Models\Attachment;
-use Namu\WireChat\Models\Message;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 

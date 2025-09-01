@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat;
+namespace Wirechat\Wirechat;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;

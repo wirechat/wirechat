@@ -1,6 +1,6 @@
 <?php
 
-use Namu\WireChat\Enums\Actions;
+use Wirechat\Wirechat\Enums\Actions;
 
 it('has delete action value as delete', function () {
 

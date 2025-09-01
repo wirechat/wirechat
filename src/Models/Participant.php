@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Models;
+namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Scopes\WithoutRemovedActionScope;
-use Namu\WireChat\Traits\Actionable;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Models\Scopes\WithoutRemovedActionScope;
+use Wirechat\Wirechat\Traits\Actionable;
 
 /**
  * @property int $id
@@ -29,9 +29,9 @@ use Namu\WireChat\Traits\Actionable;
  * @property string|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Action> $actions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
  * @property-read int|null $actions_count
- * @property-read \Namu\WireChat\Models\Conversation $conversation
+ * @property-read \Wirechat\Wirechat\Models\Conversation $conversation
  * @property-read Model|\Eloquent $participantable
  *
  * @method bool hasDeletedConversation(bool $checkDeletionExpired = false)
@@ -88,7 +88,7 @@ class Participant extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = WireChat::formatTableName('participants');
+        $this->table = Wirechat::formatTableName('participants');
 
         parent::__construct($attributes);
     }
@@ -121,11 +121,11 @@ class Participant extends Model
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
      *
-     * @return \Namu\WireChat\Workbench\Database\Factories\ParticipantFactory
+     * @return \Wirechat\Wirechat\Workbench\Database\Factories\ParticipantFactory
      */
     protected static function newFactory()
     {
-        return \Namu\WireChat\Workbench\Database\Factories\ParticipantFactory::new();
+        return \Wirechat\Wirechat\Workbench\Database\Factories\ParticipantFactory::new();
     }
 
     /**
@@ -152,7 +152,7 @@ class Participant extends Model
     /**
      * Remove the "withoutExited" global scope to include exited participants.
      *
-     * @param  Builder<\Namu\WireChat\Models\Participant>  $query
+     * @param  Builder<\Wirechat\Wirechat\Models\Participant>  $query
      */
     public function scopeWithExited(Builder $query): void
     {

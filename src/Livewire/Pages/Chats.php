@@ -1,10 +1,10 @@
 <?php
 
-namespace Namu\WireChat\Livewire\Pages;
+namespace Wirechat\Wirechat\Livewire\Pages;
 
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Namu\WireChat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 
 class Chats extends Component
 {

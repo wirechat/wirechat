@@ -4,8 +4,8 @@
 
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Livewire\New\Chat as NewChat;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
 use Workbench\App\Models\User as ModelsUser;
 
 it('user must be authenticated', function () {
@@ -133,7 +133,7 @@ describe('Creating conversation', function () {
 
     });
 
-    test('it dispataches Livewire events "closeWireChatModal" after creating conversation', function () {
+    test('it dispataches Livewire events "closeWirechatModal" after creating conversation', function () {
 
         $auth = ModelsUser::factory()->create();
 
@@ -149,7 +149,7 @@ describe('Creating conversation', function () {
         $request->call('createConversation', $otherUser->id, ModelsUser::class);
 
         // assert redirect
-        $request->assertDispatched('closeWireChatModal');
+        $request->assertDispatched('closeWirechatModal');
 
     });
 

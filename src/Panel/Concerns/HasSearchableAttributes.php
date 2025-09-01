@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Panel\Concerns;
+namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
 

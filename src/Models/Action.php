@@ -1,13 +1,13 @@
 <?php
 
-namespace Namu\WireChat\Models;
+namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Facades\WireChat;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 /**
  * @property int $id
@@ -55,7 +55,7 @@ class Action extends Model
     public function __construct(array $attributes = [])
     {
 
-        $this->table = WireChat::formatTableName('actions');
+        $this->table = Wirechat::formatTableName('actions');
 
         parent::__construct($attributes);
     }
@@ -71,7 +71,7 @@ class Action extends Model
      */
     protected static function newFactory()
     {
-        return \Namu\WireChat\Workbench\Database\Factories\ActionFactory::new();
+        return \Wirechat\Wirechat\Workbench\Database\Factories\ActionFactory::new();
     }
 
     // Polymorphic relationship to the entity being acted upon (message, conversation, etc.)

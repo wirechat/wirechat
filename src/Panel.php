@@ -1,27 +1,27 @@
 <?php
 
-namespace Namu\WireChat;
+namespace Wirechat\Wirechat;
 
 use Closure;
-use Namu\WireChat\Panel\Concerns\HasActions;
-use Namu\WireChat\Panel\Concerns\HasAttachments;
-use Namu\WireChat\Panel\Concerns\HasAuth;
-use Namu\WireChat\Panel\Concerns\HasBroadcasting;
-use Namu\WireChat\Panel\Concerns\HasChatMiddleware;
-use Namu\WireChat\Panel\Concerns\HasChatsSearch;
-use Namu\WireChat\Panel\Concerns\HasColors;
-use Namu\WireChat\Panel\Concerns\HasEmojiPicker;
-use Namu\WireChat\Panel\Concerns\HasFavicon;
-use Namu\WireChat\Panel\Concerns\HasGroups;
-use Namu\WireChat\Panel\Concerns\HasHeading;
-use Namu\WireChat\Panel\Concerns\HasId;
-use Namu\WireChat\Panel\Concerns\HasLayout;
-use Namu\WireChat\Panel\Concerns\HasMiddleware;
-use Namu\WireChat\Panel\Concerns\HasRoutes;
-use Namu\WireChat\Panel\Concerns\HasSearchableAttributes;
-use Namu\WireChat\Panel\Concerns\HasUsersSearch;
-use Namu\WireChat\Panel\Concerns\HasWebPushNotifications;
-use Namu\WireChat\Support\EvaluatesClosures;
+use Wirechat\Wirechat\Panel\Concerns\HasActions;
+use Wirechat\Wirechat\Panel\Concerns\HasAttachments;
+use Wirechat\Wirechat\Panel\Concerns\HasAuth;
+use Wirechat\Wirechat\Panel\Concerns\HasBroadcasting;
+use Wirechat\Wirechat\Panel\Concerns\HasChatMiddleware;
+use Wirechat\Wirechat\Panel\Concerns\HasChatsSearch;
+use Wirechat\Wirechat\Panel\Concerns\HasColors;
+use Wirechat\Wirechat\Panel\Concerns\HasEmojiPicker;
+use Wirechat\Wirechat\Panel\Concerns\HasFavicon;
+use Wirechat\Wirechat\Panel\Concerns\HasGroups;
+use Wirechat\Wirechat\Panel\Concerns\HasHeading;
+use Wirechat\Wirechat\Panel\Concerns\HasId;
+use Wirechat\Wirechat\Panel\Concerns\HasLayout;
+use Wirechat\Wirechat\Panel\Concerns\HasMiddleware;
+use Wirechat\Wirechat\Panel\Concerns\HasRoutes;
+use Wirechat\Wirechat\Panel\Concerns\HasSearchableAttributes;
+use Wirechat\Wirechat\Panel\Concerns\HasUsersSearch;
+use Wirechat\Wirechat\Panel\Concerns\HasWebPushNotifications;
+use Wirechat\Wirechat\Support\EvaluatesClosures;
 
 class Panel
 {
@@ -67,6 +67,6 @@ class Panel
 
     public function register(): void
     {
-        // WireChatColor::register($this->getColors());
+        // WirechatColor::register($this->getColors());
     }
 }

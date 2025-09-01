@@ -1,9 +1,9 @@
 <?php
 
-namespace Namu\WireChat\Console\Commands;
+namespace Wirechat\Wirechat\Console\Commands;
 
 use Illuminate\Console\Command;
-use Namu\WireChat\Jobs\DeleteExpiredMessagesJob;
+use Wirechat\Wirechat\Jobs\DeleteExpiredMessagesJob;
 
 class DeleteExpiredMessage extends Command
 {

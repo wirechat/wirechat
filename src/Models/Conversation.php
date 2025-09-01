@@ -1,6 +1,6 @@
 <?php
 
-namespace Namu\WireChat\Models;
+namespace Wirechat\Wirechat\Models;
 
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -11,14 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Namu\WireChat\Enums\Actions;
-use Namu\WireChat\Enums\ConversationType;
-use Namu\WireChat\Enums\ParticipantRole;
-use Namu\WireChat\Facades\WireChat;
-use Namu\WireChat\Models\Concerns\HasDynamicIds;
-use Namu\WireChat\Models\Scopes\WithoutRemovedMessages;
-use Namu\WireChat\Traits\Actionable;
-use Namu\WireChat\Workbench\Database\Factories\ConversationFactory;
+use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Models\Concerns\HasDynamicIds;
+use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
+use Wirechat\Wirechat\Traits\Actionable;
+use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
 
 /**
  * @property int $id
@@ -27,13 +27,13 @@ use Namu\WireChat\Workbench\Database\Factories\ConversationFactory;
  * @property int|null $disappearing_duration
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Action> $actions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
  * @property-read int|null $actions_count
  * @property-read Group|null $group
  * @property-read Message|null $lastMessage
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Message> $messages
  * @property-read int|null $messages_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Namu\WireChat\Models\Participant> $participants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Participant> $participants
  * @property-read int|null $participants_count
  *
  * @method static Builder|Conversation newModelQuery()
@@ -70,7 +70,7 @@ class Conversation extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = WireChat::formatTableName('conversations');
+        $this->table = Wirechat::formatTableName('conversations');
 
         parent::__construct($attributes);
     }
