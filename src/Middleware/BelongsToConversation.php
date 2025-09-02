@@ -4,8 +4,8 @@ namespace Wirechat\Wirechat\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Wirechat\Wirechat\Models\Conversation;
 use Symfony\Component\HttpFoundation\Response;
+use Wirechat\Wirechat\Models\Conversation;
 
 class BelongsToConversation
 {

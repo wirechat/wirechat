@@ -10,9 +10,9 @@ use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\View;
 use Livewire\LivewireServiceProvider;
-use Wirechat\Wirechat\WirechatServiceProvider;
 use Orchestra\Testbench\Concerns\WithLaravelMigrations;
 use Orchestra\Testbench\Concerns\WithWorkbench;
+use Wirechat\Wirechat\WirechatServiceProvider;
 use Workbench\App\Providers\Wirechat\TestPanelProvider;
 
 use function Orchestra\Testbench\workbench_path;

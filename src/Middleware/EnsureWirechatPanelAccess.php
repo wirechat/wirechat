@@ -4,10 +4,10 @@ namespace Wirechat\Wirechat\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
-use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
-use Wirechat\Wirechat\PanelRegistry;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\PanelRegistry;
 
 class EnsureWirechatPanelAccess
 {

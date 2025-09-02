@@ -4,9 +4,9 @@ namespace Wirechat\Wirechat;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use ReflectionClass;
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
 use Wirechat\Wirechat\Facades\WirechatColor;
-use ReflectionClass;
 
 class PanelRegistry
 {
