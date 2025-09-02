@@ -126,11 +126,6 @@ class MakePanelCommand extends Command
             ServiceProvider::addProviderToBootstrapFile($providerClass, $bootstrapPath);
         } else {
             // Skip config modification in test environment
-            if (app()->runningUnitTests()) {
-                $this->info('Skipping config/app.php modification in test environment.');
-
-                return;
-            }
 
             $appConfigPath = config_path('app.php');
             $appConfig = file_get_contents($appConfigPath);
