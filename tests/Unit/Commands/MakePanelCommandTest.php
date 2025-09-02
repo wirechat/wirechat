@@ -25,16 +25,20 @@ beforeEach(function () {
 afterEach(function () {});
 
 it('creates a new wirechat panel provider using a fresh ID', function () {
-
-    // Ensure file doesn't exist before test
-
     $id = 'temp';
     $className = 'TempPanelProvider';
-    $providerClass = 'App\\Providers\\Wirechat\\'.$className;
+    $namespace = 'App\\Providers\\Wirechat';
+    $providerClass = "{$namespace}\\{$className}";
     $filePath = app_path("Providers/Wirechat/{$className}.php");
     $displayPath = Str::after($filePath, base_path().DIRECTORY_SEPARATOR);
 
-    $artisan = artisan('make:wirechat-panel', ['id' => $id])
+    // Ensure the directory exists
+    $directory = dirname($filePath);
+    if (! file_exists($directory)) {
+        mkdir($directory, 0755, true);
+    }
+
+    $artisan = $this->artisan('make:wirechat-panel', ['id' => $id])
         ->assertExitCode(0)
         ->expectsOutput("Wirechat panel [$providerClass] created successfully.");
 
@@ -46,15 +50,13 @@ it('creates a new wirechat panel provider using a fresh ID', function () {
 
     expect(file_exists($filePath))->toBeTrue()
         ->and(File::get($filePath))
-        ->toContain("namespace {$this->namespace}")
+        ->toContain("namespace {$namespace}")
         ->toContain("class {$className}");
 
     if (file_exists($filePath)) {
-        File::delete($filePath); // Use unlink instead of File::delete for consistency
+        File::delete($filePath);
     }
-
 });
-
 it('does not overwrite existing file if user cancels', function () {
     File::ensureDirectoryExists(dirname($this->filePath));
     File::put($this->filePath, 'OLD');
