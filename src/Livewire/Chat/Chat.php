@@ -91,8 +91,8 @@ class Chat extends Component
         } else {
             $panelId = $this->panel()->getId();
             $channelName = "{$panelId}.conversation.{$conversationId}";
-            $listeners["echo-private:{$channelName},.Namu\\Wirechat\\Events\\MessageCreated"] = 'appendNewMessage';
-            $listeners["echo-private:{$channelName},.Namu\\Wirechat\\Events\\MessageDeleted"] = 'removeDeletedMessage';
+            $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\MessageCreated"] = 'appendNewMessage';
+            $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\MessageDeleted"] = 'removeDeletedMessage';
         }
 
         return $listeners;

@@ -93,7 +93,7 @@ class Chats extends Component
             $panelId = $this->panel()->getId();
             // Construct the channel name using the encoded type and user ID.
             $channelName = "$panelId.participant.$encodedType.$userId";
-            $listeners["echo-private:{$channelName},.Namu\\Wirechat\\Events\\NotifyParticipant"] = 'refreshComponent';
+            $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\NotifyParticipant"] = 'refreshComponent';
         }
 
         return $listeners;

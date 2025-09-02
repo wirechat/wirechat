@@ -1,4 +1,4 @@
-****# WireChat Changelog 
+****# Wirechat Changelog 
 
 All notable changes to this project will be documented in this file.
 
@@ -160,14 +160,14 @@ Update from config based to panel based settings for a clean and extensible way 
   - `'guards' => ['web']`
   - `'layout' => 'wirechat::layouts.app'`
 - Command for publishing views.
-- Standalone WireChat widget.
+- Standalone Wirechat widget.
 - Added/Improved documentation on:
   - Authorization
   - Core Components
   - Layout
   - Views
   - Contribution Guide
-  - Extending WireChat Components
+  - Extending Wirechat Components
 - `belongsToConversation` middleware added to the `/chats` view route.
 
 ### Changed
@@ -178,11 +178,11 @@ Update from config based to panel based settings for a clean and extensible way 
 
   ```diff
   + userId = @js(auth()->id());
-  + encodedType = @js(Namu\WireChat\Helpers\MorphClassResolver::encode(auth()->user()->getMorphClass()));
+  + encodedType = @js(Namu\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()->getMorphClass()));
 
   - Echo.private(`participant.${userId}`)
   + Echo.private(`participant.${encodedType}.${userId}`)
-        .listen('.Namu\\WireChat\\Events\\NotifyParticipant', (e) => {
+        .listen('.Namu\\Wirechat\\Events\\NotifyParticipant', (e) => {
            console.log(e);
       });
   ```
@@ -241,7 +241,7 @@ Update from config based to panel based settings for a clean and extensible way 
 
 ## [v0.0.1](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.1) - 2024-12-8  
 ### Added  
-- Introduced `WireChat` package with the following features:  
+- Introduced `Wirechat` package with the following features:  
   - Basic chat functionality for private conversations.  
   - Group Chats functionality.  
   - Smart Deletes for:

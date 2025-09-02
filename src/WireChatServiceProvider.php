@@ -222,7 +222,7 @@ class WirechatServiceProvider extends ServiceProvider
 
 
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
-                                        .listen('.Namu\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
+                                        .listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
 
                                             if (e.redirect_url !== window.location.href) {
                                                 if (Notification.permission === 'granted') {
