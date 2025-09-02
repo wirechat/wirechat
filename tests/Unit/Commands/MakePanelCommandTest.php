@@ -39,7 +39,7 @@ it('creates a new wirechat panel provider using a fresh ID', function () {
         ->expectsOutput("Wirechat panel [$providerClass] created successfully.");
 
     if ($this->isLaravel11OrHigherWithBootstrapFile) {
-        $artisan->expectsOutput("We’ve tried to add [{$displayPath}] into your [bootstrap/providers.php] file.If you encounter errors accessing your panel, the automatic registration may have failed. In that case, please add it manually to the returned array.");
+        $artisan->expectsOutput("We’ve tried to add [{$displayPath}] into your [bootstrap/providers.php] file. If you encounter errors accessing your panel, the automatic registration may have failed. In that case, please add it manually to the returned array.");
     } else {
         $artisan->expectsOutput("We’ve attempted to register [{$displayPath}] in your [config/app.php] providers list. If you run into issues, the change might not have applied correctly — you can always insert it yourself in the 'providers' array.");
     }
