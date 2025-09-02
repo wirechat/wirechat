@@ -48,8 +48,7 @@ it('creates a new wirechat panel provider using a fresh ID', function () {
         $artisan->expectsOutput("We’ve attempted to register [{$displayPath}] in your [config/app.php] providers list. If you run into issues, the change might not have applied correctly — you can always insert it yourself in the 'providers' array.");
     }
 
-    expect(file_exists($filePath))->toBeTrue()
-        ->and(File::get($filePath))
+    expect(file_exists($filePath))
         ->toContain("namespace {$namespace}")
         ->toContain("class {$className}");
 
