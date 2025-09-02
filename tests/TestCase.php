@@ -5,6 +5,7 @@ namespace Wirechat\Wirechat\Tests;
 use Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithViews;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,6 +31,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         return [
             LivewireServiceProvider::class,
             WirechatServiceProvider::class,
+            RouteServiceProvider::class,
             MissingLivewireAssertionsServiceProvider::class,
             TestPanelProvider::class,
         ];

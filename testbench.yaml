@@ -2,6 +2,7 @@ providers:
   - Livewire\LivewireServiceProvider
   - Wirechat\Wirechat\WirechatServiceProvider
   - Workbench\App\Providers\WorkbenchServiceProvider
+  - Illuminate\Foundation\Support\Providers\RouteServiceProvider
 
 migrations:
    #- workbench\database\migrations
