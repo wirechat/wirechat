@@ -51,8 +51,7 @@ class WirechatServiceProvider extends ServiceProvider
         }
 
         // Trigger auto-discovery
-        app(\Wirechat\Wirechat\PanelRegistry::class)->autoDiscover();
-
+        //        app(\Wirechat\Wirechat\PanelRegistry::class)->autoDiscover();
         logger('WirechatServiceProvider booted, auto-discovery completed');
 
         $this->loadLivewireComponents();

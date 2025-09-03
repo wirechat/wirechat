@@ -22,10 +22,13 @@ class MakePanelCommand extends Command
 
     public string $stubPath;
 
+    public string $defaultPanelProviderStubPath;
+
     public function __construct()
     {
         parent::__construct();
         $this->stubPath = dirname(__DIR__, 3).'/stubs/PanelProvider.stub';
+        $this->defaultPanelProviderStubPath = dirname(__DIR__, 3).'/stubs/DefaultPanelProvider.stub';
     }
 
     public function handle()
@@ -76,16 +79,15 @@ class MakePanelCommand extends Command
 
             return 1;
         }
-        $stub = file_get_contents($this->stubPath);
-
         $panels = Wirechat::panels();
-        $hasDefault = collect($panels)->contains(fn ($panel) => $panel->isDefault());
-        $defaultFlag = $hasDefault ? '' : '->default()';
+        $defaultAlreadyExists = collect($panels)->contains(fn ($panel) => $panel->isDefault());
+
+        // Determine if you should use default panel stub or normal stub
+        $stub = $defaultAlreadyExists ? file_get_contents($this->stubPath) : file_get_contents($this->defaultPanelProviderStubPath);
 
         $stub = str_replace('{{ namespace }}', $namespace, $stub);
         $stub = str_replace('{{ className }}', $className, $stub);
         $stub = str_replace('{{ panelId }}', $id, $stub);
-        $stub = str_replace('{{ defaultFlag }}', $defaultFlag, $stub);
 
         $directory = dirname($path);
         if (! is_dir($directory)) {
@@ -125,24 +127,27 @@ class MakePanelCommand extends Command
             $bootstrapPath = App::getBootstrapProvidersPath();
             ServiceProvider::addProviderToBootstrapFile($providerClass, $bootstrapPath);
         } else {
-            // Skip config modification in test environment
-
             $appConfigPath = config_path('app.php');
             $appConfig = file_get_contents($appConfigPath);
 
-            // Use a more generic anchor to avoid referencing RouteServiceProvider
-            $anchor = "'providers' => [";
-            if (! Str::contains($appConfig, $providerClass)) {
+            // Check for WirechatServiceProvider with or without full namespace
+            $anchor = Str::contains($appConfig, 'Wirechat\Wirechat\WirechatServiceProvider::class') ||
+                        Str::contains($appConfig, 'WirechatServiceProvider::class')
+                            ? 'WirechatServiceProvider::class,'
+                            : 'App\Providers\RouteServiceProvider::class,';
+
+            if (! Str::contains($appConfig, $providerClass.'::class')) {
                 file_put_contents(
                     $appConfigPath,
                     str_replace(
                         $anchor,
-                        $anchor.PHP_EOL."        {$providerClass}::class,",
+                        $anchor.PHP_EOL.'        '.$providerClass.'::class,',
                         $appConfig
                     )
                 );
             }
         }
+
         $this->info("Wirechat panel [{$providerClass}] created successfully.");
     }
 }

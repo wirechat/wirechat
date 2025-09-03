@@ -45,10 +45,45 @@ class {{ className }} extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id(\'{{ panelId }}\')
-            ->path(\'{{ panelId }}\')
-            ->middleware([\'auth\',\'web\'])
-            {{ defaultFlag }};
+             ->id(\'{{ panelId }}\')
+             ->path(\'{{ panelId }}\')
+             ->middleware([\'web\',\'auth\'])
+             ->emojiPicker()
+             ->newChatAction()
+             ->attachments();
+    }
+}
+';
+
+    expect(File::exists($file_path))->toBeTrue();
+    expect(File::get($file_path))->toBe($expectedContent);
+
+});
+
+it('ensure DefaultPanelProvider.stub exists', function () {
+
+    $file_path = dirname(__DIR__, 3).'/stubs/DefaultPanelProvider.stub';
+
+    $expectedContent =
+'<?php
+
+namespace {{ namespace }};
+
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelProvider;
+
+class {{ className }} extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+             ->id(\'{{ panelId }}\')
+             ->path(\'{{ panelId }}\')
+             ->middleware([\'web\',\'auth\'])
+             ->emojiPicker()
+             ->newChatAction()
+             ->attachments()
+             ->default();
     }
 }
 ';
