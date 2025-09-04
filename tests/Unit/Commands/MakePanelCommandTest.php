@@ -12,25 +12,39 @@ beforeEach(function () {
     $this->filePath = app_path("Providers/Wirechat/{$this->className}.php");
     $this->displayPath = Str::after($this->filePath, base_path().DIRECTORY_SEPARATOR);
     $this->providerClass = 'App\\Providers\\Wirechat\\'.$this->className;
-    // Just reference the existing stub; no need to overwrite it
     $this->stubPath = dirname(__DIR__, 3).'/stubs/PanelProvider.stub';
 
     $this->isLaravel11OrHigherWithBootstrapFile = version_compare(App::version(), '11.0', '>=') &&
         /** @phpstan-ignore-next-line */
         file_exists(App::getBootstrapProvidersPath());
-
 });
 
 afterEach(function () {
+    // Delete the generated panel provider file
+    if (File::exists($this->filePath)) {
+        File::delete($this->filePath);
+    }
 
-    // File::delete($this->filePath);
+    // Clean up the providers file based on Laravel version
+    if ($this->isLaravel11OrHigherWithBootstrapFile) {
+        $providersFile = App::getBootstrapProvidersPath();
+    } else {
+        $providersFile = config_path('app.php');
+    }
 
+    if (File::exists($providersFile)) {
+        $content = File::get($providersFile);
+        // Remove the provider class entry from the providers array
+        $content = preg_replace(
+            "/\s*".preg_quote("App\\Providers\\Wirechat\\{$this->className}::class").",?\n/",
+            '',
+            $content
+        );
+        File::put($providersFile, $content);
+    }
 });
 
 it('creates a new wirechat panel provider using a fresh ID', function () {
-
-    // Ensure the directory exists
-
     $artisan = $this->artisan('make:wirechat-panel', ['id' => $this->id])
         ->assertExitCode(0)
         ->expectsOutput("Wirechat panel [$this->providerClass] created successfully.");
@@ -40,15 +54,6 @@ it('creates a new wirechat panel provider using a fresh ID', function () {
     } else {
         $artisan->expectsOutput("We’ve attempted to register [{$this->displayPath}] in your [config/app.php] providers list. If you run into issues, the change might not have applied correctly — you can always insert it yourself in the 'providers' array.");
     }
-
-    //    expect(file_exists($this->filePath))->toBeTrue()
-    //        ->and(File::get($this->filePath))
-    //        ->toContain("namespace {$this->namespace}")
-    //        ->toContain("class {$this->className}");
-
-    //    if (file_exists($this->filePath)) {
-    //        File::delete($this->filePath);
-    //    }
 });
 
 it('does not overwrite existing file if user cancels', function () {
@@ -60,7 +65,6 @@ it('does not overwrite existing file if user cancels', function () {
         ->expectsConfirmation("The file [$this->displayPath] already exists. Do you want to overwrite it?", 'no')
         ->expectsOutput('Operation cancelled.')
         ->assertExitCode(0);
-
 });
 
 it('overwrites existing file when user confirms', function () {
@@ -77,35 +81,17 @@ it('overwrites existing file when user confirms', function () {
     expect(File::get($this->filePath))->toContain("class {$this->className}");
 });
 
-// it('shows validation error for invalid ID', function () {
-//
-//    $this->artisan('make:wirechat-panel')
-//        ->expectsQuestion('What is the panel ID?', '1234bad')
-//        ->expectsOutput('The ID must start with a letter.')
-//        ->assertExitCode(1);
-//    File::delete($this->filePath);
-// });
-
 it('shows validation error for invalid ID', function () {
-
     $this->artisan('make:wirechat-panel')
         ->expectsQuestion('What is the panel ID?', '1234bad')
         ->expectsOutput('The ID must start with a letter and contain only letters, numbers, or underscores.')
         ->assertExitCode(1);
 
     expect(File::exists(app_path('Providers/Wirechat/1234badPanelProvider.php')))->toBeFalse();
-    // File::delete($this->filePath);
-
 });
 
 it('shows error when stub file is missing', function () {
     File::delete($this->filePath);
-    // Mock panel doesnt exists  facade for stub path
-    //    File::shouldReceive('exists')
-    //        ->with($this->filePath)
-    //        ->andReturn(false);
-
-    // Set stubPath to match command's default
     $command = new MakePanelCommand;
 
     // Set a fake, non-existent stub path
