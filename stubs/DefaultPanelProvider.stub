@@ -15,6 +15,7 @@ class {{ className }} extends PanelProvider
              ->middleware(['web','auth'])
              ->emojiPicker()
              ->newChatAction()
-             ->attachments();
+             ->attachments()
+             ->default();
     }
 }
