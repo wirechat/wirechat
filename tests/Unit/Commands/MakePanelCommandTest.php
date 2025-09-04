@@ -34,12 +34,11 @@ afterEach(function () {
 
     if (File::exists($providersFile)) {
         $content = File::get($providersFile);
-        // Remove the provider class entry from the providers array
-        $content = preg_replace(
-            "/\s*".preg_quote("App\\Providers\\Wirechat\\{$this->className}::class").",?\n/",
-            '',
-            $content
-        );
+        // Remove the provider class entry, handling comma and whitespace carefully
+        $pattern = "/\s*".preg_quote("App\\Providers\\Wirechat\\{$this->className}::class")."\s*,?\s*\n/";
+        $content = preg_replace($pattern, '', $content);
+        // Fix trailing comma before closing array if necessary
+        $content = preg_replace("/,\s*\n\s*\];/", "\n];", $content);
         File::put($providersFile, $content);
     }
 });
