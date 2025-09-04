@@ -17,6 +17,15 @@ beforeEach(function () {
     $this->isLaravel11OrHigherWithBootstrapFile = version_compare(App::version(), '11.0', '>=') &&
         /** @phpstan-ignore-next-line */
         file_exists(App::getBootstrapProvidersPath());
+
+    // Save a copy of the original providers file
+    $this->providersFile = $this->isLaravel11OrHigherWithBootstrapFile
+        ? App::getBootstrapProvidersPath()
+        : config_path('app.php');
+
+    $this->originalProvidersContent = File::exists($this->providersFile)
+        ? File::get($this->providersFile)
+        : null;
 });
 
 afterEach(function () {
@@ -25,23 +34,9 @@ afterEach(function () {
         File::delete($this->filePath);
     }
 
-    // Clean up the providers file based on Laravel version
-    if ($this->isLaravel11OrHigherWithBootstrapFile) {
-        $providersFile = App::getBootstrapProvidersPath();
-    } else {
-        $providersFile = config_path('app.php');
-    }
-
-    if (File::exists($providersFile)) {
-        $content = File::get($providersFile);
-        // Remove the provider class entry, handling comma and whitespace carefully
-        $pattern = "/\s*".preg_quote("App\\Providers\\Wirechat\\{$this->className}::class")."\s*,?\s*\n/";
-        $content = preg_replace($pattern, '', $content);
-        // Fix trailing comma before closing array, ensuring valid syntax
-        $content = preg_replace("/,\s*\n\s*\];/", "\n];", $content);
-        // Ensure no empty array is left with just whitespace
-        $content = preg_replace("/'providers' => \[\s*\]/", "'providers' => []", $content);
-        File::put($providersFile, $content);
+    // Restore the original providers file contents
+    if ($this->originalProvidersContent !== null && File::exists($this->providersFile)) {
+        File::put($this->providersFile, $this->originalProvidersContent);
     }
 });
 
