@@ -150,4 +150,6 @@ class MakePanelCommand extends Command
 
         $this->info("Wirechat panel [{$providerClass}] created successfully.");
     }
+
+
 }

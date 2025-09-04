@@ -37,8 +37,10 @@ afterEach(function () {
         // Remove the provider class entry, handling comma and whitespace carefully
         $pattern = "/\s*".preg_quote("App\\Providers\\Wirechat\\{$this->className}::class")."\s*,?\s*\n/";
         $content = preg_replace($pattern, '', $content);
-        // Fix trailing comma before closing array if necessary
+        // Fix trailing comma before closing array, ensuring valid syntax
         $content = preg_replace("/,\s*\n\s*\];/", "\n];", $content);
+        // Ensure no empty array is left with just whitespace
+        $content = preg_replace("/'providers' => \[\s*\]/", "'providers' => []", $content);
         File::put($providersFile, $content);
     }
 });
