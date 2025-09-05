@@ -14,6 +14,7 @@ trait HasHeart
     public function heart(bool|Closure $condition = true): static
     {
         $this->hasHeart = $condition;
+
         return $this;
     }
 
