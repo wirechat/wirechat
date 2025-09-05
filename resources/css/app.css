@@ -1,0 +1,208 @@
+@source '../views/**/*.blade.php';
+@source '../../src/Livewire/**/*.php';
+
+@layer components {
+    /* Base styles for inputs, textareas, selects */
+    .wc-input,
+    .wc-textarea,
+    .wc-select,
+    .wc-multiselect {
+        appearance: none;
+        background-color: var(--color-white);
+        border: 1px solid var(--color-gray-500);
+        border-radius: 0;
+        padding: var(--spacing-2) var(--spacing-3);
+        font-size: var(--font-size-base);
+        line-height: var(--line-height-base);
+        box-shadow: var(--shadow-none);
+        &:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 1px var(--color-blue-600);
+            border-color: var(--color-blue-600);
+        }
+    }
+
+    /* Dark mode styles for inputs, textareas, selects */
+    .dark .wc-input,
+    .dark .wc-textarea,
+    .dark .wc-select,
+    .dark .wc-multiselect {
+        background-color: var(--color-zinc-900);
+    }
+
+    /* Placeholder styles */
+    .wc-input::placeholder,
+    .wc-textarea::placeholder {
+        color: var(--color-gray-500);
+        opacity: 1;
+    }
+
+    /* WebKit date/time input fixes */
+    .wc-input::-webkit-datetime-edit-fields-wrapper {
+        padding: 0;
+    }
+
+    .wc-input::-webkit-date-and-time-value {
+        min-height: 1.5em;
+        text-align: inherit;
+    }
+
+    .wc-input::-webkit-datetime-edit,
+    .wc-input::-webkit-datetime-edit-year-field,
+    .wc-input::-webkit-datetime-edit-month-field,
+    .wc-input::-webkit-datetime-edit-day-field,
+    .wc-input::-webkit-datetime-edit-hour-field,
+    .wc-input::-webkit-datetime-edit-minute-field,
+    .wc-input::-webkit-datetime-edit-second-field,
+    .wc-input::-webkit-datetime-edit-millisecond-field,
+    .wc-input::-webkit-datetime-edit-meridiem-field {
+        display: inline-flex;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    /* Select styles */
+    .wc-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+        background-position: right var(--spacing-2) center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: var(--spacing-10);
+        print-color-adjust: exact;
+    }
+
+    .wc-select[size]:not([size="1"]),
+    .wc-multiselect {
+        background-image: none;
+        background-position: initial;
+        background-repeat: unset;
+        background-size: initial;
+        padding-right: var(--spacing-3);
+        print-color-adjust: unset;
+    }
+
+    /* Checkbox and Radio styles */
+    .wc-checkbox,
+    .wc-radio {
+        appearance: none;
+        padding: 0;
+        print-color-adjust: exact;
+        display: inline-block;
+        vertical-align: middle;
+        background-origin: border-box;
+        user-select: none;
+        flex-shrink: 0;
+        height: var(--spacing-4);
+        width: var(--spacing-4);
+        color: var(--color-blue-600);
+        background-color: var(--color-white);
+        border: 1px solid var(--color-gray-500);
+        box-shadow: var(--shadow-none);
+    }
+
+    /* Dark mode styles for checkboxes and radios */
+    .dark .wc-checkbox,
+    .dark .wc-radio {
+        background-color: var(--color-zinc-900);
+    }
+
+    .wc-checkbox {
+        border-radius: 0;
+    }
+
+    .wc-radio {
+        border-radius: 100%;
+    }
+
+    .wc-checkbox:focus,
+    .wc-radio:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-blue-600);
+    }
+
+    .wc-checkbox:checked,
+    .wc-radio:checked {
+        border-color: transparent;
+        background-color: currentColor;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .wc-checkbox:checked {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    }
+
+    .wc-radio:checked {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='3'/%3E%3C/svg%3E");
+    }
+
+    .wc-checkbox:checked:hover,
+    .wc-checkbox:checked:focus,
+    .wc-radio:checked:hover,
+    .wc-radio:checked:focus {
+        @media (hover: hover) {
+            border-color: transparent;
+            background-color: currentColor;
+        }
+    }
+
+    .wc-checkbox:indeterminate {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3E%3Cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3E%3C/svg%3E");
+        border-color: transparent;
+        background-color: currentColor;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .wc-checkbox:indeterminate:hover,
+    .wc-checkbox:indeterminate:focus {
+        @media (hover: hover) {
+            border-color: transparent;
+            background-color: currentColor;
+        }
+    }
+
+    /* File input styles */
+    .wc-file {
+        background: unset;
+        border-color: inherit;
+        border-width: 0;
+        border-radius: 0;
+        padding: 0;
+        font-size: unset;
+        line-height: inherit;
+    }
+
+    .wc-file:focus {
+        outline: 1px solid ButtonText;
+        outline: 1px auto -webkit-focus-ring-color;
+    }
+
+    /* Forced colors for accessibility */
+    @media (forced-colors: active) {
+        .wc-checkbox:checked,
+        .wc-radio:checked,
+        .wc-checkbox:indeterminate {
+            appearance: auto;
+        }
+    }
+}
+
+/* Define custom properties for Tailwind-like values */
+:root {
+    --color-gray-500: #6b7280;
+    --color-blue-600: #2563eb;
+    --color-white: #ffffff;
+    --color-zinc-900: #18181b;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-10: 2.5rem;
+    --font-size-base: 1rem;
+    --line-height-base: 1.5;
+    --shadow-none: 0 0 #0000;
+}

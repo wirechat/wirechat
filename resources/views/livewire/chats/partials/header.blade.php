@@ -77,7 +77,7 @@
 
                 <input id="chats-search-field" name="chats_search" maxlength="100" type="search" wire:model.live.debounce='search'
                     placeholder="{{ __('wirechat::chats.inputs.search.placeholder')  }}" autocomplete="off"
-                    class=" col-span-11 border-0  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
+                    class="wc-input col-span-11 border-0  bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
 
                 </div>
 
