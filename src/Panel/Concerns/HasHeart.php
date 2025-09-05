@@ -4,22 +4,22 @@ namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
 
-trait HasChatsSearch
+trait HasHeart
 {
     /**
      * Enable or disable chat list search.
      */
-    protected bool|Closure $hasChatsSearch = false;
+    protected bool|Closure $hasHeart = false;
 
-    public function chatsSearch(bool|Closure $condition = true): static
+    public function heart(bool|Closure $condition = true): static
     {
-        $this->hasChatsSearch = $condition;
+        $this->hasHeart = $condition;
 
         return $this;
     }
 
-    public function hasChatsSearch(): bool
+    public function hasHeart(): bool
     {
-        return (bool) $this->evaluate($this->hasChatsSearch);
+        return (bool) $this->evaluate($this->hasHeart);
     }
 }

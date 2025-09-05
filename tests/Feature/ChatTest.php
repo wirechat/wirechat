@@ -804,8 +804,39 @@ describe('Box presence test: ', function () {
 
 });
 
+describe('Heart', function () {
+
+    test('it doesnt show heart if not enabled in chat', function () {
+
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        // turn on disappearing
+        $conversation->turnOffDisappearing();
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertDontSeeHtml('dusk="heart-button"');
+    });
+
+    test('it  shows heart if not enabled in chat', function () {
+
+        testPanelProvider()->heart();
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        // turn on disappearing
+        $conversation->turnOffDisappearing();
+
+        // dd($conversation);
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSeeHtml('dusk="heart-button"');
+    });
+
+})->only();
+
 describe('Emoji', function () {
-    test('it doesnt show emoji picker is not enabled in chat', function () {
+    test('it doesnt show emoji picker if not enabled in chat', function () {
 
         $auth = User::factory()->create(['name' => 'Namu']);
         $conversation = $auth->createGroup('My Group');

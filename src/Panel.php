@@ -14,6 +14,7 @@ use Wirechat\Wirechat\Panel\Concerns\HasEmojiPicker;
 use Wirechat\Wirechat\Panel\Concerns\HasFavicon;
 use Wirechat\Wirechat\Panel\Concerns\HasGroups;
 use Wirechat\Wirechat\Panel\Concerns\HasHeading;
+use Wirechat\Wirechat\Panel\Concerns\HasHeart;
 use Wirechat\Wirechat\Panel\Concerns\HasId;
 use Wirechat\Wirechat\Panel\Concerns\HasLayout;
 use Wirechat\Wirechat\Panel\Concerns\HasMiddleware;
@@ -37,6 +38,7 @@ class Panel
     use HasFavicon;
     use HasGroups;
     use HasHeading;
+    use HasHeart;
     use HasId;
     use HasLayout;
     use HasMiddleware;

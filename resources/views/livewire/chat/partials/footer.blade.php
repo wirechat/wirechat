@@ -522,9 +522,12 @@
 
 
                         {{-- send Like button --}}
+                        @if($this->panel()->hasHeart())
+
                         <button
                             x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )"
                             wire:loading.attr="disabled" wire:target="sendMessage" wire:click='sendLike()'
+                            dusk="heart-button"
                             type="button" class="hover:scale-105 transition-transform cursor-pointer group disabled:cursor-progress">
 
                             <!-- outlined heart -->
@@ -546,6 +549,7 @@
                             </span>
 
                         </button>
+                        @endif
 
 
                     </div>
