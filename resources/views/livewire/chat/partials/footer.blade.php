@@ -13,7 +13,7 @@
         </div>
     @else
         <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
-            class=" px-3 md:px-1 border-t  shadow-sm bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
+            class=" px-3 md:px-1 border-t  shadow-sm bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-border)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
 
             {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
             @if($hasEmojiPicker)
@@ -42,7 +42,7 @@
                          dusk="docked-emojipicker"
                     @endif
                     @class([
-                            "max-w-xl z-50 shadow-xl bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]   rounded-xl  h-[490px]"=>$floatingEmojiPicker,
+                            "max-w-lg h-[450px] xl:h-[520px] z-50 shadow-sm  bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] rounded-xl"=>$floatingEmojiPicker,
                             "min-w-full  border-b  h-96 border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] "=>!$floatingEmojiPicker,
                             "w-full flex hidden sm:flex  inset-x-auto py-2 sm:px-4 py-1.5  "])>
 
