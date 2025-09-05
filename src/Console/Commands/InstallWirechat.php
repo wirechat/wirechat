@@ -30,8 +30,12 @@ class InstallWirechat extends Command
             }
         }
 
+        // Create deafult panel
+        $this->createDefaultPanel();
+
         // create storage sym link
         $this->comment('Creating storage symlink...');
+
         Artisan::call('storage:link');
         $this->info('[✓] Storage linked.');
         // Publish migrations
@@ -53,6 +57,15 @@ class InstallWirechat extends Command
             'Config file already exists. Do you want to overwrite it?',
             false
         );
+    }
+
+    private function createDefaultPanel(): void
+    {
+
+        $this->call('make:wirechat-panel', [
+            'id' => 'chats',
+        ]);
+
     }
 
     private function publishConfiguration($forcePublish = false)
