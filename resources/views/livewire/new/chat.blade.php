@@ -26,7 +26,7 @@
         <section class="flex flex-wrap items-center px-0 border-b border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]">
             <input  dusk="search_users_field" autofocus type="search" id="users-search-field"
                 wire:model.live.debounce='search' autocomplete="off"  placeholder="{{__('wirechat::new.chat.inputs.search.placeholder')}}"
-                class=" w-full border-0 w-auto px-0 dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-light-primary)] rounded-lg focus:ring-0 hover:ring-0">
+                class="wc-input w-full border-0 w-auto px-0 dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-light-primary)] rounded-lg focus:ring-0 hover:ring-0">
 
         </section>
     </header>
