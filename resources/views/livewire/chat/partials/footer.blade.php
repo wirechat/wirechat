@@ -13,7 +13,7 @@
         </div>
     @else
         <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
-            class=" px-3 md:px-1 border-t  shadow-sm bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
+            class=" px-3 md:px-1 border-t  shadow-sm bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
 
             {{-- Emoji section , we put it seperate to avoid interfering as overlay for form when opened --}}
             @if($hasEmojiPicker)
@@ -72,7 +72,7 @@
 
             {{-- form and detail section  --}}
             <section
-                class=" py-2 sm:px-4 py-1.5    z-50  dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)]   flex flex-col gap-3 items-center  w-full mx-auto">
+                class=" py-2 sm:px-4 py-1.5    z-50     flex flex-col gap-3 items-center  w-full mx-auto">
 
                 {{-- Media preview section --}}
                 <section x-show="$wire.media.length>0 ||$wire.files.length>0" x-cloak
@@ -461,7 +461,7 @@
                             @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
                             @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
-                            class="wc-textarea w-full disabled:cursor-progress resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-hidden   "
+                            class="wc-textarea bg-inherit dark:bg-inherit w-full disabled:cursor-progress resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-hidden   "
                             x-init="
                               @if($hasEmojiPicker)
                             document.querySelector('emoji-picker')
