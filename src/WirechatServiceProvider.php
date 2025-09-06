@@ -9,6 +9,7 @@ use Wirechat\Wirechat\Console\Commands\InstallWirechat;
 use Wirechat\Wirechat\Console\Commands\MakePanelCommand;
 use Wirechat\Wirechat\Console\Commands\MigrateConfigToPanelCommand;
 use Wirechat\Wirechat\Console\Commands\SetupNotifications;
+use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
 use Wirechat\Wirechat\Facades\WirechatColor;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
@@ -47,6 +48,7 @@ class WirechatServiceProvider extends ServiceProvider
                 SetupNotifications::class,
                 MakePanelCommand::class,
                 MigrateConfigToPanelCommand::class,
+                UpgradeNamespaceCommand::class
             ]);
         }
 
