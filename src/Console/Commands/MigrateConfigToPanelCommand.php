@@ -160,10 +160,44 @@ class ".$className.' extends PanelProvider
         file_put_contents($path, $panelCode);
         $this->info("Panel provider created at: {$displayPath}");
 
+        // Update namespaces
+        $this->updateNamespaces();
+
         // Register provider
         $this->registerProvider($namespace, $className);
 
         $this->info('Wirechat upgrade complete! Review the panel for any custom logic.');
+    }
+
+    protected function updateNamespaces()
+    {
+        $files = [];
+        $command = "find . -type f -name '*.php' -not -path './vendor/*' -not -path './storage/*' -exec grep -l 'Namu\\\\WireChat' {} \;";
+        exec($command, $files);
+
+        if ($this->option('dry-run')) {
+            if (empty($files)) {
+                $this->info('Dry run: No files found with Namu\\WireChat to update.');
+            } else {
+                $this->info('Dry run: Files that would be updated:');
+                foreach ($files as $file) {
+                    $this->info($file);
+                }
+            }
+            return;
+        }
+
+        $command = "find . -type f -name '*.php' -not -path './vendor/*' -not -path './storage/*' -exec sed -i '' 's/Namu\\\\WireChat/Wirechat\\\\Wirechat/g' {} \;";
+        exec($command);
+
+        if (empty($files)) {
+            $this->info('No files found with Namu\\WireChat to update.');
+        } else {
+            $this->info('Updated namespaces in the following files:');
+            foreach ($files as $file) {
+                $this->info($file);
+            }
+        }
     }
 
     protected function registerProvider(string $namespace, string $className)
