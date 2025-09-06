@@ -25,11 +25,12 @@ class UpgradeNamespaceCommand extends Command
         exec('command -v find >/dev/null 2>&1', $output, $findExists);
         if ($findExists !== 0 && $isWindows) {
             $this->error('This command requires find/sed (available in Git Bash or WSL on Windows). Please install Git Bash or WSL, or manually update Namu\\WireChat to Wirechat\\Wirechat.');
+
             return 1;
         }
 
         exec($findCommand, $files);
-        $files = array_map(fn($file) => str_replace($basePath . DIRECTORY_SEPARATOR, '', $file), $files);
+        $files = array_map(fn ($file) => str_replace($basePath.DIRECTORY_SEPARATOR, '', $file), $files);
 
         if ($this->option('dry-run')) {
             if (empty($files)) {
@@ -40,6 +41,7 @@ class UpgradeNamespaceCommand extends Command
                     $this->info($file);
                 }
             }
+
             return 0;
         }
 

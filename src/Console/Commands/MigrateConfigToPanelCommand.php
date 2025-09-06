@@ -184,6 +184,7 @@ class ".$className.' extends PanelProvider
                     $this->info($file);
                 }
             }
+
             return;
         }
 

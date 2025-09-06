@@ -48,7 +48,7 @@ class WirechatServiceProvider extends ServiceProvider
                 SetupNotifications::class,
                 MakePanelCommand::class,
                 MigrateConfigToPanelCommand::class,
-                UpgradeNamespaceCommand::class
+                UpgradeNamespaceCommand::class,
             ]);
         }
 
