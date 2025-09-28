@@ -13,7 +13,7 @@
                 dispatchCloseEvent: false,
                 destroyOnClose: false,
                 closeOnClickAway:false,
-        
+
                 closeModalOnEscape(trigger) {
 
                     ///Only proceed if the trigger is for ChatModal
@@ -62,7 +62,7 @@
                         });
                     }
 
-                    //Check if should completley destroy component on close 
+                    //Check if should completley destroy component on close
                     //Meaning state won't be retained if component is opened again
                     if (this.destroyOnClose === true) {
                         Livewire.dispatch('destroyWirechatModal', {
@@ -114,8 +114,8 @@
                     this.closeOnEscape = attributes.closeOnEscape ?? false;
                     this.closeOnEscapeIsForceful = attributes.closeOnEscapeIsForceful ?? false;
                     this.dispatchCloseEvent = attributes.dispatchCloseEvent ?? false;
-                    this.destroyOnClose = attributes.destroyOnClose ?? false; 
-                    this.closeOnClickAway = attributes.closeOnClickAway ?? false; 
+                    this.destroyOnClose = attributes.destroyOnClose ?? false;
+                    this.closeOnClickAway = attributes.closeOnClickAway ?? false;
 
                     this.$nextTick(() => {
                         let focusable = this.$refs[id]?.querySelector('[autofocus]');
@@ -126,7 +126,7 @@
                         }
                     });
                 },
-                
+
                 setShowPropertyTo(show) {
                     this.show = show;
 
@@ -181,7 +181,7 @@
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen " aria-hidden="true">&#8203;</span>
 
-            <div x-show="show && showActiveModalComponent" 
+            <div x-show="show && showActiveModalComponent"
                 x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -189,7 +189,7 @@
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
 
-                class="inline-block  align-bottom  rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-full sm:max-w-lg"
+                class="inline-block  align-bottom wc-scrollbar-theme rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-full sm:max-w-lg"
                 id="chat-dialog-container" x-trap.noscroll.inert="show && showActiveModalComponent" aria-modal="true">
                 @forelse($components as $id => $component)
                     <div  x-show.immediate="activeModalComponent == '{{ $id }}'" x-ref="{{ $id }}"
@@ -202,5 +202,5 @@
         </div>
     </div>
 
-  
+
 </div>

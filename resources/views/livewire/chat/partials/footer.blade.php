@@ -72,7 +72,7 @@
 
             {{-- form and detail section  --}}
             <section
-                class=" py-2 sm:px-4 py-1.5    z-50     flex flex-col gap-3 items-center  w-full mx-auto">
+                class="  sm:px-4 py-3.5   z-50     flex flex-col gap-3 items-center  w-full mx-auto">
 
                 {{-- Media preview section --}}
                 <section x-show="$wire.media.length>0 ||$wire.files.length>0" x-cloak
