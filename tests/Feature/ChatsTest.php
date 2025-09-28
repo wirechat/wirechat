@@ -29,48 +29,48 @@ test('authenticaed user can access chatlist ', function () {
 describe('Presence check', function () {
 
     // /Content validations
-    it('has "chats title set in chatlist" as defualt', function () {
+    it('has "chats heading set in chatlist" as defualt', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSeeHtml('dusk="title"')
-            ->assertSet('title', __('wirechat::chats.labels.heading'))
+            ->assertSeeHtml('dusk="heading"')
+            ->assertSet('heading', __('wirechat::chats.labels.heading'))
             ->assertSee(__('wirechat::chats.labels.heading'));
     });
 
-    test('chat title can be set directly on compoenent', function () {
+    test('chat heading can be set directly on compoenent', function () {
         $auth = User::factory()->create();
-        Livewire::actingAs($auth)->test(Chatlist::class, ['title' => 'Messages'])
+        Livewire::actingAs($auth)->test(Chatlist::class, ['heading' => 'Messages'])
             ->assertSee('Messages')
-            ->assertSeeHtml('dusk="title"')
+            ->assertSeeHtml('dusk="heading"')
             ->assertDontSee(__('wirechat::chats.labels.heading'));
     });
 
-    test('chat title can be set directly on via provider', function () {
+    test('chat heading can be set directly on via provider', function () {
         testPanelProvider()->heading('new heading');
 
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSee('new heading')
-            ->assertSeeHtml('dusk="title"')
+            ->assertSeeHtml('dusk="heading"')
             ->assertDontSee(__('wirechat::chats.labels.heading'));
     });
 
     it('doesnt shows default heading when headiing  param is set to null at component level', function () {
         $auth = User::factory()->create();
-        Livewire::actingAs($auth)->test(Chatlist::class, ['title' => null])
+        Livewire::actingAs($auth)->test(Chatlist::class, ['heading' => null])
             ->assertdontSee(__('wirechat::chats.labels.heading'))
-            ->assertdontSeeHtml('dusk="title"')
-            ->assertNotset('title', __('wirechat::chats.labels.heading'));
+            ->assertdontSeeHtml('dusk="heading"')
+            ->assertNotset('heading', __('wirechat::chats.labels.heading'));
     });
 
-    test('doesnt show title but loads element  when set to empty string', function () {
+    test('doesnt show heading but loads element  when set to empty string', function () {
         $auth = User::factory()->create();
         testPanelProvider()->heading('');
 
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSee(__('wirechat::chats.labels.heading'))
-            ->assertSeeHtml('dusk="title"')
-            ->assertset('title', '');
+            ->assertSeeHtml('dusk="heading"')
+            ->assertset('heading', '');
     });
 
     it('shows_redirect_button', function () {
@@ -93,10 +93,10 @@ describe('Presence check', function () {
         $auth = User::factory()->create();
 
         Livewire::actingAs($auth)->test(Chatlist::class, [
-            'showNewChatModalButton' => false,
-            'allowChatsSearch' => false,
-            'showHomeRouteButton' => false,
-            'title' => null,
+            'createChatAction' => false,
+            'chatsSearch' => false,
+            'redirectToHomeAction' => false,
+            'heading' => null,
         ])
             ->assertDontSeeHtml('dusk="header"');
     });
@@ -157,7 +157,7 @@ describe('Presence check', function () {
         testPanelProvider()->chatsSearch(false);
 
         $auth = User::factory()->create();
-        Livewire::actingAs($auth)->test(Chatlist::class, ['allowChatsSearch' => true])
+        Livewire::actingAs($auth)->test(Chatlist::class, ['chatsSearch' => true])
             ->assertSee('Search')
             ->assertPropertyWired('search')
             ->assertSeeHtml('id="chats-search-field"');
@@ -176,7 +176,7 @@ describe('Presence check', function () {
             ->assertSeeHtml('id="open-new-chat-modal-button"');
     });
 
-    test('if "showNewChatModalButton" DISABLED  at component level it doesnt shows_new_chat_modal_button event if enabled_in_panel', function () {
+    test('if "createChatAction" DISABLED  at component level it doesnt shows_new_chat_modal_button event if enabled_in_panel', function () {
 
         //  Config::set('wirechat.show_new_chat_modal_button', true);
 
@@ -185,7 +185,7 @@ describe('Presence check', function () {
         $auth = User::factory()->create();
 
         Livewire::actingAs($auth)
-            ->test(Chatlist::class, ['showNewChatModalButton' => false])
+            ->test(Chatlist::class, ['createChatAction' => false])
             ->assertDontSeeHtml('id="open-new-chat-modal-button"');
     });
 
@@ -200,7 +200,7 @@ describe('Presence check', function () {
             ->assertDontSeeHtml('id="open-new-chat-modal-button"');
     });
 
-    test('if "showNewChatModalButton" ENABLED  at component level it still shows_new_chat_modal_button_if_not enabled_in_panel  ', function () {
+    test('if "createChatAction" ENABLED  at component level it still shows_new_chat_modal_button_if_not enabled_in_panel  ', function () {
 
         //    Config::set('wirechat.show_new_chat_modal_button', false);
 
@@ -208,7 +208,7 @@ describe('Presence check', function () {
 
         $auth = User::factory()->create();
         Livewire::actingAs($auth)
-            ->test(Chatlist::class, ['showNewChatModalButton' => true])
+            ->test(Chatlist::class, ['createChatAction' => true])
             ->assertSeeHtml('id="open-new-chat-modal-button"');
     });
 
@@ -316,7 +316,7 @@ describe('Presence check', function () {
                 ->assertSeeHtml('id="redirect-button"');
         });
 
-        test('it doesnt show redirect home button when chats is NOT widget and :showHomeRouteButton is false', function () {
+        test('it doesnt show redirect home button when chats is NOT widget and :redirectToHomeAction is false', function () {
 
             $auth = User::factory()->create(['name' => 'Namu']);
             $conversation = $auth->createGroup('My Group');
@@ -324,7 +324,7 @@ describe('Presence check', function () {
             $auth->sendMessageTo($conversation, 'hi');
 
             // dd($conversation);
-            Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id, 'widget' => false, 'showHomeRouteButton' => false])
+            Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id, 'widget' => false, 'redirectToHomeAction' => false])
                 ->assertDontSeeHtml('id="redirect-button"');
         });
 
@@ -340,7 +340,7 @@ describe('Presence check', function () {
                 ->assertDontSeeHtml('id="redirect-button"');
         });
 
-        test('it still shows redirect home button when chats is widget but :showHomeRouteButton is true', function () {
+        test('it still shows redirect home button when chats is widget but :redirectToHomeAction is true', function () {
 
             $auth = User::factory()->create(['name' => 'Namu']);
             $conversation = $auth->createGroup('My Group');
@@ -348,7 +348,7 @@ describe('Presence check', function () {
             $auth->sendMessageTo($conversation, 'hi');
 
             // dd($conversation);
-            Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id, 'widget' => true, 'showHomeRouteButton' => true])
+            Livewire::actingAs($auth)->test(Chatlist::class, ['conversation' => $conversation->id, 'widget' => true, 'redirectToHomeAction' => true])
                 ->assertSeeHtml('id="redirect-button"');
         });
     });
