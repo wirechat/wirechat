@@ -55,7 +55,7 @@
 
     @php
         /* Show header if any of these conditions are true  */
-        $showHeader = $showNewChatModalButton || $allowChatsSearch || $showHomeRouteButton || !empty($title);
+        $showHeader = $createChatAction || $chatsSearch || $redirectToHomeAction || !empty($heading);
     @endphp
 
     {{-- include header --}}

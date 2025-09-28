@@ -41,16 +41,16 @@ class Chats extends Component
      * Features
      */
     #[Locked]
-    public ?bool $showNewChatModalButton = null;
+    public ?bool $createChatAction = null;
 
     #[Locked]
-    public ?bool $allowChatsSearch = null;
+    public ?bool $chatsSearch = null;
 
     #[Locked]
-    public ?bool $showHomeRouteButton = null;
+    public ?bool $redirectToHomeAction = null;
 
     #[Locked]
-    public ?string $title = '';
+    public ?string $heading = '';
 
     /**
      * Indicates if more conversations can be loaded.
@@ -348,10 +348,10 @@ class Chats extends Component
 
     //    protected function initialize()
     //    {
-    //        $this->title = $this->panel()?->getHeading();
-    //        $this->showNewChatModalButton = $this->panel()?->hasNewChatAction();
-    //        $this->allowChatsSearch = $this->panel()?->hasChatsSearch();
-    //        $this->showHomeRouteButton = $this->widget
+    //        $this->heading = $this->panel()?->getHeading();
+    //        $this->createChatAction = $this->panel()?->hasCreateChatAction();
+    //        $this->chatsSearch = $this->panel()?->hasChatsSearch();
+    //        $this->redirectToHomeAction = $this->widget
     //            ? false
     //            : $this->panel()?->hasRedirectToHomeAction();
     //    }
@@ -365,18 +365,18 @@ class Chats extends Component
         // TITLE
         //
         // If current ≠ original (''), the user passed something:
-        //   • null → explicit “no title”
-        //   • non‐empty string → custom title
+        //   • null → explicit “no heading”
+        //   • non‐empty string → custom heading
         //
 
-        if ($this->title !== $defaults['title']) {
-            // leave $this->title as-is (null or custom string)
+        if ($this->heading !== $defaults['heading']) {
+            // leave $this->heading as-is (null or custom string)
         } else {
             // still '', so never set → pull from panel()
 
-            $this->title = $this->panel()?->getHeading();
+            $this->heading = $this->panel()?->getHeading();
         }
-        //  dd($this->title , $defaults['title']);
+        //  dd($this->heading , $defaults['heading']);
 
         //
         // BOOLEAN FLAGS
@@ -385,16 +385,16 @@ class Chats extends Component
         //   • null → never set → fallback to panel()
         //   • true/false → explicit override
         // todo: update action names to match panel names
-        if ($this->showNewChatModalButton === null) {
-            $this->showNewChatModalButton = $this->panel()?->hasCreateChatAction();
+        if ($this->createChatAction === null) {
+            $this->createChatAction = $this->panel()?->hasCreateChatAction();
         }
 
-        if ($this->allowChatsSearch === null) {
-            $this->allowChatsSearch = $this->panel()?->hasChatsSearch();
+        if ($this->chatsSearch === null) {
+            $this->chatsSearch = $this->panel()?->hasChatsSearch();
         }
 
-        if ($this->showHomeRouteButton === null) {
-            $this->showHomeRouteButton = $this->widget
+        if ($this->redirectToHomeAction === null) {
+            $this->redirectToHomeAction = $this->widget
                 ? false
                 : $this->panel()?->hasRedirectToHomeAction();
         }
@@ -410,13 +410,6 @@ class Chats extends Component
         $this->loadConversations();
 
         $this->initialize();
-
-        //        dd([
-        //            'showNewChatModalButton'=>$this->showNewChatModalButton,
-        //            'allowChatsSearch'=>$this->allowChatsSearch,
-        //            'showHomeRouteButton'=>$this->showHomeRouteButton,
-        //            'title'=>$this->title,
-        //        ]);
 
         return view('wirechat::livewire.chats.chats');
     }

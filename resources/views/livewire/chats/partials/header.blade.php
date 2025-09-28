@@ -3,12 +3,12 @@
 <header class="px-3 z-10 sticky top-0 w-full py-2 " dusk="header">
 
 
-    {{-- Title/name and Icon --}}
+    {{-- heading/name and Icon --}}
     <section class=" justify-between flex items-center   pb-2">
 
-        @if (isset($title))
+        @if (isset($heading))
             <div class="flex items-center gap-2 truncate  " wire:ignore>
-                <h2 class=" text-2xl font-bold dark:text-white"  dusk="title">{{$title}}</h2>
+                <h2 class=" text-2xl font-bold dark:text-white"  dusk="heading">{{$heading}}</h2>
             </div>
         @endif
 
@@ -16,7 +16,7 @@
 
         <div class="flex gap-x-3 items-center  ">
 
-            @if ($showNewChatModalButton)
+            @if ($createChatAction)
 
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
                 <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
@@ -36,7 +36,7 @@
 
 
             {{-- Only show if is not widget --}}
-            @if ($showHomeRouteButton)
+            @if ($redirectToHomeAction)
             <a id="redirect-button" href="{{ config('wirechat.home_route', '/') }}" class="flex items-center">
                 {{-- <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor" class="bi bi-x-octagon-fill w-6 h-6 text-gray-500 dark:text-gray-400 transition-colors duration-300 dark:hover:text-gray-500 hover:text-gray-900" viewBox="0 0 16 16">
                     <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
@@ -63,7 +63,7 @@
     </section>
 
     {{-- Search input --}}
-    @if ($allowChatsSearch)
+    @if ($chatsSearch)
         <section class="mt-4">
             <div class="px-2 rounded-lg dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)]  grid grid-cols-12 items-center">
 
