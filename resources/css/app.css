@@ -192,17 +192,113 @@
     }
 }
 
-/* Define custom properties for Tailwind-like values */
-:root {
-    --color-gray-500: #6b7280;
-    --color-blue-600: #2563eb;
-    --color-white: #ffffff;
-    --color-zinc-900: #18181b;
-    --spacing-2: 0.5rem;
-    --spacing-3: 0.75rem;
-    --spacing-4: 1rem;
-    --spacing-10: 2.5rem;
-    --font-size-base: 1rem;
-    --line-height-base: 1.5;
-    --shadow-none: 0 0 #0000;
+
+@layer utilities {
+    /* =========================
+     * BACKGROUND
+     * ========================= */
+    .wc-bg-primary       { @apply bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-primary)]; }
+    .wc-bg-secondary     { @apply bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]; }
+    .wc-bg-accent        { @apply bg-[var(--wc-light-accent)]    dark:bg-[var(--wc-dark-accent)]; }
+    .wc-bg-brand         { @apply bg-[var(--wc-brand-primary)]; }
+
+    /* Hover states */
+    .wc-bg-primary-hover:hover   { @apply bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-primary)]; }
+    .wc-bg-secondary-hover:hover { @apply bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]; }
+    .wc-bg-accent-hover:hover    { @apply bg-[var(--wc-light-accent)]    dark:bg-[var(--wc-dark-accent)]; }
+    .wc-bg-brand-hover:hover     { @apply bg-[var(--wc-brand-primary)]; }
+
+
+    /* Hover states */
+    .wc-text-primary-hover:hover   { @apply text-[var(--wc-light-primary)]   dark:text-[var(--wc-dark-primary)]; }
+    .wc-text-secondary-hover:hover { @apply text-[var(--wc-light-secondary)] dark:text-[var(--wc-dark-secondary)]; }
+    .wc-text-accent-hover:hover    { @apply text-[var(--wc-light-accent)]    dark:text-[var(--wc-dark-accent)]; }
+    .wc-text-brand-hover:hover     { @apply text-[var(--wc-brand-primary)]; }
+
+    /* =========================
+     * BORDER (color only)
+     * ========================= */
+
+    /* BORDER (only one token available) */
+    .wc-border-color {
+        @apply border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)];
+    }
+
+    .wc-border-primary   { @apply border-[var(--wc-light-primary)]   dark:border-[var(--wc-light-primary)]; }
+    .wc-border-secondary { @apply border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]; }
+    .wc-border-accent    { @apply border-[var(--wc-light-accent)]    dark:border-[var(--wc-dark-accent)]; }
+
+    /* Hover states */
+    .wc-border-primary-hover:hover   { @apply border-[var(--wc-light-primary)]   dark:border-[var(--wc-light-primary)]; }
+    .wc-border-secondary-hover:hover { @apply border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]; }
+    .wc-border-accent-hover:hover    { @apply border-[var(--wc-light-accent)]    dark:border-[var(--wc-dark-accent)]; }
+
+
+
+
+
+    /* =========================
+  * THEMED SCROLLBAR
+  * ========================= */
+    .wc-scrollbar-theme {
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: var(--color-zinc-200) transparent;
+
+    }
+    .dark .wc-scrollbar-theme {
+        scrollbar-color: var(--color-zinc-700) transparent;
+    }
+
+    .wc-scrollbar-theme::-webkit-scrollbar {
+        width: 3px;
+        height: 8px;
+    }
+
+    /* =========================
+     * TRACK
+     * ========================= */
+    .wc-scrollbar-theme::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+    .dark .wc-scrollbar-theme::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    /* =========================
+     * SCROLLBAR BUTTONS
+     * ========================= */
+    .wc-scrollbar-theme::-webkit-scrollbar-button{
+       display: none;
+    }
+
+    /* =========================
+     * THUMB
+     * ========================= */
+    .wc-scrollbar-theme::-webkit-scrollbar-thumb {
+        background-color: var(--color-zinc-500);
+        border-radius: 6px;
+    }
+    .dark .wc-scrollbar-theme::-webkit-scrollbar-thumb {
+        background-color: var(--color-zinc-500);
+
+    }
+
+    /* =========================
+     * HIDE SCROLLBAR
+     * ========================= */
+    .wc-scrollbar-hide {
+        scrollbar-width: none !important; /* Firefox */
+    }
+    .wc-scrollbar-hide::-webkit-scrollbar {
+        display: none; /* WebKit */
+    }
+
+
+
+
+
+
 }
+
+
+

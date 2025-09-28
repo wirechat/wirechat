@@ -77,7 +77,7 @@
             }
             "
           id="wirechat-chats-scrollable-container"
-        class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">
+        class=" overflow-y-auto py-2  wc-scrollbar-theme  grow  h-full relative " style="contain:content">
 
         {{-- loading indicator --}}
 
