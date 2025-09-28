@@ -30,9 +30,6 @@ class InstallWirechat extends Command
             }
         }
 
-        // Create deafult panel
-        $this->createDefaultPanel();
-
         // create storage sym link
         $this->comment('Creating storage symlink...');
 
@@ -42,6 +39,9 @@ class InstallWirechat extends Command
         $this->comment('Publishing migrations...');
         $this->publishMigrations();
         $this->info('[✓] Published migrations');
+
+        // Create deafult panel
+        $this->createDefaultPanel();
 
         $this->info('[✓] Wirechat Package installed successfully.');
     }
