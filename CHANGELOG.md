@@ -14,19 +14,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial changelog setup.  
 - Placeholder for upcoming features.
 
-
-
 ---
-## [0.3x]
-Update from config based to panel based settings for a clean and extensible way to define wirechat environments
 
-### Fixed
+## [v0.3.0-beta1](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-beta1) - 2025-09-29
+
+Transition from config-based to **Panel-based** settings for a cleaner, extensible way to define Wirechat environments.
+
+### Added
+- Introduced **Panels** as the new core system for managing chat environments (e.g., user, admin, support).
+- New `ChatsPanelProvider` generator (`php artisan make:wirechat-panel`).
+- `wirechat:upgrade-namespace-to-v0.3x` command to migrate `Namu\WireChat` → `Wirechat\Wirechat`.
+- `wirechat:upgrade-to-v0.3x` command to migrate old `config/wirechat.php` to panel providers.
+- `wirechat:upgrade-morph-columns` command to ensure polymorphic relations work with both UUID and bigint IDs.
+- `WireChatUser` interface and `InteractsWithWireChat` trait for user models.
+- TailwindCSS v4.0+ support.
+- Panel-specific user search (`searchUsersUsing`) for flexible customization.
+- Support for panel-based notifications with `NotifyParticipant` requiring panel IDs.
 
 ### Changed
+- Attachment URLs now resolve storage/visibility from the current panel.
+- Improved avatar component: falls back to SVG when image load fails.
+- Migrated `searchChatables` logic from User model → panel-based search.
+- Storage configuration moved from `attachments.*` keys to new `storage.*` keys.
+- UUID configuration clarified with `uses_uuid_for_conversations` key.
+- Accessor methods renamed with `wirechat` prefix (`getAvatarUrlAttribute` → `getWirechatAvatarUrlAttribute`, etc.).
+- Renamed `Chatable` trait → `InteractsWithWireChat`.
 
-* updated attachment url to use currentPanel to get disk storage and visibility settings
-* improved avatar component to load svg when image fails
-* migrated `searchChatables` from user model to panel-based search for better flexibility and customization
+### Deprecated
+- Old `namu/wirechat` package (remove after upgrade).
+- Legacy `attachments.*` config keys.
+- Old `uuids` config key (replaced by `uses_uuid_for_conversations`).
+- Old `Chatable` trait name (backwards-compatible for now).
+- Legacy accessors (`getAvatarUrlAttribute`, `getProfileUrlAttribute`, `getDisplayNameAttribute`).
+
+### Fixed
+- Panel migration ensures existing `config/wirechat.php` customizations are preserved.
+- Morph column upgrader ensures idempotent, safe migrations without breaking existing foreign keys.
 
 ---
 
