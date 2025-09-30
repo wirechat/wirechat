@@ -85,10 +85,9 @@ class WirechatServiceProvider extends ServiceProvider
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'wirechat-migrations');
 
-            //update morphs column migration
+            // update morphs column migration
             $this->publishes([
-                __DIR__.'/../stubs/upgradeMorphColumns.stub' =>
-                    database_path('migrations/'.date('Y_m_d_His').'_upgrade_wirechat_morph_columns.php'),
+                __DIR__.'/../stubs/upgradeMorphColumns.stub' => database_path('migrations/'.date('Y_m_d_His').'_upgrade_wirechat_morph_columns.php'),
             ], 'wirechat-update-morphs-migration');
 
         }
