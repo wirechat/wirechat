@@ -75,6 +75,30 @@
                             <span class="font-medium dark:text-white">({{__('wirechat::chats.labels.you')  }})</span>
                         @endif
 
+                        {{-- Seen status of last message --}}
+                        @if ($canViewLastSeenMessage)
+                            @if ($conversation->peer_participant->conversation_read_at >= $conversation->lastMessage->created_at && $lastMessage?->ownedBy($this->auth))
+                                <div class="flex items-center">
+                                    <p class="text-xs text-blue-500">Seen</p>
+                                     <svg class="ml-1" fill="#2b7fff" width="16" height="16" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <g id="SVGRepo_iconCarrier"> <path d="M1827.701 303.065 698.835 1431.801 92.299 825.266 0 917.564 698.835 1616.4 1919.869 395.234z" fill-rule="evenodd"/> </g>
+                                    </svg>
+                                    <svg class="-ml-3" fill="#2b7fff" width="16" height="16" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <g id="SVGRepo_iconCarrier"> <path d="M1827.701 303.065 698.835 1431.801 92.299 825.266 0 917.564 698.835 1616.4 1919.869 395.234z" fill-rule="evenodd"/> </g>
+                                    </svg>
+                                </div>
+                            @elseif ($lastMessage?->ownedBy($this->auth))
+                                <div class="flex items-center">
+                                    <p class="text-xs text-gray-500">Sent</p>
+                                    <x-heroicon-o-check class="w-4 h-4 text-gray-500" />
+                                </div> 
+                            @endif
+                        @endif
+
                     </div>
 
                     {{-- Message body --}}
