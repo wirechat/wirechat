@@ -19,6 +19,7 @@ use Wirechat\Wirechat\Panel\Concerns\HasGroups;
 use Wirechat\Wirechat\Panel\Concerns\HasHeading;
 use Wirechat\Wirechat\Panel\Concerns\HasHeart;
 use Wirechat\Wirechat\Panel\Concerns\HasId;
+use Wirechat\Wirechat\Panel\Concerns\HasLastSeenMessage;
 use Wirechat\Wirechat\Panel\Concerns\HasLayout;
 use Wirechat\Wirechat\Panel\Concerns\HasMiddleware;
 use Wirechat\Wirechat\Panel\Concerns\HasRoutes;
@@ -52,6 +53,7 @@ class Panel
     use HasSearchableAttributes;
     use HasUsersSearch;
     use HasWebPushNotifications;
+    use HasLastSeenMessage;
 
     protected bool|Closure $isDefault = false;
 
