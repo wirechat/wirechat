@@ -52,6 +52,9 @@ class Chats extends Component
     #[Locked]
     public ?string $heading = '';
 
+    #[Locked]
+    public ?bool $canViewLastSeenMessage = null;
+
     /**
      * Indicates if more conversations can be loaded.
      */
@@ -397,6 +400,10 @@ class Chats extends Component
             $this->redirectToHomeAction = $this->widget
                 ? false
                 : $this->panel()?->hasRedirectToHomeAction();
+        }
+
+        if ($this->canViewLastSeenMessage === null) {
+            $this->canViewLastSeenMessage = $this->panel()?->hasViewLastMessage();
         }
     }
 
