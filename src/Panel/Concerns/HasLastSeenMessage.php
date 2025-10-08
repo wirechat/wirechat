@@ -14,4 +14,9 @@ trait HasLastSeenMessage
 
         return $this;
     }
+
+    public function hasViewLastMessage(): bool
+    {
+        return (bool) $this->evaluate($this->isEnabled);
+    }
 }
