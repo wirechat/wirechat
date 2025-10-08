@@ -84,7 +84,7 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
 
                         {{-- Seen status of last message --}}
                         @if ($canViewLastSeenMessage)
-                            @if ($conversation->peer_participant->conversation_read_at >= $conversation->lastMessage->created_at && $lastMessage?->ownedBy($this->auth))
+                            @if ($conversation->isLastMessageSeen($this->auth))
                                 <div class="flex items-center">
                                     <p class="text-xs text-blue-500">Seen</p>
                                     <svg class="ml-1" fill="#2b7fff" width="16" height="16" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
