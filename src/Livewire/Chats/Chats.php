@@ -22,7 +22,9 @@ use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
  */
 class Chats extends Component
 {
-    use HasPanel, InteractsWithUI, Widget;
+    use HasPanel;
+    use InteractsWithUI;
+    use Widget;
 
     public $search;
 
@@ -118,7 +120,7 @@ class Chats extends Component
         $user = $this->auth;
         $ids = $this->conversationIds;
         $positions = array_flip($ids);
-        $table = (new Conversation)->getTable();
+        $table = (new Conversation())->getTable();
 
         $conversationQuery = Conversation::query()
             ->whereIn($table.'.id', $ids);
@@ -168,7 +170,7 @@ class Chats extends Component
         $auth = $this->auth;
         abort_if($auth == null, 401);
 
-        $table = (new Conversation)->getTable();
+        $table = (new Conversation())->getTable();
         $perPage = 10;
 
         // In free version, we use the user's relation as before
@@ -299,6 +301,10 @@ class Chats extends Component
             $this->redirectToHomeAction = $this->widget
                 ? false
                 : $this->panel()?->hasRedirectToHomeAction();
+        }
+
+        if ($this->canViewLastSeenMessage === null) {
+            $this->canViewLastSeenMessage = $this->panel()?->hasViewLastMessage();
         }
     }
 
