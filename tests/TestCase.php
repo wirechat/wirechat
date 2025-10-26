@@ -5,6 +5,8 @@ namespace Wirechat\Wirechat\Tests;
 use Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider;
 use Illuminate\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\View;
 use Livewire\LivewireServiceProvider;
@@ -16,13 +18,13 @@ use function Orchestra\Testbench\workbench_path;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
-    //  use DatabaseTruncation; // Ensures migrations are run and database is refreshed for each test
+     // use DatabaseTruncation; // Ensures migrations are run and database is refreshed for each test
     //  use WithLaravelMigrations;
     // use InteractsWithViews;
-    //  use RefreshDatabase;
+     use RefreshDatabase;
 
     use WithWorkbench;
-
+//use DatabaseMigrations;
     protected function getPackageProviders($app): array
     {
         return [
@@ -41,13 +43,31 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             $config->set('app.env', 'testing');
             $config->set('app.timezone', 'UTC');
 
-            $config->set('database.default', 'testbench');
+        $config->set('database.default', 'testbench');
+//            $config->set('database.connections.testbench', [
+//                'driver' => 'sqlite',
+//                'database' => ':memory:',
+//                'prefix' => '',
+//            ]);
+
             $config->set('database.connections.testbench', [
-                'driver' => 'sqlite',
-                'database' => ':memory:',
-                'prefix' => '',
+                'driver'   => 'pgsql',
+                'host'     => env('DB_HOST', '127.0.0.1'),
+                'port'     => env('DB_PORT', '5432'),
+                'database' => env('DB_DATABASE', 'wirechat_test'),
+                'username' => env('DB_USERNAME', 'yodah'),
+                'password' => env('DB_PASSWORD', ''),
+                'charset'  => 'utf8',
+                'prefix'   => '',
+                'sslmode'  => 'prefer',
             ]);
 
+            // SQLite fallback for fast tests
+//            $config->set('database.connections.testbench', [
+//                'driver' => 'sqlite',
+//                'database' => ':memory:',
+//                'prefix' => '',
+//            ]);
             $config->set('wirechat.user_model', \Workbench\App\Models\User::class);
 
             $config->set('queue.batching.database', 'testbench');
