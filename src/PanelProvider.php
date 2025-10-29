@@ -13,7 +13,8 @@ abstract class PanelProvider extends ServiceProvider
     {
         $panel = $this->panel(Panel::make());
 
-        Log::info('Registering panel via provider', ['id' => $panel->getId()]);
+        Log::debug('Registering panel via provider', ['id' => $panel->getId()]);
+
         app(PanelRegistry::class)->register($panel);
     }
 }

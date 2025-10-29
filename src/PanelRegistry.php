@@ -17,7 +17,7 @@ class PanelRegistry
 
     public function __construct()
     {
-        Log::info('PanelRegistry instance created', ['instance_id' => spl_object_id($this)]);
+        Log::debug('PanelRegistry instance created', ['instance_id' => spl_object_id($this)]);
     }
 
     /**
@@ -56,7 +56,7 @@ class PanelRegistry
         // Register panel-specific settings (e.g., colors)
         $panel->register();
 
-        Log::info('Panel registered successfully', [
+        Log::debug('Panel registered successfully', [
             'id' => $id,
             'instance_id' => spl_object_id($this),
             'panels_count' => count($this->panels),
@@ -70,7 +70,8 @@ class PanelRegistry
 
         if ($this->currentPanel) {
             WirechatColor::register($this->currentPanel->getColors());
-            Log::info('Current panel set', [
+
+            Log::debug('Current panel set', [
                 'panelId' => $panelId,
                 'instance_id' => spl_object_id($this),
                 'current_panel_id' => $this->currentPanel->getId(),
@@ -99,7 +100,8 @@ class PanelRegistry
             Log::error('No default panel set', ['instance_id' => spl_object_id($this)]);
             throw new NoPanelProvidedException('No default panel has been set.');
         }
-        Log::info('Returning default panel', [
+
+        Log::debug('Returning default panel', [
             'id' => $this->defaultPanel->getId(),
             'instance_id' => spl_object_id($this),
         ]);
@@ -120,7 +122,7 @@ class PanelRegistry
         ]);
 
         if (isset($this->panels[$idOrClass])) {
-            Log::info('Panel found by ID', ['id' => $idOrClass, 'instance_id' => spl_object_id($this)]);
+            Log::debug('Panel found by ID', ['id' => $idOrClass, 'instance_id' => spl_object_id($this)]);
 
             return $this->panels[$idOrClass];
         }
@@ -141,7 +143,7 @@ class PanelRegistry
             throw new NoPanelProvidedException('No default panel has been set.');
         }
 
-        Log::info('Returning default panel', [
+        Log::debug('Returning default panel', [
             'id' => $this->defaultPanel->getId(),
             'instance_id' => spl_object_id($this),
         ]);
@@ -169,7 +171,7 @@ class PanelRegistry
 
                 // Check if panel ID already exists to avoid duplicate registration
                 if (isset($this->panels[$panel->getId()])) {
-                    Log::info('Panel already exists in registry, returning existing panel', [
+                    Log::debug('Panel already exists in registry, returning existing panel', [
                         'id' => $panel->getId(),
                         'instance_id' => spl_object_id($this),
                     ]);
