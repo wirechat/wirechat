@@ -19,11 +19,11 @@ return new class extends Migration
 
             // Always string for UUID or integer-as-string
             // Actionable (the entity being acted upon)
-            $table->string('actionable_id');
+            $table->unsignedBigInteger('actionable_id');
             $table->string('actionable_type');
 
             // Actor (the one performing the action
-            $table->string('actor_id');
+            $table->unsignedBigInteger('actor_id');
             $table->string('actor_type');
 
             // Type of action (e.g., delete, archive)
