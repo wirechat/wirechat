@@ -72,9 +72,10 @@ class PanelRegistry
     public function getDefault(): ?Panel
     {
         if ($this->defaultPanel === null) {
-            throw new NoPanelProvidedException('No default panel has been set.');
+            throw new NoPanelProvidedException(
+                'No default panel has been set. Please call ->default() on at least one panel in your Wirechat PanelProvider.'
+            );
         }
-
         return $this->defaultPanel;
     }
 
