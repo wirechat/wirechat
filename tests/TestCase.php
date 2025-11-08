@@ -44,30 +44,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             $config->set('app.timezone', 'UTC');
 
         $config->set('database.default', 'testbench');
-//            $config->set('database.connections.testbench', [
-//                'driver' => 'sqlite',
-//                'database' => ':memory:',
-//                'prefix' => '',
-//            ]);
-
             $config->set('database.connections.testbench', [
-                'driver'   => 'pgsql',
-                'host'     => env('DB_HOST', '127.0.0.1'),
-                'port'     => env('DB_PORT', '5432'),
-                'database' => env('DB_DATABASE', 'wirechat_test'),
-                'username' => env('DB_USERNAME', 'yodah'),
-                'password' => env('DB_PASSWORD', ''),
-                'charset'  => 'utf8',
-                'prefix'   => '',
-                'sslmode'  => 'prefer',
+                'driver' => 'sqlite',
+                'database' => ':memory:',
+                'prefix' => '',
             ]);
 
-            // SQLite fallback for fast tests
 //            $config->set('database.connections.testbench', [
-//                'driver' => 'sqlite',
-//                'database' => ':memory:',
-//                'prefix' => '',
+//                'driver'   => 'pgsql',
+//                'host'     => env('DB_HOST', '127.0.0.1'),
+//                'port'     => env('DB_PORT', '5432'),
+//                'database' => env('DB_DATABASE', 'wirechat_test'),
+//                'username' => env('DB_USERNAME', 'yodah'),
+//                'password' => env('DB_PASSWORD', ''),
+//                'charset'  => 'utf8',
+//                'prefix'   => '',
+//                'sslmode'  => 'prefer',
 //            ]);
+
             $config->set('wirechat.user_model', \Workbench\App\Models\User::class);
 
             $config->set('queue.batching.database', 'testbench');
