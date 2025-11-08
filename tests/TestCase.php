@@ -21,7 +21,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      // use DatabaseTruncation; // Ensures migrations are run and database is refreshed for each test
     //  use WithLaravelMigrations;
     // use InteractsWithViews;
-     use RefreshDatabase;
+    // use RefreshDatabase;
 
     use WithWorkbench;
 //use DatabaseMigrations;
