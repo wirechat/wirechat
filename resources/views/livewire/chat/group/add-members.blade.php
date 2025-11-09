@@ -22,7 +22,7 @@
             wire:target='save'
             @disabled(count($selectedMembers)==0)
             @class([
-                'p-2 disabled:cursor-not-allowed curosr-pointer disabled:hover:bg-inherit ml-0 text-gray-600 dark:text-gray-300  hover:bg-[var(--wc-light-secondary)] hover:dark:bg-[var(--wc-dark-secondary)] dark:hover:text-white rounded-full hover:text-gray-800',
+                'p-2 disabled:cursor-not-allowed cursor-pointer disabled:hover:bg-inherit ml-0 text-gray-600 dark:text-gray-300  hover:bg-[var(--wc-light-secondary)] hover:dark:bg-[var(--wc-dark-secondary)] dark:hover:text-white rounded-full hover:text-gray-800',
                 'cursor-not-allowed hover:bg-none dark:hover:bg-inherit hover:bg-inherit  opacity-70'=>count($selectedMembers)==0
             ])
             class="">
