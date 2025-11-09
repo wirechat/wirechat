@@ -11,6 +11,12 @@ abstract class PanelProvider extends ServiceProvider
     public function register(): void
     {
         $panel = $this->panel(Panel::make());
+<<<<<<< HEAD
+=======
+
+        Log::debug('Registering panel via provider', ['id' => $panel->getId()]);
+
+>>>>>>> origin/0.3x
         app(PanelRegistry::class)->register($panel);
     }
 }
