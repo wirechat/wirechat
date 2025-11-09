@@ -17,7 +17,7 @@ class PanelRegistry
 
     public function __construct()
     {
-        //  Log::info('PanelRegistry instance created', ['instance_id' => spl_object_id($this)]);
+      //  Log::info('PanelRegistry instance created', ['instance_id' => spl_object_id($this)]);
     }
 
     /**
@@ -61,10 +61,10 @@ class PanelRegistry
 
     public function getCurrent(): ?Panel
     {
-        //        Log::debug('Getting current panel', [
-        //            'instance_id' => spl_object_id($this),
-        //            'current_panel_id' => $this->currentPanel?->getId(),
-        //        ]);
+//        Log::debug('Getting current panel', [
+//            'instance_id' => spl_object_id($this),
+//            'current_panel_id' => $this->currentPanel?->getId(),
+//        ]);
 
         return $this->currentPanel ?? $this->defaultPanel;
     }
@@ -76,7 +76,6 @@ class PanelRegistry
                 'No default panel has been set. Please call ->default() on at least one panel in your Wirechat PanelProvider.'
             );
         }
-
         return $this->defaultPanel;
     }
 
@@ -89,6 +88,7 @@ class PanelRegistry
         if (isset($this->panels[$idOrClass])) {
             return $this->panels[$idOrClass];
         }
+
 
         $panel = $this->resolvePanelFromProvider($idOrClass);
         if ($panel) {
