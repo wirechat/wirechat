@@ -17,6 +17,8 @@ trait HasRoutes
      */
     protected array $routes = [];
 
+    protected bool|Closure $hasRoutes = true;
+
     /**
      * The home URL for the panel, which can be a string, Closure, or null.
      */
@@ -40,6 +42,24 @@ trait HasRoutes
      * @const string
      */
     public const CHAT_ROUTE_NAME = 'chat';
+
+    /**
+     * Check if panel has registered routes
+     */
+    public function hasRoutes(): bool
+    {
+        return (bool) $this->evaluate($this->hasRoutes);
+    }
+
+    /**
+     * @param bool|\Closure $condition
+     */
+    public function registerRoutes(bool|Closure $condition = true): static
+    {
+        $this->hasRoutes = $condition;
+
+        return $this;
+    }
 
     /**
      * Sets the home URL for the panel.
