@@ -51,9 +51,6 @@ trait HasRoutes
         return (bool) $this->evaluate($this->hasRoutes);
     }
 
-    /**
-     * @param bool|\Closure $condition
-     */
     public function registerRoutes(bool|Closure $condition = true): static
     {
         $this->hasRoutes = $condition;
