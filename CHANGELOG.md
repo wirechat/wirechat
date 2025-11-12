@@ -1,4 +1,4 @@
-****# Wirechat Changelog 
+# Wirechat Changelog 
 
 All notable changes to this project will be documented in this file.
 
@@ -13,6 +13,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added  
 - Initial changelog setup.  
 - Placeholder for upcoming features.
+
+---
+
+
+## [v0.3.0-beta4](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-beta4) - 2025-11-12
+
+### Added
+- A new feature `registerRoutes(bool|Closure $condition = true)` API on the Panel class.
+
+
+---
+
+## [v0.3.0-beta3](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-beta3) - 2025-11-09
+
+### Reverted
+
+* Reverted migrations that changed `actionable_id`, `attachable_id` and `attachable_id` to string in their respective tables.
+
+### Removed
+
+* Excessive panel-related logging.
+
+### Fixed
+
+* Typos in CSS classes.
+
+---
+
+## [v0.3.0-beta2](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-beta2) - 2025-09-30
+
+### Added
+
+* Command to publish a migration to update `actionable_id`, `attachable_id` and `attachable_id` to string in their respective tables.
 
 ---
 
