@@ -192,14 +192,16 @@ class WirechatServiceProvider extends ServiceProvider
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
-            $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
-            $userId = auth()->id();
-            $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
-
             $script = '';
 
-            if ($hasWebPushNotifications) {
+            if ($currentPanel->hasWebPushNotifications() && auth()->check()) {
+
+                $panelId = $currentPanel->getId();
+                $userId = auth()->id();
+                $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(
+                    auth()->user()->getMorphClass()
+                );
+
                 $script = <<<HTML
                              <script>
                                 document.addEventListener("DOMContentLoaded", function() {
