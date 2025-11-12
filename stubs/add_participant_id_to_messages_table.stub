@@ -1,0 +1,128 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        $messagesTable = (new Message)->getTable();
+        $partsTable    = (new Participant)->getTable();
+
+        // 1) add participant_id (nullable for backfill) + useful indexes
+        Schema::table($messagesTable, function (Blueprint $t) {
+            if (! Schema::hasColumn($t->getTable(), 'participant_id')) {
+                $t->unsignedBigInteger('participant_id')->nullable()->after('id');
+                $t->index('participant_id');
+            }
+            // keep conversation_id denormalized for performance; ensure index exists
+            try { $t->index(['conversation_id', 'created_at']); } catch (\Throwable $e) {}
+        });
+
+        // 2) backfill participant_id from existing participants (NO inserts)
+        DB::table($messagesTable)
+            ->select('id', 'conversation_id', 'sendable_type', 'sendable_id')
+            ->whereNotNull('conversation_id')
+            ->whereNotNull('sendable_type')
+            ->whereNotNull('sendable_id')
+            ->orderBy('id')
+            ->chunkById(1000, function ($rows) use ($messagesTable, $partsTable) {
+                foreach ($rows as $row) {
+                    $participantId = DB::table($partsTable)
+                        ->where('conversation_id', $row->conversation_id)
+                        ->where('participantable_type', $row->sendable_type)
+                        ->where('participantable_id', (string) $row->sendable_id) // cast for PG safety
+                        ->value('id');
+
+                    if ($participantId) {
+                        DB::table($messagesTable)
+                            ->where('id', $row->id)
+                            ->update(['participant_id' => $participantId]);
+                    } else {
+                        logger()->warning('Wirechat migration: no participant match for message', [
+                            'message_id'      => $row->id,
+                            'conversation_id' => $row->conversation_id,
+                            'sendable_type'   => $row->sendable_type,
+                            'sendable_id'     => $row->sendable_id,
+                        ]);
+                    }
+                }
+            });
+
+        // 3) make participant_id NOT NULL (best-effort; requires doctrine/dbal for change())
+        try {
+            Schema::table($messagesTable, function (Blueprint $t) {
+                $t->unsignedBigInteger('participant_id')->nullable(false)->change();
+            });
+        } catch (\Throwable $e) {
+            // leave nullable if DBAL isn't available; code can enforce presence post-upgrade
+        }
+
+        // 4) drop legacy polymorphic sender columns
+        Schema::table($messagesTable, function (Blueprint $t) use ($messagesTable) {
+            if (Schema::hasColumn($messagesTable, 'sendable_type')) $t->dropColumn('sendable_type');
+            if (Schema::hasColumn($messagesTable, 'sendable_id'))   $t->dropColumn('sendable_id');
+        });
+
+        // 5) add FK to participants (best-effort)
+        try {
+            Schema::table($messagesTable, function (Blueprint $t) use ($partsTable) {
+                $t->foreign('participant_id')->references('id')->on($partsTable)->cascadeOnDelete();
+            });
+        } catch (\Throwable $e) {}
+    }
+
+    public function down(): void
+    {
+        $messagesTable = (new Message)->getTable();
+        $partsTable    = (new Participant)->getTable();
+
+        // restore legacy columns
+        Schema::table($messagesTable, function (Blueprint $t) {
+            $t->string('sendable_type')->nullable()->after('participant_id');
+            $t->string('sendable_id')->nullable()->after('sendable_type');
+        });
+
+        // backfill legacy from participant
+        DB::table($messagesTable)
+            ->select('id', 'participant_id')
+            ->whereNotNull('participant_id')
+            ->orderBy('id')
+            ->chunkById(1000, function ($rows) use ($messagesTable, $partsTable) {
+                foreach ($rows as $row) {
+                    $p = DB::table($partsTable)
+                        ->select('participantable_type', 'participantable_id')
+                        ->where('id', $row->participant_id)
+                        ->first();
+
+                    if ($p) {
+                        DB::table($messagesTable)
+                            ->where('id', $row->id)
+                            ->update([
+                                'sendable_type' => $p->participantable_type,
+                                'sendable_id'   => (string) $p->participantable_id,
+                            ]);
+                    }
+                }
+            });
+
+        // drop FK + column/indexes
+        try {
+            Schema::table($messagesTable, function (Blueprint $t) {
+                $t->dropForeign([$t->getTable().'_participant_id_foreign']);
+            });
+        } catch (\Throwable $e) {}
+
+        Schema::table($messagesTable, function (Blueprint $t) use ($messagesTable) {
+            if (Schema::hasColumn($messagesTable, 'participant_id')) {
+                try { $t->dropIndex($messagesTable.'_participant_id_index'); } catch (\Throwable $e) {}
+                $t->dropColumn('participant_id');
+            }
+        });
+    }
+};
