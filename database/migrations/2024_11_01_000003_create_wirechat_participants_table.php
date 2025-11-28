@@ -24,6 +24,7 @@ return new class extends Migration
             } else {
                 $table->unsignedBigInteger('conversation_id');
             }
+
             $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
 
             $table->string('role');

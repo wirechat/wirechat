@@ -17,7 +17,7 @@ return new class extends Migration
         // 1) add participant_id (nullable for backfill) + useful indexes
         Schema::table($messagesTable, function (Blueprint $t) {
             if (! Schema::hasColumn($t->getTable(), 'participant_id')) {
-                $t->unsignedBigInteger('participant_id')->nullable()->after('id');
+                $t->unsignedBigInteger('participant_id')->nullable()->after('conversation_id');
                 $t->index('participant_id');
             }
             // keep conversation_id denormalized for performance; ensure index exists

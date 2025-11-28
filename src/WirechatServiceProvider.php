@@ -90,8 +90,7 @@ class WirechatServiceProvider extends ServiceProvider
             ], 'wirechat-update-morphs-migration');
 
             $this->publishes([
-                __DIR__.'/../stubs/add_participant_id_to_messages_table.stub'
-                => database_path("migrations/".date('Y_m_d_His')."_add_participant_id_to_messages_table.php"),
+                __DIR__.'/../stubs/add_participant_id_to_messages_table.stub' => database_path('migrations/'.date('Y_m_d_His').'_add_participant_id_to_messages_table.php'),
             ], 'wirechat-upgrade-0.4');
 
         }

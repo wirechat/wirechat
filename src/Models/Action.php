@@ -95,19 +95,13 @@ class Action extends Model
     }
 
     /**
-     * Exclude participant passed as parameter
+     * Exclude a given actor (polymorphic).
      */
-    public function scopeWithoutActor($query, Model $user): Builder
+    public function scopeWithoutActor(Builder $query, Model $model): Builder
     {
-
-        return $query->where(function ($query) use ($user) {
-            $query->where('actor_id', '<>', $user->getKey())
-                ->orWhere('actor_type', '<>', $user->getMorphClass());
+        return $query->where(function ($query) use ($model) {
+            $query->where('actor_id', '<>', $model->getKey())
+                ->orWhere('actor_type', '<>', $model->getMorphClass());
         });
-
-        //  return $query->where(function ($query) use ($user) {
-        //      $query->whereNot('participantable_id', $user->id)
-        //            ->orWhereNot('participantable_type', $user->getMorphClass());
-        //  });
     }
 }

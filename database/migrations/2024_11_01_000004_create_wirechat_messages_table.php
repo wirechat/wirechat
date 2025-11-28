@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
 
 return new class extends Migration
 {
@@ -25,8 +26,7 @@ return new class extends Migration
             }
             $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
 
-            $table->unsignedBigInteger('sendable_id');
-            $table->string('sendable_type');
+            $table->foreignId('participant_id')->references('id')->on((new Participant)->getTable())->cascadeOnDelete();
 
             $table->unsignedBigInteger('reply_id')->nullable();
             $table->foreign('reply_id')->references('id')->on((new Message)->getTable())->nullOnDelete();
@@ -41,7 +41,6 @@ return new class extends Migration
 
             // Indexes for optimization
             $table->index(['conversation_id']);
-            $table->index(['sendable_id', 'sendable_type']);
         });
     }
 
