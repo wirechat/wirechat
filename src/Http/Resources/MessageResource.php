@@ -24,7 +24,7 @@ class MessageResource extends JsonResource
             'type' => $this->type,
             'conversation' => $this->when($this->conversation !== null, fn () => new ConversationResource($this->conversation)),
             'user' => $this->when($this->user, fn () => new WirechatUserResource($this->user)),
-            'sendable' => $this->when($this->user, fn () => new WirechatUserResource($this->user)), // bacwards compatibility
+            'sendable' => $this->when($this->user, fn () => new WirechatUserResource($this->user)), // backwards compatibility
             'participant' => $this->whenLoaded('participant', fn () => new ParticipantResource($this->participant)),
             'has_attachment' => $this->hasAttachment(),
             'attachment' => $this->whenLoaded('attachment', fn () => new AttachmentResource($this->attachment)),

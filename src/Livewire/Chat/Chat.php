@@ -107,8 +107,10 @@ class Chat extends Component
         if ($event['message']['conversation_id'] == $this->conversation->id) {
 
             // Make sure message does not belong to auth
-            // Make sure message does not belong to auth
-            if ($event['message']['participant']['participantable_id'] == auth()->id() && $event['message']['participant']['participantable_type'] === $this->auth->getMorphClass()) {
+
+            $peerParticipant= Participant::find($event['message']['participant_id']);
+
+            if ($peerParticipant?->participantable_id == auth()->id() && $peerParticipant?->participantable_type === $this->auth->getMorphClass()) {
                 return null;
             }
 
