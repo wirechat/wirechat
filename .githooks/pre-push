@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+run() {
+  echo "▶ $1"
+  shift
+  "$@"
+}
+
+if [ -f vendor/bin/phpstan ]; then
+  run "PHPStan (static analysis)" vendor/bin/phpstan analyse
+fi
+
+# future checks
+# if [ -f vendor/bin/pest ]; then
+#   run "Pest (tests)" vendor/bin/pest --parallel
+# fi
