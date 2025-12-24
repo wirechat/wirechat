@@ -52,6 +52,12 @@
         "@clear",
         "@prepare"
     ],
+    "post-install-cmd": [
+        "git config core.hooksPath .githooks || true"
+    ],
+    "post-update-cmd": [
+        "git config core.hooksPath .githooks || true"
+    ],
     "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
     "prepare": "@php vendor/bin/testbench package:discover --ansi",
     "build": "@php vendor/bin/testbench workbench:build --ansi",

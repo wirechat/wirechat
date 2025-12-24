@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+echo "Running Pint..."
+if [ -f vendor/bin/pint ]; then
+  vendor/bin/pint
+fi
+
+git update-index --again
