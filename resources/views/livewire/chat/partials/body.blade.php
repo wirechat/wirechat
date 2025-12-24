@@ -277,20 +277,19 @@
                                                 {{ $message->sendable?->wirechat_name }}
                                             </div>
                                         @endif
-                                        {{-- Attachemnt is Application/ --}}
-                                        @if (str()->startsWith($attachment->mime_type, 'application/'))
-                                            @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
-                                        @endif
 
                                         {{-- Attachemnt is Video/ --}}
                                         @if (str()->startsWith($attachment->mime_type, 'video/'))
                                             <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
-                                        @endif
 
                                         {{-- Attachemnt is image/ --}}
-                                        @if (str()->startsWith($attachment->mime_type, 'image/'))
+                                        @elseif(str()->startsWith($attachment->mime_type, 'image/'))
                                             @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
+                                        @else
+                                         {{-- Attachemnt is Application/ --}}
+                                          @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
                                         @endif
+
                                     @endif
 
                                     {{-- if message is emoji then don't show the styled messagebody layout --}}
