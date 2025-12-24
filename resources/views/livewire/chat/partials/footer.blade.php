@@ -642,18 +642,20 @@
                                 });
                             }
 
-                            // Filter invalid files based on size and type
+                            // Filter invalid files
                             const invalidFiles = Array.from(files).filter((file) => {
-                                const fileType = file.type.split('/')[1].toLowerCase(); // Extract file extension
-                                return file.size > this.maxSize || !this.allowedFileTypes.includes(
-                                fileType); // Check size and type
+                                let fileType = file.name.split('.');
+                                fileType = fileType.length > 1 ? fileType.pop().toLowerCase() : '';
+                                return file.size > this.maxSize || !this.allowedFileTypes.includes(fileType);
                             });
 
-                            // Filter valid files
+                         // Filter valid files
                             const validFiles = Array.from(files).filter((file) => {
-                                const fileType = file.type.split('/')[1].toLowerCase();
+                                let fileType = file.name.split('.');
+                                fileType = fileType.length > 1 ? fileType.pop().toLowerCase() : '';
                                 return file.size <= this.maxSize && this.allowedFileTypes.includes(fileType);
                             });
+
 
                             // Handle invalid files by showing appropriate error messages
                             if (invalidFiles.length > 0) {
