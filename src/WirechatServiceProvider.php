@@ -59,40 +59,39 @@ class WirechatServiceProvider extends ServiceProvider
 
         $this->loadLivewireComponents();
 
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'wirechat');
 
         // publish views
         if ($this->app->runningInConsole()) {
             // Publish views
             $this->publishes([
-                __DIR__.'/../resources/views' => resource_path('views/vendor/wirechat'),
+                __DIR__ . '/../resources/views' => resource_path('views/vendor/wirechat'),
             ], 'wirechat-views');
 
             // Publish language files
             $this->publishes([
-                __DIR__.'/../lang' => lang_path('vendor/wirechat'),
+                __DIR__ . '/../lang' => lang_path('vendor/wirechat'),
             ], 'wirechat-translations');
 
             // publish config
             $this->publishes([
-                __DIR__.'/../config/wirechat.php' => config_path('wirechat.php'),
+                __DIR__ . '/../config/wirechat.php' => config_path('wirechat.php'),
             ], 'wirechat-config');
 
             // publish migrations
             $this->publishes([
-                __DIR__.'/../database/migrations' => database_path('migrations'),
+                __DIR__ . '/../database/migrations' => database_path('migrations'),
             ], 'wirechat-migrations');
 
             // update morphs column migration
             $this->publishes([
-                __DIR__.'/../stubs/upgradeMorphColumns.stub' => database_path('migrations/'.date('Y_m_d_His').'_upgrade_wirechat_morph_columns.php'),
+                __DIR__ . '/../stubs/upgradeMorphColumns.stub' => database_path('migrations/' . date('Y_m_d_His') . '_upgrade_wirechat_morph_columns.php'),
             ], 'wirechat-update-morphs-migration');
-
         }
 
         /* Load channel routes */
-        $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/channels.php');
 
         // load assets
         $this->loadAssets();
@@ -104,8 +103,7 @@ class WirechatServiceProvider extends ServiceProvider
         $this->registerMiddlewares();
 
         // load translations
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
-
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'wirechat');
     }
 
     protected function bootColors()
@@ -125,7 +123,7 @@ class WirechatServiceProvider extends ServiceProvider
     {
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/wirechat.php',
+            __DIR__ . '/../config/wirechat.php',
             'wirechat'
         );
 
@@ -134,7 +132,7 @@ class WirechatServiceProvider extends ServiceProvider
             return new WirechatService;
         });
 
-        $this->app->singleton(ColorService::class, fn () => new ColorService);
+        $this->app->singleton(ColorService::class, fn() => new ColorService);
 
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container
@@ -187,23 +185,26 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
-            $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
-            $userId = auth()->id();
-            $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
-
             $script = '';
 
-            if ($hasWebPushNotifications) {
+            if ($currentPanel->hasWebPushNotifications() && auth()->check()) {
+
+                $panelId = $currentPanel->getId();
+                $userId = auth()->id();
+                $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(
+                    auth()->user()->getMorphClass()
+                );
+
                 $script = <<<HTML
                              <script>
                                 document.addEventListener("DOMContentLoaded", function() {
-
 
                                    if ('serviceWorker' in navigator) {
                                         window.addEventListener('load', async () => {
@@ -224,10 +225,6 @@ class WirechatServiceProvider extends ServiceProvider
                                             }
                                         });
                                     }
-
-
-
-
 
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
                                         .listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
@@ -292,8 +289,6 @@ class WirechatServiceProvider extends ServiceProvider
                         echo Blade::render('<x-wirechat::toast/>');
                     ?>
 
-
-
                     {$script}
 
                <?php endif; ?>
@@ -309,8 +304,10 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
