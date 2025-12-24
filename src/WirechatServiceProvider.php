@@ -59,39 +59,39 @@ class WirechatServiceProvider extends ServiceProvider
 
         $this->loadLivewireComponents();
 
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'wirechat');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
 
         // publish views
         if ($this->app->runningInConsole()) {
             // Publish views
             $this->publishes([
-                __DIR__ . '/../resources/views' => resource_path('views/vendor/wirechat'),
+                __DIR__.'/../resources/views' => resource_path('views/vendor/wirechat'),
             ], 'wirechat-views');
 
             // Publish language files
             $this->publishes([
-                __DIR__ . '/../lang' => lang_path('vendor/wirechat'),
+                __DIR__.'/../lang' => lang_path('vendor/wirechat'),
             ], 'wirechat-translations');
 
             // publish config
             $this->publishes([
-                __DIR__ . '/../config/wirechat.php' => config_path('wirechat.php'),
+                __DIR__.'/../config/wirechat.php' => config_path('wirechat.php'),
             ], 'wirechat-config');
 
             // publish migrations
             $this->publishes([
-                __DIR__ . '/../database/migrations' => database_path('migrations'),
+                __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'wirechat-migrations');
 
             // update morphs column migration
             $this->publishes([
-                __DIR__ . '/../stubs/upgradeMorphColumns.stub' => database_path('migrations/' . date('Y_m_d_His') . '_upgrade_wirechat_morph_columns.php'),
+                __DIR__.'/../stubs/upgradeMorphColumns.stub' => database_path('migrations/'.date('Y_m_d_His').'_upgrade_wirechat_morph_columns.php'),
             ], 'wirechat-update-morphs-migration');
         }
 
         /* Load channel routes */
-        $this->loadRoutesFrom(__DIR__ . '/../routes/channels.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
 
         // load assets
         $this->loadAssets();
@@ -103,7 +103,7 @@ class WirechatServiceProvider extends ServiceProvider
         $this->registerMiddlewares();
 
         // load translations
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'wirechat');
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
     }
 
     protected function bootColors()
@@ -123,7 +123,7 @@ class WirechatServiceProvider extends ServiceProvider
     {
 
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/wirechat.php',
+            __DIR__.'/../config/wirechat.php',
             'wirechat'
         );
 
@@ -132,7 +132,7 @@ class WirechatServiceProvider extends ServiceProvider
             return new WirechatService;
         });
 
-        $this->app->singleton(ColorService::class, fn() => new ColorService);
+        $this->app->singleton(ColorService::class, fn () => new ColorService);
 
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container

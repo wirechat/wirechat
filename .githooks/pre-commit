@@ -1,9 +1,19 @@
 #!/bin/sh
 set -e
 
-echo "Running Pint..."
+run() {
+  echo "▶ $1"
+  shift
+  "$@"
+}
+
 if [ -f vendor/bin/pint ]; then
-  vendor/bin/pint
+  run "Pint (code style)" vendor/bin/pint
 fi
 
+# future tools go here
+# run "PHPStan" vendor/bin/phpstan analyse
+# run "Tests" vendor/bin/pest
+
+echo "Re-staging files..."
 git update-index --again
