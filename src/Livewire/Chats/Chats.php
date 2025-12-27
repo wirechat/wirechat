@@ -191,18 +191,9 @@ class Chats extends Component
         $this->reset(['page', 'canLoadMore']);
     }
 
-    /**
-     * Loads conversations based on the current page and search filters.
-     * Applies search filters and updates the conversations collection.
-     *
-     * @return void
-     */
-    protected function loadConversations()
+    protected function conversationsQuery($perPage, $offset)
     {
-        $perPage = 10;
-        $offset = ($this->page - 1) * $perPage;
-
-        $additionalConversations = $this->auth->conversations()
+        return $this->auth->conversations()
             ->with([
                 'lastMessage.sendable',
                 'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
@@ -214,8 +205,21 @@ class Chats extends Component
             })
             ->latest('updated_at')
             ->skip($offset)
-            ->take($perPage)
-            ->get();
+            ->take($perPage);
+    }
+
+    /**
+     * Loads conversations based on the current page and search filters.
+     * Applies search filters and updates the conversations collection.
+     *
+     * @return void
+     */
+    protected function loadConversations()
+    {
+        $perPage = 10;
+        $offset = ($this->page - 1) * $perPage;
+
+        $additionalConversations = $this->conversationsQuery($perPage, $offset)->get();
 
         // Set participants manually where needed
         $additionalConversations->each(function ($conversation) {
