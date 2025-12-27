@@ -31,7 +31,7 @@
 
                 {{-- Group --}}
                 @if ($conversation->isGroup())
-                    <x-wirechat::actions.show-group-info conversation="{{ $conversation->id }}"
+                    <x-wirechat::actions.show-group-info :conversation="$conversation"
                         widget="{{ $this->isWidget() }}">
                         <div class="flex items-center gap-2 cursor-pointer ">
                             <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
@@ -44,7 +44,7 @@
                     </x-wirechat::actions.show-group-info>
                 @else
                     {{-- Not Group --}}
-                    <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}"
+                    <x-wirechat::actions.show-chat-info :conversation="$conversation"
                         widget="{{ $this->isWidget() }}">
                         <div class="flex items-center gap-2 cursor-pointer ">
                             <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
@@ -80,8 +80,11 @@
 
                         @if ($conversation->isGroup())
                             {{-- Open group info button --}}
-                            <x-wirechat::actions.show-group-info conversation="{{ $conversation->id }}"
-                                widget="{{ $this->isWidget() }}">
+                            <x-wirechat::actions.show-group-info
+                                    :conversation="$conversation"
+                                    widget="{{ $this->isWidget() }}"
+                                    isDropdown="true"
+                            >
                                 <button class="w-full text-start">
                                     <x-wirechat::dropdown-link>
                                         {{ __('wirechat::chat.actions.open_group_info.label') }}
@@ -90,7 +93,7 @@
                             </x-wirechat::actions.show-group-info>
                         @else
                             {{-- Open chat info button --}}
-                            <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}"
+                            <x-wirechat::actions.show-chat-info :conversation="$conversation"
                                 widget="{{ $this->isWidget() }}">
                                 <button class="w-full text-start">
                                     <x-wirechat::dropdown-link>
