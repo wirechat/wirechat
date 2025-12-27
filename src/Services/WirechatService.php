@@ -227,4 +227,64 @@ class WirechatService
     {
         return static::usesUuidForConversations();
     }
+
+    /**
+     * Get the Action model class from the configuration.
+     *
+     * @return class-string<\Wirechat\Wirechat\Models\Action> The Action model class.
+     */
+    public static function actionModelClass(): string
+    {
+        return (string) config('wirechat.models.action');
+    }
+
+    /**
+     * Get the Attachment model class from the configuration.
+     *
+     * @return class-string<\Wirechat\Wirechat\Models\Attachment> The Attachment model class.
+     */
+    public static function attachmentModelClass(): string
+    {
+        return (string) config('wirechat.models.attachment');
+    }
+
+    /**
+     * Get the Conversation model class from the configuration.
+     *
+     * @return class-string<\Wirechat\Wirechat\Models\Conversation> The Conversation model class.
+     */
+    public static function conversationModelClass(): string
+    {
+        return (string) config('wirechat.models.conversation');
+    }
+
+    /**
+     * Get the Group model class from the configuration.
+     *
+     * @return class-string<\Wirechat\Wirechat\Models\Group> The Group model class.
+     */
+    public static function groupModelClass(): string
+    {
+        return (string) config('wirechat.models.group');
+    }
+
+    /**
+     * Get the Message model class from the configuration.
+     *
+     * @return class-string<\Wirechat\Wirechat\Models\Message> The Message model class.
+     */
+    public static function messageModelClass(): string
+    {
+        return (string) config('wirechat.models.message');
+    }
+
+    /**
+     * Get the Participant model class from the configuration.
+     *
+     * @return class-string<\Wirechat\Wirechat\Models\Participant> The Participant model class.
+     */
+    public static function participantModelClass(): string
+    {
+        return (string) config('wirechat.models.participant');
+    }
 }

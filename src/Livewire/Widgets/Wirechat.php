@@ -9,7 +9,7 @@ use Illuminate\Support\Reflector;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
-use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Services\WirechatService;
 
 class Wirechat extends Component
 {
@@ -104,7 +104,7 @@ class Wirechat extends Component
         $instance = app()->make($parameterClassName);
 
         if (! $model = $instance->resolveRouteBinding($parameterValue)) {
-            throw (new ModelNotFoundException)->setModel(Conversation::class, [$parameterValue]);
+            throw (new ModelNotFoundException)->setModel(WirechatService::conversationModelClass(), [$parameterValue]);
         }
 
         return $model;

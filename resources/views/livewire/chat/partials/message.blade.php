@@ -64,7 +64,7 @@
 
 <pre class="whitespace-pre-line tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
-    {{$message?->body}}
+    {{$message?->sanitized_body}}
 </pre>
 
 {{-- Display the created time based on different conditions --}}

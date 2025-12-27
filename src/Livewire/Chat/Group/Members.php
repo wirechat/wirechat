@@ -16,6 +16,7 @@ use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Services\WirechatService;
 
 class Members extends ModalComponent
 {
@@ -208,9 +209,9 @@ class Members extends ModalComponent
 
         // remove from group
         // Create the 'remove' action record in the actions table
-        Action::create([
+        WirechatService::actionModelClass()::create([
             'actionable_id' => $participant->id,
-            'actionable_type' => Participant::class,
+            'actionable_type' => WirechatService::participantModelClass(),
             'actor_id' => auth()->id(),  // The admin who performed the action
             'actor_type' => auth()->user()->getMorphClass(),  // Assuming 'User' is the actor model
             'type' => Actions::REMOVED_BY_ADMIN,  // Type of action

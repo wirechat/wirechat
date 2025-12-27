@@ -13,6 +13,7 @@ use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedActionScope;
+use Wirechat\Wirechat\Services\WirechatService;
 use Wirechat\Wirechat\Traits\Actionable;
 
 /**
@@ -166,7 +167,7 @@ class Participant extends Model
      */
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(Conversation::class);
+        return $this->belongsTo(WirechatService::conversationModelClass());
     }
 
     /**
@@ -236,16 +237,16 @@ class Participant extends Model
     public function removeByAdmin(Model|Authenticatable $admin): void
     {
         // Check if a remove action already exists for this participant
-        $exists = Action::where('actionable_id', $this->id)
-            ->where('actionable_type', Participant::class)
+        $exists = WirechatService::actionModelClass()::where('actionable_id', $this->id)
+            ->where('actionable_type', WirechatService::participantModelClass())
             ->where('type', Actions::REMOVED_BY_ADMIN)
             ->exists();
 
         if (! $exists) {
             // Create the 'remove' action record in the actions table
-            Action::create([
+            WirechatService::actionModelClass()::create([
                 'actionable_id' => $this->id,
-                'actionable_type' => Participant::class,
+                'actionable_type' => WirechatService::participantModelClass(),
                 'actor_id' => $admin->getKey(),  // The admin who performed the action
                 'actor_type' => $admin->getMorphClass(),  // Assuming 'User' is the actor model
                 'type' => Actions::REMOVED_BY_ADMIN,  // Type of action

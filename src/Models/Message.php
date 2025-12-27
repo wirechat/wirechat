@@ -11,11 +11,13 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
+use Wirechat\Wirechat\Services\WirechatService;
 use Wirechat\Wirechat\Traits\Actionable;
 
 /**
@@ -25,6 +27,8 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property string $sendable_type
  * @property int|null $reply_id
  * @property string|null $body
+ * @property HtmlString|string|null $sanitized_short_body
+ * @property HtmlString|string|null $sanitized_body
  * @property MessageType $type
  * @property \Illuminate\Support\Carbon|null $kept_at filled when a message is kept from disappearing
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -93,7 +97,7 @@ class Message extends Model
 
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(Conversation::class);
+        return $this->belongsTo(WirechatService::conversationModelClass());
     }
 
     /* Polymorphic relationship for the sender */
@@ -137,7 +141,7 @@ class Message extends Model
 
     public function attachment(): MorphOne
     {
-        return $this->morphOne(Attachment::class, 'attachable');
+        return $this->morphOne(WirechatService::attachmentModelClass(), 'attachable');
     }
 
     public function hasAttachment(): bool
@@ -184,13 +188,13 @@ class Message extends Model
     // Relationship for the parent message
     public function parent(): belongsTo
     {
-        return $this->belongsTo(Message::class, 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
+        return $this->belongsTo(WirechatService::messageModelClass(), 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
     }
 
     // Relationship for the reply
     public function reply(): HasOne
     {
-        return $this->hasOne(Message::class, 'reply_id');
+        return $this->hasOne(WirechatService::messageModelClass(), 'reply_id');
     }
 
     // Method to check if the message has a reply
@@ -306,5 +310,23 @@ class Message extends Model
 
         // Use the isEmoji helper method to check if the message body contains only emojis
         return Helper::isEmoji($this->body);
+    }
+
+    /**
+     * Returns the sanitized short body attribute.
+     * This method can be overridden in child classes to customize HTML sanitization short version.
+     */
+    public function getSanitizedShortBodyAttribute(): HtmlString|string|null
+    {
+        return $this->body;
+    }
+
+    /**
+     * Returns the sanitized body attribute.
+     * This method can be overridden in child classes to customize HTML sanitization.
+     */
+    public function getSanitizedBodyAttribute(): HtmlString|string|null
+    {
+        return $this->body;
     }
 }
