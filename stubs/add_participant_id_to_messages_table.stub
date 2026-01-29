@@ -91,38 +91,63 @@ return new class extends Migration
         } catch (\Throwable $e) {}
     }
 
-    public function down(): void
-    {
-        $messagesTable = (new Message)->getTable();
-        $tablePrefix   = Wirechat::tablePrefix();
+   public function down(): void
+   {
+       $messagesTable = (new Message)->getTable();
+       $partsTable    = (new Participant)->getTable();
+       $tablePrefix   = Wirechat::tablePrefix();
 
-        $participantIndex = "{$tablePrefix}messages_participant_id_index";
+       $participantIndex = "{$tablePrefix}messages_participant_id_index";
 
-        // restore legacy columns
-        Schema::table($messagesTable, function (Blueprint $t) {
-            if (! Schema::hasColumn($t->getTable(), 'sendable_type')) {
-                $t->string('sendable_type')->nullable();
-            }
-            if (! Schema::hasColumn($t->getTable(), 'sendable_id')) {
-                $t->string('sendable_id')->nullable();
-            }
-        });
+       // 1. Restore legacy columns
+       Schema::table($messagesTable, function (Blueprint $t) use ($messagesTable) {
+           if (! Schema::hasColumn($messagesTable, 'sendable_type')) {
+               $t->string('sendable_type')->nullable();
+           }
 
-        // drop FK
-        try {
-            Schema::table($messagesTable, fn (Blueprint $t) => $t->dropForeign(['participant_id']));
-        } catch (\Throwable $e) {}
+           if (! Schema::hasColumn($messagesTable, 'sendable_id')) {
+               $t->string('sendable_id')->nullable();
+           }
+       });
 
-        // drop index before column (SQLite-safe)
-        if (Schema::hasIndex($messagesTable, $participantIndex)) {
-            Schema::table($messagesTable, fn (Blueprint $t) => $t->dropIndex($participantIndex));
-        }
+       // 2. Backfill sendable_* from participant
+       DB::table($messagesTable)
+           ->select('id', 'participant_id')
+           ->whereNotNull('participant_id')
+           ->orderBy('id')
+           ->chunkById(1000, function ($rows) use ($messagesTable, $partsTable) {
+               foreach ($rows as $row) {
+                   $participant = DB::table($partsTable)
+                       ->where('id', $row->participant_id)
+                       ->first(['participantable_type', 'participantable_id']);
 
-        // drop column
-        Schema::table($messagesTable, function (Blueprint $t) use ($messagesTable) {
-            if (Schema::hasColumn($messagesTable, 'participant_id')) {
-                $t->dropColumn('participant_id');
-            }
-        });
-    }
+                   if ($participant) {
+                       DB::table($messagesTable)
+                           ->where('id', $row->id)
+                           ->update([
+                               'sendable_type' => $participant->participantable_type,
+                               'sendable_id'   => (string) $participant->participantable_id,
+                           ]);
+                   }
+               }
+           });
+
+       // 3. Drop FK (best-effort)
+       try {
+           Schema::table($messagesTable, fn (Blueprint $t) => $t->dropForeign(['participant_id']));
+       } catch (\Throwable $e) {}
+
+       // 4. Drop index before column (SQLite-safe)
+       if (Schema::hasIndex($messagesTable, $participantIndex)) {
+           Schema::table($messagesTable, fn (Blueprint $t) => $t->dropIndex($participantIndex));
+       }
+
+       // 5. Drop participant_id column
+       Schema::table($messagesTable, function (Blueprint $t) use ($messagesTable) {
+           if (Schema::hasColumn($messagesTable, 'participant_id')) {
+               $t->dropColumn('participant_id');
+           }
+       });
+   }
+
 };
