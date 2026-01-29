@@ -27,16 +27,17 @@ class WithoutRemovedMessages implements Scope
 
         if (auth()->check()) {
             $user = auth()->user();
+            $participantable = $user->getParticipantable();
 
-            $builder->whereDoesntHave('actions', function ($q) use ($user) {
-                $q->where('actor_id', $user->id)
-                    ->where('actor_type', $user->getMorphClass())
+            $builder->whereDoesntHave('actions', function ($q) use ($participantable) {
+                $q->where('actor_id', $participantable->getKey())
+                    ->where('actor_type', $participantable->getMorphClass())
                     ->where('type', Actions::DELETE);
             })
-                ->where(function ($query) use ($user, $messagesTableName, $participantTableName) {
-                    $query->whereHas('conversation.participants', function ($q) use ($user, $messagesTableName, $participantTableName) {
-                        $q->where('participantable_id', $user->id)
-                            ->where('participantable_type', $user->getMorphClass())
+                ->where(function ($query) use ($participantable, $messagesTableName, $participantTableName) {
+                    $query->whereHas('conversation.participants', function ($q) use ($participantable, $messagesTableName, $participantTableName) {
+                        $q->where('participantable_id', $participantable->getKey())
+                            ->where('participantable_type', $participantable->getMorphClass())
                             ->where(function ($q) use ($messagesTableName, $participantTableName) {
                                 $q->orWhere(function ($q) {
                                     $q->whereNull('conversation_cleared_at')

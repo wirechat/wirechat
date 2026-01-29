@@ -178,7 +178,8 @@ class Message extends Model
     {
         $user = auth()->user();
 
-        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->getKey();
+        return $this->sendable_type == $user->getSendable()->getMorphClass()
+            && $this->sendable_id == $user->getSendable()->getKey();
     }
 
     // Relationship for the parent message

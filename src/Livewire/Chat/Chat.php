@@ -108,7 +108,9 @@ class Chat extends Component
 
             // Make sure message does not belong to auth
             // Make sure message does not belong to auth
-            if ($event['message']['sendable_id'] == auth()->id() && $event['message']['sendable_type'] === $this->auth->getMorphClass()) {
+            if ($event['message']['sendable_id'] == $this->auth->getSendable()->getKey()
+                && $event['message']['sendable_type'] === $this->auth->getSendable()->getMorphClass()
+            ) {
                 return null;
             }
 
@@ -146,7 +148,9 @@ class Chat extends Component
             // dd($newMessage);
 
             // Make sure message does not belong to auth
-            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type == $this->auth->getMorphClass()) {
+            if ($newMessage->sendable_id == $this->auth->getSendable()->getKey()
+                && $newMessage->sendable_type == $this->auth->getSendable()->getMorphClass()
+            ) {
                 return null;
             }
 
@@ -407,8 +411,8 @@ class Chat extends Component
                 $message = Message::create([
                     'reply_id' => $replyId,
                     'conversation_id' => $this->conversation->id,
-                    'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
-                    'sendable_id' => auth()->id(), // Polymorphic sender ID
+                    'sendable_type' => $this->auth->getSendable()->getMorphClass(), // Polymorphic sender type
+                    'sendable_id' => $this->auth->getSendable()->getKey(), // Polymorphic sender ID
                     'type' => MessageType::ATTACHMENT,
                     // 'body' => $this->body, // Add body if required
                 ]);
@@ -451,11 +455,13 @@ class Chat extends Component
 
         if ($this->body != null) {
 
+            $sendable = $this->auth->getSendable();
+
             $createdMessage = Message::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
-                'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
-                'sendable_id' => auth()->id(), // Polymorphic sender ID
+                'sendable_type' => $sendable->getMorphClass(), // Polymorphic sender type
+                'sendable_id' => $sendable->getKey(), // Polymorphic sender ID
                 'body' => $this->body,
                 'type' => MessageType::TEXT,
             ]);
@@ -695,8 +701,8 @@ class Chat extends Component
 
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
-            'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
-            'sendable_id' => auth()->id(), // Polymorphic sender ID
+            'sendable_type' => $this->auth->getSendable()->getMorphClass(), // Polymorphic sender type
+            'sendable_id' => $this->auth->getSendable()->getKey(), // Polymorphic sender ID
             'body' => '❤️',
             'type' => MessageType::TEXT,
         ]);
@@ -817,9 +823,9 @@ class Chat extends Component
             $this->conversation->load('participants.participantable');
             $participants = $this->conversation->participants();
 
-            $this->authParticipant = $participants->whereParticipantable($this->auth)->first();
+            $this->authParticipant = $participants->whereParticipantable($this->auth->getParticipantable())->first();
 
-            $this->receiverParticipant = $this->conversation->peerParticipant($this->auth);
+            $this->receiverParticipant = $this->conversation->peerParticipant($this->auth->getParticipantable());
 
             // If conversation is self then receiver is auth;
             if ($this->conversation->type == ConversationType::SELF) {
@@ -834,7 +840,7 @@ class Chat extends Component
                 : null;
 
         } else {
-            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
+            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth->getParticipantable())->first();
             $this->receiver = null;
         }
     }

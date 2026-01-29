@@ -178,7 +178,7 @@ class Info extends ModalComponent
 
         // Ensure all participants are removed before deleting the group
         $participantCount = $this->conversation->participants()
-            ->withoutParticipantable(auth()->user())
+            ->withoutParticipantable(auth()->user()->getParticipantable())
             ->where('role', '!=', ParticipantRole::OWNER)
             ->count();
 

@@ -1694,7 +1694,7 @@ describe('peerParticipants()', function () {
         $conversation->load('participants.participantable');
 
         // Get peer participants, excluding the authenticated user ($auth)
-        $peerParticipants = $conversation->peerParticipants(reference: $auth);
+        $peerParticipants = $conversation->peerParticipants(reference: $auth->getParticipantable());
 
         // Ensure that all retrieved peer participants are in the expected set
         expect($peerParticipants)->toHaveCount(11); // 10 random + 1 ($otherUser)
@@ -1728,7 +1728,7 @@ describe('peerParticipants()', function () {
 
         $conversation->load('participants.participantable');
         // Get peer participants, excluding the authenticated user ($auth)
-        $peerParticipants = $conversation->peerParticipants(reference: $auth);
+        $peerParticipants = $conversation->peerParticipants(reference: $auth->getParticipantable());
 
         // Ensure that all retrieved peer participants are in the expected set
         expect($peerParticipants)->toHaveCount(11); // 10 random + 1 ($otherUser)
@@ -1753,7 +1753,7 @@ describe('peerParticipants()', function () {
         $conversation = $auth->createConversationWith($otherUser);
 
         // get receiver
-        $peerParticipants = $conversation->peerParticipants(reference: $auth);
+        $peerParticipants = $conversation->peerParticipants(reference: $auth->getParticipantable());
 
         expect($peerParticipants)->toHaveCount(1); // 1
 
@@ -1772,7 +1772,7 @@ describe('peerParticipants()', function () {
         $conversation = $auth->createConversationWith($auth);
 
         // get receiver
-        $peerParticipants = $conversation->peerParticipants(reference: $auth);
+        $peerParticipants = $conversation->peerParticipants(reference: $auth->getParticipantable());
 
         expect($peerParticipants)->toBeEmpty(); // 1
     });
