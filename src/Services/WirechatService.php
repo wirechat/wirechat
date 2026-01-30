@@ -2,6 +2,8 @@
 
 namespace Wirechat\Wirechat\Services;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
@@ -226,5 +228,18 @@ class WirechatService
     public static function usesUuid(): bool
     {
         return static::usesUuidForConversations();
+    }
+
+    /**
+     * Get the model that should be used as the sendable when creating Messages.
+     *
+     * By default returns the authenticated user. Override this method in a custom
+     * WirechatService subclass to return a different entity (e.g. a bot, system, etc.).
+     *
+     * @return Authenticatable|Model|null The model to use as sendable
+     */
+    public function getSendable(): Authenticatable|Model|null
+    {
+        return auth()->user();
     }
 }

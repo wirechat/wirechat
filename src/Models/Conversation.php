@@ -173,20 +173,17 @@ class Conversation extends Model
     /**
      * Add a new participant to the conversation.
      *
-     * @param  Authenticatable  $user  the creator of group
+     * @param  Model|Authenticatable  $user  the creator of group
      * @param  ParticipantRole  $role  enum to assign to member
      * @param  bool  $undoAdminRemovalAction  If the user was recently removed by admin, allow re-adding.
      */
-    public function addParticipant(Authenticatable $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
+    public function addParticipant(Model|Authenticatable $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
     {
-        // Resolve the participantable model (allows the user to delegate to a different model)
-        $participantable = $user->getParticipantable();
-
         /** @var Participant|null $participant */
         $participant = $this->participants()
             ->withoutGlobalScopes()
-            ->where('participantable_id', $participantable->getKey())
-            ->where('participantable_type', $participantable->getMorphClass())
+            ->where('participantable_id', $user->getKey())
+            ->where('participantable_type', $user->getMorphClass())
             ->first();
 
         // Check if the participant already exists (with or without global scopes)
@@ -238,8 +235,8 @@ class Conversation extends Model
 
         /** @var Participant|null $participant */
         $participant = $this->participants()->create([
-            'participantable_id' => $participantable->getKey(),
-            'participantable_type' => $participantable->getMorphClass(),
+            'participantable_id' => $user->getKey(),
+            'participantable_type' => $user->getMorphClass(),
             'role' => $role,
         ]);
 
@@ -277,14 +274,12 @@ class Conversation extends Model
      */
     public function scopeWithoutBlanks(Builder $builder): void
     {
-        $user = auth()->user(); // Get the authenticated user
-        if ($user) {
-            $participantable = $user->getParticipantable();
-
-            $builder->whereHas('messages', function ($q) use ($participantable) {
+        $sendable = Wirechat::getSendable(); // Get the authenticated user
+        if ($sendable) {
+            $builder->whereHas('messages', function ($q) use ($sendable) {
                 /* !we only exclude one scope not all because we don't want to check aginast soft delete messages */
-                $q->withoutGlobalScope(WithoutRemovedMessages::class)->whereDoesntHave('actions', function ($q) use ($participantable) {
-                    $q->whereActor($participantable)
+                $q->withoutGlobalScope(WithoutRemovedMessages::class)->whereDoesntHave('actions', function ($q) use ($sendable) {
+                    $q->whereActor($sendable)
                         ->where('type', Actions::DELETE);
                 });
             });
@@ -296,18 +291,16 @@ class Conversation extends Model
      */
     public function scopeWithoutCleared(Builder $builder): void
     {
-        $user = auth()->user(); // Get the authenticated user
+        $sendable = Wirechat::getSendable(); // Get the authenticated user
 
         // Apply the scope only if the user is authenticated
-        if ($user) {
-            $participantable = $user->getParticipantable();
-
+        if ($sendable) {
             // Get the table name for conversations dynamically to avoid hardcoding.
             $conversationsTableName = (new Conversation)->getTable();
 
             // Apply the "without deleted conversations" scope
-            $builder->whereHas('participants', function ($query) use ($participantable, $conversationsTableName) {
-                $query->whereParticipantable($participantable)
+            $builder->whereHas('participants', function ($query) use ($sendable, $conversationsTableName) {
+                $query->whereParticipantable($sendable)
                     ->whereRaw(" (conversation_cleared_at IS NULL OR conversation_cleared_at < {$conversationsTableName}.updated_at) ");
             });
         }
@@ -320,17 +313,15 @@ class Conversation extends Model
     {
 
         // Dynamically get the parent model (i.e., the user)
-        $user = auth()->user();
+        $sendable = Wirechat::getSendable();
 
-        if ($user) {
-            $participantable = $user->getParticipantable();
-
+        if ($sendable) {
             // Get the table name for conversations dynamically to avoid hardcoding.
             $conversationsTableName = (new Conversation)->getTable();
 
             // Apply the "without deleted conversations" scope
-            $builder->whereHas('participants', function ($query) use ($participantable, $conversationsTableName) {
-                $query->whereParticipantable($participantable)
+            $builder->whereHas('participants', function ($query) use ($sendable, $conversationsTableName) {
+                $query->whereParticipantable($sendable)
                     ->whereRaw(" (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at) ");
             });
         }
@@ -342,14 +333,12 @@ class Conversation extends Model
     public function scopeWithDeleted(Builder $builder)
     {
         // Dynamically get the parent model (i.e., the user)
-        $user = auth()->user();
+        $sendable = Wirechat::getSendable();
 
-        if ($user) {
-            $participantable = $user->getParticipantable();
-
+        if ($sendable) {
             // Apply the "with deleted conversations" scope
-            $builder->whereHas('participants', function ($query) use ($participantable) {
-                $query->whereParticipantable($participantable)
+            $builder->whereHas('participants', function ($query) use ($sendable) {
+                $query->whereParticipantable($sendable)
                     ->orWhereNotNull('conversation_deleted_at');
             });
         }
@@ -433,11 +422,10 @@ class Conversation extends Model
      */
     public function receiverParticipant(): HasOne
     {
-        $user = auth()->user();
-        $participantable = $user->getParticipantable();
+        $sendable = Wirechat::getSendable();
 
         return $this->hasOne(Participant::class)
-            ->withoutParticipantable($participantable)
+            ->withoutParticipantable($sendable)
             ->where('role', ParticipantRole::OWNER)
             ->withWhereHas('conversation', function ($query) {
                 $query->whereIn('type', [ConversationType::PRIVATE]);
@@ -452,11 +440,10 @@ class Conversation extends Model
      */
     public function authParticipant(): HasOne
     {
-        $user = auth()->user();
-        $participantable = $user->getParticipantable();
+        $sendable = Wirechat::getSendable();
 
         return $this->hasOne(Participant::class)
-            ->whereParticipantable($participantable)
+            ->whereParticipantable($sendable)
             ->where('role', ParticipantRole::OWNER);
     }
 
@@ -470,46 +457,43 @@ class Conversation extends Model
             return null;
         }
 
-        $user = auth()->user();
-        $participantable = $user->getParticipantable();
+        $sendable = Wirechat::getSendable();
 
         // If it's a self conversation, return the participantable
         if ($this->isSelf()) {
-            return $participantable;
+            return $sendable;
         }
 
         // Get participants for the current conversation
         $participants = $this->participants()->where('conversation_id', $this->id);
 
         // Try to find the receiver excluding the authenticated user's participantable
-        $receiverParticipant = $participants->withoutParticipantable($participantable)->first();
+        $receiverParticipant = $participants->withoutParticipantable($sendable)->first();
         if ($receiverParticipant) {
             return $receiverParticipant->participantable;
         }
 
         // If no other participant is found, return the participantable as the receiver
-        return $participantable;
+        return $sendable;
     }
 
     /**
      * Mark the conversation as read for the current authenticated user.
      *
-     * @param  Authenticatable  $user||null
-     *                                       If not user is passed ,it will attempt to user auth(),if not available then will return null
+     * @param  Model|Authenticatable|null  $participant||null
+     *                                                         If not user is passed ,it will attempt to user auth(),if not available then will return null
      */
-    public function markAsRead(?Authenticatable $user = null)
+    public function markAsRead(Model|Authenticatable|null $participant = null)
     {
 
-        $user = $user ?? auth()->user();
-        if ($user == null) {
+        $participant = $participant ?? Wirechat::getSendable();
+        if ($participant == null) {
 
             return null;
             // code...
         }
 
-        $participantable = $user->getParticipantable();
-
-        $this->participant($participantable)?->update(['conversation_read_at' => now()]);
+        $this->participant($participant)?->update(['conversation_read_at' => now()]);
     }
 
     /**

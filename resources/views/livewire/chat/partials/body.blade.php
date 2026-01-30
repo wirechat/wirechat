@@ -147,19 +147,19 @@
 
 
                                     @php
-                                    $sender = $message?->ownedBy($this->auth)
+                                    $sender = $message?->ownedBy($this->sendable)
                                         ? __('wirechat::chat.labels.you')
                                         : ($message->sendable?->wirechat_name ?? __('wirechat::chat.labels.user'));
 
-                                    $receiver = $parent?->ownedBy($this->auth)
+                                    $receiver = $parent?->ownedBy($this->sendable)
                                         ? __('wirechat::chat.labels.you')
                                         : ($parent->sendable?->wirechat_name ?? __('wirechat::chat.labels.user'));
                                     @endphp
 
                                     <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2">
-                                        @if ($parent?->ownedBy($this->auth) && $message?->ownedBy($this->auth))
+                                        @if ($parent?->ownedBy($this->sendable) && $message?->ownedBy($this->sendable))
                                             {{ __('wirechat::chat.labels.you_replied_to_yourself') }}
-                                        @elseif ($parent?->ownedBy($this->auth))
+                                        @elseif ($parent?->ownedBy($this->sendable))
                                             {{ __('wirechat::chat.labels.participant_replied_to_you', ['sender' => $sender]) }}
                                         @elseif ($message?->ownedBy($parent->sendable))
                                             {{ __('wirechat::chat.labels.participant_replied_to_themself', ['sender' => $sender]) }}
@@ -224,7 +224,7 @@
                                         </x-slot>
                                         <x-slot name="content">
 
-                                            @if (($message->ownedBy($this->auth)|| ($authParticipant->isAdmin() && $isGroup)) && $this->panel()->hasDeleteMessageActions())
+                                            @if (($message->ownedBy($this->sendable)|| ($authParticipant->isAdmin() && $isGroup)) && $this->panel()->hasDeleteMessageActions())
                                                 <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ encrypt($message->id) }}')"
                                                     wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>

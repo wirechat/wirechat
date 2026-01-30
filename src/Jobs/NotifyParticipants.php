@@ -31,7 +31,7 @@ class NotifyParticipants implements ShouldQueue
 
     public int $tries = 1;
 
-    protected $auth;
+    protected $sendable;
 
     protected $messagesTable;
 
@@ -48,7 +48,7 @@ class NotifyParticipants implements ShouldQueue
         //
         $this->onQueue($this->getPanel()->getEventsQueue());
         //  $this->delay(now()->addSeconds(3)); // Delay
-        $this->auth = $message->sendable;
+        $this->sendable = $message->sendable;
 
         // Get table
         $this->participantsTable = (new Participant)->getTable();
@@ -80,7 +80,7 @@ class NotifyParticipants implements ShouldQueue
          * Fetch participants, ordered by `last_active_at` in descending order,
          * so that the most recently active participants are notified first. */
         Participant::where('conversation_id', $this->conversation->id)
-            ->withoutParticipantable($this->auth->getParticipantable())
+            ->withoutParticipantable($this->sendable)
             ->latest('last_active_at') // Prioritize active participants
             ->chunk(50, function ($participants) {
                 foreach ($participants as $key => $participant) {

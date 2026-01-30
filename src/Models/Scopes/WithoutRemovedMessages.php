@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
 
@@ -26,18 +27,17 @@ class WithoutRemovedMessages implements Scope
         $participantTableName = (new Participant)->getTable();
 
         if (auth()->check()) {
-            $user = auth()->user();
-            $participantable = $user->getParticipantable();
+            $sendable = Wirechat::getSendable();
 
-            $builder->whereDoesntHave('actions', function ($q) use ($participantable) {
-                $q->where('actor_id', $participantable->getKey())
-                    ->where('actor_type', $participantable->getMorphClass())
+            $builder->whereDoesntHave('actions', function ($q) use ($sendable) {
+                $q->where('actor_id', $sendable->getKey())
+                    ->where('actor_type', $sendable->getMorphClass())
                     ->where('type', Actions::DELETE);
             })
-                ->where(function ($query) use ($participantable, $messagesTableName, $participantTableName) {
-                    $query->whereHas('conversation.participants', function ($q) use ($participantable, $messagesTableName, $participantTableName) {
-                        $q->where('participantable_id', $participantable->getKey())
-                            ->where('participantable_type', $participantable->getMorphClass())
+                ->where(function ($query) use ($sendable, $messagesTableName, $participantTableName) {
+                    $query->whereHas('conversation.participants', function ($q) use ($sendable, $messagesTableName, $participantTableName) {
+                        $q->where('participantable_id', $sendable->getKey())
+                            ->where('participantable_type', $sendable->getMorphClass())
                             ->where(function ($q) use ($messagesTableName, $participantTableName) {
                                 $q->orWhere(function ($q) {
                                     $q->whereNull('conversation_cleared_at')

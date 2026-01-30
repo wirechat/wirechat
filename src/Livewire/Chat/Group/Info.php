@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Livewire\Chat\Group;
 
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
 use Wirechat\Wirechat\Enums\ParticipantRole;
@@ -15,6 +16,11 @@ use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
 
+/**
+ * Info Component
+ *
+ * @property \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null $sendable
+ */
 class Info extends ModalComponent
 {
     use HasPanel;
@@ -41,6 +47,17 @@ class Info extends ModalComponent
     ];
 
     public $totalParticipants;
+
+    /**
+     * Returns the authenticated user.
+     *
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null
+     */
+    #[Computed(persist: true)]
+    public function sendable()
+    {
+        return Wirechat::getSendable();
+    }
 
     public function participantsCountUpdated(int $newCount)
     {
@@ -170,15 +187,15 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless($this->sendable->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
 
         abort_if($this->conversation->isPrivate(), 403, 'Operation not allowed: Private chats cannot be deleted.');
 
-        abort_unless(auth()->user()->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless($this->sendable->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
 
         // Ensure all participants are removed before deleting the group
         $participantCount = $this->conversation->participants()
-            ->withoutParticipantable(auth()->user()->getParticipantable())
+            ->withoutParticipantable($this->sendable)
             ->where('role', '!=', ParticipantRole::OWNER)
             ->count();
 
@@ -194,7 +211,7 @@ class Info extends ModalComponent
         );
 
         // Soft Delete conversation
-        $this->conversation->deleteFor(auth()->user());
+        $this->conversation->deleteFor($this->sendable);
 
         // Dispatch job to delete conversation in backgroud
         // This is done to not hold up page for user incase of long running prcoess and to also give time for widget to settle avoiding 404 livewire hydrate errors
@@ -206,13 +223,11 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        $auth = auth()->user();
-
         // make sure owner if group cannot be removed from chat
-        abort_if($auth->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
+        abort_if($this->sendable->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
 
         // delete conversation
-        $auth->exitConversation($this->conversation);
+        $this->sendable->exitConversation($this->conversation);
 
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatsRoute(),
@@ -240,7 +255,7 @@ class Info extends ModalComponent
 
         abort_unless(auth()->check(), 401);
         abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.info.group.messages.invalid_conversation_type_error'));
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+        abort_unless($this->sendable->belongsToConversation($this->conversation), 403);
 
         $this->conversation = $this->conversation->load('group.conversation', 'group.cover')->loadCount('participants');
 
@@ -253,7 +268,7 @@ class Info extends ModalComponent
     public function render()
     {
 
-        $participant = $this->conversation->participant(auth()->user());
+        $participant = $this->conversation->participant($this->sendable);
 
         //  dd($this->isWidget(),$participant);
 

@@ -197,10 +197,10 @@ class WirechatServiceProvider extends ServiceProvider
             if ($currentPanel->hasWebPushNotifications() && auth()->check()) {
 
                 $panelId = $currentPanel->getId();
-                $participantable = auth()->user()->getParticipantable();
-                $userId = $participantable->getKey();
+                $sendable = \Wirechat\Wirechat\Facades\Wirechat::getSendable();
+                $userId = $sendable->getKey();
                 $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(
-                    $participantable->getMorphClass()
+                    $sendable->getMorphClass()
                 );
 
                 $script = <<<HTML

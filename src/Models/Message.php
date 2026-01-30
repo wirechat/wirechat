@@ -176,10 +176,14 @@ class Message extends Model
 
     public function belongsToAuth(): bool
     {
-        $user = auth()->user();
+        $sendable = Wirechat::getSendable();
 
-        return $this->sendable_type == $user->getSendable()->getMorphClass()
-            && $this->sendable_id == $user->getSendable()->getKey();
+        if (! $sendable) {
+            return false;
+        }
+
+        return $this->sendable_type == $sendable->getMorphClass()
+            && $this->sendable_id == $sendable->getKey();
     }
 
     // Relationship for the parent message

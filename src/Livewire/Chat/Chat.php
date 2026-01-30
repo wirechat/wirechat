@@ -30,7 +30,7 @@ use Wirechat\Wirechat\Models\Participant;
  *
  * Handles group, private and self conversations .
  *
- * @property \Illuminate\Contracts\Auth\Authenticatable|null $auth
+ * @property \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null $sendable
  */
 class Chat extends Component
 {
@@ -108,8 +108,8 @@ class Chat extends Component
 
             // Make sure message does not belong to auth
             // Make sure message does not belong to auth
-            if ($event['message']['sendable_id'] == $this->auth->getSendable()->getKey()
-                && $event['message']['sendable_type'] === $this->auth->getSendable()->getMorphClass()
+            if ($event['message']['sendable_id'] == $this->sendable->getKey()
+                && $event['message']['sendable_type'] === $this->sendable->getMorphClass()
             ) {
                 return null;
             }
@@ -148,8 +148,8 @@ class Chat extends Component
             // dd($newMessage);
 
             // Make sure message does not belong to auth
-            if ($newMessage->sendable_id == $this->auth->getSendable()->getKey()
-                && $newMessage->sendable_type == $this->auth->getSendable()->getMorphClass()
+            if ($newMessage->sendable_id == $this->sendable->getKey()
+                && $newMessage->sendable_type == $this->sendable->getMorphClass()
             ) {
                 return null;
             }
@@ -189,7 +189,7 @@ class Chat extends Component
         $message = Message::where('id', $messageId)->firstOrFail();
 
         // check if user belongs to message
-        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
+        abort_unless($this->sendable->belongsToConversation($this->conversation), 403);
 
         // abort if message does not belong to this conversation or is not owned by any participant
         abort_unless($message->conversation_id == $this->conversation->id, 403);
@@ -247,7 +247,7 @@ class Chat extends Component
         abort_unless(auth()->check(), 401);
 
         // delete conversation
-        $this->conversation->deleteFor($this->auth);
+        $this->conversation->deleteFor($this->sendable);
 
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatsRoute(),
@@ -265,7 +265,7 @@ class Chat extends Component
         abort_unless(auth()->check(), 401);
 
         // delete conversation
-        $this->conversation->clearFor($this->auth);
+        $this->conversation->clearFor($this->sendable);
 
         $this->reset('loadedMessages', 'media', 'files', 'body');
 
@@ -298,17 +298,15 @@ class Chat extends Component
     {
         abort_unless(auth()->check(), 401);
 
-        $auth = $this->auth;
-
         // make sure conversation is neigher self nor private
 
         abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.messages.cannot_exit_self_or_private_conversation'));
 
         // make sure owner if group cannot be removed from chat
-        abort_if($auth->isOwnerOf($this->conversation), 403, __('wirechat::chat.messages.owner_cannot_exit_conversation'));
+        abort_if($this->sendable->isOwnerOf($this->conversation), 403, __('wirechat::chat.messages.owner_cannot_exit_conversation'));
 
         // delete conversation
-        $auth->exitConversation($this->conversation);
+        $this->sendable->exitConversation($this->conversation);
 
         // Dispatach event instead if isWidget
         if ($this->isWidget()) {
@@ -411,8 +409,8 @@ class Chat extends Component
                 $message = Message::create([
                     'reply_id' => $replyId,
                     'conversation_id' => $this->conversation->id,
-                    'sendable_type' => $this->auth->getSendable()->getMorphClass(), // Polymorphic sender type
-                    'sendable_id' => $this->auth->getSendable()->getKey(), // Polymorphic sender ID
+                    'sendable_type' => $this->sendable->getMorphClass(), // Polymorphic sender type
+                    'sendable_id' => $this->sendable->getKey(), // Polymorphic sender ID
                     'type' => MessageType::ATTACHMENT,
                     // 'body' => $this->body, // Add body if required
                 ]);
@@ -455,13 +453,11 @@ class Chat extends Component
 
         if ($this->body != null) {
 
-            $sendable = $this->auth->getSendable();
-
             $createdMessage = Message::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
-                'sendable_type' => $sendable->getMorphClass(), // Polymorphic sender type
-                'sendable_id' => $sendable->getKey(), // Polymorphic sender ID
+                'sendable_type' => $this->sendable->getMorphClass(), // Polymorphic sender type
+                'sendable_id' => $this->sendable->getKey(), // Polymorphic sender ID
                 'body' => $this->body,
                 'type' => MessageType::TEXT,
             ]);
@@ -519,7 +515,7 @@ class Chat extends Component
 
         // make sure user belongs to conversation from the message
         // We are checking the $message->conversation for extra security because the param might be tempered with
-        abort_unless($this->auth->belongsToConversation($message->conversation), 403);
+        abort_unless($this->sendable->belongsToConversation($message->conversation), 403);
 
         // remove message from collection
         $this->removeMessage($message);
@@ -528,7 +524,7 @@ class Chat extends Component
         $this->dispatch('refresh')->to(Chats::class);
 
         // delete For $user
-        $message->deleteFor($this->auth);
+        $message->deleteFor($this->sendable);
     }
 
     /**
@@ -549,18 +545,18 @@ class Chat extends Component
         }
 
         $message = Message::where('id', $messageId)->firstOrFail();
-        $authParticipant = $this->conversation->participant($this->auth);
+        $authParticipant = $this->conversation->participant($this->sendable);
 
         // make sure user is authenticated
 
         abort_unless(auth()->check(), 401);
 
         // make sure user owns message OR allow if is admin in group
-        abort_unless($message->ownedBy($this->auth) || ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
+        abort_unless($message->ownedBy($this->sendable) || ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
 
         // make sure user belongs to conversation from the message
         // We are checking the $message->conversation for extra security because the  might be tempered with
-        abort_unless($this->auth->belongsToConversation($message->conversation), 403);
+        abort_unless($this->sendable->belongsToConversation($message->conversation), 403);
 
         // remove message from collection
         $this->removeMessage($message);
@@ -701,8 +697,8 @@ class Chat extends Component
 
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
-            'sendable_type' => $this->auth->getSendable()->getMorphClass(), // Polymorphic sender type
-            'sendable_id' => $this->auth->getSendable()->getKey(), // Polymorphic sender ID
+            'sendable_type' => $this->sendable->getMorphClass(), // Polymorphic sender type
+            'sendable_id' => $this->sendable->getKey(), // Polymorphic sender ID
             'body' => '❤️',
             'type' => MessageType::TEXT,
         ]);
@@ -799,7 +795,7 @@ class Chat extends Component
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
         $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
-        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
+        abort_unless($this->sendable->belongsToConversation($this->conversation), 403);
     }
 
     /**
@@ -809,12 +805,12 @@ class Chat extends Component
     /**
      * Returns the authenticated user.
      *
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null
      */
     #[Computed(persist: true)]
-    public function auth()
+    public function sendable()
     {
-        return auth()->user();
+        return Wirechat::getSendable();
     }
 
     private function initializeParticipants()
@@ -823,9 +819,9 @@ class Chat extends Component
             $this->conversation->load('participants.participantable');
             $participants = $this->conversation->participants();
 
-            $this->authParticipant = $participants->whereParticipantable($this->auth->getParticipantable())->first();
+            $this->authParticipant = $participants->whereParticipantable($this->sendable)->first();
 
-            $this->receiverParticipant = $this->conversation->peerParticipant($this->auth->getParticipantable());
+            $this->receiverParticipant = $this->conversation->peerParticipant($this->sendable);
 
             // If conversation is self then receiver is auth;
             if ($this->conversation->type == ConversationType::SELF) {
@@ -840,7 +836,7 @@ class Chat extends Component
                 : null;
 
         } else {
-            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth->getParticipantable())->first();
+            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->sendable)->first();
             $this->receiver = null;
         }
     }

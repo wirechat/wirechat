@@ -14,11 +14,11 @@
     <p @class([
         'truncate text-sm dark:text-white  gap-2 items-center',
         'font-semibold text-black' =>
-            !$isReadByAuth && !$lastMessage?->ownedBy($this->auth),
+            !$isReadByAuth && !$lastMessage?->ownedBy($this->sendable),
         'font-normal text-gray-600' =>
-            $isReadByAuth && !$lastMessage?->ownedBy($this->auth),
+            $isReadByAuth && !$lastMessage?->ownedBy($this->sendable),
         'font-normal text-gray-600' =>
-            $isReadByAuth && $lastMessage?->ownedBy($this->auth),
+            $isReadByAuth && $lastMessage?->ownedBy($this->sendable),
     ])>
         {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->isAttachment() ? '📎 '.__('wirechat::chats.labels.attachment') : '') }}
     </p>

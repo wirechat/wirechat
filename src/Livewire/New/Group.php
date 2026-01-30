@@ -162,7 +162,7 @@ class Group extends ModalComponent
 
             // make sure user does not belong to conversation already
             // mostly this is the auth user
-            $alreadyExists = $conversation->participants()->where('participantable_id', $participant->getParticipantable()->getKey())->where('participantable_type', $participant->getParticipantable()->getMorphClass())->exists();
+            $alreadyExists = $conversation->participants()->where('participantable_id', $participant->getKey())->where('participantable_type', $participant->getMorphClass())->exists();
             if (! $alreadyExists) {
                 $conversation->addParticipant($participant);
             }
