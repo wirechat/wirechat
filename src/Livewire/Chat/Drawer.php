@@ -42,7 +42,7 @@ class Drawer extends Component
 
         $this->drawerComponents[$id] = [
             'name' => $this->getComponentName($componentClass),
-            'attributes' => $arguments, // Deprecated todo:must be removed
+            'attributes' => $arguments, // Deprecate
             'arguments' => $arguments,
             'modalAttributes' => array_merge(
                 $componentClass::modalAttributes(), // Fetch reusable modal attributes
