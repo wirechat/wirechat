@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
-use Livewire\Mechanisms\ComponentRegistry;
 
 class Drawer extends Component
 {
@@ -34,7 +33,7 @@ class Drawer extends Component
     public function openChatDrawer($component, $arguments = [], $modalAttributes = []): void
     {
 
-        $componentClass = app(ComponentRegistry::class)->getClass($component);
+        $componentClass = $this->resolveComponentClass($component);
         $id = md5($component.serialize($arguments));
 
         $arguments = collect($arguments)
@@ -42,7 +41,7 @@ class Drawer extends Component
             ->all();
 
         $this->drawerComponents[$id] = [
-            'name' => $component,
+            'name' => $this->getComponentName($componentClass),
             'attributes' => $arguments, // Deprecated
             'arguments' => $arguments,
             'modalAttributes' => array_merge(
@@ -56,6 +55,26 @@ class Drawer extends Component
         /* ! Changed listener name to activeChatDrawerComponentChanged to not interfer with main modal */
         $this->dispatch('activeChatDrawerComponentChanged', id: $id);
 
+    }
+
+    protected function resolveComponentClass(string $component): string
+    {
+        if (class_exists(\Livewire\Mechanisms\ComponentRegistry::class)
+            && app()->bound(\Livewire\Mechanisms\ComponentRegistry::class)) {
+            return app(\Livewire\Mechanisms\ComponentRegistry::class)->getClass($component);
+        }
+
+        return app('livewire.finder')->resolveClassComponentClassName($component);
+    }
+
+    protected function getComponentName(string $class): string
+    {
+        if (class_exists(\Livewire\Mechanisms\ComponentRegistry::class)
+            && app()->bound(\Livewire\Mechanisms\ComponentRegistry::class)) {
+            return app(\Livewire\Mechanisms\ComponentRegistry::class)->getName($class);
+        }
+
+        return app('livewire.finder')->normalizeName($class);
     }
 
     public function resolveComponentProps(array $attributes, Component $component): Collection
