@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.4.x] - Maintenance Release
+## [v0.4.0](https://github.com/wirechat/wirechat/releases/tag/v0.4.0) - 2026-01-29
 
 ### Changed
 - Improved internal message sender handling using participants instead of polymorphic fields.
