@@ -31,8 +31,11 @@
 
                 {{-- Group --}}
                 @if ($conversation->isGroup())
-                    <x-wirechat::actions.show-group-info conversation="{{ $conversation->id }}"
-                        widget="{{ $this->isWidget() }}">
+                    <x-wirechat::actions.show-group-info 
+                        conversation="{{ $conversation->id }}"
+                        widget="{{ $this->isWidget() }}"
+                         panel="{{$this->panel}}"
+                        >
                         <div class="flex items-center gap-2 cursor-pointer ">
                             <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                                 :group="true" :src="$group?->cover_url ?? null "
@@ -44,8 +47,10 @@
                     </x-wirechat::actions.show-group-info>
                 @else
                     {{-- Not Group --}}
-                    <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}"
-                        widget="{{ $this->isWidget() }}">
+                    <x-wirechat::actions.show-chat-info 
+                    conversation="{{ $conversation->id }}"
+                        widget="{{ $this->isWidget() }}"
+                        panel="{{$this->panel}}">
                         <div class="flex items-center gap-2 cursor-pointer ">
                             <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                                 :group="false" :src="$receiver?->wirechat_avatar_url ?? null"

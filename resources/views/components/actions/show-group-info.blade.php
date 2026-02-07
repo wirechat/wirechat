@@ -1,6 +1,7 @@
 @props([
     'conversation' => null, //Should be conversation  ID (Int)
-    'widget' => false
+    'widget' => false,
+    'panel' => null
 ])
 
 
@@ -8,6 +9,7 @@
         component="wirechat.chat.group.info"
         dusk="show_group_info"
         conversation="{{$conversation}}"
+        :panel="$panel"
         :widget="$widget"
         >
 {{$slot}}
