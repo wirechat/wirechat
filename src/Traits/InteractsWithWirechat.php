@@ -33,7 +33,7 @@ trait InteractsWithWirechat
     /**
      * Establishes a relationship between the user and conversations.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<Conversation, static>
      */
     public function conversations()
     {
