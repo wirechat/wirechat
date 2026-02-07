@@ -26,14 +26,19 @@ class Chats extends Component
 
     /**
      * Store ONLY ids (no models) to avoid ModelSynth refetching.
+     *
+     * @var array<int,int>
      */
     public array $conversationIds = [];
-
-    public int $page = 1;
 
     public bool $canLoadMore = false;
 
     public $selectedConversationId;
+
+    // Cursor state for stable "Load more"
+    public ?string $cursorUpdatedAt = null;
+
+    public ?int $cursorId = null;
 
     #[Locked]
     public ?bool $createChatAction = null;
@@ -53,6 +58,9 @@ class Chats extends Component
 
         $this->selectedConversationId = request()->conversation;
         $this->conversationIds = [];
+        $this->cursorUpdatedAt = null;
+        $this->cursorId = null;
+        $this->canLoadMore = false;
     }
 
     public function getListeners(): array
@@ -88,19 +96,22 @@ class Chats extends Component
     /**
      * Computed conversations:
      * - avoids ModelSynth per-model refetch
-     * - uses pure Eloquent ordering (updated_at desc)
+     * - stable "load more" via cursor paging
      */
     #[Computed]
     public function conversations()
     {
-        $this->loadConversationIds();
+        if (empty($this->conversationIds)) {
+            $this->loadConversationIds(); // initial load only
+        }
 
         if (empty($this->conversationIds)) {
             return collect();
         }
 
         $user = $this->auth;
-        $ids = $this->conversationIds;
+        $ids = array_map('intval', $this->conversationIds);
+        $positions = array_flip($ids);
         $table = (new Conversation)->getTable();
 
         $conversations = Conversation::query()
@@ -116,9 +127,9 @@ class Chats extends Component
                     'conversation_read_at'
                 )->with(['participantable', 'actions']),
             ])
-            // ✅ no raw, no driver logic
             ->get()
-            ->sortBy(fn (Conversation $c) => array_search((int) $c->id, $ids, true))
+            // Preserve the exact order of loaded ids (prevents swapping)
+            ->sortBy(fn (Conversation $c) => $positions[(int) $c->id] ?? PHP_INT_MAX)
             ->values();
 
         // Set peer/auth participants without extra queries (participants already loaded)
@@ -133,32 +144,64 @@ class Chats extends Component
     }
 
     /**
-     * IDs paging:
-     * We still collect the latest ids from the user's relation query,
-     * but we don't rely on "preserve this exact list order" anymore.
+     * Cursor-based IDs paging:
+     * Appends older conversations; does not reshuffle existing items.
      */
     protected function loadConversationIds(): void
     {
+        $auth = $this->auth;
+        abort_if($auth == null, 401);
+
         $table = (new Conversation)->getTable();
         $perPage = 10;
-        $take = $this->page * $perPage;
 
-        $baseQuery = $this->auth->conversations()
+        // In free version, we use the user's relation as before
+        $baseQuery = $auth->conversations()
             ->with([]) // ids only
             ->when(trim($this->search ?? '') !== '', fn ($q) => $this->applySearchConditions($q))
             ->when(trim($this->search ?? '') === '', function ($q) {
                 /** @phpstan-ignore-next-line */
                 return $q->withoutDeleted()->withoutBlanks();
             })
-            ->latest($table.'.updated_at');
+            // deterministic ordering for cursor paging
+            ->orderByDesc($table.'.updated_at')
+            ->orderByDesc($table.'.id');
 
-        $ids = $baseQuery
-            ->take($take + 1)
-            ->pluck($table.'.id')
-            ->all();
+        // If we already have a cursor, load older than it
+        if ($this->cursorUpdatedAt !== null && $this->cursorId !== null) {
+            $baseQuery->where(function ($q) use ($table) {
+                $q->where($table.'.updated_at', '<', $this->cursorUpdatedAt)
+                    ->orWhere(function ($q2) use ($table) {
+                        $q2->where($table.'.updated_at', '=', $this->cursorUpdatedAt)
+                            ->where($table.'.id', '<', $this->cursorId);
+                    });
+            });
+        }
 
-        $this->canLoadMore = count($ids) > $take;
-        $this->conversationIds = array_slice($ids, 0, $take);
+        // Select id + updated_at so we can advance the cursor without another query
+        $rows = $baseQuery
+            ->select([$table.'.id', $table.'.updated_at'])
+            ->take($perPage + 1)
+            ->get();
+
+        $this->canLoadMore = $rows->count() > $perPage;
+
+        $rows = $rows->take($perPage);
+
+        $newIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        // Append only; stable
+        $this->conversationIds = array_values(array_unique([
+            ...$this->conversationIds,
+            ...$newIds,
+        ]));
+
+        // Update cursor
+        $last = $rows->last();
+        if ($last) {
+            $this->cursorUpdatedAt = (string) $last->updated_at;
+            $this->cursorId = (int) $last->id;
+        }
     }
 
     public function loadMore(): void
@@ -167,7 +210,7 @@ class Chats extends Component
             return;
         }
 
-        $this->page++;
+        $this->loadConversationIds();
     }
 
     public function updatedSearch($value): void
@@ -178,7 +221,9 @@ class Chats extends Component
     public function hardRefresh(): void
     {
         $this->conversationIds = [];
-        $this->reset(['page', 'canLoadMore']);
+        $this->cursorUpdatedAt = null;
+        $this->cursorId = null;
+        $this->canLoadMore = false;
     }
 
     #[On('refresh-chats')]
@@ -203,7 +248,7 @@ class Chats extends Component
     }
 
     /**
-     * Real-time notify: refresh ids so latest conversation jumps to top.
+     * Real-time notify: reset so latest conversation can jump to top.
      */
     public function refreshComponent($event): void
     {
