@@ -117,9 +117,9 @@ class Chats extends Component
                 )->with(['participantable', 'actions']),
             ])
             // ✅ no raw, no driver logic
-            ->orderByDesc($table.'.updated_at')
-            ->orderByDesc($table.'.id') // tiebreaker
-            ->get();
+            ->get()
+            ->sortBy(fn (Conversation $c) => array_search((int) $c->id, $ids, true))
+            ->values();
 
         // Set peer/auth participants without extra queries (participants already loaded)
         $conversations->each(function (Conversation $conversation) use ($user) {
