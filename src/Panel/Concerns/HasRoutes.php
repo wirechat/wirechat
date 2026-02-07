@@ -22,7 +22,7 @@ trait HasRoutes
     /**
      * The home URL for the panel, which can be a string, Closure, or null.
      */
-    protected string|Closure|null $homeUrl = null;
+    protected string|Closure|null $homeUrl = '/';
 
     /**
      * The base path for the panel's routes.

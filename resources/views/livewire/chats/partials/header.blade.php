@@ -8,51 +8,31 @@
 
         @if (isset($heading))
             <div class="flex items-center gap-2 truncate  " wire:ignore>
-                <h2 class=" text-2xl font-bold dark:text-white"  dusk="heading">{{$heading}}</h2>
+                <h2 class="text-[1.4rem]  font-bold dark:text-white"  dusk="heading">{{$heading}}</h2>
             </div>
         @endif
 
 
 
-        <div class="flex gap-x-3 items-center  ">
+        <div class="flex gap-x-4 items-center  ">
 
-            @if ($createChatAction)
-
-            <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
-                <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
-                    <svg class="w-8 h-8 -mb-1 text-gray-500 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"
-                        xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                        <g fill="none" stroke="currentColor">
-                            <path
-                                d="M12.875 5C9.225 5 7.4 5 6.242 6.103a4 4 0 0 0-.139.139C5 7.4 5 9.225 5 12.875V17c0 .943 0 1.414.293 1.707S6.057 19 7 19h4.125c3.65 0 5.475 0 6.633-1.103a4 4 0 0 0 .139-.139C19 16.6 19 14.775 19 11.125" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 10h6m-6 4h3m7-6V2m-3 3h6" />
-                        </g>
+            {{-- Widget-Action:Redirect to home --}}
+            @if ($redirectToHomeAction)
+            <a id="redirect-button" href="{{ $this->panel()->getHomeUrl() }}" class="flex items-center">
+                     <svg class="size-6  text-zinc-700 dark:hover:text-gray-200 dark:text-gray-100" xmlns="http://www.w3.org/2000/svg"  stroke="currentColor" stroke-width="0.3" width="16" height="16" fill="currentColor"  viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z"/>
+                        <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
                     </svg>
-                    {{-- <svg  class="w-7 h-7 -mb-1 stroke-[0.1]  stroke-none text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"  stroke="currentColor" viewBox="0 0 24 24" height="24" width="24" preserveAspectRatio="xMidYMid meet" fill="none"> <path d="M9.53277 12.9911H11.5086V14.9671C11.5086 15.3999 11.7634 15.8175 12.1762 15.9488C12.8608 16.1661 13.4909 15.6613 13.4909 15.009V12.9911H15.4672C15.9005 12.9911 16.3181 12.7358 16.449 12.3226C16.6659 11.6381 16.1606 11.0089 15.5086 11.0089H13.4909V9.03332C13.4909 8.60007 13.2361 8.18252 12.8233 8.05119C12.1391 7.83391 11.5086 8.33872 11.5086 8.991V11.0089H9.49088C8.83941 11.0089 8.33411 11.6381 8.55097 12.3226C8.68144 12.7358 9.09947 12.9911 9.53277 12.9911Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M0.944298 5.52617L2.99998 8.84848V17.3333C2.99998 18.8061 4.19389 20 5.66665 20H19.3333C20.8061 20 22 18.8061 22 17.3333V6.66667C22 5.19391 20.8061 4 19.3333 4H1.79468C1.01126 4 0.532088 4.85997 0.944298 5.52617ZM4.99998 8.27977V17.3333C4.99998 17.7015 5.29845 18 5.66665 18H19.3333C19.7015 18 20 17.7015 20 17.3333V6.66667C20 6.29848 19.7015 6 19.3333 6H3.58937L4.99998 8.27977Z" fill="currentColor" stroke="currentColor"></path></svg> --}}
-                    {{-- <svg  class="w-7 h-7 -mb-1 text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" class="ai ai-ChatAdd"><path d="M12 8v3m0 0v3m0-3h3m-3 0H9"/><path d="M14 19c3.771 0 5.657 0 6.828-1.172C22 16.657 22 14.771 22 11c0-3.771 0-5.657-1.172-6.828C19.657 3 17.771 3 14 3h-4C6.229 3 4.343 3 3.172 4.172 2 5.343 2 7.229 2 11c0 3.771 0 5.657 1.172 6.828.653.654 1.528.943 2.828 1.07"/><path d="M14 19c-1.236 0-2.598.5-3.841 1.145-1.998 1.037-2.997 1.556-3.489 1.225-.492-.33-.399-1.355-.212-3.404L6.5 17.5"/></svg> --}}
-                </button>
-            </x-wirechat::actions.new-chat>
+            </a>
             @endif
 
-
-            {{-- Only show if is not widget --}}
-            @if ($redirectToHomeAction)
-            <a id="redirect-button" href="{{ config('wirechat.home_route', '/') }}" class="flex items-center">
-                {{-- <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor" class="bi bi-x-octagon-fill w-6 h-6 text-gray-500 dark:text-gray-400 transition-colors duration-300 dark:hover:text-gray-500 hover:text-gray-900" viewBox="0 0 16 16">
-                    <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
-                </svg> --}}
-
-                <svg class="bi bi-x-octagon-fill w-8 my-auto h-8 stroke-[0.9] text-gray-500 dark:text-gray-400 transition-colors duration-300 dark:hover:text-gray-500 hover:text-gray-900"
-                    xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                    <g fill="none" stroke="currentColor">
-                        <path
-                            d="M5 12.76c0-1.358 0-2.037.274-2.634c.275-.597.79-1.038 1.821-1.922l1-.857C9.96 5.75 10.89 4.95 12 4.95s2.041.799 3.905 2.396l1 .857c1.03.884 1.546 1.325 1.82 1.922c.275.597.275 1.276.275 2.634V17c0 1.886 0 2.828-.586 3.414S16.886 21 15 21H9c-1.886 0-2.828 0-3.414-.586S5 18.886 5 17z" />
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M14.5 21v-5a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1v5" />
-                    </g>
-                </svg>
-                {{-- <svg class="bi bi-x-octagon-fill w-7 h-7 stroke-[0.5] text-gray-500 dark:text-gray-400 transition-colors duration-300 dark:hover:text-gray-500 hover:text-gray-900" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8H216a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H48V120l80-80,80,80Z"></path></svg> --}}
-            </a>
+            {{-- Panel-action:Creat Chat Action--}}
+            @if ($createChatAction)
+            <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
+                <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-zinc-700  dark:hover:text-gray-200 stroke-1 dark:text-gray-100"   fill="none" data-icon="icon-messages-plus-stroke" viewBox="0 0 24 24" width="1em" height="1em" display="flex" role="img"><path fill="currentColor" d="M4.49805 19C4.22205 19 3.99805 18.776 3.99805 18.5V10.462L11.998 14.099L19.998 10.462V13H21.998V5.5C21.998 4.122 20.876 3 19.498 3H4.49805C3.12005 3 1.99805 4.122 1.99805 5.5V18.5C1.99805 19.878 3.12005 21 4.49805 21H11V19H4.49805ZM4.49805 5H19.498C19.774 5 19.998 5.224 19.998 5.5V8.265L11.998 11.902L3.99805 8.265V5.5C3.99805 5.224 4.22205 5 4.49805 5ZM14 18H17V15H19V18H22V20H19V23H17V20H14V18Z"></path></svg>
+                </button>
+            </x-wirechat::actions.new-chat>
             @endif
 
 
