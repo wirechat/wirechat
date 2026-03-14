@@ -646,12 +646,12 @@ describe('List', function () {
 
         // create conversation with user1
         $conversation = $auth->createConversationWith($user1);
+        $participant = $conversation->participant($auth);
 
         Carbon::setTestNowAndTimezone(now());
         $lastMessage = Message::create([
             'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth),
-            'sendable_id' => $auth->id,
+            'participant_id' => $participant->id,
             'body' => 'How are you doing',
         ]);
 
@@ -667,12 +667,12 @@ describe('List', function () {
 
         // create conversation with user1
         $conversation = $auth->createConversationWith($user1);
+        $participant = $conversation->participant($auth);
 
         Carbon::setTestNowAndTimezone(now());
         $lastMessage = Message::create([
             'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth),
-            'sendable_id' => $auth->id,
+            'participant_id' => $participant->id,
             'body' => 'How are you doing',
         ]);
 
@@ -691,12 +691,12 @@ describe('List', function () {
 
         // create conversation with user1
         $conversation = $auth->createConversationWith($user1);
+        $participant = $conversation->participant($auth);
 
         // manually create message so we can attach attachment id
         $message = Message::create([
             'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth),
-            'sendable_id' => $auth->id,
+            'participant_id' => $participant->id,
             'type' => MessageType::ATTACHMENT,
         ]);
 

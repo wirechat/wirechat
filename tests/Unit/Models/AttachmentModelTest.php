@@ -25,11 +25,11 @@ it('tests attachment URL generation with custom test_disk', function () {
     // Create a conversation between the two users
     $conversation = $auth->createConversationWith($user1);
 
+    $participant = $conversation->participant($auth);
     // Create a message with attachment type
     $message = Message::create([
         'conversation_id' => $conversation->id,
-        'sendable_type' => get_class($auth),
-        'sendable_id' => $auth->id,
+        'participant_id' => $participant->id,
         'type' => 'attachment',
     ]);
 
@@ -70,12 +70,11 @@ it('generaes temporary URL when disk_visibility is private in wirechat', functio
 
     // Create a conversation between the two users
     $conversation = $auth->createConversationWith($user1);
-
+    $participant = $conversation->participant($auth);
     // Create a message with attachment type
     $message = Message::create([
         'conversation_id' => $conversation->id,
-        'sendable_type' => get_class($auth),
-        'sendable_id' => $auth->id,
+        'participant_id' => $participant->id,
         'type' => 'attachment',
     ]);
 
@@ -116,10 +115,11 @@ it('does not generate temporary URL when disk_visibility is public in wirechat',
     $conversation = $auth->createConversationWith($user1);
 
     // Create a message with attachment type
+    $participant = $conversation->participant($auth);
+    // Create a message with attachment type
     $message = Message::create([
         'conversation_id' => $conversation->id,
-        'sendable_type' => get_class($auth),
-        'sendable_id' => $auth->id,
+        'participant_id' => $participant->id,
         'type' => 'attachment',
     ]);
 

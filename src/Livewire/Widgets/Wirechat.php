@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
-use Livewire\Mechanisms\ComponentRegistry;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Services\WirechatService;
 
@@ -41,7 +40,6 @@ class Wirechat extends Component
     public function openChatWidget($conversation, $arguments = [], $modalAttributes = []): void
     {
         $component = 'wirechat.chat';
-        // $componentClass = app(ComponentRegistry::class)->getClass($component);
 
         // Generate a unique ID using the conversationId and arguments
         $id = md5($component.$conversation.serialize($arguments));
@@ -141,6 +139,16 @@ class Wirechat extends Component
             'open-chat' => 'openChatWidget',
 
         ];
+    }
+
+    public function closeChatWidget($data = []): void
+    {
+        if ($this->activeWirechatWidgetComponent) {
+            $force = $data['force'] ?? false;
+            $this->destroyChatWidget($this->activeWirechatWidgetComponent);
+            $this->activeWirechatWidgetComponent = null;
+            $this->selectedConversationId = null;
+        }
     }
 
     public function mount(): void
