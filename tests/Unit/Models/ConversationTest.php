@@ -1140,9 +1140,9 @@ describe('WithoutBlanks()', function () {
         $auth = Admin::factory()->create();
 
         Carbon::setTestNow(now()->subSeconds(10));
-        // Send to receiver
-        $auth->createConversationWith(User::factory()->create())->conversation;
-        $auth->createConversationWith(User::factory()->create())->conversation;
+        // Send to receiver)
+        $auth->createConversationWith(User::factory()->create());
+        $auth->createConversationWith(User::factory()->create());
 
         // create conversation with message
         $user = User::factory()->create(['name' => 'john']);

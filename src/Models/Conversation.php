@@ -16,7 +16,6 @@ use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Concerns\HasDynamicIds;
-use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
 use Wirechat\Wirechat\Traits\Actionable;
 use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
 
@@ -274,17 +273,38 @@ class Conversation extends Model
      */
     public function scopeWithoutBlanks(Builder $builder): void
     {
-        $user = auth()->user(); // Get the authenticated user
-        if ($user) {
-
-            $builder->whereHas('messages', function ($q) use ($user) {
-                /* !we only exclude one scope not all because we don't want to check aginast soft delete messages */
-                $q->withoutGlobalScope(WithoutRemovedMessages::class)->whereDoesntHave('actions', function ($q) use ($user) {
-                    $q->whereActor($user)
-                        ->where('type', Actions::DELETE);
-                });
-            });
+        $user = auth()->user();
+        if (! $user) {
+            return;
         }
+
+        $messagesTable = (new Message)->getTable();
+        $participantsTable = (new Participant)->getTable();
+
+        $builder->whereHas('messages', function (Builder $q) use ($user, $messagesTable, $participantsTable) {
+            // Remove the global scope that hides removed messages so we can apply our own logic here
+            $q->withoutGlobalScope(\Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages::class)
+
+                // We only want messages that are NOT deleted by the current user's participant in this conversation
+                ->whereDoesntHave('actions', function ($aq) use ($user, $messagesTable, $participantsTable) {
+                    $aq->where('type', Actions::DELETE)
+                        ->where('actor_type', Participant::class)
+
+                        // actor_id (actions) must reference a participant row that belongs to the same conversation
+                        // AND that participant row must belong to the current authenticated user.
+                        ->whereExists(function ($ex) use ($user, $participantsTable, $messagesTable) {
+                            $ex->select(DB::raw(1))
+                                ->from($participantsTable)
+                                // actions.actor_id = participants.id
+                                ->whereColumn("$participantsTable.id", 'actor_id')
+                                // participants.conversation_id = messages.conversation_id
+                                ->whereColumn("$participantsTable.conversation_id", "$messagesTable.conversation_id")
+                                // participant belongs to current auth user
+                                ->where("$participantsTable.participantable_id", $user->getKey())
+                                ->where("$participantsTable.participantable_type", $user->getMorphClass());
+                        });
+                });
+        });
     }
 
     /**

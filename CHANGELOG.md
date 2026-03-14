@@ -16,6 +16,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.5.0](https://github.com/wirechat/wirechat/releases/tag/v0.5.0) - 2026-01-30
+
+### Changed
+- Updated Wirechat to support **Livewire v4**.
+- Improved internal component resolution for newer Livewire lifecycle behavior.
+- Refined ChatWidget open/close handling for better stability.
+
+### Fixed
+- Updated and stabilized tests for Livewire v4.
+- Fixed duplicate close events caused by multiple dispatches.
+
+---
+
+## [v0.4.0](https://github.com/wirechat/wirechat/releases/tag/v0.4.0) - 2026-01-29
+
+### Changed
+- Improved internal message sender handling using participants instead of polymorphic fields.
+
+### Fixed
+- Rollback now correctly restores legacy `sendable_id` and `sendable_type`.
+- General bug fixes and stability improvements.
+
+### Notes
+- Compatible with **Livewire v3**.
+- This line is maintenance-only (no new features).
+
 
 ## [v0.3.0-beta4](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-beta4) - 2025-11-12
 

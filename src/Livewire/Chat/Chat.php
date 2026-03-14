@@ -64,7 +64,7 @@ class Chat extends Component
 
     public array $files = [];
 
-    public Participant|Model|null $authParticipant;
+    public Participant|Model|null $authParticipant = null;
 
     // #[Locked]
     public Participant|Model|null $receiverParticipant = null;
@@ -107,8 +107,10 @@ class Chat extends Component
         if ($event['message']['conversation_id'] == $this->conversation->id) {
 
             // Make sure message does not belong to auth
-            // Make sure message does not belong to auth
-            if ($event['message']['sendable_id'] == auth()->id() && $event['message']['sendable_type'] === $this->auth->getMorphClass()) {
+
+            $peerParticipant = Participant::find($event['message']['participant_id']);
+
+            if ($peerParticipant?->participantable_id == auth()->id() && $peerParticipant?->participantable_type === $this->auth->getMorphClass()) {
                 return null;
             }
 
@@ -146,7 +148,8 @@ class Chat extends Component
             // dd($newMessage);
 
             // Make sure message does not belong to auth
-            if ($newMessage->sendable_id == auth()->id() && $newMessage->sendable_type == $this->auth->getMorphClass()) {
+
+            if ($newMessage->participant->participantable_id == auth()->id() && $newMessage->participant->participantable_type == $this->auth->getMorphClass()) {
                 return null;
             }
 
@@ -412,8 +415,7 @@ class Chat extends Component
                 $message = Message::create([
                     'reply_id' => $replyId,
                     'conversation_id' => $this->conversation->id,
-                    'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
-                    'sendable_id' => auth()->id(), // Polymorphic sender ID
+                    'participant_id' => $this->authParticipant->getKey(),
                     'type' => MessageType::ATTACHMENT,
                     // 'body' => $this->body, // Add body if required
                 ]);
@@ -459,8 +461,7 @@ class Chat extends Component
             $createdMessage = Message::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
-                'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
-                'sendable_id' => auth()->id(), // Polymorphic sender ID
+                'participant_id' => $this->authParticipant->getKey(),
                 'body' => $this->body,
                 'type' => MessageType::TEXT,
             ]);
@@ -629,7 +630,7 @@ class Chat extends Component
     {
         $this->loadedMessages = $this->loadedMessages->map(function ($group) {
             return $group->map(function ($message) {
-                return $message->loadMissing('sendable', 'parent.sendable', 'attachment');
+                return $message->loadMissing('participant.participantable', 'parent.participant.participantable', 'attachment');
             });
         });
     }
@@ -702,8 +703,7 @@ class Chat extends Component
 
         $message = Message::create([
             'conversation_id' => $this->conversation->id,
-            'sendable_type' => $this->auth->getMorphClass(), // Polymorphic sender type
-            'sendable_id' => auth()->id(), // Polymorphic sender ID
+            'participant_id' => $this->authParticipant->getKey(),
             'body' => '❤️',
             'type' => MessageType::TEXT,
         ]);
@@ -744,7 +744,7 @@ class Chat extends Component
         // Fetch paginated messages
         /* @var Message $message */
         $messages = $this->conversation->messages()
-            ->with('sendable', 'parent.sendable', 'attachment')
+            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
             ->orderBy('created_at', 'asc')
             ->skip($this->totalMessageCount - $this->paginate_var)
             ->take($this->paginate_var)
@@ -795,7 +795,7 @@ class Chat extends Component
         } elseif (is_null($conversation)) {
             abort(422, __('wirechat::chat.messages.conversation_id_required')); // Custom error for missing input
         } else {
-            return abort(422, __('wirechat::chat.messages.invalid_conversation_input')); // Handle invalid input types
+            abort(422, __('wirechat::chat.messages.invalid_conversation_input')); // Handle invalid input types
         }
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
