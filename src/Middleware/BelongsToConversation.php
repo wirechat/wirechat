@@ -5,7 +5,7 @@ namespace Wirechat\Wirechat\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Wirechat\Wirechat\Services\WirechatService;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 class BelongsToConversation
 {
@@ -20,7 +20,7 @@ class BelongsToConversation
         $user = $request->user();
         $conversationId = $request->route('conversation');
 
-        $conversation = WirechatService::conversationModelClass()::findOrFail($conversationId);
+        $conversation = Wirechat::conversationModelClass()::findOrFail($conversationId);
 
         if (! $user || ! $user->belongsToConversation($conversation)
         ) {

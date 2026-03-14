@@ -287,4 +287,64 @@ class WirechatService
     {
         return (string) config('wirechat.models.participant');
     }
+
+    /**
+     * Get the Action model table name.
+     *
+     * @return string The Action model table name.
+     */
+    public static function actionModelTable(): string
+    {
+        return (new (static::actionModelClass()))->getTable();
+    }
+
+    /**
+     * Get the Attachment model table name.
+     *
+     * @return string The Attachment model table name.
+     */
+    public static function attachmentModelTable(): string
+    {
+        return (new (static::attachmentModelClass()))->getTable();
+    }
+
+    /**
+     * Get the Conversation model table name.
+     *
+     * @return string The Conversation model table name.
+     */
+    public static function conversationModelTable(): string
+    {
+        return (new (static::conversationModelClass()))->getTable();
+    }
+
+    /**
+     * Get the Group model table name.
+     *
+     * @return string The Group model table name.
+     */
+    public static function groupModelTable(): string
+    {
+        return (new (static::groupModelClass()))->getTable();
+    }
+
+    /**
+     * Get the Message model table name.
+     *
+     * @return string The Message model table name.
+     */
+    public static function messageModelTable(): string
+    {
+        return (new (static::messageModelClass()))->getTable();
+    }
+
+    /**
+     * Get the Participant model table name.
+     *
+     * @return string The Participant model table name.
+     */
+    public static function participantModelTable(): string
+    {
+        return (new (static::participantModelClass()))->getTable();
+    }
 }

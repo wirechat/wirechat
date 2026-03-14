@@ -2,7 +2,7 @@
 
 namespace Wirechat\Wirechat\Traits;
 
-use Wirechat\Wirechat\Services\WirechatService;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 /**
  * Trait Actionable
@@ -17,6 +17,6 @@ trait Actor
      */
     public function performedActions()
     {
-        return $this->morphMany(WirechatService::actionModelClass(), 'actor', 'actor_type', 'actor_id', 'id');
+        return $this->morphMany(Wirechat::actionModelClass(), 'actor', 'actor_type', 'actor_id', 'id');
     }
 }

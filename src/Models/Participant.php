@@ -14,7 +14,6 @@ use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedActionScope;
-use Wirechat\Wirechat\Services\WirechatService;
 use Wirechat\Wirechat\Traits\Actionable;
 use Wirechat\Wirechat\Traits\Actor;
 
@@ -140,13 +139,13 @@ class Participant extends Model
 
     public function messages(): HasMany
     {
-        return $this->hasMany(WirechatService::messageModelClass(), 'participant_id');
+        return $this->hasMany(Wirechat::messageModelClass(), 'participant_id');
     }
 
     /** Optional: fastest fetch of the latest message */
     public function latestMessage()
     {
-        return $this->hasOne(WirechatService::messageModelClass(), 'participant_id')->latestOfMany();
+        return $this->hasOne(Wirechat::messageModelClass(), 'participant_id')->latestOfMany();
     }
 
     /**
@@ -177,7 +176,7 @@ class Participant extends Model
      */
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(WirechatService::conversationModelClass());
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     /**
@@ -253,7 +252,7 @@ class Participant extends Model
         }
 
         // Check if a remove action already exists for this participant
-        $exists = WirechatService::actionModelClass()::where('actionable_id', $this->getKey())
+        $exists = Wirechat::actionModelClass()::where('actionable_id', $this->getKey())
             ->where('actionable_type', $this->getMorphClass())  // 🔁 match create()
             ->where('type', Actions::REMOVED_BY_ADMIN)
             ->where('actor_id', $adminParticipant->getKey())
@@ -261,7 +260,7 @@ class Participant extends Model
             ->exists();
 
         if (! $exists) {
-            WirechatService::actionModelClass()::create([
+            Wirechat::actionModelClass()::create([
                 'actionable_id' => $this->getKey(),
                 'actionable_type' => $this->getMorphClass(),          // participant model
                 'actor_id' => $adminParticipant->getKey(),     // admin as participant

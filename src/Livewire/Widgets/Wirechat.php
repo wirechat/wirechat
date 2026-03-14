@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
+use Wirechat\Wirechat\Facades\Wirechat as WirechatFacade;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
-use Wirechat\Wirechat\Services\WirechatService;
 
 class Wirechat extends Component
 {
@@ -102,7 +102,7 @@ class Wirechat extends Component
         $instance = app()->make($parameterClassName);
 
         if (! $model = $instance->resolveRouteBinding($parameterValue)) {
-            throw (new ModelNotFoundException)->setModel(WirechatService::conversationModelClass(), [$parameterValue]);
+            throw (new ModelNotFoundException)->setModel(WirechatFacade::conversationModelClass(), [$parameterValue]);
         }
 
         return $model;

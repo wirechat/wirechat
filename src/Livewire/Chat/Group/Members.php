@@ -9,6 +9,7 @@ use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
@@ -16,7 +17,6 @@ use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
-use Wirechat\Wirechat\Services\WirechatService;
 
 class Members extends ModalComponent
 {
@@ -209,9 +209,9 @@ class Members extends ModalComponent
 
         // remove from group
         // Create the 'remove' action record in the actions table
-        WirechatService::actionModelClass()::create([
+        Wirechat::actionModelClass()::create([
             'actionable_id' => $participant->id,
-            'actionable_type' => WirechatService::participantModelClass(),
+            'actionable_type' => $participant->getMorphClass(),
             'actor_id' => auth()->id(),  // The admin who performed the action
             'actor_type' => auth()->user()->getMorphClass(),  // Assuming 'User' is the actor model
             'type' => Actions::REMOVED_BY_ADMIN,  // Type of action

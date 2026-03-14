@@ -16,7 +16,6 @@ use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Concerns\HasDynamicIds;
-use Wirechat\Wirechat\Services\WirechatService;
 use Wirechat\Wirechat\Traits\Actionable;
 use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
 
@@ -137,7 +136,7 @@ class Conversation extends Model
      */
     public function participants(): HasMany
     {
-        return $this->hasMany(WirechatService::participantModelClass(), 'conversation_id', 'id');
+        return $this->hasMany(Wirechat::participantModelClass(), 'conversation_id', 'id');
     }
 
     /**
@@ -248,12 +247,12 @@ class Conversation extends Model
      */
     public function messages(): hasMany
     {
-        return $this->hasMany(WirechatService::messageModelClass());
+        return $this->hasMany(Wirechat::messageModelClass());
     }
 
     public function lastMessage(): hasOne
     {
-        return $this->hasOne(WirechatService::messageModelClass(), 'conversation_id')->latestOfMany();
+        return $this->hasOne(Wirechat::messageModelClass(), 'conversation_id')->latestOfMany();
     }
 
     /**
@@ -279,8 +278,8 @@ class Conversation extends Model
             return;
         }
 
-        $messagesTable = WirechatService::messageModelClass()->getTable();
-        $participantsTable = WirechatService::participantModelClass()->getTable();
+        $messagesTable = Wirechat::messageModelTable();
+        $participantsTable = Wirechat::participantModelTable();
 
         $builder->whereHas('messages', function (Builder $q) use ($user, $messagesTable, $participantsTable) {
             // Remove the global scope that hides removed messages so we can apply our own logic here
@@ -320,7 +319,7 @@ class Conversation extends Model
         if ($user) {
 
             // Get the table name for conversations dynamically to avoid hardcoding.
-            $conversationsTableName = WirechatService::conversationModelClass()->getTable();
+            $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
@@ -341,7 +340,7 @@ class Conversation extends Model
 
         if ($user) {
             // Get the table name for conversations dynamically to avoid hardcoding.
-            $conversationsTableName = WirechatService::conversationModelClass()->getTable();
+            $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
@@ -450,7 +449,7 @@ class Conversation extends Model
     {
         $user = auth()->user();
 
-        return $this->hasOne(WirechatService::participantModelClass())
+        return $this->hasOne(Wirechat::participantModelClass())
             ->withoutParticipantable($user)
             ->where('role', ParticipantRole::OWNER)
             ->withWhereHas('conversation', function ($query) {
@@ -468,7 +467,7 @@ class Conversation extends Model
     {
         $user = auth()->user();
 
-        return $this->hasOne(WirechatService::participantModelClass())
+        return $this->hasOne(Wirechat::participantModelClass())
             ->whereParticipantable($user)
             ->where('role', ParticipantRole::OWNER);
     }
@@ -720,7 +719,7 @@ class Conversation extends Model
      */
     public function group()
     {
-        return $this->hasOne(WirechatService::groupModelClass(), 'conversation_id');
+        return $this->hasOne(Wirechat::groupModelClass(), 'conversation_id');
     }
 
     public function isPrivate(): bool

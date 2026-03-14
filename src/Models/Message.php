@@ -16,7 +16,6 @@ use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
-use Wirechat\Wirechat\Services\WirechatService;
 use Wirechat\Wirechat\Traits\Actionable;
 
 /**
@@ -94,7 +93,7 @@ class Message extends Model
 
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(WirechatService::conversationModelClass());
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     /**
@@ -167,7 +166,7 @@ class Message extends Model
 
     public function attachment(): MorphOne
     {
-        return $this->morphOne(WirechatService::attachmentModelClass(), 'attachable');
+        return $this->morphOne(Wirechat::attachmentModelClass(), 'attachable');
     }
 
     public function hasAttachment(): bool
@@ -224,13 +223,13 @@ class Message extends Model
     // Relationship for the parent message
     public function parent(): belongsTo
     {
-        return $this->belongsTo(WirechatService::messageModelClass(), 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
+        return $this->belongsTo(Wirechat::messageModelClass(), 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
     }
 
     // Relationship for the reply
     public function reply(): HasOne
     {
-        return $this->hasOne(WirechatService::messageModelClass(), 'reply_id');
+        return $this->hasOne(Wirechat::messageModelClass(), 'reply_id');
     }
 
     // Method to check if the message has a reply

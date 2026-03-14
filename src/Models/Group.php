@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
-use Wirechat\Wirechat\Services\WirechatService;
 
 /**
  * @property int $id
@@ -101,7 +100,7 @@ class Group extends Model
 
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(WirechatService::conversationModelClass());
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     public function getCoverUrlAttribute(): ?string
@@ -138,7 +137,7 @@ class Group extends Model
 
     public function cover(): MorphOne
     {
-        return $this->morphOne(WirechatService::attachmentModelClass(), 'attachable');
+        return $this->morphOne(Wirechat::attachmentModelClass(), 'attachable');
     }
 
     /**

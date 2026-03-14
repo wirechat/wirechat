@@ -8,8 +8,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Wirechat\Wirechat\Events\MessageCreated;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Message;
-use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class BroadcastMessage implements ShouldQueue
@@ -34,8 +34,8 @@ class BroadcastMessage implements ShouldQueue
         $this->auth = auth()->user();
 
         // Get table
-        $this->messagesTable = (new Message)->getTable();
-        $this->participantsTable = (new Participant)->getTable();
+        $this->messagesTable = Wirechat::messageModelTable();
+        $this->participantsTable = Wirechat::participantModelTable();
     }
 
     /**

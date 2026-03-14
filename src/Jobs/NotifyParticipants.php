@@ -11,10 +11,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Wirechat\Wirechat\Events\NotifyParticipant;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
-use Wirechat\Wirechat\Models\Participant;
-use Wirechat\Wirechat\Services\WirechatService;
 use Wirechat\Wirechat\Traits\InteractsWithPanel;
 
 class NotifyParticipants implements ShouldQueue
@@ -52,7 +51,7 @@ class NotifyParticipants implements ShouldQueue
         $this->auth = $message->sendable;
 
         // Get table
-        $this->participantsTable = (new Participant)->getTable();
+        $this->participantsTable = Wirechat::participantModelTable();
 
         // dd($this);
 
@@ -80,7 +79,7 @@ class NotifyParticipants implements ShouldQueue
         /**
          * Fetch participants, ordered by `last_active_at` in descending order,
          * so that the most recently active participants are notified first. */
-        WirechatService::participantModelClass()::where('conversation_id', $this->conversation->id)
+        Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)
             ->withoutParticipantable($this->auth)
             ->latest('last_active_at') // Prioritize active participants
             ->chunk(50, function ($participants) {

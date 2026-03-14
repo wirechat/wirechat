@@ -15,7 +15,6 @@ use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Panel;
-use Wirechat\Wirechat\Services\WirechatService;
 
 /**
  * @property-read string|null $cover_url
@@ -39,9 +38,9 @@ trait InteractsWithWirechat
     public function conversations()
     {
         return $this->morphToMany(
-            WirechatService::conversationModelClass(), // The related model
+            Wirechat::conversationModelClass(), // The related model
             'participantable',   // The polymorphic field (participantable_id & participantable_type)
-            (new Participant)->getTable(), // The participants table
+            Wirechat::participantModelTable(), // The participants table
             'participantable_id', // The foreign key on the participants table for the User model
             'conversation_id'     // The foreign key for the Conversation model
         )->withPivot('conversation_id'); // Optionally load conversation_id from the pivot table
@@ -67,7 +66,7 @@ trait InteractsWithWirechat
         $type = $isSelf ? ConversationType::SELF : ConversationType::PRIVATE;
 
         // Find existing conversation (requires unique (conversation_id, participantable_type, participantable_id))
-        $existing = WirechatService::conversationModelClass()::withoutGlobalScopes()
+        $existing = Wirechat::conversationModelClass()::withoutGlobalScopes()
             ->where('type', $type)
             // must contain auth participant
             ->whereHas('participants', function ($q) use ($authType, $authId) {
@@ -93,7 +92,7 @@ trait InteractsWithWirechat
             $conversation->save();
 
             // ensure/insert participants (idempotent)
-            $authParticipant = WirechatService::participantModelClass()::firstOrCreate(
+            $authParticipant = Wirechat::participantModelClass()::firstOrCreate(
                 [
                     'conversation_id' => $conversation->getKey(),
                     'participantable_type' => $authType,
@@ -103,7 +102,7 @@ trait InteractsWithWirechat
             );
 
             if (! $isSelf) {
-                WirechatService::participantModelClass()::firstOrCreate(
+                Wirechat::participantModelClass()::firstOrCreate(
                     [
                         'conversation_id' => $conversation->getKey(),
                         'participantable_type' => $peerType,
@@ -114,7 +113,7 @@ trait InteractsWithWirechat
             }
 
             if (! empty($message)) {
-                WirechatService::messageModelClass()::create([
+                Wirechat::messageModelClass()::create([
                     'participant_id' => $authParticipant->getKey(),   // sender = auth participant
                     'conversation_id' => $conversation->getKey(),      // keep denormalized for speed
                     'body' => $message,
@@ -164,7 +163,7 @@ trait InteractsWithWirechat
         }
 
         // create participant as owner
-        WirechatService::participantModelClass()::create([
+        Wirechat::participantModelClass()::create([
             'conversation_id' => $conversation->id,
             'participantable_id' => $this->id,
             'participantable_type' => $this->getMorphClass(),
@@ -232,7 +231,7 @@ trait InteractsWithWirechat
             // get auth participant
             $participant = $conversation->participant($this);
 
-            $createdMessage = WirechatService::messageModelClass()::create([
+            $createdMessage = Wirechat::messageModelClass()::create([
                 'conversation_id' => $conversation->id,
                 'participant_id' => $participant->getKey(),
                 'body' => $message,
@@ -399,7 +398,7 @@ trait InteractsWithWirechat
         $selfConversationCheck = $participantId === $authenticatedUserId && $participantType === $authenticatedUserType;
 
         // Define the base query for finding conversations
-        $existingConversationQuery = WirechatService::conversationModelClass()::whereIn('type', [ConversationType::PRIVATE, ConversationType::SELF]);
+        $existingConversationQuery = Wirechat::conversationModelClass()::whereIn('type', [ConversationType::PRIVATE, ConversationType::SELF]);
 
         // If it's a self-conversation, adjust the query to check for two identical participants
         if ($selfConversationCheck) {

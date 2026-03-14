@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
 
@@ -23,8 +24,8 @@ class WithoutRemovedMessages implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $messagesTable = (new Message)->getTable();
-        $participantsTable = (new Participant)->getTable();
+        $messagesTable = Wirechat::messageModelTable();
+        $participantsTable = Wirechat::participantModelTable();
 
         if (! auth()->check()) {
             return;
