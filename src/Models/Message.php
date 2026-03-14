@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
@@ -21,8 +20,7 @@ use Wirechat\Wirechat\Traits\Actionable;
 /**
  * @property int $id
  * @property int|null $conversation_id
- * @property int $sendable_id
- * @property string $sendable_type
+ * @property int $participant_id
  * @property int|null $reply_id
  * @property string|null $body
  * @property MessageType $type
@@ -37,6 +35,7 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property-read Message|null $parent
  * @property-read Message|null $reply
  * @property-read Model|\Eloquent $sendable
+ * @property-read Participant|null $participant
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Message newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Message newQuery()
@@ -50,8 +49,6 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereIsNotOwnedBy(\Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable $user)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereKeptAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereReplyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Message whereSendableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Message whereSendableType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message withTrashed()
@@ -59,6 +56,7 @@ use Wirechat\Wirechat\Traits\Actionable;
  *
  * @mixin \Eloquent
  */
+// TODO:update all references of sendable_id and type tp particiapnt id
 class Message extends Model
 {
     use Actionable;
@@ -69,10 +67,9 @@ class Message extends Model
 
     protected $fillable = [
         'body',
-        'sendable_type',
-        'sendable_id',
-        'conversation_id',
+        'participant_id',
         'reply_id',
+        'conversation_id',
         'type',
         'kept_at',
     ];
@@ -96,10 +93,39 @@ class Message extends Model
         return $this->belongsTo(Conversation::class);
     }
 
-    /* Polymorphic relationship for the sender */
-    public function sendable(): MorphTo
+    /**
+     * @deprecated Use $message->user instead via the participant relationship.
+     * @see \Wirechat\Wirechat\Models\Message::getUserAttribute()
+     * Previously, messages had a polymorphic `sendable` relationship (sendable_type/sendable_id),
+     * but now messages are linked to a participant, which provides the actual user.
+     * So both $message->sendable and $message->user return the participantable.
+     */
+    public function getSendableAttribute()
     {
-        return $this->morphTo();
+        return $this->getUserAttribute();
+    }
+
+    /**
+     * Relationship to the Participant model.
+     *
+     * Each message belongs to a participant. This allows you to access
+     * the participant who sent the message via `$message->participant`.
+     */
+    public function participant(): BelongsTo
+    {
+        return $this->belongsTo(Participant::class, 'participant_id');
+    }
+
+    /**
+     * Accessor to get the actual user (participantable) who sent the message.
+     *
+     * Since participants are polymorphic (`participantable`), this returns
+     * the underlying user model (e.g., `User`) associated with the participant.
+     * You can access it via `$message->user`.
+     */
+    public function getUserAttribute()
+    {
+        return $this->participant?->participantable;
     }
 
     /**
@@ -167,18 +193,28 @@ class Message extends Model
      */
     public function ownedBy($user): bool
     {
-        if (! $user || ! ($user instanceof \Illuminate\Database\Eloquent\Model)) {
+        if (! $user || ! ($user instanceof Model)) {
             return false;
         }
 
-        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->getKey();
+        if (! $this->participant) {
+            return false;
+        }
+
+        return $this->participant->participantable_type === $user->getMorphClass()
+            && $this->participant->participantable_id == $user->getKey();
     }
 
     public function belongsToAuth(): bool
     {
         $user = auth()->user();
 
-        return $this->sendable_type == $user->getMorphClass() && $this->sendable_id == $user->getKey();
+        if (! $user || ! $this->participant) {
+            return false;
+        }
+
+        return $this->participant->participantable_type === $user->getMorphClass()
+            && $this->participant->participantable_id == $user->getKey();
     }
 
     // Relationship for the parent message
@@ -207,17 +243,10 @@ class Message extends Model
 
     public function scopeWhereIsNotOwnedBy($query, Model|Authenticatable $user)
     {
-
-        $query->where(function ($query) use ($user) {
-            $query->where('sendable_id', '<>', $user->getKey())
-                ->orWhere('sendable_type', '<>', $user->getMorphClass());
+        return $query->whereDoesntHave('participant', function ($q) use ($user) {
+            $q->where('participantable_type', $user->getMorphClass())
+                ->where('participantable_id', $user->getKey());
         });
-
-        // $query->where(function ($query) use ($user) {
-        //     $query->whereNot('sendable_id', $user->id)
-        //           ->orWhereNot('sendable_type', $user->getMorphClass());
-        // });
-
     }
 
     /**
@@ -228,7 +257,6 @@ class Message extends Model
      */
     public function deleteFor(Model|Authenticatable $user)
     {
-
         $conversation = $this->conversation;
 
         // Make sure auth belongs to conversation for this message
@@ -237,27 +265,31 @@ class Message extends Model
         // If conversation is self, then delete permanently directly
         if ($conversation->isSelf()) {
             return $this->forceDelete();
-
         }
 
-        // Try to create an action
+        // Resolve this user's participant in the conversation
+        $actorParticipant = $conversation->participant($user);
+
+        abort_unless($actorParticipant != null, 403, 'You do not belong to this conversation');
+
+        // Create an action with PARTICIPANT as actor
         $this->actions()->create([
-            'actor_id' => $user->getKey(),
-            'actor_type' => $user->getMorphClass(),
+            'actor_id' => $actorParticipant->getKey(),       // unsignedBigInteger
+            'actor_type' => $actorParticipant->getMorphClass(), // respects morph map
             'type' => Actions::DELETE,
         ]);
 
-        // If it's a private conversation (only 2 users), then check if both users have deleted the message
+        // If it's a private conversation (only 2 participants), check if both deleted the message
         if ($conversation->isPrivate()) {
+            $conversation->loadMissing('participants');
 
-            // Eager load particiapnts
-            $conversation->loadMissing('participants.participantable');
             $deletedByBothParticipants = true;
 
             foreach ($conversation->participants as $participant) {
                 $deletedByBothParticipants = $deletedByBothParticipants &&
                     $this->actions()
-                        ->whereActor($participant->participantable)
+                        ->where('actor_id', $participant->getKey())
+                        ->where('actor_type', $participant->getMorphClass())
                         ->where('type', Actions::DELETE)
                         ->exists();
             }
