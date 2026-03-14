@@ -243,7 +243,7 @@
                     <section class="p-px py-1 w-full col-span-12">
                         <div class="flex justify-between items-center dark:text-white">
                             <h6 class="text-sm">
-                                    {{ $replyMessage?->ownedBy($this->auth) ? __('wirechat::chat.labels.replying_to_yourself'): __('wirechat::chat.labels.replying_to',['participant'=>$replyMessage->sendable?->name])  }}
+                                    {{ $replyMessage?->ownedBy($this->auth) ? __('wirechat::chat.labels.replying_to_yourself'): __('wirechat::chat.labels.replying_to',['participant'=>$replyMessage->sendable?->wirechat_name])  }}
                             </h6>
                             <button wire:loading.attr="disabled" wire:click="removeReply()"
                                 class="disabled:cursor-progress">
@@ -649,7 +649,7 @@
                                 return file.size > this.maxSize || !this.allowedFileTypes.includes(fileType);
                             });
 
-                            // Filter valid files
+                         // Filter valid files
                             const validFiles = Array.from(files).filter((file) => {
                                 let fileType = file.name.split('.');
                                 fileType = fileType.length > 1 ? fileType.pop().toLowerCase() : '';

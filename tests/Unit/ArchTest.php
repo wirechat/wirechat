@@ -8,9 +8,9 @@ arch('Traits test ')
     ->expect('Wirechat\Wirechat\Traits')
     ->toBeTraits();
 
-arch('Make sure Actor is only used in InteractsWithWirechat Trait')
+arch('Make sure Actor is only used in Participant Model')
     ->expect('Wirechat\Wirechat\Traits\Actor')
-    ->toOnlyBeUsedIn('Wirechat\Wirechat\Traits\InteractsWithWirechat');
+    ->toOnlyBeUsedIn('Wirechat\Wirechat\Models\Participant');
 
 arch('Make sure Actionable is used in Conversation Model')
     ->expect('Wirechat\\Wirechat\\Traits\\Actionable')

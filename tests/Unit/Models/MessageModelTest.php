@@ -438,6 +438,7 @@ describe('DeleteForMe', function () {
         // delete message
         $message1->deleteFor($auth);
 
+        // dd($message1,\Wirechat\Wirechat\Models\Action::first());
         // authenticate as auth
         $this->actingAs($auth);
 
