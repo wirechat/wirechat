@@ -197,6 +197,7 @@
                                 @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authParticipant->isAdmin())
                                 <div dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
+                                    @if ($this->canSendMessage())
                                     <button wire:click="setReply('{{ encrypt($message->id) }}')"
                                         class=" invisible  group-hover:visible hover:scale-110 transition-transform">
 
@@ -207,7 +208,9 @@
                                                 d="M5.921 11.9 1.353 8.62a.72.72 0 0 1 0-1.238L5.921 4.1A.716.716 0 0 1 7 4.719V6c1.5 0 6 0 7 8-2.5-4.5-7-4-7-4v1.281c0 .56-.606.898-1.079.62z" />
                                         </svg>
                                     </button>
+                                    @endif
                                     {{-- Dropdown actions button --}}
+                                    @if ($this->canDeleteMessage() || $this->canSendMessage())
                                     <x-wirechat::dropdown class="w-40" align="{{ $belongsToAuth ? 'right' : 'left' }}"
                                         width="48">
                                         <x-slot name="trigger">
@@ -245,15 +248,18 @@
                                             @endif
 
 
+                                            @if ($this->canSendMessage())
                                             <button dusk="reply_to_message_button" wire:click="setReply('{{ encrypt($message->id) }}')"class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     @lang('wirechat::chat.actions.reply.label')
                                                 </x-wirechat::dropdown-link>
                                             </button>
+                                            @endif
 
 
                                         </x-slot>
                                     </x-wirechat::dropdown>
+                                    @endif
 
                                 </div>
                                 @endif
