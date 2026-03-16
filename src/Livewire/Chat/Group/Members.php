@@ -205,13 +205,16 @@ class Members extends ModalComponent
         // abort if user participants is owner
         abort_if($participant->isOwner(), 403, 'Owner cannot be removed from group');
 
+        // determine the admin's participant in this conversation to use as the actor
+        $adminParticipant = $this->conversation->participant(auth()->user());
+
         // remove from group
         // Create the 'remove' action record in the actions table
         Wirechat::actionModelClass()::create([
             'actionable_id' => $participant->id,
             'actionable_type' => $participant->getMorphClass(),
-            'actor_id' => auth()->id(),  // The admin who performed the action
-            'actor_type' => auth()->user()->getMorphClass(),  // Assuming 'User' is the actor model
+            'actor_id' => $adminParticipant->id,  // The admin participant who performed the action
+            'actor_type' => $adminParticipant->getMorphClass(),  // The participant model as actor
             'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
         ]);
 

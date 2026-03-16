@@ -241,7 +241,7 @@ class WirechatService
      */
     public static function actionModelClass(): string
     {
-        return (string) config('wirechat.models.action');
+        return (string) config('wirechat.models.action', Action::class);
     }
 
     /**
@@ -251,7 +251,7 @@ class WirechatService
      */
     public static function attachmentModelClass(): string
     {
-        return (string) config('wirechat.models.attachment');
+        return (string) config('wirechat.models.attachment', Attachment::class);
     }
 
     /**
@@ -261,7 +261,7 @@ class WirechatService
      */
     public static function conversationModelClass(): string
     {
-        return (string) config('wirechat.models.conversation');
+        return (string) config('wirechat.models.conversation', Conversation::class);
     }
 
     /**
@@ -271,7 +271,7 @@ class WirechatService
      */
     public static function groupModelClass(): string
     {
-        return (string) config('wirechat.models.group');
+        return (string) config('wirechat.models.group', Group::class);
     }
 
     /**
@@ -281,7 +281,7 @@ class WirechatService
      */
     public static function messageModelClass(): string
     {
-        return (string) config('wirechat.models.message');
+        return (string) config('wirechat.models.message', Message::class);
     }
 
     /**
@@ -291,7 +291,7 @@ class WirechatService
      */
     public static function participantModelClass(): string
     {
-        return (string) config('wirechat.models.participant');
+        return (string) config('wirechat.models.participant', Participant::class);
     }
 
     /**
@@ -301,7 +301,7 @@ class WirechatService
      */
     public static function actionModelTable(): string
     {
-        return (new (static::actionModelClass()))->getTable();
+        return static::actionModel()->getTable();
     }
 
     /**
@@ -311,7 +311,7 @@ class WirechatService
      */
     public static function attachmentModelTable(): string
     {
-        return (new (static::attachmentModelClass()))->getTable();
+        return static::attachmentModel()->getTable();
     }
 
     /**
@@ -321,7 +321,7 @@ class WirechatService
      */
     public static function conversationModelTable(): string
     {
-        return (new (static::conversationModelClass()))->getTable();
+        return static::conversationModel()->getTable();
     }
 
     /**
@@ -331,7 +331,7 @@ class WirechatService
      */
     public static function groupModelTable(): string
     {
-        return (new (static::groupModelClass()))->getTable();
+        return static::groupModel()->getTable();
     }
 
     /**
@@ -341,7 +341,7 @@ class WirechatService
      */
     public static function messageModelTable(): string
     {
-        return (new (static::messageModelClass()))->getTable();
+        return static::messageModel()->getTable();
     }
 
     /**
@@ -351,7 +351,7 @@ class WirechatService
      */
     public static function participantModelTable(): string
     {
-        return (new (static::participantModelClass()))->getTable();
+        return static::participantModel()->getTable();
     }
 
     /**

@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Message;
@@ -808,13 +809,14 @@ describe('excludeDeletedScope', function () {
 
 describe('sanitized accessors', function () {
 
-    it('returns sanitized body with HTML tags stripped', function () {
+    it('returns sanitized body with unsafe HTML tags stripped but safe tags preserved', function () {
         $auth = User::factory()->create();
         $message = Message::factory()->sender($auth)->create([
             'body' => '<p>Hello <strong>World</strong></p>',
         ]);
 
-        expect($message->sanitized_body)->toBe('Hello World');
+        // Safe tags like <p> and <strong> should be preserved
+        expect($message->sanitized_body)->toBe('<p>Hello <strong>World</strong></p>');
     });
 
     it('handles null body for sanitized_body accessor', function () {
@@ -826,13 +828,13 @@ describe('sanitized accessors', function () {
         expect($message->sanitized_body)->toBeNull();
     });
 
-    it('handles null body for sanitized_short_body accessor', function () {
+    it('handles null body for text_body accessor', function () {
         $auth = User::factory()->create();
         $message = Message::factory()->sender($auth)->create([
             'body' => null,
         ]);
 
-        expect($message->sanitized_short_body)->toBeNull();
+        expect($message->text_body)->toBeNull();
     });
 
     it('handles empty string body for sanitized_body accessor', function () {
@@ -844,77 +846,78 @@ describe('sanitized accessors', function () {
         expect($message->sanitized_body)->toBe('');
     });
 
-    it('handles empty string body for sanitized_short_body accessor', function () {
+    it('handles empty string body for text_body accessor', function () {
         $auth = User::factory()->create();
         $message = Message::factory()->sender($auth)->create([
             'body' => '',
         ]);
 
-        expect($message->sanitized_short_body)->toBe('');
+        expect($message->text_body)->toBe('');
     });
 
     it('returns HtmlString when accessor is overridden to return HtmlString', function () {
-        $auth = User::factory()->create();
-
         // Create a custom message class that overrides the accessor
         $customMessage = new class extends Message
         {
-            public function getSanitizedBodyAttribute(): \Illuminate\Support\HtmlString|string|null
+            public function getSanitizedBodyAttribute(): HtmlString|string|null
             {
-                return new \Illuminate\Support\HtmlString('<p>Sanitized HTML</p>');
+                return new HtmlString('<p>Sanitized HTML</p>');
             }
         };
 
         $customMessage->body = 'Original Body';
 
-        expect($customMessage->sanitized_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($customMessage->sanitized_body)->toBeInstanceOf(HtmlString::class);
         expect($customMessage->sanitized_body->toHtml())->toBe('<p>Sanitized HTML</p>');
     });
 
-    it('returns HtmlString when short accessor is overridden to return HtmlString', function () {
-        $auth = User::factory()->create();
-
+    it('returns HtmlString when text_body accessor is overridden to return HtmlString', function () {
         // Create a custom message class that overrides the accessor
         $customMessage = new class extends Message
         {
-            public function getSanitizedShortBodyAttribute(): \Illuminate\Support\HtmlString|string|null
+            public function getTextBodyAttribute(): HtmlString|string|null
             {
-                return new \Illuminate\Support\HtmlString('<strong>Short</strong>');
+                return new HtmlString('<strong>Short</strong>');
             }
         };
 
         $customMessage->body = 'Original Body';
 
-        expect($customMessage->sanitized_short_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
-        expect($customMessage->sanitized_short_body->toHtml())->toBe('<strong>Short</strong>');
+        expect($customMessage->text_body)->toBeInstanceOf(HtmlString::class);
+        expect($customMessage->text_body->toHtml())->toBe('<strong>Short</strong>');
     });
 
-    it('strips XSS script tags from sanitized_body', function () {
+    it('strips unsafe HTML tags but allows safe tags in sanitized_body', function () {
         $auth = User::factory()->create();
-        $bodyContent = 'This is a regular message: <script>alert("xss")</script>';
+        $bodyContent = 'This is a regular message: <script>alert("xss")</script><p>Hello <strong>World</strong></p>';
         $message = Message::factory()->sender($auth)->create([
             'body' => $bodyContent,
         ]);
 
-        // XSS script tags should be stripped
-        expect($message->sanitized_body)->toBe('This is a regular message: alert("xss")');
+        // XSS script tags should be stripped, but safe tags should remain
+        expect($message->sanitized_body)->toBe('This is a regular message: alert("xss")<p>Hello <strong>World</strong></p>');
         expect($message->sanitized_body)->not->toContain('<script>');
         expect($message->sanitized_body)->not->toContain('</script>');
+        expect($message->sanitized_body)->toContain('<p>');
+        expect($message->sanitized_body)->toContain('<strong>');
     });
 
-    it('strips all HTML tags from sanitized_body', function () {
+    it('allows safe HTML tags in sanitized_body', function () {
         $auth = User::factory()->create();
         $message = Message::factory()->sender($auth)->create([
             'body' => '<div><p>Hello</p><script>alert("hack")</script><img src="x" onerror="alert(1)"></div>',
         ]);
 
-        // All HTML tags should be stripped
-        expect($message->sanitized_body)->toBe('Helloalert("hack")');
-        expect($message->sanitized_body)->not->toContain('<');
-        expect($message->sanitized_body)->not->toContain('>');
+        // Safe tags should remain, unsafe tags should be stripped
+        expect($message->sanitized_body)->toBe('<div><p>Hello</p>alert("hack")</div>');
+        expect($message->sanitized_body)->not->toContain('<script>');
+        expect($message->sanitized_body)->not->toContain('<img');
+        expect($message->sanitized_body)->toContain('<div>');
+        expect($message->sanitized_body)->toContain('</div>');
+        expect($message->sanitized_body)->toContain('<p>');
     });
 
-    it('strips HTML tags from sanitized_short_body accessor', function () {
+    it('strips HTML tags from text_body accessor', function () {
         $auth = User::factory()->create();
         $bodyContent = '<p>Short</p> <strong>version</strong> of the message';
         $message = Message::factory()->sender($auth)->create([
@@ -922,10 +925,10 @@ describe('sanitized accessors', function () {
         ]);
 
         // HTML tags should be stripped
-        expect($message->sanitized_short_body)->toBe('Short version of the message');
+        expect($message->text_body)->toBe('Short version of the message');
     });
 
-    it('protects against XSS in sanitized_short_body accessor', function () {
+    it('protects against XSS in text_body accessor', function () {
         $auth = User::factory()->create();
         $xssBody = '<script>alert("xss")</script>Hello World<script>stealCookies()</script>';
         $message = Message::factory()->sender($auth)->create([
@@ -933,52 +936,63 @@ describe('sanitized accessors', function () {
         ]);
 
         // XSS scripts should be stripped
-        expect($message->sanitized_short_body)->toBe('alert("xss")Hello WorldstealCookies()');
-        expect($message->sanitized_short_body)->not->toContain('<script>');
-        expect($message->sanitized_short_body)->not->toContain('</script>');
+        expect($message->text_body)->toBe('alert("xss")Hello WorldstealCookies()');
+        expect($message->text_body)->not->toContain('<script>');
+        expect($message->text_body)->not->toContain('</script>');
     });
 
-    it('squishes multiple spaces into single space for sanitized_short_body accessor', function () {
+    it('squishes multiple spaces into single space for text_body accessor', function () {
         $auth = User::factory()->create();
         $bodyWithExtraSpaces = 'Hello    World   with    many   spaces';
         $message = Message::factory()->sender($auth)->create([
             'body' => $bodyWithExtraSpaces,
         ]);
 
-        expect($message->sanitized_short_body)->toBe('Hello World with many spaces');
+        expect($message->text_body)->toBe('Hello World with many spaces');
     });
 
-    it('squishes tabs and newlines into single space for sanitized_short_body accessor', function () {
+    it('squishes tabs and newlines into single space for text_body accessor', function () {
         $auth = User::factory()->create();
         $bodyWithWhitespace = "Hello\t\t\tWorld\n\n\nwith\r\nmixed\twhitespace";
         $message = Message::factory()->sender($auth)->create([
             'body' => $bodyWithWhitespace,
         ]);
 
-        expect($message->sanitized_short_body)->toBe('Hello World with mixed whitespace');
+        expect($message->text_body)->toBe('Hello World with mixed whitespace');
     });
 
-    it('trims leading and trailing whitespace for sanitized_short_body accessor', function () {
+    it('trims leading and trailing whitespace for text_body accessor', function () {
         $auth = User::factory()->create();
         $bodyWithLeadingTrailing = '   Hello World   ';
         $message = Message::factory()->sender($auth)->create([
             'body' => $bodyWithLeadingTrailing,
         ]);
 
-        expect($message->sanitized_short_body)->toBe('Hello World');
+        expect($message->text_body)->toBe('Hello World');
     });
 
-    it('handles combination of HTML stripping and squishing for sanitized_short_body accessor', function () {
+    it('handles combination of HTML stripping and squishing for text_body accessor', function () {
         $auth = User::factory()->create();
-        $bodyWithHtmlAndWhitespace = '<p>Hello</p>   <strong>World</strong>    with    spaces';
+        $bodyContent = '<p>  Hello   </p>  <strong>World</strong>   with   <em>spaces</em>  ';
         $message = Message::factory()->sender($auth)->create([
-            'body' => $bodyWithHtmlAndWhitespace,
+            'body' => $bodyContent,
         ]);
 
-        expect($message->sanitized_short_body)->toBe('Hello World with spaces');
+        expect($message->text_body)->toBe('Hello World with spaces');
     });
 
-    it('squishes whitespace without truncating for sanitized_short_body accessor', function () {
+    it('squishes whitespace without truncating for text_body accessor', function () {
+        $auth = User::factory()->create();
+        $bodyWithManySpaces = 'Word     AnotherWord';
+        $message = Message::factory()->sender($auth)->create([
+            'body' => $bodyWithManySpaces,
+        ]);
+
+        expect($message->text_body)->toBe('Word AnotherWord');
+        expect(strlen($message->text_body))->toBe(16);
+    });
+
+    it('squishes lots of whitespace without truncating for text_body accessor', function () {
         $auth = User::factory()->create();
         // Create a string with lots of spaces that get squished
         $bodyWithSpaces = 'Word'.str_repeat(' ', 50).'AnotherWord';
@@ -987,8 +1001,8 @@ describe('sanitized accessors', function () {
         ]);
 
         // After squishing, this should be "Word AnotherWord" (16 chars: 4 + 1 + 11)
-        expect($message->sanitized_short_body)->toBe('Word AnotherWord');
-        expect(strlen($message->sanitized_short_body))->toBe(16);
+        expect($message->text_body)->toBe('Word AnotherWord');
+        expect(strlen($message->text_body))->toBe(16);
     });
 
 });

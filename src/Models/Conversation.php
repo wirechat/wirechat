@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
@@ -288,7 +289,7 @@ class Conversation extends Model
                 // We only want messages that are NOT deleted by the current user's participant in this conversation
                 ->whereDoesntHave('actions', function ($aq) use ($user, $messagesTable, $participantsTable) {
                     $aq->where('type', Actions::DELETE)
-                        ->where('actor_type', Wirechat::participantModelClass())
+                        ->where('actor_type', Relation::getMorphAlias(Wirechat::participantModelClass()))
 
                         // actor_id (actions) must reference a participant row that belongs to the same conversation
                         // AND that participant row must belong to the current authenticated user.

@@ -24,7 +24,7 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property int $participant_id
  * @property int|null $reply_id
  * @property string|null $body
- * @property HtmlString|string|null $sanitized_short_body
+ * @property HtmlString|string|null $text_body
  * @property HtmlString|string|null $sanitized_body
  * @property MessageType $type
  * @property \Illuminate\Support\Carbon|null $kept_at filled when a message is kept from disappearing
@@ -344,33 +344,36 @@ class Message extends Model
     }
 
     /**
-     * Returns the sanitized body attribute.
+     * Returns the text body attribute.
      *
-     * This method can be overridden in child classes to customize HTML sanitization with a short version.
+     * This method removes all HTML tags and squishes whitespace.
      *
-     * This method can be overridden in child classes to customize the HTML sanitization behavior,
-     * for example to allow specific safe HTML tags.
-     *
-     * @return HtmlString|string|null The sanitized body with HTML tags removed, or null if body is null.
+     * @return HtmlString|string|null The text body with all HTML tags removed and whitespace squished, or null if body is null.
      */
-    public function getSanitizedShortBodyAttribute(): HtmlString|string|null
+    public function getTextBodyAttribute(): HtmlString|string|null
     {
         if ($this->body === null) {
             return null;
         }
 
-        return strip_tags($this->body);
+        // Remove all HTML tags
+        $text = strip_tags($this->body);
+
+        // Squish whitespace: replace multiple whitespace characters with a single space
+        $text = preg_replace('/\s+/', ' ', $text);
+
+        // Trim leading and trailing whitespace
+        return trim($text);
     }
 
     /**
      * Returns the sanitized body attribute.
      *
+     * This method removes unsafe HTML tags while allowing safe HTML tags.
+     *
      * This method can be overridden in child classes to customize HTML sanitization.
      *
-     * This method can be overridden in child classes to customize the HTML sanitization behavior,
-     * for example to allow specific safe HTML tags.
-     *
-     * @return HtmlString|string|null The sanitized body with HTML tags removed, or null if body is null.
+     * @return HtmlString|string|null The sanitized body with unsafe HTML tags removed, or null if body is null.
      */
     public function getSanitizedBodyAttribute(): HtmlString|string|null
     {
@@ -378,6 +381,9 @@ class Message extends Model
             return null;
         }
 
-        return strip_tags($this->body);
+        // Allow safe HTML tags: basic formatting tags (exclude img and script tags)
+        $allowedTags = '<p><br><strong><em><b><i><u><span><div><h1><h2><h3><h4><h5><h6><ul><ol><li><a>';
+
+        return strip_tags($this->body, $allowedTags);
     }
 }
