@@ -4,7 +4,6 @@ namespace Wirechat\Wirechat\Livewire\Chat\Group;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
-// use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Wirechat\Wirechat\Enums\Actions;
@@ -14,7 +13,6 @@ use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
-use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 

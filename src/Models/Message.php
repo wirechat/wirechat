@@ -116,7 +116,7 @@ class Message extends Model
      */
     public function participant(): BelongsTo
     {
-        return $this->belongsTo(Participant::class, 'participant_id');
+        return $this->belongsTo(Wirechat::participantModelClass(), 'participant_id');
     }
 
     /**
@@ -345,19 +345,49 @@ class Message extends Model
 
     /**
      * Returns the sanitized short body attribute.
-     * This method can be overridden in child classes to customize HTML sanitization short version.
+     *
+     * This method returns a sanitized version of the message body for use in list previews.
+     * HTML tags are stripped to prevent XSS attacks, and extra whitespace is normalized.
+     *
+     * This method can be overridden in child classes to customize the sanitization behavior
+     * or to add truncation logic.
+     *
+     * @return HtmlString|string|null The sanitized body, or null if body is null.
      */
     public function getSanitizedShortBodyAttribute(): HtmlString|string|null
     {
-        return $this->body;
+        if ($this->body === null) {
+            return null;
+        }
+
+        // Strip HTML tags to prevent XSS attacks
+        $body = strip_tags($this->body);
+
+        // Normalize whitespace - convert multiple spaces/tabs/newlines and special Unicode fillers to single space
+        $body = preg_replace('~(\s|\x{3164}|\x{1160})+~u', ' ', $body);
+
+        return trim($body);
     }
 
     /**
      * Returns the sanitized body attribute.
-     * This method can be overridden in child classes to customize HTML sanitization.
+     *
+     * This method returns a sanitized version of the message body with all HTML tags stripped
+     * to prevent XSS attacks. This ensures safe display in views without executing any scripts
+     * or rendering unsafe HTML.
+     *
+     * This method can be overridden in child classes to customize the HTML sanitization behavior,
+     * for example to allow specific safe HTML tags.
+     *
+     * @return HtmlString|string|null The sanitized body with HTML tags removed, or null if body is null.
      */
     public function getSanitizedBodyAttribute(): HtmlString|string|null
     {
-        return $this->body;
+        if ($this->body === null) {
+            return null;
+        }
+
+        // Strip HTML tags to prevent XSS attacks
+        return strip_tags($this->body);
     }
 }

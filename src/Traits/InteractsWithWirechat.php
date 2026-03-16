@@ -87,7 +87,7 @@ trait InteractsWithWirechat
         }
 
         return DB::transaction(function () use ($type, $isSelf, $authType, $authId, $peerType, $peerId, $message) {
-            $conversation = new Conversation;
+            $conversation = Wirechat::conversationModel();
             $conversation->type = $type;
             $conversation->save();
 
@@ -137,7 +137,7 @@ trait InteractsWithWirechat
         abort_unless($this->canCreateGroups(), 403, 'You do not have permission to create groups.');
 
         // Otherwise, create a new conversation
-        $conversation = new Conversation;
+        $conversation = Wirechat::conversationModel();
         $conversation->type = ConversationType::GROUP;
         $conversation->save();
 

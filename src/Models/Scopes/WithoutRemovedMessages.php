@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Facades\Wirechat;
-use Wirechat\Wirechat\Models\Message;
-use Wirechat\Wirechat\Models\Participant;
 
 class WithoutRemovedMessages implements Scope
 {
@@ -34,7 +32,7 @@ class WithoutRemovedMessages implements Scope
         $user = auth()->user();
         $legacyActorType = $user->getMorphClass();
         $legacyActorId = $user->getKey();
-        $participantClass = Participant::class;
+        $participantClass = Wirechat::participantModelClass();
 
         // Exclude messages that have a DELETE action performed by *this* authenticated actor
         $builder->whereDoesntHave('actions', function ($q) use (

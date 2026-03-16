@@ -3,6 +3,12 @@
 namespace Wirechat\Wirechat\Services;
 
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
 
@@ -231,7 +237,7 @@ class WirechatService
     /**
      * Get the Action model class from the configuration.
      *
-     * @return class-string<\Wirechat\Wirechat\Models\Action> The Action model class.
+     * @return class-string<Action> The Action model class.
      */
     public static function actionModelClass(): string
     {
@@ -241,7 +247,7 @@ class WirechatService
     /**
      * Get the Attachment model class from the configuration.
      *
-     * @return class-string<\Wirechat\Wirechat\Models\Attachment> The Attachment model class.
+     * @return class-string<Attachment> The Attachment model class.
      */
     public static function attachmentModelClass(): string
     {
@@ -251,7 +257,7 @@ class WirechatService
     /**
      * Get the Conversation model class from the configuration.
      *
-     * @return class-string<\Wirechat\Wirechat\Models\Conversation> The Conversation model class.
+     * @return class-string<Conversation> The Conversation model class.
      */
     public static function conversationModelClass(): string
     {
@@ -261,7 +267,7 @@ class WirechatService
     /**
      * Get the Group model class from the configuration.
      *
-     * @return class-string<\Wirechat\Wirechat\Models\Group> The Group model class.
+     * @return class-string<Group> The Group model class.
      */
     public static function groupModelClass(): string
     {
@@ -271,7 +277,7 @@ class WirechatService
     /**
      * Get the Message model class from the configuration.
      *
-     * @return class-string<\Wirechat\Wirechat\Models\Message> The Message model class.
+     * @return class-string<Message> The Message model class.
      */
     public static function messageModelClass(): string
     {
@@ -281,7 +287,7 @@ class WirechatService
     /**
      * Get the Participant model class from the configuration.
      *
-     * @return class-string<\Wirechat\Wirechat\Models\Participant> The Participant model class.
+     * @return class-string<Participant> The Participant model class.
      */
     public static function participantModelClass(): string
     {
@@ -346,5 +352,71 @@ class WirechatService
     public static function participantModelTable(): string
     {
         return (new (static::participantModelClass()))->getTable();
+    }
+
+    /**
+     * Create a new Action model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Action The Action model instance.
+     */
+    public static function actionModel(array $attributes = []): Action
+    {
+        return new (static::actionModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Attachment model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Attachment The Attachment model instance.
+     */
+    public static function attachmentModel(array $attributes = []): Attachment
+    {
+        return new (static::attachmentModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Conversation model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Conversation The Conversation model instance.
+     */
+    public static function conversationModel(array $attributes = []): Conversation
+    {
+        return new (static::conversationModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Group model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Group The Group model instance.
+     */
+    public static function groupModel(array $attributes = []): Group
+    {
+        return new (static::groupModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Message model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Message The Message model instance.
+     */
+    public static function messageModel(array $attributes = []): Message
+    {
+        return new (static::messageModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Participant model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Participant The Participant model instance.
+     */
+    public static function participantModel(array $attributes = []): Participant
+    {
+        return new (static::participantModelClass())($attributes);
     }
 }

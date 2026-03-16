@@ -105,6 +105,7 @@ class UpgradeMorphColumns extends Command
                     if ($table === Wirechat::actionModelTable()) {
                         $t->index(['actionable_id', 'actionable_type'], 'actions_actionable_idx');
                         $t->index(['actor_id', 'actor_type'], 'actions_actor_idx');
+                        $t->index('type', 'actions_type_idx');
                     }
                     if ($table === Wirechat::attachmentModelTable()) {
                         $t->index(['attachable_id', 'attachable_type'], 'attachments_attachable_idx');
