@@ -1,0 +1,197 @@
+<?php
+
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Services\WirechatService;
+
+describe('WirechatService Model Resolution', function () {
+    beforeEach(function () {
+        // Reset config to default values before each test
+        config([
+            'wirechat.models.action' => Action::class,
+            'wirechat.models.attachment' => Attachment::class,
+            'wirechat.models.conversation' => Conversation::class,
+            'wirechat.models.group' => Group::class,
+            'wirechat.models.message' => Message::class,
+            'wirechat.models.participant' => Participant::class,
+        ]);
+    });
+
+    describe('Model Class Methods', function () {
+        it('returns correct action model class', function () {
+            expect(WirechatService::actionModelClass())->toBe(Action::class);
+        });
+
+        it('returns correct attachment model class', function () {
+            expect(WirechatService::attachmentModelClass())->toBe(Attachment::class);
+        });
+
+        it('returns correct conversation model class', function () {
+            expect(WirechatService::conversationModelClass())->toBe(Conversation::class);
+        });
+
+        it('returns correct group model class', function () {
+            expect(WirechatService::groupModelClass())->toBe(Group::class);
+        });
+
+        it('returns correct message model class', function () {
+            expect(WirechatService::messageModelClass())->toBe(Message::class);
+        });
+
+        it('returns correct participant model class', function () {
+            expect(WirechatService::participantModelClass())->toBe(Participant::class);
+        });
+    });
+
+    describe('Model Instance Creation', function () {
+        it('creates action model instance', function () {
+            $model = WirechatService::actionModel([
+                'actionable_id' => 1,
+                'actionable_type' => 'test',
+                'actor_id' => 1,
+                'actor_type' => 'test',
+            ]);
+
+            expect($model)->toBeInstanceOf(Action::class)
+                ->and($model->actionable_id)->toBe(1)
+                ->and($model->actor_id)->toBe(1);
+        });
+
+        it('creates attachment model instance', function () {
+            $model = WirechatService::attachmentModel([
+                'file_name' => 'test.jpg',
+                'original_name' => 'test.jpg',
+            ]);
+
+            expect($model)->toBeInstanceOf(Attachment::class)
+                ->and($model->file_name)->toBe('test.jpg')
+                ->and($model->original_name)->toBe('test.jpg');
+        });
+
+        it('creates conversation model instance', function () {
+            $model = WirechatService::conversationModel([
+                'disappearing_duration' => 3600,
+            ]);
+
+            expect($model)->toBeInstanceOf(Conversation::class)
+                ->and($model->disappearing_duration)->toBe(3600);
+        });
+
+        it('creates group model instance', function () {
+            $model = WirechatService::groupModel(['name' => 'Test Group']);
+
+            expect($model)->toBeInstanceOf(Group::class)
+                ->and($model->name)->toBe('Test Group');
+        });
+
+        it('creates message model instance', function () {
+            $model = WirechatService::messageModel(['body' => 'Hello World']);
+
+            expect($model)->toBeInstanceOf(Message::class)
+                ->and($model->body)->toBe('Hello World');
+        });
+
+        it('creates participant model instance', function () {
+            $model = WirechatService::participantModel([
+                'participantable_id' => 1,
+                'participantable_type' => 'User',
+            ]);
+
+            expect($model)->toBeInstanceOf(Participant::class)
+                ->and($model->participantable_id)->toBe(1)
+                ->and($model->participantable_type)->toBe('User');
+        });
+    });
+
+    describe('Model Class Validation', function () {
+        it('throws exception for non-existent class', function () {
+            config(['wirechat.models.action' => 'NonExistentClass']);
+
+            try {
+                WirechatService::actionModelClass();
+                expect(false)->toBeTrue('Exception should have been thrown');
+            } catch (InvalidArgumentException $e) {
+                expect($e->getMessage())->toBe("Model class 'NonExistentClass' configured in 'wirechat.models.action' does not exist.");
+            }
+
+            // Reset config
+            config(['wirechat.models.action' => Action::class]);
+        });
+
+        it('throws exception for class that does not extend base class', function () {
+            config(['wirechat.models.action' => stdClass::class]);
+
+            try {
+                WirechatService::actionModelClass();
+                expect(false)->toBeTrue('Exception should have been thrown');
+            } catch (InvalidArgumentException $e) {
+                expect($e->getMessage())->toBe("Model class 'stdClass' configured in 'wirechat.models.action' must extend '".Action::class."'.");
+            }
+
+            // Reset config
+            config(['wirechat.models.action' => Action::class]);
+        });
+
+        it('validates model classes for all model types', function () {
+            $modelTypes = [
+                'action' => Action::class,
+                'attachment' => Attachment::class,
+                'conversation' => Conversation::class,
+                'group' => Group::class,
+                'message' => Message::class,
+                'participant' => Participant::class,
+            ];
+
+            foreach ($modelTypes as $type => $expectedClass) {
+                config(["wirechat.models.{$type}" => 'NonExistentClass']);
+
+                $method = "{$type}ModelClass";
+                try {
+                    WirechatService::{$method}();
+                    throw new Exception("Expected InvalidArgumentException was not thrown for {$type}");
+                } catch (InvalidArgumentException $e) {
+                    expect($e->getMessage())->toContain("Model class 'NonExistentClass' configured in 'wirechat.models.{$type}' does not exist.");
+                }
+
+                // Reset to valid class for next iteration
+                config(["wirechat.models.{$type}" => $expectedClass]);
+            }
+        });
+    });
+
+    describe('Model Table Names', function () {
+        it('returns correct table names for all models', function () {
+            expect(WirechatService::actionModelTable())->toBe((new Action)->getTable());
+            expect(WirechatService::attachmentModelTable())->toBe((new Attachment)->getTable());
+            expect(WirechatService::conversationModelTable())->toBe((new Conversation)->getTable());
+            expect(WirechatService::groupModelTable())->toBe((new Group)->getTable());
+            expect(WirechatService::messageModelTable())->toBe((new Message)->getTable());
+            expect(WirechatService::participantModelTable())->toBe((new Participant)->getTable());
+        });
+    });
+
+    describe('Custom Model Classes', function () {
+        it('works with custom model classes that extend base classes', function () {
+            // Create a temporary custom model class for testing
+            $customActionClass = new class extends Action
+            {
+                public function customMethod(): string
+                {
+                    return 'custom';
+                }
+            };
+
+            config(['wirechat.models.action' => get_class($customActionClass)]);
+
+            expect(WirechatService::actionModelClass())->toBe(get_class($customActionClass));
+
+            $instance = WirechatService::actionModel();
+            expect($instance)->toBeInstanceOf(get_class($customActionClass))
+                ->and($instance->customMethod())->toBe('custom');
+        });
+    });
+});

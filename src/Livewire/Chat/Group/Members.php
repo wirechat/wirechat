@@ -208,6 +208,11 @@ class Members extends ModalComponent
         // determine the admin's participant in this conversation to use as the actor
         $adminParticipant = $this->conversation->participant(auth()->user());
 
+        // ensure the admin participant exists
+        if (! $adminParticipant) {
+            abort(403, 'Admin participant not found in conversation');
+        }
+
         // remove from group
         // Create the 'remove' action record in the actions table
         Wirechat::actionModelClass()::create([
