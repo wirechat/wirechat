@@ -16,9 +16,34 @@ class WirechatService
 {
     protected PanelRegistry $registry;
 
+    protected array $tableNames = [];
+
+    protected bool $tableNamesLoaded = false;
+
     public function __construct()
     {
         $this->registry = app(PanelRegistry::class);
+    }
+
+    /**
+     * Load all table names lazily when first needed for performance optimization.
+     */
+    protected function loadTableNames(): void
+    {
+        if ($this->tableNamesLoaded) {
+            return;
+        }
+
+        $this->tableNames = [
+            'action' => $this->actionModel()->getTable(),
+            'attachment' => $this->attachmentModel()->getTable(),
+            'conversation' => $this->conversationModel()->getTable(),
+            'group' => $this->groupModel()->getTable(),
+            'message' => $this->messageModel()->getTable(),
+            'participant' => $this->participantModel()->getTable(),
+        ];
+
+        $this->tableNamesLoaded = true;
     }
 
     /**
@@ -355,7 +380,9 @@ class WirechatService
      */
     public function actionModelTable(): string
     {
-        return $this->actionModel()->getTable();
+        $this->loadTableNames();
+
+        return $this->tableNames['action'];
     }
 
     /**
@@ -365,7 +392,9 @@ class WirechatService
      */
     public function attachmentModelTable(): string
     {
-        return $this->attachmentModel()->getTable();
+        $this->loadTableNames();
+
+        return $this->tableNames['attachment'];
     }
 
     /**
@@ -375,7 +404,9 @@ class WirechatService
      */
     public function conversationModelTable(): string
     {
-        return $this->conversationModel()->getTable();
+        $this->loadTableNames();
+
+        return $this->tableNames['conversation'];
     }
 
     /**
@@ -385,7 +416,9 @@ class WirechatService
      */
     public function groupModelTable(): string
     {
-        return $this->groupModel()->getTable();
+        $this->loadTableNames();
+
+        return $this->tableNames['group'];
     }
 
     /**
@@ -395,7 +428,9 @@ class WirechatService
      */
     public function messageModelTable(): string
     {
-        return $this->messageModel()->getTable();
+        $this->loadTableNames();
+
+        return $this->tableNames['message'];
     }
 
     /**
@@ -405,7 +440,9 @@ class WirechatService
      */
     public function participantModelTable(): string
     {
-        return $this->participantModel()->getTable();
+        $this->loadTableNames();
+
+        return $this->tableNames['participant'];
     }
 
     /**

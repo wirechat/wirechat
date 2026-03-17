@@ -108,33 +108,29 @@ describe('WirechatService Model Resolution', function () {
     });
 
     describe('Model Class Validation', function () {
+        afterEach(function () {
+            // Reset all model configs to defaults after each test
+            config([
+                'wirechat.models.action' => Action::class,
+                'wirechat.models.attachment' => Attachment::class,
+                'wirechat.models.conversation' => Conversation::class,
+                'wirechat.models.group' => Group::class,
+                'wirechat.models.message' => Message::class,
+                'wirechat.models.participant' => Participant::class,
+            ]);
+        });
+
         it('throws exception for non-existent class', function () {
             config(['wirechat.models.action' => 'NonExistentClass']);
 
-            try {
-                Wirechat::actionModelClass();
-                expect(false)->toBeTrue('Exception should have been thrown');
-            } catch (InvalidArgumentException $e) {
-                expect($e->getMessage())->toBe("Model class 'NonExistentClass' configured in 'wirechat.models.action' does not exist.");
-            }
-
-            // Reset config
-            config(['wirechat.models.action' => Action::class]);
-        });
+            Wirechat::actionModelClass();
+        })->throws(InvalidArgumentException::class, "Model class 'NonExistentClass' configured in 'wirechat.models.action' does not exist.");
 
         it('throws exception for class that does not extend base class', function () {
             config(['wirechat.models.action' => stdClass::class]);
 
-            try {
-                Wirechat::actionModelClass();
-                expect(false)->toBeTrue('Exception should have been thrown');
-            } catch (InvalidArgumentException $e) {
-                expect($e->getMessage())->toBe("Model class 'stdClass' configured in 'wirechat.models.action' must extend '".Action::class."'.");
-            }
-
-            // Reset config
-            config(['wirechat.models.action' => Action::class]);
-        });
+            Wirechat::actionModelClass();
+        })->throws(InvalidArgumentException::class, "Model class 'stdClass' configured in 'wirechat.models.action' must extend '".Action::class."'.");
 
         it('validates model classes for all model types', function () {
             $modelTypes = [
@@ -150,12 +146,9 @@ describe('WirechatService Model Resolution', function () {
                 config(["wirechat.models.{$type}" => 'NonExistentClass']);
 
                 $method = "{$type}ModelClass";
-                try {
-                    Wirechat::{$method}();
-                    throw new Exception("Expected InvalidArgumentException was not thrown for {$type}");
-                } catch (InvalidArgumentException $e) {
-                    expect($e->getMessage())->toContain("Model class 'NonExistentClass' configured in 'wirechat.models.{$type}' does not exist.");
-                }
+
+                expect(fn () => Wirechat::{$method}())
+                    ->toThrow(InvalidArgumentException::class, "Model class 'NonExistentClass' configured in 'wirechat.models.{$type}' does not exist.");
 
                 // Reset to valid class for next iteration
                 config(["wirechat.models.{$type}" => $expectedClass]);
@@ -165,12 +158,12 @@ describe('WirechatService Model Resolution', function () {
 
     describe('Model Table Names', function () {
         it('returns correct table names for all models', function () {
-            expect(Wirechat::actionModelTable())->toBe((new Action)->getTable());
-            expect(Wirechat::attachmentModelTable())->toBe((new Attachment)->getTable());
-            expect(Wirechat::conversationModelTable())->toBe((new Conversation)->getTable());
-            expect(Wirechat::groupModelTable())->toBe((new Group)->getTable());
-            expect(Wirechat::messageModelTable())->toBe((new Message)->getTable());
-            expect(Wirechat::participantModelTable())->toBe((new Participant)->getTable());
+            expect(Wirechat::actionModelTable())->toBe((new Action)->getTable())
+                ->and(Wirechat::attachmentModelTable())->toBe((new Attachment)->getTable())
+                ->and(Wirechat::conversationModelTable())->toBe((new Conversation)->getTable())
+                ->and(Wirechat::groupModelTable())->toBe((new Group)->getTable())
+                ->and(Wirechat::messageModelTable())->toBe((new Message)->getTable())
+                ->and(Wirechat::participantModelTable())->toBe((new Participant)->getTable());
         });
     });
 

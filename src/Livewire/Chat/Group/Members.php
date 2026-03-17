@@ -216,9 +216,9 @@ class Members extends ModalComponent
         // remove from group
         // Create the 'remove' action record in the actions table
         Wirechat::actionModelClass()::create([
-            'actionable_id' => $participant->id,
+            'actionable_id' => $participant->getKey(),
             'actionable_type' => $participant->getMorphClass(),
-            'actor_id' => $adminParticipant->id,  // The admin participant who performed the action
+            'actor_id' => $adminParticipant->getKey(),  // The admin participant who performed the action
             'actor_type' => $adminParticipant->getMorphClass(),  // The participant model as actor
             'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
         ]);
@@ -226,7 +226,7 @@ class Members extends ModalComponent
         // remove from
         // Remove member if they are already selected
         $this->participants = $this->participants->reject(function ($member) use ($participant) {
-            return $member->id == $participant->id && get_class($member) == get_class($participant);
+            return $member->getKey() == $participant->getKey() && get_class($member) == get_class($participant);
         });
 
         // subtract one from total members and update chat list
