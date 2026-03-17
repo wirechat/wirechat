@@ -193,4 +193,81 @@ describe('WirechatService Model Resolution', function () {
             config(['wirechat.models.action' => $originalActionClass]);
         });
     });
+
+    describe('Table Name Caching', function () {
+        it('caches table names independently for each model', function () {
+            // Reset cache to ensure clean state
+            Wirechat::resetTableNameCache();
+
+            // Cache message table name
+            $messageTable1 = Wirechat::messageModelTable();
+            $messageTable2 = Wirechat::messageModelTable();
+
+            // Should return same cached value
+            expect($messageTable2)->toBe($messageTable1);
+
+            // Cache action table name independently
+            $actionTable1 = Wirechat::actionModelTable();
+            $actionTable2 = Wirechat::actionModelTable();
+
+            // Should return same cached value
+            expect($actionTable2)->toBe($actionTable1);
+
+            // Reset only message cache
+            Wirechat::resetTableNameCache('message');
+
+            // Action should still be cached
+            expect(Wirechat::actionModelTable())->toBe($actionTable1);
+
+            // Message should be re-evaluated (same result but not cached)
+            expect(Wirechat::messageModelTable())->toBe($messageTable1);
+        });
+
+        it('respects config changes after cache reset', function () {
+            // Get initial table name
+            $initialTable = Wirechat::messageModelTable();
+
+            // Create a custom model class that extends Message
+            $customMessageClass = new class extends Message
+            {
+                public function __construct(array $attributes = [])
+                {
+                    parent::__construct($attributes);
+                    $this->table = 'custom_messages_table';
+                }
+            };
+
+            // Change config to use custom model
+            config(['wirechat.models.message' => get_class($customMessageClass)]);
+
+            // Table should still be cached (old value)
+            expect(Wirechat::messageModelTable())->toBe($initialTable);
+
+            // Reset cache for message model
+            Wirechat::resetTableNameCache('message');
+
+            // Now it should use the new config
+            expect(Wirechat::messageModelTable())->toBe('custom_messages_table');
+        });
+
+        it('can reset all cache at once', function () {
+            // Prime cache for multiple models
+            $messageTable = Wirechat::messageModelTable();
+            $actionTable = Wirechat::actionModelTable();
+
+            // Verify they're cached by checking internal state via reflection
+            $reflection = new \ReflectionClass(Wirechat::getFacadeRoot());
+            $tableNamesProperty = $reflection->getProperty('tableNames');
+            $tableNamesProperty->setAccessible(true);
+            $cachedNames = $tableNamesProperty->getValue(Wirechat::getFacadeRoot());
+
+            expect($cachedNames)->toHaveKeys(['message', 'action']);
+
+            // Reset all cache
+            Wirechat::resetTableNameCache();
+
+            $cachedNamesAfterReset = $tableNamesProperty->getValue(Wirechat::getFacadeRoot());
+            expect($cachedNamesAfterReset)->toBeEmpty();
+        });
+    });
 });

@@ -18,32 +18,39 @@ class WirechatService
 
     protected array $tableNames = [];
 
-    protected bool $tableNamesLoaded = false;
-
     public function __construct()
     {
         $this->registry = app(PanelRegistry::class);
     }
 
     /**
-     * Load all table names lazily when first needed for performance optimization.
+     * Get a cached table name for a specific model, loading it lazily if needed.
+     *
+     * @param  string  $modelKey  The model key (e.g., 'action', 'message')
+     * @param  callable  $modelFactory  Factory function to create the model instance
+     * @return string The table name
      */
-    protected function loadTableNames(): void
+    protected function getCachedTableName(string $modelKey, callable $modelFactory): string
     {
-        if ($this->tableNamesLoaded) {
-            return;
+        if (! isset($this->tableNames[$modelKey])) {
+            $this->tableNames[$modelKey] = $modelFactory()->getTable();
         }
 
-        $this->tableNames = [
-            'action' => $this->actionModel()->getTable(),
-            'attachment' => $this->attachmentModel()->getTable(),
-            'conversation' => $this->conversationModel()->getTable(),
-            'group' => $this->groupModel()->getTable(),
-            'message' => $this->messageModel()->getTable(),
-            'participant' => $this->participantModel()->getTable(),
-        ];
+        return $this->tableNames[$modelKey];
+    }
 
-        $this->tableNamesLoaded = true;
+    /**
+     * Reset the table name cache. Useful for testing or when config changes at runtime.
+     *
+     * @param  string|null  $modelKey  Optional specific model key to reset, or null to reset all
+     */
+    public function resetTableNameCache(?string $modelKey = null): void
+    {
+        if ($modelKey === null) {
+            $this->tableNames = [];
+        } else {
+            unset($this->tableNames[$modelKey]);
+        }
     }
 
     /**
@@ -380,9 +387,7 @@ class WirechatService
      */
     public function actionModelTable(): string
     {
-        $this->loadTableNames();
-
-        return $this->tableNames['action'];
+        return $this->getCachedTableName('action', fn () => $this->actionModel());
     }
 
     /**
@@ -392,9 +397,7 @@ class WirechatService
      */
     public function attachmentModelTable(): string
     {
-        $this->loadTableNames();
-
-        return $this->tableNames['attachment'];
+        return $this->getCachedTableName('attachment', fn () => $this->attachmentModel());
     }
 
     /**
@@ -404,9 +407,7 @@ class WirechatService
      */
     public function conversationModelTable(): string
     {
-        $this->loadTableNames();
-
-        return $this->tableNames['conversation'];
+        return $this->getCachedTableName('conversation', fn () => $this->conversationModel());
     }
 
     /**
@@ -416,9 +417,7 @@ class WirechatService
      */
     public function groupModelTable(): string
     {
-        $this->loadTableNames();
-
-        return $this->tableNames['group'];
+        return $this->getCachedTableName('group', fn () => $this->groupModel());
     }
 
     /**
@@ -428,9 +427,7 @@ class WirechatService
      */
     public function messageModelTable(): string
     {
-        $this->loadTableNames();
-
-        return $this->tableNames['message'];
+        return $this->getCachedTableName('message', fn () => $this->messageModel());
     }
 
     /**
@@ -440,9 +437,7 @@ class WirechatService
      */
     public function participantModelTable(): string
     {
-        $this->loadTableNames();
-
-        return $this->tableNames['participant'];
+        return $this->getCachedTableName('participant', fn () => $this->participantModel());
     }
 
     /**
