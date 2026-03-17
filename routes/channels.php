@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
-use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\PanelRegistry;
 
 /*

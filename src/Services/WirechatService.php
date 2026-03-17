@@ -241,10 +241,10 @@ class WirechatService
      *
      * @throws \InvalidArgumentException When the configured class is invalid.
      */
-    public static function actionModelClass(): string
+    public function actionModelClass(): string
     {
         $class = (string) config('wirechat.models.action', Action::class);
-        static::validateModelClass($class, Action::class, 'wirechat.models.action');
+        $this->validateModelClass($class, Action::class, 'wirechat.models.action');
 
         return $class;
     }
@@ -256,10 +256,10 @@ class WirechatService
      *
      * @throws \InvalidArgumentException When the configured class is invalid.
      */
-    public static function attachmentModelClass(): string
+    public function attachmentModelClass(): string
     {
         $class = (string) config('wirechat.models.attachment', Attachment::class);
-        static::validateModelClass($class, Attachment::class, 'wirechat.models.attachment');
+        $this->validateModelClass($class, Attachment::class, 'wirechat.models.attachment');
 
         return $class;
     }
@@ -271,10 +271,10 @@ class WirechatService
      *
      * @throws \InvalidArgumentException When the configured class is invalid.
      */
-    public static function conversationModelClass(): string
+    public function conversationModelClass(): string
     {
         $class = (string) config('wirechat.models.conversation', Conversation::class);
-        static::validateModelClass($class, Conversation::class, 'wirechat.models.conversation');
+        $this->validateModelClass($class, Conversation::class, 'wirechat.models.conversation');
 
         return $class;
     }
@@ -286,10 +286,10 @@ class WirechatService
      *
      * @throws \InvalidArgumentException When the configured class is invalid.
      */
-    public static function groupModelClass(): string
+    public function groupModelClass(): string
     {
         $class = (string) config('wirechat.models.group', Group::class);
-        static::validateModelClass($class, Group::class, 'wirechat.models.group');
+        $this->validateModelClass($class, Group::class, 'wirechat.models.group');
 
         return $class;
     }
@@ -301,10 +301,10 @@ class WirechatService
      *
      * @throws \InvalidArgumentException When the configured class is invalid.
      */
-    public static function messageModelClass(): string
+    public function messageModelClass(): string
     {
         $class = (string) config('wirechat.models.message', Message::class);
-        static::validateModelClass($class, Message::class, 'wirechat.models.message');
+        $this->validateModelClass($class, Message::class, 'wirechat.models.message');
 
         return $class;
     }
@@ -316,10 +316,10 @@ class WirechatService
      *
      * @throws \InvalidArgumentException When the configured class is invalid.
      */
-    public static function participantModelClass(): string
+    public function participantModelClass(): string
     {
         $class = (string) config('wirechat.models.participant', Participant::class);
-        static::validateModelClass($class, Participant::class, 'wirechat.models.participant');
+        $this->validateModelClass($class, Participant::class, 'wirechat.models.participant');
 
         return $class;
     }
@@ -333,7 +333,7 @@ class WirechatService
      *
      * @throws \InvalidArgumentException When the class is invalid.
      */
-    protected static function validateModelClass(string $class, string $baseClass, string $configKey): void
+    protected function validateModelClass(string $class, string $baseClass, string $configKey): void
     {
         if (! class_exists($class)) {
             throw new \InvalidArgumentException(
@@ -353,9 +353,9 @@ class WirechatService
      *
      * @return string The Action model table name.
      */
-    public static function actionModelTable(): string
+    public function actionModelTable(): string
     {
-        return static::actionModel()->getTable();
+        return $this->actionModel()->getTable();
     }
 
     /**
@@ -363,9 +363,9 @@ class WirechatService
      *
      * @return string The Attachment model table name.
      */
-    public static function attachmentModelTable(): string
+    public function attachmentModelTable(): string
     {
-        return static::attachmentModel()->getTable();
+        return $this->attachmentModel()->getTable();
     }
 
     /**
@@ -373,9 +373,9 @@ class WirechatService
      *
      * @return string The Conversation model table name.
      */
-    public static function conversationModelTable(): string
+    public function conversationModelTable(): string
     {
-        return static::conversationModel()->getTable();
+        return $this->conversationModel()->getTable();
     }
 
     /**
@@ -383,9 +383,9 @@ class WirechatService
      *
      * @return string The Group model table name.
      */
-    public static function groupModelTable(): string
+    public function groupModelTable(): string
     {
-        return static::groupModel()->getTable();
+        return $this->groupModel()->getTable();
     }
 
     /**
@@ -393,9 +393,9 @@ class WirechatService
      *
      * @return string The Message model table name.
      */
-    public static function messageModelTable(): string
+    public function messageModelTable(): string
     {
-        return static::messageModel()->getTable();
+        return $this->messageModel()->getTable();
     }
 
     /**
@@ -403,9 +403,9 @@ class WirechatService
      *
      * @return string The Participant model table name.
      */
-    public static function participantModelTable(): string
+    public function participantModelTable(): string
     {
-        return static::participantModel()->getTable();
+        return $this->participantModel()->getTable();
     }
 
     /**
@@ -414,9 +414,9 @@ class WirechatService
      * @param  array  $attributes  The attributes to set on the model.
      * @return Action The Action model instance.
      */
-    public static function actionModel(array $attributes = []): Action
+    public function actionModel(array $attributes = []): Action
     {
-        return new (static::actionModelClass())($attributes);
+        return new ($this->actionModelClass())($attributes);
     }
 
     /**
@@ -425,9 +425,9 @@ class WirechatService
      * @param  array  $attributes  The attributes to set on the model.
      * @return Attachment The Attachment model instance.
      */
-    public static function attachmentModel(array $attributes = []): Attachment
+    public function attachmentModel(array $attributes = []): Attachment
     {
-        return new (static::attachmentModelClass())($attributes);
+        return new ($this->attachmentModelClass())($attributes);
     }
 
     /**
@@ -436,9 +436,9 @@ class WirechatService
      * @param  array  $attributes  The attributes to set on the model.
      * @return Conversation The Conversation model instance.
      */
-    public static function conversationModel(array $attributes = []): Conversation
+    public function conversationModel(array $attributes = []): Conversation
     {
-        return new (static::conversationModelClass())($attributes);
+        return new ($this->conversationModelClass())($attributes);
     }
 
     /**
@@ -447,9 +447,9 @@ class WirechatService
      * @param  array  $attributes  The attributes to set on the model.
      * @return Group The Group model instance.
      */
-    public static function groupModel(array $attributes = []): Group
+    public function groupModel(array $attributes = []): Group
     {
-        return new (static::groupModelClass())($attributes);
+        return new ($this->groupModelClass())($attributes);
     }
 
     /**
@@ -458,9 +458,9 @@ class WirechatService
      * @param  array  $attributes  The attributes to set on the model.
      * @return Message The Message model instance.
      */
-    public static function messageModel(array $attributes = []): Message
+    public function messageModel(array $attributes = []): Message
     {
-        return new (static::messageModelClass())($attributes);
+        return new ($this->messageModelClass())($attributes);
     }
 
     /**
@@ -469,8 +469,8 @@ class WirechatService
      * @param  array  $attributes  The attributes to set on the model.
      * @return Participant The Participant model instance.
      */
-    public static function participantModel(array $attributes = []): Participant
+    public function participantModel(array $attributes = []): Participant
     {
-        return new (static::participantModelClass())($attributes);
+        return new ($this->participantModelClass())($attributes);
     }
 }

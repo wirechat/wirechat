@@ -1,12 +1,12 @@
 <?php
 
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
-use Wirechat\Wirechat\Services\WirechatService;
 
 describe('WirechatService Model Resolution', function () {
     beforeEach(function () {
@@ -23,33 +23,33 @@ describe('WirechatService Model Resolution', function () {
 
     describe('Model Class Methods', function () {
         it('returns correct action model class', function () {
-            expect(WirechatService::actionModelClass())->toBe(Action::class);
+            expect(Wirechat::actionModelClass())->toBe(Action::class);
         });
 
         it('returns correct attachment model class', function () {
-            expect(WirechatService::attachmentModelClass())->toBe(Attachment::class);
+            expect(Wirechat::attachmentModelClass())->toBe(Attachment::class);
         });
 
         it('returns correct conversation model class', function () {
-            expect(WirechatService::conversationModelClass())->toBe(Conversation::class);
+            expect(Wirechat::conversationModelClass())->toBe(Conversation::class);
         });
 
         it('returns correct group model class', function () {
-            expect(WirechatService::groupModelClass())->toBe(Group::class);
+            expect(Wirechat::groupModelClass())->toBe(Group::class);
         });
 
         it('returns correct message model class', function () {
-            expect(WirechatService::messageModelClass())->toBe(Message::class);
+            expect(Wirechat::messageModelClass())->toBe(Message::class);
         });
 
         it('returns correct participant model class', function () {
-            expect(WirechatService::participantModelClass())->toBe(Participant::class);
+            expect(Wirechat::participantModelClass())->toBe(Participant::class);
         });
     });
 
     describe('Model Instance Creation', function () {
         it('creates action model instance', function () {
-            $model = WirechatService::actionModel([
+            $model = Wirechat::actionModel([
                 'actionable_id' => 1,
                 'actionable_type' => 'test',
                 'actor_id' => 1,
@@ -62,7 +62,7 @@ describe('WirechatService Model Resolution', function () {
         });
 
         it('creates attachment model instance', function () {
-            $model = WirechatService::attachmentModel([
+            $model = Wirechat::attachmentModel([
                 'file_name' => 'test.jpg',
                 'original_name' => 'test.jpg',
             ]);
@@ -73,7 +73,7 @@ describe('WirechatService Model Resolution', function () {
         });
 
         it('creates conversation model instance', function () {
-            $model = WirechatService::conversationModel([
+            $model = Wirechat::conversationModel([
                 'disappearing_duration' => 3600,
             ]);
 
@@ -82,21 +82,21 @@ describe('WirechatService Model Resolution', function () {
         });
 
         it('creates group model instance', function () {
-            $model = WirechatService::groupModel(['name' => 'Test Group']);
+            $model = Wirechat::groupModel(['name' => 'Test Group']);
 
             expect($model)->toBeInstanceOf(Group::class)
                 ->and($model->name)->toBe('Test Group');
         });
 
         it('creates message model instance', function () {
-            $model = WirechatService::messageModel(['body' => 'Hello World']);
+            $model = Wirechat::messageModel(['body' => 'Hello World']);
 
             expect($model)->toBeInstanceOf(Message::class)
                 ->and($model->body)->toBe('Hello World');
         });
 
         it('creates participant model instance', function () {
-            $model = WirechatService::participantModel([
+            $model = Wirechat::participantModel([
                 'participantable_id' => 1,
                 'participantable_type' => 'User',
             ]);
@@ -112,7 +112,7 @@ describe('WirechatService Model Resolution', function () {
             config(['wirechat.models.action' => 'NonExistentClass']);
 
             try {
-                WirechatService::actionModelClass();
+                Wirechat::actionModelClass();
                 expect(false)->toBeTrue('Exception should have been thrown');
             } catch (InvalidArgumentException $e) {
                 expect($e->getMessage())->toBe("Model class 'NonExistentClass' configured in 'wirechat.models.action' does not exist.");
@@ -126,7 +126,7 @@ describe('WirechatService Model Resolution', function () {
             config(['wirechat.models.action' => stdClass::class]);
 
             try {
-                WirechatService::actionModelClass();
+                Wirechat::actionModelClass();
                 expect(false)->toBeTrue('Exception should have been thrown');
             } catch (InvalidArgumentException $e) {
                 expect($e->getMessage())->toBe("Model class 'stdClass' configured in 'wirechat.models.action' must extend '".Action::class."'.");
@@ -151,7 +151,7 @@ describe('WirechatService Model Resolution', function () {
 
                 $method = "{$type}ModelClass";
                 try {
-                    WirechatService::{$method}();
+                    Wirechat::{$method}();
                     throw new Exception("Expected InvalidArgumentException was not thrown for {$type}");
                 } catch (InvalidArgumentException $e) {
                     expect($e->getMessage())->toContain("Model class 'NonExistentClass' configured in 'wirechat.models.{$type}' does not exist.");
@@ -165,17 +165,20 @@ describe('WirechatService Model Resolution', function () {
 
     describe('Model Table Names', function () {
         it('returns correct table names for all models', function () {
-            expect(WirechatService::actionModelTable())->toBe((new Action)->getTable());
-            expect(WirechatService::attachmentModelTable())->toBe((new Attachment)->getTable());
-            expect(WirechatService::conversationModelTable())->toBe((new Conversation)->getTable());
-            expect(WirechatService::groupModelTable())->toBe((new Group)->getTable());
-            expect(WirechatService::messageModelTable())->toBe((new Message)->getTable());
-            expect(WirechatService::participantModelTable())->toBe((new Participant)->getTable());
+            expect(Wirechat::actionModelTable())->toBe((new Action)->getTable());
+            expect(Wirechat::attachmentModelTable())->toBe((new Attachment)->getTable());
+            expect(Wirechat::conversationModelTable())->toBe((new Conversation)->getTable());
+            expect(Wirechat::groupModelTable())->toBe((new Group)->getTable());
+            expect(Wirechat::messageModelTable())->toBe((new Message)->getTable());
+            expect(Wirechat::participantModelTable())->toBe((new Participant)->getTable());
         });
     });
 
     describe('Custom Model Classes', function () {
         it('works with custom model classes that extend base classes', function () {
+            // Store original config value to restore later
+            $originalActionClass = config('wirechat.models.action');
+
             // Create a temporary custom model class for testing
             $customActionClass = new class extends Action
             {
@@ -187,11 +190,14 @@ describe('WirechatService Model Resolution', function () {
 
             config(['wirechat.models.action' => get_class($customActionClass)]);
 
-            expect(WirechatService::actionModelClass())->toBe(get_class($customActionClass));
+            expect(Wirechat::actionModelClass())->toBe(get_class($customActionClass));
 
-            $instance = WirechatService::actionModel();
+            $instance = Wirechat::actionModel();
             expect($instance)->toBeInstanceOf(get_class($customActionClass))
                 ->and($instance->customMethod())->toBe('custom');
+
+            // Reset config to prevent leakage to other tests
+            config(['wirechat.models.action' => $originalActionClass]);
         });
     });
 });

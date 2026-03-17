@@ -185,7 +185,7 @@ class Chat extends Component
             throw $th;
         }
 
-        $message = Message::where('id', $messageId)->firstOrFail();
+        $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
 
         // check if user belongs to message
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
@@ -407,7 +407,7 @@ class Chat extends Component
                 $replyId = ($key === 0 && $this->replyMessage) ? $this->replyMessage->id : null;
 
                 // Create the message
-                $message = Message::create([
+                $message = Wirechat::messageModelClass()::create([
                     'reply_id' => $replyId,
                     'conversation_id' => $this->conversation->id,
                     'participant_id' => $this->authParticipant->getKey(),
@@ -453,7 +453,7 @@ class Chat extends Component
 
         if ($this->body != null) {
 
-            $createdMessage = Message::create([
+            $createdMessage = Wirechat::messageModelClass()::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
                 'participant_id' => $this->authParticipant->getKey(),
@@ -507,7 +507,7 @@ class Chat extends Component
             throw $th;
         }
 
-        $message = Message::where('id', $messageId)->firstOrFail();
+        $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
 
         // make sure user is authenticated
         abort_unless(auth()->check(), 401);
@@ -543,7 +543,7 @@ class Chat extends Component
             throw $th;
         }
 
-        $message = Message::where('id', $messageId)->firstOrFail();
+        $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
         $authParticipant = $this->conversation->participant($this->auth);
 
         // make sure user is authenticated
@@ -694,7 +694,7 @@ class Chat extends Component
         // rate limit
         $this->rateLimit();
 
-        $message = Message::create([
+        $message = Wirechat::messageModelClass()::create([
             'conversation_id' => $this->conversation->id,
             'participant_id' => $this->authParticipant->getKey(),
             'body' => '❤️',
@@ -792,7 +792,7 @@ class Chat extends Component
         }
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
-        $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
+        $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $this->conversation->id)->count();
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
     }
 
@@ -834,7 +834,7 @@ class Chat extends Component
                 : null;
 
         } else {
-            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
+            $this->authParticipant = Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
             $this->receiver = null;
         }
     }
