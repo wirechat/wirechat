@@ -108,7 +108,7 @@ class Chat extends Component
 
             // Make sure message does not belong to auth
 
-            $peerParticipant = Participant::find($event['message']['participant_id']);
+            $peerParticipant = Wirechat::participantModelClass()::find($event['message']['participant_id']);
 
             if ($peerParticipant?->participantable_id == auth()->id() && $peerParticipant?->participantable_type === $this->auth->getMorphClass()) {
                 return null;
@@ -144,7 +144,7 @@ class Chat extends Component
             // scroll to bottom
             $this->dispatch('scroll-bottom');
 
-            $newMessage = Message::find($event['message']['id']);
+            $newMessage = Wirechat::messageModelClass()::find($event['message']['id']);
             // dd($newMessage);
 
             // Make sure message does not belong to auth
