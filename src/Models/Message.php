@@ -370,6 +370,7 @@ class Message extends Model
      * Returns the sanitized body attribute.
      *
      * This method removes unsafe HTML tags while allowing safe HTML tags.
+     * It also removes dangerous attributes from allowed tags for security.
      *
      * This method can be overridden in child classes to customize HTML sanitization.
      *
@@ -384,6 +385,44 @@ class Message extends Model
         // Allow safe HTML tags: basic formatting tags (exclude img and script tags)
         $allowedTags = '<p><br><strong><em><b><i><u><span><div><h1><h2><h3><h4><h5><h6><ul><ol><li><a>';
 
-        return strip_tags($this->body, $allowedTags);
+        // Remove unsafe HTML tags
+        $sanitized = strip_tags($this->body, $allowedTags);
+
+        // Remove dangerous attributes from remaining tags
+        $sanitized = $this->removeDangerousAttributes($sanitized);
+
+        return new HtmlString($sanitized);
+    }
+
+    /**
+     * Remove dangerous attributes from HTML tags.
+     *
+     * @param  string  $html  The HTML to clean
+     * @return string The cleaned HTML
+     */
+    private function removeDangerousAttributes(string $html): string
+    {
+        // List of dangerous attributes to remove
+        $dangerousAttributes = [
+            'onclick', 'onload', 'onerror', 'onmouseover', 'onmouseout',
+            'onfocus', 'onblur', 'onchange', 'onsubmit', 'onkeydown',
+            'onkeyup', 'onkeypress', 'style', 'script',
+        ];
+
+        // Remove javascript: protocols from href attributes
+        $html = preg_replace('/href\s*=\s*["\']?[^"\']*javascript:[^"\']*["\']?/i', 'href="#"', $html);
+
+        // Remove dangerous attributes
+        foreach ($dangerousAttributes as $attr) {
+            $html = preg_replace('/'.$attr.'\s*=\s*["\'][^"\']*["\']?\s*/i', ' ', $html);
+        }
+
+        // Clean up multiple spaces
+        $html = preg_replace('/\s+/', ' ', $html);
+
+        // Clean up spaces before closing tags
+        $html = preg_replace('/\s+>/', '>', $html);
+
+        return $html;
     }
 }

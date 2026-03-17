@@ -288,8 +288,14 @@ class Conversation extends Model
 
                 // We only want messages that are NOT deleted by the current user's participant in this conversation
                 ->whereDoesntHave('actions', function ($aq) use ($user, $messagesTable, $participantsTable) {
+                    $participantClass = Wirechat::participantModelClass();
+                    $participantMorphAlias = Relation::getMorphAlias($participantClass);
+
                     $aq->where('type', Actions::DELETE)
-                        ->where('actor_type', Relation::getMorphAlias(Wirechat::participantModelClass()))
+                        ->where(function ($actorTypeQuery) use ($participantClass, $participantMorphAlias) {
+                            $actorTypeQuery->where('actor_type', $participantClass)
+                                ->orWhere('actor_type', $participantMorphAlias);
+                        })
 
                         // actor_id (actions) must reference a participant row that belongs to the same conversation
                         // AND that participant row must belong to the current authenticated user.

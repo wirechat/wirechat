@@ -238,60 +238,114 @@ class WirechatService
      * Get the Action model class from the configuration.
      *
      * @return class-string<Action> The Action model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
      */
     public static function actionModelClass(): string
     {
-        return (string) config('wirechat.models.action', Action::class);
+        $class = (string) config('wirechat.models.action', Action::class);
+        static::validateModelClass($class, Action::class, 'wirechat.models.action');
+
+        return $class;
     }
 
     /**
      * Get the Attachment model class from the configuration.
      *
      * @return class-string<Attachment> The Attachment model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
      */
     public static function attachmentModelClass(): string
     {
-        return (string) config('wirechat.models.attachment', Attachment::class);
+        $class = (string) config('wirechat.models.attachment', Attachment::class);
+        static::validateModelClass($class, Attachment::class, 'wirechat.models.attachment');
+
+        return $class;
     }
 
     /**
      * Get the Conversation model class from the configuration.
      *
      * @return class-string<Conversation> The Conversation model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
      */
     public static function conversationModelClass(): string
     {
-        return (string) config('wirechat.models.conversation', Conversation::class);
+        $class = (string) config('wirechat.models.conversation', Conversation::class);
+        static::validateModelClass($class, Conversation::class, 'wirechat.models.conversation');
+
+        return $class;
     }
 
     /**
      * Get the Group model class from the configuration.
      *
      * @return class-string<Group> The Group model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
      */
     public static function groupModelClass(): string
     {
-        return (string) config('wirechat.models.group', Group::class);
+        $class = (string) config('wirechat.models.group', Group::class);
+        static::validateModelClass($class, Group::class, 'wirechat.models.group');
+
+        return $class;
     }
 
     /**
      * Get the Message model class from the configuration.
      *
      * @return class-string<Message> The Message model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
      */
     public static function messageModelClass(): string
     {
-        return (string) config('wirechat.models.message', Message::class);
+        $class = (string) config('wirechat.models.message', Message::class);
+        static::validateModelClass($class, Message::class, 'wirechat.models.message');
+
+        return $class;
     }
 
     /**
      * Get the Participant model class from the configuration.
      *
      * @return class-string<Participant> The Participant model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
      */
     public static function participantModelClass(): string
     {
-        return (string) config('wirechat.models.participant', Participant::class);
+        $class = (string) config('wirechat.models.participant', Participant::class);
+        static::validateModelClass($class, Participant::class, 'wirechat.models.participant');
+
+        return $class;
+    }
+
+    /**
+     * Validate that a model class exists and extends the expected base class.
+     *
+     * @param  string  $class  The class to validate.
+     * @param  string  $baseClass  The expected base class.
+     * @param  string  $configKey  The config key for error messages.
+     *
+     * @throws \InvalidArgumentException When the class is invalid.
+     */
+    protected static function validateModelClass(string $class, string $baseClass, string $configKey): void
+    {
+        if (! class_exists($class)) {
+            throw new \InvalidArgumentException(
+                "Model class '{$class}' configured in '{$configKey}' does not exist."
+            );
+        }
+
+        if (! is_a($class, $baseClass, true)) {
+            throw new \InvalidArgumentException(
+                "Model class '{$class}' configured in '{$configKey}' must extend '{$baseClass}'."
+            );
+        }
     }
 
     /**

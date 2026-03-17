@@ -54,10 +54,16 @@ class WithoutRemovedMessages implements Scope
                             ->where('actor_id', $legacyActorId);
                     });
 
-                    // Case B: actor stored as Participant::class — but we must ensure
+                    // Case B: actor stored as Participant (either class name or morph alias) — but we must ensure
                     // the participant row represents the current user for the same conversation.
                     $sub->orWhere(function ($b) use ($messagesTable, $participantsTable, $legacyActorId, $legacyActorType) {
-                        $b->where('actor_type', Relation::getMorphAlias(Wirechat::participantModelClass()))
+                        $participantClass = Wirechat::participantModelClass();
+                        $participantMorphAlias = Relation::getMorphAlias($participantClass);
+
+                        $b->where(function ($actorTypeQuery) use ($participantClass, $participantMorphAlias) {
+                            $actorTypeQuery->where('actor_type', $participantClass)
+                                ->orWhere('actor_type', $participantMorphAlias);
+                        })
                             // Ensure there exists a participant row such that:
                             // participants.id = actions.actor_id
                             // participants.conversation_id = messages.conversation_id

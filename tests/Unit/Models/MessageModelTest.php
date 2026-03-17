@@ -3,7 +3,6 @@
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Message;
@@ -816,7 +815,8 @@ describe('sanitized accessors', function () {
         ]);
 
         // Safe tags like <p> and <strong> should be preserved
-        expect($message->sanitized_body)->toBe('<p>Hello <strong>World</strong></p>');
+        expect($message->sanitized_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($message->sanitized_body->toHtml())->toBe('<p>Hello <strong>World</strong></p>');
     });
 
     it('handles null body for sanitized_body accessor', function () {
@@ -843,7 +843,8 @@ describe('sanitized accessors', function () {
             'body' => '',
         ]);
 
-        expect($message->sanitized_body)->toBe('');
+        expect($message->sanitized_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($message->sanitized_body->toHtml())->toBe('');
     });
 
     it('handles empty string body for text_body accessor', function () {
@@ -859,32 +860,31 @@ describe('sanitized accessors', function () {
         // Create a custom message class that overrides the accessor
         $customMessage = new class extends Message
         {
-            public function getSanitizedBodyAttribute(): HtmlString|string|null
+            public function getSanitizedBodyAttribute(): \Illuminate\Support\HtmlString|string|null
             {
-                return new HtmlString('<p>Sanitized HTML</p>');
+                return new \Illuminate\Support\HtmlString('<p>Sanitized HTML</p>');
             }
         };
 
         $customMessage->body = 'Original Body';
 
-        expect($customMessage->sanitized_body)->toBeInstanceOf(HtmlString::class);
+        expect($customMessage->sanitized_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
         expect($customMessage->sanitized_body->toHtml())->toBe('<p>Sanitized HTML</p>');
     });
 
-    it('returns HtmlString when text_body accessor is overridden to return HtmlString', function () {
+    it('returns string when text_body accessor is overridden', function () {
         // Create a custom message class that overrides the accessor
         $customMessage = new class extends Message
         {
-            public function getTextBodyAttribute(): HtmlString|string|null
+            public function getTextBodyAttribute(): ?string
             {
-                return new HtmlString('<strong>Short</strong>');
+                return 'Short text';
             }
         };
 
         $customMessage->body = 'Original Body';
 
-        expect($customMessage->text_body)->toBeInstanceOf(HtmlString::class);
-        expect($customMessage->text_body->toHtml())->toBe('<strong>Short</strong>');
+        expect($customMessage->text_body)->toBe('Short text');
     });
 
     it('strips unsafe HTML tags but allows safe tags in sanitized_body', function () {
@@ -894,12 +894,13 @@ describe('sanitized accessors', function () {
             'body' => $bodyContent,
         ]);
 
-        // XSS script tags should be stripped, but safe tags should remain
-        expect($message->sanitized_body)->toBe('This is a regular message: alert("xss")<p>Hello <strong>World</strong></p>');
-        expect($message->sanitized_body)->not->toContain('<script>');
-        expect($message->sanitized_body)->not->toContain('</script>');
-        expect($message->sanitized_body)->toContain('<p>');
-        expect($message->sanitized_body)->toContain('<strong>');
+        // XSS script tags should be stripped, but safe tags should remain, returned as HtmlString
+        expect($message->sanitized_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($message->sanitized_body->toHtml())->toBe('This is a regular message: alert("xss")<p>Hello <strong>World</strong></p>');
+        expect($message->sanitized_body->toHtml())->not->toContain('<script>');
+        expect($message->sanitized_body->toHtml())->not->toContain('</script>');
+        expect($message->sanitized_body->toHtml())->toContain('<p>');
+        expect($message->sanitized_body->toHtml())->toContain('<strong>');
     });
 
     it('allows safe HTML tags in sanitized_body', function () {
@@ -908,13 +909,14 @@ describe('sanitized accessors', function () {
             'body' => '<div><p>Hello</p><script>alert("hack")</script><img src="x" onerror="alert(1)"></div>',
         ]);
 
-        // Safe tags should remain, unsafe tags should be stripped
-        expect($message->sanitized_body)->toBe('<div><p>Hello</p>alert("hack")</div>');
-        expect($message->sanitized_body)->not->toContain('<script>');
-        expect($message->sanitized_body)->not->toContain('<img');
-        expect($message->sanitized_body)->toContain('<div>');
-        expect($message->sanitized_body)->toContain('</div>');
-        expect($message->sanitized_body)->toContain('<p>');
+        // Safe tags should remain, unsafe tags should be stripped, returned as HtmlString
+        expect($message->sanitized_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($message->sanitized_body->toHtml())->toBe('<div><p>Hello</p>alert("hack")</div>');
+        expect($message->sanitized_body->toHtml())->not->toContain('<script>');
+        expect($message->sanitized_body->toHtml())->not->toContain('<img');
+        expect($message->sanitized_body->toHtml())->toContain('<div>');
+        expect($message->sanitized_body->toHtml())->toContain('</div>');
+        expect($message->sanitized_body->toHtml())->toContain('<p>');
     });
 
     it('strips HTML tags from text_body accessor', function () {
@@ -1003,6 +1005,22 @@ describe('sanitized accessors', function () {
         // After squishing, this should be "Word AnotherWord" (16 chars: 4 + 1 + 11)
         expect($message->text_body)->toBe('Word AnotherWord');
         expect(strlen($message->text_body))->toBe(16);
+    });
+
+    it('removes dangerous attributes from sanitized_body', function () {
+        $auth = User::factory()->create();
+        $message = Message::factory()->sender($auth)->create([
+            'body' => '<a href="javascript:alert(1)" onclick="alert(2)">Link</a><p style="color:red" onload="alert(3)">Text</p>',
+        ]);
+
+        // Dangerous attributes should be removed, returned as HtmlString
+        expect($message->sanitized_body)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($message->sanitized_body->toHtml())->not->toContain('javascript:');
+        expect($message->sanitized_body->toHtml())->not->toContain('onclick');
+        expect($message->sanitized_body->toHtml())->not->toContain('onload');
+        expect($message->sanitized_body->toHtml())->not->toContain('style=');
+        expect($message->sanitized_body->toHtml())->toContain('<a href="#"');
+        expect($message->sanitized_body->toHtml())->toContain('<p>');
     });
 
 });
