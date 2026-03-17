@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\PanelRegistry;
@@ -49,7 +50,7 @@ foreach ($panels as $panel) {
             }
         }
 
-        $conversation = Conversation::find($conversationId);
+        $conversation = Wirechat::conversationModelClass()::find($conversationId);
 
         return $conversation && $user->belongsToConversation($conversation);
     }, [

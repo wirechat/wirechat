@@ -780,7 +780,7 @@ class Chat extends Component
         } elseif (is_numeric($conversation) || is_string($conversation)) {
             // Cast to integer if numeric (handles numeric strings too)
             $conversationId = $conversation;
-            $this->conversation = Conversation::find($conversationId);
+            $this->conversation = Wirechat::conversationModelClass()::find($conversationId);
 
             if (! $this->conversation) {
                 abort(404, __('wirechat::chat.messages.conversation_not_found')); // Custom error response
