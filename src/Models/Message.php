@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\HtmlString;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
@@ -24,8 +23,6 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property int $participant_id
  * @property int|null $reply_id
  * @property string|null $body
- * @property HtmlString|string|null $text_body
- * @property HtmlString|string|null $sanitized_body
  * @property MessageType $type
  * @property \Illuminate\Support\Carbon|null $kept_at filled when a message is kept from disappearing
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -341,88 +338,5 @@ class Message extends Model
 
         // Use the isEmoji helper method to check if the message body contains only emojis
         return Helper::isEmoji($this->body);
-    }
-
-    /**
-     * Returns the text body attribute.
-     *
-     * This method removes all HTML tags and squishes whitespace.
-     *
-     * @return HtmlString|string|null The text body with all HTML tags removed and whitespace squished, or null if body is null.
-     */
-    public function getTextBodyAttribute(): HtmlString|string|null
-    {
-        if ($this->body === null) {
-            return null;
-        }
-
-        // Remove all HTML tags
-        $text = strip_tags($this->body);
-
-        // Squish whitespace: replace multiple whitespace characters with a single space
-        $text = preg_replace('/\s+/', ' ', $text);
-
-        // Trim leading and trailing whitespace
-        return trim($text);
-    }
-
-    /**
-     * Returns the sanitized body attribute.
-     *
-     * This method removes unsafe HTML tags while allowing safe HTML tags.
-     * It also removes dangerous attributes from allowed tags for security.
-     *
-     * This method can be overridden in child classes to customize HTML sanitization.
-     *
-     * @return HtmlString|string|null The sanitized body with unsafe HTML tags removed, or null if body is null.
-     */
-    public function getSanitizedBodyAttribute(): HtmlString|string|null
-    {
-        if ($this->body === null) {
-            return null;
-        }
-
-        // Allow safe HTML tags: basic formatting tags (exclude img and script tags)
-        $allowedTags = '<p><br><strong><em><b><i><u><span><div><h1><h2><h3><h4><h5><h6><ul><ol><li><a>';
-
-        // Remove unsafe HTML tags
-        $sanitized = strip_tags($this->body, $allowedTags);
-
-        // Remove dangerous attributes from remaining tags
-        $sanitized = $this->removeDangerousAttributes($sanitized);
-
-        return new HtmlString($sanitized);
-    }
-
-    /**
-     * Remove dangerous attributes from HTML tags.
-     *
-     * @param  string  $html  The HTML to clean
-     * @return string The cleaned HTML
-     */
-    private function removeDangerousAttributes(string $html): string
-    {
-        // List of dangerous attributes to remove
-        $dangerousAttributes = [
-            'onclick', 'onload', 'onerror', 'onmouseover', 'onmouseout',
-            'onfocus', 'onblur', 'onchange', 'onsubmit', 'onkeydown',
-            'onkeyup', 'onkeypress', 'style', 'script',
-        ];
-
-        // Remove javascript: protocols from href attributes
-        $html = preg_replace('/href\s*=\s*["\']?[^"\']*javascript:[^"\']*["\']?/i', 'href="#"', $html);
-
-        // Remove dangerous attributes
-        foreach ($dangerousAttributes as $attr) {
-            $html = preg_replace('/'.$attr.'\s*=\s*["\'][^"\']*["\']?\s*/i', ' ', $html);
-        }
-
-        // Clean up multiple spaces
-        $html = preg_replace('/\s+/', ' ', $html);
-
-        // Clean up spaces before closing tags
-        $html = preg_replace('/\s+>/', '>', $html);
-
-        return $html;
     }
 }

@@ -20,7 +20,7 @@
         'font-normal text-gray-600' =>
             $isReadByAuth && $lastMessage?->ownedBy($this->auth),
     ])>
-        {{ !blank((string) $lastMessage->text_body) ? $lastMessage->text_body : ($lastMessage->isAttachment() ? '📎 '.__('wirechat::chats.labels.attachment') : '') }}
+        {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->isAttachment() ? '📎 '.__('wirechat::chats.labels.attachment') : '') }}
     </p>
 
     <span class="font-medium px-1 text-xs shrink-0 text-gray-800 dark:text-gray-50">
