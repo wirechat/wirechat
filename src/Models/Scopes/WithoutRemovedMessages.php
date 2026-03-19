@@ -58,7 +58,7 @@ class WithoutRemovedMessages implements Scope
                     // the participant row represents the current user for the same conversation.
                     $sub->orWhere(function ($b) use ($messagesTable, $participantsTable, $legacyActorId, $legacyActorType) {
                         $participantClass = Wirechat::participantModelClass();
-                        $participantMorphAlias = Relation::getMorphAlias($participantClass);
+                        $participantMorphAlias = app($participantClass)->getMorphClass();
 
                         $b->where(function ($actorTypeQuery) use ($participantClass, $participantMorphAlias) {
                             $actorTypeQuery->where('actor_type', $participantClass)
