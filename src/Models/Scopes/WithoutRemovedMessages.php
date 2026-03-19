@@ -4,7 +4,6 @@ namespace Wirechat\Wirechat\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
