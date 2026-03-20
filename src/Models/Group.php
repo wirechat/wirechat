@@ -100,7 +100,7 @@ class Group extends Model
 
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(Conversation::class);
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     public function getCoverUrlAttribute(): ?string
@@ -137,7 +137,7 @@ class Group extends Model
 
     public function cover(): MorphOne
     {
-        return $this->morphOne(Attachment::class, 'attachable');
+        return $this->morphOne(Wirechat::attachmentModelClass(), 'attachable');
     }
 
     /**

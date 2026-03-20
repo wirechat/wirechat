@@ -6,8 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Wirechat\Wirechat\Models\Action;
-use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 class UpgradeMorphColumns extends Command
 {
@@ -30,13 +29,13 @@ class UpgradeMorphColumns extends Command
 
         // Exactly these two tables
         $plans = [
-            (new Action)->getTable() => [
+            Wirechat::actionModelTable() => [
                 ['col' => 'actionable_id',   'is_id' => true],
                 ['col' => 'actionable_type', 'is_id' => false],
                 ['col' => 'actor_id',        'is_id' => true],
                 ['col' => 'actor_type',      'is_id' => false],
             ],
-            (new Attachment)->getTable() => [
+            Wirechat::attachmentModelTable() => [
                 ['col' => 'attachable_id',   'is_id' => true],
                 ['col' => 'attachable_type', 'is_id' => false],
             ],
@@ -103,12 +102,12 @@ class UpgradeMorphColumns extends Command
             // Ensure helpful composite indexes (idempotent)
             try {
                 Schema::table($table, function (Blueprint $t) use ($table) {
-                    if ($table === (new Action)->getTable()) {
+                    if ($table === Wirechat::actionModelTable()) {
                         $t->index(['actionable_id', 'actionable_type'], 'actions_actionable_idx');
                         $t->index(['actor_id', 'actor_type'], 'actions_actor_idx');
                         $t->index('type', 'actions_type_idx');
                     }
-                    if ($table === (new Attachment)->getTable()) {
+                    if ($table === Wirechat::attachmentModelTable()) {
                         $t->index(['attachable_id', 'attachable_type'], 'attachments_attachable_idx');
                     }
                 });

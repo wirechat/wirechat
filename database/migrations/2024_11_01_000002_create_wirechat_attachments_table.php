@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 return new class extends Migration
 {
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create((new Attachment)->getTable(), function (Blueprint $table) {
+        Schema::create(Wirechat::attachmentModelTable(), function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('attachable_id');
             $table->string('attachable_type');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists((new Attachment)->getTable());
+        Schema::dropIfExists(Wirechat::attachmentModelTable());
     }
 };
