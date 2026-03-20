@@ -29,21 +29,16 @@ trait InteractsWithIcons
             return;
         }
 
-        if (is_string($icon)) {
-            $trim = ltrim($icon);
+        // At this point, $icon must be a string (after excluding null, Closure, and Htmlable)
+        $trim = ltrim($icon);
 
-            // Block raw markup passed as a plain string.
-            if ($trim !== '' && str_starts_with($trim, '<')) {
-                throw new InvalidArgumentException(
-                    "Wirechat: {$for} string must be a Blade component name (e.g. \"wirechat::icons.plus\"). ".
-                    'To pass raw SVG/HTML, wrap it in HtmlString/Htmlable.'
-                );
-            }
-
-            return;
+        // Block raw markup passed as a plain string.
+        if ($trim !== '' && str_starts_with($trim, '<')) {
+            throw new InvalidArgumentException(
+                "Wirechat: {$for} string must be a Blade component name (e.g. \"wirechat::icons.plus\"). ".
+                'To pass raw SVG/HTML, wrap it in HtmlString/Htmlable.'
+            );
         }
-
-        throw new InvalidArgumentException("Wirechat: invalid {$for} type.");
     }
 
     /**
