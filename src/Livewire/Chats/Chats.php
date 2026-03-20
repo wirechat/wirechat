@@ -203,7 +203,7 @@ class Chats extends Component
 
         $additionalConversations = $this->sendable->conversations()
             ->with([
-                'lastMessage.sendable',
+                'lastMessage.participant.participantable',
                 'group.cover' => fn ($query) => $query->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
             ])
             ->when(trim($this->search ?? '') != '', fn ($query) => $this->applySearchConditions($query))

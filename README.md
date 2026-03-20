@@ -14,8 +14,7 @@ Some of the features include :
 - **Message Replies**: Easily reply to messages and attachments.  
 
 
-> **⚠️ Beta Notice:** Wirechat is currently in beta and is not recommended for production use. If you encounter any issues, please report them immediately to help accelerate the package's progress towards a stable release.  
-
+ 
 ---
 
 ## Documentation 📚  

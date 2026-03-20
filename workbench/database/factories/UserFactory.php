@@ -50,15 +50,19 @@ class UserFactory extends Factory
     public function withMessage(Conversation $conversation, string $body): Factory
     {
         return $this->afterCreating(function (User $user) use ($conversation, $body) {
-
-            Message::factory()->create([
-                'conversation_id' => $conversation->id,
-                'sendable_id' => $user->id,
-                'sendable_type' => get_class($user),
-                'body' => $body,
+            // Create participant for this user in the conversation
+            $participant = $conversation->participants()->firstOrCreate([
+                'participantable_id' => $user->id,
+                'participantable_type' => get_class($user),
+                'role' => 'owner', // or whatever default role you want
             ]);
 
+            // Create message linked to participant
+            Message::factory()->create([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => $body,
+            ]);
         });
-
     }
 }

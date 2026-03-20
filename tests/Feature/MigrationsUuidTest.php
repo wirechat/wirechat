@@ -68,7 +68,7 @@ describe('UUID configuration in migrations', function () {
 
         $convMigration = include __DIR__.'/../../database/migrations/2024_11_01_000001_create_wirechat_conversations_table.php';
         $convMigration->up();
-        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000003_create_wirechat_messages_table.php';
+        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000004_create_wirechat_messages_table.php';
         $migration->up();
         $columnType = Schema::getColumnType((new Message)->getTable(), 'conversation_id');
         expect(isUuidColumnType($columnType))->toBeTrue();
@@ -78,7 +78,7 @@ describe('UUID configuration in migrations', function () {
         Config::set('wirechat.uuids', false);
         $convMigration = include __DIR__.'/../../database/migrations/2024_11_01_000001_create_wirechat_conversations_table.php';
         $convMigration->up();
-        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000003_create_wirechat_messages_table.php';
+        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000004_create_wirechat_messages_table.php';
         $migration->up();
         $columnType = Schema::getColumnType((new Message)->getTable(), 'conversation_id');
         expect(isIntegerColumnType($columnType))->toBeTrue();
@@ -89,7 +89,7 @@ describe('UUID configuration in migrations', function () {
         Config::set('wirechat.uuids', true);
         $convMigration = include __DIR__.'/../../database/migrations/2024_11_01_000001_create_wirechat_conversations_table.php';
         $convMigration->up();
-        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000004_create_wirechat_participants_table.php';
+        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000003_create_wirechat_participants_table.php';
         $migration->up();
         $columnType = Schema::getColumnType((new Participant)->getTable(), 'conversation_id');
         expect(isUuidColumnType($columnType))->toBeTrue();
@@ -100,7 +100,7 @@ describe('UUID configuration in migrations', function () {
         Config::set('wirechat.uuids', false);
         $convMigration = include __DIR__.'/../../database/migrations/2024_11_01_000001_create_wirechat_conversations_table.php';
         $convMigration->up();
-        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000004_create_wirechat_participants_table.php';
+        $migration = include __DIR__.'/../../database/migrations/2024_11_01_000003_create_wirechat_participants_table.php';
         $migration->up();
         $columnType = Schema::getColumnType((new Participant)->getTable(), 'conversation_id');
         expect(isIntegerColumnType($columnType))->toBeTrue();

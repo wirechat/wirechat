@@ -88,6 +88,11 @@ class WirechatServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../stubs/upgradeMorphColumns.stub' => database_path('migrations/'.date('Y_m_d_His').'_upgrade_wirechat_morph_columns.php'),
             ], 'wirechat-update-morphs-migration');
+
+            $this->publishes([
+                __DIR__.'/../stubs/add_participant_id_to_messages_table.stub' => database_path('migrations/'.date('Y_m_d_His').'_add_participant_id_to_messages_table.php'),
+            ], 'wirechat-upgrade-0.4');
+
         }
 
         /* Load channel routes */
@@ -185,18 +190,17 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
-
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
+            $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
+            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
+
             $script = '';
 
-            if ($currentPanel->hasWebPushNotifications() && auth()->check()) {
-
-                $panelId = $currentPanel->getId();
+            if ($hasWebPushNotifications && auth()->check()) {
                 $sendable = \Wirechat\Wirechat\Facades\Wirechat::getSendable();
                 $userId = $sendable->getKey();
                 $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(
@@ -305,10 +309,8 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
-
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 

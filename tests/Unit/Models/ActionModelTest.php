@@ -147,7 +147,7 @@ test('A model returns performed actions when ->performedActions is called() on a
 
     $auth = User::factory()->create();
     $conversation = $auth->createGroup('My Group');
-
+    $participant = $conversation->participant($auth);
     // add participant
     $otherUser = $conversation->addParticipant(User::factory()->create(['name' => 'Micheal']));
 
@@ -155,12 +155,12 @@ test('A model returns performed actions when ->performedActions is called() on a
     $message = $auth->sendMessageTo($conversation, 'Hello');
     $message2 = $auth->sendMessageTo($conversation, 'Hello');
 
-    // Create delete action by auth
+    // Create delete action by auth participant
     Action::create([
         'actionable_id' => $message->id,
         'actionable_type' => Message::class,
-        'actor_id' => $auth->id,  // The admin who performed the action
-        'actor_type' => get_class($auth),  // Assuming 'User' is the actor model
+        'actor_id' => $participant->id,  // The admin who performed the action
+        'actor_type' => get_class($participant),  // Assuming 'User' is the actor model
         'type' => Actions::DELETE,  // Type of action
     ]);
 
@@ -168,12 +168,12 @@ test('A model returns performed actions when ->performedActions is called() on a
     Action::create([
         'actionable_id' => $message2->id,
         'actionable_type' => Message::class,
-        'actor_id' => $auth->id,  // The admin who performed the action
-        'actor_type' => get_class($auth),  // Assuming 'User' is the actor model
+        'actor_id' => $participant->id,  // The admin who performed the action
+        'actor_type' => get_class($participant),  // Assuming 'User' is the actor model
         'type' => Actions::DELETE,  // Type of action
     ]);
 
     // get message actions
-    expect($auth->performedActions()->count())->toBe(2);
+    expect($participant->performedActions()->count())->toBe(2);
 
 });

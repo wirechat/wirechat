@@ -278,17 +278,19 @@
                                             </div>
                                         @endif
 
-                                        @if (str()->startsWith($attachment->mime_type, 'video/'))
                                         {{-- Attachemnt is Video/ --}}
+                                        @if (str()->startsWith($attachment->mime_type, 'video/'))
                                             <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
+                                        @endif
 
-                                        @elseif (str()->startsWith($attachment->mime_type, 'image/'))
                                         {{-- Attachemnt is image/ --}}
+                                        @elseif(str()->startsWith($attachment->mime_type, 'image/'))
                                             @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
                                         @else
-                                        {{-- Attachemnt is Application/ --}}
-                                           @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
+                                         {{-- Attachemnt is Application/ --}}
+                                          @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
                                         @endif
+
                                     @endif
 
                                     {{-- if message is emoji then don't show the styled messagebody layout --}}

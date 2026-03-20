@@ -126,38 +126,35 @@ describe('Presense', function () {
 
         // Create a conversation with participants
         $conversation = $auth->createConversationWith($receiver);
+        $participant = $conversation->participant($auth);
 
         // Set specific times for testing purposes
         Carbon::setTestNow(now()->today());
         // Create messages with different timestamps
         $todayMessage = Message::create([
             'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth),
-            'sendable_id' => $auth->id,
+            'participant_id' => $participant->id,
             'body' => 'Message from today',
         ]);
 
         Carbon::setTestNow(now()->subDay());
         $yesterdayMessage = Message::create([
             'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth),
-            'sendable_id' => $auth->id,
+            'participant_id' => $participant->id,
             'body' => 'Message from yesterday',
         ]);
 
         Carbon::setTestNow(now()->subDay(2));
         $thisWeekMessage = Message::create([
             'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth),
-            'sendable_id' => $auth->id,
+            'participant_id' => $participant->id,
             'body' => 'Message from this week',
         ]);
 
         Carbon::setTestNow(now()->subWeeks(2));
         $olderMessage = Message::create([
             'conversation_id' => $conversation->id,
-            'sendable_type' => get_class($auth),
-            'sendable_id' => $auth->id,
+            'participant_id' => $participant->id,
             'body' => 'Older message',
         ]);
 
@@ -683,9 +680,9 @@ describe('Box presence test: ', function () {
 
         // add participant
 
-        $conversation->addParticipant(User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'Micheal']));
-        $conversation->addParticipant(User::factory()->withMessage($conversation, 'How can i repay you ')->create(['name' => 'Levo']));
-        $conversation->addParticipant(User::factory()->withMessage($conversation, 'Wonderful')->create(['name' => 'Luis']));
+        User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'Micheal']);
+        User::factory()->withMessage($conversation, 'How can i repay you ')->create(['name' => 'Levo']);
+        User::factory()->withMessage($conversation, 'Wonderful')->create(['name' => 'Luis']);
 
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -704,9 +701,9 @@ describe('Box presence test: ', function () {
 
         // add participant
 
-        $conversation->addParticipant(User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'Micheal']));
-        $conversation->addParticipant(User::factory()->withMessage($conversation, 'How can i repay you ')->create(['name' => 'Levo']));
-        $conversation->addParticipant(User::factory()->withMessage($conversation, 'Wonderful')->create(['name' => 'Luis']));
+        User::factory()->withMessage($conversation, 'Nice things')->create(['name' => 'Micheal']);
+        User::factory()->withMessage($conversation, 'How can i repay you ')->create(['name' => 'Levo']);
+        User::factory()->withMessage($conversation, 'Wonderful')->create(['name' => 'Luis']);
 
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])

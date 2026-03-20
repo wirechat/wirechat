@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
@@ -14,6 +15,7 @@ use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedActionScope;
 use Wirechat\Wirechat\Traits\Actionable;
+use Wirechat\Wirechat\Traits\Actor;
 
 /**
  * @property int $id
@@ -33,10 +35,6 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property-read int|null $actions_count
  * @property-read \Wirechat\Wirechat\Models\Conversation $conversation
  * @property-read Model|\Eloquent $participantable
- *
- * @method bool hasDeletedConversation(bool $checkDeletionExpired = false)
- *
- * @property-read \Illuminate\Database\Eloquent\Model|null $participantable
  *
  * @method static Builder|Participant newModelQuery()
  * @method static Builder|Participant newQuery()
@@ -63,6 +61,7 @@ use Wirechat\Wirechat\Traits\Actionable;
 class Participant extends Model
 {
     use Actionable;
+    use Actor;
     use HasFactory;
 
     protected $fillable = [
@@ -138,6 +137,17 @@ class Participant extends Model
         return $this->morphTo();
     }
 
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Wirechat::messageModelClass(), 'participant_id');
+    }
+
+    /** Optional: fastest fetch of the latest message */
+    public function latestMessage()
+    {
+        return $this->hasOne(Wirechat::messageModelClass(), 'participant_id')->latestOfMany();
+    }
+
     /**
      * Scope for filtering by participantable model.
      *
@@ -166,7 +176,7 @@ class Participant extends Model
      */
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(Conversation::class);
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     /**
@@ -230,28 +240,36 @@ class Participant extends Model
 
     /**
      * Remove a participant and log the action if not already logged.
-     *
-     * @param  Model  $admin  The admin model removing the participant.
      */
     public function removeByAdmin(Model|Authenticatable $admin): void
     {
+        // Resolve admin as participant in this conversation
+        $adminParticipant = $this->conversation->participant($admin);
+
+        if (! $adminParticipant) {
+            // admin does not belong to this conversation as a participant
+            return;
+        }
+
         // Check if a remove action already exists for this participant
-        $exists = Action::where('actionable_id', $this->id)
-            ->where('actionable_type', Participant::class)
+        $exists = Wirechat::actionModelClass()::where('actionable_id', $this->getKey())
+            ->where('actionable_type', $this->getMorphClass())  // 🔁 match create()
             ->where('type', Actions::REMOVED_BY_ADMIN)
+            ->where('actor_id', $adminParticipant->getKey())
+            ->where('actor_type', $adminParticipant->getMorphClass())
             ->exists();
 
         if (! $exists) {
-            // Create the 'remove' action record in the actions table
-            Action::create([
-                'actionable_id' => $this->id,
-                'actionable_type' => Participant::class,
-                'actor_id' => $admin->getKey(),  // The admin who performed the action
-                'actor_type' => $admin->getMorphClass(),  // Assuming 'User' is the actor model
-                'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
+            Wirechat::actionModelClass()::create([
+                'actionable_id' => $this->getKey(),
+                'actionable_type' => $this->getMorphClass(),          // participant model
+                'actor_id' => $adminParticipant->getKey(),     // admin as participant
+                'actor_type' => $adminParticipant->getMorphClass(),
+                'type' => Actions::REMOVED_BY_ADMIN,
             ]);
         }
-        // update Role to Participant
+
+        // downgrade role to normal participant
         $this->role = ParticipantRole::PARTICIPANT;
         $this->save();
     }
@@ -303,10 +321,5 @@ class Participant extends Model
             $query->where('participantable_id', '<>', $user->getKey())
                 ->orWhere('participantable_type', '<>', $user->getMorphClass());
         });
-
-        //  return $query->where(function ($query) use ($user) {
-        //      $query->whereNot('participantable_id', $user->id)
-        //            ->orWhereNot('participantable_type', $user->getMorphClass());
-        //  });
     }
 }

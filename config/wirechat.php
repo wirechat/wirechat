@@ -30,6 +30,15 @@ return [
     */
     'table_prefix' => 'wirechat_',
 
+    'models' => [
+        'action' => \Wirechat\Wirechat\Models\Action::class,
+        'attachment' => \Wirechat\Wirechat\Models\Attachment::class,
+        'conversation' => \Wirechat\Wirechat\Models\Conversation::class,
+        'group' => \Wirechat\Wirechat\Models\Group::class,
+        'message' => \Wirechat\Wirechat\Models\Message::class,
+        'participant' => \Wirechat\Wirechat\Models\Participant::class,
+    ],
+
     /*
      |--------------------------------------------------------------------------
      | Storage
