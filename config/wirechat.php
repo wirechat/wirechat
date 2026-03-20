@@ -40,7 +40,7 @@ return [
      |
      */
     'storage' => [
-        'disk' => 'public',
+        'disk' => env('WIRECHAT_STORAGE_DISK', 'public'),
         'visibility' => 'public',
         'directories' => [
             'attachments' => 'attachments',
