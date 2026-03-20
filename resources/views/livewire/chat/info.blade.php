@@ -44,7 +44,7 @@
         {{-- Only show if is not group --}}
             <button wire:confirm="{{ __('wirechat::chat.info.actions.delete_chat.confirmation_message') }}" wire:click="deleteChat"
                 class=" w-full cursor-pointer py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] transition  flex gap-3 items-center text-red-500">
-        
+
 
                  <x-wirechat::icon
                                 :icon="$this->panel()->deleteChatActionIcon()"

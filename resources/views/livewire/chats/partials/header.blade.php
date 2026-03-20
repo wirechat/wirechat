@@ -22,7 +22,7 @@
                       <x-wirechat::icon
                                 :icon="$this->panel()->redirectToHomeActionIcon()"
                                  default="wirechat::icons.logout"
-                                class="size-5"
+                                class="size-5 sm:size-6.5"
                                 :icon-attributes="$this->panel()->redirectToHomeActionIconAttributes()" 
                             />
             </a>
