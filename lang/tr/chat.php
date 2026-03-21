@@ -138,6 +138,9 @@ return [
                 'group_permissions' => [
                     'label' => 'Grup İzinleri',
                 ],
+                'invite_via_link' => [
+                    'label' => 'Bağlantı ile Davet Et',
+                ],
                 'exit_group' => [
                     'label' => 'Gruptan Çık',
                     'confirmation_message' => 'Bu gruptan çıkmak istediğinizden emin misiniz?',
@@ -241,8 +244,83 @@ return [
                 'add_other_members' => [
                     'label' => 'Diğer Üyeleri Ekle',
                 ],
+                'admin_approval' => [
+                    'label' => 'Yeni Üyeleri Onayla',
+                    'helper_text' => 'Davet bağlantısı üzerinden katılan kişilerin yöneticiler tarafından onaylanmasını iste',
+                ],
             ],
             'messages' => [
+            ],
+        ],
+        'invite_link' => [
+            'heading' => [
+                'label' => 'Bağlantı ile Gruba Davet Et',
+            ],
+            'labels' => [
+                'admin_approval_enabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı var.',
+                'admin_approval_disabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı yok.',
+            ],
+            'actions' => [
+                'edit_permissions' => [
+                    'label' => 'Grup İzinlerinde Düzenle',
+                ],
+                'send_via_chat' => [
+                    'label' => 'Bağlantıyı Sohbetle Gönder',
+                ],
+                'copy_link' => [
+                    'label' => 'Bağlantıyı Kopyala',
+                ],
+                'reset_link' => [
+                    'label' => 'Bağlantıyı Sıfırla',
+                ],
+            ],
+            'messages' => [
+                'copied_success' => 'Davet bağlantısı kopyalandı.',
+                'reset_success' => 'Grup davet bağlantısı sıfırlandı.',
+            ],
+            'send_via_chat' => [
+                'heading' => [
+                    'label' => 'Davet Bağlantısı Gönder',
+                ],
+                'inputs' => [
+                    'search' => [
+                        'placeholder' => 'Kullanıcı ara',
+                    ],
+                ],
+                'actions' => [
+                    'send' => [
+                        'label' => 'Gönder',
+                    ],
+                ],
+                'messages' => [
+                    'invite_message' => ':group grubuna bu bağlantıyla katıl: :url',
+                    'sent_success' => 'Davet bağlantısı :count sohbete gönderildi.',
+                ],
+            ],
+            'page' => [
+                'labels' => [
+                    'invited_to_group' => 'Bir gruba katılman için davet edildin',
+                    'group_fallback' => 'Grup',
+                    'members_count' => 'Üyeler :count',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'İptal',
+                    ],
+                    'join_group' => [
+                        'label' => 'Gruba Katıl',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Katılma İsteği Gönder',
+                    ],
+                ],
+                'messages' => [
+                    'join_directly' => 'Bu davet bağlantısıyla gruba hemen katılabilirsin.',
+                    'request_required' => 'Yeni üyelerin bu gruba katılmadan önce yönetici onayı alması gerekir.',
+                    'request_pending' => 'Katılma isteğin yönetici onayı bekliyor.',
+                    'request_submitted' => 'Katılma isteğin grup yöneticilerine gönderildi.',
+                    'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsın.',
+                ],
             ],
         ],
 

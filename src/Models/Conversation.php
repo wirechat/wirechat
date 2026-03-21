@@ -242,7 +242,50 @@ class Conversation extends Model
             'role' => $role,
         ]);
 
+        $this->group?->clearJoinRequest($user);
+
         return $participant;
+    }
+
+    /**
+     * Join a group conversation via an invite.
+     *
+     * Allows users who previously exited to re-join themselves, but still
+     * keeps admin removals blocked unless an admin explicitly re-adds them.
+     */
+    public function join(Model|Authenticatable $user): Participant
+    {
+        abort_if($this->isPrivate() || $this->isSelf(), 403, 'Only groups can be joined via invite links.');
+
+        /** @var Participant|null $participant */
+        $participant = $this->participants()
+            ->withoutGlobalScopes()
+            ->where('participantable_id', $user->getKey())
+            ->where('participantable_type', $user->getMorphClass())
+            ->first();
+
+        if (! $participant) {
+            return $this->addParticipant($user);
+        }
+
+        abort_if(
+            $participant->isRemovedByAdmin(),
+            403,
+            'You cannot join this group because you were removed by an admin.'
+        );
+
+        if ($participant->hasExited()) {
+            $participant->forceFill([
+                'exited_at' => null,
+                'role' => ParticipantRole::PARTICIPANT,
+            ])->save();
+
+            $this->group?->clearJoinRequest($user);
+
+            return $participant->refresh();
+        }
+
+        abort(422, 'Participant is already in the conversation.');
     }
 
     /**

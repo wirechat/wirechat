@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Wirechat\Wirechat\Http\Controllers\InviteController;
 use Wirechat\Wirechat\PanelRegistry;
 
 Route::name('wirechat.')
@@ -27,6 +28,12 @@ Route::name('wirechat.')
                     ->group(function () use ($panel) {
                         Route::view('/', 'wirechat::pages.chats', ['panel' => $panel->getId()])
                             ->name('chats');
+
+                        Route::get('/invites/{token}', [InviteController::class, 'show'])
+                            ->name('invite.show');
+                        Route::post('/invites/{token}/join', [InviteController::class, 'join'])
+                            ->name('invite.join');
+
                         Route::view('/{conversation}', 'wirechat::pages.chat', ['panel' => $panel->getId()])
                             ->middleware($panel->getChatMiddleware())
                             ->name('chat');

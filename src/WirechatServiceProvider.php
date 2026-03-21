@@ -16,8 +16,10 @@ use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
+use Wirechat\Wirechat\Livewire\Chat\Group\InviteLink;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
+use Wirechat\Wirechat\Livewire\Chat\Group\SendInviteLink;
 use Wirechat\Wirechat\Livewire\Chat\Info;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Modals\Modal;
@@ -171,6 +173,8 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.add-members', AddMembers::class);
         Livewire::component('wirechat.chat.group.members', Members::class);
         Livewire::component('wirechat.chat.group.permissions', Permissions::class);
+        Livewire::component('wirechat.chat.group.invite-link', InviteLink::class);
+        Livewire::component('wirechat.chat.group.send-invite-link', SendInviteLink::class);
 
         // stand alone widget component
         Livewire::component('wirechat', Wirechat::class);

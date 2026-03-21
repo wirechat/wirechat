@@ -152,6 +152,9 @@ return [
                 'group_permissions' => [
                     'label' => 'Group Permissions',
                 ],
+                'invite_via_link' => [
+                    'label' => 'Invite Via Group Link',
+                ],
                 'exit_group' => [
                     'label' => 'Exit Group',
                     'confirmation_message' => 'Are you sure you want to exit Group ?.',
@@ -262,9 +265,84 @@ return [
                 'add_other_members' => [
                     'label' => 'Add Other Members',
                 ],
+                'admin_approval' => [
+                    'label' => 'Approve New Members',
+                    'helper_text' => 'Require admins to approve people who join from an invite link',
+                ],
 
             ],
             'messages' => [
+            ],
+        ],
+        'invite_link' => [
+            'heading' => [
+                'label' => 'Invite To Group Via Link',
+            ],
+            'labels' => [
+                'admin_approval_enabled' => 'Members need approval from admins to join this group.',
+                'admin_approval_disabled' => 'Members do not need approval from admins to join this group.',
+            ],
+            'actions' => [
+                'edit_permissions' => [
+                    'label' => 'Edit In Group Permissions',
+                ],
+                'send_via_chat' => [
+                    'label' => 'Send Link Via Chat',
+                ],
+                'copy_link' => [
+                    'label' => 'Copy Link',
+                ],
+                'reset_link' => [
+                    'label' => 'Reset Link',
+                ],
+            ],
+            'messages' => [
+                'copied_success' => 'Invite link copied.',
+                'reset_success' => 'Group invite link reset.',
+            ],
+            'send_via_chat' => [
+                'heading' => [
+                    'label' => 'Send Invite Link',
+                ],
+                'inputs' => [
+                    'search' => [
+                        'placeholder' => 'Search users',
+                    ],
+                ],
+                'actions' => [
+                    'send' => [
+                        'label' => 'Send',
+                    ],
+                ],
+                'messages' => [
+                    'invite_message' => 'Join :group via this invite link: :url',
+                    'sent_success' => 'Invite link sent to :count chats.',
+                ],
+            ],
+            'page' => [
+                'labels' => [
+                    'invited_to_group' => 'You were invited to join a group',
+                    'group_fallback' => 'Group',
+                    'members_count' => 'Members :count',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'Cancel',
+                    ],
+                    'join_group' => [
+                        'label' => 'Join Group',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Request To Join',
+                    ],
+                ],
+                'messages' => [
+                    'join_directly' => 'You can join this group immediately from this invite link.',
+                    'request_required' => 'Admins must approve new members before they can join this group.',
+                    'request_pending' => 'Your join request is pending admin approval.',
+                    'request_submitted' => 'Your join request has been sent to the group admins.',
+                    'join_blocked' => 'You cannot join this group with this invite link right now.',
+                ],
             ],
         ],
 

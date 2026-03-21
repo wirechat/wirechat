@@ -6,10 +6,13 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Traits\Actionable;
 
 /**
  * @property int $id
@@ -28,6 +31,7 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property-read \Wirechat\Wirechat\Models\Conversation $conversation
  * @property-read \Wirechat\Wirechat\Models\Attachment|null $cover
  * @property-read string|null $cover_url
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Invite> $inviteLinks
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Group newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Group newQuery()
@@ -50,6 +54,7 @@ use Wirechat\Wirechat\Facades\Wirechat;
  */
 class Group extends Model
 {
+    use Actionable;
     use HasFactory;
 
     protected $fillable = [
@@ -63,6 +68,7 @@ class Group extends Model
         'allow_members_to_send_messages' => 'boolean',
         'allow_members_to_add_others' => 'boolean',
         'allow_members_to_edit_group_info' => 'boolean',
+        'admins_must_approve_new_members' => 'boolean',
     ];
 
     public function __construct(array $attributes = [])
@@ -84,6 +90,9 @@ class Group extends Model
                 $group->cover->delete();
 
             }
+
+            $group->actions()->delete();
+            $group->inviteLinks()->delete();
 
         });
     }
@@ -140,6 +149,11 @@ class Group extends Model
         return $this->morphOne(Attachment::class, 'attachable');
     }
 
+    public function inviteLinks(): MorphMany
+    {
+        return $this->morphMany(Invite::class, 'inviteable');
+    }
+
     /**
      * Permissions
      */
@@ -156,5 +170,44 @@ class Group extends Model
     public function allowsMembersToEditGroupInfo(): bool
     {
         return $this->allow_members_to_edit_group_info == true;
+    }
+
+    public function joinRequests(): MorphMany
+    {
+        return $this->actions()->where('type', Actions::JOIN_REQUEST);
+    }
+
+    public function hasPendingJoinRequest(Model|Authenticatable $user): bool
+    {
+        return $this->joinRequests()
+            ->where('actor_id', $user->getKey())
+            ->where('actor_type', $user->getMorphClass())
+            ->exists();
+    }
+
+    public function requestToJoin(Model|Authenticatable $user)
+    {
+        $request = $this->joinRequests()
+            ->where('actor_id', $user->getKey())
+            ->where('actor_type', $user->getMorphClass())
+            ->first();
+
+        if ($request) {
+            return $request;
+        }
+
+        return $this->actions()->create([
+            'actor_id' => $user->getKey(),
+            'actor_type' => $user->getMorphClass(),
+            'type' => Actions::JOIN_REQUEST,
+        ]);
+    }
+
+    public function clearJoinRequest(Model|Authenticatable $user): void
+    {
+        $this->joinRequests()
+            ->where('actor_id', $user->getKey())
+            ->where('actor_type', $user->getMorphClass())
+            ->delete();
     }
 }

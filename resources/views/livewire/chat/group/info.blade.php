@@ -230,6 +230,17 @@
                     <span>{{ __('wirechat::chat.group.info.actions.add_members.label') }}</span>
                 </button>
             </x-wirechat::actions.open-modal>
+
+            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.invite-link"
+                conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
+                <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex gap-3 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-1.478 1.478a3.375 3.375 0 1 1-4.773-4.773l1.478-1.478m6.136 6.136-1.478 1.478a3.375 3.375 0 0 1-4.773-4.773l1.478-1.478m0 0 3.712-3.712a3.375 3.375 0 1 0-4.773-4.773L10.125 5.26m3.712 3.712 2.651-2.651" />
+                    </svg>
+
+                    <span>{{ __('wirechat::chat.group.info.actions.invite_via_link.label') }}</span>
+                </button>
+            </x-wirechat::actions.open-chat-drawer>
         @endif
 
 

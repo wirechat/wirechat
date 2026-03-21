@@ -152,6 +152,9 @@ return [
                 'group_permissions' => [
                     'label' => 'Gruppenberechtigungen',
                 ],
+                'invite_via_link' => [
+                    'label' => 'Per Gruppenlink einladen',
+                ],
                 'exit_group' => [
                     'label' => 'Gruppe verlassen',
                     'confirmation_message' => 'Möchten Sie die Gruppe wirklich verlassen?',
@@ -237,7 +240,7 @@ return [
             ],
         ],
         // permissions component
-        'permisssions' => [
+        'permissions' => [
             'heading' => [
                 'label' => 'Berechtigungen',
             ],
@@ -262,9 +265,84 @@ return [
                 'add_other_members' => [
                     'label' => 'Weitere Mitglieder hinzufügen',
                 ],
+                'admin_approval' => [
+                    'label' => 'Neue Mitglieder bestätigen',
+                    'helper_text' => 'Administratoren müssen Personen bestätigen, die über einen Einladungslink beitreten',
+                ],
 
             ],
             'messages' => [
+            ],
+        ],
+        'invite_link' => [
+            'heading' => [
+                'label' => 'Per Link zur Gruppe einladen',
+            ],
+            'labels' => [
+                'admin_approval_enabled' => 'Mitglieder benötigen die Bestätigung eines Administrators, um dieser Gruppe beizutreten.',
+                'admin_approval_disabled' => 'Mitglieder benötigen keine Administrator-Bestätigung, um dieser Gruppe beizutreten.',
+            ],
+            'actions' => [
+                'edit_permissions' => [
+                    'label' => 'In Gruppenberechtigungen bearbeiten',
+                ],
+                'send_via_chat' => [
+                    'label' => 'Link per Chat senden',
+                ],
+                'copy_link' => [
+                    'label' => 'Link kopieren',
+                ],
+                'reset_link' => [
+                    'label' => 'Link zurücksetzen',
+                ],
+            ],
+            'messages' => [
+                'copied_success' => 'Einladungslink kopiert.',
+                'reset_success' => 'Gruppen-Einladungslink zurückgesetzt.',
+            ],
+            'send_via_chat' => [
+                'heading' => [
+                    'label' => 'Einladungslink senden',
+                ],
+                'inputs' => [
+                    'search' => [
+                        'placeholder' => 'Benutzer suchen',
+                    ],
+                ],
+                'actions' => [
+                    'send' => [
+                        'label' => 'Senden',
+                    ],
+                ],
+                'messages' => [
+                    'invite_message' => 'Tritt :group über diesen Einladungslink bei: :url',
+                    'sent_success' => 'Einladungslink an :count Chats gesendet.',
+                ],
+            ],
+            'page' => [
+                'labels' => [
+                    'invited_to_group' => 'Du wurdest eingeladen, einer Gruppe beizutreten',
+                    'group_fallback' => 'Gruppe',
+                    'members_count' => 'Mitglieder :count',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'Abbrechen',
+                    ],
+                    'join_group' => [
+                        'label' => 'Gruppe beitreten',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Beitritt anfragen',
+                    ],
+                ],
+                'messages' => [
+                    'join_directly' => 'Du kannst dieser Gruppe sofort über diesen Einladungslink beitreten.',
+                    'request_required' => 'Administratoren müssen neue Mitglieder bestätigen, bevor sie dieser Gruppe beitreten können.',
+                    'request_pending' => 'Deine Beitrittsanfrage wartet auf die Bestätigung eines Administrators.',
+                    'request_submitted' => 'Deine Beitrittsanfrage wurde an die Gruppenadministratoren gesendet.',
+                    'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
+                ],
             ],
         ],
 
