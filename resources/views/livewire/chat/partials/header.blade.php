@@ -10,9 +10,10 @@
     <div class="  flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
 
         {{-- Return --}}
-        <a wire:navigate @if ($this->isWidget()) @click="$dispatch('close-chat',{conversation: {{json_encode($conversation->id)}} })"
+        <a @if ($this->isWidget()) @click="$dispatch('close-chat',{conversation: {{json_encode($conversation->id)}} })"
             dusk="return_to_home_button_dispatch"
         @else
+            wire:navigate
             href="{{ $this->panel()->chatsRoute() }}"
             dusk="return_to_home_button_link" @endif
             @class([
