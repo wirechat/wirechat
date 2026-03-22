@@ -743,7 +743,7 @@ describe('Cursor pagination', function () {
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertSet('conversationIds', [])
             ->assertSet('cursorUpdatedAt', null)
-            ->assertSet('cursorId', null)
+            ->assertSet('cursorCreatedAt', null)
             ->assertSet('canLoadMore', false);
     });
 
@@ -762,23 +762,25 @@ describe('Cursor pagination', function () {
 
         $component
             ->assertNotSet('cursorUpdatedAt', null)
-            ->assertNotSet('cursorId', null);
+            ->assertNotSet('cursorCreatedAt', null);
     });
 
     it('loads conversations ordered by most recently updated first', function () {
         $auth = User::factory()->create();
 
-        // Create two conversations with the same updated_at timestamp
+        // Create two conversations with different created_at but the same updated_at timestamp
         $baseTime = now();
 
-        Carbon::setTestNow($baseTime->copy()->subSeconds(20));
+        Carbon::setTestNow($baseTime->copy()->subSeconds(21));
         $user1 = User::factory()->create();
         $conv1 = $auth->createConversationWith($user1, 'message 1');
 
-        // Same timestamp as $conv1, so updated_at is equal; id DESC should be the tiebreaker
         Carbon::setTestNow($baseTime->copy()->subSeconds(20));
         $user2 = User::factory()->create();
         $conv2 = $auth->createConversationWith($user2, 'message 2');
+
+        // Force conv1 to share the same updated_at as conv2 so created_at is the tiebreaker
+        $conv1->forceFill(['updated_at' => $baseTime->copy()->subSeconds(20)])->saveQuietly();
 
         // More recent conversation; should always appear first
         Carbon::setTestNow($baseTime->copy()->subSeconds(10));
@@ -792,9 +794,9 @@ describe('Cursor pagination', function () {
 
         // Most recently updated conversation should appear first
         expect($ids[0])->toBe($conv3->id)
-            // When updated_at is the same, the higher id should come first (id DESC tiebreaker)
-            ->and($ids[1])->toBe(max($conv1->id, $conv2->id))
-            ->and($ids[2])->toBe(min($conv1->id, $conv2->id));
+            // When updated_at is the same, the more recently created conversation comes first (created_at DESC tiebreaker)
+            ->and($ids[1])->toBe($conv2->id)
+            ->and($ids[2])->toBe($conv1->id);
     });
 
     it('appends new IDs on loadMore without reshuffling existing ones', function () {
@@ -916,7 +918,7 @@ describe('Cursor pagination', function () {
         $component
             ->assertSet('conversationIds', [])
             ->assertSet('cursorUpdatedAt', null)
-            ->assertSet('cursorId', null)
+            ->assertSet('cursorCreatedAt', null)
             ->assertSet('canLoadMore', false);
     });
 });
