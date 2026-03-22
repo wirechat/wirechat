@@ -28,7 +28,7 @@
             </a>
             @endif
 
-            {{-- Panel-action:Creat Chat Action--}}
+            {{-- Panel-action:Create Chat Action--}}
             @if ($createChatAction)
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
                 <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
