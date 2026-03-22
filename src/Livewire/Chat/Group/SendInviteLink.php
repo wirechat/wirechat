@@ -53,6 +53,7 @@ class SendInviteLink extends ModalComponent
         }
 
         $this->users = collect($this->panel()->searchUsers($this->search)->collection)
+            ->filter(fn ($resource) => $this->canReceiveInviteLink($resource->resource))
             ->map(function ($resource) {
                 $model = $resource->resource;
 
@@ -62,7 +63,8 @@ class SendInviteLink extends ModalComponent
                     'wirechat_name' => $model->wirechat_name,
                     'wirechat_avatar_url' => $model->wirechat_avatar_url,
                 ];
-            });
+            })
+            ->values();
     }
 
     public function toggleMember($id, string $class): void
@@ -76,6 +78,8 @@ class SendInviteLink extends ModalComponent
         if (! $model) {
             return;
         }
+
+        abort_unless($this->canReceiveInviteLink($model, shouldAbort: true), 403);
 
         if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
             $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
@@ -158,5 +162,34 @@ class SendInviteLink extends ModalComponent
     public function render()
     {
         return view('wirechat::livewire.chat.group.send-invite-link');
+    }
+
+    protected function canReceiveInviteLink(Model $model, bool $shouldAbort = false): bool
+    {
+        $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
+
+        if (! $participant) {
+            return true;
+        }
+
+        if ($participant->isBlockedByAdmin()) {
+            abort_if($shouldAbort, 403, __('wirechat::chat.group.invite_link.send_via_chat.messages.unavailable_blocked', ['member' => $model->wirechat_name]));
+
+            return false;
+        }
+
+        if ($participant->isRemovedByAdmin()) {
+            abort_if($shouldAbort, 403, __('wirechat::chat.group.invite_link.send_via_chat.messages.unavailable_removed', ['member' => $model->wirechat_name]));
+
+            return false;
+        }
+
+        if ($participant->hasExited()) {
+            abort_if($shouldAbort, 403, __('wirechat::chat.group.invite_link.send_via_chat.messages.unavailable_left', ['member' => $model->wirechat_name]));
+
+            return false;
+        }
+
+        return true;
     }
 }

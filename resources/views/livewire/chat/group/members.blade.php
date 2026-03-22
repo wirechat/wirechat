@@ -36,6 +36,24 @@
                 class="wc-input w-full border-0 w-auto dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-dark-parimary)] rounded-lg focus:ring-0 hover:ring-0">
         </section>
 
+        @if ($authIsAdminInGroup || $authIsOwner)
+            <section class="grid grid-cols-2 gap-2 pt-3">
+                <x-wirechat::actions.open-modal component="wirechat.chat.group.past-members"
+                    conversation="{{ $conversation?->id }}" :panel="$this->panel">
+                    <button type="button" class="w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
+                        {{ __('wirechat::chat.group.members.actions.past_members.label') }}
+                    </button>
+                </x-wirechat::actions.open-modal>
+
+                <x-wirechat::actions.open-modal component="wirechat.chat.group.blocked-members"
+                    conversation="{{ $conversation?->id }}" :panel="$this->panel">
+                    <button type="button" class="w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
+                        {{ __('wirechat::chat.group.members.actions.blocked_members.label') }}
+                    </button>
+                </x-wirechat::actions.open-modal>
+            </section>
+        @endif
+
     </header>
 
 
@@ -122,6 +140,13 @@
                                                 wire:confirm="{{__('wirechat::chat.group.members.actions.remove_from_group.confirmation_message',['member'=>$participant->participantable?->wirechat_name])}}"
                                                 class="text-red-500 ">
                                                 {{__('wirechat::chat.group.members.actions.remove_from_group.label')}}
+                                            </x-wirechat::dropdown-button>
+
+                                            <x-wirechat::dropdown-button
+                                                wire:click="blockMember('{{ $participant->id }}')"
+                                                wire:confirm="{{__('wirechat::chat.group.members.actions.block_member.confirmation_message',['member'=>$participant->participantable?->wirechat_name])}}"
+                                                class="text-red-500 ">
+                                                {{__('wirechat::chat.group.members.actions.block_member.label')}}
                                             </x-wirechat::dropdown-button>
                                             @endif
 

@@ -203,6 +203,16 @@ return [
                     'label' => 'Remove',
                     'confirmation_message' => 'Are you sure you want remove :member from this Group ?.',
                 ],
+                'block_member' => [
+                    'label' => 'Block Member',
+                    'confirmation_message' => 'Are you sure you want to block :member from this group ?.',
+                ],
+                'past_members' => [
+                    'label' => 'Past Members',
+                ],
+                'blocked_members' => [
+                    'label' => 'Blocked Members',
+                ],
                 'load_more' => [
                     'label' => 'Load more',
                 ],
@@ -319,6 +329,9 @@ return [
                 ],
                 'messages' => [
                     'invite_message' => 'Join :group via this invite link: :url',
+                    'unavailable_left' => ':member left this group and must open the invite link personally to rejoin.',
+                    'unavailable_removed' => ':member was removed from this group and cannot receive a group invite link.',
+                    'unavailable_blocked' => ':member is blocked from this group and cannot receive a group invite link.',
                     'sent_success' => 'Invite link sent to :count chats.',
                 ],
             ],
@@ -351,6 +364,46 @@ return [
                     'request_submitted' => 'Your join request has been sent to the group admins.',
                     'join_blocked' => 'You cannot join this group with this invite link right now.',
                 ],
+            ],
+        ],
+        'past_members' => [
+            'heading' => [
+                'label' => 'Past Members',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Search past members',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'No past members found',
+                'reason_left' => 'Left the group',
+                'reason_removed' => 'Removed by an admin',
+                'reason_blocked' => 'Blocked by an admin',
+                'at' => ':time',
+            ],
+        ],
+        'blocked_members' => [
+            'heading' => [
+                'label' => 'Blocked Members',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Search blocked members',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'No blocked members found',
+                'helper' => 'Blocked members cannot rejoin until the block is lifted.',
+            ],
+            'actions' => [
+                'lift_block' => [
+                    'label' => 'Lift Block',
+                    'confirmation_message' => 'Are you sure you want to lift the block for :member ?.',
+                ],
+            ],
+            'messages' => [
+                'unblocked_success' => ':member can join again with a group invite link.',
             ],
         ],
 

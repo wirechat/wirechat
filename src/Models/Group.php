@@ -192,7 +192,15 @@ class Group extends Model
             ->whereParticipantable($user)
             ->first();
 
-        return (bool) $participant?->isRemovedByAdmin();
+        if (! $participant) {
+            return false;
+        }
+
+        if ($participant->isBlockedByAdmin()) {
+            return true;
+        }
+
+        return $participant->isRemovedByAdmin() && ! $participant->hasExited();
     }
 
     public function hasPendingJoinRequest(Model|Authenticatable $user): bool

@@ -190,6 +190,12 @@ class Conversation extends Model
 
         // Check if the participant already exists (with or without global scopes)
         if ($participant) {
+            abort_if(
+                $participant->isBlockedByAdmin(),
+                403,
+                'Cannot add '.$user->wirechat_name.' because they were blocked from the group by an Admin.'
+            );
+
             // Abort if the participant exited themselves
             abort_if(
                 $participant->hasExited(),
@@ -269,7 +275,13 @@ class Conversation extends Model
         }
 
         abort_if(
-            $participant->isRemovedByAdmin(),
+            $participant->isBlockedByAdmin(),
+            403,
+            'You cannot join this group because you were blocked by an admin.'
+        );
+
+        abort_if(
+            $participant->isRemovedByAdmin() && ! $participant->hasExited(),
             403,
             'You cannot join this group because you were removed by an admin.'
         );
@@ -279,6 +291,10 @@ class Conversation extends Model
                 'exited_at' => null,
                 'role' => ParticipantRole::PARTICIPANT,
             ])->save();
+
+            $participant->actions()
+                ->where('type', Actions::REMOVED_BY_ADMIN->value)
+                ->delete();
 
             $this->group?->acceptPendingJoinRequest($user, $reviewedBy, true);
 

@@ -160,6 +160,86 @@ it('can send an invite link via chat', function () {
         ->and($privateConversation->messages()->latest('id')->first()->body)->toContain($invite->url(testPanelProvider()));
 });
 
+it('hides exited and removed past members from send invite search results', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $exitedUser = User::factory()->create(['name' => 'Invite Candidate Left']);
+    $removedUser = User::factory()->create(['name' => 'Invite Candidate Removed']);
+    $availableUser = User::factory()->create(['name' => 'Invite Candidate Ready']);
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->addParticipant($exitedUser)->exitConversation();
+    $conversation->addParticipant($removedUser)->removeByAdmin($owner);
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', 'Invite Candidate')
+        ->assertSee($availableUser->wirechat_name)
+        ->assertDontSee($exitedUser->wirechat_name)
+        ->assertDontSee($removedUser->wirechat_name);
+});
+
+it('rejects direct send invite selection for an exited past member', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $exitedUser = User::factory()->create(['name' => 'Exited User']);
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->addParticipant($exitedUser)->exitConversation();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->call('toggleMember', $exitedUser->getKey(), $exitedUser->getMorphClass())
+        ->assertStatus(403);
+});
+
+it('uses the panel user search callback in the send invite modal', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $emailMatchedUser = User::factory()->create([
+        'name' => 'Email Result',
+        'email' => 'custom-callback@example.com',
+    ]);
+    $nameMatchedUser = User::factory()->create([
+        'name' => 'custom-callback',
+        'email' => 'name-only@example.com',
+    ]);
+
+    testPanelProvider()->searchUsersUsing(function ($needle) {
+        return User::query()
+            ->where('email', 'like', "%{$needle}%")
+            ->get();
+    });
+
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', 'custom-callback')
+        ->assertSee($emailMatchedUser->wirechat_name)
+        ->assertDontSee($nameMatchedUser->wirechat_name);
+});
+
 it('shows invite management actions only to admins in group info', function () {
     $owner = User::factory()->create();
     $admin = User::factory()->create();
@@ -444,6 +524,54 @@ it('allows an exited participant to rejoin via the in-app invite modal', functio
     $invite->refresh();
 
     expect($participant->exited_at)->toBeNull()
+        ->and($receiver->belongsToConversation($conversation))->toBeTrue()
+        ->and($invite->usages)->toBe(1);
+});
+
+it('keeps blocked members from rejoining by invite until the block is lifted', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    $participant = $conversation->addParticipant($receiver);
+    $participant->blockByAdmin($owner);
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->call('proceed')
+        ->assertNoRedirect();
+
+    $participant->refresh();
+    $invite->refresh();
+
+    expect($participant->isBlockedByAdmin())->toBeTrue()
+        ->and($receiver->belongsToConversation($conversation))->toBeFalse()
+        ->and($invite->usages)->toBe(0);
+
+    $participant->liftBlockByAdmin();
+    $participant->refresh();
+
+    Livewire::actingAs($receiver)
+        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->call('proceed')
+        ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+
+    $participant->refresh();
+    $invite->refresh();
+
+    expect($participant->isBlockedByAdmin())->toBeFalse()
+        ->and($participant->isRemovedByAdmin())->toBeFalse()
+        ->and($participant->exited_at)->toBeNull()
         ->and($receiver->belongsToConversation($conversation))->toBeTrue()
         ->and($invite->usages)->toBe(1);
 });

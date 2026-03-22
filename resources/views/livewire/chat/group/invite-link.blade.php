@@ -13,7 +13,7 @@
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]">
                  <x-wirechat::icons.link class="size-7" />
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Anyone with Wirechat will be able to open one of these links and join your group based on your access settings.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Anyone with an account will be able to open one of these links and join your group based on your access settings.</p>
         </div>
 
         <div class="rounded-3xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-secondary)]/40 dark:bg-[var(--wc-dark-secondary)]/40 p-5 shadow-sm">

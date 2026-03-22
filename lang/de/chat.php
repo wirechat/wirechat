@@ -203,6 +203,16 @@ return [
                     'label' => 'Entfernen',
                     'confirmation_message' => 'Möchten Sie :member wirklich aus dieser Gruppe entfernen?',
                 ],
+                'block_member' => [
+                    'label' => 'Mitglied blockieren',
+                    'confirmation_message' => 'Möchten Sie :member wirklich für diese Gruppe blockieren?',
+                ],
+                'past_members' => [
+                    'label' => 'Ehemalige Mitglieder',
+                ],
+                'blocked_members' => [
+                    'label' => 'Blockierte Mitglieder',
+                ],
                 'load_more' => [
                     'label' => 'Mehr laden',
                 ],
@@ -319,6 +329,9 @@ return [
                 ],
                 'messages' => [
                     'invite_message' => 'Tritt :group über diesen Einladungslink bei: :url',
+                    'unavailable_left' => ':member hat die Gruppe verlassen und muss den Einladungslink selbst öffnen, um wieder beizutreten.',
+                    'unavailable_removed' => ':member wurde aus dieser Gruppe entfernt und kann keinen Gruppeneinladungslink erhalten.',
+                    'unavailable_blocked' => ':member ist für diese Gruppe blockiert und kann keinen Gruppeneinladungslink erhalten.',
                     'sent_success' => 'Einladungslink an :count Chats gesendet.',
                 ],
             ],
@@ -351,6 +364,46 @@ return [
                     'request_submitted' => 'Deine Beitrittsanfrage wurde an die Gruppenadministratoren gesendet.',
                     'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
                 ],
+            ],
+        ],
+        'past_members' => [
+            'heading' => [
+                'label' => 'Ehemalige Mitglieder',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Ehemalige Mitglieder suchen',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Keine ehemaligen Mitglieder gefunden',
+                'reason_left' => 'Gruppe verlassen',
+                'reason_removed' => 'Von einem Administrator entfernt',
+                'reason_blocked' => 'Von einem Administrator blockiert',
+                'at' => ':time',
+            ],
+        ],
+        'blocked_members' => [
+            'heading' => [
+                'label' => 'Blockierte Mitglieder',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Blockierte Mitglieder suchen',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Keine blockierten Mitglieder gefunden',
+                'helper' => 'Blockierte Mitglieder konnen nicht erneut beitreten, bis die Blockierung aufgehoben wird.',
+            ],
+            'actions' => [
+                'lift_block' => [
+                    'label' => 'Blockierung aufheben',
+                    'confirmation_message' => 'Möchten Sie die Blockierung für :member wirklich aufheben?',
+                ],
+            ],
+            'messages' => [
+                'unblocked_success' => ':member kann mit einem Gruppeneinladungslink wieder beitreten.',
             ],
         ],
 

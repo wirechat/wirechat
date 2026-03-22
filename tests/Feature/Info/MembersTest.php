@@ -4,7 +4,9 @@ use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Livewire\Chat\Group\BlockedMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members;
+use Wirechat\Wirechat\Livewire\Chat\Group\PastMembers;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
@@ -432,6 +434,18 @@ describe('presence test', function () {
 
     });
 
+    test('admins can see past and blocked member drawers', function () {
+        $owner = User::factory()->create(['name' => 'Owner']);
+        $admin = User::factory()->create(['name' => 'Admin']);
+
+        $conversation = $owner->createGroup('My Group');
+        $conversation->addParticipant($admin)->update(['role' => ParticipantRole::ADMIN]);
+
+        Livewire::actingAs($admin)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee(__('wirechat::chat.group.members.actions.past_members.label'))
+            ->assertSee(__('wirechat::chat.group.members.actions.blocked_members.label'));
+    });
+
 });
 
 describe('actions test', function () {
@@ -754,6 +768,76 @@ describe('actions test', function () {
 
         $request->assertDispatched('participantsCountUpdated');
 
+    });
+
+    test('calling blockMember creates a blocked past member and removes them from active members', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name' => 'Blocked User']);
+        $participant = $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->call('blockMember', $participant->id)
+            ->assertDontSee($user->wirechat_name);
+
+        $participant->refresh();
+
+        expect($participant->isBlockedByAdmin())->toBeTrue()
+            ->and($participant->isRemovedByAdmin())->toBeTrue()
+            ->and($user->belongsToConversation($conversation->fresh()))->toBeFalse();
+    });
+
+    test('past members drawer shows left removed and blocked reasons', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $leftUser = User::factory()->create(['name' => 'Left User']);
+        $removedUser = User::factory()->create(['name' => 'Removed User']);
+        $blockedUser = User::factory()->create(['name' => 'Blocked User']);
+
+        $conversation->addParticipant($leftUser)->exitConversation();
+        $conversation->addParticipant($removedUser)->removeByAdmin($auth);
+        $conversation->addParticipant($blockedUser)->blockByAdmin($auth);
+
+        Livewire::actingAs($auth)->test(PastMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee($leftUser->wirechat_name)
+            ->assertSee($removedUser->wirechat_name)
+            ->assertSee($blockedUser->wirechat_name)
+            ->assertSee(__('wirechat::chat.group.past_members.labels.reason_left'))
+            ->assertSee(__('wirechat::chat.group.past_members.labels.reason_removed'))
+            ->assertSee(__('wirechat::chat.group.past_members.labels.reason_blocked'));
+    });
+
+    test('blocked members drawer can lift a block without restoring active membership', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $blockedUser = User::factory()->create(['name' => 'Blocked User']);
+        $participant = $conversation->addParticipant($blockedUser);
+        $participant->blockByAdmin($auth);
+
+        Livewire::actingAs($auth)->test(BlockedMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee($blockedUser->wirechat_name)
+            ->call('liftBlock', $participant->id)
+            ->assertDontSee($blockedUser->wirechat_name);
+
+        $participant->refresh();
+
+        expect($participant->isBlockedByAdmin())->toBeFalse()
+            ->and($participant->hasExited())->toBeTrue()
+            ->and($blockedUser->belongsToConversation($conversation->fresh()))->toBeFalse();
+    });
+
+    test('non-admins cannot access the past members drawer', function () {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+
+        $conversation = $owner->createGroup('My Group');
+        $conversation->addParticipant($member);
+
+        Livewire::actingAs($member)->test(PastMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertStatus(403);
     });
 
 });

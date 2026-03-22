@@ -190,6 +190,16 @@ return [
                     'label' => 'Retirer',
                     'confirmation_message' => 'Êtes-vous sûr de vouloir retirer :member de ce groupe?',
                 ],
+                'block_member' => [
+                    'label' => 'Bloquer le membre',
+                    'confirmation_message' => 'Voulez-vous vraiment bloquer :member de ce groupe?',
+                ],
+                'past_members' => [
+                    'label' => 'Anciens membres',
+                ],
+                'blocked_members' => [
+                    'label' => 'Membres bloques',
+                ],
                 'load_more' => [
                     'label' => 'Charger plus',
                 ],
@@ -298,6 +308,9 @@ return [
                 ],
                 'messages' => [
                     'invite_message' => "Rejoignez :group via ce lien d'invitation : :url",
+                    'unavailable_left' => ':member a quitte ce groupe et doit ouvrir lui-meme le lien d\'invitation pour revenir.',
+                    'unavailable_removed' => ':member a ete retire de ce groupe et ne peut pas recevoir un lien d\'invitation de groupe.',
+                    'unavailable_blocked' => ':member est bloque pour ce groupe et ne peut pas recevoir un lien d\'invitation de groupe.',
                     'sent_success' => "Lien d'invitation envoyé à :count discussions.",
                 ],
             ],
@@ -330,6 +343,46 @@ return [
                     'request_submitted' => "Votre demande d'adhésion a été envoyée aux administrateurs du groupe.",
                     'join_blocked' => "Vous ne pouvez pas rejoindre ce groupe avec ce lien d'invitation pour le moment.",
                 ],
+            ],
+        ],
+        'past_members' => [
+            'heading' => [
+                'label' => 'Anciens membres',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Rechercher les anciens membres',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Aucun ancien membre trouve',
+                'reason_left' => 'A quitte le groupe',
+                'reason_removed' => 'Retire par un administrateur',
+                'reason_blocked' => 'Bloque par un administrateur',
+                'at' => ':time',
+            ],
+        ],
+        'blocked_members' => [
+            'heading' => [
+                'label' => 'Membres bloques',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Rechercher les membres bloques',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Aucun membre bloque trouve',
+                'helper' => 'Les membres bloques ne peuvent pas revenir tant que le blocage n\'est pas leve.',
+            ],
+            'actions' => [
+                'lift_block' => [
+                    'label' => 'Lever le blocage',
+                    'confirmation_message' => 'Voulez-vous vraiment lever le blocage pour :member?',
+                ],
+            ],
+            'messages' => [
+                'unblocked_success' => ':member peut a nouveau rejoindre avec un lien d\'invitation de groupe.',
             ],
         ],
     ],

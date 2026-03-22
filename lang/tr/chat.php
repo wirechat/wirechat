@@ -186,6 +186,16 @@ return [
                     'label' => 'Kaldır',
                     'confirmation_message' => ':member\'i bu gruptan kaldırmak istediğinizden emin misiniz?',
                 ],
+                'block_member' => [
+                    'label' => 'Uyeyi Engelle',
+                    'confirmation_message' => ':member kullanicisini bu grupta engellemek istediginizden emin misiniz?',
+                ],
+                'past_members' => [
+                    'label' => 'Gecmis Uyeler',
+                ],
+                'blocked_members' => [
+                    'label' => 'Engellenen Uyeler',
+                ],
                 'load_more' => [
                     'label' => 'Daha fazla yükle',
                 ],
@@ -297,6 +307,9 @@ return [
                 ],
                 'messages' => [
                     'invite_message' => ':group grubuna bu bağlantıyla katıl: :url',
+                    'unavailable_left' => ':member bu gruptan ayrildi ve geri donmek icin davet baglantisini kendi acmalidir.',
+                    'unavailable_removed' => ':member bu gruptan cikarildi ve grup davet baglantisi alamaz.',
+                    'unavailable_blocked' => ':member bu grupta engelli oldugu icin grup davet baglantisi alamaz.',
                     'sent_success' => 'Davet bağlantısı :count sohbete gönderildi.',
                 ],
             ],
@@ -329,6 +342,46 @@ return [
                     'request_submitted' => 'Katılma isteğin grup yöneticilerine gönderildi.',
                     'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsın.',
                 ],
+            ],
+        ],
+        'past_members' => [
+            'heading' => [
+                'label' => 'Gecmis Uyeler',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Gecmis uyeleri ara',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Gecmis uye bulunamadi',
+                'reason_left' => 'Gruptan ayrildi',
+                'reason_removed' => 'Bir yonetici tarafindan cikarildi',
+                'reason_blocked' => 'Bir yonetici tarafindan engellendi',
+                'at' => ':time',
+            ],
+        ],
+        'blocked_members' => [
+            'heading' => [
+                'label' => 'Engellenen Uyeler',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Engellenen uyeleri ara',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Engellenen uye bulunamadi',
+                'helper' => 'Engellenen uyeler, engel kaldirilana kadar tekrar katilamaz.',
+            ],
+            'actions' => [
+                'lift_block' => [
+                    'label' => 'Engeli Kaldir',
+                    'confirmation_message' => ':member icin engeli kaldirmak istediginizden emin misiniz?',
+                ],
+            ],
+            'messages' => [
+                'unblocked_success' => ':member grup davet baglantisiyla yeniden katilabilir.',
             ],
         ],
 

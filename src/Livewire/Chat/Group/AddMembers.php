@@ -101,6 +101,7 @@ class AddMembers extends ModalComponent
 
                 $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
 
+                abort_if($participant?->isBlockedByAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were blocked from the group by an Admin.');
                 abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->wirechat_name.' because they left the group');
 
                 if ($participant?->isRemovedByAdmin()) {

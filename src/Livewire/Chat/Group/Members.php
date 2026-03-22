@@ -13,7 +13,6 @@ use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
-use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
@@ -194,40 +193,33 @@ class Members extends ModalComponent
     /* Deleting from group */
     public function removeFromGroup(Participant $participant)
     {
+        $this->authorizeAdminAction($participant, 'remove');
 
-        // Load missing relationship in case of strict models types
-        $participant->loadMissing('participantable');
-        // abort if user does not belong to conversation
-        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        $participant->removeByAdmin(auth()->user());
 
-        // abort if auth is not admin
-        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
-
-        // abort if user participants is owner
-        abort_if($participant->isOwner(), 403, 'Owner cannot be removed from group');
-
-        // remove from group
-        // Create the 'remove' action record in the actions table
-        Action::create([
-            'actionable_id' => $participant->id,
-            'actionable_type' => Participant::class,
-            'actor_id' => auth()->id(),  // The admin who performed the action
-            'actor_type' => auth()->user()->getMorphClass(),  // Assuming 'User' is the actor model
-            'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
-        ]);
-
-        // remove from
-        // Remove member if they are already selected
         $this->participants = $this->participants->reject(function ($member) use ($participant) {
             return $member->id == $participant->id && get_class($member) == get_class($participant);
         });
 
-        // subtract one from total members and update chat list
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
         $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(\Wirechat\Wirechat\Livewire\Chat\Group\Info::class);
-        //  $this->dispatch('refresh')->self();
+    }
 
+    public function blockMember(Participant $participant)
+    {
+        $this->authorizeAdminAction($participant, 'block');
+
+        $participant->blockByAdmin(auth()->user());
+
+        $this->participants = $this->participants->reject(function ($member) use ($participant) {
+            return $member->id == $participant->id && get_class($member) == get_class($participant);
+        });
+
+        $this->totalMembersCount = $this->totalMembersCount - 1;
+
+        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(\Wirechat\Wirechat\Livewire\Chat\Group\Info::class);
+        $this->dispatch('refresh')->self();
     }
 
     /**
@@ -259,6 +251,21 @@ class Members extends ModalComponent
         $this->participants = collect();
 
         $this->loadParticipants();
+    }
+
+    protected function authorizeAdminAction(Participant $participant, string $action = 'manage'): void
+    {
+        $participant->loadMissing('participantable');
+
+        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+        abort_if($participant->isOwner(), 403, ucfirst($action).' action cannot target the group owner.');
+        abort_if($participant->isAdmin(), 403, ucfirst($action).' action cannot target another admin.');
+        abort_if(
+            $participant->participantable_id == auth()->id() && $participant->participantable_type == auth()->user()->getMorphClass(),
+            403,
+            'You cannot '.strtolower($action).' yourself from the group.'
+        );
     }
 
     public function render()
