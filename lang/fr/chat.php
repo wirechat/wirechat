@@ -198,7 +198,7 @@ return [
                     'label' => 'Anciens membres',
                 ],
                 'blocked_members' => [
-                    'label' => 'Membres bloques',
+                    'label' => 'Membres bloqués',
                 ],
                 'load_more' => [
                     'label' => 'Charger plus',
@@ -213,9 +213,9 @@ return [
                 'label' => "Demandes d'adhésion",
             ],
             'labels' => [
-                'description' => "Examinez et traitez toutes les personnes qui ont demandé à rejoindre ce groupe via un lien d'invitation.",
+                'description' => "Examinez et gérez toutes les personnes qui ont demandé à rejoindre ce groupe via un lien d'invitation.",
                 'unknown_user' => 'Utilisateur inconnu',
-                'requested_at' => 'Demandé :time',
+                'requested_at' => 'Demandée :time',
                 'via_invite_link' => "via le lien d'invitation",
                 'empty_state' => "Il n'y a aucune demande d'adhésion en attente pour le moment.",
             ],
@@ -249,7 +249,7 @@ return [
                     'label' => 'Enregistrer',
                 ],
                 'invite_via_link' => [
-                    'label' => "Liens d'invitation",
+                    'label' => 'Inviter dans le groupe via un lien',
                 ],
             ],
             'messages' => [
@@ -354,9 +354,9 @@ return [
                 ],
                 'messages' => [
                     'invite_message' => "Rejoignez :group via ce lien d'invitation : :url",
-                    'unavailable_left' => ':member a quitte ce groupe et doit ouvrir lui-meme le lien d\'invitation pour revenir.',
-                    'unavailable_removed' => ':member a ete retire de ce groupe et ne peut pas recevoir un lien d\'invitation de groupe.',
-                    'unavailable_blocked' => ':member est bloque pour ce groupe et ne peut pas recevoir un lien d\'invitation de groupe.',
+                    'unavailable_left' => ':member a quitté ce groupe et doit ouvrir lui-même le lien d\'invitation pour revenir.',
+                    'unavailable_removed' => ':member a été retiré de ce groupe et ne peut pas recevoir de lien d\'invitation de groupe.',
+                    'unavailable_blocked' => ':member est bloqué pour ce groupe et ne peut pas recevoir de lien d\'invitation de groupe.',
                     'sent_success' => "Lien d'invitation envoyé à :count discussions.",
                 ],
             ],
@@ -401,25 +401,25 @@ return [
                 ],
             ],
             'labels' => [
-                'no_results' => 'Aucun ancien membre trouve',
-                'reason_left' => 'A quitte le groupe',
-                'reason_removed' => 'Retire par un administrateur',
-                'reason_blocked' => 'Bloque par un administrateur',
+                'no_results' => 'Aucun ancien membre trouvé',
+                'reason_left' => 'A quitté le groupe',
+                'reason_removed' => 'Retiré par un administrateur',
+                'reason_blocked' => 'Bloqué par un administrateur',
                 'at' => ':time',
             ],
         ],
         'blocked_members' => [
             'heading' => [
-                'label' => 'Membres bloques',
+                'label' => 'Membres bloqués',
             ],
             'inputs' => [
                 'search' => [
-                    'placeholder' => 'Rechercher les membres bloques',
+                    'placeholder' => 'Rechercher les membres bloqués',
                 ],
             ],
             'labels' => [
-                'no_results' => 'Aucun membre bloque trouve',
-                'helper' => 'Les membres bloques ne peuvent pas revenir tant que le blocage n\'est pas leve.',
+                'no_results' => 'Aucun membre bloqué trouvé',
+                'helper' => 'Les membres bloqués ne peuvent pas revenir tant que le blocage n\'est pas levé.',
             ],
             'actions' => [
                 'lift_block' => [
@@ -428,7 +428,7 @@ return [
                 ],
             ],
             'messages' => [
-                'unblocked_success' => ':member peut a nouveau rejoindre avec un lien d\'invitation de groupe.',
+                'unblocked_success' => ':member peut à nouveau rejoindre avec un lien d\'invitation de groupe.',
             ],
         ],
     ],

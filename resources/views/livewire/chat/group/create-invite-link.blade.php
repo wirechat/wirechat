@@ -1,4 +1,4 @@
-<div class=" max-w-xl rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-6 text-gray-900 shadow-xl dark:text-white">
+<div class=" max-w-xl rounded-xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-6 text-gray-900 shadow-xl dark:text-white">
     <div class="flex items-center justify-between gap-4">
         <button type="button" wire:click="closeWirechatModal" class="rounded-full p-2 text-gray-500 transition hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
@@ -12,7 +12,7 @@
     <div class="mt-6 space-y-6">
         <div>
             <input type="text" wire:model.live="name" maxlength="120" placeholder="Link Name (Optional)"
-                class="wc-input w-full rounded-2xl border border-[var(--wc-light-border)] bg-[var(--wc-light-primary)] px-4 py-3 text-base dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-primary)]">
+                class="wc-input w-full rounded-xl border border-[var(--wc-light-border)] bg-[var(--wc-light-primary)] px-4 py-3 text-base dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-primary)]">
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Only admins will see this name.</p>
             @error('name')
                 <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
@@ -25,7 +25,7 @@
                 @foreach (['1_hour' => '1 hour', '1_day' => '1 day', '1_week' => '1 week', 'never' => 'Never'] as $value => $label)
                     <button type="button" wire:click="$set('expiryPreset', '{{ $value }}')"
                         @class([
-                            'rounded-2xl border px-3 py-3 text-sm font-medium transition',
+                            'rounded-xl border px-3 py-3 text-sm font-medium transition',
                             'border-[var(--wc-brand-primary)] bg-[var(--wc-brand-primary)] text-white' => $expiryPreset === $value,
                             'border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]' => $expiryPreset !== $value,
                         ])>

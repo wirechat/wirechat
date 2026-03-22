@@ -187,14 +187,14 @@ return [
                     'confirmation_message' => ':member\'i bu gruptan kaldırmak istediğinizden emin misiniz?',
                 ],
                 'block_member' => [
-                    'label' => 'Uyeyi Engelle',
-                    'confirmation_message' => ':member kullanicisini bu grupta engellemek istediginizden emin misiniz?',
+                    'label' => 'Üyeyi Engelle',
+                    'confirmation_message' => ':member kullanıcısını bu grupta engellemek istediğinizden emin misiniz?',
                 ],
                 'past_members' => [
-                    'label' => 'Gecmis Uyeler',
+                    'label' => 'Geçmiş Üyeler',
                 ],
                 'blocked_members' => [
-                    'label' => 'Engellenen Uyeler',
+                    'label' => 'Engellenen Üyeler',
                 ],
                 'load_more' => [
                     'label' => 'Daha fazla yükle',
@@ -206,14 +206,14 @@ return [
         ],
         'join_requests' => [
             'heading' => [
-                'label' => 'Katilma Istekleri',
+                'label' => 'Katılma İstekleri',
             ],
             'labels' => [
-                'description' => 'Bir davet baglantisi ile bu gruba katilmak isteyen herkesi incele ve yonet.',
-                'unknown_user' => 'Bilinmeyen kullanici',
-                'requested_at' => ':time once istendi',
-                'via_invite_link' => 'davet baglantisi ile',
-                'empty_state' => 'Su anda bekleyen katilma istegi yok.',
+                'description' => 'Bir davet bağlantısıyla bu gruba katılmak isteyen kişileri inceleyin ve yönetin.',
+                'unknown_user' => 'Bilinmeyen kullanıcı',
+                'requested_at' => 'İstendi: :time',
+                'via_invite_link' => 'davet bağlantısıyla',
+                'empty_state' => 'Şu anda bekleyen katılma isteği yok.',
             ],
             'actions' => [
                 'approve' => [
@@ -224,8 +224,8 @@ return [
                 ],
             ],
             'messages' => [
-                'approved_success' => 'Katilma istegi onaylandi.',
-                'dismissed_success' => 'Katilma istegi reddedildi.',
+                'approved_success' => 'Katılma isteği onaylandı.',
+                'dismissed_success' => 'Katılma isteği reddedildi.',
             ],
         ],
         // add-Members component
@@ -247,7 +247,7 @@ return [
                     'label' => 'Kaydet',
                 ],
                 'invite_via_link' => [
-                    'label' => 'Baglanti ile gruba davet et',
+                    'label' => 'Bağlantıyla gruba davet et',
                 ],
             ],
             'messages' => [
@@ -268,8 +268,8 @@ return [
                 ],
             ],
             'labels' => [
-                'members_can' => 'Üyeler yapabilecek',
-                'admins_can' => 'Yöneticiler yapabilecek',
+                'members_can' => 'Üyeler şunları yapabilir',
+                'admins_can' => 'Yöneticiler şunları yapabilir',
             ],
             'actions' => [
                 'edit_group_information' => [
@@ -295,25 +295,25 @@ return [
                 'label' => 'Davet Bağlantıları',
             ],
             'labels' => [
-                'description' => 'Bir hesabi olan herkes bu baglantilardan birini acabilir ve erisim ayarlarina gore grubuna katilabilir.',
-                'primary_link' => 'Birincil Baglanti',
+                'description' => 'Hesabı olan herkes bu bağlantılardan birini açabilir ve erişim ayarlarınıza göre grubunuza katılabilir.',
+                'primary_link' => 'Birincil Bağlantı',
                 'admin_approval_enabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı var.',
                 'admin_approval_disabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı yok.',
-                'primary_link_usage_empty' => 'Henuz kimse katilmadi',
-                'primary_link_usage_limited' => ':usages / :limit kullanim',
-                'primary_link_usage_total' => 'Su ana kadar :usages katilim',
-                'group_access' => 'Grup Erisimi',
-                'group_access_requires_approval' => 'Bu baglantilari acan kisilerin katilmadan once yonetici onayi almasi gerekir.',
-                'group_access_open' => 'Bu baglantilari acan kisiler hemen katilabilir.',
-                'join_requests' => 'Katilma Istekleri',
-                'join_requests_helper' => 'Bu gruba katilmak isteyen kisileri incele.',
-                'additional_links' => 'Ek Baglantilar',
-                'additional_links_helper' => 'Kendi suresi dolma ve kullanim siniri olan ek davet baglantilari olustur.',
-                'additional_link_usage_limited' => ':usages / :limit kullanim',
-                'additional_link_usage_total' => ':usages kullanim',
+                'primary_link_usage_empty' => 'Henüz kimse katılmadı',
+                'primary_link_usage_limited' => ':usages / :limit kullanım',
+                'primary_link_usage_total' => 'Şu ana kadar :usages katılım',
+                'group_access' => 'Grup Erişimi',
+                'group_access_requires_approval' => 'Bu bağlantıları açan kişilerin katılmadan önce yönetici onayı alması gerekir.',
+                'group_access_open' => 'Bu bağlantıları açan kişiler hemen gruba katılabilir.',
+                'join_requests' => 'Katılma İstekleri',
+                'join_requests_helper' => 'Bu gruba katılmak isteyen kişileri inceleyin.',
+                'additional_links' => 'Ek Bağlantılar',
+                'additional_links_helper' => 'Kendi son kullanma süresi ve kullanım sınırı olan ek davet bağlantıları oluşturun.',
+                'additional_link_usage_limited' => ':usages / :limit kullanım',
+                'additional_link_usage_total' => ':usages kullanım',
                 'additional_link_expires' => ':time sona erer',
-                'additional_link_never_expires' => 'Suresi dolmaz',
-                'additional_links_empty' => 'Henuz ek baglanti yok. Sinirli bir kampanya, gecici bir davet veya ozel bir tanisma akisi icin yeni bir tane olustur.',
+                'additional_link_never_expires' => 'Süresi dolmaz',
+                'additional_links_empty' => 'Henüz ek bağlantı yok. Sınırlı bir kampanya, geçici bir davet veya özel bir tanışma akışı için yeni bir tane oluşturun.',
             ],
             'actions' => [
                 'edit_permissions' => [
@@ -329,12 +329,12 @@ return [
                     'label' => 'Bağlantıyı Sıfırla',
                 ],
                 'create_new_link' => [
-                    'label' => 'Yeni Baglanti Olustur',
+                    'label' => 'Yeni Bağlantı Oluştur',
                 ],
             ],
             'messages' => [
                 'copied_success' => 'Davet bağlantısı kopyalandı.',
-                'copy_prompt' => 'Bu baglantiyi kopyala',
+                'copy_prompt' => 'Bu bağlantıyı kopyala',
                 'reset_success' => 'Grup davet bağlantısı sıfırlandı.',
             ],
             'send_via_chat' => [
@@ -353,9 +353,9 @@ return [
                 ],
                 'messages' => [
                     'invite_message' => ':group grubuna bu bağlantıyla katıl: :url',
-                    'unavailable_left' => ':member bu gruptan ayrildi ve geri donmek icin davet baglantisini kendi acmalidir.',
-                    'unavailable_removed' => ':member bu gruptan cikarildi ve grup davet baglantisi alamaz.',
-                    'unavailable_blocked' => ':member bu grupta engelli oldugu icin grup davet baglantisi alamaz.',
+                    'unavailable_left' => ':member bu gruptan ayrıldı ve yeniden katılmak için davet bağlantısını kendisi açmalıdır.',
+                    'unavailable_removed' => ':member bu gruptan çıkarıldı ve grup davet bağlantısı alamaz.',
+                    'unavailable_blocked' => ':member bu grupta engellendiği için grup davet bağlantısı alamaz.',
                     'sent_success' => 'Davet bağlantısı :count sohbete gönderildi.',
                 ],
             ],
@@ -392,42 +392,42 @@ return [
         ],
         'past_members' => [
             'heading' => [
-                'label' => 'Gecmis Uyeler',
+                'label' => 'Geçmiş Üyeler',
             ],
             'inputs' => [
                 'search' => [
-                    'placeholder' => 'Gecmis uyeleri ara',
+                    'placeholder' => 'Geçmiş üyeleri ara',
                 ],
             ],
             'labels' => [
-                'no_results' => 'Gecmis uye bulunamadi',
-                'reason_left' => 'Gruptan ayrildi',
-                'reason_removed' => 'Bir yonetici tarafindan cikarildi',
-                'reason_blocked' => 'Bir yonetici tarafindan engellendi',
+                'no_results' => 'Geçmiş üye bulunamadı',
+                'reason_left' => 'Gruptan ayrıldı',
+                'reason_removed' => 'Bir yönetici tarafından çıkarıldı',
+                'reason_blocked' => 'Bir yönetici tarafından engellendi',
                 'at' => ':time',
             ],
         ],
         'blocked_members' => [
             'heading' => [
-                'label' => 'Engellenen Uyeler',
+                'label' => 'Engellenen Üyeler',
             ],
             'inputs' => [
                 'search' => [
-                    'placeholder' => 'Engellenen uyeleri ara',
+                    'placeholder' => 'Engellenen üyeleri ara',
                 ],
             ],
             'labels' => [
-                'no_results' => 'Engellenen uye bulunamadi',
-                'helper' => 'Engellenen uyeler, engel kaldirilana kadar tekrar katilamaz.',
+                'no_results' => 'Engellenen üye bulunamadı',
+                'helper' => 'Engellenen üyeler, engel kaldırılana kadar yeniden katılamaz.',
             ],
             'actions' => [
                 'lift_block' => [
-                    'label' => 'Engeli Kaldir',
-                    'confirmation_message' => ':member icin engeli kaldirmak istediginizden emin misiniz?',
+                    'label' => 'Engeli Kaldır',
+                    'confirmation_message' => ':member için engeli kaldırmak istediğinizden emin misiniz?',
                 ],
             ],
             'messages' => [
-                'unblocked_success' => ':member grup davet baglantisiyla yeniden katilabilir.',
+                'unblocked_success' => ':member artık grup davet bağlantısıyla yeniden katılabilir.',
             ],
         ],
 

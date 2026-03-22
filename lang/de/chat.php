@@ -153,7 +153,7 @@ return [
                     'label' => 'Gruppenberechtigungen',
                 ],
                 'invite_via_link' => [
-                    'label' => 'Per Gruppenlink einladen',
+                    'label' => 'Per Link zur Gruppe einladen',
                 ],
                 'exit_group' => [
                     'label' => 'Gruppe verlassen',
@@ -229,8 +229,8 @@ return [
             'labels' => [
                 'description' => 'Überprüfe und bearbeite alle Personen, die über einen Einladungslink den Beitritt zu dieser Gruppe angefragt haben.',
                 'unknown_user' => 'Unbekannter Benutzer',
-                'requested_at' => 'Angefragt :time',
-                'via_invite_link' => 'über Einladungslink',
+                'requested_at' => 'Angefragt: :time',
+                'via_invite_link' => 'über einen Einladungslink',
                 'empty_state' => 'Zurzeit gibt es keine ausstehenden Beitrittsanfragen.',
             ],
             'actions' => [
@@ -242,7 +242,7 @@ return [
                 ],
             ],
             'messages' => [
-                'approved_success' => 'Beitrittsanfrage bestätigt.',
+                'approved_success' => 'Beitrittsanfrage genehmigt.',
                 'dismissed_success' => 'Beitrittsanfrage abgelehnt.',
             ],
         ],
@@ -266,7 +266,7 @@ return [
 
                 ],
                 'invite_via_link' => [
-                    'label' => 'Per Gruppenlink einladen',
+                    'label' => 'Per Link zur Gruppe einladen',
                 ],
 
             ],
@@ -339,7 +339,7 @@ return [
             ],
             'actions' => [
                 'edit_permissions' => [
-                    'label' => 'In Gruppenberechtigungen bearbeiten',
+                    'label' => 'In den Gruppenberechtigungen bearbeiten',
                 ],
                 'send_via_chat' => [
                     'label' => 'Link per Chat senden',
@@ -440,7 +440,7 @@ return [
             ],
             'labels' => [
                 'no_results' => 'Keine blockierten Mitglieder gefunden',
-                'helper' => 'Blockierte Mitglieder konnen nicht erneut beitreten, bis die Blockierung aufgehoben wird.',
+                'helper' => 'Blockierte Mitglieder können nicht erneut beitreten, bis die Blockierung aufgehoben wird.',
             ],
             'actions' => [
                 'lift_block' => [
