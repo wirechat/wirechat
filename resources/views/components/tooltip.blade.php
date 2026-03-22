@@ -22,7 +22,7 @@
     class="relative "
 >
     <div
-        x-anchor.top="$refs.content"
+        x-bind:x-anchor="`${tooltipPosition} $refs.content`"
         x-ref="tooltip"
         x-show="tooltipVisible"
         x-cloak
