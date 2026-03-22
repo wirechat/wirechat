@@ -18,7 +18,7 @@ trait HasChatActions
 
     protected bool|Closure $clearChatAction = true;
 
-    protected string|Htmlable|Closure|null $clearChatActionIcon = 'wirechat::icons.broom';
+    protected string|Htmlable|Closure|null $clearChatActionIcon = 'wirechat::icons.trash';
 
     protected array|Closure $clearChatActionIconAttributes = [];
 
