@@ -66,6 +66,16 @@ jobs:
             pest: ^3.7.4
             pest-plugin: ^3.0
             php: 8.4
+          - laravel: 13.*
+            testbench: 11.*
+            pest: ^3.7.4
+            pest-plugin: ^3.0
+            php: 8.3
+          - laravel: 13.*
+            testbench: 11.*
+            pest: ^3.7.4
+            pest-plugin: ^3.0
+            php: 8.4
         exclude:
           - laravel: 13.*
             php: 8.2
