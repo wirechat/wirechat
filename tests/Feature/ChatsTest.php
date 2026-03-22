@@ -768,21 +768,33 @@ describe('Cursor pagination', function () {
     it('loads conversations ordered by most recently updated first', function () {
         $auth = User::factory()->create();
 
-        $conversations = [];
-        for ($i = 0; $i < 3; $i++) {
-            Carbon::setTestNow(now()->subSeconds(30 - $i * 10));
-            $user = User::factory()->create();
-            $conversations[] = $auth->createConversationWith($user, "message $i");
-        }
+        // Create two conversations with the same updated_at timestamp
+        $baseTime = now();
+
+        Carbon::setTestNow($baseTime->copy()->subSeconds(20));
+        $user1 = User::factory()->create();
+        $conv1 = $auth->createConversationWith($user1, 'message 1');
+
+        // Same timestamp as $conv1, so updated_at is equal; id DESC should be the tiebreaker
+        Carbon::setTestNow($baseTime->copy()->subSeconds(20));
+        $user2 = User::factory()->create();
+        $conv2 = $auth->createConversationWith($user2, 'message 2');
+
+        // More recent conversation; should always appear first
+        Carbon::setTestNow($baseTime->copy()->subSeconds(10));
+        $user3 = User::factory()->create();
+        $conv3 = $auth->createConversationWith($user3, 'message 3');
+
         Carbon::setTestNow();
 
         $component = Livewire::actingAs($auth)->test(Chatlist::class);
         $ids = $component->get('conversationIds');
 
-        // Most recently updated conversation (last created) should appear first
-        expect($ids[0])->toBe($conversations[2]->id)
-            ->and($ids[1])->toBe($conversations[1]->id)
-            ->and($ids[2])->toBe($conversations[0]->id);
+        // Most recently updated conversation should appear first
+        expect($ids[0])->toBe($conv3->id)
+            // When updated_at is the same, the higher id should come first (id DESC tiebreaker)
+            ->and($ids[1])->toBe(max($conv1->id, $conv2->id))
+            ->and($ids[2])->toBe(min($conv1->id, $conv2->id));
     });
 
     it('appends new IDs on loadMore without reshuffling existing ones', function () {
