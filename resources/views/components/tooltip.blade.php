@@ -37,7 +37,7 @@
     >
         <div
             x-transition
-            class="relative px-2 py-1.5 text-blackdark:text-white rounded bg-white  dark:bg-zinc-800"
+            class="relative px-2 py-1.5 text-black dark:text-white rounded bg-white  dark:bg-zinc-800"
         >
             @if($content)
                 {{$content}}
