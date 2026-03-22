@@ -11,9 +11,7 @@
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
         <div class="space-y-3 text-center">
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-10 w-10 text-[var(--wc-brand-primary)]">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m13.5 19.5 3-3m0 0-3-3m3 3H8.25m8.25-9H9.75a3 3 0 0 0-3 3v10.5" />
-                </svg>
+                 <x-wirechat::icons.link class="size-7" />
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400">Anyone with Wirechat will be able to open one of these links and join your group based on your access settings.</p>
         </div>
@@ -129,10 +127,8 @@
                         onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.invite-link-details', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })"
                         wire:key="additional-invite-{{ $invite->id }}"
                         class="flex w-full items-center gap-4 rounded-3xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] px-4 py-4 text-left transition hover:bg-[var(--wc-light-secondary)]/60 dark:hover:bg-[var(--wc-dark-secondary)]/60">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)]">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 6.364 0l.758.758a4.5 4.5 0 0 1 0 6.364l-1.135 1.135a4.5 4.5 0 0 1-6.364 0m-6.364-6.364a4.5 4.5 0 0 1 0 6.364l-.758.758a4.5 4.5 0 0 1-6.364 0l-1.135-1.135a4.5 4.5 0 0 1 0-6.364l.758-.758a4.5 4.5 0 0 1 6.364 0" />
-                            </svg>
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)]"> 
+                             <x-wirechat::icons.link class="size-5" />
                         </div>
 
                         <div class="min-w-0 flex-1">
