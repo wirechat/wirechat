@@ -4,6 +4,7 @@
             <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
+        
         </button>
         <h3 class="text-lg font-medium">Join Requests</h3>
     </section>
@@ -11,9 +12,7 @@
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
         <div class="space-y-3 text-center">
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-10 w-10 text-[var(--wc-brand-primary)]">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.742-.479 3 3 0 0 0-4.682-2.72m.94 3.198-.94-.001M6 18.72a9.094 9.094 0 0 1-3.742-.479 3 3 0 0 1 4.682-2.72m-.94 3.198.94-.001m0 0a3 3 0 0 1 6 0m-6 0a3 3 0 0 0 6 0m-6 0H9m3 0h3m-6-9a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm-3 9a3 3 0 1 1 6 0" />
-                </svg>
+                    <x-wirechat::icons.user-group class="size-10" />
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400">Review and handle everyone who asked to join this group through an invite link.</p>
         </div>
