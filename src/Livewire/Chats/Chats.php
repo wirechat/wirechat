@@ -16,7 +16,7 @@ use Wirechat\Wirechat\Models\Conversation;
  * @property-read \Illuminate\Contracts\Auth\Authenticatable|null $auth
  * @property-read \Illuminate\Support\Collection<int, \Wirechat\Wirechat\Models\Conversation> $conversations
  * @property int|string|null $selectedConversationId
- * @property array<int, int> $conversationIds
+ * @property array<int, int|string> $conversationIds
  */
 class Chats extends Component
 {
@@ -27,7 +27,7 @@ class Chats extends Component
     /**
      * Store ONLY ids (no models) to avoid ModelSynth refetching.
      *
-     * @var array<int,int>
+     * @var array<int,int|string>
      */
     public array $conversationIds = [];
 
@@ -38,7 +38,7 @@ class Chats extends Component
     // Cursor state for stable "Load more"
     public ?string $cursorUpdatedAt = null;
 
-    public ?int $cursorId = null;
+    public int|string|null $cursorId = null;
 
     #[Locked]
     public ?bool $createChatAction = null;
@@ -110,7 +110,7 @@ class Chats extends Component
         }
 
         $user = $this->auth;
-        $ids = array_map('intval', $this->conversationIds);
+        $ids = $this->conversationIds;
         $positions = array_flip($ids);
         $table = (new Conversation)->getTable();
 
@@ -129,7 +129,7 @@ class Chats extends Component
             ])
             ->get()
             // Preserve the exact order of loaded ids (prevents swapping)
-            ->sortBy(fn (Conversation $c) => $positions[(int) $c->id] ?? PHP_INT_MAX)
+            ->sortBy(fn (Conversation $c) => $positions[$c->id] ?? PHP_INT_MAX)
             ->values();
 
         // Set peer/auth participants without extra queries (participants already loaded)
@@ -188,7 +188,7 @@ class Chats extends Component
 
         $rows = $rows->take($perPage);
 
-        $newIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $newIds = $rows->pluck('id')->all();
 
         // Append only; stable
         $this->conversationIds = array_values(array_unique([
@@ -200,7 +200,7 @@ class Chats extends Component
         $last = $rows->last();
         if ($last) {
             $this->cursorUpdatedAt = (string) $last->updated_at;
-            $this->cursorId = (int) $last->id;
+            $this->cursorId = $last->id;
         }
     }
 
