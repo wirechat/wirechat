@@ -790,11 +790,15 @@ describe('Cursor pagination', function () {
         $component = Livewire::actingAs($auth)->test(Chatlist::class);
         $ids = $component->get('conversationIds');
 
-        // Most recently updated conversation should appear first
-        expect($ids[0])->toBe($conv3->id)
-            // When updated_at is the same, the higher id should come first (id DESC tiebreaker)
-            ->and($ids[1])->toBe(max($conv1->id, $conv2->id))
-            ->and($ids[2])->toBe(min($conv1->id, $conv2->id));
+        // Expected ordering: updated_at DESC, then id DESC (as string) as tiebreaker
+        $expectedIds = Conversation::whereIn('id', [$conv1->id, $conv2->id, $conv3->id])
+            ->orderBy('updated_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->pluck('id')
+            ->values()
+            ->all();
+
+        expect($ids)->toEqual($expectedIds);
     });
 
     it('appends new IDs on loadMore without reshuffling existing ones', function () {
