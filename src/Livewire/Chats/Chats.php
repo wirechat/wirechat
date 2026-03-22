@@ -35,10 +35,13 @@ class Chats extends Component
 
     public $selectedConversationId;
 
-    // Cursor state for stable "Load more"
+    // Cursor state for stable "Load more" (3-tuple: updated_at, created_at, id)
     public ?string $cursorUpdatedAt = null;
 
     public ?string $cursorCreatedAt = null;
+
+    /** @var int|string|null */
+    public $cursorId = null;
 
     #[Locked]
     public ?bool $createChatAction = null;
@@ -60,6 +63,7 @@ class Chats extends Component
         $this->conversationIds = [];
         $this->cursorUpdatedAt = null;
         $this->cursorCreatedAt = null;
+        $this->cursorId = null;
         $this->canLoadMore = false;
     }
 
@@ -163,17 +167,23 @@ class Chats extends Component
                 /** @phpstan-ignore-next-line */
                 return $q->withoutDeleted()->withoutBlanks();
             })
-            // deterministic ordering for cursor paging
+            // deterministic ordering for cursor paging (3-tuple: updated_at, created_at, id)
             ->orderByDesc($table.'.updated_at')
-            ->orderByDesc($table.'.created_at');
+            ->orderByDesc($table.'.created_at')
+            ->orderByDesc($table.'.id');
 
-        // If we already have a cursor, load older than it
-        if ($this->cursorUpdatedAt !== null && $this->cursorCreatedAt !== null) {
+        // If we already have a cursor, load older than it (3-tuple comparison)
+        if ($this->cursorUpdatedAt !== null && $this->cursorCreatedAt !== null && $this->cursorId !== null) {
             $baseQuery->where(function ($q) use ($table) {
                 $q->where($table.'.updated_at', '<', $this->cursorUpdatedAt)
                     ->orWhere(function ($q2) use ($table) {
                         $q2->where($table.'.updated_at', '=', $this->cursorUpdatedAt)
                             ->where($table.'.created_at', '<', $this->cursorCreatedAt);
+                    })
+                    ->orWhere(function ($q3) use ($table) {
+                        $q3->where($table.'.updated_at', '=', $this->cursorUpdatedAt)
+                            ->where($table.'.created_at', '=', $this->cursorCreatedAt)
+                            ->where($table.'.id', '<', $this->cursorId);
                     });
             });
         }
@@ -201,6 +211,7 @@ class Chats extends Component
         if ($last) {
             $this->cursorUpdatedAt = (string) $last->updated_at;
             $this->cursorCreatedAt = (string) $last->created_at;
+            $this->cursorId = $last->id;
         }
     }
 
@@ -223,6 +234,7 @@ class Chats extends Component
         $this->conversationIds = [];
         $this->cursorUpdatedAt = null;
         $this->cursorCreatedAt = null;
+        $this->cursorId = null;
         $this->canLoadMore = false;
     }
 

@@ -744,6 +744,7 @@ describe('Cursor pagination', function () {
             ->assertSet('conversationIds', [])
             ->assertSet('cursorUpdatedAt', null)
             ->assertSet('cursorCreatedAt', null)
+            ->assertSet('cursorId', null)
             ->assertSet('canLoadMore', false);
     });
 
@@ -762,7 +763,8 @@ describe('Cursor pagination', function () {
 
         $component
             ->assertNotSet('cursorUpdatedAt', null)
-            ->assertNotSet('cursorCreatedAt', null);
+            ->assertNotSet('cursorCreatedAt', null)
+            ->assertNotSet('cursorId', null);
     });
 
     it('loads conversations ordered by most recently updated first', function () {
@@ -797,6 +799,47 @@ describe('Cursor pagination', function () {
             // When updated_at is the same, the more recently created conversation comes first (created_at DESC tiebreaker)
             ->and($ids[1])->toBe($conv2->id)
             ->and($ids[2])->toBe($conv1->id);
+    });
+
+    it('uses id DESC as third tie-breaker when updated_at and created_at are equal', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now()->subSeconds(10);
+
+        // Create three conversations all sharing the same updated_at and created_at
+        Carbon::setTestNow($baseTime);
+        $user1 = User::factory()->create();
+        $conv1 = $auth->createConversationWith($user1, 'message 1');
+
+        Carbon::setTestNow($baseTime);
+        $user2 = User::factory()->create();
+        $conv2 = $auth->createConversationWith($user2, 'message 2');
+
+        Carbon::setTestNow($baseTime);
+        $user3 = User::factory()->create();
+        $conv3 = $auth->createConversationWith($user3, 'message 3');
+
+        // Force all three to share the same updated_at and created_at
+        $sharedTimestamp = $baseTime->copy();
+        foreach ([$conv1, $conv2, $conv3] as $conv) {
+            $conv->forceFill([
+                'updated_at' => $sharedTimestamp,
+                'created_at' => $sharedTimestamp,
+            ])->saveQuietly();
+        }
+
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+        $ids = $component->get('conversationIds');
+
+        // When all three timestamps are equal, id DESC should be the tie-breaker
+        $sortedByIdDesc = collect([$conv1->id, $conv2->id, $conv3->id])
+            ->sortDesc()
+            ->values()
+            ->all();
+
+        expect($ids)->toBe($sortedByIdDesc);
     });
 
     it('appends new IDs on loadMore without reshuffling existing ones', function () {
@@ -919,6 +962,7 @@ describe('Cursor pagination', function () {
             ->assertSet('conversationIds', [])
             ->assertSet('cursorUpdatedAt', null)
             ->assertSet('cursorCreatedAt', null)
+            ->assertSet('cursorId', null)
             ->assertSet('canLoadMore', false);
     });
 });
