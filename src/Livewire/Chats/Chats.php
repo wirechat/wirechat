@@ -237,7 +237,7 @@ class Chats extends Component
     {
         $this->conversationIds = array_values(array_filter(
             $this->conversationIds,
-            fn ($id) => $id !== $conversationId
+            fn ($id) => (string) $id !== (string) $conversationId
         ));
     }
 
