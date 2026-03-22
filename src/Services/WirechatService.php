@@ -3,6 +3,12 @@
 namespace Wirechat\Wirechat\Services;
 
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
 
@@ -10,9 +16,41 @@ class WirechatService
 {
     protected PanelRegistry $registry;
 
+    protected array $tableNames = [];
+
     public function __construct()
     {
         $this->registry = app(PanelRegistry::class);
+    }
+
+    /**
+     * Get a cached table name for a specific model, loading it lazily if needed.
+     *
+     * @param  string  $modelKey  The model key (e.g., 'action', 'message')
+     * @param  callable  $modelFactory  Factory function to create the model instance
+     * @return string The table name
+     */
+    protected function getCachedTableName(string $modelKey, callable $modelFactory): string
+    {
+        if (! isset($this->tableNames[$modelKey])) {
+            $this->tableNames[$modelKey] = $modelFactory()->getTable();
+        }
+
+        return $this->tableNames[$modelKey];
+    }
+
+    /**
+     * Reset the table name cache. Useful for testing or when config changes at runtime.
+     *
+     * @param  string|null  $modelKey  Optional specific model key to reset, or null to reset all
+     */
+    public function resetTableNameCache(?string $modelKey = null): void
+    {
+        if ($modelKey === null) {
+            $this->tableNames = [];
+        } else {
+            unset($this->tableNames[$modelKey]);
+        }
     }
 
     /**
@@ -226,5 +264,245 @@ class WirechatService
     public static function usesUuid(): bool
     {
         return static::usesUuidForConversations();
+    }
+
+    /**
+     * Get the Action model class from the configuration.
+     *
+     * @return class-string<Action> The Action model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function actionModelClass(): string
+    {
+        $class = (string) config('wirechat.models.action', Action::class);
+        $this->validateModelClass($class, Action::class, 'wirechat.models.action');
+
+        return $class;
+    }
+
+    /**
+     * Get the Attachment model class from the configuration.
+     *
+     * @return class-string<Attachment> The Attachment model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function attachmentModelClass(): string
+    {
+        $class = (string) config('wirechat.models.attachment', Attachment::class);
+        $this->validateModelClass($class, Attachment::class, 'wirechat.models.attachment');
+
+        return $class;
+    }
+
+    /**
+     * Get the Conversation model class from the configuration.
+     *
+     * @return class-string<Conversation> The Conversation model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function conversationModelClass(): string
+    {
+        $class = (string) config('wirechat.models.conversation', Conversation::class);
+        $this->validateModelClass($class, Conversation::class, 'wirechat.models.conversation');
+
+        return $class;
+    }
+
+    /**
+     * Get the Group model class from the configuration.
+     *
+     * @return class-string<Group> The Group model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function groupModelClass(): string
+    {
+        $class = (string) config('wirechat.models.group', Group::class);
+        $this->validateModelClass($class, Group::class, 'wirechat.models.group');
+
+        return $class;
+    }
+
+    /**
+     * Get the Message model class from the configuration.
+     *
+     * @return class-string<Message> The Message model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function messageModelClass(): string
+    {
+        $class = (string) config('wirechat.models.message', Message::class);
+        $this->validateModelClass($class, Message::class, 'wirechat.models.message');
+
+        return $class;
+    }
+
+    /**
+     * Get the Participant model class from the configuration.
+     *
+     * @return class-string<Participant> The Participant model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function participantModelClass(): string
+    {
+        $class = (string) config('wirechat.models.participant', Participant::class);
+        $this->validateModelClass($class, Participant::class, 'wirechat.models.participant');
+
+        return $class;
+    }
+
+    /**
+     * Validate that a model class exists and extends the expected base class.
+     *
+     * @param  string  $class  The class to validate.
+     * @param  string  $baseClass  The expected base class.
+     * @param  string  $configKey  The config key for error messages.
+     *
+     * @throws \InvalidArgumentException When the class is invalid.
+     */
+    protected function validateModelClass(string $class, string $baseClass, string $configKey): void
+    {
+        if (! class_exists($class)) {
+            throw new \InvalidArgumentException(
+                "Model class '{$class}' configured in '{$configKey}' does not exist."
+            );
+        }
+
+        if (! is_a($class, $baseClass, true)) {
+            throw new \InvalidArgumentException(
+                "Model class '{$class}' configured in '{$configKey}' must extend '{$baseClass}'."
+            );
+        }
+    }
+
+    /**
+     * Get the Action model table name.
+     *
+     * @return string The Action model table name.
+     */
+    public function actionModelTable(): string
+    {
+        return $this->getCachedTableName('action', fn () => $this->actionModel());
+    }
+
+    /**
+     * Get the Attachment model table name.
+     *
+     * @return string The Attachment model table name.
+     */
+    public function attachmentModelTable(): string
+    {
+        return $this->getCachedTableName('attachment', fn () => $this->attachmentModel());
+    }
+
+    /**
+     * Get the Conversation model table name.
+     *
+     * @return string The Conversation model table name.
+     */
+    public function conversationModelTable(): string
+    {
+        return $this->getCachedTableName('conversation', fn () => $this->conversationModel());
+    }
+
+    /**
+     * Get the Group model table name.
+     *
+     * @return string The Group model table name.
+     */
+    public function groupModelTable(): string
+    {
+        return $this->getCachedTableName('group', fn () => $this->groupModel());
+    }
+
+    /**
+     * Get the Message model table name.
+     *
+     * @return string The Message model table name.
+     */
+    public function messageModelTable(): string
+    {
+        return $this->getCachedTableName('message', fn () => $this->messageModel());
+    }
+
+    /**
+     * Get the Participant model table name.
+     *
+     * @return string The Participant model table name.
+     */
+    public function participantModelTable(): string
+    {
+        return $this->getCachedTableName('participant', fn () => $this->participantModel());
+    }
+
+    /**
+     * Create a new Action model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Action The Action model instance.
+     */
+    public function actionModel(array $attributes = []): Action
+    {
+        return new ($this->actionModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Attachment model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Attachment The Attachment model instance.
+     */
+    public function attachmentModel(array $attributes = []): Attachment
+    {
+        return new ($this->attachmentModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Conversation model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Conversation The Conversation model instance.
+     */
+    public function conversationModel(array $attributes = []): Conversation
+    {
+        return new ($this->conversationModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Group model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Group The Group model instance.
+     */
+    public function groupModel(array $attributes = []): Group
+    {
+        return new ($this->groupModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Message model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Message The Message model instance.
+     */
+    public function messageModel(array $attributes = []): Message
+    {
+        return new ($this->messageModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Participant model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Participant The Participant model instance.
+     */
+    public function participantModel(array $attributes = []): Participant
+    {
+        return new ($this->participantModelClass())($attributes);
     }
 }

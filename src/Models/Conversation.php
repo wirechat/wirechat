@@ -136,7 +136,7 @@ class Conversation extends Model
      */
     public function participants(): HasMany
     {
-        return $this->hasMany(Participant::class, 'conversation_id', 'id');
+        return $this->hasMany(Wirechat::participantModelClass(), 'conversation_id', 'id');
     }
 
     /**
@@ -247,12 +247,12 @@ class Conversation extends Model
      */
     public function messages(): hasMany
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(Wirechat::messageModelClass());
     }
 
     public function lastMessage(): hasOne
     {
-        return $this->hasOne(Message::class, 'conversation_id')->latestOfMany();
+        return $this->hasOne(Wirechat::messageModelClass(), 'conversation_id')->latestOfMany();
     }
 
     /**
@@ -278,8 +278,8 @@ class Conversation extends Model
             return;
         }
 
-        $messagesTable = (new Message)->getTable();
-        $participantsTable = (new Participant)->getTable();
+        $messagesTable = Wirechat::messageModelTable();
+        $participantsTable = Wirechat::participantModelTable();
 
         $builder->whereHas('messages', function (Builder $q) use ($user, $messagesTable, $participantsTable) {
             // Remove the global scope that hides removed messages so we can apply our own logic here
@@ -287,8 +287,14 @@ class Conversation extends Model
 
                 // We only want messages that are NOT deleted by the current user's participant in this conversation
                 ->whereDoesntHave('actions', function ($aq) use ($user, $messagesTable, $participantsTable) {
+                    $participantClass = Wirechat::participantModelClass();
+                    $participantMorphAlias = app($participantClass)->getMorphClass();
+
                     $aq->where('type', Actions::DELETE)
-                        ->where('actor_type', Participant::class)
+                        ->where(function ($actorTypeQuery) use ($participantClass, $participantMorphAlias) {
+                            $actorTypeQuery->where('actor_type', $participantClass)
+                                ->orWhere('actor_type', $participantMorphAlias);
+                        })
 
                         // actor_id (actions) must reference a participant row that belongs to the same conversation
                         // AND that participant row must belong to the current authenticated user.
@@ -319,7 +325,7 @@ class Conversation extends Model
         if ($user) {
 
             // Get the table name for conversations dynamically to avoid hardcoding.
-            $conversationsTableName = (new Conversation)->getTable();
+            $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
@@ -340,7 +346,7 @@ class Conversation extends Model
 
         if ($user) {
             // Get the table name for conversations dynamically to avoid hardcoding.
-            $conversationsTableName = (new Conversation)->getTable();
+            $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
@@ -449,7 +455,7 @@ class Conversation extends Model
     {
         $user = auth()->user();
 
-        return $this->hasOne(Participant::class)
+        return $this->hasOne(Wirechat::participantModelClass())
             ->withoutParticipantable($user)
             ->where('role', ParticipantRole::OWNER)
             ->withWhereHas('conversation', function ($query) {
@@ -467,7 +473,7 @@ class Conversation extends Model
     {
         $user = auth()->user();
 
-        return $this->hasOne(Participant::class)
+        return $this->hasOne(Wirechat::participantModelClass())
             ->whereParticipantable($user)
             ->where('role', ParticipantRole::OWNER);
     }
@@ -719,7 +725,7 @@ class Conversation extends Model
      */
     public function group()
     {
-        return $this->hasOne(Group::class, 'conversation_id');
+        return $this->hasOne(Wirechat::groupModelClass(), 'conversation_id');
     }
 
     public function isPrivate(): bool

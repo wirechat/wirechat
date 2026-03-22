@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
-use Wirechat\Wirechat\Models\Message;
-use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 class WithoutRemovedMessages implements Scope
 {
@@ -23,8 +22,8 @@ class WithoutRemovedMessages implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $messagesTable = (new Message)->getTable();
-        $participantsTable = (new Participant)->getTable();
+        $messagesTable = Wirechat::messageModelTable();
+        $participantsTable = Wirechat::participantModelTable();
 
         if (! auth()->check()) {
             return;
@@ -33,13 +32,11 @@ class WithoutRemovedMessages implements Scope
         $user = auth()->user();
         $legacyActorType = $user->getMorphClass();
         $legacyActorId = $user->getKey();
-        $participantClass = Participant::class;
 
         // Exclude messages that have a DELETE action performed by *this* authenticated actor
         $builder->whereDoesntHave('actions', function ($q) use (
             $legacyActorType,
             $legacyActorId,
-            $participantClass,
             $messagesTable,
             $participantsTable
         ) {
@@ -47,7 +44,6 @@ class WithoutRemovedMessages implements Scope
                 ->where(function ($sub) use (
                     $legacyActorType,
                     $legacyActorId,
-                    $participantClass,
                     $messagesTable,
                     $participantsTable
                 ) {
@@ -57,10 +53,16 @@ class WithoutRemovedMessages implements Scope
                             ->where('actor_id', $legacyActorId);
                     });
 
-                    // Case B: actor stored as Participant::class — but we must ensure
+                    // Case B: actor stored as Participant (either class name or morph alias) — but we must ensure
                     // the participant row represents the current user for the same conversation.
-                    $sub->orWhere(function ($b) use ($participantClass, $messagesTable, $participantsTable, $legacyActorId, $legacyActorType) {
-                        $b->where('actor_type', $participantClass)
+                    $sub->orWhere(function ($b) use ($messagesTable, $participantsTable, $legacyActorId, $legacyActorType) {
+                        $participantClass = Wirechat::participantModelClass();
+                        $participantMorphAlias = app($participantClass)->getMorphClass();
+
+                        $b->where(function ($actorTypeQuery) use ($participantClass, $participantMorphAlias) {
+                            $actorTypeQuery->where('actor_type', $participantClass)
+                                ->orWhere('actor_type', $participantMorphAlias);
+                        })
                             // Ensure there exists a participant row such that:
                             // participants.id = actions.actor_id
                             // participants.conversation_id = messages.conversation_id

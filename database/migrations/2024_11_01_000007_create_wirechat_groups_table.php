@@ -4,8 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Wirechat\Wirechat\Facades\Wirechat;
-use Wirechat\Wirechat\Models\Conversation;
-use Wirechat\Wirechat\Models\Group;
 
 return new class extends Migration
 {
@@ -15,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         $usesUuid = Wirechat::usesUuid();
-        Schema::create((new Group)->getTable(), function (Blueprint $table) use ($usesUuid) {
+        Schema::create(Wirechat::groupModelTable(), function (Blueprint $table) use ($usesUuid) {
             $table->id();
 
             // Foreign key for conversation
@@ -47,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists((new Group)->getTable());
+        Schema::dropIfExists(Wirechat::groupModelTable());
     }
 };
