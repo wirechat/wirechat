@@ -29,7 +29,7 @@ trait HasActions
 
     public function redirectToHomeAction(
         bool|Closure $condition = true,
-        string $url = '/',
+        string|Closure|null $url = '/',
         string|Htmlable|Closure|null $icon = null,
         array|Closure $attributes = [],
     ): static {
