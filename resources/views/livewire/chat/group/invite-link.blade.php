@@ -16,7 +16,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">Anyone with an account will be able to open one of these links and join your group based on your access settings.</p>
         </div>
 
-        <div class="rounded-3xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-secondary)]/40 dark:bg-[var(--wc-dark-secondary)]/40 p-5 shadow-sm">
+        <div class="rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-secondary)]/40 dark:bg-[var(--wc-dark-secondary)]/40 p-5 shadow-sm">
             <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Primary Link</p>
 
             <div class="rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-3">
@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <div class="rounded-3xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] p-5">
+        <div class="rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] p-5">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Group Access</p>
@@ -126,7 +126,7 @@
                     <button type="button"
                         onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.invite-link-details', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })"
                         wire:key="additional-invite-{{ $invite->id }}"
-                        class="flex w-full items-center gap-4 rounded-3xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] px-4 py-4 text-left transition hover:bg-[var(--wc-light-secondary)]/60 dark:hover:bg-[var(--wc-dark-secondary)]/60">
+                        class="flex w-full items-center gap-4 rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] px-4 py-4 text-left transition hover:bg-[var(--wc-light-secondary)]/60 dark:hover:bg-[var(--wc-dark-secondary)]/60">
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)]"> 
                              <x-wirechat::icons.link class="size-5" />
                         </div>
@@ -154,7 +154,7 @@
                         </span>
                     </button>
                 @empty
-                    <div class="rounded-3xl border border-dashed border-[var(--wc-light-border)] px-5 py-8 text-center text-sm text-gray-500 dark:border-[var(--wc-dark-border)] dark:text-gray-400">
+                    <div class="rounded-2xl border border-dashed border-[var(--wc-light-border)] px-5 py-8 text-center text-sm text-gray-500 dark:border-[var(--wc-dark-border)] dark:text-gray-400">
                         No extra links yet. Create one for a limited campaign, a temporary invite, or a private onboarding flow.
                     </div>
                 @endforelse

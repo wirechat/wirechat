@@ -170,7 +170,7 @@
     <div x-data="WirechatModal()" x-on:close.stop="setShowPropertyTo(false)"
            x-on:keydown.escape.stop="closeModalOnEscape({modalType: 'WirechatModal', event: $event })"
             tabindex="0"
-           x-show="show" class="fixed   inset-0 z-[60] overflow-y-auto" style="display: none;">
+        x-show="show" class="fixed   inset-0 z-[60] overflow-y-auto" style="display: none;">
         <div class="flex items-end   justify-center min-h-screen px-4 pt-4 pb-10 text-center sm:block sm:p-0">
             <div x-show="show" x-on:click="closeModalOnClickAway()" x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"

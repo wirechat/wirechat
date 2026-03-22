@@ -1,4 +1,4 @@
-<div class="h-[calc(100vh_-_8rem)] sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-zinc-200 dark:border-zinc-700 overflow-y-auto overflow-x-hidden">
+<div class="h-[calc(100vh_-_8rem)] rounded-xl sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-zinc-200 dark:border-zinc-700 overflow-y-auto overflow-x-hidden">
     <header class="sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
         <div class="flex items-center pb-2">
             <x-wirechat::actions.close-modal>

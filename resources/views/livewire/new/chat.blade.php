@@ -2,7 +2,7 @@
 <div id="new-chat-modal ">
 
     <div
-        class="relative w-full h-96  border mx-auto border-[var(--wc-light-secondary)]  dark:border-[var(--wc-dark-secondary)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white px-7 sm:max-w-lg sm:rounded-lg">
+        class="relative w-full h-96  border mx-auto border-[var(--wc-light-secondary)]  dark:border-[var(--wc-dark-secondary)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white px-7 sm:max-w-lg rounded-lg">
 
         <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 py-2">
             <div class="flex justify-between items-center justify-between pb-2">
@@ -28,7 +28,7 @@
                 <input dusk="search_users_field" autofocus type="search" id="users-search-field"
                        wire:model.live.debounce='search' autocomplete="off"
                        placeholder="{{__('wirechat::new.chat.inputs.search.placeholder')}}"
-                       class="wc-input w-full border-0 w-auto py-2 px-0 dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-light-primary)] rounded-lg focus:ring-0 hover:ring-0">
+                       class="wc-input w-full border-0 w-auto py-2 px-0 dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-light-primary)] rounded-xl focus:ring-0 hover:ring-0">
 
             </section>
         </header>
@@ -41,7 +41,7 @@
                 {{-- Buton to trigger opening of new grop modal --}}
                 <x-wirechat::actions.new-group widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
                     <button @dusk="open_new_group_modal_button"
-                            class="flex items-center gap-3 my-4  rounded-lg p-2 w-full border  transition-colors border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)] hover:border-[var(--wc-light-secondary)] dark:hover:border-[var(--wc-dark-secondary)]">
+                            class="flex items-center gap-3 my-4  rounded-xl p-2 w-full border  transition-colors border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)] hover:border-[var(--wc-light-secondary)] dark:hover:border-[var(--wc-dark-secondary)]">
             <span style=" color: var(--wc-brand-primary); " class="p-1 bg-gray-100  rounded-full ">
 
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="   w-5 h-5">
