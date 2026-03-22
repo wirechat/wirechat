@@ -17,14 +17,38 @@
     }"
     x-init="
         tooltipId = $id('tooltip');
-        $refs.content.addEventListener('mouseenter', () => tooltipVisible = true);
-        $refs.content.addEventListener('mouseleave', () => tooltipVisible = false);
-        $refs.content.addEventListener('focusin', () => tooltipVisible = true);
+        const clearAriaOnActive = () => {
+            if ($refs.content.contains(document.activeElement)) {
+                document.activeElement.removeAttribute('aria-describedby');
+            }
+        };
+        $refs.content.addEventListener('mouseenter', () => { tooltipVisible = true; });
+        $refs.content.addEventListener('mouseleave', () => {
+            if ($refs.content.contains(document.activeElement)) return;
+            tooltipVisible = false;
+        });
+        $refs.content.addEventListener('focusin', (event) => {
+            tooltipVisible = true;
+            event.target.setAttribute('aria-describedby', tooltipId);
+        });
         $refs.content.addEventListener('focusout', (event) => {
+            event.target.removeAttribute('aria-describedby');
             const next = event.relatedTarget;
             if (next && $refs.content.contains(next)) return;
             tooltipVisible = false;
         });
+        $refs.content.addEventListener('touchstart', (event) => {
+            event.stopPropagation();
+            tooltipVisible = true;
+        }, { passive: true });
+        const hideOnOutsideTouch = (event) => {
+            if (!$el.contains(event.target)) {
+                clearAriaOnActive();
+                tooltipVisible = false;
+            }
+        };
+        document.addEventListener('touchstart', hideOnOutsideTouch, { passive: true });
+        $cleanup(() => document.removeEventListener('touchstart', hideOnOutsideTouch));
     "
     :style="`--tooltip-space: ${@js($spacing)}rem`"
     class="relative "
@@ -79,7 +103,7 @@
         </div>
     </div>
 
-    <div x-ref="content" :aria-describedby="tooltipVisible ? tooltipId : null">
+    <div x-ref="content">
         {{ $slot }}
     </div>
 </div>
