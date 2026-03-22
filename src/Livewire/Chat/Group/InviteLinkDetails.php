@@ -46,11 +46,7 @@ class InviteLinkDetails extends ModalComponent
         $this->group = $this->conversation->group;
         $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        abort_unless(
-            $this->authParticipant?->isAdmin() || $this->group?->allowsMembersToAddOthers(),
-            403,
-            'You do not have permission to access invite links'
-        );
+        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to access invite links');
 
         abort_unless(
             $this->invite->inviteable_type === $this->group->getMorphClass()
@@ -65,7 +61,9 @@ class InviteLinkDetails extends ModalComponent
 
     public function revokeLink(): void
     {
-        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to revoke invite links');
+        $authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to revoke invite links');
         abort_if($this->invite->is_primary, 403, 'Primary invite links cannot be revoked here.');
 
         $this->invite->revoke();
@@ -79,7 +77,7 @@ class InviteLinkDetails extends ModalComponent
     {
         return view('wirechat::livewire.chat.group.invite-link-details', [
             'inviteUrl' => $this->invite->url($this->panel()),
-            'canRevokeLink' => (bool) $this->authParticipant?->isAdmin() && ! $this->invite->is_primary,
+            'canRevokeLink' => (bool) $this->conversation->participant(auth()->user())?->isAdmin() && ! $this->invite->is_primary,
         ]);
     }
 }

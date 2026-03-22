@@ -212,6 +212,9 @@ return [
                 'save' => [
                     'label' => 'Kaydet',
                 ],
+                'invite_via_link' => [
+                    'label' => 'Baglanti ile gruba davet et',
+                ],
             ],
             'messages' => [
                 'invalid_conversation_type_error' => 'Yalnızca grup sohbetlerine izin verilir',

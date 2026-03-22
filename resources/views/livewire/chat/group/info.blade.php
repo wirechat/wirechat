@@ -6,6 +6,7 @@
         $authIsOwner = $participant?->isOwner();
         $isGroup = $conversation?->isGroup();
         $group = $conversation?->group;
+        $canManageInvites = $authIsAdminInGroup && $this->panel()->hasGroupInvitations();
     @endphp
 
     <section class="cursor-pointer flex gap-4 z-10  items-center p-5 sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  ">
@@ -218,7 +219,7 @@
         {{-- Add Members --}}
         @if ($authIsAdminInGroup || $group?->allowsMembersToAddOthers())
             <x-wirechat::actions.open-modal component="wirechat.chat.group.add-members"
-                conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}">
+                conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button @dusk="open_add_members_modal_button"
                     class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition  flex gap-3 items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -230,40 +231,38 @@
                     <span>{{ __('wirechat::chat.group.info.actions.add_members.label') }}</span>
                 </button>
             </x-wirechat::actions.open-modal>
+        @endif
 
-            @if ($this->panel()->hasGroupInvitations())
-                <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.invite-link"
-                    conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
-                    <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex gap-3 items-center">
+        @if ($canManageInvites)
+            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.invite-link"
+                conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
+                <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex gap-3 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-1.478 1.478a3.375 3.375 0 1 1-4.773-4.773l1.478-1.478m6.136 6.136-1.478 1.478a3.375 3.375 0 0 1-4.773-4.773l1.478-1.478m0 0 3.712-3.712a3.375 3.375 0 1 0-4.773-4.773L10.125 5.26m3.712 3.712 2.651-2.651" />
+                    </svg>
+
+                    <span>{{ __('wirechat::chat.group.info.actions.invite_via_link.label') }}</span>
+                </button>
+            </x-wirechat::actions.open-chat-drawer>
+
+            @php
+                $pendingJoinRequestsCount = $group?->pendingJoinRequests()->count();
+            @endphp
+            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.join-requests"
+                conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
+                <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex items-center justify-between gap-3">
+                    <span class="flex items-center gap-3">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-1.478 1.478a3.375 3.375 0 1 1-4.773-4.773l1.478-1.478m6.136 6.136-1.478 1.478a3.375 3.375 0 0 1-4.773-4.773l1.478-1.478m0 0 3.712-3.712a3.375 3.375 0 1 0-4.773-4.773L10.125 5.26m3.712 3.712 2.651-2.651" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.742-.479 3 3 0 0 0-4.682-2.72m.94 3.198-.94-.001M6 18.72a9.094 9.094 0 0 1-3.742-.479 3 3 0 0 1 4.682-2.72m-.94 3.198.94-.001m0 0a3 3 0 0 1 6 0m-6 0a3 3 0 0 0 6 0m-6 0H9m3 0h3m-6-9a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm-3 9a3 3 0 1 1 6 0" />
                         </svg>
+                        <span>Join Requests</span>
+                    </span>
 
-                        <span>{{ __('wirechat::chat.group.info.actions.invite_via_link.label') }}</span>
-                    </button>
-                </x-wirechat::actions.open-chat-drawer>
-
-                @if ($authIsAdminInGroup)
-                    @php
-                        $pendingJoinRequestsCount = $group?->pendingJoinRequests()->count();
-                    @endphp
-                    <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.join-requests"
-                        conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
-                        <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex items-center justify-between gap-3">
-                            <span class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.742-.479 3 3 0 0 0-4.682-2.72m.94 3.198-.94-.001M6 18.72a9.094 9.094 0 0 1-3.742-.479 3 3 0 0 1 4.682-2.72m-.94 3.198.94-.001m0 0a3 3 0 0 1 6 0m-6 0a3 3 0 0 0 6 0m-6 0H9m3 0h3m-6-9a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm-3 9a3 3 0 1 1 6 0" />
-                                </svg>
-                                <span>Join Requests</span>
-                            </span>
-
-                            <span class="inline-flex min-w-10 items-center justify-center rounded-full bg-[var(--wc-brand-primary)] px-3 py-1 text-xs font-semibold text-white">
-                                {{ $pendingJoinRequestsCount }}
-                            </span>
-                        </button>
-                    </x-wirechat::actions.open-chat-drawer>
-                @endif
-            @endif
+                    <span class="inline-flex min-w-10 items-center justify-center rounded-full bg-[var(--wc-brand-primary)] px-3 py-1 text-xs font-semibold text-white">
+                        {{ $pendingJoinRequestsCount }}
+                    </span>
+                </button>
+            </x-wirechat::actions.open-chat-drawer>
         @endif
 
 

@@ -49,11 +49,7 @@ class InviteLink extends ModalComponent
         $this->group = $this->conversation->group;
         $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        abort_unless(
-            $this->authParticipant?->isAdmin() || $this->group?->allowsMembersToAddOthers(),
-            403,
-            'You do not have permission to manage group invite links'
-        );
+        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to manage group invite links');
 
         $this->invite = $this->resolvePrimaryInvite();
     }
@@ -97,6 +93,7 @@ class InviteLink extends ModalComponent
 
     public function render()
     {
+        $authParticipant = $this->conversation->participant(auth()->user());
         $primaryInvite = $this->invite->fresh(['createdBy']);
 
         return view('wirechat::livewire.chat.group.invite-link', [
@@ -109,8 +106,9 @@ class InviteLink extends ModalComponent
                 ->with('createdBy')
                 ->latest('id')
                 ->get(),
-            'canResetLink' => (bool) $this->authParticipant?->isAdmin(),
-            'canManageJoinRequests' => (bool) $this->authParticipant?->isAdmin(),
+            'canResetLink' => (bool) $authParticipant?->isAdmin(),
+            'canManageJoinRequests' => (bool) $authParticipant?->isAdmin(),
+            'canEditGroupAccess' => (bool) $authParticipant?->isOwner(),
             'pendingJoinRequestsCount' => $this->group->pendingJoinRequests()->count(),
             'requiresAdminApproval' => $this->group->requiresInviteApproval(),
         ]);

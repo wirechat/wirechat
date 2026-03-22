@@ -214,6 +214,9 @@ return [
                 'save' => [
                     'label' => 'Enregistrer',
                 ],
+                'invite_via_link' => [
+                    'label' => 'Inviter au groupe via un lien',
+                ],
             ],
             'messages' => [
                 'invalid_conversation_type_error' => 'Seules les conversations de groupe sont autorisées',

@@ -231,6 +231,9 @@ return [
                     'label' => 'Speichern',
 
                 ],
+                'invite_via_link' => [
+                    'label' => 'Per Gruppenlink einladen',
+                ],
 
             ],
             'messages' => [

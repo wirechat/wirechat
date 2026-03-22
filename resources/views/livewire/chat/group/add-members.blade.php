@@ -1,4 +1,4 @@
-<div class="h-[calc(100vh_-_10rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] overflow-y-auto overflow-x-hidden  ">
+<div class="h-[calc(100vh_-_10rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-zinc-200 dark:border-zinc-700 overflow-y-auto overflow-x-hidden  ">
 
 <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
     <div class="flex items-center pb-2">
@@ -44,12 +44,24 @@
        </span>
     </div>
 
-    <section class="flex flex-wrap items-center px-0 border-b border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]">
+    <section class="flex flex-wrap items-center px-0 border-b border-zinc-200 dark:border-zinc-700">
         <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
             placeholder="{{ __('wirechat::chat.group.add_members.inputs.search.placeholder') }}"
             class="wc-input  w-full border-0 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
     </section>
 
+    @if ($primaryInviteUrl)
+        <section class="w-full border-zinc-200 px-0 py-3 dark:border-zinc-700">
+            <button type="button"
+                x-data
+                @click="if (navigator.clipboard) { navigator.clipboard.writeText(@js($primaryInviteUrl)); $dispatch('wirechat-toast', { type: 'success', message: @js(__('wirechat::chat.group.invite_link.messages.copied_success')) }); } else { window.prompt('Copy this link', @js($primaryInviteUrl)); }"
+                class="inline-flex w-full text-center justify-center items-center gap-2 rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
+               <x-wirechat::icons.link class="size-5" />
+
+                <span>{{ __('wirechat::chat.group.add_members.actions.invite_via_link.label') }}</span>
+            </button>
+        </section>
+    @endif
 
     <section class="  overflow-x-hidden my-2  ">
         <ul style="-ms-overflow-style: none;scrollbar-width: none;

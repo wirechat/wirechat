@@ -82,11 +82,13 @@
                     </p>
                 </div>
 
-                <button type="button"
-                    onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.permissions', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
-                    class="inline-flex items-center rounded-2xl border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
-                    Edit Permissions
-                </button>
+                @if ($canEditGroupAccess)
+                    <button type="button"
+                        onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.permissions', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
+                        class="inline-flex items-center rounded-2xl border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
+                        {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }}
+                    </button>
+                @endif
             </div>
 
             @if ($canManageJoinRequests)

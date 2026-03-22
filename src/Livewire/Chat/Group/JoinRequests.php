@@ -49,6 +49,10 @@ class JoinRequests extends ModalComponent
 
     public function approve(int $requestId): void
     {
+        $authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($authParticipant?->isAdmin(), 403, 'Only admins can manage join requests.');
+
         $request = $this->group->pendingJoinRequests()->with('requester')->findOrFail($requestId);
         $requester = $request->requester;
 
@@ -69,6 +73,10 @@ class JoinRequests extends ModalComponent
 
     public function dismiss(int $requestId): void
     {
+        $authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($authParticipant?->isAdmin(), 403, 'Only admins can manage join requests.');
+
         $request = $this->group->pendingJoinRequests()->findOrFail($requestId);
 
         $request->dismiss(auth()->user());

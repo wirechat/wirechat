@@ -51,15 +51,15 @@ class CreateInviteLink extends ModalComponent
         $this->group = $this->conversation->group;
         $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        abort_unless(
-            $this->authParticipant?->isAdmin() || $this->group?->allowsMembersToAddOthers(),
-            403,
-            'You do not have permission to create invite links'
-        );
+        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to create invite links');
     }
 
     public function createLink(): void
     {
+        $authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to create invite links');
+
         $this->validate([
             'name' => ['nullable', 'string', 'max:120'],
             'expiryPreset' => ['required', 'in:1_hour,1_day,1_week,never'],

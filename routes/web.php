@@ -24,17 +24,15 @@ Route::name('wirechat.')
                     'web',
                     "wirechat.setPanel:{$panel->getId()}",
                 ])
-                ->group(function () use ($panel) {
-                    if ($panel->hasGroupInvitations()) {
-                        Route::get('/invites/{token}', [InviteController::class, 'show'])
-                            ->middleware('throttle:wirechat-invite')
-                            ->where('token', '[A-Za-z0-9]{16,64}')
-                            ->name('invite.show');
-                        Route::post('/invites/{token}/join', [InviteController::class, 'join'])
-                            ->middleware('throttle:wirechat-invite')
-                            ->where('token', '[A-Za-z0-9]{16,64}')
-                            ->name('invite.join');
-                    }
+                ->group(function () {
+                    Route::get('/invites/{token}', [InviteController::class, 'show'])
+                        ->middleware('throttle:wirechat-invite')
+                        ->where('token', '[A-Za-z0-9]{16,64}')
+                        ->name('invite.show');
+                    Route::post('/invites/{token}/join', [InviteController::class, 'join'])
+                        ->middleware('throttle:wirechat-invite')
+                        ->where('token', '[A-Za-z0-9]{16,64}')
+                        ->name('invite.join');
                 });
 
             Route::prefix($panel->getRoutePrefix())

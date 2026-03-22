@@ -67,6 +67,10 @@ class SendInviteLink extends ModalComponent
 
     public function toggleMember($id, string $class): void
     {
+        $authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to send group invite links');
+
         $model = app($class)->find($id);
 
         if (! $model) {
@@ -86,6 +90,10 @@ class SendInviteLink extends ModalComponent
 
     public function save(): void
     {
+        $authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to send group invite links');
+
         if ($this->selectedMembers->isEmpty()) {
             return;
         }
@@ -136,11 +144,7 @@ class SendInviteLink extends ModalComponent
         $this->group = $this->conversation->group;
         $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        abort_unless(
-            $this->authParticipant?->isAdmin() || $this->group?->allowsMembersToAddOthers(),
-            403,
-            'You do not have permission to send group invite links'
-        );
+        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to send group invite links');
 
         abort_unless(
             $this->invite->inviteable_type === $this->group->getMorphClass() && (string) $this->invite->inviteable_id === (string) $this->group->getKey(),

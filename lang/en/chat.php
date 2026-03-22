@@ -231,6 +231,9 @@ return [
                     'label' => 'Save',
 
                 ],
+                'invite_via_link' => [
+                    'label' => 'Invite to group via link',
+                ],
 
             ],
             'messages' => [

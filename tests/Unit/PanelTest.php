@@ -2,6 +2,12 @@
 
 use Workbench\App\Models\User;
 
+beforeEach(function () {
+    testPanelProvider()->registerRoutes(true);
+    testPanelProvider()->groupInvitations(true);
+    testPanelProvider()->invitePageLayout('wirechat::layouts.app');
+});
+
 test(' panel hasRoutes is true by default()', function () {
     $auth = User::factory()->create();
 

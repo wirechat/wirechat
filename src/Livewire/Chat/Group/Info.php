@@ -235,6 +235,7 @@ class Info extends ModalComponent
 
     public function mount()
     {
+        $this->initializePanel($this->panel);
 
         abort_if(empty($this->conversation), 404);
 
