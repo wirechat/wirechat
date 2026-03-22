@@ -514,7 +514,7 @@
                                 x-transition:leave-start="opacity-100 translate-y-0"
                                 x-transition:leave-end="opacity-0 translate-y-1"
                                 wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
-                                id="sendMessageButton" class="bg-primary-500 dark:bg-primary-500 rounded-full p-2 cursor-pointer  hover:text-[var(--wc-brand-primary)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
+                                id="sendMessageButton" class="bg-primary-500 dark:bg-primary-500 rounded-full p-2 cursor-pointer hover:text-[var(--wc-brand-primary)] transition-colors ml-auto disabled:cursor-progress font-bold">
 
                                 <svg class="size-4.5   dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
                                     width="36" height="36" viewBox="0 0 24 24" fill="none"
