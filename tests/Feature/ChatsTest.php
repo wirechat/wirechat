@@ -800,8 +800,10 @@ describe('Cursor pagination', function () {
     it('appends new IDs on loadMore without reshuffling existing ones', function () {
         $auth = User::factory()->create();
 
+        $baseTime = now();
+
         for ($i = 0; $i < 12; $i++) {
-            Carbon::setTestNow(now()->subSeconds(120 - $i));
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
             $user = User::factory()->create();
             $auth->createConversationWith($user, "message $i");
         }
@@ -863,8 +865,10 @@ describe('Cursor pagination', function () {
     it('restarts pagination from beginning when hardRefresh is called after loading all conversations', function () {
         $auth = User::factory()->create();
 
+        $baseTime = now();
+
         for ($i = 0; $i < 12; $i++) {
-            Carbon::setTestNow(now()->subSeconds(120 - $i));
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
             $user = User::factory()->create();
             $auth->createConversationWith($user, "message $i");
         }
@@ -890,8 +894,10 @@ describe('Cursor pagination', function () {
     it('restarts pagination from beginning when search is updated', function () {
         $auth = User::factory()->create();
 
+        $baseTime = now();
+
         for ($i = 0; $i < 12; $i++) {
-            Carbon::setTestNow(now()->subSeconds(120 - $i));
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
             $user = User::factory()->create();
             $auth->createConversationWith($user, "message $i");
         }
