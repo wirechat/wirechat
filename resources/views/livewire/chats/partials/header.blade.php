@@ -17,7 +17,7 @@
         <div class="flex gap-x-4 items-center  ">
 
             {{-- Widget-Action:Redirect to home --}}
-            @if ($redirectToHomeAction)
+            @if ($redirectToHomeAction && $this->panel()->getHomeUrl())
             <a id="redirect-button" href="{{ $this->panel()->getHomeUrl() }}" class="flex items-center">
                       <x-wirechat::icon
                                 :icon="$this->panel()->redirectToHomeActionIcon()"
