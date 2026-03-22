@@ -20,7 +20,11 @@
         $refs.content.addEventListener('mouseenter', () => tooltipVisible = true);
         $refs.content.addEventListener('mouseleave', () => tooltipVisible = false);
         $refs.content.addEventListener('focusin', () => tooltipVisible = true);
-        $refs.content.addEventListener('focusout', () => tooltipVisible = false);
+        $refs.content.addEventListener('focusout', (event) => {
+            const next = event.relatedTarget;
+            if (next && $refs.content.contains(next)) return;
+            tooltipVisible = false;
+        });
     "
     :style="`--tooltip-space: ${@js($spacing)}rem`"
     class="relative "
