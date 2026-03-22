@@ -13,25 +13,21 @@
         @if ($this->isWidget())
             <button
                 type="button"
+                aria-label="{{ __('wirechat::chat.actions.close_chat.label') }}"
                 @click="$dispatch('close-chat',{conversation: {{json_encode($conversation->id)}} })"
                 dusk="return_to_home_button_dispatch"
                 class="shrink-0 cursor-pointer dark:text-white"
                 id="chatReturn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
-                    stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
+                <x-wirechat::icons.chevron-left />
             </button>
         @else
             <a wire:navigate
                 href="{{ $this->panel()->chatsRoute() }}"
+                aria-label="{{ __('wirechat::chat.actions.close_chat.label') }}"
                 dusk="return_to_home_button_link"
                 class="shrink-0 cursor-pointer dark:text-white lg:hidden"
                 id="chatReturn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
-                    stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
+                <x-wirechat::icons.chevron-left />
             </a>
         @endif
 
