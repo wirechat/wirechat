@@ -222,6 +222,30 @@ return [
                 'invalid_conversation_type_error' => 'Nur Gruppenkonversationen erlaubt',
             ],
         ],
+        'join_requests' => [
+            'heading' => [
+                'label' => 'Beitrittsanfragen',
+            ],
+            'labels' => [
+                'description' => 'Überprüfe und bearbeite alle Personen, die über einen Einladungslink den Beitritt zu dieser Gruppe angefragt haben.',
+                'unknown_user' => 'Unbekannter Benutzer',
+                'requested_at' => 'Angefragt :time',
+                'via_invite_link' => 'über Einladungslink',
+                'empty_state' => 'Zurzeit gibt es keine ausstehenden Beitrittsanfragen.',
+            ],
+            'actions' => [
+                'approve' => [
+                    'label' => 'Zur Gruppe hinzufügen',
+                ],
+                'dismiss' => [
+                    'label' => 'Ablehnen',
+                ],
+            ],
+            'messages' => [
+                'approved_success' => 'Beitrittsanfrage bestätigt.',
+                'dismissed_success' => 'Beitrittsanfrage abgelehnt.',
+            ],
+        ],
         // add-Members component
         'add_members' => [
             'heading' => [

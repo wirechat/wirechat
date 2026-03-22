@@ -208,6 +208,30 @@ return [
                 'invalid_conversation_type_error' => 'Seules les conversations de groupe sont autorisées',
             ],
         ],
+        'join_requests' => [
+            'heading' => [
+                'label' => "Demandes d'adhésion",
+            ],
+            'labels' => [
+                'description' => "Examinez et traitez toutes les personnes qui ont demandé à rejoindre ce groupe via un lien d'invitation.",
+                'unknown_user' => 'Utilisateur inconnu',
+                'requested_at' => 'Demandé :time',
+                'via_invite_link' => "via le lien d'invitation",
+                'empty_state' => "Il n'y a aucune demande d'adhésion en attente pour le moment.",
+            ],
+            'actions' => [
+                'approve' => [
+                    'label' => 'Ajouter au groupe',
+                ],
+                'dismiss' => [
+                    'label' => 'Ignorer',
+                ],
+            ],
+            'messages' => [
+                'approved_success' => "Demande d'adhésion approuvée.",
+                'dismissed_success' => "Demande d'adhésion ignorée.",
+            ],
+        ],
         // add-Members component
         'add_members' => [
             'heading' => [

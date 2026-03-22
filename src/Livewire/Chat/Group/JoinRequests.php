@@ -68,7 +68,7 @@ class JoinRequests extends ModalComponent
 
         $this->dispatch('refresh')->to(Info::class);
         $this->dispatch('refresh')->to(Chat::class);
-        $this->dispatch('wirechat-toast', type: 'success', message: 'Join request approved.');
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join_requests.messages.approved_success'));
     }
 
     public function dismiss(int $requestId): void
@@ -83,7 +83,7 @@ class JoinRequests extends ModalComponent
 
         $this->dispatch('refresh')->to(Info::class);
         $this->dispatch('refresh')->to(Chat::class);
-        $this->dispatch('wirechat-toast', type: 'success', message: 'Join request dismissed.');
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join_requests.messages.dismissed_success'));
     }
 
     public function render()

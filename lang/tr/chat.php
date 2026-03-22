@@ -204,6 +204,30 @@ return [
                 'invalid_conversation_type_error' => 'Yalnızca grup sohbetlerine izin verilir',
             ],
         ],
+        'join_requests' => [
+            'heading' => [
+                'label' => 'Katilma Istekleri',
+            ],
+            'labels' => [
+                'description' => 'Bir davet baglantisi ile bu gruba katilmak isteyen herkesi incele ve yonet.',
+                'unknown_user' => 'Bilinmeyen kullanici',
+                'requested_at' => ':time once istendi',
+                'via_invite_link' => 'davet baglantisi ile',
+                'empty_state' => 'Su anda bekleyen katilma istegi yok.',
+            ],
+            'actions' => [
+                'approve' => [
+                    'label' => 'Gruba Ekle',
+                ],
+                'dismiss' => [
+                    'label' => 'Reddet',
+                ],
+            ],
+            'messages' => [
+                'approved_success' => 'Katilma istegi onaylandi.',
+                'dismissed_success' => 'Katilma istegi reddedildi.',
+            ],
+        ],
         // add-Members component
         'add_members' => [
             'heading' => [

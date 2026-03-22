@@ -6,7 +6,7 @@
             </svg>
         
         </button>
-        <h3 class="text-lg font-medium">Join Requests</h3>
+        <h3 class="text-lg font-medium">{{ __('wirechat::chat.group.join_requests.heading.label') }}</h3>
     </section>
 
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
@@ -14,7 +14,7 @@
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]">
                     <x-wirechat::icons.user-group class="size-10" />
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Review and handle everyone who asked to join this group through an invite link.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.join_requests.labels.description') }}</p>
         </div>
 
         <div class="space-y-3">
@@ -31,11 +31,11 @@
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-start justify-between gap-3">
                                 <div>
-                                    <p class="font-medium">{{ $requester?->wirechat_name ?: 'Unknown user' }}</p>
+                                    <p class="font-medium">{{ $requester?->wirechat_name ?: __('wirechat::chat.group.join_requests.labels.unknown_user') }}</p>
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        Requested {{ $request->created_at?->diffForHumans() }}
+                                        {{ __('wirechat::chat.group.join_requests.labels.requested_at', ['time' => $request->created_at?->diffForHumans()]) }}
                                         @if (filled($meta['token'] ?? null))
-                                            • via invite link
+                                            • {{ __('wirechat::chat.group.join_requests.labels.via_invite_link') }}
                                         @endif
                                     </p>
                                 </div>
@@ -46,12 +46,12 @@
                             <div class="mt-4 flex flex-wrap gap-3">
                                 <button type="button" wire:click="approve({{ $request->id }})"
                                     class="inline-flex items-center justify-center rounded-2xl bg-[var(--wc-brand-primary)] px-4 py-2 text-sm font-medium text-white">
-                                    Add To Group
+                                    {{ __('wirechat::chat.group.join_requests.actions.approve.label') }}
                                 </button>
 
                                 <button type="button" wire:click="dismiss({{ $request->id }})"
                                     class="inline-flex items-center justify-center rounded-2xl border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
-                                    Dismiss
+                                    {{ __('wirechat::chat.group.join_requests.actions.dismiss.label') }}
                                 </button>
                             </div>
                         </div>
@@ -59,7 +59,7 @@
                 </div>
             @empty
                 <div class="rounded-3xl border border-dashed border-[var(--wc-light-border)] px-5 py-12 text-center text-sm text-gray-500 dark:border-[var(--wc-dark-border)] dark:text-gray-400">
-                    There are no pending join requests right now.
+                    {{ __('wirechat::chat.group.join_requests.labels.empty_state') }}
                 </div>
             @endforelse
         </div>

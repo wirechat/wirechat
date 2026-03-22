@@ -196,11 +196,7 @@ class Group extends Model
             return false;
         }
 
-        if ($participant->isBlockedByAdmin()) {
-            return true;
-        }
-
-        return $participant->isRemovedByAdmin() && ! $participant->hasExited();
+        return $participant->isBlockedByAdmin();
     }
 
     public function hasPendingJoinRequest(Model|Authenticatable $user): bool

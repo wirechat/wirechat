@@ -222,6 +222,30 @@ return [
                 'invalid_conversation_type_error' => 'Only group conversations allowed',
             ],
         ],
+        'join_requests' => [
+            'heading' => [
+                'label' => 'Join Requests',
+            ],
+            'labels' => [
+                'description' => 'Review and handle everyone who asked to join this group through an invite link.',
+                'unknown_user' => 'Unknown user',
+                'requested_at' => 'Requested :time',
+                'via_invite_link' => 'via invite link',
+                'empty_state' => 'There are no pending join requests right now.',
+            ],
+            'actions' => [
+                'approve' => [
+                    'label' => 'Add To Group',
+                ],
+                'dismiss' => [
+                    'label' => 'Dismiss',
+                ],
+            ],
+            'messages' => [
+                'approved_success' => 'Join request approved.',
+                'dismissed_success' => 'Join request dismissed.',
+            ],
+        ],
         // add-Members component
         'add_members' => [
             'heading' => [

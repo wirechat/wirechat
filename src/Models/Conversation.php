@@ -256,8 +256,8 @@ class Conversation extends Model
     /**
      * Join a group conversation via an invite.
      *
-     * Allows users who previously exited to re-join themselves, but still
-     * keeps admin removals blocked unless an admin explicitly re-adds them.
+     * Allows users who previously exited or were removed by admins to re-join
+     * themselves, while still keeping admin blocks enforced.
      */
     public function join(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null): Participant
     {
@@ -280,11 +280,19 @@ class Conversation extends Model
             'You cannot join this group because you were blocked by an admin.'
         );
 
-        abort_if(
-            $participant->isRemovedByAdmin() && ! $participant->hasExited(),
-            403,
-            'You cannot join this group because you were removed by an admin.'
-        );
+        if ($participant->isRemovedByAdmin() && ! $participant->hasExited()) {
+            $participant->forceFill([
+                'role' => ParticipantRole::PARTICIPANT,
+            ])->save();
+
+            $participant->actions()
+                ->where('type', Actions::REMOVED_BY_ADMIN->value)
+                ->delete();
+
+            $this->group?->acceptPendingJoinRequest($user, $reviewedBy, true);
+
+            return $participant->refresh();
+        }
 
         if ($participant->hasExited()) {
             $participant->forceFill([

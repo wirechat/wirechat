@@ -530,6 +530,38 @@ it('allows an exited participant to rejoin via the in-app invite modal', functio
         ->and($invite->usages)->toBe(1);
 });
 
+it('allows an admin-removed participant to rejoin via the in-app invite modal', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    $participant = $conversation->addParticipant($receiver);
+    $participant->removeByAdmin($owner);
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->call('proceed')
+        ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+
+    $participant->refresh();
+    $invite->refresh();
+
+    expect($participant->isRemovedByAdmin())->toBeFalse()
+        ->and($participant->isBlockedByAdmin())->toBeFalse()
+        ->and($receiver->belongsToConversation($conversation))->toBeTrue()
+        ->and($invite->usages)->toBe(1);
+});
+
 it('keeps blocked members from rejoining by invite until the block is lifted', function () {
     $owner = User::factory()->create();
     $receiver = User::factory()->create();
