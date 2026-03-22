@@ -34,6 +34,8 @@ class JoinRequests extends ModalComponent
     {
         $this->initializePanel($this->panel);
 
+        abort_unless($this->panel()->hasGroupInvitations(), 404);
+
         abort_unless(auth()->check(), 401);
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
         abort_if($this->conversation->isPrivate(), 403, 'This feature is only available for groups');

@@ -15,6 +15,7 @@ use Wirechat\Wirechat\Panel\Concerns\HasDeleteMessageActions;
 use Wirechat\Wirechat\Panel\Concerns\HasEmojiPicker;
 use Wirechat\Wirechat\Panel\Concerns\HasFavicon;
 use Wirechat\Wirechat\Panel\Concerns\HasGroupActions;
+use Wirechat\Wirechat\Panel\Concerns\HasGroupInvitations;
 use Wirechat\Wirechat\Panel\Concerns\HasGroups;
 use Wirechat\Wirechat\Panel\Concerns\HasHeading;
 use Wirechat\Wirechat\Panel\Concerns\HasHeart;
@@ -42,6 +43,7 @@ class Panel
     use HasEmojiPicker;
     use HasFavicon;
     use HasGroupActions;
+    use HasGroupInvitations;
     use HasGroups;
     use HasHeading;
     use HasHeart;

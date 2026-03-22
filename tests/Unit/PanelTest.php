@@ -18,6 +18,26 @@ test(' panel hasRoutes is false when registerRoutes is FALSE', function () {
 
 });
 
+test('panel hasGroupInvitations is true by default()', function () {
+    expect(testPanelProvider()->hasGroupInvitations())->toBeTrue();
+});
+
+test('panel hasGroupInvitations is false when disabled', function () {
+    testPanelProvider()->groupInvitations(false);
+
+    expect(testPanelProvider()->hasGroupInvitations())->toBeFalse();
+});
+
+test('panel invitePageLayout defaults to wirechat app layout', function () {
+    expect(testPanelProvider()->getInvitePageLayout())->toBe('wirechat::layouts.app');
+});
+
+test('panel invitePageLayout can be customized', function () {
+    testPanelProvider()->invitePageLayout('layouts.guest');
+
+    expect(testPanelProvider()->getInvitePageLayout())->toBe('layouts.guest');
+});
+
 describe('Chats Route', function () {
 
     test('return 404 if user canAccessWirechatPanel() returns false on chats route', function () {

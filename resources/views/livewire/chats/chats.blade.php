@@ -6,7 +6,7 @@
         const container = document.getElementById('wirechat-chats-scrollable-container');
         const pendingInviteToken = @js($pendingInviteToken);
 
-        if (pendingInviteToken) {
+        if (pendingInviteToken && @js($this->panel()->hasGroupInvitations())) {
             setTimeout(() => {
                 Livewire.dispatch('openWirechatModal', {
                     component: 'wirechat.chat.group.join-from-invite',

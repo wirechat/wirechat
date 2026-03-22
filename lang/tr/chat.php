@@ -301,11 +301,15 @@ return [
                 'labels' => [
                     'invited_to_group' => 'Bir gruba katılman için davet edildin',
                     'group_fallback' => 'Grup',
+                    'invite_title' => 'Grup Sohbeti Daveti',
                     'members_count' => 'Üyeler :count',
                 ],
                 'actions' => [
                     'cancel' => [
                         'label' => 'İptal',
+                    ],
+                    'continue' => [
+                        'label' => 'Devam Et',
                     ],
                     'join_group' => [
                         'label' => 'Gruba Katıl',
@@ -315,6 +319,7 @@ return [
                     ],
                 ],
                 'messages' => [
+                    'invited_to_join_at' => ':app üzerinde bu gruba katılman için davet edildin.',
                     'join_directly' => 'Bu davet bağlantısıyla gruba hemen katılabilirsin.',
                     'request_required' => 'Yeni üyelerin bu gruba katılmadan önce yönetici onayı alması gerekir.',
                     'request_pending' => 'Katılma isteğin yönetici onayı bekliyor.',

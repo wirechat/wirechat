@@ -323,11 +323,15 @@ return [
                 'labels' => [
                     'invited_to_group' => 'Du wurdest eingeladen, einer Gruppe beizutreten',
                     'group_fallback' => 'Gruppe',
+                    'invite_title' => 'Gruppenchat-Einladung',
                     'members_count' => 'Mitglieder :count',
                 ],
                 'actions' => [
                     'cancel' => [
                         'label' => 'Abbrechen',
+                    ],
+                    'continue' => [
+                        'label' => 'Weiter',
                     ],
                     'join_group' => [
                         'label' => 'Gruppe beitreten',
@@ -337,6 +341,7 @@ return [
                     ],
                 ],
                 'messages' => [
+                    'invited_to_join_at' => 'Du wurdest eingeladen, dieser Gruppe auf :app beizutreten.',
                     'join_directly' => 'Du kannst dieser Gruppe sofort über diesen Einladungslink beitreten.',
                     'request_required' => 'Administratoren müssen neue Mitglieder bestätigen, bevor sie dieser Gruppe beitreten können.',
                     'request_pending' => 'Deine Beitrittsanfrage wartet auf die Bestätigung eines Administrators.',

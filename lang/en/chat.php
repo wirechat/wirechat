@@ -323,11 +323,15 @@ return [
                 'labels' => [
                     'invited_to_group' => 'You were invited to join a group',
                     'group_fallback' => 'Group',
+                    'invite_title' => 'Group Chat Invite',
                     'members_count' => 'Members :count',
                 ],
                 'actions' => [
                     'cancel' => [
                         'label' => 'Cancel',
+                    ],
+                    'continue' => [
+                        'label' => 'Continue',
                     ],
                     'join_group' => [
                         'label' => 'Join Group',
@@ -337,6 +341,7 @@ return [
                     ],
                 ],
                 'messages' => [
+                    'invited_to_join_at' => "You've been invited to join this group on :app.",
                     'join_directly' => 'You can join this group immediately from this invite link.',
                     'request_required' => 'Admins must approve new members before they can join this group.',
                     'request_pending' => 'Your join request is pending admin approval.',

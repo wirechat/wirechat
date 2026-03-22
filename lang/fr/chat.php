@@ -302,11 +302,15 @@ return [
                 'labels' => [
                     'invited_to_group' => 'Vous avez été invité à rejoindre un groupe',
                     'group_fallback' => 'Groupe',
+                    'invite_title' => 'Invitation au chat de groupe',
                     'members_count' => 'Membres :count',
                 ],
                 'actions' => [
                     'cancel' => [
                         'label' => 'Annuler',
+                    ],
+                    'continue' => [
+                        'label' => 'Continuer',
                     ],
                     'join_group' => [
                         'label' => 'Rejoindre le groupe',
@@ -316,6 +320,7 @@ return [
                     ],
                 ],
                 'messages' => [
+                    'invited_to_join_at' => 'Vous avez été invité à rejoindre ce groupe sur :app.',
                     'join_directly' => "Vous pouvez rejoindre ce groupe immédiatement via ce lien d'invitation.",
                     'request_required' => "Les administrateurs doivent approuver les nouveaux membres avant qu'ils puissent rejoindre ce groupe.",
                     'request_pending' => "Votre demande d'adhésion est en attente de l'approbation d'un administrateur.",

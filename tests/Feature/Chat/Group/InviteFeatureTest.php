@@ -5,6 +5,7 @@ use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\JoinRequestStatus;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Group\CreateInviteLink;
+use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
 use Wirechat\Wirechat\Livewire\Chat\Group\InviteLink;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinFromInvite;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
@@ -147,7 +148,130 @@ it('shows the invite preview page to guests', function () {
     $this->get(testPanelProvider()->inviteRoute($invite->token))
         ->assertOk()
         ->assertSee('Test Group')
-        ->assertSee('Join Group');
+        ->assertSee(__('wirechat::chat.group.invite_link.page.labels.invite_title'))
+        ->assertSee(__('wirechat::chat.group.invite_link.page.messages.invited_to_join_at', ['app' => config('app.name')]))
+        ->assertSee(__('wirechat::chat.group.invite_link.page.actions.continue.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.page.actions.join_group.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.page.actions.cancel.label'))
+        ->assertSee('method="POST"', escape: false)
+        ->assertSee('name="_token"', escape: false)
+        ->assertSee(testPanelProvider()->inviteJoinRoute($invite->token), escape: false);
+});
+
+it('renders invite preview page using translations', function () {
+    app()->setLocale('tr');
+
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $conversation = $owner->createGroup('Test Group', 'A great group');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->get(testPanelProvider()->inviteRoute($invite->token))
+        ->assertOk()
+        ->assertSee(__('wirechat::chat.group.invite_link.page.labels.invite_title'))
+        ->assertSee(__('wirechat::chat.group.invite_link.page.messages.invited_to_join_at', ['app' => config('app.name')]))
+        ->assertSee(__('wirechat::chat.group.invite_link.page.actions.continue.label'));
+});
+
+it('rejects tampered invite tokens on the join endpoint', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $tamperedToken = Invite::generateToken();
+
+    expect($tamperedToken)->not->toBe($invite->token);
+
+    $this->post(testPanelProvider()->inviteJoinRoute($tamperedToken))
+        ->assertNotFound()
+        ->assertSessionMissing('wirechat_pending_invite_token');
+});
+
+it('rejects malformed invite tokens before hitting the controller', function () {
+    $this->get(testPanelProvider()->inviteRoute('bad-token!!'))
+        ->assertNotFound();
+
+    $this->post(testPanelProvider()->inviteJoinRoute('bad-token!!'))
+        ->assertNotFound()
+        ->assertSessionMissing('wirechat_pending_invite_token');
+});
+
+it('returns gone for revoked invite links', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $invite->revoke();
+
+    $this->get(testPanelProvider()->inviteRoute($invite->token))
+        ->assertStatus(410);
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertStatus(410)
+        ->assertSessionMissing('wirechat_pending_invite_token');
+});
+
+it('rate limits repeated invite join attempts', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    foreach (range(1, 10) as $attempt) {
+        $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+            ->assertRedirect(testPanelProvider()->chatsRoute());
+    }
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertStatus(429);
+});
+
+it('hides and blocks group invitations when the panel disables them', function () {
+    testPanelProvider()->groupInvitations(false);
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->get(testPanelProvider()->inviteRoute($invite->token))
+        ->assertNotFound();
+
+    Livewire::actingAs($owner)
+        ->test(GroupInfo::class, ['conversation' => $conversation])
+        ->assertDontSee(__('wirechat::chat.group.info.actions.invite_via_link.label'))
+        ->assertDontSee('Join Requests');
+
+    Livewire::actingAs($owner)
+        ->test(InviteLink::class, ['conversation' => $conversation])
+        ->assertStatus(404);
 });
 
 it('stages the invite token in session and redirects to chats index', function () {

@@ -16,7 +16,7 @@ class InviteController extends Controller
     {
         $panel = Wirechat::currentPanel();
 
-        abort_if($panel === null, 404);
+        abort_if($panel === null || ! $panel->hasGroupInvitations(), 404);
 
         $invite = Invite::query()
             ->where('panel_id', $panel->getId())

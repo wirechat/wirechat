@@ -43,6 +43,8 @@ class JoinFromInvite extends ModalComponent
     {
         $this->initializePanel($this->panel);
 
+        abort_unless($this->panel()->hasGroupInvitations(), 404);
+
         abort_unless(auth()->check(), 401);
 
         $this->resolveContext();

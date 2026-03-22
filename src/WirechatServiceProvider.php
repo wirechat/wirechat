@@ -2,7 +2,10 @@
 
 namespace Wirechat\Wirechat;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Console\Commands\InstallWirechat;
@@ -64,6 +67,7 @@ class WirechatServiceProvider extends ServiceProvider
         //        app(\Wirechat\Wirechat\PanelRegistry::class)->autoDiscover();
 
         $this->loadLivewireComponents();
+        $this->configureRateLimiting();
 
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
@@ -186,6 +190,22 @@ class WirechatServiceProvider extends ServiceProvider
 
         // stand alone widget component
         Livewire::component('wirechat', Wirechat::class);
+    }
+
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('wirechat-invite', function (Request $request) {
+            $token = (string) $request->route('token');
+            $method = strtolower($request->method());
+            $maxAttempts = $request->isMethod('POST') ? 10 : 30;
+
+            return Limit::perMinute($maxAttempts)->by(implode(':', [
+                'wirechat-invite',
+                $method,
+                $request->ip() ?? 'unknown',
+                $token,
+            ]));
+        });
     }
 
     protected function registerMiddlewares(): void

@@ -41,6 +41,8 @@ class CreateInviteLink extends ModalComponent
     {
         $this->initializePanel($this->panel);
 
+        abort_unless($this->panel()->hasGroupInvitations(), 404);
+
         abort_unless(auth()->check(), 401);
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'You do not have permission to access this resource');
         abort_if($this->conversation->isPrivate(), 403, 'This feature is only available for groups');

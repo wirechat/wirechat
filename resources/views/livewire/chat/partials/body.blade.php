@@ -78,7 +78,7 @@
     </div>
 
 
-    @if ($isGroup && $authParticipant?->isAdmin())
+    @if ($isGroup && $authParticipant?->isAdmin() && $this->panel()->hasGroupInvitations())
         @php
             $pendingJoinRequestsCount = $conversation->group?->pendingJoinRequests()->count();
         @endphp

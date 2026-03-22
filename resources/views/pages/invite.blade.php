@@ -1,4 +1,4 @@
-@extends(\Wirechat\Wirechat\Facades\Wirechat::currentPanel()->getLayout())
+@extends(\Wirechat\Wirechat\Facades\Wirechat::currentPanel()->getInvitePageLayout())
 
 @section('content')
 
@@ -9,14 +9,14 @@
                 <x-wirechat::avatar group :src="$group->cover_url" class="size-20 shrink-0 " />
 
                 <div class="min-w-0">
-                    <h1 class="text-2xl font-semibold break-words">{{ $group->name ?: 'Group' }}</h1>
+                    <h1 class="text-2xl font-semibold break-words">{{ $group->name ?: __('wirechat::chat.group.invite_link.page.labels.group_fallback') }}</h1>
 
-                     <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 break-words">Group Chat Invite</p>
+                    <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 break-words">{{ __('wirechat::chat.group.invite_link.page.labels.invite_title') }}</p>
                 </div>
             </div>
 
 
-            <p class="text-sm">You've been invited to join this group. at {{config('app.name')}}</p>
+            <p class="text-sm">{{ __('wirechat::chat.group.invite_link.page.messages.invited_to_join_at', ['app' => config('app.name')]) }}</p>
 
 
             <div class="flex flex-col gap-3 justify-center">
@@ -24,7 +24,7 @@
                     @csrf
                     <button type="submit"
                         class="w-full w-full inline-flex justify-center items-center rounded-2xl px-5 py-3 bg-primary-500 text-white">
-                            Continue
+                        {{ __('wirechat::chat.group.invite_link.page.actions.continue.label') }}
                     </button>
                 </form>
             </div>
