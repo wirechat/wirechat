@@ -36,6 +36,7 @@
                                 :icon="$this->panel()->createChatActionIcon()"
                                 default="wirechat::icons.messages-plus"
                                 class="size-5"
+                                :icon-attributes="$this->panel()->createChatActionIconAttributes()"
                             />
                     </button>
             </x-wirechat::actions.new-chat>
