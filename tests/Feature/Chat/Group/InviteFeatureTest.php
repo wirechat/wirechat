@@ -50,7 +50,9 @@ it('allows admins to access invite links', function () {
     Livewire::actingAs($admin)
         ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(200)
-        ->assertSee('Invite Links');
+        ->assertSee(__('wirechat::chat.group.invite_link.heading.label'))
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.primary_link'))
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.additional_links'));
 
     $invite = $conversation->group->inviteLinks()->first();
 
@@ -261,13 +263,13 @@ it('shows invite management actions only to admins in group info', function () {
         ->test(GroupInfo::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertSee(__('wirechat::chat.group.info.actions.add_members.label'))
         ->assertSee(__('wirechat::chat.group.info.actions.invite_via_link.label'))
-        ->assertSee('Join Requests');
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.join_requests'));
 
     Livewire::actingAs($participantUser)
         ->test(GroupInfo::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertSee(__('wirechat::chat.group.info.actions.add_members.label'))
         ->assertDontSee(__('wirechat::chat.group.info.actions.invite_via_link.label'))
-        ->assertDontSee('Join Requests');
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.join_requests'));
 });
 
 it('shows group access editing only to owners inside invite links', function () {
@@ -286,7 +288,7 @@ it('shows group access editing only to owners inside invite links', function () 
     Livewire::actingAs($admin)
         ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertDontSee(__('wirechat::chat.group.invite_link.actions.edit_permissions.label'))
-        ->assertSee('Create New Link');
+        ->assertSee(__('wirechat::chat.group.invite_link.actions.create_new_link.label'));
 });
 
 it('shows the invite preview page to guests', function () {
@@ -423,7 +425,7 @@ it('hides and blocks group invitations when the panel disables them', function (
     Livewire::actingAs($owner)
         ->test(GroupInfo::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertDontSee(__('wirechat::chat.group.info.actions.invite_via_link.label'))
-        ->assertDontSee('Join Requests');
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.join_requests'));
 
     Livewire::actingAs($owner)
         ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])

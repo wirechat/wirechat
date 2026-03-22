@@ -268,11 +268,28 @@ return [
         ],
         'invite_link' => [
             'heading' => [
-                'label' => 'Bağlantı ile Gruba Davet Et',
+                'label' => 'Davet Bağlantıları',
             ],
             'labels' => [
+                'description' => 'Bir hesabi olan herkes bu baglantilardan birini acabilir ve erisim ayarlarina gore grubuna katilabilir.',
+                'primary_link' => 'Birincil Baglanti',
                 'admin_approval_enabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı var.',
                 'admin_approval_disabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı yok.',
+                'primary_link_usage_empty' => 'Henuz kimse katilmadi',
+                'primary_link_usage_limited' => ':usages / :limit kullanim',
+                'primary_link_usage_total' => 'Su ana kadar :usages katilim',
+                'group_access' => 'Grup Erisimi',
+                'group_access_requires_approval' => 'Bu baglantilari acan kisilerin katilmadan once yonetici onayi almasi gerekir.',
+                'group_access_open' => 'Bu baglantilari acan kisiler hemen katilabilir.',
+                'join_requests' => 'Katilma Istekleri',
+                'join_requests_helper' => 'Bu gruba katilmak isteyen kisileri incele.',
+                'additional_links' => 'Ek Baglantilar',
+                'additional_links_helper' => 'Kendi suresi dolma ve kullanim siniri olan ek davet baglantilari olustur.',
+                'additional_link_usage_limited' => ':usages / :limit kullanim',
+                'additional_link_usage_total' => ':usages kullanim',
+                'additional_link_expires' => ':time sona erer',
+                'additional_link_never_expires' => 'Suresi dolmaz',
+                'additional_links_empty' => 'Henuz ek baglanti yok. Sinirli bir kampanya, gecici bir davet veya ozel bir tanisma akisi icin yeni bir tane olustur.',
             ],
             'actions' => [
                 'edit_permissions' => [
@@ -287,9 +304,13 @@ return [
                 'reset_link' => [
                     'label' => 'Bağlantıyı Sıfırla',
                 ],
+                'create_new_link' => [
+                    'label' => 'Yeni Baglanti Olustur',
+                ],
             ],
             'messages' => [
                 'copied_success' => 'Davet bağlantısı kopyalandı.',
+                'copy_prompt' => 'Bu baglantiyi kopyala',
                 'reset_success' => 'Grup davet bağlantısı sıfırlandı.',
             ],
             'send_via_chat' => [

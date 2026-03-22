@@ -290,11 +290,28 @@ return [
         ],
         'invite_link' => [
             'heading' => [
-                'label' => 'Per Link zur Gruppe einladen',
+                'label' => 'Einladungslinks',
             ],
             'labels' => [
+                'description' => 'Jede Person mit einem Konto kann einen dieser Links öffnen und deiner Gruppe entsprechend deiner Zugriffseinstellungen beitreten.',
+                'primary_link' => 'Primärer Link',
                 'admin_approval_enabled' => 'Mitglieder benötigen die Bestätigung eines Administrators, um dieser Gruppe beizutreten.',
                 'admin_approval_disabled' => 'Mitglieder benötigen keine Administrator-Bestätigung, um dieser Gruppe beizutreten.',
+                'primary_link_usage_empty' => 'Noch niemand ist beigetreten',
+                'primary_link_usage_limited' => ':usages / :limit Nutzungen',
+                'primary_link_usage_total' => ':usages Beitritte bisher',
+                'group_access' => 'Gruppenzugriff',
+                'group_access_requires_approval' => 'Personen, die diese Links öffnen, benötigen vor dem Beitritt die Bestätigung eines Administrators.',
+                'group_access_open' => 'Personen, die diese Links öffnen, können sofort beitreten.',
+                'join_requests' => 'Beitrittsanfragen',
+                'join_requests_helper' => 'Überprüfe, wer den Beitritt zu dieser Gruppe angefragt hat.',
+                'additional_links' => 'Zusätzliche Links',
+                'additional_links_helper' => 'Erstelle zusätzliche Einladungslinks mit eigener Ablaufzeit und Nutzungslimits.',
+                'additional_link_usage_limited' => ':usages / :limit Nutzungen',
+                'additional_link_usage_total' => ':usages Nutzungen',
+                'additional_link_expires' => 'Läuft :time ab',
+                'additional_link_never_expires' => 'Läuft nie ab',
+                'additional_links_empty' => 'Noch keine zusätzlichen Links. Erstelle einen für eine begrenzte Kampagne, eine temporäre Einladung oder einen privaten Onboarding-Ablauf.',
             ],
             'actions' => [
                 'edit_permissions' => [
@@ -309,9 +326,13 @@ return [
                 'reset_link' => [
                     'label' => 'Link zurücksetzen',
                 ],
+                'create_new_link' => [
+                    'label' => 'Neuen Link erstellen',
+                ],
             ],
             'messages' => [
                 'copied_success' => 'Einladungslink kopiert.',
+                'copy_prompt' => 'Diesen Link kopieren',
                 'reset_success' => 'Gruppen-Einladungslink zurückgesetzt.',
             ],
             'send_via_chat' => [

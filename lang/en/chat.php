@@ -290,11 +290,28 @@ return [
         ],
         'invite_link' => [
             'heading' => [
-                'label' => 'Invite To Group Via Link',
+                'label' => 'Invite Links',
             ],
             'labels' => [
+                'description' => 'Anyone with an account will be able to open one of these links and join your group based on your access settings.',
+                'primary_link' => 'Primary Link',
                 'admin_approval_enabled' => 'Members need approval from admins to join this group.',
                 'admin_approval_disabled' => 'Members do not need approval from admins to join this group.',
+                'primary_link_usage_empty' => 'Nobody joined yet',
+                'primary_link_usage_limited' => ':usages / :limit uses',
+                'primary_link_usage_total' => ':usages joins so far',
+                'group_access' => 'Group Access',
+                'group_access_requires_approval' => 'People who open these links will need admin approval before they join.',
+                'group_access_open' => 'People who open these links can join immediately.',
+                'join_requests' => 'Join Requests',
+                'join_requests_helper' => 'Review who asked to join this group.',
+                'additional_links' => 'Additional Links',
+                'additional_links_helper' => 'Create extra invite links with their own expiry and usage limits.',
+                'additional_link_usage_limited' => ':usages / :limit uses',
+                'additional_link_usage_total' => ':usages uses',
+                'additional_link_expires' => 'Expires :time',
+                'additional_link_never_expires' => 'Never expires',
+                'additional_links_empty' => 'No extra links yet. Create one for a limited campaign, a temporary invite, or a private onboarding flow.',
             ],
             'actions' => [
                 'edit_permissions' => [
@@ -309,9 +326,13 @@ return [
                 'reset_link' => [
                     'label' => 'Reset Link',
                 ],
+                'create_new_link' => [
+                    'label' => 'Create New Link',
+                ],
             ],
             'messages' => [
                 'copied_success' => 'Invite link copied.',
+                'copy_prompt' => 'Copy this link',
                 'reset_success' => 'Group invite link reset.',
             ],
             'send_via_chat' => [

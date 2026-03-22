@@ -225,7 +225,7 @@ return [
                     'label' => 'Enregistrer',
                 ],
                 'invite_via_link' => [
-                    'label' => 'Inviter au groupe via un lien',
+                    'label' => "Liens d'invitation",
                 ],
             ],
             'messages' => [
@@ -269,11 +269,28 @@ return [
         ],
         'invite_link' => [
             'heading' => [
-                'label' => 'Inviter au groupe via un lien',
+                'label' => "Liens d'invitation",
             ],
             'labels' => [
+                'description' => "Toute personne disposant d'un compte pourra ouvrir l'un de ces liens et rejoindre votre groupe selon vos paramètres d'accès.",
+                'primary_link' => 'Lien principal',
                 'admin_approval_enabled' => 'Les membres doivent être approuvés par les administrateurs pour rejoindre ce groupe.',
                 'admin_approval_disabled' => "Les membres n'ont pas besoin de l'approbation des administrateurs pour rejoindre ce groupe.",
+                'primary_link_usage_empty' => "Personne n'a encore rejoint",
+                'primary_link_usage_limited' => ':usages / :limit utilisations',
+                'primary_link_usage_total' => ':usages adhésions jusqu’à présent',
+                'group_access' => 'Accès au groupe',
+                'group_access_requires_approval' => "Les personnes qui ouvrent ces liens devront obtenir l'approbation d'un administrateur avant de rejoindre le groupe.",
+                'group_access_open' => 'Les personnes qui ouvrent ces liens peuvent rejoindre immédiatement le groupe.',
+                'join_requests' => "Demandes d'adhésion",
+                'join_requests_helper' => 'Examinez les personnes qui ont demandé à rejoindre ce groupe.',
+                'additional_links' => 'Liens supplémentaires',
+                'additional_links_helper' => "Créez des liens d'invitation supplémentaires avec leur propre expiration et leurs propres limites d'utilisation.",
+                'additional_link_usage_limited' => ':usages / :limit utilisations',
+                'additional_link_usage_total' => ':usages utilisations',
+                'additional_link_expires' => 'Expire :time',
+                'additional_link_never_expires' => "N'expire jamais",
+                'additional_links_empty' => "Aucun lien supplémentaire pour le moment. Créez-en un pour une campagne limitée, une invitation temporaire ou un parcours d'intégration privé.",
             ],
             'actions' => [
                 'edit_permissions' => [
@@ -288,9 +305,13 @@ return [
                 'reset_link' => [
                     'label' => 'Réinitialiser le lien',
                 ],
+                'create_new_link' => [
+                    'label' => 'Créer un nouveau lien',
+                ],
             ],
             'messages' => [
                 'copied_success' => "Lien d'invitation copié.",
+                'copy_prompt' => 'Copier ce lien',
                 'reset_success' => "Lien d'invitation du groupe réinitialisé.",
             ],
             'send_via_chat' => [

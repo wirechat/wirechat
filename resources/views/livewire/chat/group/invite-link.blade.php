@@ -5,7 +5,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-        <h3 class="text-lg font-medium">Invite Links</h3>
+        <h3 class="text-lg font-medium">{{ __('wirechat::chat.group.invite_link.heading.label') }}</h3>
     </section>
 
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
@@ -13,11 +13,11 @@
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]">
                  <x-wirechat::icons.link class="size-7" />
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Anyone with an account will be able to open one of these links and join your group based on your access settings.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.labels.description') }}</p>
         </div>
 
         <div class="rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-secondary)]/40 dark:bg-[var(--wc-dark-secondary)]/40 p-5 shadow-sm">
-            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Primary Link</p>
+            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.labels.primary_link') }}</p>
 
             <div class="rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-3">
                 <div class="flex items-center gap-3">
@@ -35,32 +35,32 @@
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <button type="button"
                         x-data
-                        @click="if (navigator.clipboard) { navigator.clipboard.writeText(@js($primaryInviteUrl)); $dispatch('wirechat-toast', { type: 'success', message: 'Invite link copied.' }); } else { window.prompt('Copy this link', @js($primaryInviteUrl)); }"
+                        @click="if (navigator.clipboard) { navigator.clipboard.writeText(@js($primaryInviteUrl)); $dispatch('wirechat-toast', { type: 'success', message: @js(__('wirechat::chat.group.invite_link.messages.copied_success')) }); } else { window.prompt(@js(__('wirechat::chat.group.invite_link.messages.copy_prompt')), @js($primaryInviteUrl)); }"
                         class="inline-flex items-center justify-center rounded-2xl bg-[var(--wc-brand-primary)] px-4 py-3 text-sm font-medium text-white">
-                        Copy Link
+                        {{ __('wirechat::chat.group.invite_link.actions.copy_link.label') }}
                     </button>
 
                     <button type="button"
                         onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.send-invite-link', arguments: { conversation: @js($conversation->id), invite: @js($primaryInvite->id), panel: @js($this->panel) } })"
                         class="inline-flex items-center justify-center rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] px-4 py-3 text-sm font-medium">
-                        Share Link
+                        {{ __('wirechat::chat.group.invite_link.actions.send_via_chat.label') }}
                     </button>
                 </div>
 
                 <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                     <span>
                         @if ($primaryInvite->usages === 0)
-                            Nobody joined yet
+                            {{ __('wirechat::chat.group.invite_link.labels.primary_link_usage_empty') }}
                         @elseif ($primaryInvite->limit)
-                            {{ $primaryInvite->usages }} / {{ $primaryInvite->limit }} uses
+                            {{ __('wirechat::chat.group.invite_link.labels.primary_link_usage_limited', ['usages' => $primaryInvite->usages, 'limit' => $primaryInvite->limit]) }}
                         @else
-                            {{ $primaryInvite->usages }} joins so far
+                            {{ __('wirechat::chat.group.invite_link.labels.primary_link_usage_total', ['usages' => $primaryInvite->usages]) }}
                         @endif
                     </span>
 
                     @if ($canResetLink)
                         <button type="button" wire:click="resetLink" class="font-medium text-[var(--wc-brand-primary)] hover:underline">
-                            Reset Link
+                            {{ __('wirechat::chat.group.invite_link.actions.reset_link.label') }}
                         </button>
                     @endif
                 </div>
@@ -70,12 +70,12 @@
         <div class="rounded-2xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] p-5">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Group Access</p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.labels.group_access') }}</p>
                     <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
                         @if ($requiresAdminApproval)
-                            People who open these links will need admin approval before they join.
+                            {{ __('wirechat::chat.group.invite_link.labels.group_access_requires_approval') }}
                         @else
-                            People who open these links can join immediately.
+                            {{ __('wirechat::chat.group.invite_link.labels.group_access_open') }}
                         @endif
                     </p>
                 </div>
@@ -95,8 +95,8 @@
                         onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join-requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
                         class="flex w-full items-center justify-between gap-3 text-left">
                         <div>
-                            <p class="font-medium">Join Requests</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Review who asked to join this group.</p>
+                            <p class="font-medium">{{ __('wirechat::chat.group.invite_link.labels.join_requests') }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.labels.join_requests_helper') }}</p>
                         </div>
 
                         <span class="inline-flex min-w-10 items-center justify-center rounded-full bg-[var(--wc-brand-primary)] px-3 py-1 text-sm font-semibold text-white">
@@ -110,14 +110,14 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between gap-3">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Additional Links</p>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create extra invite links with their own expiry and usage limits.</p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.labels.additional_links') }}</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.labels.additional_links_helper') }}</p>
                 </div>
 
                 <button type="button"
                     onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.create-invite-link', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
                     class="inline-flex items-center rounded-2xl bg-[var(--wc-brand-primary)] px-4 py-2 text-sm font-medium text-white">
-                    Create New Link
+                    {{ __('wirechat::chat.group.invite_link.actions.create_new_link.label') }}
                 </button>
             </div>
 
@@ -135,14 +135,14 @@
                             <p class="truncate font-medium">{{ $invite->name ?: $invite->token }}</p>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 @if ($invite->limit)
-                                    {{ $invite->usages }} / {{ $invite->limit }} uses
+                                    {{ __('wirechat::chat.group.invite_link.labels.additional_link_usage_limited', ['usages' => $invite->usages, 'limit' => $invite->limit]) }}
                                 @else
-                                    {{ $invite->usages }} uses
+                                    {{ __('wirechat::chat.group.invite_link.labels.additional_link_usage_total', ['usages' => $invite->usages]) }}
                                 @endif
                                 @if ($invite->expires_at)
-                                    • Expires {{ $invite->expires_at->diffForHumans() }}
+                                    • {{ __('wirechat::chat.group.invite_link.labels.additional_link_expires', ['time' => $invite->expires_at->diffForHumans()]) }}
                                 @else
-                                    • Never expires
+                                    • {{ __('wirechat::chat.group.invite_link.labels.additional_link_never_expires') }}
                                 @endif
                             </p>
                         </div>
@@ -155,7 +155,7 @@
                     </button>
                 @empty
                     <div class="rounded-2xl border border-dashed border-[var(--wc-light-border)] px-5 py-8 text-center text-sm text-gray-500 dark:border-[var(--wc-dark-border)] dark:text-gray-400">
-                        No extra links yet. Create one for a limited campaign, a temporary invite, or a private onboarding flow.
+                        {{ __('wirechat::chat.group.invite_link.labels.additional_links_empty') }}
                     </div>
                 @endforelse
             </div>
