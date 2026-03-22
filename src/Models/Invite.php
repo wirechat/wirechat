@@ -21,6 +21,7 @@ use Wirechat\Wirechat\Panel;
  * @property string|null $name
  * @property int|null $limit
  * @property int $usages
+ * @property bool $is_primary
  * @property \Illuminate\Support\Carbon|null $expires_at
  * @property \Illuminate\Support\Carbon|null $last_used_at
  * @property \Illuminate\Support\Carbon|null $revoked_at
@@ -30,6 +31,8 @@ use Wirechat\Wirechat\Panel;
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $inviteable
  *
  * @method static Builder|Invite active()
+ * @method static Builder|Invite additional()
+ * @method static Builder|Invite primary()
  * @method static Builder|Invite newModelQuery()
  * @method static Builder|Invite newQuery()
  * @method static Builder|Invite query()
@@ -50,12 +53,14 @@ class Invite extends Model
         'name',
         'limit',
         'usages',
+        'is_primary',
         'expires_at',
         'last_used_at',
         'revoked_at',
     ];
 
     protected $casts = [
+        'is_primary' => 'boolean',
         'expires_at' => 'datetime',
         'last_used_at' => 'datetime',
         'revoked_at' => 'datetime',
@@ -90,6 +95,16 @@ class Invite extends Model
                 $query->whereNull('limit')
                     ->orWhereColumn('usages', '<', 'limit');
             });
+    }
+
+    public function scopePrimary(Builder $query): void
+    {
+        $query->where('is_primary', true);
+    }
+
+    public function scopeAdditional(Builder $query): void
+    {
+        $query->where('is_primary', false);
     }
 
     public function isExpired(): bool

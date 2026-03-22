@@ -4,6 +4,19 @@
      x-on:open-chat.window="selectedConversationId = $event.detail.conversation; $wire.selectedConversationId = $event.detail.conversation;"
      x-init="
         const container = document.getElementById('wirechat-chats-scrollable-container');
+        const pendingInviteToken = @js($pendingInviteToken);
+
+        if (pendingInviteToken) {
+            setTimeout(() => {
+                Livewire.dispatch('openWirechatModal', {
+                    component: 'wirechat.chat.group.join-from-invite',
+                    arguments: {
+                        token: pendingInviteToken,
+                        panel: @js($this->panel)
+                    }
+                });
+            }, 250);
+        }
 
         function scrollToConversation(attempts = 10, delay = 200) {
             const el = document.getElementById('conversation-' + selectedConversationId);

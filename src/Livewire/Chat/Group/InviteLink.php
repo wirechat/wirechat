@@ -13,6 +13,10 @@ class InviteLink extends ModalComponent
 {
     use HasPanel;
 
+    protected $listeners = [
+        'refreshGroupInvites' => '$refresh',
+    ];
+
     #[Locked]
     public Conversation $conversation;
 
@@ -49,30 +53,32 @@ class InviteLink extends ModalComponent
             'You do not have permission to manage group invite links'
         );
 
-        $this->invite = $this->resolveCurrentInvite();
+        $this->invite = $this->resolvePrimaryInvite();
     }
 
-    protected function resolveCurrentInvite(): Invite
+    protected function resolvePrimaryInvite(): Invite
     {
         $invite = $this->group->inviteLinks()
             ->active()
             ->where('panel_id', $this->panel()->getId())
+            ->primary()
             ->latest('id')
             ->first();
 
-        return $invite ?? $this->createInvite();
+        return $invite ?? $this->createInvite(primary: true);
     }
 
-    protected function createInvite(): Invite
+    protected function createInvite(bool $primary = false, array $attributes = []): Invite
     {
         $auth = auth()->user();
 
-        return $this->group->inviteLinks()->create([
+        return $this->group->inviteLinks()->create(array_merge([
             'panel_id' => $this->panel()->getId(),
             'created_by_id' => $auth?->getKey(),
             'created_by_type' => $auth?->getMorphClass(),
             'token' => Invite::generateToken(),
-        ]);
+            'is_primary' => $primary,
+        ], $attributes));
     }
 
     public function resetLink(): void
@@ -82,17 +88,29 @@ class InviteLink extends ModalComponent
         abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to reset group invite links');
 
         $this->invite->revoke();
-        $this->invite = $this->createInvite();
+        $this->invite = $this->createInvite(primary: true);
 
         $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.invite_link.messages.reset_success'));
     }
 
     public function render()
     {
+        $primaryInvite = $this->invite->fresh(['createdBy']);
+
         return view('wirechat::livewire.chat.group.invite-link', [
-            'inviteUrl' => $this->invite->url($this->panel()),
+            'primaryInvite' => $primaryInvite,
+            'primaryInviteUrl' => $primaryInvite->url($this->panel()),
+            'additionalInvites' => $this->group->inviteLinks()
+                ->active()
+                ->where('panel_id', $this->panel()->getId())
+                ->additional()
+                ->with('createdBy')
+                ->latest('id')
+                ->get(),
             'canResetLink' => (bool) $this->authParticipant?->isAdmin(),
-            'requiresAdminApproval' => (bool) $this->group->admins_must_approve_new_members,
+            'canManageJoinRequests' => (bool) $this->authParticipant?->isAdmin(),
+            'pendingJoinRequestsCount' => $this->group->pendingJoinRequests()->count(),
+            'requiresAdminApproval' => $this->group->requiresInviteApproval(),
         ]);
     }
 }

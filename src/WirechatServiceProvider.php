@@ -15,8 +15,12 @@ use Wirechat\Wirechat\Facades\WirechatColor;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
+use Wirechat\Wirechat\Livewire\Chat\Group\CreateInviteLink;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
 use Wirechat\Wirechat\Livewire\Chat\Group\InviteLink;
+use Wirechat\Wirechat\Livewire\Chat\Group\InviteLinkDetails;
+use Wirechat\Wirechat\Livewire\Chat\Group\JoinFromInvite;
+use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
 use Wirechat\Wirechat\Livewire\Chat\Group\SendInviteLink;
@@ -174,6 +178,10 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.members', Members::class);
         Livewire::component('wirechat.chat.group.permissions', Permissions::class);
         Livewire::component('wirechat.chat.group.invite-link', InviteLink::class);
+        Livewire::component('wirechat.chat.group.create-invite-link', CreateInviteLink::class);
+        Livewire::component('wirechat.chat.group.invite-link-details', InviteLinkDetails::class);
+        Livewire::component('wirechat.chat.group.join-from-invite', JoinFromInvite::class);
+        Livewire::component('wirechat.chat.group.join-requests', JoinRequests::class);
         Livewire::component('wirechat.chat.group.send-invite-link', SendInviteLink::class);
 
         // stand alone widget component

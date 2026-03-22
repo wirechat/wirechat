@@ -179,7 +179,7 @@ class Conversation extends Model
      * @param  ParticipantRole  $role  enum to assign to member
      * @param  bool  $undoAdminRemovalAction  If the user was recently removed by admin, allow re-adding.
      */
-    public function addParticipant(Model $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
+    public function addParticipant(Model $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false, Model|Authenticatable|null $reviewedBy = null): Participant
     {
         /** @var Participant|null $participant */
         $participant = $this->participants()
@@ -242,7 +242,7 @@ class Conversation extends Model
             'role' => $role,
         ]);
 
-        $this->group?->clearJoinRequest($user);
+        $this->group?->acceptPendingJoinRequest($user, $reviewedBy, true);
 
         return $participant;
     }
@@ -253,7 +253,7 @@ class Conversation extends Model
      * Allows users who previously exited to re-join themselves, but still
      * keeps admin removals blocked unless an admin explicitly re-adds them.
      */
-    public function join(Model|Authenticatable $user): Participant
+    public function join(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null): Participant
     {
         abort_if($this->isPrivate() || $this->isSelf(), 403, 'Only groups can be joined via invite links.');
 
@@ -265,7 +265,7 @@ class Conversation extends Model
             ->first();
 
         if (! $participant) {
-            return $this->addParticipant($user);
+            return $this->addParticipant($user, reviewedBy: $reviewedBy);
         }
 
         abort_if(
@@ -280,7 +280,7 @@ class Conversation extends Model
                 'role' => ParticipantRole::PARTICIPANT,
             ])->save();
 
-            $this->group?->clearJoinRequest($user);
+            $this->group?->acceptPendingJoinRequest($user, $reviewedBy, true);
 
             return $participant->refresh();
         }

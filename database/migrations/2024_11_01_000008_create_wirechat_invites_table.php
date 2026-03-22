@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->unsignedInteger('limit')->nullable();
             $table->unsignedInteger('usages')->default(0);
+            $table->boolean('is_primary')->default(false)->index();
             $table->timestamp('expires_at')->nullable()->index();
             $table->timestamp('last_used_at')->nullable();
             $table->timestamp('revoked_at')->nullable()->index();

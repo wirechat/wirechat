@@ -7,8 +7,8 @@
                 <x-wirechat::avatar :src="$group->cover_url" class="w-18 h-18 shrink-0" />
 
                 <div class="min-w-0">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.page.labels.invited_to_group') }}</p>
-                    <h1 class="text-2xl font-semibold break-words">{{ $group->name ?: __('wirechat::chat.group.invite_link.page.labels.group_fallback') }}</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Invite to group</p>
+                    <h1 class="text-2xl font-semibold break-words">{{ $group->name ?: 'Group' }}</h1>
                     @if (filled($group->description))
                         <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 break-words">{{ $group->description }}</p>
                     @endif
@@ -16,7 +16,7 @@
             </div>
 
             <div class="space-y-3">
-                <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.invite_link.page.labels.members_count', ['count' => $conversation->participants->count()]) }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Members {{ $conversation->participants->count() }}</p>
 
                 <div class="flex items-center gap-3 overflow-x-auto pb-2">
                     @foreach ($membersPreview as $participant)
@@ -28,40 +28,36 @@
                 </div>
             </div>
 
-            @if (session('wirechat_invite_notice'))
-                <div class="rounded-2xl px-4 py-3 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] text-sm">
-                    {{ session('wirechat_invite_notice') }}
-                </div>
-            @endif
-
             <div class="rounded-2xl px-4 py-3 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] text-sm leading-6">
-                @if ($joinBlocked)
-                    {{ __('wirechat::chat.group.invite_link.page.messages.join_blocked') }}
+                @if ($isMember)
+                    You are already a member of this group.
+                @elseif ($joinBlocked)
+                    You cannot join this group with this invite link right now.
                 @elseif ($hasPendingJoinRequest)
-                    {{ __('wirechat::chat.group.invite_link.page.messages.request_pending') }}
-                @elseif ($requiresAdminApproval)
-                    {{ __('wirechat::chat.group.invite_link.page.messages.request_required') }}
+                    Your join request is still pending. Continue in Wirechat to view it.
                 @else
-                    {{ __('wirechat::chat.group.invite_link.page.messages.join_directly') }}
+                    Continue in Wirechat to join this group or request access.
                 @endif
             </div>
 
             <div class="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
-                <a href="{{ \Wirechat\Wirechat\Facades\Wirechat::currentPanel()->chatsRoute() }}"
+                <button type="button"
+                    onclick="window.history.length > 1 ? window.history.back() : window.location.href = @js(\Wirechat\Wirechat\Facades\Wirechat::currentPanel()->chatsRoute())"
                     class="inline-flex justify-center items-center rounded-2xl px-5 py-3 border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]">
-                    {{ __('wirechat::chat.group.invite_link.page.actions.cancel.label') }}
-                </a>
+                    Cancel
+                </button>
 
-                @if (! $joinBlocked && ! $hasPendingJoinRequest)
+                @if ($isMember)
+                    <a href="{{ \Wirechat\Wirechat\Facades\Wirechat::currentPanel()->chatRoute($conversation->id) }}"
+                        class="w-full sm:w-auto inline-flex justify-center items-center rounded-2xl px-5 py-3 bg-[var(--wc-brand-primary)] text-white">
+                        Open Group
+                    </a>
+                @else
                     <form method="POST" action="{{ \Wirechat\Wirechat\Facades\Wirechat::currentPanel()->inviteJoinRoute($invite->token) }}">
                         @csrf
                         <button type="submit"
                             class="w-full sm:w-auto inline-flex justify-center items-center rounded-2xl px-5 py-3 bg-[var(--wc-brand-primary)] text-white">
-                            @if ($requiresAdminApproval)
-                                {{ __('wirechat::chat.group.invite_link.page.actions.request_to_join.label') }}
-                            @else
-                                {{ __('wirechat::chat.group.invite_link.page.actions.join_group.label') }}
-                            @endif
+                            Join Group
                         </button>
                     </form>
                 @endif

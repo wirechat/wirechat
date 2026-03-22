@@ -35,6 +35,8 @@ class Chats extends Component
 
     public $selectedConversationId;
 
+    public ?string $pendingInviteToken = null;
+
     // Cursor state for stable "Load more"
     public ?string $cursorUpdatedAt = null;
 
@@ -57,6 +59,7 @@ class Chats extends Component
         abort_unless(auth()->check(), 401);
 
         $this->selectedConversationId = request()->conversation;
+        $this->pendingInviteToken = session()->pull('wirechat_pending_invite_token');
         $this->conversationIds = [];
         $this->cursorUpdatedAt = null;
         $this->cursorId = null;
