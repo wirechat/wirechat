@@ -735,6 +735,238 @@ describe('List', function () {
     });
 });
 
+describe('Cursor pagination', function () {
+
+    it('starts with empty conversationIds, null cursor and canLoadMore=false when user has no conversations', function () {
+        $auth = User::factory()->create();
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSet('conversationIds', [])
+            ->assertSet('cursorUpdatedAt', null)
+            ->assertSet('cursorCreatedAt', null)
+            ->assertSet('cursorId', null)
+            ->assertSet('canLoadMore', false);
+    });
+
+    it('populates conversationIds and advances cursor after initial load', function () {
+        $auth = User::factory()->create();
+
+        for ($i = 0; $i < 3; $i++) {
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        $ids = $component->get('conversationIds');
+        expect($ids)->toHaveCount(3);
+
+        $component
+            ->assertNotSet('cursorUpdatedAt', null)
+            ->assertNotSet('cursorCreatedAt', null)
+            ->assertNotSet('cursorId', null);
+    });
+
+    it('loads conversations ordered by most recently updated first', function () {
+        $auth = User::factory()->create();
+
+        // Create two conversations with different created_at but the same updated_at timestamp
+        $baseTime = now();
+
+        Carbon::setTestNow($baseTime->copy()->subSeconds(21));
+        $user1 = User::factory()->create();
+        $conv1 = $auth->createConversationWith($user1, 'message 1');
+
+        Carbon::setTestNow($baseTime->copy()->subSeconds(20));
+        $user2 = User::factory()->create();
+        $conv2 = $auth->createConversationWith($user2, 'message 2');
+
+        // Force conv1 to share the same updated_at as conv2 so created_at is the tiebreaker
+        $conv1->forceFill(['updated_at' => $baseTime->copy()->subSeconds(20)])->saveQuietly();
+
+        // More recent conversation; should always appear first
+        Carbon::setTestNow($baseTime->copy()->subSeconds(10));
+        $user3 = User::factory()->create();
+        $conv3 = $auth->createConversationWith($user3, 'message 3');
+
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+        $ids = $component->get('conversationIds');
+
+        // Most recently updated conversation should appear first
+        expect($ids[0])->toBe($conv3->id)
+            // When updated_at is the same, the more recently created conversation comes first (created_at DESC tiebreaker)
+            ->and($ids[1])->toBe($conv2->id)
+            ->and($ids[2])->toBe($conv1->id);
+    });
+
+    it('uses id DESC as third tie-breaker when updated_at and created_at are equal', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now()->subSeconds(10);
+
+        // Create three conversations all sharing the same updated_at and created_at
+        Carbon::setTestNow($baseTime);
+        $user1 = User::factory()->create();
+        $conv1 = $auth->createConversationWith($user1, 'message 1');
+
+        Carbon::setTestNow($baseTime);
+        $user2 = User::factory()->create();
+        $conv2 = $auth->createConversationWith($user2, 'message 2');
+
+        Carbon::setTestNow($baseTime);
+        $user3 = User::factory()->create();
+        $conv3 = $auth->createConversationWith($user3, 'message 3');
+
+        // Force all three to share the same updated_at and created_at
+        $sharedTimestamp = $baseTime->copy();
+        foreach ([$conv1, $conv2, $conv3] as $conv) {
+            $conv->forceFill([
+                'updated_at' => $sharedTimestamp,
+                'created_at' => $sharedTimestamp,
+            ])->saveQuietly();
+        }
+
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+        $ids = $component->get('conversationIds');
+
+        // When all three timestamps are equal, id DESC should be the tie-breaker
+        $sortedByIdDesc = collect([$conv1->id, $conv2->id, $conv3->id])
+            ->sortDesc()
+            ->values()
+            ->all();
+
+        expect($ids)->toBe($sortedByIdDesc);
+    });
+
+    it('appends new IDs on loadMore without reshuffling existing ones', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now();
+
+        for ($i = 0; $i < 12; $i++) {
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        $firstPageIds = $component->get('conversationIds');
+        expect($firstPageIds)->toHaveCount(10);
+
+        $component->call('loadMore');
+
+        $allIds = $component->get('conversationIds');
+        expect($allIds)->toHaveCount(12);
+
+        // First 10 items must remain in the exact same positions
+        foreach ($firstPageIds as $index => $id) {
+            expect($allIds[$index])->toBe($id);
+        }
+    });
+
+    it('does not change conversationIds when loadMore is called but canLoadMore is false', function () {
+        $auth = User::factory()->create();
+
+        for ($i = 0; $i < 3; $i++) {
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSet('canLoadMore', false);
+
+        $idsBefore = $component->get('conversationIds');
+
+        $component->call('loadMore');
+
+        expect($component->get('conversationIds'))->toBe($idsBefore);
+    });
+
+    it('removes conversation from conversationIds when chat-deleted event fires', function () {
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+
+        $conversation1 = $auth->createConversationWith($user1, 'hello');
+        $conversation2 = $auth->createConversationWith($user2, 'world');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        expect($component->get('conversationIds'))->toContain($conversation1->id);
+
+        $component->dispatch('chat-deleted', $conversation1->id);
+
+        $updatedIds = $component->get('conversationIds');
+        expect($updatedIds)->not->toContain($conversation1->id)
+            ->and($updatedIds)->toContain($conversation2->id);
+    });
+
+    it('restarts pagination from beginning when hardRefresh is called after loading all conversations', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now();
+
+        for ($i = 0; $i < 12; $i++) {
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        // First page: 10 loaded, can load more
+        expect($component->get('conversationIds'))->toHaveCount(10);
+        $component->assertSet('canLoadMore', true);
+
+        // Load all remaining conversations
+        $component->call('loadMore');
+        expect($component->get('conversationIds'))->toHaveCount(12);
+        $component->assertSet('canLoadMore', false);
+
+        // hardRefresh resets cursor and restarts from first page
+        $component->call('hardRefresh');
+        expect($component->get('conversationIds'))->toHaveCount(10);
+        $component->assertSet('canLoadMore', true);
+    });
+
+    it('restarts pagination from beginning when search is updated', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now();
+
+        for ($i = 0; $i < 12; $i++) {
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        // Advance to last page so cursor is deep
+        $component->call('loadMore');
+        expect($component->get('conversationIds'))->toHaveCount(12);
+        $component->assertSet('canLoadMore', false);
+
+        // Updating search resets cursor via hardRefresh; no match → cursor stays null
+        $component->set('search', 'xyznonexistent');
+
+        $component
+            ->assertSet('conversationIds', [])
+            ->assertSet('cursorUpdatedAt', null)
+            ->assertSet('cursorCreatedAt', null)
+            ->assertSet('cursorId', null)
+            ->assertSet('canLoadMore', false);
+    });
+});
+
 describe('Search', function () {
 
     it('it shows all conversations items when search query is null', function () {

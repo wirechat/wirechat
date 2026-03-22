@@ -26,6 +26,8 @@ use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
  * @property int|null $disappearing_duration
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Wirechat\Wirechat\Models\Participant|null $auth_participant
+ * @property \Wirechat\Wirechat\Models\Participant|null $peer_participant
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
  * @property-read int|null $actions_count
  * @property-read Group|null $group
@@ -46,9 +48,10 @@ use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
  * @method static Builder|Conversation whereType($value)
  * @method static Builder|Conversation whereUpdatedAt($value)
  * @method static Builder withDeleted()
- * @method static Builder|Conversation withoutBlanks()
  * @method static Builder|Conversation withoutCleared()
- * @method static Builder|Conversation withoutDeleted()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> withoutDeleted()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> withoutBlanks()
+ * @method \Illuminate\Database\Eloquent\Relations\HasOne group()
  */
 class Conversation extends Model
 {
