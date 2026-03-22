@@ -791,10 +791,11 @@ describe('Cursor pagination', function () {
         $ids = $component->get('conversationIds');
 
         // Most recently updated conversation should appear first
-        expect($ids[0])->toBe($conv3->id)
-            // When updated_at is the same, the higher id should come first (id DESC tiebreaker)
-            ->and($ids[1])->toBe(max($conv1->id, $conv2->id))
-            ->and($ids[2])->toBe(min($conv1->id, $conv2->id));
+        expect($ids[0])->toBe((string) $conv3->id)
+            // When updated_at is the same, the higher id should come first (id DESC tiebreaker).
+            // $conv2 was created after $conv1 so it has a higher integer id.
+            ->and($ids[1])->toBe((string) $conv2->id)
+            ->and($ids[2])->toBe((string) $conv1->id);
     });
 
     it('appends new IDs on loadMore without reshuffling existing ones', function () {
@@ -853,13 +854,13 @@ describe('Cursor pagination', function () {
 
         $component = Livewire::actingAs($auth)->test(Chatlist::class);
 
-        expect($component->get('conversationIds'))->toContain($conversation1->id);
+        expect($component->get('conversationIds'))->toContain((string) $conversation1->id);
 
         $component->dispatch('chat-deleted', $conversation1->id);
 
         $updatedIds = $component->get('conversationIds');
-        expect($updatedIds)->not->toContain($conversation1->id)
-            ->and($updatedIds)->toContain($conversation2->id);
+        expect($updatedIds)->not->toContain((string) $conversation1->id)
+            ->and($updatedIds)->toContain((string) $conversation2->id);
     });
 
     it('restarts pagination from beginning when hardRefresh is called after loading all conversations', function () {
