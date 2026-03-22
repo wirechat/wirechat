@@ -45,7 +45,7 @@
         //const observer = new MutationObserver(() => {
         //    scrollToConversation();
         //});
-        //observer.observe(container, { Child: true, subtree: true });
+        //observer.observe(container, { childList: true, subtree: true });
     "
 
 
