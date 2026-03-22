@@ -247,6 +247,7 @@ return [
             ],
             'labels' => [
                 'members_can' => 'Les membres peuvent',
+                'admins_can' => 'Les administrateurs peuvent',
             ],
             'actions' => [
                 'edit_group_information' => [

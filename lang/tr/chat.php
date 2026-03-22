@@ -245,6 +245,7 @@ return [
             ],
             'labels' => [
                 'members_can' => 'Üyeler yapabilecek',
+                'admins_can' => 'Yöneticiler yapabilecek',
             ],
             'actions' => [
                 'edit_group_information' => [

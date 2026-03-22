@@ -135,7 +135,22 @@
                     </span>
 
                 </li>
+ 
 
+            </ul>
+        </section>
+
+
+
+          <section >
+
+            <h5 class="w-full text-start py-4 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] px-4">
+
+                {{__('wirechat::chat.group.permissions.labels.admins_can')}}:
+            </h5>
+
+
+       <ul class="space-y-2">
                 <li class="w-full flex items-center p-5">
                     <span class="w-12">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5">
@@ -155,14 +170,10 @@
                         </label>
                     </span>
                 </li>
-
             </ul>
-        </section>
 
 
-
-
-
+         </section>
     </div>
 
 </div>

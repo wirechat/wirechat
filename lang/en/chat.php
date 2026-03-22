@@ -265,6 +265,7 @@ return [
             ],
             'labels' => [
                 'members_can' => 'Members can',
+                'admins_can' => 'Admins can',
 
             ],
             'actions' => [
