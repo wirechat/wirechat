@@ -22,13 +22,9 @@
 @if ($icon instanceof Htmlable)
     {{ $icon }}
 @elseif (is_string($icon) && $icon !== '')
-    <x-dynamic-component :component="$icon" {{  $attributes
-        ->merge($iconBag->getAttributes())
-        ->merge(['class' => 'size-6 text-zinc-700 dark:text-gray-100 dark:hover:text-gray-200']) }} />
+    <x-dynamic-component :component="$icon" {{ $final }} />
 @elseif ($default instanceof Htmlable)
     {{ $default }}
 @elseif (is_string($default) && $default !== '')
-    <x-dynamic-component :component="$default" {{ $attributes
-        ->merge($iconBag->getAttributes())
-        ->merge(['class' => 'size-6 text-zinc-700 dark:text-gray-100 dark:hover:text-gray-200']) }} />
+    <x-dynamic-component :component="$default" {{ $final }} />
 @endif
