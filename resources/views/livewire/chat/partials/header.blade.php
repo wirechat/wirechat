@@ -12,6 +12,7 @@
         {{-- Return --}}
         @if ($this->isWidget())
             <button
+                type="button"
                 @click="$dispatch('close-chat',{conversation: {{json_encode($conversation->id)}} })"
                 dusk="return_to_home_button_dispatch"
                 class="shrink-0 cursor-pointer dark:text-white"
