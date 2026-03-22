@@ -13,10 +13,14 @@
         tooltipVisible: @js($tooltipVisible),
         tooltipText: @js($text),
         tooltipArrow: @js($arrow),
+        tooltipId: null,
     }"
     x-init="
+        tooltipId = $id('tooltip');
         $refs.content.addEventListener('mouseenter', () => tooltipVisible = true);
         $refs.content.addEventListener('mouseleave', () => tooltipVisible = false);
+        $refs.content.addEventListener('focusin', () => tooltipVisible = true);
+        $refs.content.addEventListener('focusout', () => tooltipVisible = false);
     "
     :style="`--tooltip-space: ${@js($spacing)}rem`"
     class="relative "
@@ -26,6 +30,8 @@
         x-ref="tooltip"
         x-show="tooltipVisible"
         x-cloak
+        role="tooltip"
+        :id="tooltipId"
         class="absolute w-auto text-sm"
 
         :style="{
@@ -69,7 +75,7 @@
         </div>
     </div>
 
-    <div x-ref="content">
+    <div x-ref="content" :aria-describedby="tooltipVisible ? tooltipId : null">
         {{ $slot }}
     </div>
 </div>
