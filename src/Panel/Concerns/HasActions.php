@@ -31,7 +31,7 @@ trait HasActions
         bool|Closure $condition = true,
         string|Closure|null $url = '/',
         string|Htmlable|Closure|null $icon = null,
-        array|Closure $attributes = [],
+        array|Closure $iconAttributes = [],
     ): static {
         $this->redirectToHomeAction = $condition;
         $this->homeUrl = $url;
@@ -41,7 +41,7 @@ trait HasActions
             $this->assertValidIcon($icon, 'redirectToHomeAction icon');
             $this->redirectToHomeActionIcon = $icon;
         }
-        $this->redirectToHomeActionIconAttributes = $attributes;
+        $this->redirectToHomeActionIconAttributes = $iconAttributes;
 
         return $this;
     }
