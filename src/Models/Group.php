@@ -75,16 +75,18 @@ class Group extends Model
     {
         parent::boot();
 
-        // listen to deleted
-        static::deleted(function ($group) {
+        static::whenBooted(function () {
+            // listen to deleted
+            static::deleted(function ($group) {
 
-            if ($group->cover?->exists()) {
+                if ($group->cover?->exists()) {
 
-                // delete cover
-                $group->cover->delete();
+                    // delete cover
+                    $group->cover->delete();
 
-            }
+                }
 
+            });
         });
     }
 

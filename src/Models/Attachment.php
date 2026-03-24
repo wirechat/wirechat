@@ -66,14 +66,16 @@ class Attachment extends Model
     {
         parent::boot();
 
-        // listen to deleted
-        static::deleted(function (Attachment $media) {
+        static::whenBooted(function () {
+            // listen to deleted
+            static::deleted(function (Attachment $media) {
 
-            $disk = Wirechat::storage()->disk();
+                $disk = Wirechat::storage()->disk();
 
-            if (Storage::disk($disk)->exists($media->file_path)) {
-                Storage::disk($disk)->delete($media->file_path);
-            }
+                if (Storage::disk($disk)->exists($media->file_path)) {
+                    Storage::disk($disk)->delete($media->file_path);
+                }
+            });
         });
     }
 

@@ -81,26 +81,26 @@ class Conversation extends Model
     {
         parent::boot();
 
-        // static::addGlobalScope(new WithoutDeletedScope());
-        // DELETED event
-        static::deleted(function ($conversation) {
-
-            // Use a DB transaction to ensure atomicity
-            DB::transaction(function () use ($conversation) {
-
-                // Delete associated participants
-                $conversation->participants()->withoutGlobalScopes()->forceDelete();
+        static::whenBooted(function () {
+            // static::addGlobalScope(new WithoutDeletedScope());
+            // DELETED event
+            static::deleted(function ($conversation) {
 
                 // Use a DB transaction to ensure atomicity
+                DB::transaction(function () use ($conversation) {
 
-                // Delete associated messages
-                $conversation->messages()?->withoutGlobalScopes()?->forceDelete();
+                    // Delete associated participants
+                    $conversation->participants()->withoutGlobalScopes()->forceDelete();
 
-                // Delete actions
-                $conversation->actions()?->delete();
+                    // Delete associated messages
+                    $conversation->messages()?->withoutGlobalScopes()?->forceDelete();
 
-                // Delete group
-                $conversation->group()?->delete();
+                    // Delete actions
+                    $conversation->actions()?->delete();
+
+                    // Delete group
+                    $conversation->group()?->delete();
+                });
             });
         });
 

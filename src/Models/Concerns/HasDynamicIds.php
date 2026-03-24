@@ -125,10 +125,12 @@ trait HasDynamicIds
     protected static function bootHasDynamicIds()
     {
         if (Wirechat::usesUuidForConversations()) {
-            static::creating(function ($model) {
-                if (! $model->getKey()) {
-                    $model->{$model->getKeyName()} = $model->newUniqueId();
-                }
+            static::whenBooted(function () {
+                static::creating(function ($model) {
+                    if (! $model->getKey()) {
+                        $model->{$model->getKeyName()} = $model->newUniqueId();
+                    }
+                });
             });
         }
     }
