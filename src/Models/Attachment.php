@@ -62,27 +62,15 @@ class Attachment extends Model
         return \Wirechat\Wirechat\Workbench\Database\Factories\AttachmentFactory::new();
     }
 
-    protected static function boot(): void
+    protected static function booted()
     {
-        parent::boot();
+        static::deleted(function (Attachment $media) {
+            $disk = Wirechat::storage()->disk();
 
-        $registerDeletedHook = function () {
-            // listen to deleted
-            static::deleted(function (Attachment $media) {
-
-                $disk = Wirechat::storage()->disk();
-
-                if (Storage::disk($disk)->exists($media->file_path)) {
-                    Storage::disk($disk)->delete($media->file_path);
-                }
-            });
-        };
-
-        if (method_exists(static::class, 'whenBooted')) {
-            static::whenBooted($registerDeletedHook);
-        } else {
-            static::booted($registerDeletedHook);
-        }
+            if (Storage::disk($disk)->exists($media->file_path)) {
+                Storage::disk($disk)->delete($media->file_path);
+            }
+        });
     }
 
     /**

@@ -77,38 +77,28 @@ class Conversation extends Model
         parent::__construct($attributes);
     }
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
+        // static::addGlobalScope(new WithoutDeletedScope());
+        // DELETED event
+        static::deleted(function ($conversation) {
 
-        $registerDeletedHook = function () {
-            // static::addGlobalScope(new WithoutDeletedScope());
-            // DELETED event
-            static::deleted(function ($conversation) {
+            // Use a DB transaction to ensure atomicity
+            DB::transaction(function () use ($conversation) {
 
-                // Use a DB transaction to ensure atomicity
-                DB::transaction(function () use ($conversation) {
+                // Delete associated participants
+                $conversation->participants()->withoutGlobalScopes()->forceDelete();
 
-                    // Delete associated participants
-                    $conversation->participants()->withoutGlobalScopes()->forceDelete();
+                // Delete associated messages
+                $conversation->messages()?->withoutGlobalScopes()?->forceDelete();
 
-                    // Delete associated messages
-                    $conversation->messages()?->withoutGlobalScopes()?->forceDelete();
+                // Delete actions
+                $conversation->actions()?->delete();
 
-                    // Delete actions
-                    $conversation->actions()?->delete();
-
-                    // Delete group
-                    $conversation->group()?->delete();
-                });
+                // Delete group
+                $conversation->group()?->delete();
             });
-        };
-
-        if (method_exists(static::class, 'whenBooted')) {
-            static::whenBooted($registerDeletedHook);
-        } else {
-            static::booted($registerDeletedHook);
-        }
+        });
 
         // static::created(function ($model) {
         //     // Convert the id to base 36 and limit to 6 characters (to leave room for randomness)

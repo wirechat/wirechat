@@ -71,29 +71,19 @@ class Group extends Model
         parent::__construct($attributes);
     }
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
+        // listen to deleted
+        static::deleted(function ($group) {
 
-        $registerDeletedHook = function () {
-            // listen to deleted
-            static::deleted(function ($group) {
+            if ($group->cover?->exists()) {
 
-                if ($group->cover?->exists()) {
+                // delete cover
+                $group->cover->delete();
 
-                    // delete cover
-                    $group->cover->delete();
+            }
 
-                }
-
-            });
-        };
-
-        if (method_exists(static::class, 'whenBooted')) {
-            static::whenBooted($registerDeletedHook);
-        } else {
-            static::booted($registerDeletedHook);
-        }
+        });
     }
 
     /**
