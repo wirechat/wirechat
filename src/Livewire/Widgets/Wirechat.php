@@ -9,10 +9,12 @@ use Illuminate\Support\Reflector;
 use Livewire\Component;
 use Wirechat\Wirechat\Facades\Wirechat as WirechatFacade;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 
 class Wirechat extends Component
 {
     use HasPanel;
+    use InteractsWithUI;
 
     public ?string $activeWirechatWidgetComponent = null;
 

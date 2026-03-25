@@ -321,6 +321,7 @@ class Color
             'slate' => static::Slate,
             'gray' => static::Gray,
             'zinc' => static::Zinc,
+            'dark' => static::Zinc,
             'neutral' => static::Neutral,
             'stone' => static::Stone,
             'red' => static::Red,

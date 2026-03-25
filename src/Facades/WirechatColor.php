@@ -12,6 +12,7 @@ use Wirechat\Wirechat\Services\ColorService;
  * @method static string|null success(int $shade = 500)
  * @method static string|null warning(int $shade = 500)
  * @method static string|null gray(int $shade = 500)
+ * @method static string|null dark(int $shade = 500)
  * @method static array|null palette(string $name)
  * @method static void register(array $map)
  */

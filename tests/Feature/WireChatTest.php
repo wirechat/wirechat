@@ -1,10 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Support\Color;
 use Workbench\App\Models\User;
 
 test('user must be authenticated', function () {
@@ -74,4 +76,44 @@ test('it removes Chat when "closeChatWidget" event is selected ', function () {
     // assert
     $response->assertDontSeeLivewire(Chat::class);
 
+});
+
+test('it applies ui classes and styles to the widget shell only', function () {
+    $auth = User::factory()->create();
+
+    $response = Livewire::actingAs($auth)->test(Wirechat::class, [
+        'class' => 'border-none shadow-none',
+        'styles' => [
+            'min-height' => '32rem',
+            'border-radius' => '0',
+        ],
+    ]);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*rounded-lg border-none shadow-none[^"]*"/', $html, $classMatches);
+    preg_match_all('/style="min-height: 32rem; border-radius: 0;"/', $html, $styleMatches);
+
+    expect($classMatches[0])->toHaveCount(1)
+        ->and($styleMatches[0])->toHaveCount(1);
+});
+
+test('wirechat styles uses the dark palette and supports extending zinc shades', function () {
+    $customDark = [
+        900 => 'oklch(0.18 0.01 285.9)',
+        800 => 'oklch(0.24 0.01 286.0)',
+        700 => 'oklch(0.31 0.01 286.1)',
+    ];
+
+    testPanelProvider()->colors([
+        'dark' => $customDark,
+    ]);
+
+    $styles = Blade::render('@wirechatStyles(panel: "test")');
+
+    expect($styles)
+        ->toContain('--wc-dark-primary: '.$customDark[900].';')
+        ->toContain('--wc-dark-secondary: '.$customDark[800].';')
+        ->toContain('--wc-dark-accent: '.$customDark[700].';')
+        ->toContain('--wc-light-secondary: '.Color::Zinc[100].';');
 });
