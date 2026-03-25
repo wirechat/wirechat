@@ -40,6 +40,27 @@ test('authenticaed user can access chatbox ', function () {
         ->assertStatus(200);
 });
 
+test('it applies ui classes and styles to the chat shell only', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+
+    $response = Livewire::actingAs($auth)->test(ChatBox::class, [
+        'conversation' => $conversation->id,
+        'class' => 'chat-shell-test',
+        'styles' => [
+            'min-height' => '24rem',
+        ],
+    ]);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*chat-shell-test[^"]*"/', $html, $classMatches);
+    preg_match_all('/style="contain:content; min-height: 24rem;"/', $html, $styleMatches);
+
+    expect($classMatches[0])->toHaveCount(1)
+        ->and($styleMatches[0])->toHaveCount(1);
+});
+
 test('returns 404 if conversation is not found', function () {
     $auth = User::factory()->create();
 

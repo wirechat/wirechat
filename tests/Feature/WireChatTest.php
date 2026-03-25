@@ -117,3 +117,29 @@ test('wirechat styles uses the dark palette and supports extending zinc shades',
         ->toContain('--wc-dark-accent: '.$customDark[700].';')
         ->toContain('--wc-light-secondary: '.Color::Zinc[100].';');
 });
+
+test('it forwards listClass and chatClass to the widget children', function () {
+    $auth = User::factory()->create();
+    $conversation = $auth->createConversationWith(User::factory()->create());
+
+    $response = Livewire::actingAs($auth)->test(Wirechat::class, [
+        'listClass' => 'widget-list-shell-test',
+        'chatClass' => 'widget-chat-shell-test',
+    ]);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*widget-list-shell-test[^"]*"/', $html, $listClassMatches);
+    preg_match_all('/class="[^"]*widget-chat-shell-test[^"]*"/', $html, $chatClassMatchesBeforeOpen);
+
+    expect($listClassMatches[0])->toHaveCount(1)
+        ->and($chatClassMatchesBeforeOpen[0])->toHaveCount(0);
+
+    $response->dispatch('openChatWidget', conversation: $conversation->id);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*widget-chat-shell-test[^"]*"/', $html, $chatClassMatchesAfterOpen);
+
+    expect($chatClassMatchesAfterOpen[0])->toHaveCount(1);
+});

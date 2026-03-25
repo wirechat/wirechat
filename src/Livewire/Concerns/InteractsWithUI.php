@@ -22,9 +22,17 @@ trait InteractsWithUI
 
     public function getUiStyles(): ?string
     {
+        return $this->formatUiStyles($this->styles);
+    }
+
+    /**
+     * @param  array<int|string, mixed>|string|null  $styles
+     */
+    protected function formatUiStyles(array|string|null $styles): ?string
+    {
         $declarations = [];
 
-        foreach ($this->normalizeUiStyles($this->styles) as $declaration) {
+        foreach ($this->normalizeUiStyles($styles) as $declaration) {
             $declarations[] = rtrim($declaration, ';');
         }
 

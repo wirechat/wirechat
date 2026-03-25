@@ -191,8 +191,8 @@
 
      class="{{ $widgetShellClass }}"
      @if($widgetShellStyles) style="{{ $widgetShellStyles }}" @endif>
-      <div :class="chatIsOpen && 'hidden md:grid'" class="relative  w-full h-full sm:border-r border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]    md:w-[360px] lg:w-[400px] xl:w-[450px] shrink-0 overflow-y-auto  ">
-          <livewire:wirechat.chats :widget="true" :panel="$this->panel" />
+      <div :class="chatIsOpen && 'hidden md:grid'" class="relative  w-full h-full  md:w-[360px] lg:w-[400px] xl:w-[450px] shrink-0 overflow-y-auto  ">
+          <livewire:wirechat.chats :widget="true" :panel="$this->panel" :class="' sm:border-r border-zinc-200 dark:border-zinc-700  ' .$this->chatsClass" :styles="$this->chatsStyles" />
       </div>
       <main
            x-data="ChatWidget()"
@@ -218,7 +218,7 @@
                          wire:key="key-{{$id }}"
                          class="h-full">
 
-                    @livewire($component['name'], ['conversation'=> $component['conversation'] ,'widget'=>true,'panel'=>$this->panel], key($id))
+                    @livewire($component['name'], ['conversation'=> $component['conversation'] ,'widget'=>true,'panel'=>$this->panel, 'class' => $this->chatClass, 'styles' => $this->chatStyles], key($id))
                     </div>
                 @empty
                 @endforelse
