@@ -134,7 +134,10 @@ trait HasDynamicIds
                 });
             };
 
-            if (method_exists(Model::class, 'whenBooted')) {
+            /** @var class-string<Model> $modelClass */
+            $modelClass = static::class;
+
+            if (method_exists($modelClass, 'whenBooted')) {
                 static::whenBooted($registerCreatingHook);
             } else {
                 static::booted($registerCreatingHook);
