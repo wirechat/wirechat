@@ -81,7 +81,7 @@ class Conversation extends Model
     {
         parent::boot();
 
-        static::whenBooted(function () {
+        $registerDeletedHook = function () {
             // static::addGlobalScope(new WithoutDeletedScope());
             // DELETED event
             static::deleted(function ($conversation) {
@@ -102,7 +102,13 @@ class Conversation extends Model
                     $conversation->group()?->delete();
                 });
             });
-        });
+        };
+
+        if (method_exists(static::class, 'whenBooted')) {
+            static::whenBooted($registerDeletedHook);
+        } else {
+            static::booted($registerDeletedHook);
+        }
 
         // static::created(function ($model) {
         //     // Convert the id to base 36 and limit to 6 characters (to leave room for randomness)

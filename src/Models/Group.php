@@ -75,7 +75,7 @@ class Group extends Model
     {
         parent::boot();
 
-        static::whenBooted(function () {
+        $registerDeletedHook = function () {
             // listen to deleted
             static::deleted(function ($group) {
 
@@ -87,7 +87,13 @@ class Group extends Model
                 }
 
             });
-        });
+        };
+
+        if (method_exists(static::class, 'whenBooted')) {
+            static::whenBooted($registerDeletedHook);
+        } else {
+            static::booted($registerDeletedHook);
+        }
     }
 
     /**

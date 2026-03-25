@@ -66,7 +66,7 @@ class Attachment extends Model
     {
         parent::boot();
 
-        static::whenBooted(function () {
+        $registerDeletedHook = function () {
             // listen to deleted
             static::deleted(function (Attachment $media) {
 
@@ -76,7 +76,13 @@ class Attachment extends Model
                     Storage::disk($disk)->delete($media->file_path);
                 }
             });
-        });
+        };
+
+        if (method_exists(static::class, 'whenBooted')) {
+            static::whenBooted($registerDeletedHook);
+        } else {
+            static::booted($registerDeletedHook);
+        }
     }
 
     /**
