@@ -77,10 +77,8 @@ class Conversation extends Model
         parent::__construct($attributes);
     }
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
-
         // static::addGlobalScope(new WithoutDeletedScope());
         // DELETED event
         static::deleted(function ($conversation) {
