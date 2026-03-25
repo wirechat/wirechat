@@ -2,6 +2,7 @@
 
 namespace Wirechat\Wirechat\Models\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 use Wirechat\Wirechat\Facades\Wirechat;
@@ -133,7 +134,7 @@ trait HasDynamicIds
                 });
             };
 
-            if (method_exists(static::class, 'whenBooted')) {
+            if (method_exists(Model::class, 'whenBooted')) {
                 static::whenBooted($registerCreatingHook);
             } else {
                 static::booted($registerCreatingHook);
