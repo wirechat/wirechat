@@ -171,7 +171,7 @@ class Attachment extends Model
         if ($storedPath && $disk) {
             $storedMimeType = Storage::disk($disk)->mimeType($storedPath);
 
-            if (static::hasSpecificMimeType($storedMimeType)) {
+            if (is_string($storedMimeType) && static::hasSpecificMimeType($storedMimeType)) {
                 return $storedMimeType;
             }
         }
