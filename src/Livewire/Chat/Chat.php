@@ -206,33 +206,6 @@ class Chat extends Component
         $this->replyMessage = null;
     }
 
-    /**
-     * livewire method
-     ** This is avoid replacing temporary files on add more files
-     * We override the function in WithFileUploads Trait
-     * todo:uncomment if used this in fronend
-     */
-    public function _finishUpload($name, $tmpPath, $isMultiple)
-    {
-        $this->cleanupOldUploads();
-
-        $files = collect($tmpPath)->map(function ($i) {
-            return TemporaryUploadedFile::createFromLivewire($i);
-        })->toArray();
-        $this->dispatch('upload:finished', name: $name, tmpFilenames: collect($files)->map->getFilename()->toArray())->self();
-
-        // If the property is an array, APPEND the upload to the array.
-        $currentValue = $this->getPropertyValue($name);
-
-        if (is_array($currentValue)) {
-            $files = array_merge($currentValue, $files);
-        } else {
-            $files = $files[0];
-        }
-
-        app('livewire')->updateProperty($this, $name, $files);
-    }
-
     public function resetAttachmentErrors()
     {
 
