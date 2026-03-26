@@ -23,6 +23,7 @@ use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
@@ -438,7 +439,11 @@ class Chat extends Component
                     'file_path' => $path,
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
-                    'mime_type' => $attachment->getMimeType(),
+                    'mime_type' => Attachment::resolveMimeType(
+                        $attachment,
+                        $path,
+                        Wirechat::storage()->disk()
+                    ),
                     'url' => Storage::disk(Wirechat::storage()->disk())->url($path), // Use disk and path
                 ]);
 

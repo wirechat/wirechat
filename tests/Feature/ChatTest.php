@@ -1931,6 +1931,32 @@ describe('Sending messages ', function () {
         }
     });
 
+    test('it renders stored generic image attachments as images using the original extension', function () {
+        Storage::fake('public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $message->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/legacy-photo.png',
+            'file_name' => 'legacy-photo.png',
+            'original_name' => 'legacy-photo.png',
+            'mime_type' => 'application/octet-stream',
+            'url' => '/storage/'.Wirechat::storage()->attachmentsDirectory().'/legacy-photo.png',
+        ]);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSeeHtml('<img ');
+    });
+
     test('it saves image to storage when created & clears files properties when done', function () {
         Storage::fake('public');
 
