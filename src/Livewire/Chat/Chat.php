@@ -2,6 +2,7 @@
 
 namespace Wirechat\Wirechat\Livewire\Chat;
 
+use Composer\InstalledVersions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -38,7 +39,9 @@ class Chat extends Component
     use HasPanel;
     use InteractsWithUI;
     use Widget;
-    use WithFileUploads;
+    use WithFileUploads {
+        _finishUpload as protected livewireFinishUpload;
+    }
     use WithPagination;
 
     // public ?Conversation $conversation;
@@ -210,12 +213,18 @@ class Chat extends Component
 
     /**
      * livewire method
-     ** This is avoid replacing temporary files on add more files
-     * We override the function in WithFileUploads Trait
-     * todo:uncomment if used this in fronend
+     * Keep the legacy append workaround for Livewire 3 only.
+     *
+     * Livewire 4 handles append behavior internally and now passes signed
+     * temporary upload references that must be resolved by the framework
+     * implementation before creating TemporaryUploadedFile instances.
      */
-    public function _finishUpload($name, $tmpPath, $isMultiple)
+    public function _finishUpload($name, $tmpPath, $isMultiple, $append = true)
     {
+        if (! $this->isLivewireThree()) {
+            return $this->livewireFinishUpload($name, $tmpPath, $isMultiple, $append);
+        }
+
         $this->cleanupOldUploads();
 
         $files = collect($tmpPath)->map(function ($i) {
@@ -233,6 +242,13 @@ class Chat extends Component
         }
 
         app('livewire')->updateProperty($this, $name, $files);
+    }
+
+    protected function isLivewireThree(): bool
+    {
+        $version = InstalledVersions::getVersion('livewire/livewire');
+
+        return $version !== null && version_compare($version, '4.0.0', '<');
     }
 
     public function resetAttachmentErrors()

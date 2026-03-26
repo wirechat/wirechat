@@ -1892,6 +1892,45 @@ describe('Sending messages ', function () {
         expect(count($messageExists))->toBe(1);
     });
 
+    test('it appends media uploaded one by one and preserves image metadata when sent', function () {
+        Storage::fake('public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        $firstImage = UploadedFile::fake()->image('first-photo.png');
+        $secondImage = UploadedFile::fake()->image('second-photo.jpg');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        $request->upload('media', [$firstImage]);
+        $request->upload('media', [$secondImage]);
+
+        $uploadedMedia = $request->get('media');
+
+        expect($uploadedMedia)->toHaveCount(2)
+            ->and(collect($uploadedMedia)->map->getClientOriginalName()->all())
+            ->toBe(['first-photo.png', 'second-photo.jpg']);
+
+        $request->call('sendMessage')
+            ->assertSet('media', []);
+
+        $attachments = Attachment::query()
+            ->orderBy('id')
+            ->get(['original_name', 'mime_type', 'file_path']);
+
+        expect($attachments)->toHaveCount(2)
+            ->and($attachments->pluck('original_name')->all())
+            ->toBe(['first-photo.png', 'second-photo.jpg'])
+            ->and($attachments->pluck('mime_type')->all())
+            ->toBe(['image/png', 'image/jpeg']);
+
+        foreach ($attachments as $attachment) {
+            Storage::disk('public')->assertExists($attachment->file_path);
+        }
+    });
+
     test('it saves image to storage when created & clears files properties when done', function () {
         Storage::fake('public');
 
