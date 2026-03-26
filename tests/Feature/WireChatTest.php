@@ -118,12 +118,12 @@ test('wirechat styles uses the dark palette and supports extending zinc shades',
         ->toContain('--wc-light-secondary: '.Color::Zinc[100].';');
 });
 
-test('it forwards listClass and chatClass to the widget children', function () {
+test('it forwards chatsClass and chatClass to the widget children', function () {
     $auth = User::factory()->create();
     $conversation = $auth->createConversationWith(User::factory()->create());
 
     $response = Livewire::actingAs($auth)->test(Wirechat::class, [
-        'listClass' => 'widget-list-shell-test',
+        'chatsClass' => 'widget-list-shell-test',
         'chatClass' => 'widget-chat-shell-test',
     ]);
 
@@ -142,4 +142,15 @@ test('it forwards listClass and chatClass to the widget children', function () {
     preg_match_all('/class="[^"]*widget-chat-shell-test[^"]*"/', $html, $chatClassMatchesAfterOpen);
 
     expect($chatClassMatchesAfterOpen[0])->toHaveCount(1);
+});
+
+test('it keeps the widget chat panel scoped to the widget shell without locking page scroll', function () {
+    $auth = User::factory()->create();
+
+    $html = Livewire::actingAs($auth)->test(Wirechat::class)->html();
+
+    expect($html)
+        ->toContain('class="absolute inset-0" id="chatwidget-container"')
+        ->not->toContain("document.body.classList.add('overflow-y-hidden');")
+        ->not->toContain("document.body.classList.remove('overflow-y-hidden');");
 });

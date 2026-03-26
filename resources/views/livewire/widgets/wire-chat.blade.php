@@ -135,11 +135,7 @@
 
                     setShowPropertyTo(show) {
                         this.show = show;
-                        if (show) {
-                            document.body.classList.add('overflow-y-hidden');
-                        } else {
-                            document.body.classList.remove('overflow-y-hidden');
-
+                        if (!show) {
                             setTimeout(() => {
                                 this.activeWidgetComponent = false;
                                 this.$wire.resetState();
@@ -210,7 +206,7 @@
                 x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="ease-in duration-100 " x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 -translate-x-full"
-                class="fixed inset-0" id="chatwidget-container"
+                class="absolute inset-0" id="chatwidget-container"
                 aria-modal="true">
                 @forelse($widgetComponents as $id => $component)
                     <div x-show.immediate="activeWidgetComponent == @js($id)"
