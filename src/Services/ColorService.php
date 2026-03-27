@@ -52,14 +52,22 @@ class ColorService
      */
     public function all(): array
     {
+        $colors = $this->colors;
         $panel = Wirechat::currentPanel();
 
         if ($panel) {
-            // panel colors override colors
-            return array_merge($this->colors, $panel->getColors());
+            foreach ($panel->getColors() as $name => $palette) {
+                if (isset($colors[$name]) && is_array($colors[$name]) && is_array($palette)) {
+                    $colors[$name] = array_replace($colors[$name], $palette);
+
+                    continue;
+                }
+
+                $colors[$name] = $palette;
+            }
         }
 
-        return $this->colors;
+        return $colors;
     }
 
     // === Convenience shortcuts for common colors ===
@@ -76,9 +84,33 @@ class ColorService
         return $this->get('danger', $shade);
     }
 
+    /** Get the "success" color. */
+    public function success(int $shade = 500): ?string
+    {
+        return $this->get('success', $shade);
+    }
+
+    /** Get the "info" color. */
+    public function info(int $shade = 500): ?string
+    {
+        return $this->get('info', $shade);
+    }
+
     /** Get the "warning" color. */
     public function warning(int $shade = 500): ?string
     {
         return $this->get('warning', $shade);
+    }
+
+    /** Get the "gray" color. */
+    public function gray(int $shade = 500): ?string
+    {
+        return $this->get('gray', $shade);
+    }
+
+    /** Get the "dark" color. */
+    public function dark(int $shade = 500): ?string
+    {
+        return $this->get('dark', $shade);
     }
 }

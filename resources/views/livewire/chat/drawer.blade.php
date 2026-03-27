@@ -136,11 +136,7 @@
 
                     setShowPropertyTo(show) {
                         this.show = show;
-                        if (show) {
-                            document.body.classList.add('overflow-y-hidden');
-                        } else {
-                            document.body.classList.remove('overflow-y-hidden');
-
+                        if (!show) {
                             setTimeout(() => {
                                 this.activeDrawerComponent = false;
                                 this.$wire.resetState();
@@ -172,7 +168,7 @@
     x-data="ChatDrawer()" x-on:close.stop="setShowPropertyTo(false)"
          x-on:keydown.escape.stop="closeChatDrawerOnEscape({ modalType: 'ChatDrawer', event: $event }); "
          x-show="show"
-         class="fixed bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  dark:text-white opacity-100 inset-0 z-50 h-full overflow-y-auto" style="display: none;"
+         class="absolute bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  dark:text-white opacity-100 inset-0 z-50 h-full overflow-y-auto" style="display: none;"
          aria-modal="true"
          tabindex="0"
     

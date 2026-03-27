@@ -9,6 +9,7 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
 
@@ -20,7 +21,7 @@ use Wirechat\Wirechat\Models\Conversation;
  */
 class Chats extends Component
 {
-    use HasPanel, Widget;
+    use HasPanel, InteractsWithUI, Widget;
 
     public $search;
 

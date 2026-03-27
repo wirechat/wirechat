@@ -26,6 +26,25 @@ test('authenticaed user can access chatlist ', function () {
         ->assertStatus(200);
 });
 
+test('it applies ui classes and styles to the chats shell only', function () {
+    $auth = User::factory()->create();
+
+    $response = Livewire::actingAs($auth)->test(Chatlist::class, [
+        'class' => 'chats-shell-test',
+        'styles' => [
+            'min-height' => '20rem',
+        ],
+    ]);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*chats-shell-test[^"]*"/', $html, $classMatches);
+    preg_match_all('/style="min-height: 20rem;"/', $html, $styleMatches);
+
+    expect($classMatches[0])->toHaveCount(1)
+        ->and($styleMatches[0])->toHaveCount(1);
+});
+
 describe('Presence check', function () {
 
     // /Content validations
