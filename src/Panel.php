@@ -23,6 +23,7 @@ use Wirechat\Wirechat\Panel\Concerns\HasLayout;
 use Wirechat\Wirechat\Panel\Concerns\HasMiddleware;
 use Wirechat\Wirechat\Panel\Concerns\HasRoutes;
 use Wirechat\Wirechat\Panel\Concerns\HasSearchableAttributes;
+use Wirechat\Wirechat\Panel\Concerns\HasUnReadMessages;
 use Wirechat\Wirechat\Panel\Concerns\HasUsersSearch;
 use Wirechat\Wirechat\Panel\Concerns\HasWebPushNotifications;
 use Wirechat\Wirechat\Support\EvaluatesClosures;
@@ -50,6 +51,7 @@ class Panel
     use HasMiddleware;
     use HasRoutes;
     use HasSearchableAttributes;
+    use HasUnReadMessages;
     use HasUsersSearch;
     use HasWebPushNotifications;
 

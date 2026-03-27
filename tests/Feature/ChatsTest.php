@@ -8,6 +8,7 @@ use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Support\Enums\UnReadType;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -568,7 +569,7 @@ describe('List', function () {
             ->assertDontSee('You:'); // assert not visible
     });
 
-    it('shows unread message count "2" if message does not belong to user', function () {
+    it('shows unread message dot by default if message does not belong to user', function () {
 
         $auth = User::factory()->create();
 
@@ -585,7 +586,35 @@ describe('List', function () {
         // dd($conversations,$messages);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSeeHtml('dusk="unreadMessagesDot"');
+            ->assertSeeHtml('dusk="unreadMessagesDot"')
+            ->assertDontSeeHtml('dusk="unreadMessagesCount"');
+    });
+
+    it('shows unread message count badge when panel unread type is count', function () {
+
+        testPanelProvider()->unReadMessages(type: UnReadType::Count);
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+
+        $response = Livewire::actingAs($auth)->test(Chatlist::class);
+        $widgetResponse = Livewire::actingAs($auth)->test(Chatlist::class, ['widget' => true]);
+
+        expect($response->html())
+            ->toContain('dusk="unreadMessagesCount"')
+            ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</')
+            ->not->toContain('dusk="unreadMessagesDot"');
+
+        expect($widgetResponse->html())
+            ->toContain('dusk="unreadMessagesCount"')
+            ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</')
+            ->not->toContain('dusk="unreadMessagesDot"');
     });
     it('Doesnt show unread message Dot if message does not belong to Auth and is Read', function () {
 
