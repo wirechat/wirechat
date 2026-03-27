@@ -1,4 +1,9 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
+@use('Wirechat\Wirechat\Support\Enums\UnReadType')
+
+@php
+$unReadMessagesType = $this->panel()->getUnReadMessagesType();
+@endphp
 
 <ul wire:loading.delay.long.remove wire:target="search" class="p-2 grid w-full space-y-2">
     @foreach ($conversations as $key=> $conversation)
@@ -11,13 +16,17 @@
     //mark isReadByAuth true if user has chat opened
     $isReadByAuth = $conversation?->readBy($conversation->auth_participant??$this->auth) || $selectedConversationId == $conversation->id;
     $belongsToAuth = $lastMessage?->belongsToAuth();
+    $showUnreadStatus = $this->panel()->hasUnReadMessages() && $lastMessage != null && !$lastMessage?->ownedBy($this->auth) && !$isReadByAuth;
+    $unReadMessagesCount = $showUnreadStatus && $unReadMessagesType === UnReadType::Count
+        ? $conversation->getUnreadCountFor($this->auth)
+        : null;
 
 
     @endphp
 
     <li x-data="{
         conversationID: @js($conversation->id),
-        showUnreadStatus: @js(!$isReadByAuth),
+        showUnreadStatus: @js($showUnreadStatus),
         handleChatOpened(event) {
             // Hide unread dot
             if (event.detail.conversation== this.conversationID) {
@@ -86,16 +95,28 @@
 
                 {{-- Read status --}}
                 {{-- Only show if AUTH is NOT onwer of message --}}
-                @if ($lastMessage != null && !$lastMessage?->ownedBy($this->auth) && !$isReadByAuth)
-                    <div x-show="showUnreadStatus" dusk="unreadMessagesDot" class=" col-span-2 flex flex-col text-center my-auto">
-                        {{-- Dots icon --}}
-                        <span dusk="unreadDotItem" class="sr-only">unread dot</span>
-                        <svg @style(['color:var(--wc-brand-primary)']) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                            fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
-                            <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
-                        </svg>
+                @if ($showUnreadStatus)
+                    @if ($unReadMessagesType === UnReadType::Count)
+                        <div x-show="showUnreadStatus" dusk="unreadMessagesCount" class="col-span-2 flex flex-col text-center my-auto items-end">
+                            <span class="sr-only">unread messages count</span>
+                            <span
+                                @style(['background-color:var(--wc-brand-primary)'])
+                                class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold leading-none text-white"
+                            >
+                                {{ $unReadMessagesCount }}
+                            </span>
+                        </div>
+                    @else
+                        <div x-show="showUnreadStatus" dusk="unreadMessagesDot" class=" col-span-2 flex flex-col text-center my-auto">
+                            {{-- Dots icon --}}
+                            <span dusk="unreadDotItem" class="sr-only">unread dot</span>
+                            <svg @style(['color:var(--wc-brand-primary)']) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
+                                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+                            </svg>
 
-                    </div>
+                        </div>
+                    @endif
                 @endif
 
 
