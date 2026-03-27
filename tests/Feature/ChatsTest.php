@@ -8,7 +8,7 @@ use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
-use Wirechat\Wirechat\Support\Enums\UnReadType;
+use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -592,7 +592,7 @@ describe('List', function () {
 
     it('shows unread message count badge when panel unread type is count', function () {
 
-        testPanelProvider()->unReadMessages(type: UnReadType::Count);
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
 
         $auth = User::factory()->create();
 
@@ -615,6 +615,26 @@ describe('List', function () {
             ->toContain('dusk="unreadMessagesCount"')
             ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</')
             ->not->toContain('dusk="unreadMessagesDot"');
+    });
+
+    it('uses reactive preview classes so unread text de-emphasizes immediately when a chat is opened', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+
+        $html = Livewire::actingAs($auth)->test(Chatlist::class)->html();
+
+        expect($html)
+            ->toContain('dusk="messagePreviewBody"')
+            ->toContain('dusk="messagePreviewTime"')
+            ->toContain('showUnreadStatus && !false')
+            ->toContain('font-semibold text-black')
+            ->toContain('font-normal text-gray-600');
     });
     it('Doesnt show unread message Dot if message does not belong to Auth and is Read', function () {
 
