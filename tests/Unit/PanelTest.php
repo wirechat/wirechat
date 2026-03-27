@@ -1,5 +1,6 @@
 <?php
 
+use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Wirechat\Wirechat\Support\Enums\UnReadType;
 use Workbench\App\Models\User;
 
@@ -22,17 +23,27 @@ test(' panel hasRoutes is false when registerRoutes is FALSE', function () {
 test('panel unread messages type defaults to dot', function () {
     User::factory()->create();
 
-    expect(testPanelProvider()->hasUnReadMessages())->toBeTrue()
-        ->and(testPanelProvider()->getUnReadMessagesType())->toBe(UnReadType::Dot);
+    expect(testPanelProvider()->hasUnreadIndicator())->toBeTrue()
+        ->and(testPanelProvider()->getUnreadIndicatorType())->toBe(UnreadIndicatorType::Dot);
 });
 
 test('panel unread messages type can be set to count', function () {
     User::factory()->create();
 
+    testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+    expect(testPanelProvider()->hasUnreadIndicator())->toBeTrue()
+        ->and(testPanelProvider()->getUnreadIndicatorType())->toBe(UnreadIndicatorType::Count);
+});
+
+test('legacy unread messages panel aliases still work', function () {
+    User::factory()->create();
+
     testPanelProvider()->unReadMessages(type: UnReadType::Count);
 
     expect(testPanelProvider()->hasUnReadMessages())->toBeTrue()
-        ->and(testPanelProvider()->getUnReadMessagesType())->toBe(UnReadType::Count);
+        ->and(testPanelProvider()->getUnReadMessagesType())->toBe(UnReadType::Count)
+        ->and(testPanelProvider()->getUnreadIndicatorType())->toBe(UnreadIndicatorType::Count);
 });
 
 describe('Chats Route', function () {

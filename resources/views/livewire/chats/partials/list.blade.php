@@ -1,8 +1,8 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
-@use('Wirechat\Wirechat\Support\Enums\UnReadType')
+@use('Wirechat\Wirechat\Support\Enums\UnreadIndicatorType')
 
 @php
-$unReadMessagesType = $this->panel()->getUnReadMessagesType();
+$unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
 @endphp
 
 <ul wire:loading.delay.long.remove wire:target="search" class="p-2 grid w-full space-y-2">
@@ -16,8 +16,8 @@ $unReadMessagesType = $this->panel()->getUnReadMessagesType();
     //mark isReadByAuth true if user has chat opened
     $isReadByAuth = $conversation?->readBy($conversation->auth_participant??$this->auth) || $selectedConversationId == $conversation->id;
     $belongsToAuth = $lastMessage?->belongsToAuth();
-    $showUnreadStatus = $this->panel()->hasUnReadMessages() && $lastMessage != null && !$lastMessage?->ownedBy($this->auth) && !$isReadByAuth;
-    $unReadMessagesCount = $showUnreadStatus && $unReadMessagesType === UnReadType::Count
+    $showUnreadStatus = $this->panel()->hasUnreadIndicator() && $lastMessage != null && !$lastMessage?->ownedBy($this->auth) && !$isReadByAuth;
+    $unreadIndicatorCount = $showUnreadStatus && $unreadIndicatorType === UnreadIndicatorType::Count
         ? $conversation->getUnreadCountFor($this->auth)
         : null;
 
@@ -96,14 +96,14 @@ $unReadMessagesType = $this->panel()->getUnReadMessagesType();
                 {{-- Read status --}}
                 {{-- Only show if AUTH is NOT onwer of message --}}
                 @if ($showUnreadStatus)
-                    @if ($unReadMessagesType === UnReadType::Count)
+                    @if ($unreadIndicatorType === UnreadIndicatorType::Count)
                         <div x-show="showUnreadStatus" dusk="unreadMessagesCount" class="col-span-2 flex flex-col text-center my-auto items-end">
                             <span class="sr-only">unread messages count</span>
                             <span
                                 @style(['background-color:var(--wc-brand-primary)'])
                                 class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold leading-none text-white"
                             >
-                                {{ $unReadMessagesCount }}
+                                {{ $unreadIndicatorCount }}
                             </span>
                         </div>
                     @else
