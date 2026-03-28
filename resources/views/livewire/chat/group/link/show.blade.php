@@ -50,7 +50,7 @@
             </button>
 
             <button type="button"
-                onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.send-invite-link', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })"
+                onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.link.send', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })"
                 class="inline-flex items-center justify-center rounded-2xl border border-[var(--wc-light-border)] px-4 py-3 text-sm font-medium dark:border-[var(--wc-dark-border)]">
                 Share Link
             </button>

@@ -23,7 +23,7 @@ arch('Ensure Widget Trait is used in Components')
         'Wirechat\Wirechat\Livewire\Chats\Chats',
         'Wirechat\Wirechat\Livewire\New\Chat',
         'Wirechat\Wirechat\Livewire\New\Group',
-        // 'Wirechat\Wirechat\Livewire\Chat\Group\AddMembers',
+        // 'Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers',
         'Wirechat\Wirechat\Livewire\Chat\Info',
-        'Wirechat\Wirechat\Livewire\Chat\Group\Members',
+        'Wirechat\Wirechat\Livewire\Chat\Group\Members\Members',
     ]);

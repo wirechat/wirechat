@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
@@ -10,7 +10,7 @@ use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
-class PastMembers extends ModalComponent
+class BlockedMembers extends ModalComponent
 {
     use HasPanel;
 
@@ -21,7 +21,7 @@ class PastMembers extends ModalComponent
 
     public $search;
 
-    public $pastMembers;
+    public $blockedMembers;
 
     protected ?Participant $authParticipant = null;
 
@@ -45,39 +45,59 @@ class PastMembers extends ModalComponent
 
         $this->conversation = $this->conversation->load('group');
         $this->group = $this->conversation->group;
-        $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to view past members');
+        $this->authorizeBlockedMembersAccess('You do not have permission to view blocked members');
 
-        $this->loadPastMembers();
+        $this->loadBlockedMembers();
     }
 
     public function updatedSearch(): void
     {
-        $this->loadPastMembers();
+        $this->loadBlockedMembers();
+    }
+
+    public function liftBlock(int $participantId): void
+    {
+        $this->authorizeBlockedMembersAccess('You do not have permission to lift blocks');
+
+        $participant = $this->conversation->participants()
+            ->withoutGlobalScopes()
+            ->with(['participantable', 'actions'])
+            ->whereKey($participantId)
+            ->firstOrFail();
+
+        abort_unless($participant->isBlockedByAdmin(), 404, 'Member is not blocked.');
+
+        $participant->liftBlockByAdmin();
+
+        $this->loadBlockedMembers();
+
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.blocked_members.messages.unblocked_success', ['member' => $participant->participantable?->wirechat_name]));
+        $this->dispatch('refresh')->to(Members::class);
     }
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.past-members');
+        return view('wirechat::livewire.chat.group.members.blocked');
     }
 
-    protected function loadPastMembers(): void
+    protected function authorizeBlockedMembersAccess(string $message): void
+    {
+        $this->authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($this->authParticipant?->isAdmin(), 403, $message);
+    }
+
+    protected function loadBlockedMembers(): void
     {
         $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = [];
 
-        $this->pastMembers = $this->conversation->participants()
+        $this->blockedMembers = $this->conversation->participants()
             ->withoutGlobalScopes()
             ->with(['participantable', 'actions.actor.participantable'])
-            ->where(function ($query) {
-                $query->whereNotNull('exited_at')
-                    ->orWhereHas('actions', function ($actionQuery) {
-                        $actionQuery->whereIn('type', [
-                            Actions::REMOVED_BY_ADMIN->value,
-                            Actions::BLOCKED_BY_ADMIN->value,
-                        ]);
-                    });
+            ->whereHas('actions', function ($query) {
+                $query->where('type', Actions::BLOCKED_BY_ADMIN->value);
             })
             ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
                 $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
@@ -98,7 +118,6 @@ class PastMembers extends ModalComponent
             })
             ->latest('updated_at')
             ->get()
-            ->filter(fn (Participant $participant) => $participant->pastMembershipReason() !== null)
             ->values();
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
@@ -154,7 +154,7 @@ class AddMembers extends ModalComponent
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.add-members', [
+        return view('wirechat::livewire.chat.group.members.add', [
             'maxGroupMembers' => $this->panel()->getMaxGroupMembers(),
         ]);
     }

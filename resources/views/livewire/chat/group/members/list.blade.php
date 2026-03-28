@@ -38,14 +38,14 @@
 
         @if ($authIsAdminInGroup || $authIsOwner)
             <section class="grid grid-cols-2 gap-2 pt-3">
-                <x-wirechat::actions.open-modal component="wirechat.chat.group.past-members"
+                <x-wirechat::actions.open-modal component="wirechat.chat.group.members.past"
                     conversation="{{ $conversation?->id }}" :panel="$this->panel">
                     <button type="button" class="w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
                         {{ __('wirechat::chat.group.members.actions.past_members.label') }}
                     </button>
                 </x-wirechat::actions.open-modal>
 
-                <x-wirechat::actions.open-modal component="wirechat.chat.group.blocked-members"
+                <x-wirechat::actions.open-modal component="wirechat.chat.group.members.blocked"
                     conversation="{{ $conversation?->id }}" :panel="$this->panel">
                     <button type="button" class="w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
                         {{ __('wirechat::chat.group.members.actions.blocked_members.label') }}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Link;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -161,7 +161,7 @@ class SendInviteLink extends ModalComponent
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.send-invite-link');
+        return view('wirechat::livewire.chat.group.link.send');
     }
 
     protected function canReceiveInviteLink(Model $model, bool $shouldAbort = false): bool

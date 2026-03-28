@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Link;
 
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
@@ -101,6 +101,6 @@ class CreateInviteLink extends ModalComponent
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.create-invite-link');
+        return view('wirechat::livewire.chat.group.link.create');
     }
 }

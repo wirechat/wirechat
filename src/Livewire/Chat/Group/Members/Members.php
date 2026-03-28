@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
@@ -274,7 +274,7 @@ class Members extends ModalComponent
         //
 
         // Pass data to the view
-        return view('wirechat::livewire.chat.group.members', [
+        return view('wirechat::livewire.chat.group.members.list', [
             'participant' => $this->conversation->participant(auth()->user()),
 
         ]);

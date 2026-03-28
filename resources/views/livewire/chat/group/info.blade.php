@@ -200,7 +200,7 @@
     {{-- Members section --}}
     <section class="my-4 text-left space-y-3">
         {{-- Actiion button to trigger opening members  modal --}}
-        <x-wirechat::actions.open-modal component="wirechat.chat.group.members"
+        <x-wirechat::actions.open-modal component="wirechat.chat.group.members.list"
             conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
             {{-- Members count --}}
             <button class="cursor-pointer flex w-full justify-between items-center px-8 focus:outline-hidden ">
@@ -218,7 +218,7 @@
 
         {{-- Add Members --}}
         @if ($authIsAdminInGroup || $group?->allowsMembersToAddOthers())
-            <x-wirechat::actions.open-modal component="wirechat.chat.group.add-members"
+            <x-wirechat::actions.open-modal component="wirechat.chat.group.members.add"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button @dusk="open_add_members_modal_button"
                     class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition  flex gap-3 items-center">
@@ -234,7 +234,7 @@
         @endif
 
         @if ($canManageInvites)
-            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.invite-link"
+            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.link.list"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex gap-3 items-center">
                   

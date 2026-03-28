@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
@@ -10,7 +10,7 @@ use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
-class BlockedMembers extends ModalComponent
+class PastMembers extends ModalComponent
 {
     use HasPanel;
 
@@ -21,7 +21,7 @@ class BlockedMembers extends ModalComponent
 
     public $search;
 
-    public $blockedMembers;
+    public $pastMembers;
 
     protected ?Participant $authParticipant = null;
 
@@ -45,59 +45,39 @@ class BlockedMembers extends ModalComponent
 
         $this->conversation = $this->conversation->load('group');
         $this->group = $this->conversation->group;
+        $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        $this->authorizeBlockedMembersAccess('You do not have permission to view blocked members');
+        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to view past members');
 
-        $this->loadBlockedMembers();
+        $this->loadPastMembers();
     }
 
     public function updatedSearch(): void
     {
-        $this->loadBlockedMembers();
-    }
-
-    public function liftBlock(int $participantId): void
-    {
-        $this->authorizeBlockedMembersAccess('You do not have permission to lift blocks');
-
-        $participant = $this->conversation->participants()
-            ->withoutGlobalScopes()
-            ->with(['participantable', 'actions'])
-            ->whereKey($participantId)
-            ->firstOrFail();
-
-        abort_unless($participant->isBlockedByAdmin(), 404, 'Member is not blocked.');
-
-        $participant->liftBlockByAdmin();
-
-        $this->loadBlockedMembers();
-
-        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.blocked_members.messages.unblocked_success', ['member' => $participant->participantable?->wirechat_name]));
-        $this->dispatch('refresh')->to(Members::class);
+        $this->loadPastMembers();
     }
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.blocked-members');
+        return view('wirechat::livewire.chat.group.members.past');
     }
 
-    protected function authorizeBlockedMembersAccess(string $message): void
-    {
-        $this->authParticipant = $this->conversation->participant(auth()->user());
-
-        abort_unless($this->authParticipant?->isAdmin(), 403, $message);
-    }
-
-    protected function loadBlockedMembers(): void
+    protected function loadPastMembers(): void
     {
         $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = [];
 
-        $this->blockedMembers = $this->conversation->participants()
+        $this->pastMembers = $this->conversation->participants()
             ->withoutGlobalScopes()
             ->with(['participantable', 'actions.actor.participantable'])
-            ->whereHas('actions', function ($query) {
-                $query->where('type', Actions::BLOCKED_BY_ADMIN->value);
+            ->where(function ($query) {
+                $query->whereNotNull('exited_at')
+                    ->orWhereHas('actions', function ($actionQuery) {
+                        $actionQuery->whereIn('type', [
+                            Actions::REMOVED_BY_ADMIN->value,
+                            Actions::BLOCKED_BY_ADMIN->value,
+                        ]);
+                    });
             })
             ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
                 $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
@@ -118,6 +98,7 @@ class BlockedMembers extends ModalComponent
             })
             ->latest('updated_at')
             ->get()
+            ->filter(fn (Participant $participant) => $participant->pastMembershipReason() !== null)
             ->values();
     }
 }

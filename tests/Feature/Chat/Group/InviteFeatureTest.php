@@ -5,13 +5,13 @@ use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\JoinRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
-use Wirechat\Wirechat\Livewire\Chat\Group\CreateInviteLink;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
-use Wirechat\Wirechat\Livewire\Chat\Group\InviteLink;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinFromInvite;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
+use Wirechat\Wirechat\Livewire\Chat\Group\Link\CreateInviteLink;
+use Wirechat\Wirechat\Livewire\Chat\Group\Link\InviteLink;
+use Wirechat\Wirechat\Livewire\Chat\Group\Link\SendInviteLink;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
-use Wirechat\Wirechat\Livewire\Chat\Group\SendInviteLink;
 use Wirechat\Wirechat\Models\Invite;
 use Workbench\App\Models\User;
 

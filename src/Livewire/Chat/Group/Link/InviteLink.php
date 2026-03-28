@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Link;
 
 use Livewire\Attributes\Locked;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
@@ -96,7 +96,7 @@ class InviteLink extends ModalComponent
         $authParticipant = $this->conversation->participant(auth()->user());
         $primaryInvite = $this->invite->fresh(['createdBy']);
 
-        return view('wirechat::livewire.chat.group.invite-link', [
+        return view('wirechat::livewire.chat.group.link.list', [
             'primaryInvite' => $primaryInvite,
             'primaryInviteUrl' => $primaryInvite->url($this->panel()),
             'additionalInvites' => $this->group->inviteLinks()

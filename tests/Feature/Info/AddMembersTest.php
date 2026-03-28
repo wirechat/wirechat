@@ -2,7 +2,7 @@
 
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\ParticipantRole;
-use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers;
 use Wirechat\Wirechat\Models\Conversation;
 use Workbench\App\Models\User;
 
