@@ -91,23 +91,17 @@
         >
             @if ($canEditGroupAccess)
                 <x-slot:actions>
-                    <x-wirechat::button
+                    <button type="button" class="m-0"
                         variant="secondary"
                         size="sm"
                         onclick="{{ $openPermissionsDrawerAction }}"
                     >
                         {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }}
-                    </x-wirechat::button>
+                    </button>
                 </x-slot:actions>
             @endif
 
-            <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">
-                @if ($requiresAdminApproval)
-                    {{ __('wirechat::chat.group.invite_link.labels.group_access_requires_approval') }}
-                @else
-                    {{ __('wirechat::chat.group.invite_link.labels.group_access_open') }}
-                @endif
-            </p>
+           
 
             @if ($canManageJoinRequests)
                 <div class="rounded-2xl bg-[var(--wc-light-secondary)] px-4 py-3 dark:bg-[var(--wc-dark-secondary)]">
@@ -125,6 +119,14 @@
                     </button>
                 </div>
             @endif
+
+             <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">
+                @if ($requiresAdminApproval)
+                    {{ __('wirechat::chat.group.invite_link.labels.group_access_requires_approval') }}
+                @else
+                    {{ __('wirechat::chat.group.invite_link.labels.group_access_open') }}
+                @endif
+            </p>
         </x-wirechat::section>
 
         <x-wirechat::section
