@@ -45,7 +45,7 @@
                         value="{{ $expirySliderIndex === false ? count($expirySliderKeys) - 1 : $expirySliderIndex }}"
                         x-data="{}"
                         x-on:input="$wire.set('expiryPreset', {{ $expirySliderKeysJs }}[$event.target.value] ?? 'never')"
-                        class="mx-auto w-full"
+                        class="wc-range-zinc mx-auto w-full"
                     />
                 </div>
 
