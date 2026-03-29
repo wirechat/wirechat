@@ -167,7 +167,9 @@
     </div>
 
     @if ($pendingJoinRequestsCount > 0)
-        <div x-data="{ joinRequestsBannerDismissed: false }" x-cloak x-show="!joinRequestsBannerDismissed"
+        <div
+            x-data="joinRequestsBanner(@js('wirechat.join-requests-banner.' . $this->panel()->getId() . '.' . $conversation->id))"
+            x-cloak x-show="!joinRequestsBannerDismissed"
             class="border-zinc-100 bg-zinc-50 px-2 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/60 lg:px-4">
             <div class="mx-auto flex w-full items-center justify-between gap-3 rounded-2xl px-1 text-sm">
                 <button type="button"
@@ -190,7 +192,7 @@
                     </div>
                 </button>
 
-                <button type="button" @click.stop="joinRequestsBannerDismissed = true"
+                <button type="button" @click.stop="dismissBanner()"
                     class="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-200/70 hover:text-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-700/70 dark:hover:text-white"
                     aria-label="{{ __('wirechat::chat.group.join.requests.actions.dismiss_banner.label') }}">
                     <x-wirechat::icons.x class="size-4" />
@@ -200,3 +202,59 @@
     @endif
 
 </header>
+
+@script
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (window.__wirechatJoinRequestsBannerRegistered) {
+                return;
+            }
+
+            window.__wirechatJoinRequestsBannerRegistered = true;
+
+            Alpine.store('wirechatJoinRequestsBanner', {
+                ttlMs: 3600000,
+                getExpiry(key) {
+                    try {
+                        return Number(window.localStorage.getItem(key)) || 0;
+                    } catch (error) {
+                        return 0;
+                    }
+                },
+                isDismissed(key) {
+                    const expiresAt = this.getExpiry(key);
+
+                    if (expiresAt > Date.now()) {
+                        return true;
+                    }
+
+                    this.clear(key);
+
+                    return false;
+                },
+                dismiss(key) {
+                    try {
+                        window.localStorage.setItem(key, String(Date.now() + this.ttlMs));
+                    } catch (error) {}
+                },
+                clear(key) {
+                    try {
+                        window.localStorage.removeItem(key);
+                    } catch (error) {}
+                },
+            });
+
+            Alpine.data('joinRequestsBanner', (key) => ({
+                joinRequestsBannerDismissed: false,
+                key,
+                init() {
+                    this.joinRequestsBannerDismissed = Alpine.store('wirechatJoinRequestsBanner').isDismissed(this.key);
+                },
+                dismissBanner() {
+                    Alpine.store('wirechatJoinRequestsBanner').dismiss(this.key);
+                    this.joinRequestsBannerDismissed = true;
+                },
+            }));
+        });
+    </script>
+@endscript
