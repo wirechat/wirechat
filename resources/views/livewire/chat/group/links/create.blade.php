@@ -16,8 +16,8 @@
         '100' => '100',
         'unlimited' => __('wirechat::chat.group.invite_link.create.options.usage.unlimited'),
     ];
-    $usageSliderKeys = array_keys($usageSliderOptions);
-    $usageSliderIndex = array_search($usagePreset, $usageSliderKeys, true);
+    $usageSliderKeys = array_map('strval', array_keys($usageSliderOptions));
+    $usageSliderIndex = array_search((string) $usagePreset, $usageSliderKeys, true);
     $usageSliderKeysJs = (string) \Illuminate\Support\Js::from(array_values($usageSliderKeys));
 @endphp
 
@@ -49,6 +49,7 @@
             <div class="mt-3 flex w-full flex-col items-center">
                 <div class="w-full">
                     <input
+                        wire:key="expiry-slider-{{ $expiryPreset }}"
                         type="range"
                         min="0"
                         max="{{ count($expirySliderKeys) - 1 }}"
@@ -68,18 +69,20 @@
 
                 <div class="mt-2 flex justify-between w-full   text-center text-xs">
                     @foreach ($expirySliderOptions as $key => $label)
-                        <span @class([
-                            'flex items-center justify-center transition',
-                            'font-medium text-[var(--wc-brand-primary)]' => $expiryPreset === $key,
-                            'text-gray-600 dark:text-gray-300' => $expiryPreset !== $key,
-                        ])>
+                        <button type="button"
+                            wire:click="$set('expiryPreset', '{{ $key }}')"
+                            @class([
+                                'flex items-center justify-center transition cursor-pointer',
+                                'font-medium text-[var(--wc-brand-primary)]' => $expiryPreset === $key,
+                                'text-gray-600 dark:text-gray-300' => $expiryPreset !== $key,
+                            ])>
                             @if ($key === 'never')
                                 <x-wirechat::icons.infinite class="size-3" />
                                 <span class="sr-only">{{ $label }}</span>
                             @else
                                 {{ $label }}
                             @endif
-                        </span>
+                        </button>
                     @endforeach
                 </div>
             </div>
@@ -94,6 +97,7 @@
             <div class="mt-3 flex w-full flex-col items-center">
                 <div class=" w-full">
                     <input
+                        wire:key="usage-slider-{{ $usagePreset }}"
                         type="range"
                         min="0"
                         max="{{ count($usageSliderKeys) - 1 }}"
@@ -114,14 +118,16 @@
                                 default => 'translateX(-50%)',
                             };
                         @endphp
-                        <span @class([
-                            'absolute top-0 flex flex-col gap-1 transition',
-                            'left-0 items-start text-left' => $loop->first,
-                            'right-0 items-end text-right' => $loop->last,
-                            'items-center text-center' => ! $loop->first && ! $loop->last,
-                            'font-medium text-[var(--wc-brand-primary)]' => $usagePreset === $key,
-                            'text-gray-600 dark:text-gray-300' => $usagePreset !== $key,
-                        ])
+                        <button type="button"
+                            wire:click="$set('usagePreset', '{{ $key }}')"
+                            @class([
+                                'absolute top-0 flex flex-col gap-1 transition cursor-pointer',
+                                'left-0 items-start text-left' => $loop->first,
+                                'right-0 items-end text-right' => $loop->last,
+                                'items-center text-center' => ! $loop->first && ! $loop->last,
+                                'font-medium text-[var(--wc-brand-primary)]' => (string) $usagePreset === (string) $key,
+                                'text-gray-600 dark:text-gray-300' => (string) $usagePreset !== (string) $key,
+                            ])
                             @if (! $loop->first && ! $loop->last)
                                 style="left: {{ ($loop->index / (count($usageSliderOptions) - 1)) * 100 }}%; transform: {{ $usageTransform }};"
                             @endif
@@ -134,7 +140,7 @@
                             @else
                                 {{ $label }}
                             @endif
-                        </span>
+                        </button>
                     @endforeach
                 </div>
             </div>

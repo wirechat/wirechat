@@ -182,6 +182,43 @@ it('renders translated content in the create invite link modal', function () {
         ->assertSee(__('wirechat::chat.group.invite_link.create.actions.create.label'));
 });
 
+it('marks the selected usage preset as active in the create invite link modal', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    Livewire::actingAs($owner)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->set('usagePreset', '10')
+        ->assertSeeHtml('font-medium text-[var(--wc-brand-primary)]')
+        ->assertSee('10');
+});
+
+it('updates the usage slider position when the selected usage preset changes', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    Livewire::actingAs($owner)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->set('usagePreset', '10')
+        ->assertSeeHtml('wire:key="usage-slider-10"')
+        ->assertSeeHtml('value="1"')
+        ->set('usagePreset', '100')
+        ->assertSeeHtml('wire:key="usage-slider-100"')
+        ->assertSeeHtml('value="3"');
+});
+
+it('renders clickable expiry and usage slider labels in the create invite link modal', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    Livewire::actingAs($owner)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSeeHtml('wire:click="$set(\'expiryPreset\', \'1_day\')"')
+        ->assertSeeHtml('wire:click="$set(\'expiryPreset\', \'never\')"')
+        ->assertSeeHtml('wire:click="$set(\'usagePreset\', \'10\')"')
+        ->assertSeeHtml('wire:click="$set(\'usagePreset\', \'unlimited\')"');
+});
+
 it('validates the create invite link name length', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');
