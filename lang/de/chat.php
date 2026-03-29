@@ -353,6 +353,9 @@ return [
                 'create_new_link' => [
                     'label' => 'Neuen Link erstellen',
                 ],
+                'load_more' => [
+                    'label' => 'Mehr laden',
+                ],
             ],
             'messages' => [
                 'copied_success' => 'Einladungslink kopiert.',

@@ -353,6 +353,9 @@ return [
                 'create_new_link' => [
                     'label' => 'Create New Link',
                 ],
+                'load_more' => [
+                    'label' => 'Load More',
+                ],
             ],
             'messages' => [
                 'copied_success' => 'Invite link copied.',

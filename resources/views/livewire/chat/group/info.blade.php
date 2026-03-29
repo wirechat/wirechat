@@ -234,7 +234,7 @@
         @endif
 
         @if ($canManageInvites)
-            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.link.list"
+            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.links.links"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex gap-3 items-center">
                   

@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group\Link;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Links;
 
 use Livewire\Attributes\Locked;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
@@ -9,7 +9,7 @@ use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Participant;
 
-class InviteLink extends ModalComponent
+class Links extends ModalComponent
 {
     use HasPanel;
 
@@ -96,16 +96,9 @@ class InviteLink extends ModalComponent
         $authParticipant = $this->conversation->participant(auth()->user());
         $primaryInvite = $this->invite->fresh(['createdBy']);
 
-        return view('wirechat::livewire.chat.group.link.list', [
+        return view('wirechat::livewire.chat.group.links.links', [
             'primaryInvite' => $primaryInvite,
             'primaryInviteUrl' => $primaryInvite->url($this->panel()),
-            'additionalInvites' => $this->group->inviteLinks()
-                ->active()
-                ->where('panel_id', $this->panel()->getId())
-                ->additional()
-                ->with('createdBy')
-                ->latest('id')
-                ->get(),
             'canResetLink' => (bool) $authParticipant?->isAdmin(),
             'canManageJoinRequests' => (bool) $authParticipant?->isAdmin(),
             'canEditGroupAccess' => (bool) $authParticipant?->isOwner(),

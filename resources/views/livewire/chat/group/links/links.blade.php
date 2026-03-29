@@ -16,12 +16,11 @@
         $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copied_success'));
         $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copy_prompt'));
 
-        $openPrimaryInviteDetailsAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.link.show', arguments: { conversation: {$conversationId}, invite: {$primaryInviteId}, panel: {$panelId} } })";
+        $openPrimaryInviteDetailsAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.show', arguments: { conversation: {$conversationId}, invite: {$primaryInviteId}, panel: {$panelId} } })";
         $copyPrimaryInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$primaryInviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$primaryInviteUrlJs}); }";
-        $openSendInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.link.send', arguments: { conversation: {$conversationId}, invite: {$primaryInviteId}, panel: {$panelId} } })";
+        $openSendInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: {$conversationId}, invite: {$primaryInviteId}, panel: {$panelId} } })";
         $openPermissionsDrawerAction = "Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.permissions', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
         $openJoinRequestsDrawerAction = "Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join-requests', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
-        $openCreateInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.link.create', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
     @endphp
 
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
@@ -34,7 +33,7 @@
 
         <x-wirechat::section
             :title="__('wirechat::chat.group.invite_link.labels.primary_link')"
-            class="dark:border-zinc-700 b p-5 shadow-sm"
+            class="dark:border-zinc-700 b p-5"
         >
             <div class="rounded-xl border border-dashed dark:border-zinc-700 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-3">
                 <div class="flex items-center gap-3">
@@ -53,8 +52,14 @@
                     <x-wirechat::button
                         x-data="{}"
                         x-on:click="{{ $copyPrimaryInviteAction }}"
+                        class="items-center flex gap-2"
                     >
                         {{ __('wirechat::chat.group.invite_link.actions.copy_link.label') }}
+
+                        
+                      <x-wirechat::icons.clipboard-document class="size-4" />
+
+
                     </x-wirechat::button>
 
                     <x-wirechat::button
@@ -84,7 +89,9 @@
                 </div>
             </div>
         </x-wirechat::section>
-
+        {{------------------}}
+        {{-- Group Access --}}
+        {{------------------}}
         <x-wirechat::section
             :title="__('wirechat::chat.group.invite_link.labels.group_access')"
             class=" dark:border-zinc-700 p-5"
@@ -96,7 +103,8 @@
                         size="sm"
                         onclick="{{ $openPermissionsDrawerAction }}"
                     >
-                        {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }}
+                    <x-wirechat::icons.cog-6-tooth class="size-4 text-zinc-600" />
+                        {{-- {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }} --}}
                     </button>
                 </x-slot:actions>
             @endif
@@ -129,57 +137,10 @@
             </p>
         </x-wirechat::section>
 
-        <x-wirechat::section
-            :title="__('wirechat::chat.group.invite_link.labels.additional_links')"
-            :description="__('wirechat::chat.group.invite_link.labels.additional_links_helper')"
-            class="space-y-4"
-        >
-            <x-slot:actions>
-                <x-wirechat::button
-                    size="sm"
-                    onclick="{{ $openCreateInviteLinkAction }}">
-                    {{ __('wirechat::chat.group.invite_link.actions.create_new_link.label') }}
-                </x-wirechat::button>
-            </x-slot:actions>
-
-            <div class="space-y-3">
-                @forelse ($additionalInvites as $invite)
-                    <button type="button"
-                        onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.link.show', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })"
-                        wire:key="additional-invite-{{ $invite->id }}"
-                        class="flex w-full items-center gap-4 rounded-xl border dark:border-zinc-700 px-4 py-4 text-left transition hover:bg-[var(--wc-light-secondary)]/60 dark:hover:bg-[var(--wc-dark-secondary)]/60">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)]">
-                            <x-wirechat::icons.link class="size-5" />
-                        </div>
-
-                        <div class="min-w-0 flex-1">
-                            <p class="truncate font-medium">{{ $invite->name ?: $invite->token }}</p>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                @if ($invite->limit)
-                                    {{ __('wirechat::chat.group.invite_link.labels.additional_link_usage_limited', ['usages' => $invite->usages, 'limit' => $invite->limit]) }}
-                                @else
-                                    {{ __('wirechat::chat.group.invite_link.labels.additional_link_usage_total', ['usages' => $invite->usages]) }}
-                                @endif
-                                @if ($invite->expires_at)
-                                    • {{ __('wirechat::chat.group.invite_link.labels.additional_link_expires', ['time' => $invite->expires_at->diffForHumans()]) }}
-                                @else
-                                    • {{ __('wirechat::chat.group.invite_link.labels.additional_link_never_expires') }}
-                                @endif
-                            </p>
-                        </div>
-
-                        <span class="text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
-                            </svg>
-                        </span>
-                    </button>
-                @empty
-                    <div class="rounded-xl border border-dashed border-[var(--wc-light-border)] px-5 py-8 text-center text-sm text-gray-500 dark:border-[var(--wc-dark-border)] dark:text-gray-400">
-                        {{ __('wirechat::chat.group.invite_link.labels.additional_links_empty') }}
-                    </div>
-                @endforelse
-            </div>
-        </x-wirechat::section>
+        <livewire:wirechat.chat.group.links.list
+            :conversation="$conversation"
+            :panel="$this->panel"
+            :key="'group-additional-links-'.$conversation->getKey().'-'.$this->panel"
+        />
     </section>
 </div>

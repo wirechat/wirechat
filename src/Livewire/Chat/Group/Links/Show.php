@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group\Link;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Links;
 
 use Livewire\Attributes\Locked;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
@@ -9,7 +9,7 @@ use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Participant;
 
-class InviteLinkDetails extends ModalComponent
+class Show extends ModalComponent
 {
     use HasPanel;
 
@@ -75,7 +75,7 @@ class InviteLinkDetails extends ModalComponent
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.link.show', [
+        return view('wirechat::livewire.chat.group.links.show', [
             'inviteUrl' => $this->invite->url($this->panel()),
             'canRevokeLink' => (bool) $this->conversation->participant(auth()->user())?->isAdmin() && ! $this->invite->is_primary,
         ]);

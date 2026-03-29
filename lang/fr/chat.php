@@ -332,6 +332,9 @@ return [
                 'create_new_link' => [
                     'label' => 'Créer un nouveau lien',
                 ],
+                'load_more' => [
+                    'label' => 'Charger plus',
+                ],
             ],
             'messages' => [
                 'copied_success' => "Lien d'invitation copié.",

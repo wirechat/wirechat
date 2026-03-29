@@ -20,10 +20,10 @@ use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinFromInvite;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
-use Wirechat\Wirechat\Livewire\Chat\Group\Link\CreateInviteLink;
-use Wirechat\Wirechat\Livewire\Chat\Group\Link\InviteLink;
-use Wirechat\Wirechat\Livewire\Chat\Group\Link\InviteLinkDetails;
-use Wirechat\Wirechat\Livewire\Chat\Group\Link\SendInviteLink;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Show;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\BlockedMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\Members;
@@ -185,22 +185,27 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.members.past', PastMembers::class);
         Livewire::component('wirechat.chat.group.members.blocked', BlockedMembers::class);
         Livewire::component('wirechat.chat.group.permissions', Permissions::class);
-        Livewire::component('wirechat.chat.group.link.list', InviteLink::class);
-        Livewire::component('wirechat.chat.group.link.create', CreateInviteLink::class);
-        Livewire::component('wirechat.chat.group.link.show', InviteLinkDetails::class);
+        Livewire::component('wirechat.chat.group.links.links', Links::class);
+        Livewire::component('wirechat.chat.group.links.list', \Wirechat\Wirechat\Livewire\Chat\Group\Links\List::class);
+        Livewire::component('wirechat.chat.group.links.create', Create::class);
+        Livewire::component('wirechat.chat.group.links.show', Show::class);
         Livewire::component('wirechat.chat.group.join-from-invite', JoinFromInvite::class);
         Livewire::component('wirechat.chat.group.join-requests', JoinRequests::class);
-        Livewire::component('wirechat.chat.group.link.send', SendInviteLink::class);
+        Livewire::component('wirechat.chat.group.links.send', Send::class);
 
         // Backwards-compatible aliases for existing integrations.
         Livewire::component('wirechat.chat.group.add-members', AddMembers::class);
         Livewire::component('wirechat.chat.group.members', Members::class);
         Livewire::component('wirechat.chat.group.past-members', PastMembers::class);
         Livewire::component('wirechat.chat.group.blocked-members', BlockedMembers::class);
-        Livewire::component('wirechat.chat.group.invite-link', InviteLink::class);
-        Livewire::component('wirechat.chat.group.create-invite-link', CreateInviteLink::class);
-        Livewire::component('wirechat.chat.group.invite-link-details', InviteLinkDetails::class);
-        Livewire::component('wirechat.chat.group.send-invite-link', SendInviteLink::class);
+        Livewire::component('wirechat.chat.group.link.list', Links::class);
+        Livewire::component('wirechat.chat.group.link.create', Create::class);
+        Livewire::component('wirechat.chat.group.link.show', Show::class);
+        Livewire::component('wirechat.chat.group.link.send', Send::class);
+        Livewire::component('wirechat.chat.group.invite-link', Links::class);
+        Livewire::component('wirechat.chat.group.create-invite-link', Create::class);
+        Livewire::component('wirechat.chat.group.invite-link-details', Show::class);
+        Livewire::component('wirechat.chat.group.send-invite-link', Send::class);
 
         // stand alone widget component
         Livewire::component('wirechat', Wirechat::class);

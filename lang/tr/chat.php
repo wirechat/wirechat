@@ -331,6 +331,9 @@ return [
                 'create_new_link' => [
                     'label' => 'Yeni Bağlantı Oluştur',
                 ],
+                'load_more' => [
+                    'label' => 'Daha Fazla Yükle',
+                ],
             ],
             'messages' => [
                 'copied_success' => 'Davet bağlantısı kopyalandı.',

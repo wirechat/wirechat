@@ -8,9 +8,9 @@ use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinFromInvite;
 use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
-use Wirechat\Wirechat\Livewire\Chat\Group\Link\CreateInviteLink;
-use Wirechat\Wirechat\Livewire\Chat\Group\Link\InviteLink;
-use Wirechat\Wirechat\Livewire\Chat\Group\Link\SendInviteLink;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
 use Wirechat\Wirechat\Models\Invite;
 use Workbench\App\Models\User;
@@ -48,7 +48,7 @@ it('allows admins to access invite links', function () {
     $participant->save();
 
     Livewire::actingAs($admin)
-        ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(200)
         ->assertSee(__('wirechat::chat.group.invite_link.heading.label'))
         ->assertSee(__('wirechat::chat.group.invite_link.labels.primary_link'))
@@ -80,15 +80,15 @@ it('forbids non-admin participants from accessing invite link management even wh
     ]);
 
     Livewire::actingAs($participantUser)
-        ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(403);
 
     Livewire::actingAs($participantUser)
-        ->test(CreateInviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(403);
 
     Livewire::actingAs($participantUser)
-        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(403);
 
     Livewire::actingAs($participantUser)
@@ -101,7 +101,7 @@ it('can reset the active primary invite link', function () {
     $conversation = $owner->createGroup('Test');
 
     Livewire::actingAs($owner)
-        ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->call('resetLink');
 
     $group = $conversation->group->fresh();
@@ -118,11 +118,11 @@ it('can create an additional invite link', function () {
     $conversation = $owner->createGroup('Test');
 
     Livewire::actingAs($owner)
-        ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(200);
 
     Livewire::actingAs($owner)
-        ->test(CreateInviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->set('name', 'Launch Team')
         ->set('expiryPreset', '1_day')
         ->set('usagePreset', '10')
@@ -136,6 +136,34 @@ it('can create an additional invite link', function () {
         ->and($additionalInvite?->name)->toBe('Launch Team')
         ->and($additionalInvite?->limit)->toBe(10)
         ->and($additionalInvite?->expires_at)->not->toBeNull();
+});
+
+it('loads additional invite links incrementally from the dedicated list component', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    foreach (range(1, 12) as $number) {
+        $conversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $owner->getKey(),
+            'created_by_type' => $owner->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'name' => sprintf('Campaign %02d', $number),
+            'is_primary' => false,
+        ]);
+    }
+
+    Livewire::actingAs($owner)
+        ->test(\Wirechat\Wirechat\Livewire\Chat\Group\Links\List::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.additional_links'))
+        ->assertSee(__('wirechat::chat.group.invite_link.actions.load_more.label'))
+        ->assertSee('Campaign 12')
+        ->assertSee('Campaign 03')
+        ->assertDontSee('Campaign 02')
+        ->assertDontSee('Campaign 01')
+        ->call('loadMore')
+        ->assertSee('Campaign 02')
+        ->assertSee('Campaign 01');
 });
 
 it('can send an invite link via chat', function () {
@@ -152,7 +180,7 @@ it('can send an invite link via chat', function () {
     ]);
 
     Livewire::actingAs($owner)
-        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
         ->call('save');
 
@@ -181,7 +209,7 @@ it('hides exited and removed past members from send invite search results', func
     ]);
 
     Livewire::actingAs($owner)
-        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->set('search', 'Invite Candidate')
         ->assertSee($availableUser->wirechat_name)
         ->assertDontSee($exitedUser->wirechat_name)
@@ -204,7 +232,7 @@ it('rejects direct send invite selection for an exited past member', function ()
     ]);
 
     Livewire::actingAs($owner)
-        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->call('toggleMember', $exitedUser->getKey(), $exitedUser->getMorphClass())
         ->assertStatus(403);
 });
@@ -236,7 +264,7 @@ it('uses the panel user search callback in the send invite modal', function () {
     ]);
 
     Livewire::actingAs($owner)
-        ->test(SendInviteLink::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->set('search', 'custom-callback')
         ->assertSee($emailMatchedUser->wirechat_name)
         ->assertDontSee($nameMatchedUser->wirechat_name);
@@ -282,11 +310,11 @@ it('shows group access editing only to owners inside invite links', function () 
     $participant->save();
 
     Livewire::actingAs($owner)
-        ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertSee(__('wirechat::chat.group.invite_link.actions.edit_permissions.label'));
 
     Livewire::actingAs($admin)
-        ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertDontSee(__('wirechat::chat.group.invite_link.actions.edit_permissions.label'))
         ->assertSee(__('wirechat::chat.group.invite_link.actions.create_new_link.label'));
 });
@@ -428,7 +456,7 @@ it('hides and blocks group invitations when the panel disables them', function (
         ->assertDontSee(__('wirechat::chat.group.invite_link.labels.join_requests'));
 
     Livewire::actingAs($owner)
-        ->test(InviteLink::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(404);
 });
 
