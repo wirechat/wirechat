@@ -471,6 +471,8 @@ return [
                 ],
                 'labels' => [
                     'description' => 'Überprüfe und bearbeite alle Personen, die über einen Einladungslink den Beitritt zu dieser Gruppe angefragt haben.',
+                    'review' => 'Prüfen',
+                    'summary' => '{1} Beitrittsanfrage|[2,*] Beitrittsanfragen',
                     'unknown_user' => 'Unbekannter Benutzer',
                     'requested_at' => 'Angefragt: :time',
                     'via_invite_link' => 'über einen Einladungslink',
@@ -487,6 +489,9 @@ return [
                     ],
                     'dismiss' => [
                         'label' => 'Ablehnen',
+                    ],
+                    'dismiss_banner' => [
+                        'label' => 'Hinweis zu Beitrittsanfragen ausblenden',
                     ],
                     'dismiss_all' => [
                         'label' => 'Alle Ablehnen',

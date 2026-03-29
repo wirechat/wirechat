@@ -167,25 +167,35 @@
     </div>
 
     @if ($pendingJoinRequestsCount > 0)
-        <div class="px-2 lg:px-4   border-zinc-100 dark:border-zinc-700 shadow-sm bg-zinc-50   py-3 dark:bg-zinc-800/60">
-            <button type="button"
-                onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
-                class="mx-auto flex w-full items-center justify-between gap-3 rounded-2xl   px-1  text-sm">
-               
-              <div class="flex items-center gap-3">
-                <x-wirechat::icons.user-clock class="size-5 ml-1 dark:text-zinc-300" />
-                  <span class="font-medium text-[var(--wc-brand-primary)]">
-                    {{ __('wirechat::chat.group.join.requests.heading.label') }}
-                </span>
+        <div x-data="{ joinRequestsBannerDismissed: false }" x-cloak x-show="!joinRequestsBannerDismissed"
+            class="border-zinc-100 bg-zinc-50 px-2 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/60 lg:px-4">
+            <div class="mx-auto flex w-full items-center justify-between gap-3 rounded-2xl px-1 text-sm">
+                <button type="button"
+                    onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
+                    class="min-w-0 flex-1 text-left">
+                    <div class="flex items-center gap-2">
+                        <x-wirechat::icons.user-clock class="ml-1 size-5 dark:text-zinc-300" />
 
-              </div>
+                        <span class="font-bold text-primary-500">
+                            {{ __('wirechat::chat.group.join.requests.labels.review') }}
+                        </span>
 
-                <span class="flex items-center gap-3">
-                    <span class="inline-flex w-8 h-6 bg-primary-500  items-center justify-center rounded-full shrink-0 px-3 py-1 text-xs font-semibold text-white">
-                        {{ $pendingJoinRequestsCount }}
-                    </span>
-                </span>
-            </button>
+                        <span class="font-medium text-primary-500">
+                            {{ $pendingJoinRequestsCount }}
+                        </span>
+
+                        <span class="truncate font-medium text-gray-700 dark:text-white/80">
+                            {{ trans_choice('wirechat::chat.group.join.requests.labels.summary', $pendingJoinRequestsCount, ['count' => $pendingJoinRequestsCount]) }}
+                        </span>
+                    </div>
+                </button>
+
+                <button type="button" @click.stop="joinRequestsBannerDismissed = true"
+                    class="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-200/70 hover:text-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-700/70 dark:hover:text-white"
+                    aria-label="{{ __('wirechat::chat.group.join.requests.actions.dismiss_banner.label') }}">
+                    <x-wirechat::icons.x class="size-4" />
+                </button>
+            </div>
         </div>
     @endif
 

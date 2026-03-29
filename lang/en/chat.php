@@ -471,6 +471,8 @@ return [
                 ],
                 'labels' => [
                     'description' => 'Review and handle everyone who asked to join this group through an invite link.',
+                    'review' => 'Review',
+                    'summary' => '{1} join request|[2,*] join requests',
                     'unknown_user' => 'Unknown user',
                     'requested_at' => 'Requested :time',
                     'via_invite_link' => 'via invite link',
@@ -487,6 +489,9 @@ return [
                     ],
                     'dismiss' => [
                         'label' => 'Dismiss',
+                    ],
+                    'dismiss_banner' => [
+                        'label' => 'Dismiss join requests banner',
                     ],
                     'dismiss_all' => [
                         'label' => 'Reject All',

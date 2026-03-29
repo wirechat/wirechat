@@ -986,10 +986,25 @@ it('shows the join request banner only to group admins', function () {
 
     Livewire::actingAs($owner)
         ->test(Chat::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->assertSee(__('wirechat::chat.group.join.requests.heading.label'))
+        ->assertSee(__('wirechat::chat.group.join.requests.labels.review'))
+        ->assertSee(trans_choice('wirechat::chat.group.join.requests.labels.summary', 1, ['count' => 1]))
         ->assertSee('1');
 
     Livewire::actingAs($member)
         ->test(Chat::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->assertDontSee(__('wirechat::chat.group.join.requests.heading.label'));
+        ->assertDontSee(__('wirechat::chat.group.join.requests.labels.review'));
+});
+
+it('pluralizes the join request banner summary for admins', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $conversation->group->requestToJoin(User::factory()->create());
+    $conversation->group->requestToJoin(User::factory()->create());
+
+    Livewire::actingAs($owner)
+        ->test(Chat::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.join.requests.labels.review'))
+        ->assertSee('2')
+        ->assertSee(trans_choice('wirechat::chat.group.join.requests.labels.summary', 2, ['count' => 2]));
 });

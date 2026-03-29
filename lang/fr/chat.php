@@ -450,6 +450,8 @@ return [
                 ],
                 'labels' => [
                     'description' => "Examinez et gérez toutes les personnes qui ont demandé à rejoindre ce groupe via un lien d'invitation.",
+                    'review' => 'Vérifier',
+                    'summary' => '{1} demande d’adhésion|[2,*] demandes d’adhésion',
                     'unknown_user' => 'Utilisateur inconnu',
                     'requested_at' => 'Demandée :time',
                     'via_invite_link' => "via le lien d'invitation",
@@ -466,6 +468,9 @@ return [
                     ],
                     'dismiss' => [
                         'label' => 'Ignorer',
+                    ],
+                    'dismiss_banner' => [
+                        'label' => 'Masquer la bannière des demandes d’adhésion',
                     ],
                     'dismiss_all' => [
                         'label' => 'Tout refuser',

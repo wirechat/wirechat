@@ -449,6 +449,8 @@ return [
                 ],
                 'labels' => [
                     'description' => 'Bir davet bağlantısıyla bu gruba katılmak isteyen kişileri inceleyin ve yönetin.',
+                    'review' => 'İncele',
+                    'summary' => '{1} katılma isteği|[2,*] katılma isteği',
                     'unknown_user' => 'Bilinmeyen kullanıcı',
                     'requested_at' => 'İstendi: :time',
                     'via_invite_link' => 'davet bağlantısıyla',
@@ -465,6 +467,9 @@ return [
                     ],
                     'dismiss' => [
                         'label' => 'Reddet',
+                    ],
+                    'dismiss_banner' => [
+                        'label' => 'Katılma istekleri bildirimini kapat',
                     ],
                     'dismiss_all' => [
                         'label' => 'Tümünü Reddet',
