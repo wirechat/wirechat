@@ -12,7 +12,7 @@
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
         <div class="space-y-3 text-center">
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]">
-                    <x-wirechat::icons.user-group class="size-10" />
+                    <x-wirechat::icons.user-clock class="size-10" />
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.join.requests.labels.description') }}</p>
         </div>

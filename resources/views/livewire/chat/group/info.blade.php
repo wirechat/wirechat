@@ -247,7 +247,7 @@
                 <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex items-center justify-between gap-3">
                     <span class="flex items-center gap-3">
                       
-                        <x-wirechat::icons.user-group class="size-6.7" />
+                        <x-wirechat::icons.user-clock class="size-6.7" />
                         <span>{{ __('wirechat::chat.group.join.requests.heading.label') }}</span>
                     </span>
 
