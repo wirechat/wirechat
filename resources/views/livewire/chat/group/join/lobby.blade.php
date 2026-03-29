@@ -20,7 +20,7 @@
                 @endif
             </div>
         </div>
-        <p class=" text-sm text-gray-500 dark:text-gray-400">
+        <p wire:ignore class=" text-sm text-gray-500 dark:text-gray-400">
             {{ trans_choice('wirechat::chat.group.join.lobby.labels.members_count', $conversation?->participants_count ?? 0, ['count' => $conversation?->participants_count ?? 0]) }}
         </p>
         @if ($membersPreview->isNotEmpty())
@@ -33,7 +33,7 @@
                 @if ($remainingMembersCount > 0)
                     <div
                         aria-label="{{ trans_choice('wirechat::chat.group.join.lobby.labels.more_members', $remainingMembersCount, ['count' => $remainingMembersCount]) }}"
-                        class="flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--wc-light-border)] bg-[var(--wc-light-secondary)] text-xs font-semibold text-gray-700 dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-secondary)] dark:text-gray-200"
+                        class="flex ml-6 size-10 shrink-0 items-center justify-center rounded-full border border-[var(--wc-light-border)] bg-[var(--wc-light-secondary)] text-xs font-semibold text-gray-700 dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-secondary)] dark:text-gray-200"
                     >
                         +{{ number_format($remainingMembersCount) }}
                     </div>
