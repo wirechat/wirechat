@@ -6,8 +6,8 @@ use Wirechat\Wirechat\Enums\JoinRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
-use Wirechat\Wirechat\Livewire\Chat\Group\JoinFromInvite;
-use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
+use Wirechat\Wirechat\Livewire\Chat\Group\Join\Lobby;
+use Wirechat\Wirechat\Livewire\Chat\Group\Join\Requests;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
@@ -117,7 +117,7 @@ it('forbids non-admin participants from accessing invite link management even wh
         ->assertStatus(403);
 
     Livewire::actingAs($participantUser)
-        ->test(JoinRequests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(403);
 });
 
@@ -525,12 +525,12 @@ it('renders join from invite modal using translations', function () {
     ]);
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
-        ->assertSee(__('wirechat::chat.group.join_from_invite.heading.label'))
-        ->assertSee(__('wirechat::chat.group.join_from_invite.labels.members_count', ['count' => $conversation->participants_count]))
-        ->assertSee(__('wirechat::chat.group.join_from_invite.labels.open_access'))
-        ->assertSee(__('wirechat::chat.group.join_from_invite.actions.cancel.label'))
-        ->assertSee(__('wirechat::chat.group.join_from_invite.actions.join_group.label'));
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.join.lobby.heading.label'))
+        ->assertSee(__('wirechat::chat.group.join.lobby.labels.members_count', ['count' => $conversation->participants_count]))
+        ->assertSee(__('wirechat::chat.group.join.lobby.labels.open_access'))
+        ->assertSee(__('wirechat::chat.group.join.lobby.actions.cancel.label'))
+        ->assertSee(__('wirechat::chat.group.join.lobby.actions.join_group.label'));
 });
 
 it('shows an overflow badge when the invite modal has more than six members to preview', function () {
@@ -551,9 +551,9 @@ it('shows an overflow badge when the invite modal has more than six members to p
     ]);
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->assertSee('+1')
-        ->assertSee(trans_choice('wirechat::chat.group.join_from_invite.labels.members_count', 7, ['count' => 7]));
+        ->assertSee(trans_choice('wirechat::chat.group.join.lobby.labels.members_count', 7, ['count' => 7]));
 });
 
 it('rejects tampered invite tokens on the join endpoint', function () {
@@ -684,7 +684,7 @@ it('joins a public group from the in-app invite modal', function () {
     ]);
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->call('proceed')
         ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
 
@@ -708,7 +708,7 @@ it('creates a join request from the in-app invite modal when approval is require
     ]);
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->call('proceed')
         ->assertNoRedirect();
 
@@ -738,7 +738,7 @@ it('allows an exited participant to rejoin via the in-app invite modal', functio
     ]);
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->call('proceed')
         ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
 
@@ -769,7 +769,7 @@ it('allows an admin-removed participant to rejoin via the in-app invite modal', 
     ]);
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->call('proceed')
         ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
 
@@ -801,7 +801,7 @@ it('keeps blocked members from rejoining by invite until the block is lifted', f
     ]);
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->call('proceed')
         ->assertNoRedirect();
 
@@ -816,7 +816,7 @@ it('keeps blocked members from rejoining by invite until the block is lifted', f
     $participant->refresh();
 
     Livewire::actingAs($receiver)
-        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->call('proceed')
         ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
 
@@ -847,7 +847,7 @@ it('allows admins to approve join requests from the drawer', function () {
     $request = $conversation->group->pendingJoinRequests()->whereRequester($receiver)->firstOrFail();
 
     Livewire::actingAs($owner)
-        ->test(JoinRequests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->call('approve', $request->id);
 
     $invite->refresh();
@@ -876,7 +876,7 @@ it('allows admins to dismiss join requests from the drawer', function () {
     $request = $conversation->group->pendingJoinRequests()->whereRequester($receiver)->firstOrFail();
 
     Livewire::actingAs($owner)
-        ->test(JoinRequests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->call('dismiss', $request->id);
 
     $invite->refresh();

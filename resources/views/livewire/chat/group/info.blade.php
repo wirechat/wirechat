@@ -246,13 +246,13 @@
             @php
                 $pendingJoinRequestsCount = $group?->pendingJoinRequests()->count();
             @endphp
-            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.join-requests"
+            <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.join.requests"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex items-center justify-between gap-3">
                     <span class="flex items-center gap-3">
                       
                         <x-wirechat::icons.user-group class="size-6.7" />
-                        <span>Join Requests</span>
+                        <span>{{ __('wirechat::chat.group.join.requests.heading.label') }}</span>
                     </span>
 
                     <span class="inline-flex min-w-10 items-center justify-center rounded-full bg-[var(--wc-brand-primary)] px-3 py-1 text-xs font-semibold text-white">

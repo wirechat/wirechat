@@ -222,30 +222,6 @@ return [
                 'invalid_conversation_type_error' => 'Only group conversations allowed',
             ],
         ],
-        'join_requests' => [
-            'heading' => [
-                'label' => 'Join Requests',
-            ],
-            'labels' => [
-                'description' => 'Review and handle everyone who asked to join this group through an invite link.',
-                'unknown_user' => 'Unknown user',
-                'requested_at' => 'Requested :time',
-                'via_invite_link' => 'via invite link',
-                'empty_state' => 'There are no pending join requests right now.',
-            ],
-            'actions' => [
-                'approve' => [
-                    'label' => 'Add To Group',
-                ],
-                'dismiss' => [
-                    'label' => 'Dismiss',
-                ],
-            ],
-            'messages' => [
-                'approved_success' => 'Join request approved.',
-                'dismissed_success' => 'Join request dismissed.',
-            ],
-        ],
         // add-Members component
         'add_members' => [
             'heading' => [
@@ -488,42 +464,69 @@ return [
                 ],
             ],
         ],
-        'join_from_invite' => [
-            'heading' => [
-                'label' => 'Join Group',
+        'join' => [
+            'requests' => [
+                'heading' => [
+                    'label' => 'Join Requests',
+                ],
+                'labels' => [
+                    'description' => 'Review and handle everyone who asked to join this group through an invite link.',
+                    'unknown_user' => 'Unknown user',
+                    'requested_at' => 'Requested :time',
+                    'via_invite_link' => 'via invite link',
+                    'empty_state' => 'There are no pending join requests right now.',
+                    'count' => '{1} :count Join Request|[2,*] :count Join Requests',
+                ],
+                'actions' => [
+                    'approve' => [
+                        'label' => 'Add To Group',
+                    ],
+                    'dismiss' => [
+                        'label' => 'Dismiss',
+                    ],
+                ],
+                'messages' => [
+                    'approved_success' => 'Join request approved.',
+                    'dismissed_success' => 'Join request dismissed.',
+                ],
             ],
-            'labels' => [
-                'default_group_name' => 'Group',
-                'members_count' => '{1} :count member|[2,*] :count members',
-                'more_members' => '{1} :count more member|[2,*] :count more members',
-                'already_member' => 'You are already a member of this group.',
-                'join_blocked' => 'You can’t join this group with this invite right now.',
-                'pending_review' => 'Your join request is already waiting for admin review.',
-                'requires_approval' => 'New members need admin approval before they can join this group.',
-                'open_access' => 'You can join this group right away.',
-            ],
-            'actions' => [
-                'cancel' => [
-                    'label' => 'Cancel',
-                ],
-                'open_group' => [
-                    'label' => 'Open Group',
-                ],
-                'request_pending' => [
-                    'label' => 'Request Pending',
-                ],
-                'request_to_join' => [
-                    'label' => 'Request To Join',
-                ],
-                'join_group' => [
+            'lobby' => [
+                'heading' => [
                     'label' => 'Join Group',
                 ],
-            ],
-            'messages' => [
-                'invite_inactive' => 'This invite link is no longer active.',
-                'join_blocked' => 'You can’t join this group with this invite right now.',
-                'pending_request' => 'Your join request is already pending.',
-                'request_sent' => 'Your join request has been sent to the admins.',
+                'labels' => [
+                    'default_group_name' => 'Group',
+                    'members_count' => '{1} :count member|[2,*] :count members',
+                    'more_members' => '{1} :count more member|[2,*] :count more members',
+                    'already_member' => 'You are already a member of this group.',
+                    'join_blocked' => 'You can’t join this group with this invite right now.',
+                    'pending_review' => 'Your join request is already waiting for admin review.',
+                    'requires_approval' => 'New members need admin approval before they can join this group.',
+                    'open_access' => 'You can join this group right away.',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'Cancel',
+                    ],
+                    'open_group' => [
+                        'label' => 'Open Group',
+                    ],
+                    'request_pending' => [
+                        'label' => 'Request Pending',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Request To Join',
+                    ],
+                    'join_group' => [
+                        'label' => 'Join Group',
+                    ],
+                ],
+                'messages' => [
+                    'invite_inactive' => 'This invite link is no longer active.',
+                    'join_blocked' => 'You can’t join this group with this invite right now.',
+                    'pending_request' => 'Your join request is already pending.',
+                    'request_sent' => 'Your join request has been sent to the admins.',
+                ],
             ],
         ],
         'past_members' => [

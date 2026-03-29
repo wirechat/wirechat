@@ -18,8 +18,8 @@ use Wirechat\Wirechat\Facades\WirechatColor;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
-use Wirechat\Wirechat\Livewire\Chat\Group\JoinFromInvite;
-use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
+use Wirechat\Wirechat\Livewire\Chat\Group\Join\Lobby;
+use Wirechat\Wirechat\Livewire\Chat\Group\Join\Requests;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
@@ -189,8 +189,8 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.links.list', \Wirechat\Wirechat\Livewire\Chat\Group\Links\List::class);
         Livewire::component('wirechat.chat.group.links.create', Create::class);
         Livewire::component('wirechat.chat.group.links.show', Show::class);
-        Livewire::component('wirechat.chat.group.join-from-invite', JoinFromInvite::class);
-        Livewire::component('wirechat.chat.group.join-requests', JoinRequests::class);
+        Livewire::component('wirechat.chat.group.join.lobby', Lobby::class);
+        Livewire::component('wirechat.chat.group.join.requests', Requests::class);
         Livewire::component('wirechat.chat.group.links.send', Send::class);
 
         // Backwards-compatible aliases for existing integrations.

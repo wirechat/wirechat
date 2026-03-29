@@ -208,30 +208,6 @@ return [
                 'invalid_conversation_type_error' => 'Seules les conversations de groupe sont autorisées',
             ],
         ],
-        'join_requests' => [
-            'heading' => [
-                'label' => "Demandes d'adhésion",
-            ],
-            'labels' => [
-                'description' => "Examinez et gérez toutes les personnes qui ont demandé à rejoindre ce groupe via un lien d'invitation.",
-                'unknown_user' => 'Utilisateur inconnu',
-                'requested_at' => 'Demandée :time',
-                'via_invite_link' => "via le lien d'invitation",
-                'empty_state' => "Il n'y a aucune demande d'adhésion en attente pour le moment.",
-            ],
-            'actions' => [
-                'approve' => [
-                    'label' => 'Ajouter au groupe',
-                ],
-                'dismiss' => [
-                    'label' => 'Ignorer',
-                ],
-            ],
-            'messages' => [
-                'approved_success' => "Demande d'adhésion approuvée.",
-                'dismissed_success' => "Demande d'adhésion ignorée.",
-            ],
-        ],
         // add-Members component
         'add_members' => [
             'heading' => [
@@ -467,42 +443,69 @@ return [
                 ],
             ],
         ],
-        'join_from_invite' => [
-            'heading' => [
-                'label' => 'Rejoindre le groupe',
+        'join' => [
+            'requests' => [
+                'heading' => [
+                    'label' => "Demandes d'adhésion",
+                ],
+                'labels' => [
+                    'description' => "Examinez et gérez toutes les personnes qui ont demandé à rejoindre ce groupe via un lien d'invitation.",
+                    'unknown_user' => 'Utilisateur inconnu',
+                    'requested_at' => 'Demandée :time',
+                    'via_invite_link' => "via le lien d'invitation",
+                    'empty_state' => "Il n'y a aucune demande d'adhésion en attente pour le moment.",
+                    'count' => '{1} :count demande d’adhésion|[2,*] :count demandes d’adhésion',
+                ],
+                'actions' => [
+                    'approve' => [
+                        'label' => 'Ajouter au groupe',
+                    ],
+                    'dismiss' => [
+                        'label' => 'Ignorer',
+                    ],
+                ],
+                'messages' => [
+                    'approved_success' => "Demande d'adhésion approuvée.",
+                    'dismissed_success' => "Demande d'adhésion ignorée.",
+                ],
             ],
-            'labels' => [
-                'default_group_name' => 'Groupe',
-                'members_count' => '{1} :count membre|[2,*] :count membres',
-                'more_members' => '{1} :count membre supplémentaire|[2,*] :count membres supplémentaires',
-                'already_member' => 'Vous faites déjà partie de ce groupe.',
-                'join_blocked' => 'Vous ne pouvez pas rejoindre ce groupe avec ce lien d’invitation pour le moment.',
-                'pending_review' => 'Votre demande est déjà en attente de validation par un administrateur.',
-                'requires_approval' => 'Les nouveaux membres doivent être approuvés par un administrateur avant de rejoindre ce groupe.',
-                'open_access' => 'Vous pouvez rejoindre ce groupe immédiatement.',
-            ],
-            'actions' => [
-                'cancel' => [
-                    'label' => 'Annuler',
-                ],
-                'open_group' => [
-                    'label' => 'Ouvrir le groupe',
-                ],
-                'request_pending' => [
-                    'label' => 'Demande en attente',
-                ],
-                'request_to_join' => [
-                    'label' => 'Demander à rejoindre',
-                ],
-                'join_group' => [
+            'lobby' => [
+                'heading' => [
                     'label' => 'Rejoindre le groupe',
                 ],
-            ],
-            'messages' => [
-                'invite_inactive' => 'Ce lien d’invitation n’est plus actif.',
-                'join_blocked' => 'Vous ne pouvez pas rejoindre ce groupe avec ce lien d’invitation pour le moment.',
-                'pending_request' => 'Votre demande est déjà en attente.',
-                'request_sent' => 'Votre demande a été envoyée aux administrateurs.',
+                'labels' => [
+                    'default_group_name' => 'Groupe',
+                    'members_count' => '{1} :count membre|[2,*] :count membres',
+                    'more_members' => '{1} :count membre supplémentaire|[2,*] :count membres supplémentaires',
+                    'already_member' => 'Vous faites déjà partie de ce groupe.',
+                    'join_blocked' => 'Vous ne pouvez pas rejoindre ce groupe avec ce lien d’invitation pour le moment.',
+                    'pending_review' => 'Votre demande est déjà en attente de validation par un administrateur.',
+                    'requires_approval' => 'Les nouveaux membres doivent être approuvés par un administrateur avant de rejoindre ce groupe.',
+                    'open_access' => 'Vous pouvez rejoindre ce groupe immédiatement.',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'Annuler',
+                    ],
+                    'open_group' => [
+                        'label' => 'Ouvrir le groupe',
+                    ],
+                    'request_pending' => [
+                        'label' => 'Demande en attente',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Demander à rejoindre',
+                    ],
+                    'join_group' => [
+                        'label' => 'Rejoindre le groupe',
+                    ],
+                ],
+                'messages' => [
+                    'invite_inactive' => 'Ce lien d’invitation n’est plus actif.',
+                    'join_blocked' => 'Vous ne pouvez pas rejoindre ce groupe avec ce lien d’invitation pour le moment.',
+                    'pending_request' => 'Votre demande est déjà en attente.',
+                    'request_sent' => 'Votre demande a été envoyée aux administrateurs.',
+                ],
             ],
         ],
         'past_members' => [

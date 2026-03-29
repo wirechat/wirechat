@@ -222,30 +222,6 @@ return [
                 'invalid_conversation_type_error' => 'Nur Gruppenkonversationen erlaubt',
             ],
         ],
-        'join_requests' => [
-            'heading' => [
-                'label' => 'Beitrittsanfragen',
-            ],
-            'labels' => [
-                'description' => 'Überprüfe und bearbeite alle Personen, die über einen Einladungslink den Beitritt zu dieser Gruppe angefragt haben.',
-                'unknown_user' => 'Unbekannter Benutzer',
-                'requested_at' => 'Angefragt: :time',
-                'via_invite_link' => 'über einen Einladungslink',
-                'empty_state' => 'Zurzeit gibt es keine ausstehenden Beitrittsanfragen.',
-            ],
-            'actions' => [
-                'approve' => [
-                    'label' => 'Zur Gruppe hinzufügen',
-                ],
-                'dismiss' => [
-                    'label' => 'Ablehnen',
-                ],
-            ],
-            'messages' => [
-                'approved_success' => 'Beitrittsanfrage genehmigt.',
-                'dismissed_success' => 'Beitrittsanfrage abgelehnt.',
-            ],
-        ],
         // add-Members component
         'add_members' => [
             'heading' => [
@@ -488,42 +464,69 @@ return [
                 ],
             ],
         ],
-        'join_from_invite' => [
-            'heading' => [
-                'label' => 'Gruppe beitreten',
+        'join' => [
+            'requests' => [
+                'heading' => [
+                    'label' => 'Beitrittsanfragen',
+                ],
+                'labels' => [
+                    'description' => 'Überprüfe und bearbeite alle Personen, die über einen Einladungslink den Beitritt zu dieser Gruppe angefragt haben.',
+                    'unknown_user' => 'Unbekannter Benutzer',
+                    'requested_at' => 'Angefragt: :time',
+                    'via_invite_link' => 'über einen Einladungslink',
+                    'empty_state' => 'Zurzeit gibt es keine ausstehenden Beitrittsanfragen.',
+                    'count' => '{1} :count Beitrittsanfrage|[2,*] :count Beitrittsanfragen',
+                ],
+                'actions' => [
+                    'approve' => [
+                        'label' => 'Zur Gruppe hinzufügen',
+                    ],
+                    'dismiss' => [
+                        'label' => 'Ablehnen',
+                    ],
+                ],
+                'messages' => [
+                    'approved_success' => 'Beitrittsanfrage genehmigt.',
+                    'dismissed_success' => 'Beitrittsanfrage abgelehnt.',
+                ],
             ],
-            'labels' => [
-                'default_group_name' => 'Gruppe',
-                'members_count' => '{1} :count Mitglied|[2,*] :count Mitglieder',
-                'more_members' => '{1} :count weiteres Mitglied|[2,*] :count weitere Mitglieder',
-                'already_member' => 'Du bist bereits Mitglied dieser Gruppe.',
-                'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
-                'pending_review' => 'Deine Beitrittsanfrage wartet bereits auf die Prüfung durch einen Admin.',
-                'requires_approval' => 'Neue Mitglieder brauchen die Freigabe eines Admins, bevor sie dieser Gruppe beitreten können.',
-                'open_access' => 'Du kannst dieser Gruppe sofort beitreten.',
-            ],
-            'actions' => [
-                'cancel' => [
-                    'label' => 'Abbrechen',
-                ],
-                'open_group' => [
-                    'label' => 'Gruppe öffnen',
-                ],
-                'request_pending' => [
-                    'label' => 'Anfrage ausstehend',
-                ],
-                'request_to_join' => [
-                    'label' => 'Beitritt anfragen',
-                ],
-                'join_group' => [
+            'lobby' => [
+                'heading' => [
                     'label' => 'Gruppe beitreten',
                 ],
-            ],
-            'messages' => [
-                'invite_inactive' => 'Dieser Einladungslink ist nicht mehr aktiv.',
-                'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
-                'pending_request' => 'Deine Beitrittsanfrage ist bereits ausstehend.',
-                'request_sent' => 'Deine Beitrittsanfrage wurde an die Admins gesendet.',
+                'labels' => [
+                    'default_group_name' => 'Gruppe',
+                    'members_count' => '{1} :count Mitglied|[2,*] :count Mitglieder',
+                    'more_members' => '{1} :count weiteres Mitglied|[2,*] :count weitere Mitglieder',
+                    'already_member' => 'Du bist bereits Mitglied dieser Gruppe.',
+                    'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
+                    'pending_review' => 'Deine Beitrittsanfrage wartet bereits auf die Prüfung durch einen Admin.',
+                    'requires_approval' => 'Neue Mitglieder brauchen die Freigabe eines Admins, bevor sie dieser Gruppe beitreten können.',
+                    'open_access' => 'Du kannst dieser Gruppe sofort beitreten.',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'Abbrechen',
+                    ],
+                    'open_group' => [
+                        'label' => 'Gruppe öffnen',
+                    ],
+                    'request_pending' => [
+                        'label' => 'Anfrage ausstehend',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Beitritt anfragen',
+                    ],
+                    'join_group' => [
+                        'label' => 'Gruppe beitreten',
+                    ],
+                ],
+                'messages' => [
+                    'invite_inactive' => 'Dieser Einladungslink ist nicht mehr aktiv.',
+                    'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
+                    'pending_request' => 'Deine Beitrittsanfrage ist bereits ausstehend.',
+                    'request_sent' => 'Deine Beitrittsanfrage wurde an die Admins gesendet.',
+                ],
             ],
         ],
         'past_members' => [

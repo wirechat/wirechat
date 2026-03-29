@@ -85,11 +85,11 @@
 
         @if ($pendingJoinRequestsCount > 0)
             <button type="button"
-                onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join-requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
+                onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
                 class="sticky top-0 z-[60] mx-auto flex w-full max-w-3xl items-center justify-between gap-3 rounded-2xl border border-[var(--wc-light-border)] bg-[var(--wc-light-primary)] px-4 py-3 text-sm shadow-sm dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-primary)]">
                 <span class="flex items-center gap-3">
                     <x-wirechat::avatar :src="$conversation->group?->cover_url" class="h-10 w-10" />
-                    <span class="font-medium text-[var(--wc-brand-primary)]">{{ $pendingJoinRequestsCount }} {{ $pendingJoinRequestsCount === 1 ? 'Join Request' : 'Join Requests' }}</span>
+                    <span class="font-medium text-[var(--wc-brand-primary)]">{{ trans_choice('wirechat::chat.group.join.requests.labels.count', $pendingJoinRequestsCount, ['count' => $pendingJoinRequestsCount]) }}</span>
                 </span>
 
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--wc-light-border)] text-gray-500 dark:border-[var(--wc-dark-border)] dark:text-gray-300">

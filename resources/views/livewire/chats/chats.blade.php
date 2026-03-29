@@ -9,7 +9,7 @@
         if (pendingInviteToken && @js($this->panel()->hasGroupInvitations())) {
             setTimeout(() => {
                 Livewire.dispatch('openWirechatModal', {
-                    component: 'wirechat.chat.group.join-from-invite',
+                    component: 'wirechat.chat.group.join.lobby',
                     arguments: {
                         token: pendingInviteToken,
                         panel: @js($this->panel)

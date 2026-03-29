@@ -20,7 +20,7 @@
         $copyPrimaryInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$primaryInviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$primaryInviteUrlJs}); }";
         $openSendInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: {$conversationId}, invite: {$primaryInviteId}, panel: {$panelId} } })";
         $openPermissionsDrawerAction = "Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.permissions', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
-        $openJoinRequestsDrawerAction = "Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join-requests', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
+        $openJoinRequestsDrawerAction = "Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
     @endphp
 
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">

@@ -204,30 +204,6 @@ return [
                 'invalid_conversation_type_error' => 'Yalnızca grup sohbetlerine izin verilir',
             ],
         ],
-        'join_requests' => [
-            'heading' => [
-                'label' => 'Katılma İstekleri',
-            ],
-            'labels' => [
-                'description' => 'Bir davet bağlantısıyla bu gruba katılmak isteyen kişileri inceleyin ve yönetin.',
-                'unknown_user' => 'Bilinmeyen kullanıcı',
-                'requested_at' => 'İstendi: :time',
-                'via_invite_link' => 'davet bağlantısıyla',
-                'empty_state' => 'Şu anda bekleyen katılma isteği yok.',
-            ],
-            'actions' => [
-                'approve' => [
-                    'label' => 'Gruba Ekle',
-                ],
-                'dismiss' => [
-                    'label' => 'Reddet',
-                ],
-            ],
-            'messages' => [
-                'approved_success' => 'Katılma isteği onaylandı.',
-                'dismissed_success' => 'Katılma isteği reddedildi.',
-            ],
-        ],
         // add-Members component
         'add_members' => [
             'heading' => [
@@ -466,42 +442,69 @@ return [
                 ],
             ],
         ],
-        'join_from_invite' => [
-            'heading' => [
-                'label' => 'Gruba Katıl',
+        'join' => [
+            'requests' => [
+                'heading' => [
+                    'label' => 'Katılma İstekleri',
+                ],
+                'labels' => [
+                    'description' => 'Bir davet bağlantısıyla bu gruba katılmak isteyen kişileri inceleyin ve yönetin.',
+                    'unknown_user' => 'Bilinmeyen kullanıcı',
+                    'requested_at' => 'İstendi: :time',
+                    'via_invite_link' => 'davet bağlantısıyla',
+                    'empty_state' => 'Şu anda bekleyen katılma isteği yok.',
+                    'count' => ':count Katılma İsteği',
+                ],
+                'actions' => [
+                    'approve' => [
+                        'label' => 'Gruba Ekle',
+                    ],
+                    'dismiss' => [
+                        'label' => 'Reddet',
+                    ],
+                ],
+                'messages' => [
+                    'approved_success' => 'Katılma isteği onaylandı.',
+                    'dismissed_success' => 'Katılma isteği reddedildi.',
+                ],
             ],
-            'labels' => [
-                'default_group_name' => 'Grup',
-                'members_count' => ':count üye',
-                'more_members' => ':count üye daha',
-                'already_member' => 'Bu grubun zaten bir üyesisiniz.',
-                'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
-                'pending_review' => 'Katılma isteğiniz zaten yönetici incelemesinde.',
-                'requires_approval' => 'Bu gruba katılmak için önce yönetici onayı gerekir.',
-                'open_access' => 'Bu gruba hemen katılabilirsiniz.',
-            ],
-            'actions' => [
-                'cancel' => [
-                    'label' => 'Vazgeç',
-                ],
-                'open_group' => [
-                    'label' => 'Grubu Aç',
-                ],
-                'request_pending' => [
-                    'label' => 'İstek Bekliyor',
-                ],
-                'request_to_join' => [
-                    'label' => 'Katılma İsteği Gönder',
-                ],
-                'join_group' => [
+            'lobby' => [
+                'heading' => [
                     'label' => 'Gruba Katıl',
                 ],
-            ],
-            'messages' => [
-                'invite_inactive' => 'Bu davet bağlantısı artık aktif değil.',
-                'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
-                'pending_request' => 'Katılma isteğiniz zaten beklemede.',
-                'request_sent' => 'Katılma isteğiniz yöneticilere gönderildi.',
+                'labels' => [
+                    'default_group_name' => 'Grup',
+                    'members_count' => ':count üye',
+                    'more_members' => ':count üye daha',
+                    'already_member' => 'Bu grubun zaten bir üyesisiniz.',
+                    'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
+                    'pending_review' => 'Katılma isteğiniz zaten yönetici incelemesinde.',
+                    'requires_approval' => 'Bu gruba katılmak için önce yönetici onayı gerekir.',
+                    'open_access' => 'Bu gruba hemen katılabilirsiniz.',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'Vazgeç',
+                    ],
+                    'open_group' => [
+                        'label' => 'Grubu Aç',
+                    ],
+                    'request_pending' => [
+                        'label' => 'İstek Bekliyor',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Katılma İsteği Gönder',
+                    ],
+                    'join_group' => [
+                        'label' => 'Gruba Katıl',
+                    ],
+                ],
+                'messages' => [
+                    'invite_inactive' => 'Bu davet bağlantısı artık aktif değil.',
+                    'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
+                    'pending_request' => 'Katılma isteğiniz zaten beklemede.',
+                    'request_sent' => 'Katılma isteğiniz yöneticilere gönderildi.',
+                ],
             ],
         ],
         'past_members' => [

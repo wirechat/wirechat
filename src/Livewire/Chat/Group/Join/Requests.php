@@ -1,16 +1,17 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Join;
 
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
+use Wirechat\Wirechat\Livewire\Chat\Group\Info;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
-class JoinRequests extends ModalComponent
+class Requests extends ModalComponent
 {
     use HasPanel;
 
@@ -68,7 +69,7 @@ class JoinRequests extends ModalComponent
 
         $this->dispatch('refresh')->to(Info::class);
         $this->dispatch('refresh')->to(Chat::class);
-        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join_requests.messages.approved_success'));
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join.requests.messages.approved_success'));
     }
 
     public function dismiss(int $requestId): void
@@ -83,12 +84,12 @@ class JoinRequests extends ModalComponent
 
         $this->dispatch('refresh')->to(Info::class);
         $this->dispatch('refresh')->to(Chat::class);
-        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join_requests.messages.dismissed_success'));
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join.requests.messages.dismissed_success'));
     }
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.join-requests', [
+        return view('wirechat::livewire.chat.group.join.requests', [
             'requests' => $this->group->pendingJoinRequests()->with('requester')->latest()->get(),
         ]);
     }
