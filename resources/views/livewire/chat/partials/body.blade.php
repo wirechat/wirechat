@@ -76,31 +76,6 @@
     <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore" class="invisible transition-all duration-300 ">
         <x-wirechat::loading-spin />
     </div>
-
-
-    @if ($isGroup && $authParticipant?->isAdmin() && $this->panel()->hasGroupInvitations())
-        @php
-            $pendingJoinRequestsCount = $conversation->group?->pendingJoinRequests()->count();
-        @endphp
-
-        @if ($pendingJoinRequestsCount > 0)
-            <button type="button"
-                onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
-                class="sticky top-0 z-[60] mx-auto flex w-full max-w-3xl items-center justify-between gap-3 rounded-2xl border border-[var(--wc-light-border)] bg-[var(--wc-light-primary)] px-4 py-3 text-sm shadow-sm dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-primary)]">
-                <span class="flex items-center gap-3">
-                    <x-wirechat::avatar :src="$conversation->group?->cover_url" class="h-10 w-10" />
-                    <span class="font-medium text-[var(--wc-brand-primary)]">{{ trans_choice('wirechat::chat.group.join.requests.labels.count', $pendingJoinRequestsCount, ['count' => $pendingJoinRequestsCount]) }}</span>
-                </span>
-
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--wc-light-border)] text-gray-500 dark:border-[var(--wc-dark-border)] dark:text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
-                    </svg>
-                </span>
-            </button>
-        @endif
-    @endif
-
     {{-- Define previous message outside the loop --}}
     @php
         $previousMessage = null;

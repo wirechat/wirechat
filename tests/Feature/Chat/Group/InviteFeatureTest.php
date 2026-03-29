@@ -899,9 +899,10 @@ it('shows the join request banner only to group admins', function () {
 
     Livewire::actingAs($owner)
         ->test(Chat::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->assertSee('Join Request');
+        ->assertSee(__('wirechat::chat.group.join.requests.heading.label'))
+        ->assertSee('1');
 
     Livewire::actingAs($member)
         ->test(Chat::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->assertDontSee('Join Request');
+        ->assertDontSee(__('wirechat::chat.group.join.requests.heading.label'));
 });
