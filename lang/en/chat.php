@@ -362,6 +362,47 @@ return [
                 'copy_prompt' => 'Copy this link',
                 'reset_success' => 'Group invite link reset.',
             ],
+            'create' => [
+                'heading' => [
+                    'label' => 'New invite link',
+                ],
+                'inputs' => [
+                    'name' => [
+                        'placeholder' => 'Link name (optional)',
+                        'helper_text' => 'Only admins can see this name.',
+                    ],
+                ],
+                'sections' => [
+                    'expiry' => [
+                        'label' => 'Link availability',
+                    ],
+                    'usage' => [
+                        'label' => 'Join limit',
+                    ],
+                ],
+                'options' => [
+                    'expiry' => [
+                        '1_hour' => '1 hour',
+                        '1_day' => '1 day',
+                        '1_week' => '1 week',
+                        'never' => 'Never',
+                    ],
+                    'usage' => [
+                        'unlimited' => 'Unlimited',
+                    ],
+                ],
+                'labels' => [
+                    'approval_notice' => "Approval still follows your group's access settings. Public groups let people join right away, while private or approval-only groups create join requests.",
+                ],
+                'actions' => [
+                    'create' => [
+                        'label' => 'Create link',
+                    ],
+                ],
+                'messages' => [
+                    'created_success' => 'Invite link created.',
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => 'Send Invite Link',

@@ -162,6 +162,59 @@ it('can create an additional invite link', function () {
         ->and($additionalInvite?->expires_at)->not->toBeNull();
 });
 
+it('renders translated content in the create invite link modal', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    Livewire::actingAs($owner)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.invite_link.create.heading.label'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.inputs.name.placeholder'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.inputs.name.helper_text'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.sections.expiry.label'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.sections.usage.label'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.options.expiry.1_hour'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.options.expiry.1_day'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.options.expiry.1_week'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.options.expiry.never'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.options.usage.unlimited'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.labels.approval_notice'))
+        ->assertSee(__('wirechat::chat.group.invite_link.create.actions.create.label'));
+});
+
+it('validates the create invite link name length', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    Livewire::actingAs($owner)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->set('name', str_repeat('a', 121))
+        ->call('createLink')
+        ->assertHasErrors(['name' => 'max']);
+});
+
+it('validates the create invite link expiry preset', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    Livewire::actingAs($owner)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->set('expiryPreset', '2_weeks')
+        ->call('createLink')
+        ->assertHasErrors(['expiryPreset' => 'in']);
+});
+
+it('validates the create invite link usage preset', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    Livewire::actingAs($owner)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->set('usagePreset', '999')
+        ->call('createLink')
+        ->assertHasErrors(['usagePreset' => 'in']);
+});
+
 it('loads additional invite links incrementally from the dedicated list component', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');

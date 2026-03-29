@@ -362,6 +362,47 @@ return [
                 'copy_prompt' => 'Diesen Link kopieren',
                 'reset_success' => 'Gruppen-Einladungslink zurückgesetzt.',
             ],
+            'create' => [
+                'heading' => [
+                    'label' => 'Neuer Einladungslink',
+                ],
+                'inputs' => [
+                    'name' => [
+                        'placeholder' => 'Linkname (optional)',
+                        'helper_text' => 'Diesen Namen sehen nur Administratoren.',
+                    ],
+                ],
+                'sections' => [
+                    'expiry' => [
+                        'label' => 'Gültigkeitsdauer des Links',
+                    ],
+                    'usage' => [
+                        'label' => 'Teilnahmelimit',
+                    ],
+                ],
+                'options' => [
+                    'expiry' => [
+                        '1_hour' => '1 Stunde',
+                        '1_day' => '1 Tag',
+                        '1_week' => '1 Woche',
+                        'never' => 'Unbegrenzt',
+                    ],
+                    'usage' => [
+                        'unlimited' => 'Unbegrenzt',
+                    ],
+                ],
+                'labels' => [
+                    'approval_notice' => 'Die Freigabe richtet sich weiterhin nach den Zugriffseinstellungen der Gruppe. In öffentlichen Gruppen können Personen sofort beitreten; in privaten Gruppen oder Gruppen mit Freigabepflicht wird zuerst eine Beitrittsanfrage erstellt.',
+                ],
+                'actions' => [
+                    'create' => [
+                        'label' => 'Link erstellen',
+                    ],
+                ],
+                'messages' => [
+                    'created_success' => 'Einladungslink erstellt.',
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => 'Einladungslink senden',

@@ -341,6 +341,47 @@ return [
                 'copy_prompt' => 'Copier ce lien',
                 'reset_success' => "Lien d'invitation du groupe réinitialisé.",
             ],
+            'create' => [
+                'heading' => [
+                    'label' => "Nouveau lien d'invitation",
+                ],
+                'inputs' => [
+                    'name' => [
+                        'placeholder' => 'Nom du lien (facultatif)',
+                        'helper_text' => 'Seuls les administrateurs verront ce nom.',
+                    ],
+                ],
+                'sections' => [
+                    'expiry' => [
+                        'label' => 'Durée de validité du lien',
+                    ],
+                    'usage' => [
+                        'label' => 'Limite de participants',
+                    ],
+                ],
+                'options' => [
+                    'expiry' => [
+                        '1_hour' => '1 heure',
+                        '1_day' => '1 jour',
+                        '1_week' => '1 semaine',
+                        'never' => 'Sans expiration',
+                    ],
+                    'usage' => [
+                        'unlimited' => 'Illimité',
+                    ],
+                ],
+                'labels' => [
+                    'approval_notice' => "L'approbation suit toujours les paramètres d'accès du groupe. Dans un groupe public, les personnes peuvent rejoindre immédiatement le groupe ; dans un groupe privé ou avec validation, une demande d'adhésion est créée.",
+                ],
+                'actions' => [
+                    'create' => [
+                        'label' => 'Créer le lien',
+                    ],
+                ],
+                'messages' => [
+                    'created_success' => "Lien d'invitation créé.",
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => "Envoyer le lien d'invitation",

@@ -5,27 +5,32 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-        <h3 class="text-lg font-semibold">New Link</h3>
+        <h3 class="text-lg font-semibold">{{ __('wirechat::chat.group.invite_link.create.heading.label') }}</h3>
         <span class="w-10"></span>
     </div>
 
     <div class="mt-6 space-y-6">
         <div>
-            <input type="text" wire:model.live="name" maxlength="120" placeholder="Link Name (Optional)"
+            <input type="text" wire:model.live="name" maxlength="120" placeholder="{{ __('wirechat::chat.group.invite_link.create.inputs.name.placeholder') }}"
                 class="wc-input w-full rounded-xl border border-[var(--wc-light-border)] bg-[var(--wc-light-primary)] px-4 py-3 text-base dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-primary)]">
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Only admins will see this name.</p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.create.inputs.name.helper_text') }}</p>
             @error('name')
                 <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
             @enderror
         </div>
 
         <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Limit By Time Period</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.create.sections.expiry.label') }}</p>
             <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                @foreach (['1_hour' => '1 hour', '1_day' => '1 day', '1_week' => '1 week', 'never' => 'Never'] as $value => $label)
+                @foreach ([
+                    '1_hour' => __('wirechat::chat.group.invite_link.create.options.expiry.1_hour'),
+                    '1_day' => __('wirechat::chat.group.invite_link.create.options.expiry.1_day'),
+                    '1_week' => __('wirechat::chat.group.invite_link.create.options.expiry.1_week'),
+                    'never' => __('wirechat::chat.group.invite_link.create.options.expiry.never'),
+                ] as $value => $label)
                     <button type="button" wire:click="$set('expiryPreset', '{{ $value }}')"
                         @class([
-                            'rounded-xl border px-3 py-3 text-sm font-medium transition',
+                            'rounded-lg border px-2 py-2 text-sm font-medium transition',
                             'border-[var(--wc-brand-primary)] bg-[var(--wc-brand-primary)] text-white' => $expiryPreset === $value,
                             'border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]' => $expiryPreset !== $value,
                         ])>
@@ -38,13 +43,20 @@
             @enderror
         </div>
 
+        {{-- Usage Presets --}}
         <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Limit By Number Of Users</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.create.sections.usage.label') }}</p>
             <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                @foreach (['1' => '1', '10' => '10', '50' => '50', '100' => '100', 'unlimited' => 'Unlimited'] as $value => $label)
+                @foreach ([
+                    '1' => '1',
+                    '10' => '10',
+                    '50' => '50',
+                    '100' => '100',
+                    'unlimited' => __('wirechat::chat.group.invite_link.create.options.usage.unlimited'),
+                ] as $value => $label)
                     <button type="button" wire:click="$set('usagePreset', '{{ $value }}')"
                         @class([
-                            'rounded-2xl border px-3 py-3 text-sm font-medium transition',
+                            'rounded-lg border px-2 py-2 text-sm font-medium transition',
                             'border-[var(--wc-brand-primary)] bg-[var(--wc-brand-primary)] text-white' => $usagePreset === $value,
                             'border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]' => $usagePreset !== $value,
                         ])>
@@ -57,13 +69,13 @@
             @enderror
         </div>
 
-        <div class="rounded-2xl bg-[var(--wc-light-secondary)] px-4 py-3 text-sm text-gray-600 dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300">
-            Approval still follows the group settings. Public groups can join directly, while private or approval-only groups will create join requests.
+        <div class="rounded-xl bg-[var(--wc-light-secondary)] px-4 py-3 text-sm text-gray-600 dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300">
+            {{ __('wirechat::chat.group.invite_link.create.labels.approval_notice') }}
         </div>
 
         <button type="button" wire:click="createLink" wire:loading.attr="disabled"
-            class="inline-flex w-full items-center justify-center rounded-2xl bg-[var(--wc-brand-primary)] px-4 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70">
-            Create
+            class="inline-flex w-full items-center justify-center rounded-xl bg-[var(--wc-brand-primary)] px-4 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70">
+            {{ __('wirechat::chat.group.invite_link.create.actions.create.label') }}
         </button>
     </div>
 </div>

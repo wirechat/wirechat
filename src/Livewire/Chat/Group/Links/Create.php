@@ -80,7 +80,7 @@ class Create extends ModalComponent
         ]);
 
         $this->dispatch('refreshGroupInvites');
-        $this->dispatch('wirechat-toast', type: 'success', message: 'Invite link created.');
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.invite_link.create.messages.created_success'));
         $this->closeWirechatModal();
     }
 

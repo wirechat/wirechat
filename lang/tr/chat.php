@@ -340,6 +340,47 @@ return [
                 'copy_prompt' => 'Bu bağlantıyı kopyala',
                 'reset_success' => 'Grup davet bağlantısı sıfırlandı.',
             ],
+            'create' => [
+                'heading' => [
+                    'label' => 'Yeni davet bağlantısı',
+                ],
+                'inputs' => [
+                    'name' => [
+                        'placeholder' => 'Bağlantı adı (isteğe bağlı)',
+                        'helper_text' => 'Bu adı yalnızca yöneticiler görebilir.',
+                    ],
+                ],
+                'sections' => [
+                    'expiry' => [
+                        'label' => 'Bağlantı süresi',
+                    ],
+                    'usage' => [
+                        'label' => 'Katılım sınırı',
+                    ],
+                ],
+                'options' => [
+                    'expiry' => [
+                        '1_hour' => '1 saat',
+                        '1_day' => '1 gün',
+                        '1_week' => '1 hafta',
+                        'never' => 'Süresiz',
+                    ],
+                    'usage' => [
+                        'unlimited' => 'Sınırsız',
+                    ],
+                ],
+                'labels' => [
+                    'approval_notice' => 'Onay süreci yine grubun erişim ayarlarına bağlıdır. Herkese açık gruplarda kişiler hemen katılabilir; özel veya onay gerektiren gruplarda ise katılma isteği oluşturulur.',
+                ],
+                'actions' => [
+                    'create' => [
+                        'label' => 'Bağlantı oluştur',
+                    ],
+                ],
+                'messages' => [
+                    'created_success' => 'Davet bağlantısı oluşturuldu.',
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => 'Davet Bağlantısı Gönder',
