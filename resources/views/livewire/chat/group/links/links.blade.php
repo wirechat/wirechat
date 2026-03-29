@@ -124,8 +124,6 @@
             </p>
 
             @if ($canEditGroupAccess)
-                Edit in 
-        
                 <x-wirechat::button onclick="{{ $openPermissionsDrawerAction }}" variant="link">
                                 {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }}
                 </x-wirechat::button>
