@@ -153,9 +153,13 @@
             {{ __('wirechat::chat.group.invite_link.create.labels.approval_notice') }}
         </div>
 
-        <button type="button" wire:click="createLink" wire:loading.attr="disabled"
-            class="inline-flex w-full items-center justify-center rounded-xl bg-[var(--wc-brand-primary)] px-4 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70">
+        <x-wirechat::button
+            variant="primary"
+            class="w-full"
+            wire:click="createLink"
+            wire:loading.attr="disabled">
             {{ __('wirechat::chat.group.invite_link.create.actions.create.label') }}
-        </button>
+        </x-wirechat::button>
+      
     </div>
 </div>

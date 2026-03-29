@@ -44,6 +44,23 @@ test('panel invitePageLayout can be customized', function () {
     expect(testPanelProvider()->getInvitePageLayout())->toBe('layouts.guest');
 });
 
+test('primary utility theme is mapped to the provider palette tokens', function () {
+    $providerContents = file_get_contents(__DIR__.'/../../src/WirechatServiceProvider.php');
+    $cssContents = file_get_contents(__DIR__.'/../../resources/css/app.css');
+
+    expect($providerContents)
+        ->toContain('--wc-primary-50: {$primary50};')
+        ->toContain('--wc-primary-500: {$primary500};')
+        ->toContain('--wc-primary-950: {$primary950};')
+        ->toContain('--wc-brand-primary: var(--wc-primary-500);');
+
+    expect($cssContents)
+        ->toContain('@theme inline {')
+        ->toContain('--color-primary-50: var(--wc-primary-50);')
+        ->toContain('--color-primary-500: var(--wc-primary-500);')
+        ->toContain('--color-primary-950: var(--wc-primary-950);');
+});
+
 describe('Chats Route', function () {
 
     test('return 404 if user canAccessWirechatPanel() returns false on chats route', function () {

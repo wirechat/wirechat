@@ -381,6 +381,38 @@ return [
                     'created_success' => 'Davet bağlantısı oluşturuldu.',
                 ],
             ],
+            'show' => [
+                'heading' => [
+                    'label' => 'Davet bağlantısı',
+                ],
+                'labels' => [
+                    'link' => 'Bağlantı',
+                    'created_by' => 'Bağlantıyı oluşturan',
+                    'unknown' => 'Bilinmiyor',
+                    'uses' => 'Kullanım',
+                    'limit' => 'Sınır',
+                    'unlimited' => 'Sınırsız',
+                    'expires' => 'Sona erme',
+                    'never' => 'Asla',
+                ],
+                'actions' => [
+                    'copy_link' => [
+                        'label' => 'Bağlantıyı kopyala',
+                    ],
+                    'share_link' => [
+                        'label' => 'Bağlantıyı paylaş',
+                    ],
+                    'revoke' => [
+                        'label' => 'Bağlantıyı iptal et',
+                    ],
+                ],
+                'messages' => [
+                    'copied_success' => 'Davet bağlantısı kopyalandı.',
+                    'copy_prompt' => 'Bu bağlantıyı kopyala',
+                    'revoke_confirmation' => 'Bu davet bağlantısını iptal etmek istediğinizden emin misiniz?',
+                    'revoked_success' => 'Davet bağlantısı iptal edildi.',
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => 'Davet Bağlantısı Gönder',

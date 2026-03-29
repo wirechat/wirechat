@@ -11,6 +11,7 @@ use Wirechat\Wirechat\Livewire\Chat\Group\JoinRequests;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Show;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
 use Wirechat\Wirechat\Models\Invite;
 use Workbench\App\Models\User;
@@ -180,6 +181,34 @@ it('renders translated content in the create invite link modal', function () {
         ->assertSee(__('wirechat::chat.group.invite_link.create.options.usage.unlimited'))
         ->assertSee(__('wirechat::chat.group.invite_link.create.labels.approval_notice'))
         ->assertSee(__('wirechat::chat.group.invite_link.create.actions.create.label'));
+});
+
+it('renders translated content in the invite link details modal', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $conversation = $owner->createGroup('Test');
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => false,
+        'usages' => 3,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.invite_link.show.heading.label'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.labels.link'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.labels.created_by'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.labels.uses'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.labels.limit'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.labels.unlimited'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.labels.expires'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.labels.never'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.actions.share_link.label'))
+        ->assertSee(__('wirechat::chat.group.invite_link.show.actions.revoke.label'));
 });
 
 it('marks the selected usage preset as active in the create invite link modal', function () {

@@ -2,16 +2,18 @@
     'type' => 'button',
     'variant' => 'primary',
     'size' => 'md',
+    'outline' => true,
     'fullWidth' => false,
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition focus:outline-hidden';
+    $baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition focus:outline-hidden  disabled:cursor-not-allowed disabled:opacity-60';
 
     $variantClasses = [
         'primary' => 'bg-[var(--wc-brand-primary)] text-white hover:opacity-90',
         'secondary' => 'border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-transparent text-gray-900 dark:text-white hover:bg-[var(--wc-light-secondary)]/60 dark:hover:bg-[var(--wc-dark-secondary)]/60',
         'link' => 'rounded-none p-0 font-medium text-[var(--wc-brand-primary)] hover:underline',
+        'subtle' => ' bg-transparent text-gray-500 dark:text-gray-400 hover:bg-[var(--wc-light-secondary)]/60 dark:hover:bg-[var(--wc-dark-secondary)]/60',
     ];
 
     $sizeClasses = [
@@ -25,6 +27,6 @@
         : trim($baseClasses.' '.($sizeClasses[$size] ?? $sizeClasses['md']).' '.$variantClasses[$variant].' '.($fullWidth ? 'w-full' : ''));
 @endphp
 
-<button type="{{ $type }}" {{ $attributes->class([$classes]) }}>
+<button type="{{ $type }}" {{ $attributes->merge(['class' => $classes]) }}>
     {{ $slot }}
 </button>

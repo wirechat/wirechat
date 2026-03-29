@@ -403,6 +403,38 @@ return [
                     'created_success' => 'Einladungslink erstellt.',
                 ],
             ],
+            'show' => [
+                'heading' => [
+                    'label' => 'Einladungslink',
+                ],
+                'labels' => [
+                    'link' => 'Link',
+                    'created_by' => 'Link erstellt von',
+                    'unknown' => 'Unbekannt',
+                    'uses' => 'Nutzungen',
+                    'limit' => 'Limit',
+                    'unlimited' => 'Unbegrenzt',
+                    'expires' => 'Läuft ab',
+                    'never' => 'Nie',
+                ],
+                'actions' => [
+                    'copy_link' => [
+                        'label' => 'Link kopieren',
+                    ],
+                    'share_link' => [
+                        'label' => 'Link teilen',
+                    ],
+                    'revoke' => [
+                        'label' => 'Link widerrufen',
+                    ],
+                ],
+                'messages' => [
+                    'copied_success' => 'Einladungslink kopiert.',
+                    'copy_prompt' => 'Diesen Link kopieren',
+                    'revoke_confirmation' => 'Möchtest du diesen Einladungslink wirklich widerrufen?',
+                    'revoked_success' => 'Einladungslink widerrufen.',
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => 'Einladungslink senden',

@@ -403,6 +403,38 @@ return [
                     'created_success' => 'Invite link created.',
                 ],
             ],
+            'show' => [
+                'heading' => [
+                    'label' => 'Invite link',
+                ],
+                'labels' => [
+                    'link' => 'Link',
+                    'created_by' => 'Link created by',
+                    'unknown' => 'Unknown',
+                    'uses' => 'Uses',
+                    'limit' => 'Limit',
+                    'unlimited' => 'Unlimited',
+                    'expires' => 'Expires',
+                    'never' => 'Never',
+                ],
+                'actions' => [
+                    'copy_link' => [
+                        'label' => 'Copy link',
+                    ],
+                    'share_link' => [
+                        'label' => 'Share link',
+                    ],
+                    'revoke' => [
+                        'label' => 'Revoke link',
+                    ],
+                ],
+                'messages' => [
+                    'copied_success' => 'Invite link copied.',
+                    'copy_prompt' => 'Copy this link',
+                    'revoke_confirmation' => 'Are you sure you want to revoke this invite link?',
+                    'revoked_success' => 'Invite link revoked.',
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => 'Send Invite Link',

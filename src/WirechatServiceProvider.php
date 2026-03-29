@@ -370,27 +370,59 @@ class WirechatServiceProvider extends ServiceProvider
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
-            $primaryColor = isset($currentPanel->getColors()['primary']) ? $currentPanel->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';
+            $defaultPrimaryPalette = Color::Blue;
+            $configuredPrimaryPalette = $currentPanel?->getColors()['primary'] ?? null;
+
+            $primaryPalette = $defaultPrimaryPalette;
+
+            if (is_array($configuredPrimaryPalette)) {
+                $primaryPalette = array_replace($primaryPalette, $configuredPrimaryPalette);
+            } elseif (is_string($configuredPrimaryPalette) && $configuredPrimaryPalette !== '') {
+                $primaryPalette[500] = $configuredPrimaryPalette;
+            }
+
+            $primary50 = $primaryPalette[50];
+            $primary100 = $primaryPalette[100];
+            $primary200 = $primaryPalette[200];
+            $primary300 = $primaryPalette[300];
+            $primary400 = $primaryPalette[400];
+            $primary500 = $primaryPalette[500];
+            $primary600 = $primaryPalette[600];
+            $primary700 = $primaryPalette[700];
+            $primary800 = $primaryPalette[800];
+            $primary900 = $primaryPalette[900];
+            $primary950 = $primaryPalette[950];
 
             return "<?php echo <<<EOT
-                <style>
-                    :root {
-                        --wc-brand-primary: {$primaryColor};
+                    <style>
+                        :root {
+                            --wc-primary-50: {$primary50};
+                            --wc-primary-100: {$primary100};
+                            --wc-primary-200: {$primary200};
+                            --wc-primary-300: {$primary300};
+                            --wc-primary-400: {$primary400};
+                            --wc-primary-500: {$primary500};
+                            --wc-primary-600: {$primary600};
+                            --wc-primary-700: {$primary700};
+                            --wc-primary-800: {$primary800};
+                            --wc-primary-900: {$primary900};
+                            --wc-primary-950: {$primary950};
+                            --wc-brand-primary: var(--wc-primary-500);
 
-                        --wc-light-primary: #fff;  /* white */
-                        --wc-light-secondary: oklch(0.967 0.001 286.375);/* --color-zinc-100 */
-                        --wc-light-accent: oklch(0.985 0 0);/* --color-zinc-50 */
-                        --wc-light-border: oklch(0.92 0.004 286.32);/* --color-zinc-200 */
+                            --wc-light-primary: #fff;  /* white */
+                            --wc-light-secondary: oklch(0.967 0.001 286.375);/* --color-zinc-100 */
+                            --wc-light-accent: oklch(0.985 0 0);/* --color-zinc-50 */
+                            --wc-light-border: oklch(0.92 0.004 286.32);/* --color-zinc-200 */
 
-                        --wc-dark-primary: oklch(0.21 0.006 285.885); /* --color-zinc-900 */
-                        --wc-dark-secondary: oklch(0.274 0.006 286.033);/* --color-zinc-800 */
-                        --wc-dark-accent: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
-                        --wc-dark-border: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
-                    }
-                    [x-cloak] {
-                        display: none !important;
-                    }
-                </style>
+                            --wc-dark-primary: oklch(0.21 0.006 285.885); /* --color-zinc-900 */
+                            --wc-dark-secondary: oklch(0.274 0.006 286.033);/* --color-zinc-800 */
+                            --wc-dark-accent: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
+                            --wc-dark-border: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
+                        }
+                        [x-cloak] {
+                            display: none !important;
+                        }
+                    </style>
             EOT; ?>";
         });
     }

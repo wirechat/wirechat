@@ -69,7 +69,7 @@ class Show extends ModalComponent
         $this->invite->revoke();
 
         $this->dispatch('refreshGroupInvites');
-        $this->dispatch('wirechat-toast', type: 'success', message: 'Invite link revoked.');
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.invite_link.show.messages.revoked_success'));
         $this->closeWirechatModal();
     }
 

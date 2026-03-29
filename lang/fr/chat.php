@@ -382,6 +382,38 @@ return [
                     'created_success' => "Lien d'invitation créé.",
                 ],
             ],
+            'show' => [
+                'heading' => [
+                    'label' => "Lien d'invitation",
+                ],
+                'labels' => [
+                    'link' => 'Lien',
+                    'created_by' => 'Lien créé par',
+                    'unknown' => 'Inconnu',
+                    'uses' => 'Utilisations',
+                    'limit' => 'Limite',
+                    'unlimited' => 'Illimité',
+                    'expires' => 'Expiration',
+                    'never' => 'Jamais',
+                ],
+                'actions' => [
+                    'copy_link' => [
+                        'label' => 'Copier le lien',
+                    ],
+                    'share_link' => [
+                        'label' => 'Partager le lien',
+                    ],
+                    'revoke' => [
+                        'label' => 'Révoquer le lien',
+                    ],
+                ],
+                'messages' => [
+                    'copied_success' => "Lien d'invitation copié.",
+                    'copy_prompt' => 'Copier ce lien',
+                    'revoke_confirmation' => "Voulez-vous vraiment révoquer ce lien d'invitation ?",
+                    'revoked_success' => "Lien d'invitation révoqué.",
+                ],
+            ],
             'send_via_chat' => [
                 'heading' => [
                     'label' => "Envoyer le lien d'invitation",
