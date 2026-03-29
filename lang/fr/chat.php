@@ -474,6 +474,7 @@ return [
             'labels' => [
                 'default_group_name' => 'Groupe',
                 'members_count' => '{1} :count membre|[2,*] :count membres',
+                'more_members' => '{1} :count membre supplémentaire|[2,*] :count membres supplémentaires',
                 'already_member' => 'Vous faites déjà partie de ce groupe.',
                 'join_blocked' => 'Vous ne pouvez pas rejoindre ce groupe avec ce lien d’invitation pour le moment.',
                 'pending_review' => 'Votre demande est déjà en attente de validation par un administrateur.',

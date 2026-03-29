@@ -473,6 +473,7 @@ return [
             'labels' => [
                 'default_group_name' => 'Grup',
                 'members_count' => ':count üye',
+                'more_members' => ':count üye daha',
                 'already_member' => 'Bu grubun zaten bir üyesisiniz.',
                 'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
                 'pending_review' => 'Katılma isteğiniz zaten yönetici incelemesinde.',

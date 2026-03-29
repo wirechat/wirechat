@@ -495,6 +495,7 @@ return [
             'labels' => [
                 'default_group_name' => 'Group',
                 'members_count' => '{1} :count member|[2,*] :count members',
+                'more_members' => '{1} :count more member|[2,*] :count more members',
                 'already_member' => 'You are already a member of this group.',
                 'join_blocked' => 'You can’t join this group with this invite right now.',
                 'pending_review' => 'Your join request is already waiting for admin review.',

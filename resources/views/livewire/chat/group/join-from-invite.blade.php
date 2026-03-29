@@ -30,6 +30,14 @@
                         <x-wirechat::avatar :src="$participant->participantable?->wirechat_avatar_url" class="size-10" />
                     </div>
                 @endforeach
+                @if ($remainingMembersCount > 0)
+                    <div
+                        aria-label="{{ trans_choice('wirechat::chat.group.join_from_invite.labels.more_members', $remainingMembersCount, ['count' => $remainingMembersCount]) }}"
+                        class="flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--wc-light-border)] bg-[var(--wc-light-secondary)] text-xs font-semibold text-gray-700 dark:border-[var(--wc-dark-border)] dark:bg-[var(--wc-dark-secondary)] dark:text-gray-200"
+                    >
+                        +{{ number_format($remainingMembersCount) }}
+                    </div>
+                @endif
             </div>
         @endif
 

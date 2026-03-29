@@ -495,6 +495,7 @@ return [
             'labels' => [
                 'default_group_name' => 'Gruppe',
                 'members_count' => '{1} :count Mitglied|[2,*] :count Mitglieder',
+                'more_members' => '{1} :count weiteres Mitglied|[2,*] :count weitere Mitglieder',
                 'already_member' => 'Du bist bereits Mitglied dieser Gruppe.',
                 'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
                 'pending_review' => 'Deine Beitrittsanfrage wartet bereits auf die Prüfung durch einen Admin.',

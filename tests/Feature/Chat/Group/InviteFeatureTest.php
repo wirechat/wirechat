@@ -533,6 +533,29 @@ it('renders join from invite modal using translations', function () {
         ->assertSee(__('wirechat::chat.group.join_from_invite.actions.join_group.label'));
 });
 
+it('shows an overflow badge when the invite modal has more than six members to preview', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test Group');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    User::factory()->count(6)->create()->each(fn (User $user) => $conversation->addParticipant($user));
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->assertSee('+1')
+        ->assertSee(trans_choice('wirechat::chat.group.join_from_invite.labels.members_count', 7, ['count' => 7]));
+});
+
 it('rejects tampered invite tokens on the join endpoint', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');

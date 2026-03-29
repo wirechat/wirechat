@@ -122,8 +122,13 @@ class JoinFromInvite extends ModalComponent
 
     public function render()
     {
+        $members = $this->conversation?->participants ?? collect();
+        $membersPreview = $members->take(6);
+        $remainingMembersCount = max(($this->conversation?->participants_count ?? $members->count()) - $membersPreview->count(), 0);
+
         return view('wirechat::livewire.chat.group.join-from-invite', [
-            'membersPreview' => $this->conversation?->participants?->take(5) ?? collect(),
+            'membersPreview' => $membersPreview,
+            'remainingMembersCount' => $remainingMembersCount,
         ]);
     }
 }
