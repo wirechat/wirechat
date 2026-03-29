@@ -339,7 +339,7 @@ return [
             ],
             'actions' => [
                 'edit_permissions' => [
-                    'label' => 'In den Gruppenberechtigungen bearbeiten',
+                    'label' => 'Gruppenberechtigungen',
                 ],
                 'send_via_chat' => [
                     'label' => 'Link per Chat senden',

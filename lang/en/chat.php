@@ -339,7 +339,7 @@ return [
             ],
             'actions' => [
                 'edit_permissions' => [
-                    'label' => 'Edit In Group Permissions',
+                    'label' => 'Group Permissions',
                 ],
                 'send_via_chat' => [
                     'label' => 'Send Link Via Chat',

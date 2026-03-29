@@ -96,20 +96,6 @@
             :title="__('wirechat::chat.group.invite_link.labels.group_access')"
             class=" dark:border-zinc-700 p-5"
         >
-            @if ($canEditGroupAccess)
-                <x-slot:actions>
-                    <button type="button" class="m-0"
-                        variant="secondary"
-                        size="sm"
-                        onclick="{{ $openPermissionsDrawerAction }}"
-                    >
-                    <x-wirechat::icons.cog-6-tooth class="size-4 text-zinc-600" />
-                        {{-- {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }} --}}
-                    </button>
-                </x-slot:actions>
-            @endif
-
-           
 
             @if ($canManageJoinRequests)
                 <div class="rounded-xl bg-[var(--wc-light-secondary)] px-4 py-3 dark:bg-[var(--wc-dark-secondary)]">
@@ -128,6 +114,7 @@
                 </div>
             @endif
 
+            <div class="flex gap-2 text-sm items-center">
              <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">
                 @if ($requiresAdminApproval)
                     {{ __('wirechat::chat.group.invite_link.labels.group_access_requires_approval') }}
@@ -135,8 +122,21 @@
                     {{ __('wirechat::chat.group.invite_link.labels.group_access_open') }}
                 @endif
             </p>
+
+            @if ($canEditGroupAccess)
+                Edit in 
+        
+                <x-wirechat::button onclick="{{ $openPermissionsDrawerAction }}" variant="link">
+                                {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }}
+                </x-wirechat::button>
+            @endif
+            </div>
+
         </x-wirechat::section>
 
+        {{------------------}}
+        {{-- Group links --}}
+        {{------------------}}
         <livewire:wirechat.chat.group.links.list
             :conversation="$conversation"
             :panel="$this->panel"

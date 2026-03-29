@@ -317,7 +317,7 @@ return [
             ],
             'actions' => [
                 'edit_permissions' => [
-                    'label' => 'Grup İzinlerinde Düzenle',
+                    'label' => 'Grup izinleri',
                 ],
                 'send_via_chat' => [
                     'label' => 'Bağlantıyı Sohbetle Gönder',

@@ -60,6 +60,7 @@ class Permissions extends ModalComponent
     {
         // dd($field, $value);
         $this->group->setAttribute($field, $value)->save();
+        $this->dispatch('refreshGroupInvites');
     }
 
     public function mount()

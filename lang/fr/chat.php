@@ -318,7 +318,7 @@ return [
             ],
             'actions' => [
                 'edit_permissions' => [
-                    'label' => 'Modifier dans les permissions du groupe',
+                    'label' => 'Permissions du groupe',
                 ],
                 'send_via_chat' => [
                     'label' => 'Envoyer le lien via le chat',

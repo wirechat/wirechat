@@ -93,6 +93,8 @@ class Links extends ModalComponent
 
     public function render()
     {
+        $this->group = $this->group->fresh();
+
         $authParticipant = $this->conversation->participant(auth()->user());
         $primaryInvite = $this->invite->fresh(['createdBy']);
 
@@ -103,7 +105,7 @@ class Links extends ModalComponent
             'canManageJoinRequests' => (bool) $authParticipant?->isAdmin(),
             'canEditGroupAccess' => (bool) $authParticipant?->isOwner(),
             'pendingJoinRequestsCount' => $this->group->pendingJoinRequests()->count(),
-            'requiresAdminApproval' => $this->group->requiresInviteApproval(),
+            'requiresAdminApproval' => (bool) $this->group->admins_must_approve_new_members,
         ]);
     }
 }

@@ -183,4 +183,19 @@ describe('Actions', function () {
         expect($group->allow_members_to_send_messages)->toBe(false);
 
     });
+
+    test('it dispatches invite link refresh when admin approval changes', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createGroup('Test');
+        $conversation->addParticipant($receiver);
+
+        Livewire::actingAs($auth)->test(Permissions::class, ['conversation' => $conversation])
+            ->set('admins_must_approve_new_members', true)
+            ->assertDispatched('refreshGroupInvites')
+            ->set('admins_must_approve_new_members', false)
+            ->assertDispatched('refreshGroupInvites');
+    });
 });

@@ -38,6 +38,30 @@ it('shows and updates the admin approval toggle in group permissions', function 
     expect($conversation->group->fresh()->admins_must_approve_new_members)->toBeTrue();
 });
 
+it('updates the invite link access label when admin approval changes', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $component = Livewire::actingAs($owner)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.group_access_open'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.group_access_requires_approval'));
+
+    $conversation->group->setAttribute('admins_must_approve_new_members', true)->save();
+
+    $component
+        ->call('$refresh')
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.group_access_requires_approval'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.group_access_open'));
+
+    $conversation->group->setAttribute('admins_must_approve_new_members', false)->save();
+
+    $component
+        ->call('$refresh')
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.group_access_open'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.group_access_requires_approval'));
+});
+
 it('allows admins to access invite links', function () {
     $owner = User::factory()->create();
     $admin = User::factory()->create();
@@ -158,11 +182,11 @@ it('loads additional invite links incrementally from the dedicated list componen
         ->assertSee(__('wirechat::chat.group.invite_link.labels.additional_links'))
         ->assertSee(__('wirechat::chat.group.invite_link.actions.load_more.label'))
         ->assertSee('Campaign 12')
-        ->assertSee('Campaign 03')
-        ->assertDontSee('Campaign 02')
+        ->assertSee('Campaign 10')
+        ->assertDontSee('Campaign 09')
         ->assertDontSee('Campaign 01')
         ->call('loadMore')
-        ->assertSee('Campaign 02')
+        ->assertSee('Campaign 09')
         ->assertSee('Campaign 01');
 });
 
@@ -311,11 +335,11 @@ it('shows group access editing only to owners inside invite links', function () 
 
     Livewire::actingAs($owner)
         ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->assertSee(__('wirechat::chat.group.invite_link.actions.edit_permissions.label'));
+        ->assertSee('wirechat.chat.group.permissions');
 
     Livewire::actingAs($admin)
         ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->assertDontSee(__('wirechat::chat.group.invite_link.actions.edit_permissions.label'))
+        ->assertDontSee('wirechat.chat.group.permissions')
         ->assertSee(__('wirechat::chat.group.invite_link.actions.create_new_link.label'));
 });
 
