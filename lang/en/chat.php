@@ -481,13 +481,26 @@ return [
                     'approve' => [
                         'label' => 'Add To Group',
                     ],
+                    'approve_all' => [
+                        'label' => 'Accept All',
+                        'confirmation_message' => 'Are you sure you want to accept all pending join requests?',
+                    ],
                     'dismiss' => [
                         'label' => 'Dismiss',
+                    ],
+                    'dismiss_all' => [
+                        'label' => 'Reject All',
+                        'confirmation_message' => 'Are you sure you want to reject all pending join requests?',
+                    ],
+                    'load_more' => [
+                        'label' => 'Load More',
                     ],
                 ],
                 'messages' => [
                     'approved_success' => 'Join request approved.',
+                    'approved_all_success' => '{1} :count join request approved.|[2,*] :count join requests approved.',
                     'dismissed_success' => 'Join request dismissed.',
+                    'dismissed_all_success' => '{1} :count join request rejected.|[2,*] :count join requests rejected.',
                 ],
             ],
             'lobby' => [

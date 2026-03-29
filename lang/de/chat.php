@@ -481,13 +481,26 @@ return [
                     'approve' => [
                         'label' => 'Zur Gruppe hinzufügen',
                     ],
+                    'approve_all' => [
+                        'label' => 'Alle Annehmen',
+                        'confirmation_message' => 'Möchtest du wirklich alle ausstehenden Beitrittsanfragen annehmen?',
+                    ],
                     'dismiss' => [
                         'label' => 'Ablehnen',
+                    ],
+                    'dismiss_all' => [
+                        'label' => 'Alle Ablehnen',
+                        'confirmation_message' => 'Möchtest du wirklich alle ausstehenden Beitrittsanfragen ablehnen?',
+                    ],
+                    'load_more' => [
+                        'label' => 'Mehr Laden',
                     ],
                 ],
                 'messages' => [
                     'approved_success' => 'Beitrittsanfrage genehmigt.',
+                    'approved_all_success' => '{1} :count Beitrittsanfrage genehmigt.|[2,*] :count Beitrittsanfragen genehmigt.',
                     'dismissed_success' => 'Beitrittsanfrage abgelehnt.',
+                    'dismissed_all_success' => '{1} :count Beitrittsanfrage abgelehnt.|[2,*] :count Beitrittsanfragen abgelehnt.',
                 ],
             ],
             'lobby' => [

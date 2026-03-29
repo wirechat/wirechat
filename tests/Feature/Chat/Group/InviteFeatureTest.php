@@ -888,6 +888,93 @@ it('allows admins to dismiss join requests from the drawer', function () {
         ->and($invite->usages)->toBe(0);
 });
 
+it('renders bulk join request actions and load more controls for admins', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    collect(range(1, 11))->each(function (int $index) use ($conversation) {
+        $conversation->group->requestToJoin(User::factory()->create(['name' => "Requester {$index}"]));
+    });
+
+    Livewire::actingAs($owner)
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.join.requests.actions.approve_all.label'))
+        ->assertSee(__('wirechat::chat.group.join.requests.actions.dismiss_all.label'))
+        ->assertSee(__('wirechat::chat.group.join.requests.actions.approve_all.confirmation_message'))
+        ->assertSee(__('wirechat::chat.group.join.requests.actions.dismiss_all.confirmation_message'))
+        ->assertSee(__('wirechat::chat.group.join.requests.actions.load_more.label'));
+});
+
+it('can load more join requests from the drawer', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $hiddenRequester = User::factory()->create(['name' => 'Hidden Requester']);
+    $conversation->group->requestToJoin($hiddenRequester)->forceFill([
+        'created_at' => now()->subDay(),
+        'updated_at' => now()->subDay(),
+    ])->save();
+
+    collect(range(1, 10))->each(function (int $index) use ($conversation) {
+        $conversation->group->requestToJoin(User::factory()->create(['name' => "Visible Requester {$index}"]));
+    });
+
+    Livewire::actingAs($owner)
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertDontSee('Hidden Requester')
+        ->assertSee(__('wirechat::chat.group.join.requests.actions.load_more.label'))
+        ->call('loadMore')
+        ->assertSee('Hidden Requester');
+});
+
+it('allows admins to approve all pending join requests from the drawer', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $requesters = collect(range(1, 3))->map(function (int $index) use ($conversation, $invite) {
+        $requester = User::factory()->create(['name' => "Approve {$index}"]);
+        $conversation->group->requestToJoin($requester, $invite);
+
+        return $requester;
+    });
+
+    Livewire::actingAs($owner)
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->call('approveAll');
+
+    $invite->refresh();
+
+    expect($requesters->every(fn ($requester) => $requester->belongsToConversation($conversation)))->toBeTrue()
+        ->and($conversation->group->pendingJoinRequests()->count())->toBe(0)
+        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::ACCEPTED)->count())->toBe(3)
+        ->and($invite->usages)->toBe(3);
+});
+
+it('allows admins to reject all pending join requests from the drawer', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    collect(range(1, 3))->each(function (int $index) use ($conversation) {
+        $conversation->group->requestToJoin(User::factory()->create(['name' => "Dismiss {$index}"]));
+    });
+
+    Livewire::actingAs($owner)
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->call('dismissAll');
+
+    expect($conversation->group->pendingJoinRequests()->count())->toBe(0)
+        ->and($conversation->participants()->count())->toBe(1)
+        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::DISMISSED)->count())->toBe(3);
+});
+
 it('shows the join request banner only to group admins', function () {
     $owner = User::factory()->create();
     $member = User::factory()->create();

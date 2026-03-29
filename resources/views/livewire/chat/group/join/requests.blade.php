@@ -18,6 +18,26 @@
         </div>
 
         <div class="space-y-3">
+            @if ($requests->isNotEmpty())
+                <div class="flex flex-wrap items-center justify-end gap-3">
+                    <button
+                        type="button"
+                        wire:click="approveAll"
+                        wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.approve_all.confirmation_message') }}"
+                        class="inline-flex items-center justify-center rounded-lg bg-[var(--wc-brand-primary)] px-4 py-2 text-sm font-medium text-white">
+                        {{ __('wirechat::chat.group.join.requests.actions.approve_all.label') }}
+                    </button>
+
+                    <button
+                        type="button"
+                        wire:click="dismissAll"
+                        wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.dismiss_all.confirmation_message') }}"
+                        class="inline-flex items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
+                        {{ __('wirechat::chat.group.join.requests.actions.dismiss_all.label') }}
+                    </button>
+                </div>
+            @endif
+
             @forelse ($requests as $request)
                 @php
                     $meta = $request->data ?? [];
@@ -62,6 +82,17 @@
                     {{ __('wirechat::chat.group.join.requests.labels.empty_state') }}
                 </div>
             @endforelse
+
+            @if ($hasMoreRequests)
+                <div class="flex justify-center pt-2">
+                    <button
+                        type="button"
+                        wire:click="loadMore"
+                        class="inline-flex items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-border)] dark:text-gray-200 dark:hover:bg-[var(--wc-dark-secondary)]">
+                        {{ __('wirechat::chat.group.join.requests.actions.load_more.label') }}
+                    </button>
+                </div>
+            @endif
         </div>
     </section>
 </div>

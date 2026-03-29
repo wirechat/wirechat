@@ -460,13 +460,26 @@ return [
                     'approve' => [
                         'label' => 'Ajouter au groupe',
                     ],
+                    'approve_all' => [
+                        'label' => 'Tout accepter',
+                        'confirmation_message' => 'Voulez-vous vraiment accepter toutes les demandes d’adhésion en attente ?',
+                    ],
                     'dismiss' => [
                         'label' => 'Ignorer',
+                    ],
+                    'dismiss_all' => [
+                        'label' => 'Tout refuser',
+                        'confirmation_message' => 'Voulez-vous vraiment refuser toutes les demandes d’adhésion en attente ?',
+                    ],
+                    'load_more' => [
+                        'label' => 'Charger plus',
                     ],
                 ],
                 'messages' => [
                     'approved_success' => "Demande d'adhésion approuvée.",
+                    'approved_all_success' => '{1} :count demande d’adhésion approuvée.|[2,*] :count demandes d’adhésion approuvées.',
                     'dismissed_success' => "Demande d'adhésion ignorée.",
+                    'dismissed_all_success' => '{1} :count demande d’adhésion refusée.|[2,*] :count demandes d’adhésion refusées.',
                 ],
             ],
             'lobby' => [

@@ -6,9 +6,9 @@
 @endphp
 
 <header
-    class="w-full sticky inset-x-0 top-0 z-10 flex flex-col  bg-[var(--wc-light-primary)]  dark:border-[var(--wc-dark-secondary)] dark:bg-[var(--wc-dark-secondary)]">
+    class="w-full sticky inset-x-0 top-0 z-10 flex flex-col  bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)] ">
 
-    <div class="  border-b border-zinc-200/80 flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
+    <div class="  border-b border-zinc-200/80 dark:border-zinc-700  flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
 
         {{-- Return --}}
         <a wire:navigate @if ($this->isWidget()) @click="$dispatch('close-chat',{conversation: {{json_encode($conversation->id)}} })"
@@ -167,13 +167,13 @@
     </div>
 
     @if ($pendingJoinRequestsCount > 0)
-        <div class="px-2 lg:px-4   border-zinc-100 shadow-sm bg-zinc-50 dark:border-zinc-600 py-3 dark:bg-zinc-800/60">
+        <div class="px-2 lg:px-4   border-zinc-100 dark:border-zinc-700 shadow-sm bg-zinc-50   py-3 dark:bg-zinc-800/60">
             <button type="button"
                 onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
                 class="mx-auto flex w-full items-center justify-between gap-3 rounded-2xl   px-1  text-sm">
                
               <div class="flex items-center gap-3">
-                <x-wirechat::icons.user-group class="size-5 ml-1 dark:text-zinc-300" />
+                <x-wirechat::icons.user-clock class="size-5 ml-1 dark:text-zinc-300" />
                   <span class="font-medium text-[var(--wc-brand-primary)]">
                     {{ __('wirechat::chat.group.join.requests.heading.label') }}
                 </span>

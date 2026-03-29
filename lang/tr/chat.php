@@ -459,13 +459,26 @@ return [
                     'approve' => [
                         'label' => 'Gruba Ekle',
                     ],
+                    'approve_all' => [
+                        'label' => 'Tümünü Kabul Et',
+                        'confirmation_message' => 'Bekleyen tüm katılma isteklerini kabul etmek istediğinize emin misiniz?',
+                    ],
                     'dismiss' => [
                         'label' => 'Reddet',
+                    ],
+                    'dismiss_all' => [
+                        'label' => 'Tümünü Reddet',
+                        'confirmation_message' => 'Bekleyen tüm katılma isteklerini reddetmek istediğinize emin misiniz?',
+                    ],
+                    'load_more' => [
+                        'label' => 'Daha Fazlasını Yükle',
                     ],
                 ],
                 'messages' => [
                     'approved_success' => 'Katılma isteği onaylandı.',
+                    'approved_all_success' => '{1} :count katılma isteği onaylandı.|[2,*] :count katılma isteği onaylandı.',
                     'dismissed_success' => 'Katılma isteği reddedildi.',
+                    'dismissed_all_success' => '{1} :count katılma isteği reddedildi.|[2,*] :count katılma isteği reddedildi.',
                 ],
             ],
             'lobby' => [
