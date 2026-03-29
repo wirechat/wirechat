@@ -8,6 +8,17 @@
     $expirySliderKeys = array_keys($expirySliderOptions);
     $expirySliderIndex = array_search($expiryPreset, $expirySliderKeys, true);
     $expirySliderKeysJs = (string) \Illuminate\Support\Js::from(array_values($expirySliderKeys));
+
+    $usageSliderOptions = [
+        '1' => '1',
+        '10' => '10',
+        '50' => '50',
+        '100' => '100',
+        'unlimited' => __('wirechat::chat.group.invite_link.create.options.usage.unlimited'),
+    ];
+    $usageSliderKeys = array_keys($usageSliderOptions);
+    $usageSliderIndex = array_search($usagePreset, $usageSliderKeys, true);
+    $usageSliderKeysJs = (string) \Illuminate\Support\Js::from(array_values($usageSliderKeys));
 @endphp
 
 <div class=" max-w-xl rounded-xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-6 text-gray-900 shadow-xl dark:text-white">
@@ -49,13 +60,13 @@
                     />
                 </div>
 
-                <div class="mt-1 flex justify-between px-2 items-center w-full text-xs text-gray-400 dark:text-gray-500">
+                <div class="mt-1 flex justify-between px-2  items-center w-full text-xs text-gray-400 dark:text-gray-500">
                     @foreach ($expirySliderKeys as $key)
                         <span class="justify-self-center">|</span>
                     @endforeach
                 </div>
 
-                <div class="mt-2 flex justify-between w-full  text-center text-xs">
+                <div class="mt-2 flex justify-between w-full   text-center text-xs">
                     @foreach ($expirySliderOptions as $key => $label)
                         <span @class([
                             'flex items-center justify-center transition',
@@ -63,7 +74,7 @@
                             'text-gray-600 dark:text-gray-300' => $expiryPreset !== $key,
                         ])>
                             @if ($key === 'never')
-                                <x-wirechat::icons.infinite class="size-4" />
+                                <x-wirechat::icons.infinite class="size-3" />
                                 <span class="sr-only">{{ $label }}</span>
                             @else
                                 {{ $label }}
@@ -80,23 +91,52 @@
         {{-- Usage Presets --}}
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.create.sections.usage.label') }}</p>
-            <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                @foreach ([
-                    '1' => '1',
-                    '10' => '10',
-                    '50' => '50',
-                    '100' => '100',
-                    'unlimited' => __('wirechat::chat.group.invite_link.create.options.usage.unlimited'),
-                ] as $value => $label)
-                    <button type="button" wire:click="$set('usagePreset', '{{ $value }}')"
-                        @class([
-                            'rounded-lg border px-2 py-2 text-sm font-medium transition',
-                            'border-[var(--wc-brand-primary)] bg-[var(--wc-brand-primary)] text-white' => $usagePreset === $value,
-                            'border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]' => $usagePreset !== $value,
-                        ])>
-                        {{ $label }}
-                    </button>
-                @endforeach
+            <div class="mt-3 flex w-full flex-col items-center">
+                <div class=" w-full">
+                    <input
+                        type="range"
+                        min="0"
+                        max="{{ count($usageSliderKeys) - 1 }}"
+                        step="1"
+                        value="{{ $usageSliderIndex === false ? count($usageSliderKeys) - 1 : $usageSliderIndex }}"
+                        x-data="{}"
+                        x-on:input="$wire.set('usagePreset', {{ $usageSliderKeysJs }}[$event.target.value] ?? 'unlimited')"
+                        class="wc-range-zinc mx-auto w-full"
+                    />
+                </div>
+
+                <div class="relative mt-2 px-4 h-9 w-[97.5%] text-xs">
+                    @foreach ($usageSliderOptions as $key => $label)
+                        @php
+                            $usageTransform = match ($key) {
+                                '10' => 'translateX(calc(-50% + 0.25rem))',
+                                '100' => 'translateX(calc(-50% - 0.25rem))',
+                                default => 'translateX(-50%)',
+                            };
+                        @endphp
+                        <span @class([
+                            'absolute top-0 flex flex-col gap-1 transition',
+                            'left-0 items-start text-left' => $loop->first,
+                            'right-0 items-end text-right' => $loop->last,
+                            'items-center text-center' => ! $loop->first && ! $loop->last,
+                            'font-medium text-[var(--wc-brand-primary)]' => $usagePreset === $key,
+                            'text-gray-600 dark:text-gray-300' => $usagePreset !== $key,
+                        ])
+                            @if (! $loop->first && ! $loop->last)
+                                style="left: {{ ($loop->index / (count($usageSliderOptions) - 1)) * 100 }}%; transform: {{ $usageTransform }};"
+                            @endif
+                        >
+                            <span class="text-gray-400 dark:text-gray-500">|</span>
+
+                            @if ($key === 'unlimited')
+                                <x-wirechat::icons.infinite class="size-3" />
+                                <span class="sr-only">{{ $label }}</span>
+                            @else
+                                {{ $label }}
+                            @endif
+                        </span>
+                    @endforeach
+                </div>
             </div>
             @error('usagePreset')
                 <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
