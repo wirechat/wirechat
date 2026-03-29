@@ -507,6 +507,32 @@ it('renders invite preview page using translations', function () {
         ->assertSee(__('wirechat::chat.group.invite_link.page.actions.continue.label'));
 });
 
+it('renders join from invite modal using translations', function () {
+    app()->setLocale('tr');
+
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test Group', 'Harika bir grup');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(JoinFromInvite::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.join_from_invite.heading.label'))
+        ->assertSee(__('wirechat::chat.group.join_from_invite.labels.members_count', ['count' => $conversation->participants_count]))
+        ->assertSee(__('wirechat::chat.group.join_from_invite.labels.open_access'))
+        ->assertSee(__('wirechat::chat.group.join_from_invite.actions.cancel.label'))
+        ->assertSee(__('wirechat::chat.group.join_from_invite.actions.join_group.label'));
+});
+
 it('rejects tampered invite tokens on the join endpoint', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');

@@ -466,6 +466,43 @@ return [
                 ],
             ],
         ],
+        'join_from_invite' => [
+            'heading' => [
+                'label' => 'Gruba Katıl',
+            ],
+            'labels' => [
+                'default_group_name' => 'Grup',
+                'members_count' => ':count üye',
+                'already_member' => 'Bu grubun zaten bir üyesisiniz.',
+                'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
+                'pending_review' => 'Katılma isteğiniz zaten yönetici incelemesinde.',
+                'requires_approval' => 'Bu gruba katılmak için önce yönetici onayı gerekir.',
+                'open_access' => 'Bu gruba hemen katılabilirsiniz.',
+            ],
+            'actions' => [
+                'cancel' => [
+                    'label' => 'Vazgeç',
+                ],
+                'open_group' => [
+                    'label' => 'Grubu Aç',
+                ],
+                'request_pending' => [
+                    'label' => 'İstek Bekliyor',
+                ],
+                'request_to_join' => [
+                    'label' => 'Katılma İsteği Gönder',
+                ],
+                'join_group' => [
+                    'label' => 'Gruba Katıl',
+                ],
+            ],
+            'messages' => [
+                'invite_inactive' => 'Bu davet bağlantısı artık aktif değil.',
+                'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
+                'pending_request' => 'Katılma isteğiniz zaten beklemede.',
+                'request_sent' => 'Katılma isteğiniz yöneticilere gönderildi.',
+            ],
+        ],
         'past_members' => [
             'heading' => [
                 'label' => 'Geçmiş Üyeler',

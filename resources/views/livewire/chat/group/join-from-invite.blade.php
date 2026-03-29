@@ -5,7 +5,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-        <h3 class="text-lg font-semibold">Join Group</h3>
+        <h3 class="text-lg font-semibold">{{ __('wirechat::chat.group.join_from_invite.heading.label') }}</h3>
         <span class="w-10"></span>
     </div>
 
@@ -14,13 +14,15 @@
             <x-wirechat::avatar :src="$group?->cover_url" class="size-16 shrink-0" />
 
             <div class="w-full flex flex-col gap-1">
-                <h4 class="text-xl font-semibold wrap-break-word">{{ $group?->name ?: 'Group' }}</h4>
+                <h4 class="text-xl font-semibold wrap-break-word">{{ $group?->name ?: __('wirechat::chat.group.join_from_invite.labels.default_group_name') }}</h4>
                 @if (filled($group?->description))
                 <p class=" text-sm  text-gray-600 dark:text-gray-300">{{ $group->description }}</p>
                 @endif
             </div>
         </div>
-        <p class=" text-sm text-gray-500 dark:text-gray-400">{{ $conversation?->participants_count }} members</p>
+        <p class=" text-sm text-gray-500 dark:text-gray-400">
+            {{ trans_choice('wirechat::chat.group.join_from_invite.labels.members_count', $conversation?->participants_count ?? 0, ['count' => $conversation?->participants_count ?? 0]) }}
+        </p>
         @if ($membersPreview->isNotEmpty())
             <div class="flex items-center overflow-x-auto  -space-x-5 pb-1">
                 @foreach ($membersPreview as $participant)
@@ -33,15 +35,15 @@
 
         <div class="rounded-xl bg-[var(--wc-light-secondary)] px-4 py-3 text-sm leading-6 text-gray-700 dark:bg-[var(--wc-dark-secondary)] dark:text-gray-200">
             @if ($isMember)
-                You are already a member of this group.
+                {{ __('wirechat::chat.group.join_from_invite.labels.already_member') }}
             @elseif ($joinBlocked)
-                You cannot join this group with this invite right now.
+                {{ __('wirechat::chat.group.join_from_invite.labels.join_blocked') }}
             @elseif ($hasPendingJoinRequest)
-                Your join request is already pending admin review.
+                {{ __('wirechat::chat.group.join_from_invite.labels.pending_review') }}
             @elseif ($requiresApproval)
-                This group requires admin approval before new members can join.
+                {{ __('wirechat::chat.group.join_from_invite.labels.requires_approval') }}
             @else
-                You can join this group immediately.
+                {{ __('wirechat::chat.group.join_from_invite.labels.open_access') }}
             @endif
         </div>
 
@@ -51,7 +53,7 @@
             variant="subtle"
             wire:click="closeWirechatModal"
             >
-               Cancel
+               {{ __('wirechat::chat.group.join_from_invite.actions.cancel.label') }}
             </x-wirechat::button>
             <x-wirechat::button
                 wire:click="proceed"
@@ -59,13 +61,13 @@
                 ::disabled="{{ ($joinBlocked || $hasPendingJoinRequest) }}"
                 class="inline-flex items-center justify-center rounded-2xl bg-[var(--wc-brand-primary)] px-5 py-3 text-sm font-medium text-white">
                 @if ($isMember)
-                    Open Group
+                    {{ __('wirechat::chat.group.join_from_invite.actions.open_group.label') }}
                 @elseif ($hasPendingJoinRequest)
-                    Request Pending
+                    {{ __('wirechat::chat.group.join_from_invite.actions.request_pending.label') }}
                 @elseif ($requiresApproval)
-                    Request To Join
+                    {{ __('wirechat::chat.group.join_from_invite.actions.request_to_join.label') }}
                 @else
-                    Join Group
+                    {{ __('wirechat::chat.group.join_from_invite.actions.join_group.label') }}
                 @endif
             </x-wirechat::button>
 

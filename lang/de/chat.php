@@ -488,6 +488,43 @@ return [
                 ],
             ],
         ],
+        'join_from_invite' => [
+            'heading' => [
+                'label' => 'Gruppe beitreten',
+            ],
+            'labels' => [
+                'default_group_name' => 'Gruppe',
+                'members_count' => '{1} :count Mitglied|[2,*] :count Mitglieder',
+                'already_member' => 'Du bist bereits Mitglied dieser Gruppe.',
+                'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
+                'pending_review' => 'Deine Beitrittsanfrage wartet bereits auf die Prüfung durch einen Admin.',
+                'requires_approval' => 'Neue Mitglieder brauchen die Freigabe eines Admins, bevor sie dieser Gruppe beitreten können.',
+                'open_access' => 'Du kannst dieser Gruppe sofort beitreten.',
+            ],
+            'actions' => [
+                'cancel' => [
+                    'label' => 'Abbrechen',
+                ],
+                'open_group' => [
+                    'label' => 'Gruppe öffnen',
+                ],
+                'request_pending' => [
+                    'label' => 'Anfrage ausstehend',
+                ],
+                'request_to_join' => [
+                    'label' => 'Beitritt anfragen',
+                ],
+                'join_group' => [
+                    'label' => 'Gruppe beitreten',
+                ],
+            ],
+            'messages' => [
+                'invite_inactive' => 'Dieser Einladungslink ist nicht mehr aktiv.',
+                'join_blocked' => 'Du kannst dieser Gruppe mit diesem Einladungslink derzeit nicht beitreten.',
+                'pending_request' => 'Deine Beitrittsanfrage ist bereits ausstehend.',
+                'request_sent' => 'Deine Beitrittsanfrage wurde an die Admins gesendet.',
+            ],
+        ],
         'past_members' => [
             'heading' => [
                 'label' => 'Ehemalige Mitglieder',

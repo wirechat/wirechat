@@ -467,6 +467,43 @@ return [
                 ],
             ],
         ],
+        'join_from_invite' => [
+            'heading' => [
+                'label' => 'Rejoindre le groupe',
+            ],
+            'labels' => [
+                'default_group_name' => 'Groupe',
+                'members_count' => '{1} :count membre|[2,*] :count membres',
+                'already_member' => 'Vous faites déjà partie de ce groupe.',
+                'join_blocked' => 'Vous ne pouvez pas rejoindre ce groupe avec ce lien d’invitation pour le moment.',
+                'pending_review' => 'Votre demande est déjà en attente de validation par un administrateur.',
+                'requires_approval' => 'Les nouveaux membres doivent être approuvés par un administrateur avant de rejoindre ce groupe.',
+                'open_access' => 'Vous pouvez rejoindre ce groupe immédiatement.',
+            ],
+            'actions' => [
+                'cancel' => [
+                    'label' => 'Annuler',
+                ],
+                'open_group' => [
+                    'label' => 'Ouvrir le groupe',
+                ],
+                'request_pending' => [
+                    'label' => 'Demande en attente',
+                ],
+                'request_to_join' => [
+                    'label' => 'Demander à rejoindre',
+                ],
+                'join_group' => [
+                    'label' => 'Rejoindre le groupe',
+                ],
+            ],
+            'messages' => [
+                'invite_inactive' => 'Ce lien d’invitation n’est plus actif.',
+                'join_blocked' => 'Vous ne pouvez pas rejoindre ce groupe avec ce lien d’invitation pour le moment.',
+                'pending_request' => 'Votre demande est déjà en attente.',
+                'request_sent' => 'Votre demande a été envoyée aux administrateurs.',
+            ],
+        ],
         'past_members' => [
             'heading' => [
                 'label' => 'Anciens membres',

@@ -488,6 +488,43 @@ return [
                 ],
             ],
         ],
+        'join_from_invite' => [
+            'heading' => [
+                'label' => 'Join Group',
+            ],
+            'labels' => [
+                'default_group_name' => 'Group',
+                'members_count' => '{1} :count member|[2,*] :count members',
+                'already_member' => 'You are already a member of this group.',
+                'join_blocked' => 'You can’t join this group with this invite right now.',
+                'pending_review' => 'Your join request is already waiting for admin review.',
+                'requires_approval' => 'New members need admin approval before they can join this group.',
+                'open_access' => 'You can join this group right away.',
+            ],
+            'actions' => [
+                'cancel' => [
+                    'label' => 'Cancel',
+                ],
+                'open_group' => [
+                    'label' => 'Open Group',
+                ],
+                'request_pending' => [
+                    'label' => 'Request Pending',
+                ],
+                'request_to_join' => [
+                    'label' => 'Request To Join',
+                ],
+                'join_group' => [
+                    'label' => 'Join Group',
+                ],
+            ],
+            'messages' => [
+                'invite_inactive' => 'This invite link is no longer active.',
+                'join_blocked' => 'You can’t join this group with this invite right now.',
+                'pending_request' => 'Your join request is already pending.',
+                'request_sent' => 'Your join request has been sent to the admins.',
+            ],
+        ],
         'past_members' => [
             'heading' => [
                 'label' => 'Past Members',

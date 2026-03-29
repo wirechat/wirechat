@@ -59,7 +59,7 @@ class JoinFromInvite extends ModalComponent
             ->with(['inviteable.cover', 'createdBy'])
             ->firstOrFail();
 
-        abort_unless($invite->isActive(), 410, 'Invite link is no longer active.');
+        abort_unless($invite->isActive(), 410, __('wirechat::chat.group.join_from_invite.messages.invite_inactive'));
 
         $group = $invite->inviteable;
 
@@ -94,13 +94,13 @@ class JoinFromInvite extends ModalComponent
         }
 
         if ($this->joinBlocked) {
-            $this->dispatch('wirechat-toast', type: 'error', message: 'You cannot join this group with this invite right now.');
+            $this->dispatch('wirechat-toast', type: 'error', message: __('wirechat::chat.group.join_from_invite.messages.join_blocked'));
 
             return null;
         }
 
         if ($this->hasPendingJoinRequest) {
-            $this->dispatch('wirechat-toast', type: 'info', message: 'Your join request is already pending.');
+            $this->dispatch('wirechat-toast', type: 'info', message: __('wirechat::chat.group.join_from_invite.messages.pending_request'));
 
             return null;
         }
@@ -109,7 +109,7 @@ class JoinFromInvite extends ModalComponent
             $this->group->requestToJoin($auth, $this->invite);
             $this->syncState();
 
-            $this->dispatch('wirechat-toast', type: 'success', message: 'Your join request has been sent to the admins.');
+            $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join_from_invite.messages.request_sent'));
 
             return null;
         }
