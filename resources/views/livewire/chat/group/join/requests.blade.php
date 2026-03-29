@@ -59,7 +59,6 @@
                                     </p>
                                 </div>
 
-                                <span class="text-sm text-gray-400">{{ $request->created_at?->format('H:i') }}</span>
                             </div>
                         </div>
 

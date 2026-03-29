@@ -19,13 +19,17 @@ class Requests extends ModalComponent
     #[Locked]
     public Conversation $conversation;
 
-    public int $perPage = 10;
+    public int $visibleRequestCount = 5;
+
+    public array $loadedRequestIds = [];
+
+    public bool $hasMoreRequests = false;
 
     public $group;
 
     protected ?Participant $authParticipant = null;
 
-    protected int $perPageStep = 10;
+    protected int $perPageStep = 5;
 
     public static function modalAttributes(): array
     {
@@ -51,6 +55,8 @@ class Requests extends ModalComponent
         $this->authParticipant = $this->conversation->participant(auth()->user());
 
         abort_unless($this->authParticipant?->isAdmin(), 403, 'Only admins can manage join requests.');
+
+        $this->syncLoadedRequests();
     }
 
     public function approve(int $requestId): void
@@ -60,6 +66,7 @@ class Requests extends ModalComponent
 
         $this->reviewRequest($request, $reviewedBy);
 
+        $this->syncLoadedRequests();
         $this->refreshSurfaces();
         $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join.requests.messages.approved_success'));
     }
@@ -71,6 +78,7 @@ class Requests extends ModalComponent
 
         $request->dismiss($reviewedBy);
 
+        $this->syncLoadedRequests();
         $this->refreshSurfaces();
         $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.join.requests.messages.dismissed_success'));
     }
@@ -87,6 +95,7 @@ class Requests extends ModalComponent
             $approvedCount++;
         }
 
+        $this->syncLoadedRequests();
         $this->refreshSurfaces();
 
         if ($approvedCount > 0) {
@@ -110,6 +119,7 @@ class Requests extends ModalComponent
             $dismissedCount++;
         }
 
+        $this->syncLoadedRequests();
         $this->refreshSurfaces();
 
         if ($dismissedCount > 0) {
@@ -123,20 +133,21 @@ class Requests extends ModalComponent
 
     public function loadMore(): void
     {
-        $this->perPage += $this->perPageStep;
+        $this->visibleRequestCount += $this->perPageStep;
+        $this->syncLoadedRequests();
     }
 
     public function render()
     {
-        $requests = $this->pendingRequestsQuery()
-            ->limit($this->perPage)
-            ->get();
-
-        $totalRequests = $this->group->pendingJoinRequests()->count();
+        $requests = empty($this->loadedRequestIds)
+            ? collect()
+            : $this->pendingRequestsQuery()
+                ->whereKey($this->loadedRequestIds)
+                ->get();
 
         return view('wirechat::livewire.chat.group.join.requests', [
             'requests' => $requests,
-            'hasMoreRequests' => $totalRequests > $requests->count(),
+            'hasMoreRequests' => $this->hasMoreRequests,
         ]);
     }
 
@@ -176,5 +187,38 @@ class Requests extends ModalComponent
     {
         $this->dispatch('refresh')->to(Info::class);
         $this->dispatch('refresh')->to(Chat::class);
+    }
+
+    protected function syncLoadedRequests(): void
+    {
+        $currentPendingIds = $this->group->pendingJoinRequests()
+            ->whereKey($this->loadedRequestIds)
+            ->pluck('id')
+            ->all();
+
+        $this->loadedRequestIds = array_values(array_map('intval', $currentPendingIds));
+
+        while (count($this->loadedRequestIds) < $this->visibleRequestCount) {
+            $missingCount = $this->visibleRequestCount - count($this->loadedRequestIds);
+
+            $nextRequestIds = $this->pendingRequestsQuery()
+                ->when($this->loadedRequestIds !== [], fn ($query) => $query->whereNotIn('id', $this->loadedRequestIds))
+                ->limit($missingCount)
+                ->pluck('id')
+                ->all();
+
+            if ($nextRequestIds === []) {
+                break;
+            }
+
+            $this->loadedRequestIds = array_values(array_unique([
+                ...$this->loadedRequestIds,
+                ...array_map('intval', $nextRequestIds),
+            ]));
+        }
+
+        $this->hasMoreRequests = $this->pendingRequestsQuery()
+            ->when($this->loadedRequestIds !== [], fn ($query) => $query->whereNotIn('id', $this->loadedRequestIds))
+            ->exists();
     }
 }
