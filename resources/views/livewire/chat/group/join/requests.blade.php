@@ -15,6 +15,8 @@
                     <x-wirechat::icons.user-clock class="size-10" />
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.join.requests.labels.description') }}</p>
+
+            <x-wirechat::loading-spin wire:loading.delay />
         </div>
 
         <div class="space-y-3">
@@ -24,16 +26,18 @@
                     <button
                         type="button"
                         wire:click="dismissAll"
+                        wire:loading.attr="disabled"
                         wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.dismiss_all.confirmation_message') }}"
-                        class="inline-flex text-red-500 items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
+                        class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all text-red-500 items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
                         {{ __('wirechat::chat.group.join.requests.actions.dismiss_all.label') }}
                     </button>
 
                     <button
                         type="button"
                         wire:click="approveAll"
+                        wire:loading.attr="disabled"
                         wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.approve_all.confirmation_message') }}"
-                        class="inline-flex items-center justify-center rounded-lg bg-[var(--wc-brand-primary)] px-4 py-2 text-sm font-medium text-white">
+                        class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all items-center justify-center rounded-lg bg-[var(--wc-brand-primary)] px-4 py-2 text-sm font-medium text-white">
                         {{ __('wirechat::chat.group.join.requests.actions.approve_all.label') }}
                     </button>
 
@@ -65,9 +69,11 @@
                         <div class="ml-auto flex shrink-0 items-center gap-2 self-center">
                           
                             <button
+                                 wire:loading.attr="disabled"
                                 type="button"
                                 wire:click="dismiss({{ $request->id }})"
-                                class="inline-flex size-10 items-center justify-center rounded-full bg-red-50 text-red-600 transition hover:bg-red-100 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
+                                class="inline-flex
+                                 size-10 items-center disabled:cursor-not-allowed disabled:opacity-80 transition-all justify-center rounded-full bg-red-50 text-red-600  hover:bg-red-100 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
                                 aria-label="{{ __('wirechat::chat.group.join.requests.actions.dismiss.label') }}"
                                 title="{{ __('wirechat::chat.group.join.requests.actions.dismiss.label') }}">
                                 <x-wirechat::icons.x class="size-5 !text-current dark:!text-current" />
@@ -75,8 +81,9 @@
 
                             <button
                                 type="button"
+                                     wire:loading.attr="disabled"
                                 wire:click="approve({{ $request->id }})"
-                                class="inline-flex size-10 items-center justify-center rounded-full bg-primary-50 text-primary-700 transition hover:bg-primary-100 dark:bg-primary-700/20 dark:text-primary-300 dark:hover:bg-primary-700/30"
+                                class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all size-10 items-center justify-center rounded-full bg-primary-50 text-primary-700  hover:bg-primary-100 dark:bg-primary-700/20 dark:text-primary-300 dark:hover:bg-primary-700/30"
                                 aria-label="{{ __('wirechat::chat.group.join.requests.actions.approve.label') }}"
                                 title="{{ __('wirechat::chat.group.join.requests.actions.approve.label') }}">
                                 <x-wirechat::icons.check class="size-5 !text-current" />
@@ -93,9 +100,10 @@
             @if ($hasMoreRequests)
                 <div class="flex justify-center pt-2">
                     <button
+                        wire:loading.attr="disabled"
                         type="button"
                         wire:click="loadMore"
-                        class="inline-flex items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-border)] dark:text-gray-200 dark:hover:bg-[var(--wc-dark-secondary)]">
+                        class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-border)] dark:text-gray-200 dark:hover:bg-[var(--wc-dark-secondary)]">
                         {{ __('wirechat::chat.group.join.requests.actions.load_more.label') }}
                     </button>
                 </div>

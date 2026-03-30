@@ -109,6 +109,8 @@ class Requests extends ModalComponent
                 type: 'success',
                 message: trans_choice('wirechat::chat.group.join.requests.messages.approved_all_success', $approvedCount, ['count' => $approvedCount]),
             );
+
+            $this->dispatch('refresh')->to(Info::class);
         }
     }
 
@@ -135,6 +137,8 @@ class Requests extends ModalComponent
                 type: 'success',
                 message: trans_choice('wirechat::chat.group.join.requests.messages.dismissed_all_success', $dismissedCount, ['count' => $dismissedCount]),
             );
+
+            $this->dispatch('refresh')->to(Info::class);
         }
     }
 
