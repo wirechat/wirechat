@@ -21,25 +21,30 @@
 
         <div class="space-y-3">
             @if ($requests->isNotEmpty())
-                <div class="flex flex-wrap items-center justify-end gap-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {{ trans_choice('wirechat::chat.group.join.requests.labels.count', $pendingRequestsCount, ['count' => $pendingRequestsCount]) }}
+                    </p>
 
-                    <button
-                        type="button"
-                        wire:click="dismissAll"
-                        wire:loading.attr="disabled"
-                        wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.dismiss_all.confirmation_message') }}"
-                        class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all text-red-500 items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
-                        {{ __('wirechat::chat.group.join.requests.actions.dismiss_all.label') }}
-                    </button>
+                    <div class="flex flex-wrap items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            wire:click="dismissAll"
+                            wire:loading.attr="disabled"
+                            wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.dismiss_all.confirmation_message') }}"
+                            class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all text-red-500 items-center justify-center rounded-lg border border-[var(--wc-light-border)] px-4 py-2 text-sm font-medium dark:border-[var(--wc-dark-border)]">
+                            {{ __('wirechat::chat.group.join.requests.actions.dismiss_all.label') }}
+                        </button>
 
-                    <button
-                        type="button"
-                        wire:click="approveAll"
-                        wire:loading.attr="disabled"
-                        wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.approve_all.confirmation_message') }}"
-                        class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all items-center justify-center rounded-lg bg-[var(--wc-brand-primary)] px-4 py-2 text-sm font-medium text-white">
-                        {{ __('wirechat::chat.group.join.requests.actions.approve_all.label') }}
-                    </button>
+                        <button
+                            type="button"
+                            wire:click="approveAll"
+                            wire:loading.attr="disabled"
+                            wire:confirm="{{ __('wirechat::chat.group.join.requests.actions.approve_all.confirmation_message') }}"
+                            class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all items-center justify-center rounded-lg bg-[var(--wc-brand-primary)] px-4 py-2 text-sm font-medium text-white">
+                            {{ __('wirechat::chat.group.join.requests.actions.approve_all.label') }}
+                        </button>
+                    </div>
 
                 </div>
             @endif

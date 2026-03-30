@@ -899,6 +899,7 @@ it('renders bulk join request actions and load more controls for admins', functi
 
     Livewire::actingAs($owner)
         ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(trans_choice('wirechat::chat.group.join.requests.labels.count', 11, ['count' => 11]))
         ->assertSee(__('wirechat::chat.group.join.requests.actions.approve_all.label'))
         ->assertSee(__('wirechat::chat.group.join.requests.actions.dismiss_all.label'))
         ->assertSee(__('wirechat::chat.group.join.requests.actions.approve_all.confirmation_message'))

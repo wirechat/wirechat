@@ -110,7 +110,7 @@ class Requests extends ModalComponent
                 message: trans_choice('wirechat::chat.group.join.requests.messages.approved_all_success', $approvedCount, ['count' => $approvedCount]),
             );
 
-            $this->dispatch('refresh')->to(Info::class);
+            $this->dispatch('refreshGroupInfo')->to(Info::class);
         }
     }
 
@@ -138,7 +138,7 @@ class Requests extends ModalComponent
                 message: trans_choice('wirechat::chat.group.join.requests.messages.dismissed_all_success', $dismissedCount, ['count' => $dismissedCount]),
             );
 
-            $this->dispatch('refresh')->to(Info::class);
+            $this->dispatch('refreshGroupInfo')->to(Info::class);
         }
     }
 
@@ -156,9 +156,12 @@ class Requests extends ModalComponent
                 ->whereKey($this->loadedRequestIds)
                 ->get();
 
+        $pendingRequestsCount = $this->group->pendingJoinRequests()->count();
+
         return view('wirechat::livewire.chat.group.join.requests', [
             'requests' => $requests,
             'hasMoreRequests' => $this->hasMoreRequests,
+            'pendingRequestsCount' => $pendingRequestsCount,
         ]);
     }
 
@@ -196,7 +199,7 @@ class Requests extends ModalComponent
 
     protected function refreshSurfaces(): void
     {
-        $this->dispatch('refresh')->to(Info::class);
+        $this->dispatch('refreshGroupInfo')->to(Info::class);
         $pendingCount = $this->group->pendingJoinRequests()->count();
         $latestRequestId = $pendingCount > 0
             ? $this->group->pendingJoinRequests()->latest('id')->value('id')

@@ -1100,4 +1100,35 @@ describe('Exiting Chat', function () {
         expect($auth->belongsToConversation($conversation))->toBe(true);
     });
 
+    test('it refreshes the join requests count when group info is refreshed', function () {
+
+        testPanelProvider()->groupInvitations(true);
+
+        $auth = User::factory()->create();
+        $dismissedRequester = User::factory()->create();
+
+        $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        foreach (range(1, 12) as $index) {
+            $conversation->group->requestToJoin(User::factory()->create(['name' => "Requester {$index}"]));
+        }
+
+        $conversation->group->requestToJoin($dismissedRequester);
+
+        $request = Livewire::actingAs($auth)->test(Info::class, [
+            'conversation' => $conversation,
+            'panel' => testPanelProvider()->getId(),
+        ]);
+
+        $request
+            ->assertSee(__('wirechat::chat.group.join.requests.heading.label'))
+            ->assertSet('pendingJoinRequestsCount', 13);
+
+        $conversation->group->dismissPendingJoinRequest($dismissedRequester, $auth);
+
+        $request
+            ->dispatch('refresh')
+            ->assertSet('pendingJoinRequestsCount', 12);
+    });
+
 });

@@ -38,9 +38,13 @@ class Info extends ModalComponent
 
     protected $listeners = [
         'participantsCountUpdated',
+        'refresh' => '$refresh',
+        'refreshGroupInfo' => '$refresh',
     ];
 
     public $totalParticipants;
+
+    public int $pendingJoinRequestsCount = 0;
 
     public function participantsCountUpdated(int $newCount)
     {
@@ -247,7 +251,7 @@ class Info extends ModalComponent
 
         $this->totalParticipants = $this->conversation->participants_count;
         $this->group = $this->conversation->group;
-
+        $this->pendingJoinRequestsCount = (int) ($this->group?->pendingJoinRequests()->count() ?? 0);
         $this->setDefaultValues();
     }
 
@@ -255,6 +259,9 @@ class Info extends ModalComponent
     {
 
         $participant = $this->conversation->participant(auth()->user());
+        $this->pendingJoinRequestsCount = $this->conversation->isGroup() && $participant?->isAdmin() && $this->panel()->hasGroupInvitations()
+            ? (int) ($this->group?->pendingJoinRequests()->count() ?? 0)
+            : 0;
 
         //  dd($this->isWidget(),$participant);
 
