@@ -1,3 +1,8 @@
+@php
+    $widgetShellClass = trim('w-full h-full bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] flex overflow-hidden rounded-lg '.$this->getUiClass());
+    $widgetShellStyles = $this->getUiStyles();
+@endphp
+
 <div class="h-full ">
     @script
         <script>
@@ -130,11 +135,7 @@
 
                     setShowPropertyTo(show) {
                         this.show = show;
-                        if (show) {
-                            document.body.classList.add('overflow-y-hidden');
-                        } else {
-                            document.body.classList.remove('overflow-y-hidden');
-
+                        if (!show) {
                             setTimeout(() => {
                                 this.activeWidgetComponent = false;
                                 this.$wire.resetState();
@@ -184,9 +185,10 @@
         }
     }"
 
-     class ='w-full h-full bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] flex overflow-hidden rounded-lg'>
-      <div :class="chatIsOpen && 'hidden md:grid'" class="relative  w-full h-full sm:border-r border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)]    md:w-[360px] lg:w-[400px] xl:w-[450px] shrink-0 overflow-y-auto  ">
-          <livewire:wirechat.chats :widget="true" :panel="$this->panel" />
+     class="{{ $widgetShellClass }}"
+     @if($widgetShellStyles) style="{{ $widgetShellStyles }}" @endif>
+      <div :class="chatIsOpen && 'hidden md:grid'" class="relative  w-full h-full  md:w-[360px] lg:w-[400px] xl:w-[450px] shrink-0 overflow-y-auto  ">
+          <livewire:wirechat.chats :widget="true" :panel="$this->panel" :class="' sm:border-r border-zinc-200 dark:border-zinc-700  ' .$this->chatsClass" :styles="$this->chatsStyles" />
       </div>
       <main
            x-data="ChatWidget()"
@@ -204,7 +206,7 @@
                 x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="ease-in duration-100 " x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 -translate-x-full"
-                class="fixed inset-0" id="chatwidget-container"
+                class="absolute inset-0" id="chatwidget-container"
                 aria-modal="true">
                 @forelse($widgetComponents as $id => $component)
                     <div x-show.immediate="activeWidgetComponent == @js($id)"
@@ -212,7 +214,7 @@
                          wire:key="key-{{$id }}"
                          class="h-full">
 
-                    @livewire($component['name'], ['conversation'=> $component['conversation'] ,'widget'=>true,'panel'=>$this->panel], key($id))
+                    @livewire($component['name'], ['conversation'=> $component['conversation'] ,'widget'=>true,'panel'=>$this->panel, 'class' => $this->chatClass, 'styles' => $this->chatStyles], key($id))
                     </div>
                 @empty
                 @endforelse

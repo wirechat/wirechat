@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
@@ -33,7 +34,7 @@ trait InteractsWithWirechat
     /**
      * Establishes a relationship between the user and conversations.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<Conversation, static>
      */
     public function conversations()
     {
@@ -157,7 +158,11 @@ trait InteractsWithWirechat
                 'file_path' => $path,
                 'file_name' => basename($path),
                 'original_name' => $photo->getClientOriginalName(),
-                'mime_type' => $photo->getMimeType(),
+                'mime_type' => Attachment::resolveMimeType(
+                    $photo,
+                    $path,
+                    Wirechat::storage()->disk()
+                ),
                 'url' => Storage::disk(Wirechat::storage()->disk())->url($path),
             ]);
         }

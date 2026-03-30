@@ -1,4 +1,8 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
+@php
+    $chatsShellClass = trim('flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full sm:p-3 '.$this->getUiClass());
+    $chatsShellStyles = $this->getUiStyles();
+@endphp
 <div
     x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
      x-on:open-chat.window="selectedConversationId = $event.detail.conversation; $wire.selectedConversationId = $event.detail.conversation;"
@@ -47,11 +51,8 @@
         //});
         //observer.observe(container, { childList: true, subtree: true });
     "
-
-
-
-
-     class="flex flex-col bg-[var(--wc-light-primary)]  dark:bg-[var(--wc-dark-primary)]  transition-all h-full overflow-hidden w-full sm:p-3">
+     class="{{ $chatsShellClass }}"
+     @if($chatsShellStyles) style="{{ $chatsShellStyles }}" @endif>
 
     @php
         /* Show header if any of these conditions are true  */
