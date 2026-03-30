@@ -848,7 +848,8 @@ it('allows admins to approve join requests from the drawer', function () {
 
     Livewire::actingAs($owner)
         ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->call('approve', $request->id);
+        ->call('approve', $request->id)
+        ->assertDispatched('wirechat-join-requests-banner-updated');
 
     $invite->refresh();
 
@@ -973,7 +974,8 @@ it('allows admins to approve all pending join requests from the drawer', functio
 
     Livewire::actingAs($owner)
         ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-        ->call('approveAll');
+        ->call('approveAll')
+        ->assertDispatched('wirechat-join-requests-banner-updated');
 
     $invite->refresh();
 

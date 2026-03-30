@@ -198,12 +198,16 @@ class Requests extends ModalComponent
     {
         $this->dispatch('refresh')->to(Info::class);
         $pendingCount = $this->group->pendingJoinRequests()->count();
+        $latestRequestId = $pendingCount > 0
+            ? $this->group->pendingJoinRequests()->latest('id')->value('id')
+            : 0;
 
         $this->dispatch(
             'wirechat-join-requests-banner-updated',
             conversationId: $this->conversation->id,
             count: $pendingCount,
             summary: trans_choice('wirechat::chat.group.join.requests.labels.summary', $pendingCount, ['count' => $pendingCount]),
+            latestRequestId: $latestRequestId,
         );
     }
 
