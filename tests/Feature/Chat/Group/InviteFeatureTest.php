@@ -915,7 +915,7 @@ it('can load more join requests from the drawer', function () {
         'updated_at' => now()->subDay(),
     ])->save();
 
-    collect(range(1, 10))->each(function (int $index) use ($conversation) {
+    collect(range(1, 5))->each(function (int $index) use ($conversation) {
         $conversation->group->requestToJoin(User::factory()->create(['name' => "Visible Requester {$index}"]));
     });
 
@@ -925,6 +925,31 @@ it('can load more join requests from the drawer', function () {
         ->assertSee(__('wirechat::chat.group.join.requests.actions.load_more.label'))
         ->call('loadMore')
         ->assertSee('Hidden Requester');
+});
+
+it('keeps the join requests drawer interactive after approving a visible request', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $hiddenRequester = User::factory()->create(['name' => 'Pulled In Requester']);
+    $conversation->group->requestToJoin($hiddenRequester)->forceFill([
+        'created_at' => now()->subDay(),
+        'updated_at' => now()->subDay(),
+    ])->save();
+
+    $visibleRequests = collect(range(1, 5))->map(function (int $index) use ($conversation) {
+        $requester = User::factory()->create(['name' => "Visible Approve {$index}"]);
+        $conversation->group->requestToJoin($requester);
+
+        return $conversation->group->pendingJoinRequests()->whereRequester($requester)->latest('id')->firstOrFail();
+    });
+
+    Livewire::actingAs($owner)
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertDontSee('Pulled In Requester')
+        ->call('approve', $visibleRequests->first()->id)
+        ->assertSee(__('wirechat::chat.group.join.requests.heading.label'))
+        ->assertSee('Pulled In Requester');
 });
 
 it('allows admins to approve all pending join requests from the drawer', function () {
@@ -939,7 +964,7 @@ it('allows admins to approve all pending join requests from the drawer', functio
         'is_primary' => true,
     ]);
 
-    $requesters = collect(range(1, 3))->map(function (int $index) use ($conversation, $invite) {
+    $requesters = collect(range(1, 12))->map(function (int $index) use ($conversation, $invite) {
         $requester = User::factory()->create(['name' => "Approve {$index}"]);
         $conversation->group->requestToJoin($requester, $invite);
 
@@ -954,15 +979,15 @@ it('allows admins to approve all pending join requests from the drawer', functio
 
     expect($requesters->every(fn ($requester) => $requester->belongsToConversation($conversation)))->toBeTrue()
         ->and($conversation->group->pendingJoinRequests()->count())->toBe(0)
-        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::ACCEPTED)->count())->toBe(3)
-        ->and($invite->usages)->toBe(3);
+        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::ACCEPTED)->count())->toBe(12)
+        ->and($invite->usages)->toBe(12);
 });
 
 it('allows admins to reject all pending join requests from the drawer', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');
 
-    collect(range(1, 3))->each(function (int $index) use ($conversation) {
+    collect(range(1, 12))->each(function (int $index) use ($conversation) {
         $conversation->group->requestToJoin(User::factory()->create(['name' => "Dismiss {$index}"]));
     });
 
@@ -972,7 +997,7 @@ it('allows admins to reject all pending join requests from the drawer', function
 
     expect($conversation->group->pendingJoinRequests()->count())->toBe(0)
         ->and($conversation->participants()->count())->toBe(1)
-        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::DISMISSED)->count())->toBe(3);
+        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::DISMISSED)->count())->toBe(12);
 });
 
 it('shows the join request banner only to group admins', function () {

@@ -5,7 +5,7 @@ namespace Wirechat\Wirechat\Livewire\Chat\Group\Join;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
-use Wirechat\Wirechat\Livewire\Chat\Chat;
+use Wirechat\Wirechat\Enums\JoinRequestStatus;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
@@ -30,6 +30,8 @@ class Requests extends ModalComponent
     protected ?Participant $authParticipant = null;
 
     protected int $perPageStep = 5;
+
+    protected int $bulkActionChunkSize = 100;
 
     public static function modalAttributes(): array
     {
@@ -86,14 +88,17 @@ class Requests extends ModalComponent
     public function approveAll(): void
     {
         $reviewedBy = $this->authorizeAdmin();
-        $requests = $this->pendingRequestsQuery()->get();
-
         $approvedCount = 0;
 
-        foreach ($requests as $request) {
-            $this->reviewRequest($request, $reviewedBy);
-            $approvedCount++;
-        }
+        $this->group->pendingJoinRequests()
+            ->with(['requester', 'invite'])
+            ->orderBy('id')
+            ->chunkById($this->bulkActionChunkSize, function ($requests) use (&$approvedCount, $reviewedBy) {
+                foreach ($requests as $request) {
+                    $this->reviewRequest($request, $reviewedBy);
+                    $approvedCount++;
+                }
+            });
 
         $this->syncLoadedRequests();
         $this->refreshSurfaces();
@@ -110,13 +115,15 @@ class Requests extends ModalComponent
     public function dismissAll(): void
     {
         $reviewedBy = $this->authorizeAdmin();
-        $requests = $this->pendingRequestsQuery()->get();
+        $dismissedCount = $this->group->pendingJoinRequests()->count();
 
-        $dismissedCount = 0;
-
-        foreach ($requests as $request) {
-            $request->dismiss($reviewedBy);
-            $dismissedCount++;
+        if ($dismissedCount > 0) {
+            $this->group->pendingJoinRequests()->update([
+                'status' => JoinRequestStatus::DISMISSED,
+                'reviewed_by_id' => $reviewedBy->getKey(),
+                'reviewed_by_type' => $reviewedBy->getMorphClass(),
+                'reviewed_at' => now(),
+            ]);
         }
 
         $this->syncLoadedRequests();
@@ -186,7 +193,14 @@ class Requests extends ModalComponent
     protected function refreshSurfaces(): void
     {
         $this->dispatch('refresh')->to(Info::class);
-        $this->dispatch('refresh')->to(Chat::class);
+        $pendingCount = $this->group->pendingJoinRequests()->count();
+
+        $this->dispatch(
+            'wirechat-join-requests-banner-updated',
+            conversationId: $this->conversation->id,
+            count: $pendingCount,
+            summary: trans_choice('wirechat::chat.group.join.requests.labels.summary', $pendingCount, ['count' => $pendingCount]),
+        );
     }
 
     protected function syncLoadedRequests(): void
