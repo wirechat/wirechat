@@ -671,7 +671,7 @@
                                     if (file.size > this.maxSize) {
                                         $dispatch('wirechat-toast', {
                                             type: 'warning',
-                                            message:this.type===media?
+                                            message:this.type==='media'?
                                                     @js(__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>$this->panel()->getMediaMaxUploadSize()])):
                                                     @js(__('wirechat::validation.max.file', ['attribute' => __('wirechat::chat.inputs.media.label'),'max'=>$this->panel()->getFileMaxUploadSize()]))
 
@@ -681,7 +681,7 @@
                                         const extension = file.name.split('.').pop().toLowerCase();
                                         $dispatch('wirechat-toast', {
                                             type: 'warning',
-                                            message: this.type===media?
+                                            message: this.type==='media'?
                                                     @js(__('wirechat::validation.mimes', [ 'attribute' => __('wirechat::chat.inputs.media.label'), 'values' => implode(', ', $this->panel()->getMediaMimes()) ])):
                                                     @js(__('wirechat::validation.mimes', [ 'attribute' => __('wirechat::chat.inputs.media.label'), 'values' => implode(', ', $this->panel()->getFileMimes()) ]))
                                            // message: `One or more Files not uploaded: .${extension} (type not allowed)`
