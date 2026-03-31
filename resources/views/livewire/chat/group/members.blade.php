@@ -1,3 +1,5 @@
+@use('Wirechat\Wirechat\Facades\Wirechat')
+
 @php
        $authIsAdminInGroup=  $participant?->isAdmin();
        $authIsOwner=  $participant?->isOwner();
@@ -48,9 +50,10 @@
 
                     @foreach ($participants as $key => $participant)
                         @php
+                            $authParticipant = Wirechat::getParticipantable();
                             $loopParticipantIsAuth =
-                                $participant->participantable_id == auth()->id() &&
-                                $participant->participantable_type == auth()->user()->getMorphClass();
+                                $participant->participantable_id == $authParticipant?->getKey() &&
+                                $participant->participantable_type == $authParticipant?->getMorphClass();
                         @endphp
                         <li x-data="{ open: false }" x-ref="button" @click="open = ! open" x-init="$watch('open', value => {
                             $refs.members.style.overflow = value ? 'hidden' : '';

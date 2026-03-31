@@ -207,14 +207,14 @@ class Message extends Model
 
     public function belongsToAuth(): bool
     {
-        $sendable = Wirechat::getSendable();
+        $user = Wirechat::getParticipantable();
 
-        if (! $sendable || ! $this->participant) {
+        if (! $user || ! $this->participant) {
             return false;
         }
 
-        return $this->participant->participantable_type === $sendable->getMorphClass()
-            && $this->participant->participantable_id == $sendable->getKey();
+        return $this->participant->participantable_type === $user->getMorphClass()
+            && $this->participant->participantable_id == $user->getKey();
     }
 
     // Relationship for the parent message

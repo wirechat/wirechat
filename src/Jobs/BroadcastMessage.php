@@ -31,7 +31,7 @@ class BroadcastMessage implements ShouldQueue
         $this->resolvePanel($panel);
         //
         $this->onQueue($this->getPanel()->getMessagesQueue());
-        $this->auth = auth()->user();
+        $this->auth = Wirechat::getParticipantable();
 
         // Get table
         $this->messagesTable = Wirechat::messageModelTable();

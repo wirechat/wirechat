@@ -202,10 +202,10 @@ class WirechatServiceProvider extends ServiceProvider
             $script = '';
 
             if ($hasWebPushNotifications && auth()->check()) {
-                $sendable = \Wirechat\Wirechat\Facades\Wirechat::getSendable();
-                $userId = $sendable->getKey();
+                $user = \Wirechat\Wirechat\Facades\Wirechat::getParticipantable();
+                $userId = $user->getKey();
                 $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(
-                    $sendable->getMorphClass()
+                    $user->getMorphClass()
                 );
 
                 $script = <<<HTML

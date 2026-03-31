@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Livewire\New;
 
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
@@ -155,7 +156,7 @@ class Group extends ModalComponent
 
         // create group
         /* @var $conversation */
-        $conversation = auth()->user()->createGroup($this->name, $this->description, $this->photo);
+        $conversation = Wirechat::getParticipantable()->createGroup($this->name, $this->description, $this->photo);
 
         // Add participants
         foreach ($this->selectedMembers as $key => $participant) {
@@ -187,7 +188,7 @@ class Group extends ModalComponent
     {
 
         abort_unless(auth()->check(), 401);
-        abort_unless(auth()->user()->canCreateGroups(), 403, 'You do not have permission to create groups.');
+        abort_unless(Wirechat::getParticipantable()->canCreateGroups(), 403, 'You do not have permission to create groups.');
 
         $this->selectedMembers = collect();
     }

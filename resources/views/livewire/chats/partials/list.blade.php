@@ -5,11 +5,11 @@
     @php
     //$receiver =$conversation->getReceiver();
     $group = $conversation->isGroup() ? $conversation->group : null;
-    $receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peer_participant?->participantable : $this->sendable);
-    //$receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peerParticipant()?->participantable : $this->sendable);
+    $receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peer_participant?->participantable : $this->participantable);
+    //$receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peerParticipant()?->participantable : $this->participantable);
     $lastMessage = $conversation->lastMessage;
     //mark isReadByAuth true if user has chat opened
-    $isReadByAuth = $conversation?->readBy($conversation->auth_participant??$this->sendable) || $selectedConversationId == $conversation->id;
+    $isReadByAuth = $conversation?->readBy($conversation->auth_participant??$this->participantable) || $selectedConversationId == $conversation->id;
     $belongsToAuth = $lastMessage?->belongsToAuth();
 
 
@@ -86,7 +86,7 @@
 
                 {{-- Read status --}}
                 {{-- Only show if AUTH is NOT onwer of message --}}
-                @if ($lastMessage != null && !$lastMessage?->ownedBy($this->sendable) && !$isReadByAuth)
+                @if ($lastMessage != null && !$lastMessage?->ownedBy($this->participantable) && !$isReadByAuth)
                     <div x-show="showUnreadStatus" dusk="unreadMessagesDot" class=" col-span-2 flex flex-col text-center my-auto">
                         {{-- Dots icon --}}
                         <span dusk="unreadDotItem" class="sr-only">unread dot</span>

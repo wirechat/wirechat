@@ -20,7 +20,7 @@ use Wirechat\Wirechat\Models\Conversation;
 /**
  * Info Component
  *
- * @property \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null $sendable
+ * @property \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null $participantable
  */
 class Info extends ModalComponent
 {
@@ -50,14 +50,38 @@ class Info extends ModalComponent
     public $totalParticipants;
 
     /**
-     * Returns the authenticated user.
+     * Returns the authenticated participantable.
      *
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null
      */
     #[Computed(persist: true)]
+    public function participantable()
+    {
+        return Wirechat::getParticipantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
     public function sendable()
     {
-        return Wirechat::getSendable();
+        return $this->participantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
+    public function user()
+    {
+        return $this->participantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
+    public function participant()
+    {
+        return $this->participantable();
     }
 
     public function participantsCountUpdated(int $newCount)
@@ -192,15 +216,15 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        abort_unless($this->sendable->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless($this->participantable->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
 
         abort_if($this->conversation->isPrivate(), 403, 'Operation not allowed: Private chats cannot be deleted.');
 
-        abort_unless($this->sendable->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless($this->participantable->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
 
         // Ensure all participants are removed before deleting the group
         $participantCount = $this->conversation->participants()
-            ->withoutParticipantable($this->sendable)
+            ->withoutParticipantable($this->participantable)
             ->where('role', '!=', ParticipantRole::OWNER)
             ->count();
 
@@ -216,7 +240,7 @@ class Info extends ModalComponent
         );
 
         // Soft Delete conversation
-        $this->conversation->deleteFor($this->sendable);
+        $this->conversation->deleteFor($this->participantable);
 
         // Dispatch job to delete conversation in backgroud
         // This is done to not hold up page for user incase of long running prcoess and to also give time for widget to settle avoiding 404 livewire hydrate errors
@@ -229,10 +253,10 @@ class Info extends ModalComponent
         abort_unless(auth()->check(), 401);
 
         // make sure owner if group cannot be removed from chat
-        abort_if($this->sendable->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
+        abort_if($this->participantable->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
 
         // delete conversation
-        $this->sendable->exitConversation($this->conversation);
+        $this->participantable->exitConversation($this->conversation);
 
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatsRoute(),
@@ -260,7 +284,7 @@ class Info extends ModalComponent
 
         abort_unless(auth()->check(), 401);
         abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.info.group.messages.invalid_conversation_type_error'));
-        abort_unless($this->sendable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
 
         $this->conversation = $this->conversation->load('group.conversation', 'group.cover')->loadCount('participants');
 
@@ -273,7 +297,7 @@ class Info extends ModalComponent
     public function render()
     {
 
-        $participant = $this->conversation->participant($this->sendable);
+        $participant = $this->conversation->participant($this->participantable);
 
         //  dd($this->isWidget(),$participant);
 

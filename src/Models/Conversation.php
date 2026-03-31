@@ -274,20 +274,20 @@ class Conversation extends Model
      */
     public function scopeWithoutBlanks(Builder $builder): void
     {
-        $sendable = Wirechat::getSendable(); // Get the authenticated user
-        if (! $sendable) {
+        $user = Wirechat::getParticipantable(); // Get the authenticated user
+        if (! $user) {
             return;
         }
 
         $messagesTable = Wirechat::messageModelTable();
         $participantsTable = Wirechat::participantModelTable();
 
-        $builder->whereHas('messages', function (Builder $q) use ($sendable, $messagesTable, $participantsTable) {
+        $builder->whereHas('messages', function (Builder $q) use ($user, $messagesTable, $participantsTable) {
             // Remove the global scope that hides removed messages so we can apply our own logic here
             $q->withoutGlobalScope(\Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages::class)
 
                 // We only want messages that are NOT deleted by the current user's participant in this conversation
-                ->whereDoesntHave('actions', function ($aq) use ($sendable, $messagesTable, $participantsTable) {
+                ->whereDoesntHave('actions', function ($aq) use ($user, $messagesTable, $participantsTable) {
                     $participantClass = Wirechat::participantModelClass();
                     $participantMorphAlias = app($participantClass)->getMorphClass();
 
@@ -299,7 +299,7 @@ class Conversation extends Model
 
                         // actor_id (actions) must reference a participant row that belongs to the same conversation
                         // AND that participant row must belong to the current authenticated user.
-                        ->whereExists(function ($ex) use ($sendable, $participantsTable, $messagesTable) {
+                        ->whereExists(function ($ex) use ($user, $participantsTable, $messagesTable) {
                             $ex->select(DB::raw(1))
                                 ->from($participantsTable)
                                 // actions.actor_id = participants.id
@@ -307,8 +307,8 @@ class Conversation extends Model
                                 // participants.conversation_id = messages.conversation_id
                                 ->whereColumn("$participantsTable.conversation_id", "$messagesTable.conversation_id")
                                 // participant belongs to current auth user
-                                ->where("$participantsTable.participantable_id", $sendable->getKey())
-                                ->where("$participantsTable.participantable_type", $sendable->getMorphClass());
+                                ->where("$participantsTable.participantable_id", $user->getKey())
+                                ->where("$participantsTable.participantable_type", $user->getMorphClass());
                         });
                 });
         });
@@ -319,17 +319,17 @@ class Conversation extends Model
      */
     public function scopeWithoutCleared(Builder $builder): void
     {
-        $sendable = Wirechat::getSendable(); // Get the authenticated user
+        $user = Wirechat::getParticipantable(); // Get the authenticated user
 
         // dd($model->id);
         // Apply the scope only if the user is authenticated
-        if ($sendable) {
+        if ($user) {
             // Get the table name for conversations dynamically to avoid hardcoding.
             $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
-            $builder->whereHas('participants', function ($query) use ($sendable, $conversationsTableName) {
-                $query->whereParticipantable($sendable)
+            $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
+                $query->whereParticipantable($user)
                     ->whereRaw(" (conversation_cleared_at IS NULL OR conversation_cleared_at < {$conversationsTableName}.updated_at) ");
             });
         }
@@ -342,15 +342,15 @@ class Conversation extends Model
     {
 
         // Dynamically get the parent model (i.e., the user)
-        $sendable = Wirechat::getSendable();
+        $user = Wirechat::getParticipantable();
 
-        if ($sendable) {
+        if ($user) {
             // Get the table name for conversations dynamically to avoid hardcoding.
             $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
-            $builder->whereHas('participants', function ($query) use ($sendable, $conversationsTableName) {
-                $query->whereParticipantable($sendable)
+            $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
+                $query->whereParticipantable($user)
                     ->whereRaw(" (conversation_deleted_at IS NULL OR conversation_deleted_at < {$conversationsTableName}.updated_at) ");
             });
         }
@@ -362,12 +362,12 @@ class Conversation extends Model
     public function scopeWithDeleted(Builder $builder)
     {
         // Dynamically get the parent model (i.e., the user)
-        $sendable = Wirechat::getSendable();
+        $user = Wirechat::getParticipantable();
 
-        if ($sendable) {
+        if ($user) {
             // Apply the "with deleted conversations" scope
-            $builder->whereHas('participants', function ($query) use ($sendable) {
-                $query->whereParticipantable($sendable)
+            $builder->whereHas('participants', function ($query) use ($user) {
+                $query->whereParticipantable($user)
                     ->orWhereNotNull('conversation_deleted_at');
             });
         }
@@ -451,10 +451,10 @@ class Conversation extends Model
      */
     public function receiverParticipant(): HasOne
     {
-        $sendable = Wirechat::getSendable();
+        $user = Wirechat::getParticipantable();
 
         return $this->hasOne(Wirechat::participantModelClass())
-            ->withoutParticipantable($sendable)
+            ->withoutParticipantable($user)
             ->where('role', ParticipantRole::OWNER)
             ->withWhereHas('conversation', function ($query) {
                 $query->whereIn('type', [ConversationType::PRIVATE]);
@@ -469,10 +469,10 @@ class Conversation extends Model
      */
     public function authParticipant(): HasOne
     {
-        $sendable = Wirechat::getSendable();
+        $user = Wirechat::getParticipantable();
 
         return $this->hasOne(Wirechat::participantModelClass())
-            ->whereParticipantable($sendable)
+            ->whereParticipantable($user)
             ->where('role', ParticipantRole::OWNER);
     }
 
@@ -486,24 +486,24 @@ class Conversation extends Model
             return null;
         }
 
-        $sendable = Wirechat::getSendable();
+        $user = Wirechat::getParticipantable();
 
         // If it's a self conversation, return the participantable
         if ($this->isSelf()) {
-            return $sendable;
+            return $user;
         }
 
         // Get participants for the current conversation
         $participants = $this->participants()->where('conversation_id', $this->id);
 
         // Try to find the receiver excluding the authenticated user's participantable
-        $receiverParticipant = $participants->withoutParticipantable($sendable)->first();
+        $receiverParticipant = $participants->withoutParticipantable($user)->first();
         if ($receiverParticipant) {
             return $receiverParticipant->participantable;
         }
 
         // If no other participant is found, return the participantable as the receiver
-        return $sendable;
+        return $user;
     }
 
     /**
@@ -515,7 +515,7 @@ class Conversation extends Model
     public function markAsRead(Model|Authenticatable|null $participant = null)
     {
 
-        $participant = $participant ?? Wirechat::getSendable();
+        $participant = $participant ?? Wirechat::getParticipantable();
         if ($participant == null) {
 
             return null;

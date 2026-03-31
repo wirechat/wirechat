@@ -6,11 +6,11 @@ namespace Workbench\App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Wirechat\Wirechat\Contracts\WirechatUser;
+use Wirechat\Wirechat\Contracts\Participantable;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Traits\InteractsWithWirechat;
 
-class User extends Authenticatable implements WirechatUser
+class User extends Authenticatable implements Participantable
 {
     use HasFactory, Notifiable;
 

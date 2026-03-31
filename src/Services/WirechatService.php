@@ -2,7 +2,6 @@
 
 namespace Wirechat\Wirechat\Services;
 
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
 use Wirechat\Wirechat\Models\Action;
@@ -269,16 +268,38 @@ class WirechatService
     }
 
     /**
-     * Get the model that should be used as the sendable when creating Messages.
+     * Get the model that should be used as the participantable when creating Messages.
      *
      * By default returns the authenticated user. Override this method in a custom
      * WirechatService subclass to return a different entity (e.g. a bot, system, etc.).
      *
-     * @return Authenticatable|Model|null The model to use as sendable
+     * @return \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null The model to use as participantable
      */
-    public function getSendable(): Authenticatable|Model|null
+    public function getParticipantable(): Model|\Wirechat\Wirechat\Contracts\Participantable|null
     {
         return auth()->user();
+    }
+
+    /**
+     * Get the model that should be used as the participant when creating Messages.
+     *
+     * @deprecated Use getParticipantable() instead.
+     * @see \Wirechat\Wirechat\Services\WirechatService::getParticipantable()
+     */
+    public function getParticipant(): Model|\Wirechat\Wirechat\Contracts\Participantable|null
+    {
+        return $this->getParticipantable();
+    }
+
+    /**
+     * Get the model that should be used as the sendable when creating Messages.
+     *
+     * @deprecated Use getParticipantable() instead.
+     * @see \Wirechat\Wirechat\Services\WirechatService::getParticipantable()
+     */
+    public function getSendable(): Model|\Wirechat\Wirechat\Contracts\Participantable|null
+    {
+        return $this->getParticipantable();
     }
 
     /**

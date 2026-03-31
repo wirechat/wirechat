@@ -14,7 +14,7 @@ use Wirechat\Wirechat\Models\Conversation;
 /**
  * Info Component
  *
- * @property \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null $sendable
+ * @property \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null $participantable
  */
 class Info extends ModalComponent
 {
@@ -30,14 +30,38 @@ class Info extends ModalComponent
     }
 
     /**
-     * Returns the authenticated user.
+     * Returns the authenticated participantable.
      *
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null
      */
     #[Computed(persist: true)]
+    public function participantable()
+    {
+        return Wirechat::getParticipantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
     public function sendable()
     {
-        return Wirechat::getSendable();
+        return $this->participantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
+    public function user()
+    {
+        return $this->participantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
+    public function participant()
+    {
+        return $this->participantable();
     }
 
     /**
@@ -48,11 +72,11 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        abort_unless($this->sendable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
         abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
 
         // delete conversation
-        $this->conversation->deleteFor($this->sendable);
+        $this->conversation->deleteFor($this->participantable);
 
         // redirect to chats page pr
         // Dispatach event instead if isWidget
@@ -83,7 +107,7 @@ class Info extends ModalComponent
         abort_if(empty($this->conversation), 404);
 
         abort_unless(auth()->check(), 401);
-        abort_unless($this->sendable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
 
         abort_if($this->conversation->isGroup(), 403, __('wirechat::chat.info.messages.invalid_conversation_type_error'));
 
@@ -95,7 +119,7 @@ class Info extends ModalComponent
     public function render()
     {
 
-        $receiver = $this->conversation->peerParticipant($this->sendable)?->participantable;
+        $receiver = $this->conversation->peerParticipant($this->participantable)?->participantable;
 
         // Pass data to the view
         return view('wirechat::livewire.chat.info', [

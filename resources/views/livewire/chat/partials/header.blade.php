@@ -150,7 +150,7 @@
                         @endif
 
 
-                        @if ($conversation->isGroup() && !$this->sendable->isOwnerOf($conversation))
+                        @if ($conversation->isGroup() && !$this->participantable->isOwnerOf($conversation))
                             <button wire:click="exitConversation"
                                 wire:confirm="{{ __('wirechat::chat.actions.exit_group.confirmation_message') }}"
                                 class="w-full text-start ">

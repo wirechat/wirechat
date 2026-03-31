@@ -36,7 +36,7 @@
         <div class="relative w-full">
 
             {{-- New Group button --}}
-            @if ($this->panel()->hasCreateGroupAction() && auth()->user()->canCreateGroups())
+            @if ($this->panel()->hasCreateGroupAction() && Wirechat::getParticipantable()?->canCreateGroups())
 
                 {{-- Buton to trigger opening of new grop modal --}}
                 <x-wirechat::actions.new-group widget="{{$this->isWidget()}}" panel="{{$this->panel}}">

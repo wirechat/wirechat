@@ -250,7 +250,7 @@ describe('sendMessageTo() ', function () {
         // pass participant model - which does not use Triat Chatable
         $auth->sendMessageTo($participant, 'hello');
 
-    })->throws(Exception::class, 'The model must use `InteractsWithWirechat` trait and must implement WirechatUser');
+    })->throws(Exception::class, 'The model must use `InteractsWithWirechat` trait and must implement Participantable');
 
     it('aborts 403 is user does not belong to conversation ', function () {
 

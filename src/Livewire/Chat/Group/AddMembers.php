@@ -7,6 +7,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 // use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
@@ -126,7 +127,7 @@ class AddMembers extends ModalComponent
                 // check if is removed - if true then
                 // abort if non admin member tries to add a participant previously removed by admin
                 if ($participant?->isRemovedByAdmin()) {
-                    $authParticipant = $this->conversation->participant(auth()->user());
+                    $authParticipant = $this->conversation->participant(Wirechat::getParticipantable());
 
                     abort_unless($authParticipant?->isAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were removed from the group by an Admin.');
 
@@ -145,7 +146,7 @@ class AddMembers extends ModalComponent
     public function save()
     {
 
-        $authParticipant = $this->conversation->participant(auth()->user());
+        $authParticipant = $this->conversation->participant(Wirechat::getParticipantable());
 
         foreach ($this->selectedMembers as $key => $member) {
 
@@ -166,7 +167,7 @@ class AddMembers extends ModalComponent
     public function mount()
     {
         abort_unless(auth()->check(), 401);
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+        abort_unless(Wirechat::getParticipantable()->belongsToConversation($this->conversation), 403);
 
         abort_if($this->conversation->isPrivate(), 403, 'Cannot add members to private conversation');
 

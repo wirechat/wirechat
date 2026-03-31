@@ -208,7 +208,7 @@ trait InteractsWithWirechat
                 ! in_array(InteractsWithWirechat::class, class_uses($model)) &&
                 ! in_array(Chatable::class, class_uses($model))
             ) {
-                abort(403, 'The model must use `InteractsWithWirechat` trait and must implement WirechatUser');
+                abort(403, 'The model must use `InteractsWithWirechat` trait and must implement Participantable');
             }
 
             // Deprecation notice if Chatable is still in use

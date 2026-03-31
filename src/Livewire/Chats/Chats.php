@@ -15,7 +15,7 @@ use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
 
 /**
- * @property \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null $sendable
+ * @property \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null $participantable
  * @property-read \Illuminate\Support\Collection<int, \Wirechat\Wirechat\Models\Conversation> $conversations
  * @property int|string|null $selectedConversationId
  * @property array<int, int|string> $conversationIds
@@ -71,9 +71,9 @@ class Chats extends Component
 
     public function getListeners(): array
     {
-        $sendable = $this->sendable;
-        $encodedType = MorphClassResolver::encode($sendable?->getMorphClass());
-        $sendableId = $sendable?->getKey();
+        $participantable = $this->participantable;
+        $encodedType = MorphClassResolver::encode($participantable?->getMorphClass());
+        $participantableId = $participantable?->getKey();
 
         $listeners = [
             'refresh' => '$refresh',
@@ -87,21 +87,45 @@ class Chats extends Component
         }
 
         $panelId = $this->panel()->getId();
-        $channelName = "$panelId.participant.$encodedType.$sendableId";
+        $channelName = "$panelId.participant.$encodedType.$participantableId";
         $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\NotifyParticipant"] = 'refreshComponent';
 
         return $listeners;
     }
 
     /**
-     * Returns the authenticated user.
+     * Returns the authenticated participantable.
      *
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null
      */
     #[Computed(persist: true)]
+    public function participantable()
+    {
+        return Wirechat::getParticipantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
     public function sendable()
     {
-        return Wirechat::getSendable();
+        return $this->participantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
+    public function user()
+    {
+        return $this->participantable();
+    }
+
+    /**
+     * @deprecated Use participantable() instead.
+     */
+    public function participant()
+    {
+        return $this->participantable();
     }
 
     /**
@@ -120,7 +144,7 @@ class Chats extends Component
             return collect();
         }
 
-        $sendable = $this->sendable;
+        $participantable = $this->participantable;
         $ids = $this->conversationIds;
         $positions = array_flip($ids);
         $table = (new Conversation)->getTable();
@@ -144,10 +168,10 @@ class Chats extends Component
             ->values();
 
         // Set peer/auth participants without extra queries (participants already loaded)
-        $conversations->each(function (Conversation $conversation) use ($sendable) {
+        $conversations->each(function (Conversation $conversation) use ($participantable) {
             if ($conversation->isPrivate() || $conversation->isSelf()) {
-                $conversation->auth_participant = $conversation->participant($sendable);
-                $conversation->peer_participant = $conversation->peerParticipant($sendable);
+                $conversation->auth_participant = $conversation->participant($participantable);
+                $conversation->peer_participant = $conversation->peerParticipant($participantable);
             }
         });
 
@@ -160,18 +184,17 @@ class Chats extends Component
      */
     protected function loadConversationIds(): void
     {
-        $sendable = $this->sendable;
-        abort_if($sendable == null, 401);
+        $participantable = $this->participantable;
+        abort_if($participantable == null, 401);
 
         $table = (new Conversation)->getTable();
         $perPage = 10;
 
-        // In free version, we use the user's relation as before
-        $baseQuery = $sendable->conversations()
+        // In free version, we use the participant's relation as before
+        $baseQuery = $participantable->conversations()
             ->with([]) // ids only
             ->when(trim($this->search ?? '') !== '', fn ($q) => $this->applySearchConditions($q))
             ->when(trim($this->search ?? '') === '', function ($q) {
-                /** @phpstan-ignore-next-line */
                 return $q->withoutDeleted()->withoutBlanks();
             })
             // deterministic ordering for cursor paging (3-tuple: updated_at, created_at, id)

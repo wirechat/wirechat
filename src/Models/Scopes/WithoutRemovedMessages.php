@@ -29,9 +29,9 @@ class WithoutRemovedMessages implements Scope
             return;
         }
 
-        $sendable = Wirechat::getSendable();
-        $legacyActorType = $sendable->getMorphClass();
-        $legacyActorId = $sendable->getKey();
+        $user = Wirechat::getParticipantable();
+        $legacyActorType = $user->getMorphClass();
+        $legacyActorId = $user->getKey();
 
         // Exclude messages that have a DELETE action performed by *this* authenticated actor
         $builder->whereDoesntHave('actions', function ($q) use (
@@ -80,9 +80,9 @@ class WithoutRemovedMessages implements Scope
         });
 
         // Ensure the message is visible according to the current user's participant row
-        $builder->whereHas('participant.conversation.participants', function ($q) use ($sendable, $messagesTable, $participantsTable) {
-            $q->where('participantable_id', $sendable->getKey())
-                ->where('participantable_type', $sendable->getMorphClass())
+        $builder->whereHas('participant.conversation.participants', function ($q) use ($user, $messagesTable, $participantsTable) {
+            $q->where('participantable_id', $user->getKey())
+                ->where('participantable_type', $user->getMorphClass())
                 ->where(function ($q2) use ($messagesTable, $participantsTable) {
                     $q2->where(function ($q3) {
                         $q3->whereNull('conversation_cleared_at')
