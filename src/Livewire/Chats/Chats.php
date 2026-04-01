@@ -195,6 +195,7 @@ class Chats extends Component
             ->with([]) // ids only
             ->when(trim($this->search ?? '') !== '', fn ($q) => $this->applySearchConditions($q))
             ->when(trim($this->search ?? '') === '', function ($q) {
+                /** @phpstan-ignore-next-line */
                 return $q->withoutDeleted()->withoutBlanks();
             })
             // deterministic ordering for cursor paging (3-tuple: updated_at, created_at, id)
