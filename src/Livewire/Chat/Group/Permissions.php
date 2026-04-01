@@ -64,7 +64,7 @@ class Permissions extends ModalComponent
     public function mount()
     {
         abort_unless(auth()->check(), 401);
-        abort_unless(Wirechat::getParticipantable()->belongsToConversation($this->conversation), 403, 'You do not have permission to access this resource');
+        abort_unless(Wirechat::getParticipantable()?->belongsToConversation($this->conversation), 403, 'You do not have permission to access this resource');
 
         abort_unless($this->conversation->isOwner(Wirechat::getParticipantable()), 403, 'You do not have permission to edit group permissions');
 

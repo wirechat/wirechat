@@ -156,7 +156,7 @@ class Group extends ModalComponent
 
         // create group
         /* @var $conversation */
-        $conversation = Wirechat::getParticipantable()->createGroup($this->name, $this->description, $this->photo);
+        $conversation = Wirechat::getParticipantable()?->createGroup($this->name, $this->description, $this->photo);
 
         // Add participants
         foreach ($this->selectedMembers as $key => $participant) {
@@ -188,7 +188,7 @@ class Group extends ModalComponent
     {
 
         abort_unless(auth()->check(), 401);
-        abort_unless(Wirechat::getParticipantable()->canCreateGroups(), 403, 'You do not have permission to create groups.');
+        abort_unless(Wirechat::getParticipantable()?->canCreateGroups(), 403, 'You do not have permission to create groups.');
 
         $this->selectedMembers = collect();
     }

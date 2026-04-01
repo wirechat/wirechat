@@ -30,8 +30,8 @@ foreach ($panels as $panel) {
     $middleware = $panel->getMiddleware();
 
     // Conversation channel
-    Broadcast::channel("{$panelId}.conversation.{conversationId}", function ($user, $conversationId) {
-        $participantable = Wirechat::getParticipantable();
+    Broadcast::channel("{$panelId}.conversation.{conversationId}", function ($user, $conversationId) use ($guards) {
+        $participantable = Wirechat::getParticipantable($guards);
 
         if (! $participantable) {
             return false;
@@ -46,8 +46,8 @@ foreach ($panels as $panel) {
     ]);
 
     // Participant channel
-    Broadcast::channel("{$panelId}.participant.{encodedType}.{id}", function ($user, $encodedType, $id) {
-        $participantable = Wirechat::getParticipantable();
+    Broadcast::channel("{$panelId}.participant.{encodedType}.{id}", function ($user, $encodedType, $id) use ($guards) {
+        $participantable = Wirechat::getParticipantable($guards);
 
         if (! $participantable) {
             return false;

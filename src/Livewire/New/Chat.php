@@ -55,7 +55,7 @@ class Chat extends ModalComponent
         $model = $model::find($id);
 
         if ($model) {
-            $createdConversation = Wirechat::getParticipantable()->createConversationWith($model);
+            $createdConversation = Wirechat::getParticipantable()?->createConversationWith($model);
 
             if ($createdConversation) {
 

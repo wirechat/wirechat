@@ -167,7 +167,7 @@ class AddMembers extends ModalComponent
     public function mount()
     {
         abort_unless(auth()->check(), 401);
-        abort_unless(Wirechat::getParticipantable()->belongsToConversation($this->conversation), 403);
+        abort_unless(Wirechat::getParticipantable()?->belongsToConversation($this->conversation), 403);
 
         abort_if($this->conversation->isPrivate(), 403, 'Cannot add members to private conversation');
 

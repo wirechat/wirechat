@@ -273,11 +273,22 @@ class WirechatService
      * By default returns the authenticated user. Override this method in a custom
      * WirechatService subclass to return a different entity (e.g. a bot, system, etc.).
      *
+     * @param  array<int, string>  $guards  The authentication guards to check. Empty array uses default guard.
      * @return \Wirechat\Wirechat\Contracts\Participantable|null The model to use as participantable
      */
-    public function getParticipantable(): ?\Wirechat\Wirechat\Contracts\Participantable
+    public function getParticipantable(array $guards = []): ?\Wirechat\Wirechat\Contracts\Participantable
     {
-        return auth()->user();
+        if (empty($guards)) {
+            return auth()->user();
+        }
+
+        foreach ($guards as $guard) {
+            if (auth()->guard($guard)->check()) {
+                return auth()->guard($guard)->user();
+            }
+        }
+
+        return null;
     }
 
     /**
