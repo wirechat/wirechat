@@ -105,8 +105,11 @@ class Group extends Model
     /**
      * Check if group is owned by
      */
-    public function isOwnedBy(Participantable $user): bool
+    public function isOwnedBy(?Participantable $user): bool
     {
+        if ($user === null) {
+            return false;
+        }
 
         $conversation = $this->conversation;
 

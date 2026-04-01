@@ -753,8 +753,11 @@ class Conversation extends Model
      *  Role Checks
      * -------------------------------------------
      */
-    public function isOwner(Participantable $model): bool
+    public function isOwner(?Participantable $model): bool
     {
+        if ($model === null) {
+            return false;
+        }
 
         $participant = $this->participant($model);
 
@@ -766,8 +769,11 @@ class Conversation extends Model
      *  Role Checks
      * -------------------------------------------
      */
-    public function isAdmin(Participantable $model): bool
+    public function isAdmin(?Participantable $model): bool
     {
+        if ($model === null) {
+            return false;
+        }
 
         $participant = $this->participant($model);
 

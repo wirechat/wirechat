@@ -191,9 +191,9 @@ class Message extends Model
     /**
      * Check if the message is owned by user
      */
-    public function ownedBy(Participantable $user): bool
+    public function ownedBy(?Participantable $user): bool
     {
-        if (! $this->participant) {
+        if ($user === null || ! $this->participant) {
             return false;
         }
 
