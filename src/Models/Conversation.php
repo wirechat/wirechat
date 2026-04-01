@@ -3,7 +3,6 @@
 namespace Wirechat\Wirechat\Models;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Wirechat\Wirechat\Contracts\Participantable;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
@@ -146,11 +146,11 @@ class Conversation extends Model
      * If participants are already loaded, it fetches from the collection.
      * Otherwise, it queries dynamically via the `participants()` relationship.
      *
-     * @param  Model|\Illuminate\Contracts\Auth\Authenticatable  $user  The user instance.
+     * @param  Participantable  $user  The user instance.
      * @param  bool  $withoutGlobalScopes  Whether to ignore global scopes in the query.
      * @return Participant|null The corresponding participant or null if not found.
      */
-    public function participant(Model|Authenticatable $user, bool $withoutGlobalScopes = false): ?Participant
+    public function participant(Participantable $user, bool $withoutGlobalScopes = false): ?Participant
     {
         $query = $this->relationLoaded('participants')
             ? $this->participants
@@ -173,11 +173,11 @@ class Conversation extends Model
     /**
      * Add a new participant to the conversation.
      *
-     * @param  Model|Authenticatable  $user  the creator of group
+     * @param  Participantable  $user  the creator of group
      * @param  ParticipantRole  $role  enum to assign to member
      * @param  bool  $undoAdminRemovalAction  If the user was recently removed by admin, allow re-adding.
      */
-    public function addParticipant(Model|Authenticatable $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
+    public function addParticipant(Participantable $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
     {
         /** @var Participant|null $participant */
         $participant = $this->participants()
@@ -379,10 +379,10 @@ class Conversation extends Model
      * This method retrieves the other participant in a private conversation
      * or returns the given reference user for self conversations.
      *
-     * @param  Model|\Illuminate\Contracts\Auth\Authenticatable  $reference  The reference user/model to exclude.
+     * @param  Participantable  $reference  The reference user/model to exclude.
      * @return Participant|null The other participant or null if not applicable.
      */
-    public function peerParticipant(Model|Authenticatable $reference): ?Participant
+    public function peerParticipant(Participantable $reference): ?Participant
     {
         // Return null if user does not belong to conversation
         if (! $reference->belongsToConversation($this)) {
@@ -509,10 +509,10 @@ class Conversation extends Model
     /**
      * Mark the conversation as read for the current authenticated user.
      *
-     * @param  Model|Authenticatable|null  $participant||null
-     *                                                         If not user is passed ,it will attempt to user auth(),if not available then will return null
+     * @param  Participantable|null  $participant||null
+     *                                                   If not user is passed ,it will attempt to user auth(),if not available then will return null
      */
-    public function markAsRead(Model|Authenticatable|null $participant = null)
+    public function markAsRead(?Participantable $participant = null)
     {
 
         $participant = $participant ?? Wirechat::getParticipantable();
@@ -533,10 +533,10 @@ class Conversation extends Model
      * instance is provided, it is used directly; otherwise, the participant
      * is retrieved from the conversation.
      *
-     * @param  Model|Participant  $user  The user model or Participant instance.
+     * @param  Participantable|Participant  $user  The user model or Participant instance.
      * @return bool True if the conversation has been fully read, false otherwise.
      */
-    public function readBy(Model|Participant $user): bool
+    public function readBy(Participantable|Participant $user): bool
     {
         $participant = $user instanceof Participant ? $user : $this->participant($user);
 
@@ -546,10 +546,9 @@ class Conversation extends Model
     /**
      * Retrieve unread messages in this conversation for a specific user.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $user
      * @return \Illuminate\Database\Eloquent\Collection<int,Message>
      */
-    public function unreadMessages(Model|Authenticatable $user): \Illuminate\Database\Eloquent\Collection
+    public function unreadMessages(Participantable $user): \Illuminate\Database\Eloquent\Collection
     {
         $participant = $this->participant($user);
 
@@ -588,10 +587,10 @@ class Conversation extends Model
     /**
      * Get unread messages count for the specified user.
      */
-    public function getUnreadCountFor(Model $model): int
+    public function getUnreadCountFor(Participantable $user): int
     {
         // Get unread messages by reusing the unreadMessages method
-        $unreadMessages = $this->unreadMessages($model);
+        $unreadMessages = $this->unreadMessages($user);
 
         return $unreadMessages->count(); // Return the count of unread messages
     }
@@ -645,9 +644,9 @@ class Conversation extends Model
     /**
      * Delete all messages for the given participant and check if the conversation can be deleted.
      *
-     * @param  Model|Authenticatable  $user  The participant whose messages are to be deleted.
+     * @param  Participantable  $user  The participant whose messages are to be deleted.
      */
-    public function deleteFor(Model|Authenticatable $user): ?bool
+    public function deleteFor(Participantable $user): ?bool
     {
         // Ensure the participant belongs to the conversation
         abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
@@ -692,14 +691,14 @@ class Conversation extends Model
     /**
      * Check if a given user has deleted all messages in the conversation using the deleteForMe
      */
-    public function hasBeenDeletedBy(Model|Authenticatable $user): bool
+    public function hasBeenDeletedBy(Participantable $user): bool
     {
         $participant = $this->participant($user);
 
         return $participant->hasDeletedConversation(checkDeletionExpired: true);
     }
 
-    public function clearFor(Model|Authenticatable $user)
+    public function clearFor(Participantable $user)
     {
         // Ensure the participant belongs to the conversation
         abort_unless($user->belongsToConversation($this), 403, 'User does not belong to conversation');
@@ -754,7 +753,7 @@ class Conversation extends Model
      *  Role Checks
      * -------------------------------------------
      */
-    public function isOwner(Model|Authenticatable $model): bool
+    public function isOwner(Participantable $model): bool
     {
 
         $participant = $this->participant($model);
@@ -767,7 +766,7 @@ class Conversation extends Model
      *  Role Checks
      * -------------------------------------------
      */
-    public function isAdmin(Model|Authenticatable $model): bool
+    public function isAdmin(Participantable $model): bool
     {
 
         $participant = $this->participant($model);

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
@@ -31,54 +30,32 @@ foreach ($panels as $panel) {
     $middleware = $panel->getMiddleware();
 
     // Conversation channel
-    Broadcast::channel("{$panelId}.conversation.{conversationId}", function ($user, $conversationId) use ($guards) {
-        // If $user is already authenticated by the application's broadcast auth, use it
-        if (! $user) {
-            // Fallback to checking each guard defined in the panel
-            $authenticatedUser = null;
-            foreach ($guards as $guard) {
-                if (Auth::guard($guard)->check()) {
-                    $authenticatedUser = Auth::guard($guard)->user();
-                    break;
-                }
-            }
-            $user = $authenticatedUser ?? null;
+    Broadcast::channel("{$panelId}.conversation.{conversationId}", function ($user, $conversationId) {
+        $participantable = Wirechat::getParticipantable();
 
-            if (! $user) {
-                return false;
-            }
+        if (! $participantable) {
+            return false;
         }
 
         $conversation = Wirechat::conversationModelClass()::find($conversationId);
 
-        return $conversation && $user->belongsToConversation($conversation);
+        return $conversation && $participantable->belongsToConversation($conversation);
     }, [
         'guards' => $guards,
         'middleware' => $middleware,
     ]);
 
     // Participant channel
-    Broadcast::channel("{$panelId}.participant.{encodedType}.{id}", function ($user, $encodedType, $id) use ($guards) {
-        // If $user is already authenticated by the application's broadcast auth, use it
-        if (! $user) {
-            // Fallback to checking each guard defined in the panel
-            $authenticatedUser = null;
-            foreach ($guards as $guard) {
-                if (Auth::guard($guard)->check()) {
-                    $authenticatedUser = Auth::guard($guard)->user();
-                    break;
-                }
-            }
-            $user = $authenticatedUser ?? null;
+    Broadcast::channel("{$panelId}.participant.{encodedType}.{id}", function ($user, $encodedType, $id) {
+        $participantable = Wirechat::getParticipantable();
 
-            if (! $user) {
-                return false;
-            }
+        if (! $participantable) {
+            return false;
         }
 
         $morphType = MorphClassResolver::decode($encodedType);
 
-        return $user->id == $id && $user->getMorphClass() == $morphType;
+        return $participantable->getKey() == $id && $participantable->getMorphClass() == $morphType;
     }, [
         'guards' => $guards,
         'middleware' => $middleware,

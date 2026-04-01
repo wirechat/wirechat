@@ -36,7 +36,7 @@ trait InteractsWithWirechat
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<Conversation, static>
      */
-    public function conversations()
+    public function conversations(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
         return $this->morphToMany(
             Wirechat::conversationModelClass(), // The related model
@@ -380,7 +380,7 @@ trait InteractsWithWirechat
     /**
      * Clear a conversation
      */
-    public function clearConversation(Conversation $conversation)
+    public function clearConversation(Conversation $conversation): void
     {
 
         // use already created methods inside conversation model

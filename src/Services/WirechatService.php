@@ -273,33 +273,11 @@ class WirechatService
      * By default returns the authenticated user. Override this method in a custom
      * WirechatService subclass to return a different entity (e.g. a bot, system, etc.).
      *
-     * @return \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null The model to use as participantable
+     * @return \Wirechat\Wirechat\Contracts\Participantable|null The model to use as participantable
      */
-    public function getParticipantable(): Model|\Wirechat\Wirechat\Contracts\Participantable|null
+    public function getParticipantable(): ?\Wirechat\Wirechat\Contracts\Participantable
     {
         return auth()->user();
-    }
-
-    /**
-     * Get the model that should be used as the participant when creating Messages.
-     *
-     * @deprecated Use getParticipantable() instead.
-     * @see \Wirechat\Wirechat\Services\WirechatService::getParticipantable()
-     */
-    public function getParticipant(): Model|\Wirechat\Wirechat\Contracts\Participantable|null
-    {
-        return $this->getParticipantable();
-    }
-
-    /**
-     * Get the model that should be used as the sendable when creating Messages.
-     *
-     * @deprecated Use getParticipantable() instead.
-     * @see \Wirechat\Wirechat\Services\WirechatService::getParticipantable()
-     */
-    public function getSendable(): Model|\Wirechat\Wirechat\Contracts\Participantable|null
-    {
-        return $this->getParticipantable();
     }
 
     /**

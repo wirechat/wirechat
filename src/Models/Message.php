@@ -2,7 +2,6 @@
 
 namespace Wirechat\Wirechat\Models;
 
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Wirechat\Wirechat\Contracts\Participantable;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
@@ -179,7 +179,7 @@ class Message extends Model
     /**
      * Check if the message has been read by a specific user.
      */
-    public function readBy(Model|Participant $user): bool
+    public function readBy(Participantable|Participant $user): bool
     {
         if ($user instanceof Participant) {
             $user = $user->participantable;
@@ -191,12 +191,8 @@ class Message extends Model
     /**
      * Check if the message is owned by user
      */
-    public function ownedBy($user): bool
+    public function ownedBy(Participantable $user): bool
     {
-        if (! $user || ! ($user instanceof Model)) {
-            return false;
-        }
-
         if (! $this->participant) {
             return false;
         }
@@ -241,7 +237,7 @@ class Message extends Model
         return $this->parent()->exists();
     }
 
-    public function scopeWhereIsNotOwnedBy($query, Model|Authenticatable $user)
+    public function scopeWhereIsNotOwnedBy($query, Participantable $user)
     {
         return $query->whereDoesntHave('participant', function ($q) use ($user) {
             $q->where('participantable_type', $user->getMorphClass())
@@ -255,7 +251,7 @@ class Message extends Model
      *
      * @return bool|null
      */
-    public function deleteFor(Model|Authenticatable $user)
+    public function deleteFor(Participantable $user)
     {
         $conversation = $this->conversation;
 
@@ -304,7 +300,7 @@ class Message extends Model
 
     /**
      * Deleting message for everyone   */
-    public function deleteForEveryone(Model $user): void
+    public function deleteForEveryone(Participantable $user): void
     {
 
         $conversation = $this->conversation;

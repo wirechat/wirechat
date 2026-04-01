@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Contracts;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Panel;
@@ -25,9 +26,19 @@ interface Participantable
     public function canAccessWirechatPanel(Panel $panel): bool;
 
     /**
+     * Get the unique identifier for the model.
+     */
+    public function getKey();
+
+    /**
+     * Get the class name for polymorphic relations.
+     */
+    public function getMorphClass();
+
+    /**
      * Get conversations relationship.
      */
-    public function conversations();
+    public function conversations(): MorphToMany;
 
     /**
      * Create a conversation with another participant.
@@ -58,4 +69,34 @@ interface Participantable
      * Check if is owner of a conversation.
      */
     public function isOwnerOf(Group|Conversation $entity): bool;
+
+    /**
+     * Delete a conversation for the participant.
+     */
+    public function deleteConversation(Conversation $conversation): void;
+
+    /**
+     * Clear a conversation for the participant.
+     */
+    public function clearConversation(Conversation $conversation): void;
+
+    /**
+     * Send a message to a model or conversation.
+     */
+    public function sendMessageTo(Model $model, string $message);
+
+    /**
+     * Get the wirechat display name attribute.
+     */
+    public function getWirechatNameAttribute(): ?string;
+
+    /**
+     * Get the wirechat avatar URL attribute.
+     */
+    public function getWirechatAvatarUrlAttribute(): ?string;
+
+    /**
+     * Get the wirechat profile URL attribute.
+     */
+    public function getWirechatProfileUrlAttribute(): ?string;
 }
