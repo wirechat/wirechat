@@ -270,4 +270,98 @@ describe('WirechatService Model Resolution', function () {
             expect($cachedNamesAfterReset)->toBeEmpty();
         });
     });
+
+    describe('getParticipantable', function () {
+        it('returns null when no user is authenticated', function () {
+            auth()->logout();
+
+            expect(Wirechat::getParticipantable())->toBeNull();
+        });
+
+        it('returns null when authenticated user does not implement Participantable', function () {
+            // Create a mock user that doesn't implement Participantable but implements Authenticatable
+            $user = new class implements \Illuminate\Contracts\Auth\Authenticatable
+            {
+                public function getKey()
+                {
+                    return 1;
+                }
+
+                public function getMorphClass()
+                {
+                    return 'MockUser';
+                }
+
+                public function getAuthIdentifierName()
+                {
+                    return 'id';
+                }
+
+                public function getAuthIdentifier()
+                {
+                    return 1;
+                }
+
+                public function getAuthPasswordName()
+                {
+                    return 'password';
+                }
+
+                public function getAuthPassword()
+                {
+                    return 'password';
+                }
+
+                public function getRememberToken()
+                {
+                    return 'token';
+                }
+
+                public function setRememberToken($value)
+                {
+                    //
+                }
+
+                public function getRememberTokenName()
+                {
+                    return 'remember_token';
+                }
+            };
+
+            auth()->setUser($user);
+
+            expect(Wirechat::getParticipantable())->toBeNull();
+        });
+
+        it('returns user when authenticated user implements Participantable', function () {
+            $user = \Workbench\App\Models\User::factory()->create();
+            auth()->login($user);
+
+            $participantable = Wirechat::getParticipantable();
+
+            expect($participantable)->toBeInstanceOf(\Wirechat\Wirechat\Contracts\Participantable::class);
+            expect($participantable->getKey())->toBe($user->getKey());
+        });
+
+        it('iterates through guards when provided', function () {
+            $user = \Workbench\App\Models\User::factory()->create();
+            auth()->guard('web')->login($user);
+
+            $participantable = Wirechat::getParticipantable(['api', 'web']);
+
+            expect($participantable)->toBeInstanceOf(\Wirechat\Wirechat\Contracts\Participantable::class);
+            expect($participantable->getKey())->toBe($user->getKey());
+        });
+
+        it('returns null when no matching guards have authenticated Participantable users', function () {
+            // Authenticate on web guard
+            $user = \Workbench\App\Models\User::factory()->create();
+            auth()->guard('web')->login($user);
+
+            // Check only api guard (which doesn't exist, should be handled gracefully)
+            $participantable = Wirechat::getParticipantable(['api']);
+
+            expect($participantable)->toBeNull();
+        });
+    });
 });

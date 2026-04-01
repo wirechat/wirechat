@@ -12,6 +12,7 @@ use Wirechat\Wirechat\Console\Commands\SetupNotifications;
 use Wirechat\Wirechat\Console\Commands\UpgradeMorphColumns;
 use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
 use Wirechat\Wirechat\Facades\WirechatColor;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
@@ -191,9 +192,9 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
+                $currentPanel = Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
@@ -202,13 +203,15 @@ class WirechatServiceProvider extends ServiceProvider
             $script = '';
 
             if ($hasWebPushNotifications && auth()->check()) {
-                $user = \Wirechat\Wirechat\Facades\Wirechat::getParticipantable();
-                $userId = $user->getKey();
-                $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(
-                    $user->getMorphClass()
-                );
+                $user = Facades\Wirechat::getParticipantable();
 
-                $script = <<<HTML
+                if ($user !== null) {
+                    $userId = $user->getKey();
+                    $encodedType = MorphClassResolver::encode(
+                        $user->getMorphClass()
+                    );
+
+                    $script = <<<HTML
                              <script>
                                 document.addEventListener("DOMContentLoaded", function() {
 
@@ -283,9 +286,10 @@ class WirechatServiceProvider extends ServiceProvider
                                             new Notification(title, options);
                                         }
                                     }
-                                    });
+                                     });
                              </script>
                           HTML;
+                }
             }
 
             return <<<HTML
@@ -310,9 +314,9 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
+                $currentPanel = Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $colors = [

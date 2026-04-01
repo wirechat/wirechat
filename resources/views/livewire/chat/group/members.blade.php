@@ -1,9 +1,8 @@
-@use('Wirechat\Wirechat\Facades\Wirechat')
-
 @php
        $authIsAdminInGroup=  $participant?->isAdmin();
        $authIsOwner=  $participant?->isOwner();
        $isGroup=  $conversation?->isGroup();
+       $authParticipant = \Wirechat\Wirechat\Facades\Wirechat::getParticipantable();
 
     @endphp
 
@@ -50,7 +49,6 @@
 
                     @foreach ($participants as $key => $participant)
                         @php
-                            $authParticipant = Wirechat::getParticipantable();
                             $loopParticipantIsAuth =
                                 $participant->participantable_id == $authParticipant?->getKey() &&
                                 $participant->participantable_type == $authParticipant?->getMorphClass();

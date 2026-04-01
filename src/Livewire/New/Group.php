@@ -154,9 +154,15 @@ class Group extends ModalComponent
 
         $this->validate();
 
+        $participantable = Wirechat::getParticipantable();
+
+        if (! $participantable) {
+            abort(401, 'No authenticated participantable entity could be resolved.');
+        }
+
         // create group
         /* @var $conversation */
-        $conversation = Wirechat::getParticipantable()?->createGroup($this->name, $this->description, $this->photo);
+        $conversation = $participantable->createGroup($this->name, $this->description, $this->photo);
 
         // Add participants
         foreach ($this->selectedMembers as $key => $participant) {
