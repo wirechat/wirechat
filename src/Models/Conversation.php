@@ -486,24 +486,24 @@ class Conversation extends Model
             return null;
         }
 
-        $user = Wirechat::getParticipantable();
+        $participantable = Wirechat::getParticipantable();
 
         // If it's a self conversation, return the participantable
         if ($this->isSelf()) {
-            return $user;
+            return $participantable;
         }
 
         // Get participants for the current conversation
         $participants = $this->participants()->where('conversation_id', $this->id);
 
         // Try to find the receiver excluding the authenticated user's participantable
-        $receiverParticipant = $participants->withoutParticipantable($user)->first();
+        $receiverParticipant = $participants->withoutParticipantable($participantable)->first();
         if ($receiverParticipant) {
             return $receiverParticipant->participantable;
         }
 
         // If no other participant is found, return the participantable as the receiver
-        return $user;
+        return $participantable;
     }
 
     /**

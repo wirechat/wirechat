@@ -33,7 +33,7 @@ use Wirechat\Wirechat\Models\Participant;
  *
  * Handles group, private and self conversations .
  *
- * @property \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null $participantable
+ * @property \Wirechat\Wirechat\Contracts\Participantable|null $participantable
  */
 class Chat extends Component
 {
@@ -830,36 +830,12 @@ class Chat extends Component
     /**
      * Returns the authenticated participantable.
      *
-     * @return \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null
+     * @return \Wirechat\Wirechat\Contracts\Participantable|null
      */
     #[Computed(persist: true)]
     public function participantable()
     {
         return Wirechat::getParticipantable();
-    }
-
-    /**
-     * @deprecated Use participantable() instead.
-     */
-    public function sendable()
-    {
-        return $this->participantable();
-    }
-
-    /**
-     * @deprecated Use participantable() instead.
-     */
-    public function user()
-    {
-        return $this->participantable();
-    }
-
-    /**
-     * @deprecated Use participantable() instead.
-     */
-    public function participant()
-    {
-        return $this->participantable();
     }
 
     private function initializeParticipants()

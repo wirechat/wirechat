@@ -31,7 +31,7 @@ class NotifyParticipants implements ShouldQueue
 
     public int $tries = 1;
 
-    protected $user;
+    protected $sendable;
 
     protected $messagesTable;
 
@@ -48,7 +48,7 @@ class NotifyParticipants implements ShouldQueue
         //
         $this->onQueue($this->getPanel()->getEventsQueue());
         //  $this->delay(now()->addSeconds(3)); // Delay
-        $this->user = $message->user;
+        $this->sendable = $message->sendable;
 
         // Get table
         $this->participantsTable = Wirechat::participantModelTable();
@@ -80,7 +80,7 @@ class NotifyParticipants implements ShouldQueue
          * Fetch participants, ordered by `last_active_at` in descending order,
          * so that the most recently active participants are notified first. */
         Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)
-            ->withoutParticipantable($this->user)
+            ->withoutParticipantable($this->sendable)
             ->latest('last_active_at') // Prioritize active participants
             ->chunk(50, function ($participants) {
                 foreach ($participants as $key => $participant) {

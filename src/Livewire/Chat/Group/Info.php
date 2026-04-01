@@ -20,7 +20,7 @@ use Wirechat\Wirechat\Models\Conversation;
 /**
  * Info Component
  *
- * @property \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null $participantable
+ * @property \Wirechat\Wirechat\Contracts\Participantable|null $participantable
  */
 class Info extends ModalComponent
 {
@@ -52,36 +52,12 @@ class Info extends ModalComponent
     /**
      * Returns the authenticated participantable.
      *
-     * @return \Illuminate\Database\Eloquent\Model|\Wirechat\Wirechat\Contracts\Participantable|null
+     * @return \Wirechat\Wirechat\Contracts\Participantable|null
      */
     #[Computed(persist: true)]
     public function participantable()
     {
         return Wirechat::getParticipantable();
-    }
-
-    /**
-     * @deprecated Use participantable() instead.
-     */
-    public function sendable()
-    {
-        return $this->participantable();
-    }
-
-    /**
-     * @deprecated Use participantable() instead.
-     */
-    public function user()
-    {
-        return $this->participantable();
-    }
-
-    /**
-     * @deprecated Use participantable() instead.
-     */
-    public function participant()
-    {
-        return $this->participantable();
     }
 
     public function participantsCountUpdated(int $newCount)
