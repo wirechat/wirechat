@@ -197,7 +197,7 @@ class WirechatServiceProvider extends ServiceProvider
             }
 
             $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
+            $panelId = $currentPanel->getId();
 
             $script = '';
 
