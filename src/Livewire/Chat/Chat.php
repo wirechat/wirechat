@@ -200,7 +200,7 @@ class Chat extends Component
         $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
 
         // check if user belongs to message
-        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
 
         // abort if message does not belong to this conversation or is not owned by any participant
         abort_unless($message->conversation_id == $this->conversation->id, 403);
@@ -327,10 +327,10 @@ class Chat extends Component
         abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.messages.cannot_exit_self_or_private_conversation'));
 
         // make sure owner if group cannot be removed from chat
-        abort_if($this->participantable->isOwnerOf($this->conversation), 403, __('wirechat::chat.messages.owner_cannot_exit_conversation'));
+        abort_if($this->participantable?->isOwnerOf($this->conversation), 403, __('wirechat::chat.messages.owner_cannot_exit_conversation'));
 
         // delete conversation
-        $this->participantable->exitConversation($this->conversation);
+        $this->participantable?->exitConversation($this->conversation);
 
         // Dispatach event instead if isWidget
         if ($this->isWidget()) {
@@ -541,7 +541,7 @@ class Chat extends Component
 
         // make sure user belongs to conversation from the message
         // We are checking the $message->conversation for extra security because the param might be tempered with
-        abort_unless($this->participantable->belongsToConversation($message->conversation), 403);
+        abort_unless($this->participantable?->belongsToConversation($message->conversation), 403);
 
         // remove message from collection
         $this->removeMessage($message);
@@ -582,7 +582,7 @@ class Chat extends Component
 
         // make sure user belongs to conversation from the message
         // We are checking the $message->conversation for extra security because the  might be tempered with
-        abort_unless($this->participantable->belongsToConversation($message->conversation), 403);
+        abort_unless($this->participantable?->belongsToConversation($message->conversation), 403);
 
         // remove message from collection
         $this->removeMessage($message);
@@ -820,7 +820,7 @@ class Chat extends Component
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
         $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $this->conversation->id)->count();
-        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
     }
 
     /**

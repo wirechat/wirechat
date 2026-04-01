@@ -192,11 +192,12 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        abort_unless($this->participantable->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
 
         abort_if($this->conversation->isPrivate(), 403, 'Operation not allowed: Private chats cannot be deleted.');
 
-        abort_unless($this->participantable->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
+        /** @phpstan-ignore-next-line */
+        abort_unless($this->participantable?->isOwnerOf($this->conversation), 403, 'Forbidden: You do not have permission to delete this group.');
 
         // Ensure all participants are removed before deleting the group
         $participantCount = $this->conversation->participants()
@@ -229,10 +230,10 @@ class Info extends ModalComponent
         abort_unless(auth()->check(), 401);
 
         // make sure owner if group cannot be removed from chat
-        abort_if($this->participantable->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
+        abort_if($this->participantable?->isOwnerOf($this->conversation), 403, 'Owner cannot exit conversation');
 
         // delete conversation
-        $this->participantable->exitConversation($this->conversation);
+        $this->participantable?->exitConversation($this->conversation);
 
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatsRoute(),
@@ -260,7 +261,7 @@ class Info extends ModalComponent
 
         abort_unless(auth()->check(), 401);
         abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.info.group.messages.invalid_conversation_type_error'));
-        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
 
         $this->conversation = $this->conversation->load('group.conversation', 'group.cover')->loadCount('participants');
 

@@ -48,7 +48,7 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
         abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
 
         // delete conversation
@@ -83,7 +83,7 @@ class Info extends ModalComponent
         abort_if(empty($this->conversation), 404);
 
         abort_unless(auth()->check(), 401);
-        abort_unless($this->participantable->belongsToConversation($this->conversation), 403);
+        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
 
         abort_if($this->conversation->isGroup(), 403, __('wirechat::chat.info.messages.invalid_conversation_type_error'));
 
