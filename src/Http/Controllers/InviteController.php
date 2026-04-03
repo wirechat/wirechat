@@ -64,9 +64,13 @@ class InviteController extends Controller
     public function join(Request $request, string $token): RedirectResponse
     {
         $invite = $this->resolveInvite($token);
+        $panel = Wirechat::currentPanel();
 
         $request->session()->put('wirechat_pending_invite_token', $invite->token);
+        $request->session()->put('wirechat_pending_invite_panel', $panel?->getId());
 
-        return redirect()->to(Wirechat::currentPanel()->chatsRoute());
+        $redirect = $panel?->getInviteJoinRedirectUrl($request);
+
+        return redirect()->to($redirect ?: $panel->chatsRoute());
     }
 }

@@ -5,6 +5,7 @@ namespace Wirechat\Wirechat\Livewire\Chat\Group\Join;
 use Livewire\Attributes\Locked;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Invite;
@@ -12,6 +13,7 @@ use Wirechat\Wirechat\Models\Invite;
 class Lobby extends ModalComponent
 {
     use HasPanel;
+    use Widget;
 
     #[Locked]
     public string $token;
@@ -90,7 +92,7 @@ class Lobby extends ModalComponent
         $auth = auth()->user();
 
         if ($this->isMember) {
-            return $this->redirect($this->panel()->chatRoute($this->conversation->id));
+            return $this->redirectAfterJoin();
         }
 
         if ($this->joinBlocked) {
@@ -116,6 +118,18 @@ class Lobby extends ModalComponent
 
         $this->conversation->join($auth);
         $this->invite?->markUsed();
+
+        return $this->redirectAfterJoin();
+    }
+
+    protected function redirectAfterJoin()
+    {
+        if ($this->isWidget()) {
+            $this->openChat($this->conversation->id);
+            $this->closeWirechatModal();
+
+            return null;
+        }
 
         return $this->redirect($this->panel()->chatRoute($this->conversation->id));
     }

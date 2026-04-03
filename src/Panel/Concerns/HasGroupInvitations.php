@@ -13,6 +13,8 @@ trait HasGroupInvitations
 
     protected string|Closure|null $invitePageLayout = 'wirechat::layouts.app';
 
+    protected string|Closure|null $inviteJoinRedirect = null;
+
     public function groupInvitations(bool|Closure $condition = true): static
     {
         $this->hasGroupInvitations = $condition;
@@ -35,5 +37,24 @@ trait HasGroupInvitations
     public function getInvitePageLayout(): ?string
     {
         return $this->evaluate($this->invitePageLayout);
+    }
+
+    /**
+     * Override the redirect target after joining via an invite.
+     */
+    public function inviteJoinRedirect(string|Closure|null $url): static
+    {
+        $this->inviteJoinRedirect = $url;
+
+        return $this;
+    }
+
+    public function getInviteJoinRedirectUrl(?\Illuminate\Http\Request $request = null): ?string
+    {
+        return $this->evaluate(
+            $this->inviteJoinRedirect,
+            ['request' => $request],
+            $request ? [\Illuminate\Http\Request::class => $request] : []
+        );
     }
 }

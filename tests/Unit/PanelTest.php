@@ -6,6 +6,7 @@ beforeEach(function () {
     testPanelProvider()->registerRoutes(true);
     testPanelProvider()->groupInvitations(true);
     testPanelProvider()->invitePageLayout('wirechat::layouts.app');
+    testPanelProvider()->inviteJoinRedirect(null);
 });
 
 test(' panel hasRoutes is true by default()', function () {
@@ -42,6 +43,16 @@ test('panel invitePageLayout can be customized', function () {
     testPanelProvider()->invitePageLayout('layouts.guest');
 
     expect(testPanelProvider()->getInvitePageLayout())->toBe('layouts.guest');
+});
+
+test('panel inviteJoinRedirect is null by default', function () {
+    expect(testPanelProvider()->getInviteJoinRedirectUrl())->toBeNull();
+});
+
+test('panel inviteJoinRedirect can be customized', function () {
+    testPanelProvider()->inviteJoinRedirect('/widget');
+
+    expect(testPanelProvider()->getInviteJoinRedirectUrl())->toBe('/widget');
 });
 
 test('primary utility theme is mapped to the provider palette tokens', function () {

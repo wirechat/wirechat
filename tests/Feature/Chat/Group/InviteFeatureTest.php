@@ -18,6 +18,7 @@ use Workbench\App\Models\User;
 
 beforeEach(function () {
     testPanelProvider()->groupInvitations(true);
+    testPanelProvider()->inviteJoinRedirect(null);
 });
 
 it('shows and updates the admin approval toggle in group permissions', function () {
@@ -667,7 +668,27 @@ it('stages the invite token in session and redirects to chats index', function (
 
     $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
         ->assertRedirect(testPanelProvider()->chatsRoute())
-        ->assertSessionHas('wirechat_pending_invite_token', $invite->token);
+        ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
+        ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
+});
+
+it('redirects invite joins to the panel inviteJoinRedirect when configured', function () {
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    testPanelProvider()->inviteJoinRedirect('/wirechat-widget');
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertRedirect('/wirechat-widget')
+        ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
+        ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
 });
 
 it('joins a public group from the in-app invite modal', function () {
@@ -689,6 +710,38 @@ it('joins a public group from the in-app invite modal', function () {
         ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
         ->call('proceed')
         ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+
+    $invite->refresh();
+
+    expect($receiver->belongsToConversation($conversation))->toBeTrue()
+        ->and($invite->usages)->toBe(1);
+});
+
+it('opens the joined group in widget mode from the invite lobby', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, [
+            'token' => $invite->token,
+            'panel' => testPanelProvider()->getId(),
+            'widget' => true,
+        ])
+        ->call('proceed')
+        ->assertNoRedirect()
+        ->assertDispatched('open-chat')
+        ->assertDispatched('closeWirechatModal');
 
     $invite->refresh();
 

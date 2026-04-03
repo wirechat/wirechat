@@ -5,14 +5,18 @@
      x-init="
         const container = document.getElementById('wirechat-chats-scrollable-container');
         const pendingInviteToken = @js($pendingInviteToken);
+        const pendingInvitePanel = @js($pendingInvitePanel);
 
         if (pendingInviteToken && @js($this->panel()->hasGroupInvitations())) {
+            const invitePanel = pendingInvitePanel || @js($this->panel);
+
             setTimeout(() => {
                 Livewire.dispatch('openWirechatModal', {
                     component: 'wirechat.chat.group.join.lobby',
                     arguments: {
                         token: pendingInviteToken,
-                        panel: @js($this->panel)
+                        panel: invitePanel,
+                        widget: @js($this->widget)
                     }
                 });
             }, 250);
