@@ -108,6 +108,16 @@ return [
      * Group Folder
      *------------------------*/
     'group' => [
+        'invite_message' => [
+            'labels' => [
+                'type' => 'Invitation au groupe',
+            ],
+            'actions' => [
+                'view_group' => [
+                    'label' => 'Voir le groupe',
+                ],
+            ],
+        ],
         // Group info component
         'info' => [
             'heading' => [

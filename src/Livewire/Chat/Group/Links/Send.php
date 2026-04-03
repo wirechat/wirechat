@@ -129,7 +129,9 @@ class Send extends ModalComponent
             }
         }
 
+        // Refresh the chat list so newly created or updated DM threads show up immediately.
         $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('refresh-chats')->to(Chats::class);
         $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.invite_link.send_via_chat.messages.sent_success', ['count' => $this->selectedMembers->count()]));
         $this->closeWirechatModal();
     }

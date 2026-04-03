@@ -114,7 +114,7 @@
                 </div>
             @endif
 
-            <div class="flex gap-2 text-sm items-center">
+            <div class="flex gap-2 text-sm text-start items-center">
              <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">
                 @if ($requiresAdminApproval)
                     {{ __('wirechat::chat.group.invite_link.labels.group_access_requires_approval') }}

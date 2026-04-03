@@ -118,6 +118,17 @@ return [
 
     'group' => [
 
+        'invite_message' => [
+            'labels' => [
+                'type' => 'Einladung zum Gruppenchat',
+            ],
+            'actions' => [
+                'view_group' => [
+                    'label' => 'Gruppe ansehen',
+                ],
+            ],
+        ],
+
         // Gruppeninfo-Komponente
         'info' => [
             'heading' => [

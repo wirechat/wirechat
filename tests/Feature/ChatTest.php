@@ -21,6 +21,7 @@ use Wirechat\Wirechat\Livewire\Chat\Chat as ChatBox;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
@@ -174,6 +175,51 @@ describe('Presense', function () {
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
             ->assertSee('Older message');
+    });
+
+    test('it renders a group invite preview card from a wirechat invite link in the message body', function () {
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah', 'A place to share ideas');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Follow this link to join my group: '.$invite->url(testPanelProvider())
+        )->conversation;
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])
+            ->assertSee('Yodah')
+            ->assertSee(__('wirechat::chat.group.invite_message.labels.type'))
+            ->assertDontSee('A place to share ideas')
+            ->assertSee('Follow this link to join my group:')
+            ->assertSee(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->assertSee($invite->url(testPanelProvider()));
+    });
+
+    test('it does not render a group invite preview card for foreign or edited text without a valid wirechat invite link', function () {
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $conversation = $sender->sendMessageTo($receiver, 'Edited invite text https://example.com/chats/invites/not-a-wirechat-link')->conversation;
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])
+            ->assertSee('Edited invite text')
+            ->assertDontSee(__('wirechat::chat.group.invite_message.labels.type'))
+            ->assertDontSee(__('wirechat::chat.group.invite_message.actions.view_group.label'));
     });
 
     test('it_doesnt_show_upload_trigger_if_attachments_not_enabled', function () {

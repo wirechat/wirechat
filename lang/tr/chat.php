@@ -104,6 +104,17 @@ return [
      *------------------------*/
     'group' => [
 
+        'invite_message' => [
+            'labels' => [
+                'type' => 'Grup sohbeti daveti',
+            ],
+            'actions' => [
+                'view_group' => [
+                    'label' => 'Grubu görüntüle',
+                ],
+            ],
+        ],
+
         // Group info component
         'info' => [
             'heading' => [

@@ -7,19 +7,20 @@
    $isNotSameAsNext = !$isSameAsNext;
    $isSameAsPrevious = ($message?->sendable_id === $previousMessage?->sendable_id) && ($message?->sendable_type === $previousMessage?->sendable_type);
    $isNotSameAsPrevious = !$isSameAsPrevious;
+   $groupInvitePreview = $message?->groupInvitePreview($this->panel());
 @endphp
 
 <div
 
 
 {{-- We use style here to make it easy for dynamic and safe injection --}}
-@style([
+{{-- @style([
 'background-color:var(--wc-brand-primary)' => $belongsToAuth==true
-])
+]) --}}
 
 @class([
     'flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-    'text-white' => $belongsToAuth, // Background color for messages sent by the authenticated user
+    'text-white  bg-primary-500 opacity-90' => $belongsToAuth, // Background color for messages sent by the authenticated user
     'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
@@ -62,6 +63,13 @@
 </div>
 @endif
 
+@if ($groupInvitePreview)
+    @include('wirechat::livewire.chat.partials.group-invite', [
+        'preview' => $groupInvitePreview,
+        'belongsToAuth' => $belongsToAuth,
+    ])
+@endif
+
 <pre class="whitespace-pre-line tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
     {{$message?->body}}
@@ -76,4 +84,14 @@
     @endphp
 </span>
 
+@if ($groupInvitePreview)
+    <a href="{{ $groupInvitePreview['url'] }}"
+        @class([
+            'mt-2 -mx-2.5  block border-t px-4 py-2 text-center text-sm font-semibold transition hover:opacity-95',
+            'border-white/20 text-white/90' => $belongsToAuth,
+            'border-[var(--wc-light-border)] text-primary-500 dark:border-[var(--wc-dark-border)] dark:text-primary-300' => ! $belongsToAuth,
+        ])>
+        {{ __('wirechat::chat.group.invite_message.actions.view_group.label') }}
+    </a>
+@endif
 </div>

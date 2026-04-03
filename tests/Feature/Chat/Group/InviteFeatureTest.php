@@ -325,7 +325,9 @@ it('can send an invite link via chat', function () {
     Livewire::actingAs($owner)
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
-        ->call('save');
+        ->call('save')
+        ->assertDispatched('refresh')
+        ->assertDispatched('refresh-chats');
 
     $privateConversation = $owner->createConversationWith($receiver);
 

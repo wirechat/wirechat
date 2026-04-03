@@ -118,6 +118,17 @@ return [
 
     'group' => [
 
+        'invite_message' => [
+            'labels' => [
+                'type' => 'Group chat invite',
+            ],
+            'actions' => [
+                'view_group' => [
+                    'label' => 'View group',
+                ],
+            ],
+        ],
+
         // Group info component
         'info' => [
             'heading' => [
