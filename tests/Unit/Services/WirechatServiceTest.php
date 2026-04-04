@@ -167,6 +167,40 @@ describe('WirechatService Model Resolution', function () {
         });
     });
 
+    describe('Linkify helpers', function () {
+        it('detects bare domains when bare domains are allowed', function () {
+            config([
+                'wirechat.links.allow_bare_domains' => true,
+                'wirechat.links.allowed_tlds' => null,
+            ]);
+
+            expect(Wirechat::containsLink('whatsapp.com'))->toBeTrue()
+                ->and(Wirechat::containsLink('web.whatsapp.com'))->toBeTrue();
+        });
+
+        it('only linkifies bare domains matching allowed tlds', function () {
+            config([
+                'wirechat.links.allow_bare_domains' => true,
+                'wirechat.links.allowed_tlds' => ['asdf'],
+            ]);
+
+            expect(Wirechat::containsLink('gcg.asdf'))->toBeTrue()
+                ->and(Wirechat::containsLink('whatsapp.com'))->toBeFalse();
+        });
+
+        it('linkifies bare domain segments into anchors', function () {
+            config([
+                'wirechat.links.allow_bare_domains' => true,
+                'wirechat.links.allowed_tlds' => ['com'],
+            ]);
+
+            $segments = Wirechat::linkifyMessage('hello whatsapp.com world');
+
+            expect(collect($segments)->where('is_link', true)->pluck('href')->all())
+                ->toContain('https://whatsapp.com');
+        });
+    });
+
     describe('Custom Model Classes', function () {
         it('works with custom model classes that extend base classes', function () {
             // Store original config value to restore later
