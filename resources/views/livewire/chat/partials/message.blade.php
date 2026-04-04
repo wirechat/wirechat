@@ -7,6 +7,10 @@
    $isNotSameAsNext = !$isSameAsNext;
    $isSameAsPrevious = ($message?->sendable_id === $previousMessage?->sendable_id) && ($message?->sendable_type === $previousMessage?->sendable_type);
    $isNotSameAsPrevious = !$isSameAsPrevious;
+   $canLinkifyMessages = $this->panel()->canLinkifyMessages();
+   $body = (string) ($message?->body ?? '');
+   $isLinkMessage = $canLinkifyMessages && Wirechat::containsLink($body);
+   $segments = $isLinkMessage ? Wirechat::linkifyMessage($body) : [];
 @endphp
 
 <div
@@ -62,10 +66,27 @@
 </div>
 @endif
 
+@if ($isLinkMessage)
+    @foreach ($segments as $segment)
+        @if ($segment['is_link'])
+            <a
+                dusk="message-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline  tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
+                href="{{ $segment['href'] }}">
+                {{ $segment['text'] }}
+            </a>
+        @else
+            {{ $segment['text'] }}
+        @endif
+    @endforeach
+@else
 <pre class="whitespace-pre-line tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
-    {{$message?->body}}
+    {{ $message?->body }}
 </pre>
+@endif
 
 {{-- Display the created time based on different conditions --}}
 <span

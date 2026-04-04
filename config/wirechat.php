@@ -55,4 +55,19 @@ return [
             'attachments' => 'attachments',
         ],
     ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Linkify Messages
+     |--------------------------------------------------------------------------
+     |
+     | Configure how Wirechat detects and linkifies URLs in message bodies.
+     | If allowed_tlds is set, only those TLDs will be recognized.
+     | When null, Wirechat uses its built-in list of common TLDs.
+     |
+     */
+    'links' => [
+        'allow_bare_domains' => true,
+        'allowed_tlds' => null,
+    ],
 ];
