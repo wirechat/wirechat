@@ -1457,6 +1457,48 @@ describe('Sending messages ', function () {
         expect($message->type)->toBe(MessageType::TEXT);
     });
 
+    test('it linkifies message urls when linkify messages is enabled', function () {
+        testPanelProvider()->linkifyMessages(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"');
+    });
+
+    test('it renders message urls as plain text when linkify messages is disabled', function () {
+        testPanelProvider()->linkifyMessages(false);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->not->toContain('dusk="message-link"')
+            ->toContain('https://example.com');
+    });
+
     test('it dispatches livewire event "refresh" & "scroll-bottom" when message is sent', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);

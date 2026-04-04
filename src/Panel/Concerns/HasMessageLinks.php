@@ -6,7 +6,7 @@ use Closure;
 
 trait HasMessageLinks
 {
-    protected bool|Closure $linkifyMessages = true;
+    protected bool|Closure $linkifyMessages = false;
 
     /**
      * Enable or disable URL parsing/linkification in message bodies.
