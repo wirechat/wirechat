@@ -66,7 +66,7 @@ return [
      | Defaults shown below.
      |
      */
-    'links' => [
+    'message_links' => [
         'allow_bare_domains' => true,
         'allowed_tlds' => [
             'com', 'net', 'org', 'io', 'co', 'me', 'app', 'dev', 'ai', 'gg', 'tv',
