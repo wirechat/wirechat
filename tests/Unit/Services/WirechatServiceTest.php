@@ -170,7 +170,7 @@ describe('WirechatService Model Resolution', function () {
     describe('Linkify helpers', function () {
         it('detects bare domains when bare domains are allowed', function () {
             config([
-                'wirechat.links.allow_bare_domains' => true,
+                'wirechat.message_links.allow_bare_domains' => true,
             ]);
 
             expect(Wirechat::containsLink('whatsapp.com'))->toBeTrue()
@@ -179,8 +179,8 @@ describe('WirechatService Model Resolution', function () {
 
         it('only linkifies bare domains matching allowed tlds', function () {
             config([
-                'wirechat.links.allow_bare_domains' => true,
-                'wirechat.links.allowed_tlds' => ['asdf'],
+                'wirechat.message_links.allow_bare_domains' => true,
+                'wirechat.message_links.allowed_tlds' => ['asdf'],
             ]);
 
             expect(Wirechat::containsLink('gcg.asdf'))->toBeTrue()
@@ -189,8 +189,8 @@ describe('WirechatService Model Resolution', function () {
 
         it('linkifies bare domain segments into anchors', function () {
             config([
-                'wirechat.links.allow_bare_domains' => true,
-                'wirechat.links.allowed_tlds' => ['com'],
+                'wirechat.message_links.allow_bare_domains' => true,
+                'wirechat.message_links.allowed_tlds' => ['com'],
             ]);
 
             $segments = Wirechat::linkifyMessage('hello whatsapp.com world');
