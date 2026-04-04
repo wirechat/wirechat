@@ -4,11 +4,6 @@ namespace Wirechat\Wirechat\Services\Concerns;
 
 trait InteractsWithLinks
 {
-    protected array $defaultAllowedTlds = [
-        'com', 'net', 'org', 'io', 'co', 'me', 'app', 'dev', 'ai', 'gg', 'tv',
-        'info', 'biz', 'xyz', 'site', 'store', 'shop', 'pro', 'cloud',
-    ];
-
     /**
      * Check if the given message contains only a single link and nothing else.
      *
@@ -186,10 +181,10 @@ trait InteractsWithLinks
 
     public function allowedTlds(): array
     {
-        $allowed = config('wirechat.links.allowed_tlds');
+        $allowed = config('wirechat.links.allowed_tlds', []);
 
         if ($allowed === null) {
-            return $this->defaultAllowedTlds;
+            return [];
         }
 
         return array_values(array_filter(array_map('strtolower', (array) $allowed)));
