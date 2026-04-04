@@ -63,11 +63,14 @@ return [
      |
      | Configure how Wirechat detects and linkifies URLs in message bodies.
      | If allowed_tlds is set, only those TLDs will be recognized.
-     | When null, Wirechat uses its built-in list of common TLDs.
+     | Defaults shown below.
      |
      */
     'links' => [
         'allow_bare_domains' => true,
-        'allowed_tlds' => null,
+        'allowed_tlds' => [
+            'com', 'net', 'org', 'io', 'co', 'me', 'app', 'dev', 'ai', 'gg', 'tv',
+            'info', 'biz', 'xyz', 'site', 'store', 'shop', 'pro', 'cloud',
+        ],
     ],
 ];

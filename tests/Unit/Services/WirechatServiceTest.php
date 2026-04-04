@@ -171,7 +171,6 @@ describe('WirechatService Model Resolution', function () {
         it('detects bare domains when bare domains are allowed', function () {
             config([
                 'wirechat.links.allow_bare_domains' => true,
-                'wirechat.links.allowed_tlds' => null,
             ]);
 
             expect(Wirechat::containsLink('whatsapp.com'))->toBeTrue()
