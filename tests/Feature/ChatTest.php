@@ -1478,6 +1478,29 @@ describe('Sending messages ', function () {
             ->toContain('href="https://example.com"');
     });
 
+    test('it preserves whitespace formatting when rendering linkified messages', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, "hello\nhttps://example.com\nworld");
+        $message->type = MessageType::TEXT;
+        $message->body = "hello\nhttps://example.com\nworld";
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-text"')
+            ->toContain('whitespace-pre-wrap')
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"');
+    });
+
     test('it renders message urls as plain text when linkify messages is disabled', function () {
         testPanelProvider()->parseMessageUrls(false);
 
@@ -1496,7 +1519,9 @@ describe('Sending messages ', function () {
 
         expect($html)
             ->not->toContain('dusk="message-link"')
-            ->toContain('https://example.com');
+            ->toContain('dusk="message-text"')
+            ->toContain('https://example.com')
+            ->toMatch('/dusk="message-text"[^>]*>hello https:\\/\\/example\\.com world/');
     });
 
     test('it dispatches livewire event "refresh" & "scroll-bottom" when message is sent', function () {

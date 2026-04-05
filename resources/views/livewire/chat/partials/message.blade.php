@@ -11,6 +11,7 @@
    $body = (string) ($message?->body ?? '');
    $isLinkMessage = $canParseMessageUrls && Wirechat::containsLink($body);
    $segments = $isLinkMessage ? Wirechat::linkifyMessage($body) : [];
+   $messageTextClasses = 'whitespace-pre-wrap tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal';
 @endphp
 
 <div
@@ -75,10 +76,8 @@
             class="underline tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
             href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
 @else
-<pre class="whitespace-pre-line tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
-    style="font-family: inherit;">
-    {{ $message?->body }}
-</pre>
+<pre dusk="message-text" class="{{ $messageTextClasses }}"
+    style="font-family: inherit;">{{ $message?->body }}</pre>
 @endif
 
 {{-- Display the created time based on different conditions --}}
