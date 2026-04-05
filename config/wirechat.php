@@ -58,10 +58,10 @@ return [
 
     /*
      |--------------------------------------------------------------------------
-     | Linkify Messages
+     | Message Links
      |--------------------------------------------------------------------------
      |
-     | Configure how Wirechat detects and linkifies URLs in message bodies.
+     | Configure how Wirechat detects and links URLs in message bodies.
      | If allowed_tlds is set, only those TLDs will be recognized.
      | Defaults shown below.
      |
