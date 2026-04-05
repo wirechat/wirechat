@@ -7,9 +7,9 @@
    $isNotSameAsNext = !$isSameAsNext;
    $isSameAsPrevious = ($message?->sendable_id === $previousMessage?->sendable_id) && ($message?->sendable_type === $previousMessage?->sendable_type);
    $isNotSameAsPrevious = !$isSameAsPrevious;
-   $canParseUrls = $this->panel()->canParseUrls();
+   $canParseMessageUrls = $this->panel()->canParseMessageUrls();
    $body = (string) ($message?->body ?? '');
-   $isLinkMessage = $canParseUrls && Wirechat::containsLink($body);
+   $isLinkMessage = $canParseMessageUrls && Wirechat::containsLink($body);
    $segments = $isLinkMessage ? Wirechat::linkifyMessage($body) : [];
 @endphp
 

@@ -58,7 +58,7 @@ return [
 
     /*
      |--------------------------------------------------------------------------
-     | Message Links
+     | Message URL Parsing
      |--------------------------------------------------------------------------
      |
      | Configure how Wirechat detects and links URLs in message bodies.
@@ -66,7 +66,7 @@ return [
      | Defaults shown below.
      |
      */
-    'message_links' => [
+    'message_url_parsing' => [
         'allow_bare_domains' => true,
         'allowed_tlds' => [
             'com', 'net', 'org', 'io', 'co', 'me', 'app', 'dev', 'ai', 'gg', 'tv',
