@@ -6,20 +6,20 @@ use Closure;
 
 trait HasMessageLinks
 {
-    protected bool|Closure $parseUrls = false;
+    protected bool|Closure $parseMessageUrls = false;
 
     /**
      * Enable or disable URL parsing/linkification in message bodies.
      */
-    public function parseUrls(bool|Closure $condition = true): static
+    public function parseMessageUrls(bool|Closure $condition = true): static
     {
-        $this->parseUrls = $condition;
+        $this->parseMessageUrls = $condition;
 
         return $this;
     }
 
-    public function canParseUrls(): bool
+    public function canParseMessageUrls(): bool
     {
-        return (bool) $this->evaluate($this->parseUrls);
+        return (bool) $this->evaluate($this->parseMessageUrls);
     }
 }

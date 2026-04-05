@@ -181,7 +181,7 @@ trait InteractsWithLinks
 
     public function allowedTlds(): array
     {
-        $allowed = config('wirechat.message_links.allowed_tlds', []);
+        $allowed = config('wirechat.message_url_parsing.allowed_tlds', []);
 
         if ($allowed === null) {
             return [];
@@ -220,7 +220,7 @@ trait InteractsWithLinks
 
     private function canLinkifyBareDomain(): bool
     {
-        return (bool) config('wirechat.message_links.allow_bare_domains', true);
+        return (bool) config('wirechat.message_url_parsing.allow_bare_domains', true);
     }
 
     private function splitTrailingPunctuation(string $token): array
