@@ -12,6 +12,7 @@ use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 
 /**
  * @property-read \Illuminate\Contracts\Auth\Authenticatable|null $auth
@@ -119,8 +120,18 @@ class Chats extends Component
         $positions = array_flip($ids);
         $table = (new Conversation)->getTable();
 
-        $conversations = Conversation::query()
-            ->whereIn($table.'.id', $ids)
+        $conversationQuery = Conversation::query()
+            ->whereIn($table.'.id', $ids);
+
+        if ($this->panel()->hasUnreadIndicator()) {
+            if ($this->panel()->getUnreadIndicatorType() === UnreadIndicatorType::Count) {
+                $conversationQuery->withUnreadCountFor($user);
+            } else {
+                $conversationQuery->withUnreadExistsFor($user);
+            }
+        }
+
+        $conversations = $conversationQuery
             ->with([
                 'lastMessage.participant.participantable',
                 'group.cover' => fn ($q) => $q->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),

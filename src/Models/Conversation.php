@@ -587,14 +587,127 @@ class Conversation extends Model
     }
 
     /**
+     * Build a correlated subquery for unread messages for a specific user.
+     *
+     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     */
+    protected static function unreadSubqueryFor(Model|Authenticatable $user): Builder
+    {
+        $messagesTable = Wirechat::messageModelTable();
+        $conversationsTable = Wirechat::conversationModelTable();
+
+        $participantSubquery = Wirechat::participantModelClass()::query()
+            ->select('conversation_id', 'conversation_read_at')
+            ->where('participantable_id', $user->getKey())
+            ->where('participantable_type', $user->getMorphClass());
+
+        return Wirechat::messageModelClass()::query()
+            ->joinSub($participantSubquery, 'auth_participant', function ($join) use ($messagesTable) {
+                $join->on('auth_participant.conversation_id', '=', $messagesTable.'.conversation_id');
+            })
+            ->whereColumn($messagesTable.'.conversation_id', $conversationsTable.'.id')
+            ->whereIsNotOwnedBy($user)
+            ->where(function ($query) use ($messagesTable) {
+                $query->whereNull('auth_participant.conversation_read_at')
+                    ->orWhereColumn($messagesTable.'.created_at', '>', 'auth_participant.conversation_read_at');
+            });
+    }
+
+    /**
+     * Build a correlated subquery for unread message counts for a specific user.
+     *
+     * This is useful for preloading unread counts on conversation lists without
+     * triggering one unread query per conversation row during rendering.
+     *
+     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     */
+    public static function unreadCountSubqueryFor(Model|Authenticatable $user): Builder
+    {
+        return static::unreadSubqueryFor($user)
+            ->selectRaw('COUNT(*)');
+    }
+
+    /**
+     * Build a correlated subquery that reports whether unread messages exist.
+     *
+     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     */
+    public static function unreadExistsSubqueryFor(Model|Authenticatable $user): Builder
+    {
+        return static::unreadSubqueryFor($user)
+            ->selectRaw('1')
+            ->limit(1);
+    }
+
+    /**
+     * Add a preloaded unread-count subquery to the conversation query.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeWithUnreadCountFor(
+        Builder $query,
+        Model|Authenticatable $user,
+        string $column = 'unread_messages_count'
+    ): Builder {
+        return $query->addSelect([$column => static::unreadCountSubqueryFor($user)]);
+    }
+
+    /**
+     * Add a preloaded unread-exists subquery to the conversation query.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeWithUnreadExistsFor(
+        Builder $query,
+        Model|Authenticatable $user,
+        string $column = 'has_unread_messages'
+    ): Builder {
+        return $query->addSelect([$column => static::unreadExistsSubqueryFor($user)]);
+    }
+
+    /**
+     * Get the total unread message count across all conversations for the specified user.
+     */
+    public static function getTotalUnreadCountFor(Model|Authenticatable $user): int
+    {
+        $messagesTable = Wirechat::messageModelTable();
+        $participantsTable = Wirechat::participantModelTable();
+
+        return (int) Wirechat::messageModelClass()::query()
+            ->join($participantsTable, $participantsTable.'.conversation_id', '=', $messagesTable.'.conversation_id')
+            ->where($participantsTable.'.participantable_id', $user->getKey())
+            ->where($participantsTable.'.participantable_type', $user->getMorphClass())
+            ->whereIsNotOwnedBy($user)
+            ->where(function ($query) use ($messagesTable, $participantsTable) {
+                $query->whereNull($participantsTable.'.conversation_read_at')
+                    ->orWhereColumn($messagesTable.'.created_at', '>', $participantsTable.'.conversation_read_at');
+            })
+            ->count();
+    }
+
+    /**
      * Get unread messages count for the specified user.
      */
     public function getUnreadCountFor(Model $model): int
     {
-        // Get unread messages by reusing the unreadMessages method
-        $unreadMessages = $this->unreadMessages($model);
+        if ($this->relationLoaded('messages')) {
+            return $this->unreadMessages($model)->count();
+        }
 
-        return $unreadMessages->count(); // Return the count of unread messages
+        $participant = $this->participant($model);
+
+        if (! $participant) {
+            return 0;
+        }
+
+        return (int) $this->messages()
+            ->whereIsNotOwnedBy($model)
+            ->when($participant->conversation_read_at, function ($query) use ($participant) {
+                $query->where('created_at', '>', $participant->conversation_read_at);
+            })
+            ->count();
     }
 
     /**

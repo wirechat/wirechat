@@ -13,13 +13,17 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
     $receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peer_participant?->participantable : $this->auth);
     //$receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peerParticipant()?->participantable : $this->auth);
     $lastMessage = $conversation->lastMessage;
-    //mark isReadByAuth true if user has chat opened
-    $isReadByAuth = $conversation?->readBy($conversation->auth_participant??$this->auth) || $selectedConversationId == $conversation->id;
     $belongsToAuth = $lastMessage?->belongsToAuth();
-    $showUnreadStatus = $this->panel()->hasUnreadIndicator() && $lastMessage != null && !$lastMessage?->ownedBy($this->auth) && !$isReadByAuth;
-    $unreadIndicatorCount = $showUnreadStatus && $unreadIndicatorType === UnreadIndicatorType::Count
-        ? $conversation->getUnreadCountFor($this->auth)
+    $unreadIndicatorCount = $unreadIndicatorType === UnreadIndicatorType::Count
+        ? (int) $conversation->getAttribute('unread_messages_count')
         : null;
+    $hasUnreadMessages = $unreadIndicatorType === UnreadIndicatorType::Count
+        ? $unreadIndicatorCount > 0
+        : (bool) $conversation->getAttribute('has_unread_messages');
+    $showUnreadStatus = $this->panel()->hasUnreadIndicator()
+        && $lastMessage != null
+        && $hasUnreadMessages
+        && $selectedConversationId != $conversation->id;
 
 
     @endphp

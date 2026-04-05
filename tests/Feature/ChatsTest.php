@@ -617,6 +617,88 @@ describe('List', function () {
             ->not->toContain('dusk="unreadMessagesDot"');
     });
 
+    it('preloads unread message existence on conversations when panel unread indicator uses dot', function () {
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $conversation = $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        $conversations = collect($component->instance()->conversations);
+        $loadedConversation = $conversations->firstWhere('id', $conversation->id);
+
+        expect($loadedConversation)->not->toBeNull()
+            ->and((bool) $loadedConversation?->getAttribute('has_unread_messages'))->toBeTrue();
+    });
+
+    it('preloads unread message counts on conversations when panel unread type is count', function () {
+
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $conversation = $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        $conversations = collect($component->instance()->conversations);
+        $loadedConversation = $conversations->firstWhere('id', $conversation->id);
+
+        expect($loadedConversation)->not->toBeNull()
+            ->and($loadedConversation?->getAttribute('unread_messages_count'))->toBe(2);
+    });
+
+    it('keeps the unread dot visible when unread messages remain after auth sends the latest message', function () {
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+        sleep(1);
+        $auth->sendMessageTo($user1, message: 'Replying now');
+
+        $response = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        expect($response->html())
+            ->toContain('dusk="unreadMessagesDot"')
+            ->not->toContain('dusk="unreadMessagesCount"');
+    });
+
+    it('keeps the unread count badge visible when unread messages remain after auth sends the latest message', function () {
+
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+        sleep(1);
+        $auth->sendMessageTo($user1, message: 'Replying now');
+
+        $response = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        expect($response->html())
+            ->toContain('dusk="unreadMessagesCount"')
+            ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</');
+    });
+
     it('uses reactive preview classes so unread text de-emphasizes immediately when a chat is opened', function () {
 
         $auth = User::factory()->create();
