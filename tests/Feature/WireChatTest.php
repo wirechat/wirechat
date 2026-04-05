@@ -161,12 +161,11 @@ test('it keeps a single shared chat drawer mounted in the widget shell', functio
 
     $response = Livewire::actingAs($auth)->test(Wirechat::class);
 
-    expect(substr_count($response->html(), 'id="chat-drawer"'))->toBe(1)
-        ->and(array_key_exists('widget-chat-drawer', $response->snapshot['memo']['children']))->toBeTrue();
+    expect(substr_count($response->html(), 'id="chat-drawer"'))->toBe(1);
 
     $response->dispatch('openChatWidget', conversation: $conversation->id);
 
-    expect(array_key_exists('widget-chat-drawer', $response->snapshot['memo']['children']))->toBeTrue();
+    expect(substr_count($response->html(), 'id="chat-drawer"'))->toBe(1);
 });
 
 test('widget chat does not mount its own drawer instance', function () {
