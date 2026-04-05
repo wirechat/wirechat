@@ -1458,7 +1458,7 @@ describe('Sending messages ', function () {
     });
 
     test('it linkifies message urls when linkify messages is enabled', function () {
-        testPanelProvider()->linkifyMessages(true);
+        testPanelProvider()->parseUrls(true);
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1479,7 +1479,7 @@ describe('Sending messages ', function () {
     });
 
     test('it renders message urls as plain text when linkify messages is disabled', function () {
-        testPanelProvider()->linkifyMessages(false);
+        testPanelProvider()->parseUrls(false);
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
