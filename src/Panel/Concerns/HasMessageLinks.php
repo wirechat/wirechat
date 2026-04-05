@@ -22,20 +22,4 @@ trait HasMessageLinks
     {
         return (bool) $this->evaluate($this->parseUrls);
     }
-
-    /**
-     * @deprecated Use parseUrls() instead.
-     */
-    public function linkifyMessages(bool|Closure $condition = true): static
-    {
-        return $this->parseUrls($condition);
-    }
-
-    /**
-     * @deprecated Use canParseUrls() instead.
-     */
-    public function canLinkifyMessages(): bool
-    {
-        return $this->canParseUrls();
-    }
 }
