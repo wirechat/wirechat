@@ -2,6 +2,22 @@
 
 use Workbench\App\Models\User;
 
+test(' panel hasRoutes is true by default()', function () {
+    $auth = User::factory()->create();
+
+    expect(testPanelProvider()->hasRoutes())->toBeTrue();
+
+});
+
+test(' panel hasRoutes is false when registerRoutes is FALSE', function () {
+    $auth = User::factory()->create();
+
+    testPanelProvider()->registerRoutes(false);
+
+    expect(testPanelProvider()->hasRoutes())->toBeFalse();
+
+});
+
 describe('Chats Route', function () {
 
     test('return 404 if user canAccessWirechatPanel() returns false on chats route', function () {

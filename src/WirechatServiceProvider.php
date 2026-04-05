@@ -56,7 +56,6 @@ class WirechatServiceProvider extends ServiceProvider
 
         // Trigger auto-discovery
         //        app(\Wirechat\Wirechat\PanelRegistry::class)->autoDiscover();
-        logger('WirechatServiceProvider booted, auto-discovery completed');
 
         $this->loadLivewireComponents();
 
@@ -89,7 +88,6 @@ class WirechatServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../stubs/upgradeMorphColumns.stub' => database_path('migrations/'.date('Y_m_d_His').'_upgrade_wirechat_morph_columns.php'),
             ], 'wirechat-update-morphs-migration');
-
         }
 
         /* Load channel routes */
@@ -106,7 +104,6 @@ class WirechatServiceProvider extends ServiceProvider
 
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
-
     }
 
     protected function bootColors()
@@ -188,23 +185,26 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
-            $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
-            $userId = auth()->id();
-            $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
-
             $script = '';
 
-            if ($hasWebPushNotifications) {
+            if ($currentPanel->hasWebPushNotifications() && auth()->check()) {
+
+                $panelId = $currentPanel->getId();
+                $userId = auth()->id();
+                $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(
+                    auth()->user()->getMorphClass()
+                );
+
                 $script = <<<HTML
                              <script>
                                 document.addEventListener("DOMContentLoaded", function() {
-
 
                                    if ('serviceWorker' in navigator) {
                                         window.addEventListener('load', async () => {
@@ -225,10 +225,6 @@ class WirechatServiceProvider extends ServiceProvider
                                             }
                                         });
                                     }
-
-
-
-
 
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
                                         .listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
@@ -293,8 +289,6 @@ class WirechatServiceProvider extends ServiceProvider
                         echo Blade::render('<x-wirechat::toast/>');
                     ?>
 
-
-
                     {$script}
 
                <?php endif; ?>
@@ -310,8 +304,10 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 

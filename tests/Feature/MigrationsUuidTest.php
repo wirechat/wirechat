@@ -128,21 +128,21 @@ describe('UUID configuration in migrations', function () {
         expect(isIntegerColumnType($columnType))->toBeTrue();
     });
 
-    test('attachments table uses string for polymorphic ids', function () {
+    test('attachments table uses  integer for polymorphic conversation ', function () {
         Config::set('wirechat.uuids', false);
         $migration = include __DIR__.'/../../database/migrations/2024_11_01_000002_create_wirechat_attachments_table.php';
         $migration->up();
         $columnType = Schema::getColumnType((new Attachment)->getTable(), 'attachable_id');
-        expect(isUuidColumnType($columnType))->toBeTrue();
+        expect(isUuidColumnType($columnType))->toBefalse();
     });
 
-    test('actions table uses string for polymorphic ids', function () {
+    test('actions table uses integer for polymorphic conversation', function () {
         Config::set('wirechat.uuids', false);
         $migration = include __DIR__.'/../../database/migrations/2024_11_01_000006_create_wirechat_actions_table.php';
         $migration->up();
         $actionableType = Schema::getColumnType((new Action)->getTable(), 'actionable_id');
         $actorType = Schema::getColumnType((new Action)->getTable(), 'actor_id');
-        expect(isUuidColumnType($actionableType))->toBeTrue();
-        expect(isUuidColumnType($actorType))->toBeTrue();
+        expect(isUuidColumnType($actionableType))->toBefalse();
+        expect(isUuidColumnType($actorType))->toBefalse();
     });
 });
