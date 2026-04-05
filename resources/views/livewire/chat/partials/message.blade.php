@@ -67,20 +67,13 @@
 @endif
 
 @if ($isLinkMessage)
-    @foreach ($segments as $segment)
-        @if ($segment['is_link'])
-            <a
-                dusk="message-link"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="underline  tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
-                href="{{ $segment['href'] }}">
-                {{ $segment['text'] }}
-            </a>
-        @else
-            {{ $segment['text'] }}
-        @endif
-    @endforeach
+<pre class="whitespace-pre-line tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
+    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])<a
+            dusk="message-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
+            href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
 @else
 <pre class="whitespace-pre-line tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
