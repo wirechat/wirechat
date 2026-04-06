@@ -2,6 +2,32 @@
 <main x-data="{
     height: 0,
     previousHeight: 0,
+    booting: true,
+    restorePending: false,
+    restoreScrollTop: 0,
+    restoreScrollHeight: 0,
+    scrollToBottom() {
+        this.height = $el.scrollHeight;
+        $el.scrollTop = this.height;
+    },
+    prepareRestore() {
+        this.restorePending = true;
+        this.restoreScrollTop = $el.scrollTop;
+        this.restoreScrollHeight = $el.scrollHeight;
+    },
+    restoreAfterOlderLoaded() {
+        if (!this.restorePending) return;
+        this.restorePending = false;
+        const newHeight = $el.scrollHeight;
+        $el.scrollTop = newHeight - this.restoreScrollHeight + this.restoreScrollTop;
+    },
+    onScroll() {
+        const scrollTop = $el.scrollTop;
+        if ((scrollTop <= 0) && $wire.canLoadMore) {
+            this.prepareRestore();
+            $wire.loadMore();
+        }
+    },
     updateScrollPosition: function() {
         // Calculate the difference in height
 
@@ -22,30 +48,24 @@
 
     }"
         x-init="
-
-        setTimeout(() => {
-
-                requestAnimationFrame(() => {
-
-                    this.height = $el.scrollHeight;
-                    $el.scrollTop = this.height;
-                });
-
-            }, 300); //! Add delay so height can be update at right time
-
-
+        $nextTick(() => {
+            scrollToBottom();
+            requestAnimationFrame(() => {
+                scrollToBottom();
+            });
+            setTimeout(() => {
+                booting = false;
+            }, 120);
+        });
         "
-    @scroll ="
-        scrollTop= $el.scrollTop;
-        if((scrollTop<=0) && $wire.canLoadMore){
-
-            $wire.loadMore();
-
-        }
-     "
+    @scroll="onScroll()"
     @update-height.window="
         requestAnimationFrame(() => {
-            updateScrollPosition();
+            if (restorePending) {
+                restoreAfterOlderLoaded();
+            } else {
+                updateScrollPosition();
+            }
           });
         "
 
@@ -68,7 +88,8 @@
 
 
     x-cloak
-     class='flex flex-col h-full  relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  grow  overscroll-contain overflow-x-hidden w-full my-auto'
+    x-bind:class="{'opacity-0 pointer-events-none': booting}"
+     class='flex flex-col h-full transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  grow  overscroll-contain overflow-x-hidden w-full my-auto'
     style="contain: content" >
 
 
@@ -113,7 +134,7 @@
                 @endphp
 
 
-                <div class="flex gap-2" wire:key="message-{{ $key }}"  >
+                <div class="flex gap-2" wire:key="message-{{ $key }}" >
 
                     {{-- Message user Avatar --}}
                     {{-- Hide avatar if message belongs to auth --}}
