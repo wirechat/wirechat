@@ -187,7 +187,7 @@ trait InteractsWithLinks
 
     private function linkifyPattern(): string
     {
-        return '~(https?://[^\s<]+|www\.[^\s<]+|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?::\d{1,5})?(?:[/?#][^\s<]*)?)~i';
+        return '~(https?://[^\s<]+|(?<![\w@])www\.[^\s<]+|(?<![\w@])[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?::\d{1,5})?(?:[/?#][^\s<]*)?)~i';
     }
 
     private function resolveLinkToken(string $token): ?string

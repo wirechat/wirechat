@@ -199,6 +199,19 @@ describe('WirechatService Model Resolution', function () {
                 ->toContain('https://whatsapp.com');
         });
 
+        it('does not linkify bare domains inside email addresses', function () {
+            config([
+                'wirechat.message_url_parsing.allow_bare_domains' => true,
+                'wirechat.message_url_parsing.allowed_tlds' => ['com'],
+            ]);
+
+            expect(Wirechat::containsLink('reach me at foo@example.com'))->toBeFalse();
+
+            $segments = Wirechat::linkifyMessage('email foo@example.com now');
+
+            expect(collect($segments)->where('is_link', true))->toHaveCount(0);
+        });
+
         it('does not linkify localhost or ip hosts', function () {
             config([
                 'wirechat.message_url_parsing.allow_bare_domains' => true,
