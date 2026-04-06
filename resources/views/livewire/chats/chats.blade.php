@@ -10,6 +10,7 @@
         const container = document.getElementById('wirechat-chats-scrollable-container');
 
         function scrollToConversation(attempts = 10, delay = 200) {
+            requestAnimationFrame(() => {
             const el = document.getElementById('conversation-' + selectedConversationId);
             if (!container || !el || !selectedConversationId) {
                 if (attempts > 0) {
@@ -31,7 +32,7 @@
             const finalScroll = Math.max(0, Math.min(scrollOffset, maxScroll));
 
             // Animate scroll
-            requestAnimationFrame(() => {
+        
                 container.scrollTo({ top: finalScroll, behavior: 'smooth' });
             });
         }
@@ -78,6 +79,7 @@
             }
             "
           id="wirechat-chats-scrollable-container"
+          wire:navigate:scroll
         class=" overflow-y-auto py-2  wc-scrollbar-theme  grow  h-full relative " style="contain:content">
 
         {{-- loading indicator --}}
