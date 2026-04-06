@@ -10,10 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Facades\Wirechat;
-use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
 
 class DeleteExpiredMessagesJob implements ShouldQueue
@@ -43,7 +41,7 @@ class DeleteExpiredMessagesJob implements ShouldQueue
     public function handle()
     {
         // Get all conversations with disappearing messages enabled
-        $conversations = Conversation::whereNotNull('disappearing_duration')->get();
+        $conversations = Wirechat::conversationModelClass()::whereNotNull('disappearing_duration')->get();
 
         foreach ($conversations as $conversation) {
 

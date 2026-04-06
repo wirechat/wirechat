@@ -122,6 +122,7 @@ class WirechatServiceProvider extends ServiceProvider
             'warning' => Color::Amber,
             'info' => Color::Blue,
             'gray' => Color::Zinc,
+            'dark' => Color::Zinc,
         ]);
     }
 
@@ -319,7 +320,36 @@ class WirechatServiceProvider extends ServiceProvider
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
-            $primaryColor = isset($currentPanel->getColors()['primary']) ? $currentPanel->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';
+            $colors = [
+                'primary' => Color::Blue,
+                'gray' => Color::Zinc,
+                'dark' => Color::Zinc,
+            ];
+
+            if ($currentPanel) {
+                foreach ($currentPanel->getColors() as $name => $palette) {
+                    if (isset($colors[$name]) && is_array($colors[$name]) && is_array($palette)) {
+                        $colors[$name] = array_replace($colors[$name], $palette);
+
+                        continue;
+                    }
+
+                    $colors[$name] = $palette;
+                }
+            }
+
+            $primaryPalette = $colors['primary'] ?? Color::Blue;
+            $grayPalette = $colors['gray'] ?? Color::Zinc;
+            $darkPalette = $colors['dark'] ?? Color::Zinc;
+
+            $primaryColor = $primaryPalette[500] ?? Color::Blue[500];
+            $lightSecondary = $grayPalette[100] ?? Color::Zinc[100];
+            $lightAccent = $grayPalette[50] ?? Color::Zinc[50];
+            $lightBorder = $grayPalette[200] ?? Color::Zinc[200];
+            $darkPrimary = $darkPalette[900] ?? Color::Zinc[900];
+            $darkSecondary = $darkPalette[800] ?? Color::Zinc[800];
+            $darkAccent = $darkPalette[700] ?? Color::Zinc[700];
+            $darkBorder = $darkPalette[700] ?? Color::Zinc[700];
 
             return "<?php echo <<<EOT
                 <style>
@@ -327,14 +357,14 @@ class WirechatServiceProvider extends ServiceProvider
                         --wc-brand-primary: {$primaryColor};
 
                         --wc-light-primary: #fff;  /* white */
-                        --wc-light-secondary: oklch(0.967 0.001 286.375);/* --color-zinc-100 */
-                        --wc-light-accent: oklch(0.985 0 0);/* --color-zinc-50 */
-                        --wc-light-border: oklch(0.92 0.004 286.32);/* --color-zinc-200 */
+                        --wc-light-secondary: {$lightSecondary};/* --color-zinc-100 */
+                        --wc-light-accent: {$lightAccent};/* --color-zinc-50 */
+                        --wc-light-border: {$lightBorder};/* --color-zinc-200 */
 
-                        --wc-dark-primary: oklch(0.21 0.006 285.885); /* --color-zinc-900 */
-                        --wc-dark-secondary: oklch(0.274 0.006 286.033);/* --color-zinc-800 */
-                        --wc-dark-accent: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
-                        --wc-dark-border: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
+                        --wc-dark-primary: {$darkPrimary}; /* --color-zinc-900 */
+                        --wc-dark-secondary: {$darkSecondary};/* --color-zinc-800 */
+                        --wc-dark-accent: {$darkAccent};/* --color-zinc-700 */
+                        --wc-dark-border: {$darkBorder};/* --color-zinc-700 */
                     }
                     [x-cloak] {
                         display: none !important;

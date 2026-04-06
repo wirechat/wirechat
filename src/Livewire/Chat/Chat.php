@@ -2,6 +2,7 @@
 
 namespace Wirechat\Wirechat\Livewire\Chat;
 
+use Composer\InstalledVersions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -20,7 +21,9 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
@@ -35,8 +38,11 @@ use Wirechat\Wirechat\Models\Participant;
 class Chat extends Component
 {
     use HasPanel;
+    use InteractsWithUI;
     use Widget;
-    use WithFileUploads;
+    use WithFileUploads {
+        _finishUpload as protected livewireFinishUpload;
+    }
     use WithPagination;
 
     // public ?Conversation $conversation;
@@ -108,7 +114,7 @@ class Chat extends Component
 
             // Make sure message does not belong to auth
 
-            $peerParticipant = Participant::find($event['message']['participant_id']);
+            $peerParticipant = Wirechat::participantModelClass()::find($event['message']['participant_id']);
 
             if ($peerParticipant?->participantable_id == auth()->id() && $peerParticipant?->participantable_type === $this->auth->getMorphClass()) {
                 return null;
@@ -144,7 +150,7 @@ class Chat extends Component
             // scroll to bottom
             $this->dispatch('scroll-bottom');
 
-            $newMessage = Message::find($event['message']['id']);
+            $newMessage = Wirechat::messageModelClass()::find($event['message']['id']);
             // dd($newMessage);
 
             // Make sure message does not belong to auth
@@ -185,7 +191,7 @@ class Chat extends Component
             throw $th;
         }
 
-        $message = Message::where('id', $messageId)->firstOrFail();
+        $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
 
         // check if user belongs to message
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
@@ -208,12 +214,18 @@ class Chat extends Component
 
     /**
      * livewire method
-     ** This is avoid replacing temporary files on add more files
-     * We override the function in WithFileUploads Trait
-     * todo:uncomment if used this in fronend
+     * Keep the legacy append workaround for Livewire 3 only.
+     *
+     * Livewire 4 handles append behavior internally and now passes signed
+     * temporary upload references that must be resolved by the framework
+     * implementation before creating TemporaryUploadedFile instances.
      */
-    public function _finishUpload($name, $tmpPath, $isMultiple)
+    public function _finishUpload($name, $tmpPath, $isMultiple, $append = true)
     {
+        if (! $this->isLivewireThree()) {
+            return $this->livewireFinishUpload($name, $tmpPath, $isMultiple, $append);
+        }
+
         $this->cleanupOldUploads();
 
         $files = collect($tmpPath)->map(function ($i) {
@@ -231,6 +243,13 @@ class Chat extends Component
         }
 
         app('livewire')->updateProperty($this, $name, $files);
+    }
+
+    protected function isLivewireThree(): bool
+    {
+        $version = InstalledVersions::getVersion('livewire/livewire');
+
+        return $version !== null && version_compare($version, '4.0.0', '<');
     }
 
     public function resetAttachmentErrors()
@@ -407,7 +426,7 @@ class Chat extends Component
                 $replyId = ($key === 0 && $this->replyMessage) ? $this->replyMessage->id : null;
 
                 // Create the message
-                $message = Message::create([
+                $message = Wirechat::messageModelClass()::create([
                     'reply_id' => $replyId,
                     'conversation_id' => $this->conversation->id,
                     'participant_id' => $this->authParticipant->getKey(),
@@ -420,7 +439,11 @@ class Chat extends Component
                     'file_path' => $path,
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
-                    'mime_type' => $attachment->getMimeType(),
+                    'mime_type' => Attachment::resolveMimeType(
+                        $attachment,
+                        $path,
+                        Wirechat::storage()->disk()
+                    ),
                     'url' => Storage::disk(Wirechat::storage()->disk())->url($path), // Use disk and path
                 ]);
 
@@ -453,7 +476,7 @@ class Chat extends Component
 
         if ($this->body != null) {
 
-            $createdMessage = Message::create([
+            $createdMessage = Wirechat::messageModelClass()::create([
                 'reply_id' => $this->replyMessage?->id,
                 'conversation_id' => $this->conversation->id,
                 'participant_id' => $this->authParticipant->getKey(),
@@ -507,7 +530,7 @@ class Chat extends Component
             throw $th;
         }
 
-        $message = Message::where('id', $messageId)->firstOrFail();
+        $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
 
         // make sure user is authenticated
         abort_unless(auth()->check(), 401);
@@ -543,7 +566,7 @@ class Chat extends Component
             throw $th;
         }
 
-        $message = Message::where('id', $messageId)->firstOrFail();
+        $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
         $authParticipant = $this->conversation->participant($this->auth);
 
         // make sure user is authenticated
@@ -694,7 +717,7 @@ class Chat extends Component
         // rate limit
         $this->rateLimit();
 
-        $message = Message::create([
+        $message = Wirechat::messageModelClass()::create([
             'conversation_id' => $this->conversation->id,
             'participant_id' => $this->authParticipant->getKey(),
             'body' => '❤️',
@@ -780,7 +803,7 @@ class Chat extends Component
         } elseif (is_numeric($conversation) || is_string($conversation)) {
             // Cast to integer if numeric (handles numeric strings too)
             $conversationId = $conversation;
-            $this->conversation = Conversation::find($conversationId);
+            $this->conversation = Wirechat::conversationModelClass()::find($conversationId);
 
             if (! $this->conversation) {
                 abort(404, __('wirechat::chat.messages.conversation_not_found')); // Custom error response
@@ -792,7 +815,7 @@ class Chat extends Component
         }
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
-        $this->totalMessageCount = Message::where('conversation_id', $this->conversation->id)->count();
+        $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $this->conversation->id)->count();
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
     }
 
@@ -834,7 +857,7 @@ class Chat extends Component
                 : null;
 
         } else {
-            $this->authParticipant = Participant::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
+            $this->authParticipant = Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
             $this->receiver = null;
         }
     }

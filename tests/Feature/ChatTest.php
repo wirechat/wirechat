@@ -40,6 +40,27 @@ test('authenticaed user can access chatbox ', function () {
         ->assertStatus(200);
 });
 
+test('it applies ui classes and styles to the chat shell only', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+
+    $response = Livewire::actingAs($auth)->test(ChatBox::class, [
+        'conversation' => $conversation->id,
+        'class' => 'chat-shell-test',
+        'styles' => [
+            'min-height' => '24rem',
+        ],
+    ]);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*chat-shell-test[^"]*"/', $html, $classMatches);
+    preg_match_all('/style="contain:content; min-height: 24rem;"/', $html, $styleMatches);
+
+    expect($classMatches[0])->toHaveCount(1)
+        ->and($styleMatches[0])->toHaveCount(1);
+});
+
 test('returns 404 if conversation is not found', function () {
     $auth = User::factory()->create();
 
@@ -1436,6 +1457,73 @@ describe('Sending messages ', function () {
         expect($message->type)->toBe(MessageType::TEXT);
     });
 
+    test('it linkifies message urls when linkify messages is enabled', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"');
+    });
+
+    test('it preserves whitespace formatting when rendering linkified messages', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, "hello\nhttps://example.com\nworld");
+        $message->type = MessageType::TEXT;
+        $message->body = "hello\nhttps://example.com\nworld";
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-text"')
+            ->toContain('whitespace-pre-wrap')
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"');
+    });
+
+    test('it renders message urls as plain text when linkify messages is disabled', function () {
+        testPanelProvider()->parseMessageUrls(false);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->not->toContain('dusk="message-link"')
+            ->toContain('dusk="message-text"')
+            ->toContain('https://example.com')
+            ->toMatch('/dusk="message-text"[^>]*>[\\s\\S]*hello[\\s\\S]*https:\\/\\/example\\.com[\\s\\S]*world/');
+    });
+
     test('it dispatches livewire event "refresh" & "scroll-bottom" when message is sent', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1869,6 +1957,71 @@ describe('Sending messages ', function () {
 
         $messageExists = Attachment::all();
         expect(count($messageExists))->toBe(1);
+    });
+
+    test('it appends media uploaded one by one and preserves image metadata when sent', function () {
+        Storage::fake('public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        $firstImage = UploadedFile::fake()->image('first-photo.png');
+        $secondImage = UploadedFile::fake()->image('second-photo.jpg');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        $request->upload('media', [$firstImage]);
+        $request->upload('media', [$secondImage]);
+
+        $uploadedMedia = $request->get('media');
+
+        expect($uploadedMedia)->toHaveCount(2)
+            ->and(collect($uploadedMedia)->map->getClientOriginalName()->all())
+            ->toBe(['first-photo.png', 'second-photo.jpg']);
+
+        $request->call('sendMessage')
+            ->assertSet('media', []);
+
+        $attachments = Attachment::query()
+            ->orderBy('id')
+            ->get(['original_name', 'mime_type', 'file_path']);
+
+        expect($attachments)->toHaveCount(2)
+            ->and($attachments->pluck('original_name')->all())
+            ->toBe(['first-photo.png', 'second-photo.jpg'])
+            ->and($attachments->pluck('mime_type')->all())
+            ->toBe(['image/png', 'image/jpeg']);
+
+        foreach ($attachments as $attachment) {
+            Storage::disk('public')->assertExists($attachment->file_path);
+        }
+    });
+
+    test('it renders stored generic image attachments as images using the original extension', function () {
+        Storage::fake('public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $message->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/legacy-photo.png',
+            'file_name' => 'legacy-photo.png',
+            'original_name' => 'legacy-photo.png',
+            'mime_type' => 'application/octet-stream',
+            'url' => '/storage/'.Wirechat::storage()->attachmentsDirectory().'/legacy-photo.png',
+        ]);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSeeHtml('<img ');
     });
 
     test('it saves image to storage when created & clears files properties when done', function () {
