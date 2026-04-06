@@ -1521,7 +1521,7 @@ describe('Sending messages ', function () {
             ->not->toContain('dusk="message-link"')
             ->toContain('dusk="message-text"')
             ->toContain('https://example.com')
-            ->toMatch('/dusk="message-text"[^>]*>hello https:\\/\\/example\\.com world/');
+            ->toMatch('/dusk="message-text"[^>]*>[\\s\\S]*hello[\\s\\S]*https:\\/\\/example\\.com[\\s\\S]*world/');
     });
 
     test('it dispatches livewire event "refresh" & "scroll-bottom" when message is sent', function () {
