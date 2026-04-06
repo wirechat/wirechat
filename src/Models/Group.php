@@ -75,10 +75,8 @@ class Group extends Model
         parent::__construct($attributes);
     }
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::deleted(function ($group) {
             if ($group->cover?->exists()) {
                 $group->cover->delete();
@@ -101,7 +99,7 @@ class Group extends Model
 
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(Conversation::class);
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     public function getCoverUrlAttribute(): ?string
@@ -133,7 +131,7 @@ class Group extends Model
 
     public function cover(): MorphOne
     {
-        return $this->morphOne(Attachment::class, 'attachable');
+        return $this->morphOne(Wirechat::attachmentModelClass(), 'attachable');
     }
 
     public function inviteLinks(): MorphMany

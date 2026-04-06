@@ -9,25 +9,27 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 
 /**
  * @property-read \Illuminate\Contracts\Auth\Authenticatable|null $auth
  * @property-read \Illuminate\Support\Collection<int, \Wirechat\Wirechat\Models\Conversation> $conversations
  * @property int|string|null $selectedConversationId
- * @property array<int, int> $conversationIds
+ * @property array<int, int|string> $conversationIds
  */
 class Chats extends Component
 {
-    use HasPanel, Widget;
+    use HasPanel, InteractsWithUI, Widget;
 
     public $search;
 
     /**
      * Store ONLY ids (no models) to avoid ModelSynth refetching.
      *
-     * @var array<int,int>
+     * @var array<int,int|string>
      */
     public array $conversationIds = [];
 
@@ -40,9 +42,13 @@ class Chats extends Component
     public ?string $pendingInvitePanel = null;
 
     // Cursor state for stable "Load more"
+    // Cursor state for stable "Load more" (3-tuple: updated_at, created_at, id)
     public ?string $cursorUpdatedAt = null;
 
-    public ?int $cursorId = null;
+    public ?string $cursorCreatedAt = null;
+
+    /** @var int|string|null */
+    public $cursorId = null;
 
     #[Locked]
     public ?bool $createChatAction = null;
@@ -65,6 +71,7 @@ class Chats extends Component
         $this->pendingInvitePanel = session()->pull('wirechat_pending_invite_panel');
         $this->conversationIds = [];
         $this->cursorUpdatedAt = null;
+        $this->cursorCreatedAt = null;
         $this->cursorId = null;
         $this->canLoadMore = false;
     }
@@ -116,12 +123,22 @@ class Chats extends Component
         }
 
         $user = $this->auth;
-        $ids = array_map('intval', $this->conversationIds);
+        $ids = $this->conversationIds;
         $positions = array_flip($ids);
         $table = (new Conversation)->getTable();
 
-        $conversations = Conversation::query()
-            ->whereIn($table.'.id', $ids)
+        $conversationQuery = Conversation::query()
+            ->whereIn($table.'.id', $ids);
+
+        if ($this->panel()->hasUnreadIndicator()) {
+            if ($this->panel()->getUnreadIndicatorType() === UnreadIndicatorType::Count) {
+                $conversationQuery->withUnreadCountFor($user);
+            } else {
+                $conversationQuery->withUnreadExistsFor($user);
+            }
+        }
+
+        $conversations = $conversationQuery
             ->with([
                 'lastMessage.participant.participantable',
                 'group.cover' => fn ($q) => $q->select('id', 'url', 'attachable_type', 'attachable_id', 'file_path'),
@@ -135,7 +152,7 @@ class Chats extends Component
             ])
             ->get()
             // Preserve the exact order of loaded ids (prevents swapping)
-            ->sortBy(fn (Conversation $c) => $positions[(int) $c->id] ?? PHP_INT_MAX)
+            ->sortBy(fn (Conversation $c) => $positions[$c->id] ?? PHP_INT_MAX)
             ->values();
 
         // Set peer/auth participants without extra queries (participants already loaded)
@@ -169,24 +186,30 @@ class Chats extends Component
                 /** @phpstan-ignore-next-line */
                 return $q->withoutDeleted()->withoutBlanks();
             })
-            // deterministic ordering for cursor paging
+            // deterministic ordering for cursor paging (3-tuple: updated_at, created_at, id)
             ->orderByDesc($table.'.updated_at')
+            ->orderByDesc($table.'.created_at')
             ->orderByDesc($table.'.id');
 
-        // If we already have a cursor, load older than it
-        if ($this->cursorUpdatedAt !== null && $this->cursorId !== null) {
+        // If we already have a cursor, load older than it (3-tuple comparison)
+        if ($this->cursorUpdatedAt !== null && $this->cursorCreatedAt !== null && $this->cursorId !== null) {
             $baseQuery->where(function ($q) use ($table) {
                 $q->where($table.'.updated_at', '<', $this->cursorUpdatedAt)
                     ->orWhere(function ($q2) use ($table) {
                         $q2->where($table.'.updated_at', '=', $this->cursorUpdatedAt)
+                            ->where($table.'.created_at', '<', $this->cursorCreatedAt);
+                    })
+                    ->orWhere(function ($q3) use ($table) {
+                        $q3->where($table.'.updated_at', '=', $this->cursorUpdatedAt)
+                            ->where($table.'.created_at', '=', $this->cursorCreatedAt)
                             ->where($table.'.id', '<', $this->cursorId);
                     });
             });
         }
 
-        // Select id + updated_at so we can advance the cursor without another query
+        // Select id + updated_at + created_at so we can advance the cursor without another query
         $rows = $baseQuery
-            ->select([$table.'.id', $table.'.updated_at'])
+            ->select([$table.'.id', $table.'.updated_at', $table.'.created_at'])
             ->take($perPage + 1)
             ->get();
 
@@ -194,7 +217,7 @@ class Chats extends Component
 
         $rows = $rows->take($perPage);
 
-        $newIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $newIds = $rows->pluck('id')->all();
 
         // Append only; stable
         $this->conversationIds = array_values(array_unique([
@@ -206,7 +229,8 @@ class Chats extends Component
         $last = $rows->last();
         if ($last) {
             $this->cursorUpdatedAt = (string) $last->updated_at;
-            $this->cursorId = (int) $last->id;
+            $this->cursorCreatedAt = (string) $last->created_at;
+            $this->cursorId = $last->id;
         }
     }
 
@@ -228,6 +252,7 @@ class Chats extends Component
     {
         $this->conversationIds = [];
         $this->cursorUpdatedAt = null;
+        $this->cursorCreatedAt = null;
         $this->cursorId = null;
         $this->canLoadMore = false;
     }
@@ -243,7 +268,7 @@ class Chats extends Component
     {
         $this->conversationIds = array_values(array_filter(
             $this->conversationIds,
-            fn ($id) => (int) $id !== (int) $conversationId
+            fn ($id) => (string) $id !== (string) $conversationId
         ));
     }
 

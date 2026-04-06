@@ -1,5 +1,7 @@
 <?php
 
+use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
+use Wirechat\Wirechat\Support\Enums\UnReadType;
 use Workbench\App\Models\User;
 
 beforeEach(function () {
@@ -70,6 +72,32 @@ test('primary utility theme is mapped to the provider palette tokens', function 
         ->toContain('--color-primary-50: var(--wc-primary-50);')
         ->toContain('--color-primary-500: var(--wc-primary-500);')
         ->toContain('--color-primary-950: var(--wc-primary-950);');
+
+});
+test('panel unread messages type defaults to dot', function () {
+    User::factory()->create();
+
+    expect(testPanelProvider()->hasUnreadIndicator())->toBeTrue()
+        ->and(testPanelProvider()->getUnreadIndicatorType())->toBe(UnreadIndicatorType::Dot);
+});
+
+test('panel unread messages type can be set to count', function () {
+    User::factory()->create();
+
+    testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+    expect(testPanelProvider()->hasUnreadIndicator())->toBeTrue()
+        ->and(testPanelProvider()->getUnreadIndicatorType())->toBe(UnreadIndicatorType::Count);
+});
+
+test('legacy unread messages panel aliases still work', function () {
+    User::factory()->create();
+
+    testPanelProvider()->unReadMessages(type: UnReadType::Count);
+
+    expect(testPanelProvider()->hasUnReadMessages())->toBeTrue()
+        ->and(testPanelProvider()->getUnReadMessagesType())->toBe(UnReadType::Count)
+        ->and(testPanelProvider()->getUnreadIndicatorType())->toBe(UnreadIndicatorType::Count);
 });
 
 describe('Chats Route', function () {

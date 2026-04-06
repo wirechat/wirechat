@@ -95,7 +95,7 @@ class Message extends Model
 
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(Conversation::class);
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     /**
@@ -118,7 +118,7 @@ class Message extends Model
      */
     public function participant(): BelongsTo
     {
-        return $this->belongsTo(Participant::class, 'participant_id');
+        return $this->belongsTo(Wirechat::participantModelClass(), 'participant_id');
     }
 
     /**
@@ -148,6 +148,24 @@ class Message extends Model
         // Add scope if authenticated
         static::addGlobalScope(WithoutRemovedMessages::class);
 
+        static::saving(function (Message $message) {
+            if ($message->type === MessageType::ATTACHMENT) {
+                return;
+            }
+
+            $body = trim((string) $message->body);
+
+            if ($body === '') {
+                $message->type = MessageType::TEXT;
+
+                return;
+            }
+
+            $message->type = Wirechat::containsLink($body)
+                ? MessageType::LINK
+                : MessageType::TEXT;
+        });
+
         // listen to deleted
         static::deleted(function ($message) {
 
@@ -168,7 +186,7 @@ class Message extends Model
 
     public function attachment(): MorphOne
     {
-        return $this->morphOne(Attachment::class, 'attachable');
+        return $this->morphOne(Wirechat::attachmentModelClass(), 'attachable');
     }
 
     public function hasAttachment(): bool
@@ -179,6 +197,11 @@ class Message extends Model
     public function isAttachment(): bool
     {
         return $this->type === MessageType::ATTACHMENT;
+    }
+
+    public function isLink(): bool
+    {
+        return $this->type === MessageType::LINK;
     }
 
     /**
@@ -225,13 +248,13 @@ class Message extends Model
     // Relationship for the parent message
     public function parent(): belongsTo
     {
-        return $this->belongsTo(Message::class, 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
+        return $this->belongsTo(Wirechat::messageModelClass(), 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
     }
 
     // Relationship for the reply
     public function reply(): HasOne
     {
-        return $this->hasOne(Message::class, 'reply_id');
+        return $this->hasOne(Wirechat::messageModelClass(), 'reply_id');
     }
 
     // Method to check if the message has a reply

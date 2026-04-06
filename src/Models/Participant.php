@@ -139,13 +139,13 @@ class Participant extends Model
 
     public function messages(): HasMany
     {
-        return $this->hasMany(Message::class, 'participant_id');
+        return $this->hasMany(Wirechat::messageModelClass(), 'participant_id');
     }
 
     /** Optional: fastest fetch of the latest message */
     public function latestMessage()
     {
-        return $this->hasOne(Message::class, 'participant_id')->latestOfMany();
+        return $this->hasOne(Wirechat::messageModelClass(), 'participant_id')->latestOfMany();
     }
 
     /**
@@ -176,7 +176,7 @@ class Participant extends Model
      */
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(Conversation::class);
+        return $this->belongsTo(Wirechat::conversationModelClass());
     }
 
     /**
@@ -302,15 +302,15 @@ class Participant extends Model
         }
 
         // Check if a remove action already exists for this participant
-        $exists = Action::where('actionable_id', $this->getKey())
-            ->where('actionable_type', $this->getMorphClass())
+        $exists = Wirechat::actionModelClass()::where('actionable_id', $this->getKey())
+            ->where('actionable_type', $this->getMorphClass())  // 🔁 match create()
             ->where('type', Actions::REMOVED_BY_ADMIN)
             ->where('actor_id', $adminParticipant->getKey())
             ->where('actor_type', $adminParticipant->getMorphClass())
             ->exists();
 
         if (! $exists) {
-            Action::create([
+            Wirechat::actionModelClass()::create([
                 'actionable_id' => $this->getKey(),
                 'actionable_type' => $this->getMorphClass(),
                 'actor_id' => $adminParticipant->getKey(),

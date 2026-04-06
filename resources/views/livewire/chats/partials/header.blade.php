@@ -17,8 +17,9 @@
         <div class="flex gap-x-4 items-center  ">
 
             {{-- Widget-Action:Redirect to home --}}
-            @if ($redirectToHomeAction)
-            <a id="redirect-button" href="{{ $this->panel()->getHomeUrl() }}" class="flex items-center">
+            @php $homeUrl = $this->panel()->getHomeUrl(); @endphp
+            @if ($redirectToHomeAction && $homeUrl)
+            <a id="redirect-button" href="{{ $homeUrl }}" class="flex items-center">
                       <x-wirechat::icon
                                 :icon="$this->panel()->redirectToHomeActionIcon()"
                                  default="wirechat::icons.logout"
@@ -28,7 +29,7 @@
             </a>
             @endif
 
-            {{-- Panel-action:Creat Chat Action--}}
+            {{-- Panel-action:Create Chat Action--}}
             @if ($createChatAction)
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
                 <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
@@ -36,6 +37,7 @@
                                 :icon="$this->panel()->createChatActionIcon()"
                                 default="wirechat::icons.messages-plus"
                                 class="size-5"
+                                :icon-attributes="$this->panel()->createChatActionIconAttributes()"
                             />
                     </button>
             </x-wirechat::actions.new-chat>

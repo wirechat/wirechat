@@ -3,7 +3,7 @@
 namespace Wirechat\Wirechat\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 /**
  * Trait Actionable
@@ -15,6 +15,6 @@ trait Actionable
      */
     public function actions(): MorphMany
     {
-        return $this->morphMany(Action::class, 'actionable', 'actionable_type', 'actionable_id', 'id');
+        return $this->morphMany(Wirechat::actionModelClass(), 'actionable', 'actionable_type', 'actionable_id', 'id');
     }
 }

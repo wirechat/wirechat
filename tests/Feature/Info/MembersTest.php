@@ -85,6 +85,19 @@ describe('presence test', function () {
             ->assertSee('Cold');
     });
 
+    test('member action menu is layered above the sticky modal chrome', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $conversation->addParticipant(User::factory()->create(['name' => 'John']));
+
+        $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+
+        $request
+            ->assertSeeHtml('x-anchor.bottom-end="$refs.button"')
+            ->assertSeeHtml('class="z-20 ml-auto bg-[var(--wc-light-secondary)]');
+    });
+
     test('it show label "You" if member in loop is auth user', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');

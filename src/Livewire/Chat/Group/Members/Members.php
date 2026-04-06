@@ -4,11 +4,11 @@ namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
-// use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
@@ -197,8 +197,34 @@ class Members extends ModalComponent
 
         $participant->removeByAdmin(auth()->user());
 
+        // abort if auth is not admin
+        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+
+        // abort if user participants is owner
+        abort_if($participant->isOwner(), 403, 'Owner cannot be removed from group');
+
+        // determine the admin's participant in this conversation to use as the actor
+        $adminParticipant = $this->conversation->participant(auth()->user());
+
+        // ensure the admin participant exists
+        if (! $adminParticipant) {
+            abort(403, 'Admin participant not found in conversation');
+        }
+
+        // remove from group
+        // Create the 'remove' action record in the actions table
+        Wirechat::actionModelClass()::create([
+            'actionable_id' => $participant->getKey(),
+            'actionable_type' => $participant->getMorphClass(),
+            'actor_id' => $adminParticipant->getKey(),  // The admin participant who performed the action
+            'actor_type' => $adminParticipant->getMorphClass(),  // The participant model as actor
+            'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
+        ]);
+
+        // remove from
+        // Remove member if they are already selected
         $this->participants = $this->participants->reject(function ($member) use ($participant) {
-            return $member->id == $participant->id && get_class($member) == get_class($participant);
+            return $member->getKey() == $participant->getKey() && get_class($member) == get_class($participant);
         });
 
         $this->totalMembersCount = $this->totalMembersCount - 1;

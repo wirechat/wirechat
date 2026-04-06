@@ -12,17 +12,12 @@
     $iconBag = $iconAttributes instanceof ComponentAttributeBag
         ? $iconAttributes
         : new ComponentAttributeBag(is_array($iconAttributes) ? $iconAttributes : []);
-
-    // Merge: caller attrs + icon attrs + defaults
-    $final = $attributes
-        ->merge($iconBag->getAttributes())
-        ->merge(['class' => 'size-6 text-zinc-700 dark:text-gray-100 dark:hover:text-gray-200']);
 @endphp
 
 @if ($icon instanceof Htmlable)
     {{ $icon }}
 @elseif (is_string($icon) && $icon !== '')
-    <x-dynamic-component :component="$icon" {{  $attributes
+    <x-dynamic-component :component="$icon" {{ $attributes
         ->merge($iconBag->getAttributes())
         ->merge(['class' => 'size-6 text-zinc-700 dark:text-gray-100 dark:hover:text-gray-200']) }} />
 @elseif ($default instanceof Htmlable)

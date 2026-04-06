@@ -21,9 +21,11 @@ use Wirechat\Wirechat\Panel\Concerns\HasHeading;
 use Wirechat\Wirechat\Panel\Concerns\HasHeart;
 use Wirechat\Wirechat\Panel\Concerns\HasId;
 use Wirechat\Wirechat\Panel\Concerns\HasLayout;
+use Wirechat\Wirechat\Panel\Concerns\HasMessageLinks;
 use Wirechat\Wirechat\Panel\Concerns\HasMiddleware;
 use Wirechat\Wirechat\Panel\Concerns\HasRoutes;
 use Wirechat\Wirechat\Panel\Concerns\HasSearchableAttributes;
+use Wirechat\Wirechat\Panel\Concerns\HasUnreadIndicator;
 use Wirechat\Wirechat\Panel\Concerns\HasUsersSearch;
 use Wirechat\Wirechat\Panel\Concerns\HasWebPushNotifications;
 use Wirechat\Wirechat\Support\EvaluatesClosures;
@@ -49,9 +51,11 @@ class Panel
     use HasHeart;
     use HasId;
     use HasLayout;
+    use HasMessageLinks;
     use HasMiddleware;
     use HasRoutes;
     use HasSearchableAttributes;
+    use HasUnreadIndicator;
     use HasUsersSearch;
     use HasWebPushNotifications;
 

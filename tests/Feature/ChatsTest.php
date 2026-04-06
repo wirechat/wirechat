@@ -8,6 +8,7 @@ use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -24,6 +25,25 @@ test('authenticaed user can access chatlist ', function () {
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertStatus(200);
+});
+
+test('it applies ui classes and styles to the chats shell only', function () {
+    $auth = User::factory()->create();
+
+    $response = Livewire::actingAs($auth)->test(Chatlist::class, [
+        'class' => 'chats-shell-test',
+        'styles' => [
+            'min-height' => '20rem',
+        ],
+    ]);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*chats-shell-test[^"]*"/', $html, $classMatches);
+    preg_match_all('/style="min-height: 20rem;"/', $html, $styleMatches);
+
+    expect($classMatches[0])->toHaveCount(1)
+        ->and($styleMatches[0])->toHaveCount(1);
 });
 
 describe('Presence check', function () {
@@ -372,7 +392,7 @@ describe('List', function () {
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
         $auth->createConversationWith($user2, 'new message');
@@ -391,7 +411,7 @@ describe('List', function () {
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
         $auth->createConversationWith($user2, 'new message');
@@ -409,7 +429,7 @@ describe('List', function () {
         $user2 = Admin::factory()->create(['name' => 'iam Admin']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
         $auth->createConversationWith($user2, 'new message');
@@ -549,7 +569,7 @@ describe('List', function () {
             ->assertDontSee('You:'); // assert not visible
     });
 
-    it('shows unread message count "2" if message does not belong to user', function () {
+    it('shows unread message dot by default if message does not belong to user', function () {
 
         $auth = User::factory()->create();
 
@@ -566,7 +586,137 @@ describe('List', function () {
         // dd($conversations,$messages);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSeeHtml('dusk="unreadMessagesDot"');
+            ->assertSeeHtml('dusk="unreadMessagesDot"')
+            ->assertDontSeeHtml('dusk="unreadMessagesCount"');
+    });
+
+    it('shows unread message count badge when panel unread type is count', function () {
+
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+
+        $response = Livewire::actingAs($auth)->test(Chatlist::class);
+        $widgetResponse = Livewire::actingAs($auth)->test(Chatlist::class, ['widget' => true]);
+
+        expect($response->html())
+            ->toContain('dusk="unreadMessagesCount"')
+            ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</')
+            ->not->toContain('dusk="unreadMessagesDot"');
+
+        expect($widgetResponse->html())
+            ->toContain('dusk="unreadMessagesCount"')
+            ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</')
+            ->not->toContain('dusk="unreadMessagesDot"');
+    });
+
+    it('preloads unread message existence on conversations when panel unread indicator uses dot', function () {
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $conversation = $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        $conversations = collect($component->instance()->conversations);
+        $loadedConversation = $conversations->firstWhere('id', $conversation->id);
+
+        expect($loadedConversation)->not->toBeNull()
+            ->and((bool) $loadedConversation?->getAttribute('has_unread_messages'))->toBeTrue();
+    });
+
+    it('preloads unread message counts on conversations when panel unread type is count', function () {
+
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $conversation = $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        $conversations = collect($component->instance()->conversations);
+        $loadedConversation = $conversations->firstWhere('id', $conversation->id);
+
+        expect($loadedConversation)->not->toBeNull()
+            ->and($loadedConversation?->getAttribute('unread_messages_count'))->toBe(2);
+    });
+
+    it('keeps the unread dot visible when unread messages remain after auth sends the latest message', function () {
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+        sleep(1);
+        $auth->sendMessageTo($user1, message: 'Replying now');
+
+        $response = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        expect($response->html())
+            ->toContain('dusk="unreadMessagesDot"')
+            ->not->toContain('dusk="unreadMessagesCount"');
+    });
+
+    it('keeps the unread count badge visible when unread messages remain after auth sends the latest message', function () {
+
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+        $user1->sendMessageTo($auth, message: 'kudos');
+        sleep(1);
+        $auth->sendMessageTo($user1, message: 'Replying now');
+
+        $response = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        expect($response->html())
+            ->toContain('dusk="unreadMessagesCount"')
+            ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</');
+    });
+
+    it('uses reactive preview classes so unread text de-emphasizes immediately when a chat is opened', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+
+        $html = Livewire::actingAs($auth)->test(Chatlist::class)->html();
+
+        expect($html)
+            ->toContain('dusk="messagePreviewBody"')
+            ->toContain('dusk="messagePreviewTime"')
+            ->toContain('showUnreadStatus && !false')
+            ->toContain('font-semibold text-black')
+            ->toContain('font-normal text-gray-600');
     });
     it('Doesnt show unread message Dot if message does not belong to Auth and is Read', function () {
 
@@ -735,6 +885,238 @@ describe('List', function () {
     });
 });
 
+describe('Cursor pagination', function () {
+
+    it('starts with empty conversationIds, null cursor and canLoadMore=false when user has no conversations', function () {
+        $auth = User::factory()->create();
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSet('conversationIds', [])
+            ->assertSet('cursorUpdatedAt', null)
+            ->assertSet('cursorCreatedAt', null)
+            ->assertSet('cursorId', null)
+            ->assertSet('canLoadMore', false);
+    });
+
+    it('populates conversationIds and advances cursor after initial load', function () {
+        $auth = User::factory()->create();
+
+        for ($i = 0; $i < 3; $i++) {
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        $ids = $component->get('conversationIds');
+        expect($ids)->toHaveCount(3);
+
+        $component
+            ->assertNotSet('cursorUpdatedAt', null)
+            ->assertNotSet('cursorCreatedAt', null)
+            ->assertNotSet('cursorId', null);
+    });
+
+    it('loads conversations ordered by most recently updated first', function () {
+        $auth = User::factory()->create();
+
+        // Create two conversations with different created_at but the same updated_at timestamp
+        $baseTime = now();
+
+        Carbon::setTestNow($baseTime->copy()->subSeconds(21));
+        $user1 = User::factory()->create();
+        $conv1 = $auth->createConversationWith($user1, 'message 1');
+
+        Carbon::setTestNow($baseTime->copy()->subSeconds(20));
+        $user2 = User::factory()->create();
+        $conv2 = $auth->createConversationWith($user2, 'message 2');
+
+        // Force conv1 to share the same updated_at as conv2 so created_at is the tiebreaker
+        $conv1->forceFill(['updated_at' => $baseTime->copy()->subSeconds(20)])->saveQuietly();
+
+        // More recent conversation; should always appear first
+        Carbon::setTestNow($baseTime->copy()->subSeconds(10));
+        $user3 = User::factory()->create();
+        $conv3 = $auth->createConversationWith($user3, 'message 3');
+
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+        $ids = $component->get('conversationIds');
+
+        // Most recently updated conversation should appear first
+        expect($ids[0])->toBe($conv3->id)
+            // When updated_at is the same, the more recently created conversation comes first (created_at DESC tiebreaker)
+            ->and($ids[1])->toBe($conv2->id)
+            ->and($ids[2])->toBe($conv1->id);
+    });
+
+    it('uses id DESC as third tie-breaker when updated_at and created_at are equal', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now()->subSeconds(10);
+
+        // Create three conversations all sharing the same updated_at and created_at
+        Carbon::setTestNow($baseTime);
+        $user1 = User::factory()->create();
+        $conv1 = $auth->createConversationWith($user1, 'message 1');
+
+        Carbon::setTestNow($baseTime);
+        $user2 = User::factory()->create();
+        $conv2 = $auth->createConversationWith($user2, 'message 2');
+
+        Carbon::setTestNow($baseTime);
+        $user3 = User::factory()->create();
+        $conv3 = $auth->createConversationWith($user3, 'message 3');
+
+        // Force all three to share the same updated_at and created_at
+        $sharedTimestamp = $baseTime->copy();
+        foreach ([$conv1, $conv2, $conv3] as $conv) {
+            $conv->forceFill([
+                'updated_at' => $sharedTimestamp,
+                'created_at' => $sharedTimestamp,
+            ])->saveQuietly();
+        }
+
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+        $ids = $component->get('conversationIds');
+
+        // When all three timestamps are equal, id DESC should be the tie-breaker
+        $sortedByIdDesc = collect([$conv1->id, $conv2->id, $conv3->id])
+            ->sortDesc()
+            ->values()
+            ->all();
+
+        expect($ids)->toBe($sortedByIdDesc);
+    });
+
+    it('appends new IDs on loadMore without reshuffling existing ones', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now();
+
+        for ($i = 0; $i < 12; $i++) {
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        $firstPageIds = $component->get('conversationIds');
+        expect($firstPageIds)->toHaveCount(10);
+
+        $component->call('loadMore');
+
+        $allIds = $component->get('conversationIds');
+        expect($allIds)->toHaveCount(12);
+
+        // First 10 items must remain in the exact same positions
+        foreach ($firstPageIds as $index => $id) {
+            expect($allIds[$index])->toBe($id);
+        }
+    });
+
+    it('does not change conversationIds when loadMore is called but canLoadMore is false', function () {
+        $auth = User::factory()->create();
+
+        for ($i = 0; $i < 3; $i++) {
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSet('canLoadMore', false);
+
+        $idsBefore = $component->get('conversationIds');
+
+        $component->call('loadMore');
+
+        expect($component->get('conversationIds'))->toBe($idsBefore);
+    });
+
+    it('removes conversation from conversationIds when chat-deleted event fires', function () {
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+
+        $conversation1 = $auth->createConversationWith($user1, 'hello');
+        $conversation2 = $auth->createConversationWith($user2, 'world');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        expect($component->get('conversationIds'))->toContain($conversation1->id);
+
+        $component->dispatch('chat-deleted', $conversation1->id);
+
+        $updatedIds = $component->get('conversationIds');
+        expect($updatedIds)->not->toContain($conversation1->id)
+            ->and($updatedIds)->toContain($conversation2->id);
+    });
+
+    it('restarts pagination from beginning when hardRefresh is called after loading all conversations', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now();
+
+        for ($i = 0; $i < 12; $i++) {
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        // First page: 10 loaded, can load more
+        expect($component->get('conversationIds'))->toHaveCount(10);
+        $component->assertSet('canLoadMore', true);
+
+        // Load all remaining conversations
+        $component->call('loadMore');
+        expect($component->get('conversationIds'))->toHaveCount(12);
+        $component->assertSet('canLoadMore', false);
+
+        // hardRefresh resets cursor and restarts from first page
+        $component->call('hardRefresh');
+        expect($component->get('conversationIds'))->toHaveCount(10);
+        $component->assertSet('canLoadMore', true);
+    });
+
+    it('restarts pagination from beginning when search is updated', function () {
+        $auth = User::factory()->create();
+
+        $baseTime = now();
+
+        for ($i = 0; $i < 12; $i++) {
+            Carbon::setTestNow($baseTime->copy()->subSeconds(120 - $i));
+            $user = User::factory()->create();
+            $auth->createConversationWith($user, "message $i");
+        }
+        Carbon::setTestNow();
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class);
+
+        // Advance to last page so cursor is deep
+        $component->call('loadMore');
+        expect($component->get('conversationIds'))->toHaveCount(12);
+        $component->assertSet('canLoadMore', false);
+
+        // Updating search resets cursor via hardRefresh; no match → cursor stays null
+        $component->set('search', 'xyznonexistent');
+
+        $component
+            ->assertSet('conversationIds', [])
+            ->assertSet('cursorUpdatedAt', null)
+            ->assertSet('cursorCreatedAt', null)
+            ->assertSet('cursorId', null)
+            ->assertSet('canLoadMore', false);
+    });
+});
+
 describe('Search', function () {
 
     it('it shows all conversations items when search query is null', function () {
@@ -745,10 +1127,10 @@ describe('Search', function () {
         $user2 = User::factory()->create(['name' => 'Mary']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
-        $auth->createConversationWith($user2, 'how are you doing');
+        $conversationWithMary = $auth->createConversationWith($user2, 'how are you doing');
 
         Livewire::actingAs($auth)->test(Chatlist::class, ['search' => null])
             ->assertSee('John')
@@ -766,17 +1148,23 @@ describe('Search', function () {
         $user2 = User::factory()->create(['name' => 'Mary']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
-        $auth->createConversationWith($user2, 'how are you doing');
+        $conversationWithMary = $auth->createConversationWith($user2, 'how are you doing');
 
         $request = Livewire::actingAs($auth)->test(Chatlist::class);
 
         $request->set('search', 'John');
 
         $request->assertSee('John');
-        $request->assertDontSee('Mary');
+        $request->assertViewHas('conversations', function ($conversations) use ($conversationWithJohn, $conversationWithMary) {
+            $ids = $conversations->pluck('id')->all();
+
+            return count($ids) === 1
+                && in_array($conversationWithJohn->id, $ids, true)
+                && ! in_array($conversationWithMary->id, $ids, true);
+        });
     });
 
     test('deleted conversation should  appear when searched', function () {

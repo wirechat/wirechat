@@ -13,19 +13,53 @@
         tooltipVisible: @js($tooltipVisible),
         tooltipText: @js($text),
         tooltipArrow: @js($arrow),
+        tooltipId: null,
     }"
     x-init="
-        $refs.content.addEventListener('mouseenter', () => tooltipVisible = true);
-        $refs.content.addEventListener('mouseleave', () => tooltipVisible = false);
+        tooltipId = $id('tooltip');
+        const clearAriaOnActive = () => {
+            if ($refs.content.contains(document.activeElement)) {
+                document.activeElement.removeAttribute('aria-describedby');
+            }
+        };
+        $refs.content.addEventListener('mouseenter', () => { tooltipVisible = true; });
+        $refs.content.addEventListener('mouseleave', () => {
+            if ($refs.content.contains(document.activeElement)) return;
+            tooltipVisible = false;
+        });
+        $refs.content.addEventListener('focusin', (event) => {
+            tooltipVisible = true;
+            event.target.setAttribute('aria-describedby', tooltipId);
+        });
+        $refs.content.addEventListener('focusout', (event) => {
+            event.target.removeAttribute('aria-describedby');
+            const next = event.relatedTarget;
+            if (next && $refs.content.contains(next)) return;
+            tooltipVisible = false;
+        });
+        $refs.content.addEventListener('touchstart', (event) => {
+            event.stopPropagation();
+            tooltipVisible = true;
+        }, { passive: true });
+        const hideOnOutsideTouch = (event) => {
+            if (!$el.contains(event.target)) {
+                clearAriaOnActive();
+                tooltipVisible = false;
+            }
+        };
+        document.addEventListener('touchstart', hideOnOutsideTouch, { passive: true });
+        $cleanup(() => document.removeEventListener('touchstart', hideOnOutsideTouch));
     "
     :style="`--tooltip-space: ${@js($spacing)}rem`"
     class="relative "
 >
     <div
-        x-anchor.top="$refs.content"
+        x-bind:x-anchor="`${tooltipPosition} $refs.content`"
         x-ref="tooltip"
         x-show="tooltipVisible"
         x-cloak
+        role="tooltip"
+        :id="tooltipId"
         class="absolute w-auto text-sm"
 
         :style="{
@@ -37,7 +71,7 @@
     >
         <div
             x-transition
-            class="relative px-2 py-1.5 text-blackdark:text-white rounded bg-white  dark:bg-zinc-800"
+            class="relative px-2 py-1.5 text-black dark:text-white rounded bg-white  dark:bg-zinc-800"
         >
             @if($content)
                 {{$content}}

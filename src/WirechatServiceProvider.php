@@ -134,6 +134,7 @@ class WirechatServiceProvider extends ServiceProvider
             'warning' => Color::Amber,
             'info' => Color::Blue,
             'gray' => Color::Zinc,
+            'dark' => Color::Zinc,
         ]);
     }
 
@@ -370,28 +371,49 @@ class WirechatServiceProvider extends ServiceProvider
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
-            $defaultPrimaryPalette = Color::Blue;
-            $configuredPrimaryPalette = $currentPanel?->getColors()['primary'] ?? null;
+            $colors = [
+                'primary' => Color::Blue,
+                'light' => Color::Zinc,
+                'gray' => Color::Zinc,
+                'dark' => Color::Zinc,
+            ];
 
-            $primaryPalette = $defaultPrimaryPalette;
+            if ($currentPanel) {
+                foreach ($currentPanel->getColors() as $name => $palette) {
+                    if (isset($colors[$name]) && is_array($colors[$name]) && is_array($palette)) {
+                        $colors[$name] = array_replace($colors[$name], $palette);
 
-            if (is_array($configuredPrimaryPalette)) {
-                $primaryPalette = array_replace($primaryPalette, $configuredPrimaryPalette);
-            } elseif (is_string($configuredPrimaryPalette) && $configuredPrimaryPalette !== '') {
-                $primaryPalette[500] = $configuredPrimaryPalette;
+                        continue;
+                    }
+
+                    $colors[$name] = $palette;
+                }
             }
 
-            $primary50 = $primaryPalette[50];
-            $primary100 = $primaryPalette[100];
-            $primary200 = $primaryPalette[200];
-            $primary300 = $primaryPalette[300];
-            $primary400 = $primaryPalette[400];
-            $primary500 = $primaryPalette[500];
-            $primary600 = $primaryPalette[600];
-            $primary700 = $primaryPalette[700];
-            $primary800 = $primaryPalette[800];
-            $primary900 = $primaryPalette[900];
-            $primary950 = $primaryPalette[950];
+            $primaryPalette = $colors['primary'] ?? Color::Blue;
+            $grayPalette = $colors['gray'] ?? Color::Zinc;
+            $lightPalette = $colors['light'] ?? $grayPalette;
+            $darkPalette = $colors['dark'] ?? Color::Zinc;
+
+            $primary50 = $primaryPalette[50] ?? Color::Blue[50];
+            $primary100 = $primaryPalette[100] ?? Color::Blue[100];
+            $primary200 = $primaryPalette[200] ?? Color::Blue[200];
+            $primary300 = $primaryPalette[300] ?? Color::Blue[300];
+            $primary400 = $primaryPalette[400] ?? Color::Blue[400];
+            $primary500 = $primaryPalette[500] ?? Color::Blue[500];
+            $primary600 = $primaryPalette[600] ?? Color::Blue[600];
+            $primary700 = $primaryPalette[700] ?? Color::Blue[700];
+            $primary800 = $primaryPalette[800] ?? Color::Blue[800];
+            $primary900 = $primaryPalette[900] ?? Color::Blue[900];
+            $primary950 = $primaryPalette[950] ?? Color::Blue[950];
+
+            $lightSecondary = $lightPalette[100] ?? Color::Zinc[100];
+            $lightAccent = $lightPalette[50] ?? Color::Zinc[50];
+            $lightBorder = $lightPalette[200] ?? Color::Zinc[200];
+            $darkPrimary = $darkPalette[900] ?? Color::Zinc[900];
+            $darkSecondary = $darkPalette[800] ?? Color::Zinc[800];
+            $darkAccent = $darkPalette[700] ?? Color::Zinc[700];
+            $darkBorder = $darkPalette[700] ?? Color::Zinc[700];
 
             return "<?php echo <<<EOT
                     <style>
@@ -409,20 +431,20 @@ class WirechatServiceProvider extends ServiceProvider
                             --wc-primary-950: {$primary950};
                             --wc-brand-primary: var(--wc-primary-500);
 
-                            --wc-light-primary: #fff;  /* white */
-                            --wc-light-secondary: oklch(0.967 0.001 286.375);/* --color-zinc-100 */
-                            --wc-light-accent: oklch(0.985 0 0);/* --color-zinc-50 */
-                            --wc-light-border: oklch(0.92 0.004 286.32);/* --color-zinc-200 */
+                        --wc-light-primary: #fff;  /* white */
+                        --wc-light-secondary: {$lightSecondary};/* --color-zinc-100 */
+                        --wc-light-accent: {$lightAccent};/* --color-zinc-50 */
+                        --wc-light-border: {$lightBorder};/* --color-zinc-200 */
 
-                            --wc-dark-primary: oklch(0.21 0.006 285.885); /* --color-zinc-900 */
-                            --wc-dark-secondary: oklch(0.274 0.006 286.033);/* --color-zinc-800 */
-                            --wc-dark-accent: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
-                            --wc-dark-border: oklch(0.37 0.013 285.805);/* --color-zinc-700 */
-                        }
-                        [x-cloak] {
-                            display: none !important;
-                        }
-                    </style>
+                        --wc-dark-primary: {$darkPrimary}; /* --color-zinc-900 */
+                        --wc-dark-secondary: {$darkSecondary};/* --color-zinc-800 */
+                        --wc-dark-accent: {$darkAccent};/* --color-zinc-700 */
+                        --wc-dark-border: {$darkBorder};/* --color-zinc-700 */
+                    }
+                    [x-cloak] {
+                        display: none !important;
+                    }
+                </style>
             EOT; ?>";
         });
     }

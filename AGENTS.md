@@ -6,7 +6,15 @@ Read this before making changes. If the user gives direct instructions that conf
 
 ## What This Package Is
 
-`wirechat` is the base chat package.
+`wirechat` is the base Laravel + Livewire chat package for:
+
+- private chats
+- self chats
+- group conversations
+- embeddable widget chat
+- attachments and media sharing
+- replies, deletes, and group member management
+- panel-based configuration and theming
 
 This file should read as `wirechat`-first guidance, not as a trimmed copy of pro-only conventions.
 
@@ -42,9 +50,9 @@ When working here:
 
 Main runtime dependencies from `composer.json`:
 
-- PHP `^8.2|^8.3|^8.4`
-- Laravel `^10|^11|^12`
-- Livewire `^3.5|^4.0`
+- PHP `^8.1|^8.2|^8.3|^8.4`
+- Laravel `^10|^11|^12|^13`
+- Livewire `^3.7|^4.0`
 - Laravel Prompts
 
 Main dev/test tooling:
@@ -62,6 +70,12 @@ Backward compatibility across supported Laravel and Livewire versions matters.
 
 Panels are one of the most important concepts in Wirechat.
 
+- Panels are registered through `PanelProvider` classes.
+- Each panel must have an `id()`.
+- Panels can be resolved by id or provider class.
+- One panel can be marked as `->default()`.
+- Panel state is tracked through `PanelRegistry`.
+
 Key files:
 
 - `src/Panel.php`
@@ -70,13 +84,13 @@ Key files:
 - `src/Services/WirechatService.php`
 - `workbench/app/Providers/Wirechat/TestPanelProvider.php`
 
-If a change affects routes, middleware, auth, search, uploads, group behavior, theming, or rendering, check whether it should be panel-aware.
+If a change affects routes, middleware, search, theming, auth, uploads, group behavior, or widget behavior, check whether it should be panel-aware.
 
-### 2. Panel configuration is package API
+### 2. Panel configuration is public API
 
 Do not casually break panel methods or their meaning.
 
-Important panel options include:
+Important panel options currently include:
 
 - `id()`
 - `path()`
@@ -121,17 +135,17 @@ Important panel options include:
 When changing panel behavior:
 
 - treat it as package API
-- prefer additive changes over breaking changes
-- be careful with method names and semantics because user panel providers depend on them
+- consider existing panel providers in user apps
+- prefer additive changes over breaking renames or semantic changes
 
 ### 3. Multi-auth and multi-model support are fundamental
 
-Wirechat is built around polymorphic participants, not one fixed user model.
+Wirechat is built around polymorphic participants, not a single hard-coded user model.
 
-- participants use `participantable_id` + `participantable_type`
-- multiple authenticatable model types can participate
-- panels can authenticate through multiple guards via `guards([...])`
-- access is controlled through `canAccessWirechatPanel(Panel $panel)`
+- Participants use `participantable_id` + `participantable_type`.
+- Multiple authenticatable model types can participate in conversations.
+- Panels can authenticate through multiple guards via `guards([...])`.
+- Access is also controlled per user model via `canAccessWirechatPanel(Panel $panel)`.
 
 Important public surfaces:
 
@@ -140,15 +154,17 @@ Important public surfaces:
 - `src/Models/Participant.php`
 - `src/Models/Conversation.php`
 
-Expected integration path:
+The expected user-model integration is:
 
 - implement `WirechatUser`
 - use `InteractsWithWirechat`
 
+The old `Chatable` trait still exists for backward compatibility, but `InteractsWithWirechat` is the preferred path.
+
 Avoid changes that assume:
 
 - only one auth guard
-- only one participant model type
+- only one user model
 - only `App\Models\User`
 
 ### 4. Group flows are first-class package behavior
@@ -183,21 +199,27 @@ When changing group behavior, think about:
 
 Keep the base package implementation solid and self-contained. If a group feature may later be extended in pro, that is fine, but the base package should still feel intentional and complete without needing pro context.
 
-### 5. Widget mode and full-page mode are separate UX paths
+### 5. UI modes are separate UX paths
 
-Key files:
+There are two important presentation modes:
 
+- full-page chat pages
+- embeddable widget mode
+
+Treat them as separate UX paths. A fix in one does not guarantee the other is correct.
+
+Important files:
+
+- `src/Livewire/Pages/*`
 - `src/Livewire/Widgets/Wirechat.php`
-- `resources/views/livewire/widgets/wire-chat.blade.php`
-- `tests/Feature/WireChatTest.php`
+- `resources/views/livewire/widgets/*`
+- `resources/views/livewire/chat/*`
 
-Treat widget mode and full-page mode as separate UX paths.
-
-If a change affects modals, drawers, closing behavior, redirects, or shared state, check both.
+When changing drawers, modals, shell layout, or Alpine event flows, verify both modes.
 
 ## Configuration Surface
 
-Global config in `config/wirechat.php` includes:
+Global config in `config/wirechat.php` currently includes:
 
 - `uses_uuid_for_conversations`
 - `table_prefix`
@@ -216,7 +238,7 @@ In particular:
 
 ## Public Integration Points
 
-These are high-value extension points and should be changed carefully.
+These are high-value extension points and should be changed carefully:
 
 ### User model integration
 
@@ -355,6 +377,7 @@ High-value directories:
 - `src/Traits` - public integration helpers for user models
 - `src/Panel` - panel options and public configuration surface
 - `resources/views/livewire` - Blade UI structure
+- `routes` - package routes and channels
 - `tests/Feature` - user-facing behavior
 - `tests/Unit` - model/service/trait behavior
 - `workbench/` - example app and panel providers used in tests

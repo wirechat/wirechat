@@ -5,15 +5,13 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Wirechat\Wirechat\Facades\Wirechat;
-use Wirechat\Wirechat\Models\Message;
-use Wirechat\Wirechat\Models\Participant;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        $messagesTable = (new Message)->getTable();
-        $partsTable    = (new Participant)->getTable();
+        $messagesTable = Wirechat::messageModelTable();
+        $partsTable    = Wirechat::participantModelTable();
         $tablePrefix   = Wirechat::tablePrefix();
 
         $participantIndex           = "{$tablePrefix}messages_participant_id_index";
@@ -93,8 +91,8 @@ return new class extends Migration
 
    public function down(): void
    {
-       $messagesTable = (new Message)->getTable();
-       $partsTable    = (new Participant)->getTable();
+       $messagesTable = Wirechat::messageModelTable();
+       $partsTable    = Wirechat::participantModelTable();
        $tablePrefix   = Wirechat::tablePrefix();
 
        $participantIndex = "{$tablePrefix}messages_participant_id_index";

@@ -136,11 +136,7 @@
 
                     setShowPropertyTo(show) {
                         this.show = show;
-                        if (show) {
-                            document.body.classList.add('overflow-y-hidden');
-                        } else {
-                            document.body.classList.remove('overflow-y-hidden');
-
+                        if (!show) {
                             setTimeout(() => {
                                 this.activeDrawerComponent = false;
                                 this.$wire.resetState();

@@ -1,10 +1,17 @@
 <?php
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config as FacadesConfig;
 use Illuminate\Support\Facades\Storage;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
+
+it('resolves a specific mime type from the original extension when upload mime is generic', function () {
+    $file = UploadedFile::fake()->create('photo.png', 400, 'application/octet-stream');
+
+    expect(Attachment::resolveMimeType($file))->toBe('image/png');
+});
 
 it('tests attachment URL generation with custom test_disk', function () {
     // Dynamically configure the "test_disk" disk for testing
