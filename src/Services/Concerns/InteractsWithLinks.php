@@ -37,6 +37,14 @@ trait InteractsWithLinks
 
         $host = strtolower($host);
 
+        $allowedTlds = $this->allowedTlds();
+        $allowLocalHosts = app()->environment(['local', 'testing']);
+
+        // Allow localhost/IPs only in local/testing, unless TLD allowlist is explicitly empty
+        if ($host === 'localhost' || filter_var($host, FILTER_VALIDATE_IP)) {
+            return $allowLocalHosts && $allowedTlds !== [];
+        }
+
         // Must contain a dot and not start/end with one
         if (! str_contains($host, '.') || str_starts_with($host, '.') || str_ends_with($host, '.')) {
             return false;
@@ -61,7 +69,6 @@ trait InteractsWithLinks
             return false;
         }
 
-        $allowedTlds = $this->allowedTlds();
         if ($allowedTlds !== null && ! in_array($tld, $allowedTlds, true)) {
             return false;
         }

@@ -219,15 +219,15 @@ describe('WirechatService Model Resolution', function () {
                 ->toContain('mailto:foo@example.com?subject=Hello');
         });
 
-        it('does not linkify localhost or ip hosts', function () {
+        it('linkifies localhost or ip hosts in local/testing', function () {
             config([
                 'wirechat.message_url_parsing.allow_bare_domains' => true,
                 'wirechat.message_url_parsing.allowed_tlds' => ['com'],
             ]);
 
-            expect(Wirechat::containsLink('http://localhost'))->toBeFalse()
-                ->and(Wirechat::containsLink('http://127.0.0.1'))->toBeFalse()
-                ->and(Wirechat::containsLink('http://192.168.1.15/test'))->toBeFalse();
+            expect(Wirechat::containsLink('http://localhost'))->toBeTrue()
+                ->and(Wirechat::containsLink('http://127.0.0.1'))->toBeTrue()
+                ->and(Wirechat::containsLink('http://192.168.1.15/test'))->toBeTrue();
         });
     });
 
