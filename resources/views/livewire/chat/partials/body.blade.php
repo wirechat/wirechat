@@ -3,36 +3,30 @@
     height: 0,
     previousHeight: 0,
     booting: true,
+    restorePending: false,
+    restoreScrollTop: 0,
+    restoreScrollHeight: 0,
     scrollToBottom() {
         this.height = $el.scrollHeight;
         $el.scrollTop = this.height;
     },
-    waitForMedia() {
-        const media = $el.querySelectorAll('img, video');
-        if (media.length === 0) {
-            return Promise.resolve();
+    prepareRestore() {
+        this.restorePending = true;
+        this.restoreScrollTop = $el.scrollTop;
+        this.restoreScrollHeight = $el.scrollHeight;
+    },
+    restoreAfterOlderLoaded() {
+        if (!this.restorePending) return;
+        this.restorePending = false;
+        const newHeight = $el.scrollHeight;
+        $el.scrollTop = newHeight - this.restoreScrollHeight + this.restoreScrollTop;
+    },
+    onScroll() {
+        const scrollTop = $el.scrollTop;
+        if ((scrollTop <= 0) && $wire.canLoadMore) {
+            this.prepareRestore();
+            $wire.loadMore();
         }
-
-        return Promise.all(Array.from(media).map((el) => {
-            return new Promise((resolve) => {
-                if (el.tagName === 'IMG') {
-                    if (el.complete) {
-                        resolve();
-                        return;
-                    }
-                    el.addEventListener('load', resolve, { once: true });
-                    el.addEventListener('error', resolve, { once: true });
-                    return;
-                }
-
-                if (el.readyState >= 2) {
-                    resolve();
-                    return;
-                }
-                el.addEventListener('loadeddata', resolve, { once: true });
-                el.addEventListener('error', resolve, { once: true });
-            });
-        }));
     },
     updateScrollPosition: function() {
         // Calculate the difference in height
@@ -56,29 +50,22 @@
         x-init="
         $nextTick(() => {
             scrollToBottom();
-            waitForMedia().then(() => {
-                requestAnimationFrame(() => {
-                    scrollToBottom();
-                    booting = false;
-                });
+            requestAnimationFrame(() => {
+                scrollToBottom();
             });
             setTimeout(() => {
-                scrollToBottom();
                 booting = false;
-            }, 400);
+            }, 120);
         });
         "
-    @scroll ="
-        scrollTop= $el.scrollTop;
-        if((scrollTop<=0) && $wire.canLoadMore){
-
-            $wire.loadMore();
-
-        }
-     "
+    @scroll="onScroll()"
     @update-height.window="
         requestAnimationFrame(() => {
-            updateScrollPosition();
+            if (restorePending) {
+                restoreAfterOlderLoaded();
+            } else {
+                updateScrollPosition();
+            }
           });
         "
 
@@ -146,7 +133,7 @@
                 @endphp
 
 
-                <div class="flex gap-2" wire:key="message-{{ $key }}"  >
+                <div class="flex gap-2" wire:key="message-{{ $key }}" >
 
                     {{-- Message user Avatar --}}
                     {{-- Hide avatar if message belongs to auth --}}
