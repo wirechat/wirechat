@@ -673,16 +673,19 @@ class Conversation extends Model
     public static function getTotalUnreadCountFor(Model|Authenticatable $user): int
     {
         $messagesTable = Wirechat::messageModelTable();
-        $participantsTable = Wirechat::participantModelTable();
+        $participantSubquery = Wirechat::participantModelClass()::query()
+            ->select('conversation_id', 'conversation_read_at')
+            ->where('participantable_id', $user->getKey())
+            ->where('participantable_type', $user->getMorphClass());
 
         return (int) Wirechat::messageModelClass()::query()
-            ->join($participantsTable, $participantsTable.'.conversation_id', '=', $messagesTable.'.conversation_id')
-            ->where($participantsTable.'.participantable_id', $user->getKey())
-            ->where($participantsTable.'.participantable_type', $user->getMorphClass())
+            ->joinSub($participantSubquery, 'auth_participant', function ($join) use ($messagesTable) {
+                $join->on('auth_participant.conversation_id', '=', $messagesTable.'.conversation_id');
+            })
             ->whereIsNotOwnedBy($user)
-            ->where(function ($query) use ($messagesTable, $participantsTable) {
-                $query->whereNull($participantsTable.'.conversation_read_at')
-                    ->orWhereColumn($messagesTable.'.created_at', '>', $participantsTable.'.conversation_read_at');
+            ->where(function ($query) use ($messagesTable) {
+                $query->whereNull('auth_participant.conversation_read_at')
+                    ->orWhereColumn($messagesTable.'.created_at', '>', 'auth_participant.conversation_read_at');
             })
             ->count();
     }
