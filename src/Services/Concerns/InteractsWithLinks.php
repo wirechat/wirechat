@@ -14,8 +14,8 @@ trait InteractsWithLinks
     {
         $message = trim($message);
 
-        // No spaces allowed
-        if ($message === '' || str_contains($message, ' ')) {
+        // No whitespace allowed
+        if ($message === '' || preg_match('/\s/', $message)) {
             return false;
         }
 

@@ -219,6 +219,16 @@ describe('WirechatService Model Resolution', function () {
                 ->toContain('mailto:foo@example.com?subject=Hello');
         });
 
+        it('rejects links containing whitespace', function () {
+            config([
+                'wirechat.message_url_parsing.allow_bare_domains' => true,
+                'wirechat.message_url_parsing.allowed_tlds' => ['com'],
+            ]);
+
+            expect(Wirechat::isLink("https://example.com\nnow"))->toBeFalse()
+                ->and(Wirechat::isLink("https://example.com\tnow"))->toBeFalse();
+        });
+
         it('does not linkify localhost or ip hosts', function () {
             config([
                 'wirechat.message_url_parsing.allow_bare_domains' => true,
