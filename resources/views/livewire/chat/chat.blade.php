@@ -142,8 +142,10 @@ $chatShellStyles = trim(implode(' ', array_filter([
         @include('wirechat::livewire.chat.partials.footer', [ 'conversation' => $conversation, 'authParticipant' => $authParticipant, 'media' => $media, 'files' => $files, 'replyMessage' => $replyMessage])
 
     </div>
-
-    <livewire:wirechat.chat.drawer />
+    {{-- Widget mode keeps a single shared drawer in the widget shell so chat refreshes do not tear it down. --}}
+    @unless($this->isWidget())
+        <livewire:wirechat.chat.drawer />
+    @endunless
 
     @script
 

@@ -11,9 +11,12 @@ use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
+use Wirechat\Wirechat\Services\Concerns\InteractsWithLinks;
 
 class WirechatService
 {
+    use InteractsWithLinks;
+
     protected PanelRegistry $registry;
 
     protected array $tableNames = [];

@@ -154,3 +154,44 @@ test('it keeps the widget chat panel scoped to the widget shell without locking 
         ->not->toContain("document.body.classList.add('overflow-y-hidden');")
         ->not->toContain("document.body.classList.remove('overflow-y-hidden');");
 });
+
+test('it keeps a single shared chat drawer mounted in the widget shell', function () {
+    $auth = User::factory()->create();
+    $conversation = $auth->createConversationWith(User::factory()->create());
+
+    $response = Livewire::actingAs($auth)->test(Wirechat::class);
+
+    $children = $response->snapshot['memo']['children'] ?? [];
+    $hasDrawerInSnapshot = array_key_exists('widget-chat-drawer', $children);
+
+    if ($hasDrawerInSnapshot) {
+        expect($hasDrawerInSnapshot)->toBeTrue();
+    } else {
+        preg_match_all('/wire:key="widget-chat-drawer"/', $response->html(), $drawerMatches);
+        expect($drawerMatches[0])->toHaveCount(1);
+    }
+
+    $response->dispatch('openChatWidget', conversation: $conversation->id);
+
+    $childrenAfterOpen = $response->snapshot['memo']['children'] ?? [];
+    $hasDrawerAfterOpen = array_key_exists('widget-chat-drawer', $childrenAfterOpen);
+
+    if ($hasDrawerAfterOpen) {
+        expect($hasDrawerAfterOpen)->toBeTrue();
+    } else {
+        preg_match_all('/wire:key="widget-chat-drawer"/', $response->html(), $drawerMatchesAfterOpen);
+        expect($drawerMatchesAfterOpen[0])->toHaveCount(1);
+    }
+});
+
+test('widget chat does not mount its own drawer instance', function () {
+    $auth = User::factory()->create();
+    $conversation = $auth->createConversationWith(User::factory()->create());
+
+    $html = Livewire::actingAs($auth)->test(Chat::class, [
+        'conversation' => $conversation->id,
+        'widget' => true,
+    ])->html();
+
+    expect($html)->not->toContain('id="chat-drawer"');
+});
