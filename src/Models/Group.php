@@ -129,21 +129,33 @@ class Group extends Model
             ->exists();
     }
 
+    /**
+     * @return MorphOne<\Wirechat\Wirechat\Models\Attachment, $this>
+     */
     public function cover(): MorphOne
     {
         return $this->morphOne(Wirechat::attachmentModelClass(), 'attachable');
     }
 
+    /**
+     * @return MorphMany<\Wirechat\Wirechat\Models\Invite, $this>
+     */
     public function inviteLinks(): MorphMany
     {
         return $this->morphMany(Invite::class, 'inviteable');
     }
 
+    /**
+     * @return MorphMany<\Wirechat\Wirechat\Models\JoinRequest, $this>
+     */
     public function joinRequests(): MorphMany
     {
         return $this->morphMany(JoinRequest::class, 'joinable');
     }
 
+    /**
+     * @return MorphMany<\Wirechat\Wirechat\Models\JoinRequest, $this>
+     */
     public function pendingJoinRequests(): MorphMany
     {
         return $this->joinRequests()->pending();
@@ -184,6 +196,7 @@ class Group extends Model
 
     public function inviteJoinBlockedFor(Model|Authenticatable $user): bool
     {
+        /** @var Participant|null $participant */
         $participant = $this->conversation
             ->participants()
             ->withoutGlobalScopes()
@@ -206,6 +219,7 @@ class Group extends Model
 
     public function requestToJoin(Model|Authenticatable $user, ?Invite $invite = null): JoinRequest
     {
+        /** @var JoinRequest|null $request */
         $request = $this->pendingJoinRequests()
             ->whereRequester($user)
             ->latest('id')
@@ -222,16 +236,20 @@ class Group extends Model
             return $request->refresh();
         }
 
-        return $this->joinRequests()->create([
+        /** @var JoinRequest $created */
+        $created = $this->joinRequests()->create([
             'requester_id' => $user->getKey(),
             'requester_type' => $user->getMorphClass(),
             'invite_id' => $invite?->getKey(),
             'data' => $invite ? ['invite_id' => $invite->getKey(), 'token' => $invite->token] : null,
         ]);
+
+        return $created;
     }
 
     public function acceptPendingJoinRequest(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null, bool $markInviteUsed = false): ?JoinRequest
     {
+        /** @var JoinRequest|null $request */
         $request = $this->pendingJoinRequests()
             ->whereRequester($user)
             ->with('invite')
@@ -253,6 +271,7 @@ class Group extends Model
 
     public function dismissPendingJoinRequest(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null): ?JoinRequest
     {
+        /** @var JoinRequest|null $request */
         $request = $this->pendingJoinRequests()
             ->whereRequester($user)
             ->latest('id')

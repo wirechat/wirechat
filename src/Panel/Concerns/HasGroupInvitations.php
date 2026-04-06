@@ -5,7 +5,7 @@ namespace Wirechat\Wirechat\Panel\Concerns;
 use Closure;
 
 /**
- * @method mixed evaluate(mixed $value)
+ * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = [])
  */
 trait HasGroupInvitations
 {

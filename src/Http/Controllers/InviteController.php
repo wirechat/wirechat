@@ -36,6 +36,7 @@ class InviteController extends Controller
 
         abort_unless($group instanceof Group, 404);
 
+        /** @var \Wirechat\Wirechat\Models\Conversation $conversation */
         $conversation = $group->conversation()->with(['participants.participantable'])->firstOrFail();
         $auth = $request->user();
 

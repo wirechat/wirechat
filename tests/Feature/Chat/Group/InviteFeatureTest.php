@@ -298,7 +298,7 @@ it('loads additional invite links incrementally from the dedicated list componen
     }
 
     Livewire::actingAs($owner)
-        ->test(\Wirechat\Wirechat\Livewire\Chat\Group\Links\List::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(\Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertSee(__('wirechat::chat.group.invite_link.labels.additional_links'))
         ->assertSee(__('wirechat::chat.group.invite_link.actions.load_more.label'))
         ->assertSee('Campaign 12')

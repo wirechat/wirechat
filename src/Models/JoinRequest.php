@@ -25,6 +25,7 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property array<string, mixed>|null $data
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Wirechat\Wirechat\Models\Invite|null $invite
  *
  * @mixin \Eloquent
  */

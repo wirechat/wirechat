@@ -403,7 +403,7 @@ class Message extends Model
         /** @var Group $group */
         $group = $invite->inviteable;
         $group->loadMissing('cover', 'conversation');
-        $group->conversation?->loadCount('participants');
+        $group->conversation->loadCount('participants');
 
         return static::$groupInvitePreviewCache[$cacheKey] = [
             'token' => $invite->token,
@@ -411,7 +411,7 @@ class Message extends Model
             'name' => $group->name ?: __('wirechat::chat.group.join.lobby.labels.default_group_name'),
             'description' => $group->description,
             'cover_url' => $group->cover_url,
-            'members_count' => (int) ($group->conversation?->participants_count ?? 0),
+            'members_count' => (int) ($group->conversation->participants_count ?? 0),
         ];
     }
 

@@ -10,7 +10,7 @@ use Closure;
  * Enables group chat functionality with support for closures
  * and configuration of group limits.
  *
- * @method mixed evaluate(mixed $value)
+ * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = [])
  */
 trait HasGroups
 {

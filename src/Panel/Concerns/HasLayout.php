@@ -9,7 +9,7 @@ use Closure;
  *
  * Supports setting a static or dynamic layout view.
  *
- * @method mixed evaluate(mixed $value)
+ * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = [])
  */
 trait HasLayout
 {

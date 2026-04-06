@@ -7,7 +7,7 @@ use Livewire\Component;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Models\Conversation;
 
-class ListComponent extends Component
+class ListLinks extends Component
 {
     use HasPanel;
 
@@ -74,5 +74,3 @@ class ListComponent extends Component
         abort_unless($participant?->isAdmin(), 403, $message);
     }
 }
-
-class_alias(ListComponent::class, __NAMESPACE__.'\\List');

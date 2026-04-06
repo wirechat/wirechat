@@ -22,7 +22,7 @@ class Lobby extends ModalComponent
 
     public ?Conversation $conversation = null;
 
-    public $group;
+    public ?Group $group = null;
 
     public bool $isMember = false;
 
@@ -67,6 +67,7 @@ class Lobby extends ModalComponent
 
         abort_unless($group instanceof Group, 404);
 
+        /** @var Conversation $conversation */
         $conversation = $group->conversation()
             ->with(['participants.participantable', 'group.cover'])
             ->withCount('participants')
@@ -136,9 +137,17 @@ class Lobby extends ModalComponent
 
     public function render()
     {
-        $members = $this->conversation?->participants ?? collect();
+        if ($this->conversation === null) {
+            return view('wirechat::livewire.chat.group.join.lobby', [
+                'membersPreview' => collect(),
+                'remainingMembersCount' => 0,
+            ]);
+        }
+
+        $members = $this->conversation->participants;
         $membersPreview = $members->take(6);
-        $remainingMembersCount = max(($this->conversation?->participants_count ?? $members->count()) - $membersPreview->count(), 0);
+        $memberTotal = $this->conversation->participants_count ?? $members->count();
+        $remainingMembersCount = max($memberTotal - $membersPreview->count(), 0);
 
         return view('wirechat::livewire.chat.group.join.lobby', [
             'membersPreview' => $membersPreview,

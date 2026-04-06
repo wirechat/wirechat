@@ -187,7 +187,7 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.members.blocked', BlockedMembers::class);
         Livewire::component('wirechat.chat.group.permissions', Permissions::class);
         Livewire::component('wirechat.chat.group.links.links', Links::class);
-        Livewire::component('wirechat.chat.group.links.list', \Wirechat\Wirechat\Livewire\Chat\Group\Links\List::class);
+        Livewire::component('wirechat.chat.group.links.list', \Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks::class);
         Livewire::component('wirechat.chat.group.links.create', Create::class);
         Livewire::component('wirechat.chat.group.links.show', Show::class);
         Livewire::component('wirechat.chat.group.join.lobby', Lobby::class);

@@ -65,14 +65,14 @@ class BlockedMembers extends ModalComponent
             ->with(['participantable', 'actions'])
             ->whereKey($participantId)
             ->firstOrFail();
-
+        /** @var Participant $participant */
         abort_unless($participant->isBlockedByAdmin(), 404, 'Member is not blocked.');
 
         $participant->liftBlockByAdmin();
 
         $this->loadBlockedMembers();
 
-        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.blocked_members.messages.unblocked_success', ['member' => $participant->participantable?->wirechat_name]));
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.blocked_members.messages.unblocked_success', ['member' => $participant->participantable->wirechat_name]));
         $this->dispatch('refresh')->to(Members::class);
     }
 

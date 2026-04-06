@@ -274,13 +274,7 @@ class Participant extends Model
 
     protected function actionMatchesType(Action $action, Actions $type): bool
     {
-        $actionType = $action->type;
-
-        if ($actionType instanceof Actions) {
-            return $actionType === $type;
-        }
-
-        return $actionType === $type->value;
+        return $action->type === $type;
     }
 
     protected function forgetLoadedActions(): void

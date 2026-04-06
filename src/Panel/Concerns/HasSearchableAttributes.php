@@ -9,7 +9,7 @@ use Closure;
  *
  * Defines which fields are searchable for models (e.g., User).
  *
- * @method mixed evaluate(mixed $value)
+ * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = [])
  */
 trait HasSearchableAttributes
 {

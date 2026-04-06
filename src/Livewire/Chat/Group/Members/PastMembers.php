@@ -67,7 +67,7 @@ class PastMembers extends ModalComponent
         $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = [];
 
-        $this->pastMembers = $this->conversation->participants()
+        $participants = $this->conversation->participants()
             ->withoutGlobalScopes()
             ->with(['participantable', 'actions.actor.participantable'])
             ->where(function ($query) {
@@ -97,7 +97,10 @@ class PastMembers extends ModalComponent
                 });
             })
             ->latest('updated_at')
-            ->get()
+            ->get();
+
+        /** @var \Illuminate\Support\Collection<int, Participant> $participants */
+        $this->pastMembers = $participants
             ->filter(fn (Participant $participant) => $participant->pastMembershipReason() !== null)
             ->values();
     }
