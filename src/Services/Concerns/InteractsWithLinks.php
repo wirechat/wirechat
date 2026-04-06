@@ -62,7 +62,7 @@ trait InteractsWithLinks
         }
 
         $allowedTlds = $this->allowedTlds();
-        if ($allowedTlds !== [] && ! in_array($tld, $allowedTlds, true)) {
+        if ($allowedTlds !== null && ! in_array($tld, $allowedTlds, true)) {
             return false;
         }
 
@@ -174,12 +174,12 @@ trait InteractsWithLinks
         return $segments;
     }
 
-    public function allowedTlds(): array
+    public function allowedTlds(): ?array
     {
-        $allowed = config('wirechat.message_url_parsing.allowed_tlds', []);
+        $allowed = config('wirechat.message_url_parsing.allowed_tlds', null);
 
         if ($allowed === null) {
-            return [];
+            return null;
         }
 
         return array_values(array_filter(array_map('strtolower', (array) $allowed)));
@@ -187,7 +187,7 @@ trait InteractsWithLinks
 
     private function linkifyPattern(): string
     {
-        return '~(https?://[^\s<]+|www\.[^\s<]+|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?:/[^\s<]*)?)~i';
+        return '~(https?://[^\s<]+|www\.[^\s<]+|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?::\d{1,5})?(?:[/?#][^\s<]*)?)~i';
     }
 
     private function resolveLinkToken(string $token): ?string

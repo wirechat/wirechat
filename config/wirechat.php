@@ -62,7 +62,9 @@ return [
      |--------------------------------------------------------------------------
      |
      | Configure how Wirechat detects and links URLs in message bodies.
-     | If allowed_tlds is set, only those TLDs will be recognized.
+     | If allowed_tlds is null, all TLDs are allowed.
+     | If allowed_tlds is an empty array, no TLDs are allowed.
+     | If allowed_tlds is a list, only those TLDs will be recognized.
      | Defaults shown below.
      |
      */
