@@ -5,17 +5,17 @@ namespace Wirechat\Wirechat\Services\Concerns;
 trait InteractsWithLinks
 {
     /**
-     * Check if the given message contains only a single link and nothing else.
+     * Validate a single link token (URL or email).
      *
-     * The method returns true only when the message is a valid URL
-     * without any extra text, spaces, or characters.
+     * Leading/trailing whitespace is ignored. If you need to detect
+     * links inside longer text, use containsLink() instead.
      */
     public function isLink(string $message): bool
     {
         $message = trim($message);
 
-        // No whitespace allowed
-        if ($message === '' || preg_match('/\s/', $message)) {
+        // No spaces allowed inside a single token
+        if ($message === '' || str_contains($message, ' ')) {
             return false;
         }
 
