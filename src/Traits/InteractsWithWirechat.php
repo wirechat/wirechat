@@ -324,7 +324,9 @@ trait InteractsWithWirechat
             return $conversation->getUnreadCountFor($this);
         }
 
-        return Conversation::getTotalUnreadCountFor($this);
+        $conversationModelClass = Wirechat::conversationModelClass();
+
+        return $conversationModelClass::getTotalUnreadCountFor($this);
     }
 
     /**
