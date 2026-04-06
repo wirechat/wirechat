@@ -392,7 +392,7 @@ describe('List', function () {
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
         $auth->createConversationWith($user2, 'new message');
@@ -411,7 +411,7 @@ describe('List', function () {
         $user2 = User::factory()->create(['name' => 'iam user 2']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
         $auth->createConversationWith($user2, 'new message');
@@ -429,7 +429,7 @@ describe('List', function () {
         $user2 = Admin::factory()->create(['name' => 'iam Admin']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
         $auth->createConversationWith($user2, 'new message');
@@ -1127,10 +1127,10 @@ describe('Search', function () {
         $user2 = User::factory()->create(['name' => 'Mary']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
-        $auth->createConversationWith($user2, 'how are you doing');
+        $conversationWithMary = $auth->createConversationWith($user2, 'how are you doing');
 
         Livewire::actingAs($auth)->test(Chatlist::class, ['search' => null])
             ->assertSee('John')
@@ -1148,17 +1148,23 @@ describe('Search', function () {
         $user2 = User::factory()->create(['name' => 'Mary']);
 
         // create conversation with user1
-        $auth->createConversationWith($user1, 'hello');
+        $conversationWithJohn = $auth->createConversationWith($user1, 'hello');
 
         // create conversation with user2
-        $auth->createConversationWith($user2, 'how are you doing');
+        $conversationWithMary = $auth->createConversationWith($user2, 'how are you doing');
 
         $request = Livewire::actingAs($auth)->test(Chatlist::class);
 
         $request->set('search', 'John');
 
         $request->assertSee('John');
-        $request->assertDontSee('Mary');
+        $request->assertViewHas('conversations', function ($conversations) use ($conversationWithJohn, $conversationWithMary) {
+            $ids = $conversations->pluck('id')->all();
+
+            return count($ids) === 1
+                && in_array($conversationWithJohn->id, $ids, true)
+                && ! in_array($conversationWithMary->id, $ids, true);
+        });
     });
 
     test('deleted conversation should  appear when searched', function () {
