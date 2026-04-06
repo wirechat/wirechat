@@ -37,11 +37,6 @@ trait InteractsWithLinks
 
         $host = strtolower($host);
 
-        // Reject localhost / IPs (optional — keep/remove depending on your needs)
-        if ($host === 'localhost' || filter_var($host, FILTER_VALIDATE_IP)) {
-            return false;
-        }
-
         // Must contain a dot and not start/end with one
         if (! str_contains($host, '.') || str_starts_with($host, '.') || str_ends_with($host, '.')) {
             return false;
