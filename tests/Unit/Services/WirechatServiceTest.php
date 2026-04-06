@@ -199,17 +199,24 @@ describe('WirechatService Model Resolution', function () {
                 ->toContain('https://whatsapp.com');
         });
 
-        it('does not linkify bare domains inside email addresses', function () {
+        it('linkifies email addresses as mailto links', function () {
             config([
                 'wirechat.message_url_parsing.allow_bare_domains' => true,
                 'wirechat.message_url_parsing.allowed_tlds' => ['com'],
             ]);
 
-            expect(Wirechat::containsLink('reach me at foo@example.com'))->toBeFalse();
+            expect(Wirechat::containsLink('reach me at foo@example.com'))->toBeTrue()
+                ->and(Wirechat::containsLink('reach me at foo@example.com?subject=Hello'))->toBeTrue();
 
             $segments = Wirechat::linkifyMessage('email foo@example.com now');
 
-            expect(collect($segments)->where('is_link', true))->toHaveCount(0);
+            expect(collect($segments)->where('is_link', true)->pluck('href')->all())
+                ->toContain('mailto:foo@example.com');
+
+            $segmentsWithQuery = Wirechat::linkifyMessage('email foo@example.com?subject=Hello now');
+
+            expect(collect($segmentsWithQuery)->where('is_link', true)->pluck('href')->all())
+                ->toContain('mailto:foo@example.com?subject=Hello');
         });
 
         it('does not linkify localhost or ip hosts', function () {

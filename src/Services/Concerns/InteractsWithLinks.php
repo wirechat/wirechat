@@ -187,7 +187,7 @@ trait InteractsWithLinks
 
     private function linkifyPattern(): string
     {
-        return '~(https?://[^\s<]+|(?<![\w@])www\.[^\s<]+|(?<![\w@])[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?::\d{1,5})?(?:[/?#][^\s<]*)?)~i';
+        return '~(https?://[^\s<]+|(?<![\w@])[a-z0-9._%+\-]+@[a-z0-9.-]+\.[a-z]{2,24}(?:[/?#][^\s<]*)?(?![\w@])|(?<![\w@])www\.[^\s<]+|(?<![\w@])[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?::\d{1,5})?(?:[/?#][^\s<]*)?)~i';
     }
 
     private function resolveLinkToken(string $token): ?string
@@ -196,6 +196,10 @@ trait InteractsWithLinks
 
         if ($token === '') {
             return null;
+        }
+
+        if ($this->isEmailToken($token)) {
+            return 'mailto:'.$token;
         }
 
         $hasScheme = preg_match('~^https?://~i', $token) === 1;
@@ -216,6 +220,66 @@ trait InteractsWithLinks
     private function canLinkifyBareDomain(): bool
     {
         return (bool) config('wirechat.message_url_parsing.allow_bare_domains', true);
+    }
+
+    private function isEmailToken(string $token): bool
+    {
+        $token = trim($token);
+        if ($token === '') {
+            return false;
+        }
+
+        $email = preg_split('/[?#]/', $token, 2)[0] ?? '';
+
+        if ($email === '' || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            return false;
+        }
+
+        [$local, $host] = explode('@', $email, 2);
+
+        if ($host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+
+        if ($host === 'localhost' || filter_var($host, FILTER_VALIDATE_IP)) {
+            return false;
+        }
+
+        if (! str_contains($host, '.') || str_starts_with($host, '.') || str_ends_with($host, '.')) {
+            return false;
+        }
+
+        if (str_contains($host, '..')) {
+            return false;
+        }
+
+        $labels = explode('.', $host);
+        if (count($labels) < 2) {
+            return false;
+        }
+
+        $tld = strtolower((string) end($labels));
+        if (! preg_match('/^[a-z]{2,24}$/', $tld)) {
+            return false;
+        }
+
+        $allowedTlds = $this->allowedTlds();
+        if ($allowedTlds !== null && ! in_array($tld, $allowedTlds, true)) {
+            return false;
+        }
+
+        foreach ($labels as $label) {
+            if ($label === '' || strlen($label) > 63) {
+                return false;
+            }
+            if (! preg_match('/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/', $label)) {
+                return false;
+            }
+        }
+
+        return $local !== '';
     }
 
     private function splitTrailingPunctuation(string $token): array
