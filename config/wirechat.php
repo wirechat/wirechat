@@ -36,6 +36,7 @@ return [
         'conversation' => \Wirechat\Wirechat\Models\Conversation::class,
         'group' => \Wirechat\Wirechat\Models\Group::class,
         'message' => \Wirechat\Wirechat\Models\Message::class,
+        'message_request' => \Wirechat\Wirechat\Models\MessageRequest::class,
         'participant' => \Wirechat\Wirechat\Models\Participant::class,
     ],
 

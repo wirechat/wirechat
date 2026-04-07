@@ -20,6 +20,8 @@ use Wirechat\Wirechat\Livewire\Chat\Group\Members;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
 use Wirechat\Wirechat\Livewire\Chat\Info;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
+use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Requests as ChatsRequests;
 use Wirechat\Wirechat\Livewire\Modals\Modal;
 use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
 use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
@@ -157,6 +159,8 @@ class WirechatServiceProvider extends ServiceProvider
 
         // Chats
         Livewire::component('wirechat.chats', Chats::class);
+        Livewire::component('wirechat.chats.drawer', ChatsDrawer::class);
+        Livewire::component('wirechat.chats.requests', ChatsRequests::class);
 
         // modal
         Livewire::component('wirechat.modal', Modal::class);

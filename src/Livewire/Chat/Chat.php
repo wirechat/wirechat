@@ -14,10 +14,13 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Events\MessageRequestUpdated;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
@@ -78,6 +81,10 @@ class Chat extends Component
     // Theme
     public $replyMessage = null;
 
+    public bool $canRespondToMessageRequest = false;
+
+    public bool $hasPendingOutgoingMessageRequest = false;
+
     public function getListeners()
     {
         $conversationId = $this->conversation?->id;
@@ -91,6 +98,14 @@ class Chat extends Component
         $listeners = [
             'refresh' => '$refresh',
         ];
+
+        $user = $this->auth;
+
+        if ($this->panel() !== null && $user) {
+            $panelId = $this->panel()->getId();
+            $encodedType = MorphClassResolver::encode($user->getMorphClass());
+            $listeners["echo-private:{$panelId}.participant.{$encodedType}.{$user->getKey()},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated"] = 'handleMessageRequestUpdated';
+        }
 
         if ($this->panel() == null) {
             \Illuminate\Support\Facades\Log::warning('Wirechat:No panels registered in Chat Component');
@@ -263,6 +278,7 @@ class Chat extends Component
     public function deleteConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // delete conversation
         $this->conversation->deleteFor($this->auth);
@@ -281,6 +297,7 @@ class Chat extends Component
     public function clearConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // delete conversation
         $this->conversation->clearFor($this->auth);
@@ -355,6 +372,7 @@ class Chat extends Component
     {
 
         abort_unless(auth()->check(), 401);
+        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // rate limit
         $this->rateLimit();
@@ -711,6 +729,7 @@ class Chat extends Component
     /** Send Like as  message */
     public function sendLike()
     {
+        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // sleep(2);
 
@@ -789,6 +808,7 @@ class Chat extends Component
     {
         $this->initializeConversation($conversation);
         $this->initializeParticipants();
+        $this->syncMessageRequestState();
         $this->finalizeConversationState();
         $this->loadMessages();
     }
@@ -816,7 +836,7 @@ class Chat extends Component
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
         $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $this->conversation->id)->count();
-        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
+        abort_unless($this->auth->canAccessConversation($this->conversation), 403);
     }
 
     /**
@@ -837,7 +857,7 @@ class Chat extends Component
     private function initializeParticipants()
     {
         if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
-            $this->conversation->load('participants.participantable');
+            $this->conversation->load('participants.participantable', 'messageRequests.sender', 'messageRequests.recipient');
             $participants = $this->conversation->participants();
 
             $this->authParticipant = $participants->whereParticipantable($this->auth)->first();
@@ -849,12 +869,7 @@ class Chat extends Component
                 $this->receiverParticipant = $this->authParticipant;
             }
 
-            /** @var \Wirechat\Wirechat\Models\Participant|null $participant */
-            $participant = $this->receiverParticipant;
-
-            $this->receiver = $participant
-                ? $participant->participantable
-                : null;
+            $this->receiver = $this->conversation->displayPeer($this->auth);
 
         } else {
             $this->authParticipant = Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
@@ -876,6 +891,114 @@ class Chat extends Component
                 $this->authParticipant->update(['conversation_deleted_at' => null]);
             }
         }
+    }
+
+    protected function syncMessageRequestState(): void
+    {
+        $this->canRespondToMessageRequest = false;
+        $this->hasPendingOutgoingMessageRequest = false;
+
+        if (! $this->conversation->isPrivate()) {
+            return;
+        }
+
+        $this->canRespondToMessageRequest = ! $this->authParticipant
+            && $this->conversation->hasPendingMessageRequestFor($this->auth);
+
+        $this->hasPendingOutgoingMessageRequest = (bool) $this->authParticipant
+            && $this->receiverParticipant === null
+            && $this->conversation->hasPendingMessageRequestFrom($this->auth);
+    }
+
+    protected function refreshConversationContext(bool $reloadMessages = false): void
+    {
+        $conversationId = $this->conversation->id;
+        $this->conversation = Wirechat::conversationModelClass()::find($conversationId);
+
+        if (! $this->conversation || ! $this->auth->canAccessConversation($this->conversation)) {
+            $this->handleComponentTermination(
+                redirectRoute: $this->panel()->chatsRoute(),
+                events: [
+                    'close-chat',
+                    Chats::class => 'refresh',
+                ]
+            );
+
+            return;
+        }
+
+        $this->initializeParticipants();
+        $this->syncMessageRequestState();
+
+        if ($reloadMessages) {
+            $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $conversationId)->count();
+            $this->loadMessages();
+        }
+    }
+
+    public function acceptMessageRequest(): void
+    {
+        abort_unless(auth()->check(), 401);
+        abort_unless($this->canRespondToMessageRequest, 403);
+
+        $request = $this->conversation->pendingMessageRequestFor($this->auth);
+        $sender = $request?->sender;
+
+        $this->conversation->acceptMessageRequestFor($this->auth, $this->auth);
+        $this->conversation->touch();
+
+        if ($sender instanceof Model) {
+            event(new MessageRequestUpdated($sender, $this->conversation->id, MessageRequestStatus::ACCEPTED, $this->panel()->getId()));
+        }
+
+        $this->refreshConversationContext();
+        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.message_request.messages.accepted'));
+    }
+
+    public function dismissMessageRequest()
+    {
+        abort_unless(auth()->check(), 401);
+        abort_unless($this->canRespondToMessageRequest, 403);
+
+        $request = $this->conversation->pendingMessageRequestFor($this->auth);
+        $sender = $request?->sender;
+        $conversationId = $this->conversation->id;
+
+        $this->conversation->dismissMessageRequestFor($this->auth, $this->auth);
+
+        if ($sender instanceof Model) {
+            event(new MessageRequestUpdated($sender, $conversationId, MessageRequestStatus::DISMISSED, $this->panel()->getId()));
+        }
+
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.message_request.messages.dismissed'));
+
+        return $this->handleComponentTermination(
+            redirectRoute: $this->panel()->chatsRoute(),
+            events: [
+                'close-chat',
+                Chats::class => 'refresh',
+            ]
+        );
+    }
+
+    public function handleMessageRequestUpdated($event)
+    {
+        if ((string) ($event['conversation_id'] ?? '') !== (string) $this->conversation?->id) {
+            return;
+        }
+
+        if (($event['status'] ?? null) === MessageRequestStatus::DISMISSED->value) {
+            return $this->handleComponentTermination(
+                redirectRoute: $this->panel()->chatsRoute(),
+                events: [
+                    'close-chat',
+                    Chats::class => 'refresh',
+                ]
+            );
+        }
+
+        $this->refreshConversationContext();
     }
 
     public function render()

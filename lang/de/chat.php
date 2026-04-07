@@ -92,6 +92,27 @@ return [
         'invalid_conversation_input' => 'Ungültige Konversationseingabe.',
     ],
 
+    'message_request' => [
+        'labels' => [
+            'heading' => 'Nachrichtenanfrage',
+            'description' => 'Öffne die Konversation und akzeptiere sie, bevor du antworten kannst.',
+            'outgoing_notice' => 'Diese Nachrichtenanfrage ist noch ausstehend. Der Empfänger kann den Verlauf prüfen, bevor er beitritt.',
+        ],
+        'actions' => [
+            'accept' => [
+                'label' => 'Akzeptieren',
+            ],
+            'dismiss' => [
+                'label' => 'Ablehnen',
+            ],
+        ],
+        'messages' => [
+            'accepted' => 'Nachrichtenanfrage akzeptiert.',
+            'dismissed' => 'Nachrichtenanfrage abgelehnt.',
+            'accept_required' => 'Akzeptiere diese Nachrichtenanfrage, bevor du Nachrichten sendest.',
+        ],
+    ],
+
     /**-------------------------
      * Info Component
      *------------------------*/

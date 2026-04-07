@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Concerns\HasDynamicIds;
@@ -32,6 +33,7 @@ use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
  * @property-read int|null $actions_count
  * @property-read Group|null $group
  * @property-read Message|null $lastMessage
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $messageRequests
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Message> $messages
  * @property-read int|null $messages_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Participant> $participants
@@ -254,6 +256,220 @@ class Conversation extends Model
     public function lastMessage(): hasOne
     {
         return $this->hasOne(Wirechat::messageModelClass(), 'conversation_id')->latestOfMany();
+    }
+
+    /**
+     * Pending and historical message requests attached to this conversation.
+     */
+    public function messageRequests(): HasMany
+    {
+        return $this->hasMany(Wirechat::messageRequestModelClass(), 'conversation_id');
+    }
+
+    public function pendingMessageRequests(): HasMany
+    {
+        return $this->messageRequests()->pending();
+    }
+
+    public function pendingMessageRequestFor(Model|Authenticatable $recipient): ?MessageRequest
+    {
+        if ($this->relationLoaded('messageRequests')) {
+            /** @var ?MessageRequest $request */
+            $request = collect($this->messageRequests)
+                ->filter(fn (MessageRequest $request): bool => $request->status === MessageRequestStatus::PENDING
+                    && (string) $request->recipient_id === (string) $recipient->getKey()
+                    && $request->recipient_type === $recipient->getMorphClass())
+                ->sortByDesc('id')
+                ->first();
+
+            return $request;
+        }
+
+        /** @var ?MessageRequest $request */
+        $request = $this->pendingMessageRequests()
+            ->whereRecipient($recipient)
+            ->latest('id')
+            ->first();
+
+        return $request;
+    }
+
+    public function pendingMessageRequestFrom(Model|Authenticatable $sender): ?MessageRequest
+    {
+        if ($this->relationLoaded('messageRequests')) {
+            /** @var ?MessageRequest $request */
+            $request = collect($this->messageRequests)
+                ->filter(fn (MessageRequest $request): bool => $request->status === MessageRequestStatus::PENDING
+                    && (string) $request->sender_id === (string) $sender->getKey()
+                    && $request->sender_type === $sender->getMorphClass())
+                ->sortByDesc('id')
+                ->first();
+
+            return $request;
+        }
+
+        /** @var ?MessageRequest $request */
+        $request = $this->pendingMessageRequests()
+            ->whereSender($sender)
+            ->latest('id')
+            ->first();
+
+        return $request;
+    }
+
+    public function latestPendingMessageRequest(): ?MessageRequest
+    {
+        if ($this->relationLoaded('messageRequests')) {
+            /** @var ?MessageRequest $request */
+            $request = collect($this->messageRequests)
+                ->filter(fn (MessageRequest $request): bool => $request->status === MessageRequestStatus::PENDING)
+                ->sortByDesc('id')
+                ->first();
+
+            return $request;
+        }
+
+        /** @var ?MessageRequest $request */
+        $request = $this->pendingMessageRequests()
+            ->latest('id')
+            ->first();
+
+        return $request;
+    }
+
+    public function hasPendingMessageRequestFor(Model|Authenticatable $recipient): bool
+    {
+        return $this->pendingMessageRequestFor($recipient) !== null;
+    }
+
+    public function hasPendingMessageRequestFrom(Model|Authenticatable $sender): bool
+    {
+        return $this->pendingMessageRequestFrom($sender) !== null;
+    }
+
+    public function hasActiveMessageRequest(): bool
+    {
+        return $this->latestPendingMessageRequest() !== null;
+    }
+
+    public function createMessageRequestFor(Model|Authenticatable $recipient, Model|Authenticatable|null $sender = null): MessageRequest
+    {
+        abort_if(! $this->isPrivate(), 403, 'Message requests are only available for private conversations.');
+
+        $sender = $sender ?? auth()->user();
+
+        abort_if(! $sender, 403, 'A sender is required to create a message request.');
+        abort_if($recipient->belongsToConversation($this), 422, 'Participant is already in the conversation.');
+
+        $existingRequest = $this->pendingMessageRequestFor($recipient);
+
+        if ($existingRequest) {
+            return $existingRequest;
+        }
+
+        abort_if($this->hasActiveMessageRequest(), 409, 'A message request is already pending for this conversation.');
+
+        /** @var MessageRequest $created */
+        $created = $this->messageRequests()->create([
+            'sender_id' => $sender->getKey(),
+            'sender_type' => $sender->getMorphClass(),
+            'recipient_id' => $recipient->getKey(),
+            'recipient_type' => $recipient->getMorphClass(),
+        ]);
+
+        $this->forgetLoadedMessageRequests();
+
+        return $created;
+    }
+
+    public function acceptMessageRequestFor(Model|Authenticatable $recipient, Model|Authenticatable|null $reviewedBy = null): Participant
+    {
+        abort_if(! $this->isPrivate(), 403, 'Message requests are only available for private conversations.');
+
+        $request = $this->pendingMessageRequestFor($recipient);
+
+        abort_if(! $request, 404, 'Message request not found.');
+
+        /** @var Participant|null $participant */
+        $participant = $this->participants()
+            ->withoutGlobalScopes()
+            ->whereParticipantable($recipient)
+            ->first();
+
+        if (! $participant) {
+            $participant = $this->addParticipant($recipient, ParticipantRole::OWNER);
+        }
+
+        $participant->forceFill([
+            'conversation_read_at' => now(),
+            'last_active_at' => now(),
+        ])->save();
+
+        $request->approve($reviewedBy);
+        $this->forgetLoadedMessageRequests();
+
+        return $participant->refresh();
+    }
+
+    public function dismissMessageRequestFor(Model|Authenticatable $recipient, Model|Authenticatable|null $reviewedBy = null): ?MessageRequest
+    {
+        abort_if(! $this->isPrivate(), 403, 'Message requests are only available for private conversations.');
+
+        $request = $this->pendingMessageRequestFor($recipient);
+
+        if (! $request) {
+            return null;
+        }
+
+        $request->dismiss($reviewedBy);
+        $request->forceFill([
+            'conversation_id' => null,
+        ])->save();
+
+        $this->forgetLoadedMessageRequests();
+
+        if (! $recipient->belongsToConversation($this)) {
+            $this->delete();
+        }
+
+        return $request->refresh();
+    }
+
+    public function canBeAccessedBy(Model|Authenticatable $user): bool
+    {
+        if ($user->belongsToConversation($this)) {
+            return true;
+        }
+
+        return $this->isPrivate() && $this->hasPendingMessageRequestFor($user);
+    }
+
+    public function displayPeer(Model|Authenticatable $reference): ?Model
+    {
+        if ($this->isGroup()) {
+            return null;
+        }
+
+        if ($this->isSelf()) {
+            return $reference instanceof Model ? $reference : null;
+        }
+
+        if ($reference->belongsToConversation($this)) {
+            $peerParticipant = $this->peerParticipant($reference);
+
+            if ($peerParticipant?->participantable instanceof Model) {
+                return $peerParticipant->participantable;
+            }
+
+            return $this->latestPendingMessageRequest()?->recipient;
+        }
+
+        return $this->pendingMessageRequestFor($reference)?->sender;
+    }
+
+    public function forgetLoadedMessageRequests(): void
+    {
+        unset($this->relations['messageRequests']);
     }
 
     /**

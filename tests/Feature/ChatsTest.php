@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
+use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
@@ -25,6 +26,38 @@ test('authenticaed user can access chatlist ', function () {
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertStatus(200);
+});
+
+test('it shows the requests drawer button in the chats header', function () {
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('id="open-requests-drawer-button"');
+});
+
+test('pending request conversations stay out of the normal chats list', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $receiver = User::factory()->create(['name' => 'Pending User']);
+
+    $auth->createMessageRequestConversationWith($receiver);
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSee('Pending User');
+});
+
+test('requests drawer lists incoming and outgoing pending requests', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $incomingSender->createMessageRequestConversationWith($auth);
+    $auth->createMessageRequestConversationWith($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSee('Incoming Sender')
+        ->assertSee('Outgoing Recipient')
+        ->assertSee(__('wirechat::chats.requests.labels.incoming'))
+        ->assertSee(__('wirechat::chats.requests.labels.outgoing'));
 });
 
 test('it applies ui classes and styles to the chats shell only', function () {

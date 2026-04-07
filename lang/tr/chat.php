@@ -81,6 +81,27 @@ return [
         'invalid_conversation_input' => 'Geçersiz sohbet girdisi.',
     ],
 
+    'message_request' => [
+        'labels' => [
+            'heading' => 'Mesaj isteği',
+            'description' => 'Yanıt verebilmek için konuşmayı açıp isteği kabul et.',
+            'outgoing_notice' => 'Bu mesaj isteği hâlâ beklemede. Alıcı konuşmaya katılmadan önce akışı inceleyebilir.',
+        ],
+        'actions' => [
+            'accept' => [
+                'label' => 'Kabul et',
+            ],
+            'dismiss' => [
+                'label' => 'Reddet',
+            ],
+        ],
+        'messages' => [
+            'accepted' => 'Mesaj isteği kabul edildi.',
+            'dismissed' => 'Mesaj isteği reddedildi.',
+            'accept_required' => 'Mesaj göndermeden önce bu isteği kabul et.',
+        ],
+    ],
+
     /**-------------------------
      * Info Component
      *------------------------*/

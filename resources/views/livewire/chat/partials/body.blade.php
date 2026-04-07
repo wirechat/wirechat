@@ -80,6 +80,7 @@
     {{-- Define previous message outside the loop --}}
     @php
         $previousMessage = null;
+        $authIsAdmin = $authParticipant?->isAdmin() ?? false;
     @endphp
 
     <!--Message-->
@@ -194,7 +195,7 @@
                             ])>
 
                                 {{-- Message Actions --}}
-                                @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authParticipant->isAdmin())
+                                @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authIsAdmin)
                                 <div dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
                                     <button wire:click="setReply('{{ encrypt($message->id) }}')"
@@ -224,7 +225,7 @@
                                         </x-slot>
                                         <x-slot name="content">
 
-                                            @if (($message->ownedBy($this->auth)|| ($authParticipant->isAdmin() && $isGroup)) && $this->panel()->hasDeleteMessageActions())
+                                            @if (($message->ownedBy($this->auth)|| ($authIsAdmin && $isGroup)) && $this->panel()->hasDeleteMessageActions())
                                                 <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ encrypt($message->id) }}')"
                                                     wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>

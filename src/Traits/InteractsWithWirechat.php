@@ -124,6 +124,100 @@ trait InteractsWithWirechat
             return $conversation;
         });
     }
+
+    /**
+     * Creates or reuses a private conversation that begins as a message request.
+     *
+     * When the opposite-direction request already exists and is still pending,
+     * that request is accepted immediately so only one active request can exist
+     * for the pair at a time.
+     */
+    public function createMessageRequestConversationWith(Model $peer): ?Conversation
+    {
+        abort_unless($this->canCreateChats(), 403, 'You do not have permission to create chats.');
+
+        $authType = $this->getMorphClass();
+        $authId = (string) $this->getKey();
+
+        $peerType = $peer->getMorphClass();
+        $peerId = (string) $peer->getKey();
+
+        $isSelf = ($authId === $peerId) && ($authType === $peerType);
+
+        if ($isSelf) {
+            return $this->createConversationWith($peer);
+        }
+
+        $existingConversation = Wirechat::conversationModelClass()::withoutGlobalScopes()
+            ->where('type', ConversationType::PRIVATE)
+            ->where(function ($query) use ($authType, $authId, $peerType, $peerId) {
+                $query
+                    ->where(function ($acceptedConversation) use ($authType, $authId, $peerType, $peerId) {
+                        $acceptedConversation
+                            ->whereHas('participants', function ($participantQuery) use ($authType, $authId) {
+                                $participantQuery->where('participantable_type', $authType)
+                                    ->where('participantable_id', $authId);
+                            })
+                            ->whereHas('participants', function ($participantQuery) use ($peerType, $peerId) {
+                                $participantQuery->where('participantable_type', $peerType)
+                                    ->where('participantable_id', $peerId);
+                            });
+                    })
+                    ->orWhereHas('messageRequests', function ($requestQuery) use ($authType, $authId, $peerType, $peerId) {
+                        $requestQuery
+                            ->pending()
+                            ->where(function ($pairQuery) use ($authType, $authId, $peerType, $peerId) {
+                                $pairQuery
+                                    ->where(function ($forward) use ($authType, $authId, $peerType, $peerId) {
+                                        $forward->where('sender_type', $authType)
+                                            ->where('sender_id', $authId)
+                                            ->where('recipient_type', $peerType)
+                                            ->where('recipient_id', $peerId);
+                                    })
+                                    ->orWhere(function ($reverse) use ($authType, $authId, $peerType, $peerId) {
+                                        $reverse->where('sender_type', $peerType)
+                                            ->where('sender_id', $peerId)
+                                            ->where('recipient_type', $authType)
+                                            ->where('recipient_id', $authId);
+                                    });
+                            });
+                    });
+            })
+            ->latest('updated_at')
+            ->first();
+
+        if ($existingConversation) {
+            $incomingRequest = $existingConversation->pendingMessageRequestFor($this);
+
+            if ($incomingRequest) {
+                $existingConversation->acceptMessageRequestFor($this, $this);
+                $existingConversation->touch();
+
+                return $existingConversation->fresh();
+            }
+
+            return $existingConversation;
+        }
+
+        return DB::transaction(function () use ($authType, $authId, $peer) {
+            $conversation = Wirechat::conversationModel();
+            $conversation->type = ConversationType::PRIVATE;
+            $conversation->save();
+
+            Wirechat::participantModelClass()::firstOrCreate(
+                [
+                    'conversation_id' => $conversation->getKey(),
+                    'participantable_type' => $authType,
+                    'participantable_id' => $authId,
+                ],
+                ['role' => ParticipantRole::OWNER]
+            );
+
+            $conversation->createMessageRequestFor($peer, $this);
+
+            return $conversation;
+        });
+    }
     /**
      * Room configuration
      */
@@ -253,6 +347,11 @@ trait InteractsWithWirechat
         }
 
         return null;
+    }
+
+    public function canAccessConversation(Conversation $conversation): bool
+    {
+        return $conversation->canBeAccessedBy($this);
     }
 
     /**

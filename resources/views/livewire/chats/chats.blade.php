@@ -96,4 +96,6 @@
         @endif
     </main>
 
+    <livewire:wirechat.chats.drawer wire:key="chats-drawer" />
+
 </div>

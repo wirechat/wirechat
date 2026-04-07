@@ -19,4 +19,24 @@ return [
             'placeholder' => 'Rechercher',
         ],
     ],
+
+    'requests' => [
+        'heading' => 'Demandes de message',
+        'actions' => [
+            'open' => [
+                'label' => 'Demandes',
+            ],
+            'close' => [
+                'label' => 'Fermer les demandes',
+            ],
+        ],
+        'labels' => [
+            'description' => 'Consultez les demandes reçues et suivez celles que vous avez envoyées.',
+            'incoming' => 'Reçues',
+            'outgoing' => 'Envoyées',
+            'pending' => 'En attente',
+            'no_message' => 'Aucun message pour le moment',
+            'empty_state' => 'Vous n’avez aucune demande de message active pour le moment.',
+        ],
+    ],
 ];

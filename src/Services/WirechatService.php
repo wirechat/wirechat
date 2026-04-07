@@ -8,6 +8,7 @@ use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
@@ -345,6 +346,21 @@ class WirechatService
     }
 
     /**
+     * Get the MessageRequest model class from the configuration.
+     *
+     * @return class-string<MessageRequest> The MessageRequest model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function messageRequestModelClass(): string
+    {
+        $class = (string) config('wirechat.models.message_request', MessageRequest::class);
+        $this->validateModelClass($class, MessageRequest::class, 'wirechat.models.message_request');
+
+        return $class;
+    }
+
+    /**
      * Get the Participant model class from the configuration.
      *
      * @return class-string<Participant> The Participant model class.
@@ -434,6 +450,16 @@ class WirechatService
     }
 
     /**
+     * Get the MessageRequest model table name.
+     *
+     * @return string The MessageRequest model table name.
+     */
+    public function messageRequestModelTable(): string
+    {
+        return $this->getCachedTableName('message_request', fn () => $this->messageRequestModel());
+    }
+
+    /**
      * Get the Participant model table name.
      *
      * @return string The Participant model table name.
@@ -496,6 +522,17 @@ class WirechatService
     public function messageModel(array $attributes = []): Message
     {
         return new ($this->messageModelClass())($attributes);
+    }
+
+    /**
+     * Create a new MessageRequest model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return MessageRequest The MessageRequest model instance.
+     */
+    public function messageRequestModel(array $attributes = []): MessageRequest
+    {
+        return new ($this->messageRequestModelClass())($attributes);
     }
 
     /**

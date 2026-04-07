@@ -80,19 +80,24 @@ class WithoutRemovedMessages implements Scope
         });
 
         // Ensure the message is visible according to the current user's participant row
-        $builder->whereHas('participant.conversation.participants', function ($q) use ($user, $messagesTable, $participantsTable) {
-            $q->where('participantable_id', $user->getKey())
-                ->where('participantable_type', $user->getMorphClass())
-                ->where(function ($q2) use ($messagesTable, $participantsTable) {
-                    $q2->where(function ($q3) {
-                        $q3->whereNull('conversation_cleared_at')
-                            ->whereNull('conversation_deleted_at');
-                    })
-                        ->orWhere(function ($q4) use ($messagesTable, $participantsTable) {
-                            $q4->whereColumn("$messagesTable.created_at", '>', "$participantsTable.conversation_cleared_at")
-                                ->orWhereColumn("$messagesTable.created_at", '>', "$participantsTable.conversation_deleted_at");
-                        });
-                });
+        // or because the user is the recipient of a pending message request.
+        $builder->where(function (Builder $visibilityQuery) use ($user, $messagesTable, $participantsTable) {
+            $visibilityQuery->whereHas('participant.conversation.participants', function ($q) use ($user, $messagesTable, $participantsTable) {
+                $q->where('participantable_id', $user->getKey())
+                    ->where('participantable_type', $user->getMorphClass())
+                    ->where(function ($q2) use ($messagesTable, $participantsTable) {
+                        $q2->where(function ($q3) {
+                            $q3->whereNull('conversation_cleared_at')
+                                ->whereNull('conversation_deleted_at');
+                        })
+                            ->orWhere(function ($q4) use ($messagesTable, $participantsTable) {
+                                $q4->whereColumn("$messagesTable.created_at", '>', "$participantsTable.conversation_cleared_at")
+                                    ->orWhereColumn("$messagesTable.created_at", '>', "$participantsTable.conversation_deleted_at");
+                            });
+                    });
+            })->orWhereHas('conversation.messageRequests', function ($q) use ($user) {
+                $q->pending()->whereRecipient($user);
+            });
         });
     }
 }

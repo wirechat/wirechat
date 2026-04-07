@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Events\MessageCreated;
@@ -22,6 +23,7 @@ use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -75,6 +77,58 @@ test('returns 403(Forbidden) if user doesnt not bleong to conversation', functio
 
     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertStatus(403);
+});
+
+describe('Message requests', function () {
+    test('pending recipient can review the thread and sees accept and reject actions', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createMessageRequestConversationWith($receiver);
+        $participant = $conversation->participant($auth);
+
+        Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'body' => 'Hello from a request',
+        ]);
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Hello from a request')
+            ->assertSee(__('wirechat::chat.message_request.actions.accept.label'))
+            ->assertSee(__('wirechat::chat.message_request.actions.dismiss.label'))
+            ->assertDontSee(__('wirechat::chat.inputs.message.placeholder'));
+    });
+
+    test('pending recipient can accept a message request', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createMessageRequestConversationWith($receiver);
+        $request = MessageRequest::query()->pending()->where('conversation_id', $conversation->id)->firstOrFail();
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('acceptMessageRequest');
+
+        expect($conversation->fresh()->participant($receiver))->not->toBeNull()
+            ->and($request->fresh()->status)->toBe(MessageRequestStatus::ACCEPTED);
+    });
+
+    test('rejecting a message request dismisses it and removes the pending conversation', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createMessageRequestConversationWith($receiver);
+        $request = MessageRequest::query()->pending()->where('conversation_id', $conversation->id)->firstOrFail();
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('dismissMessageRequest')
+            ->assertRedirect(testPanelProvider()->chatsRoute());
+
+        expect(Conversation::find($conversation->id))->toBeNull()
+            ->and($request->fresh()->status)->toBe(MessageRequestStatus::DISMISSED)
+            ->and($request->fresh()->conversation_id)->toBeNull();
+    });
 });
 
 describe('Presense', function () {
