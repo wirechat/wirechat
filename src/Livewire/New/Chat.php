@@ -54,7 +54,7 @@ class Chat extends ModalComponent
         $model = $model::find($id);
 
         if ($model) {
-            $createdConversation = auth()->user()->createMessageRequestConversationWith($model);
+            $createdConversation = auth()->user()->sendMessageRequestTo($model);
 
             if ($createdConversation) {
 

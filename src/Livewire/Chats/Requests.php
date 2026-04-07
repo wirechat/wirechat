@@ -14,9 +14,13 @@ class Requests extends ModalComponent
     use HasPanel;
     use Widget;
 
+    public string $activeTab = 'incoming';
+
     public function mount(): void
     {
         abort_unless(auth()->check(), 401);
+
+        $this->activeTab = $this->resolveDefaultTab();
     }
 
     public static function modalAttributes(): array
@@ -33,6 +37,15 @@ class Requests extends ModalComponent
     public function auth()
     {
         return auth()->user();
+    }
+
+    public function setActiveTab(string $tab): void
+    {
+        if (! in_array($tab, ['incoming', 'outgoing'], true)) {
+            return;
+        }
+
+        $this->activeTab = $tab;
     }
 
     #[Computed]
@@ -65,6 +78,28 @@ class Requests extends ModalComponent
             ->get();
     }
 
+    #[Computed]
+    public function currentRequests()
+    {
+        return $this->activeTab === 'outgoing'
+            ? $this->outgoingRequests
+            : $this->incomingRequests;
+    }
+
+    #[Computed]
+    public function hasRequests(): bool
+    {
+        return $this->incomingRequests->isNotEmpty() || $this->outgoingRequests->isNotEmpty();
+    }
+
+    #[Computed]
+    public function currentEmptyState(): string
+    {
+        return $this->activeTab === 'outgoing'
+            ? __('wirechat::chats.requests.labels.outgoing_empty_state')
+            : __('wirechat::chats.requests.labels.incoming_empty_state');
+    }
+
     public function openConversation(int $requestId)
     {
         /** @var MessageRequest $request */
@@ -87,12 +122,21 @@ class Requests extends ModalComponent
         $this->closeChatListDrawer();
 
         if ($this->isWidget()) {
-            $this->dispatch('open-chat', conversation: $conversation->id);
+            $this->openChat($conversation->id);
 
             return null;
         }
 
         return $this->redirect($this->panel()->chatRoute($conversation->id));
+    }
+
+    protected function resolveDefaultTab(): string
+    {
+        if ($this->incomingRequests->isNotEmpty()) {
+            return 'incoming';
+        }
+
+        return $this->outgoingRequests->isNotEmpty() ? 'outgoing' : 'incoming';
     }
 
     public function render()

@@ -39,6 +39,8 @@ return [
             'pending' => 'Pending',
             'no_message' => 'No message yet',
             'empty_state' => 'You have no active message requests right now.',
+            'incoming_empty_state' => 'You have no incoming message requests right now.',
+            'outgoing_empty_state' => 'You have not sent any active message requests right now.',
         ],
     ],
 ];

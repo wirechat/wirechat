@@ -39,6 +39,8 @@ return [
             'pending' => 'Beklemede',
             'no_message' => 'Henüz mesaj yok',
             'empty_state' => 'Şu anda aktif bir mesaj isteğin yok.',
+            'incoming_empty_state' => 'Şu anda gelen bir mesaj isteğin yok.',
+            'outgoing_empty_state' => 'Şu anda gönderilmiş aktif bir mesaj isteğin yok.',
         ],
     ],
 ];

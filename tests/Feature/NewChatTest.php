@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
+use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\MessageRequest;
 use Workbench\App\Models\User as ModelsUser;
 
@@ -141,11 +142,49 @@ describe('Creating conversation', function () {
 
     });
 
+    test('it reuses an existing direct conversation without creating a request', function () {
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($otherUser);
+
+        Livewire::actingAs($auth)->test(NewChat::class)
+            ->set('search', 'Joh')
+            ->assertSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class)
+            ->assertRedirect(testPanelProvider()->chatRoute($conversation->id))
+            ->assertNotDispatched('open-chat');
+
+        expect($auth->conversations()->count())->toBe(1)
+            ->and(MessageRequest::query()->count())->toBe(0)
+            ->and($auth->conversations()->first()?->id)->toBe($conversation->id);
+    });
+
+    test('it reuses an existing outgoing pending request instead of creating a duplicate', function () {
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->sendMessageRequestTo($otherUser);
+        $existingRequest = MessageRequest::query()->pending()->firstOrFail();
+
+        Livewire::actingAs($auth)->test(NewChat::class)
+            ->set('search', 'Joh')
+            ->assertSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class)
+            ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+
+        expect(MessageRequest::query()->pending()->count())->toBe(1)
+            ->and(MessageRequest::query()->pending()->first()?->id)->toBe($existingRequest->id)
+            ->and($auth->conversations()->count())->toBe(1)
+            ->and($auth->conversations()->first()?->id)->toBe($conversation->id);
+    });
+
     test('it accepts an opposite pending request instead of creating a second request', function () {
         $auth = ModelsUser::factory()->create();
         $otherUser = ModelsUser::factory()->create(['name' => 'John']);
 
-        $conversation = $otherUser->createMessageRequestConversationWith($auth);
+        $conversation = $otherUser->sendMessageRequestTo($auth);
+        $requestRecord = MessageRequest::query()->pending()->firstOrFail();
 
         expect($conversation)->not->toBeNull()
             ->and($conversation?->participant($otherUser))->not->toBeNull()
@@ -157,7 +196,36 @@ describe('Creating conversation', function () {
 
         expect($auth->hasConversationWith($otherUser))->toBeTrue()
             ->and($conversation?->fresh()->participant($auth))->not->toBeNull()
-            ->and(MessageRequest::query()->pending()->count())->toBe(0);
+            ->and(MessageRequest::query()->pending()->count())->toBe(0)
+            ->and(MessageRequest::query()->whereKey($requestRecord->id)->exists())->toBeFalse();
+    });
+
+    test('it creates a fresh request when a dismissed request history already exists', function () {
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $dismissedConversation = $auth->sendMessageRequestTo($otherUser);
+        $dismissedRequest = MessageRequest::query()->pending()->firstOrFail();
+
+        $dismissedConversation->dismissMessageRequestFor($otherUser, $otherUser);
+
+        expect(Conversation::query()->find($dismissedConversation->id))->toBeNull()
+            ->and(MessageRequest::query()->dismissed()->whereKey($dismissedRequest->id)->exists())->toBeTrue();
+
+        Livewire::actingAs($auth)->test(NewChat::class)
+            ->set('search', 'Joh')
+            ->assertSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        $newConversation = $auth->conversations()->first();
+        $newRequest = MessageRequest::query()->pending()->first();
+
+        expect($newConversation)->not->toBeNull()
+            ->and($newConversation?->id)->not->toBe($dismissedConversation->id)
+            ->and($newRequest)->not->toBeNull()
+            ->and($newRequest?->conversation_id)->toBe($newConversation?->id)
+            ->and(MessageRequest::query()->dismissed()->count())->toBe(1)
+            ->and(MessageRequest::query()->pending()->count())->toBe(1);
     });
 
     test('it dispataches Livewire events "closeWirechatModal" after creating conversation', function () {

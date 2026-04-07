@@ -9,6 +9,7 @@ use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
@@ -39,25 +40,106 @@ test('pending request conversations stay out of the normal chats list', function
     $auth = User::factory()->create(['name' => 'Auth']);
     $receiver = User::factory()->create(['name' => 'Pending User']);
 
-    $auth->createMessageRequestConversationWith($receiver);
+    $auth->sendMessageRequestTo($receiver);
 
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertDontSee('Pending User');
 });
 
-test('requests drawer lists incoming and outgoing pending requests', function () {
+test('requests drawer shows its heading, description, tabs, and empty state', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSee(__('wirechat::chats.requests.heading'))
+        ->assertSee(__('wirechat::chats.requests.labels.description'))
+        ->assertSeeHtml('dusk="incoming-requests-tab"')
+        ->assertSeeHtml('dusk="outgoing-requests-tab"')
+        ->assertSee(__('wirechat::chats.requests.labels.empty_state'))
+        ->assertSet('activeTab', 'incoming');
+});
+
+test('requests drawer defaults to the incoming tab when incoming requests exist', function () {
     $auth = User::factory()->create(['name' => 'Auth']);
     $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
     $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
 
-    $incomingSender->createMessageRequestConversationWith($auth);
-    $auth->createMessageRequestConversationWith($outgoingRecipient);
+    $incomingSender->sendMessageRequestTo($auth);
+    $auth->sendMessageRequestTo($outgoingRecipient);
 
     Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'incoming')
         ->assertSee('Incoming Sender')
+        ->assertDontSee('Outgoing Recipient');
+});
+
+test('requests drawer defaults to the outgoing tab when only outgoing requests exist', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $auth->sendMessageRequestTo($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'outgoing')
         ->assertSee('Outgoing Recipient')
-        ->assertSee(__('wirechat::chats.requests.labels.incoming'))
-        ->assertSee(__('wirechat::chats.requests.labels.outgoing'));
+        ->assertDontSee(__('wirechat::chats.requests.labels.empty_state'));
+});
+
+test('requests drawer can switch between incoming and outgoing tabs', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $incomingSender->sendMessageRequestTo($auth);
+    $auth->sendMessageRequestTo($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'incoming')
+        ->assertSee('Incoming Sender')
+        ->assertDontSee('Outgoing Recipient')
+        ->call('setActiveTab', 'outgoing')
+        ->assertSet('activeTab', 'outgoing')
+        ->assertSee('Outgoing Recipient')
+        ->assertDontSee('Incoming Sender');
+});
+
+test('requests drawer shows a tab-specific empty state when the selected tab has no items', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $auth->sendMessageRequestTo($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'outgoing')
+        ->call('setActiveTab', 'incoming')
+        ->assertSee(__('wirechat::chats.requests.labels.incoming_empty_state'))
+        ->assertDontSee(__('wirechat::chats.requests.labels.empty_state'));
+});
+
+test('requests drawer redirects to the conversation in full-page mode', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+
+    $conversation = $incomingSender->sendMessageRequestTo($auth);
+    $request = MessageRequest::query()->pending()->firstOrFail();
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->call('openConversation', $request->id)
+        ->assertDispatched('closeChatListDrawer')
+        ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+});
+
+test('requests drawer opens the conversation in widget mode without redirecting', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+
+    $incomingSender->sendMessageRequestTo($auth);
+    $request = MessageRequest::query()->pending()->firstOrFail();
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class, ['widget' => true])
+        ->call('openConversation', $request->id)
+        ->assertDispatched('closeChatListDrawer')
+        ->assertDispatched('open-chat')
+        ->assertNoRedirect();
 });
 
 test('it applies ui classes and styles to the chats shell only', function () {

@@ -132,7 +132,7 @@ trait InteractsWithWirechat
      * that request is accepted immediately so only one active request can exist
      * for the pair at a time.
      */
-    public function createMessageRequestConversationWith(Model $peer): ?Conversation
+    public function sendMessageRequestTo(Model $peer): ?Conversation
     {
         abort_unless($this->canCreateChats(), 403, 'You do not have permission to create chats.');
 
@@ -217,6 +217,14 @@ trait InteractsWithWirechat
 
             return $conversation;
         });
+    }
+
+    /**
+     * @deprecated Use sendMessageRequestTo() instead.
+     */
+    public function createMessageRequestConversationWith(Model $peer): ?Conversation
+    {
+        return $this->sendMessageRequestTo($peer);
     }
     /**
      * Room configuration

@@ -84,7 +84,7 @@ describe('Message requests', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
 
-        $conversation = $auth->createMessageRequestConversationWith($receiver);
+        $conversation = $auth->sendMessageRequestTo($receiver);
         $participant = $conversation->participant($auth);
 
         Message::create([
@@ -100,25 +100,38 @@ describe('Message requests', function () {
             ->assertDontSee(__('wirechat::chat.inputs.message.placeholder'));
     });
 
+    test('sender sees the outgoing pending notice while keeping the composer', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee(__('wirechat::chat.message_request.labels.outgoing_notice'))
+            ->assertSee(__('wirechat::chat.inputs.message.placeholder'))
+            ->assertDontSee(__('wirechat::chat.message_request.actions.accept.label'))
+            ->assertDontSee(__('wirechat::chat.message_request.actions.dismiss.label'));
+    });
+
     test('pending recipient can accept a message request', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
-        $conversation = $auth->createMessageRequestConversationWith($receiver);
+        $conversation = $auth->sendMessageRequestTo($receiver);
         $request = MessageRequest::query()->pending()->where('conversation_id', $conversation->id)->firstOrFail();
 
         Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->call('acceptMessageRequest');
 
         expect($conversation->fresh()->participant($receiver))->not->toBeNull()
-            ->and($request->fresh()->status)->toBe(MessageRequestStatus::ACCEPTED);
+            ->and(MessageRequest::query()->whereKey($request->id)->exists())->toBeFalse();
     });
 
     test('rejecting a message request dismisses it and removes the pending conversation', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
 
-        $conversation = $auth->createMessageRequestConversationWith($receiver);
+        $conversation = $auth->sendMessageRequestTo($receiver);
         $request = MessageRequest::query()->pending()->where('conversation_id', $conversation->id)->firstOrFail();
 
         Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])

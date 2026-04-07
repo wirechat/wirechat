@@ -70,7 +70,7 @@ test('recipient can access a pending message request conversation', function () 
     $auth = User::factory()->create();
     $receiver = User::factory()->create();
 
-    $conversation = $auth->createMessageRequestConversationWith($receiver);
+    $conversation = $auth->sendMessageRequestTo($receiver);
 
     $this->actingAs($receiver)
         ->get(testPanelProvider()->chatRoute($conversation->id))

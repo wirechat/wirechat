@@ -406,6 +406,7 @@ class Conversation extends Model
         ])->save();
 
         $request->approve($reviewedBy);
+        $request->delete();
         $this->forgetLoadedMessageRequests();
 
         return $participant->refresh();

@@ -37,6 +37,8 @@ return [
             'pending' => 'En attente',
             'no_message' => 'Aucun message pour le moment',
             'empty_state' => 'Vous n’avez aucune demande de message active pour le moment.',
+            'incoming_empty_state' => 'Vous n’avez aucune demande de message reçue pour le moment.',
+            'outgoing_empty_state' => 'Vous n’avez envoyé aucune demande de message active pour le moment.',
         ],
     ],
 ];

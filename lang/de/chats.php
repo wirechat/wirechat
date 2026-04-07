@@ -39,6 +39,8 @@ return [
             'pending' => 'Ausstehend',
             'no_message' => 'Noch keine Nachricht',
             'empty_state' => 'Du hast aktuell keine aktiven Nachrichtenanfragen.',
+            'incoming_empty_state' => 'Du hast aktuell keine eingehenden Nachrichtenanfragen.',
+            'outgoing_empty_state' => 'Du hast aktuell keine aktiven gesendeten Nachrichtenanfragen.',
         ],
     ],
 ];
