@@ -2,6 +2,38 @@
 <main x-data="{
     height: 0,
     previousHeight: 0,
+    booting: true,
+    scrollToBottom() {
+        this.height = $el.scrollHeight;
+        $el.scrollTop = this.height;
+    },
+    waitForMedia() {
+        const media = $el.querySelectorAll('img, video');
+        if (media.length === 0) {
+            return Promise.resolve();
+        }
+
+        return Promise.all(Array.from(media).map((el) => {
+            return new Promise((resolve) => {
+                if (el.tagName === 'IMG') {
+                    if (el.complete) {
+                        resolve();
+                        return;
+                    }
+                    el.addEventListener('load', resolve, { once: true });
+                    el.addEventListener('error', resolve, { once: true });
+                    return;
+                }
+
+                if (el.readyState >= 2) {
+                    resolve();
+                    return;
+                }
+                el.addEventListener('loadeddata', resolve, { once: true });
+                el.addEventListener('error', resolve, { once: true });
+            });
+        }));
+    },
     updateScrollPosition: function() {
         // Calculate the difference in height
 
@@ -22,18 +54,19 @@
 
     }"
         x-init="
-
-        setTimeout(() => {
-
+        $nextTick(() => {
+            scrollToBottom();
+            waitForMedia().then(() => {
                 requestAnimationFrame(() => {
-
-                    this.height = $el.scrollHeight;
-                    $el.scrollTop = this.height;
+                    scrollToBottom();
+                    booting = false;
                 });
-
-            }, 300); //! Add delay so height can be update at right time
-
-
+            });
+            setTimeout(() => {
+                scrollToBottom();
+                booting = false;
+            }, 400);
+        });
         "
     @scroll ="
         scrollTop= $el.scrollTop;
@@ -68,7 +101,8 @@
 
 
     x-cloak
-     class='flex flex-col h-full  relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  grow  overscroll-contain overflow-x-hidden w-full my-auto'
+    x-bind:class="{'opacity-0 pointer-events-none': booting}"
+     class='flex flex-col h-full transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  grow  overscroll-contain overflow-x-hidden w-full my-auto'
     style="contain: content" >
 
 
