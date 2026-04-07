@@ -324,14 +324,9 @@ trait InteractsWithWirechat
             return $conversation->getUnreadCountFor($this);
         }
 
-        // If no conversation is provided, calculate unread messages across all user conversations
-        $totalUnread = 0;
+        $conversationModelClass = Wirechat::conversationModelClass();
 
-        foreach ($this->conversations as $conv) {
-            $totalUnread += $conv->getUnreadCountFor($this);
-        }
-
-        return $totalUnread;
+        return $conversationModelClass::getTotalUnreadCountFor($this);
     }
 
     /**

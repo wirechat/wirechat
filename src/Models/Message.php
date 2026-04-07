@@ -143,6 +143,24 @@ class Message extends Model
         // Add scope if authenticated
         static::addGlobalScope(WithoutRemovedMessages::class);
 
+        static::saving(function (Message $message) {
+            if ($message->type === MessageType::ATTACHMENT) {
+                return;
+            }
+
+            $body = trim((string) $message->body);
+
+            if ($body === '') {
+                $message->type = MessageType::TEXT;
+
+                return;
+            }
+
+            $message->type = Wirechat::containsLink($body)
+                ? MessageType::LINK
+                : MessageType::TEXT;
+        });
+
         // listen to deleted
         static::deleted(function ($message) {
 
@@ -174,6 +192,11 @@ class Message extends Model
     public function isAttachment(): bool
     {
         return $this->type === MessageType::ATTACHMENT;
+    }
+
+    public function isLink(): bool
+    {
+        return $this->type === MessageType::LINK;
     }
 
     /**

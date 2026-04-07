@@ -41,11 +41,11 @@ trait HasUnreadIndicator
     }
 
     /**
-     * @deprecated Use unreadIndicator() instead.
+     * @deprecated Use unreadIndicator() with UnreadIndicatorType instead.
      */
     public function unReadMessages(
         bool|Closure $condition = true,
-        UnreadIndicatorType|UnReadType|string|Closure|null $type = UnReadType::Dot
+        UnreadIndicatorType|UnReadType|string|Closure|null $type = UnreadIndicatorType::Dot
     ): static {
         return $this->unreadIndicator($condition, $type);
     }
@@ -59,7 +59,7 @@ trait HasUnreadIndicator
     }
 
     /**
-     * @deprecated Use getUnreadIndicatorType() instead.
+     * @deprecated Use getUnreadIndicatorType() and UnreadIndicatorType instead.
      */
     public function getUnReadMessagesType(): UnReadType
     {
