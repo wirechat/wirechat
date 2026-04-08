@@ -12,7 +12,6 @@ use Wirechat\Wirechat\Console\Commands\SetupNotifications;
 use Wirechat\Wirechat\Console\Commands\UpgradeMorphColumns;
 use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
 use Wirechat\Wirechat\Facades\WirechatColor;
-use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
@@ -110,6 +109,7 @@ class WirechatServiceProvider extends ServiceProvider
 
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
+
     }
 
     protected function bootColors()
@@ -192,28 +192,24 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = Facades\Wirechat::getPanel($panel);
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = $currentPanel->getId();
+            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
 
             $script = '';
 
             if ($hasWebPushNotifications && auth()->check()) {
-                $user = Facades\Wirechat::getParticipantable();
+                $userId = auth()->id();
+                $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
 
-                if ($user !== null) {
-                    $userId = $user->getKey();
-                    $encodedType = MorphClassResolver::encode(
-                        $user->getMorphClass()
-                    );
-
-                    $script = <<<HTML
+                $script = <<<HTML
                              <script>
                                 document.addEventListener("DOMContentLoaded", function() {
+
 
                                    if ('serviceWorker' in navigator) {
                                         window.addEventListener('load', async () => {
@@ -234,6 +230,10 @@ class WirechatServiceProvider extends ServiceProvider
                                             }
                                         });
                                     }
+
+
+
+
 
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
                                         .listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
@@ -286,10 +286,9 @@ class WirechatServiceProvider extends ServiceProvider
                                             new Notification(title, options);
                                         }
                                     }
-                                     });
+                                    });
                              </script>
                           HTML;
-                }
             }
 
             return <<<HTML
@@ -298,6 +297,8 @@ class WirechatServiceProvider extends ServiceProvider
                         echo Blade::render('@livewire("wirechat.modal")');
                         echo Blade::render('<x-wirechat::toast/>');
                     ?>
+
+
 
                     {$script}
 
@@ -314,9 +315,9 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = Facades\Wirechat::getPanel($panel);
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $colors = [

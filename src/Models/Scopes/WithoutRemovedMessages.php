@@ -24,18 +24,12 @@ class WithoutRemovedMessages implements Scope
     {
         $messagesTable = Wirechat::messageModelTable();
         $participantsTable = Wirechat::participantModelTable();
-        $actionsTable = Wirechat::actionModelTable();
 
         if (! auth()->check()) {
             return;
         }
 
-        $user = Wirechat::getParticipantable();
-
-        if ($user === null) {
-            return;
-        }
-
+        $user = auth()->user();
         $legacyActorType = $user->getMorphClass();
         $legacyActorId = $user->getKey();
 
@@ -44,16 +38,14 @@ class WithoutRemovedMessages implements Scope
             $legacyActorType,
             $legacyActorId,
             $messagesTable,
-            $participantsTable,
-            $actionsTable
+            $participantsTable
         ) {
             $q->where('type', Actions::DELETE)
                 ->where(function ($sub) use (
                     $legacyActorType,
                     $legacyActorId,
                     $messagesTable,
-                    $participantsTable,
-                    $actionsTable
+                    $participantsTable
                 ) {
                     // Case A: legacy user actor (actor stored as the user model)
                     $sub->where(function ($a) use ($legacyActorType, $legacyActorId) {
@@ -63,7 +55,7 @@ class WithoutRemovedMessages implements Scope
 
                     // Case B: actor stored as Participant (either class name or morph alias) — but we must ensure
                     // the participant row represents the current user for the same conversation.
-                    $sub->orWhere(function ($b) use ($messagesTable, $participantsTable, $legacyActorId, $legacyActorType, $actionsTable) {
+                    $sub->orWhere(function ($b) use ($messagesTable, $participantsTable, $legacyActorId, $legacyActorType) {
                         $participantClass = Wirechat::participantModelClass();
                         $participantMorphAlias = app($participantClass)->getMorphClass();
 
@@ -75,10 +67,10 @@ class WithoutRemovedMessages implements Scope
                             // participants.id = actions.actor_id
                             // participants.conversation_id = messages.conversation_id
                             // participants.participantable_{id,type} = current user
-                            ->whereExists(function ($ex) use ($participantsTable, $messagesTable, $legacyActorId, $legacyActorType, $actionsTable) {
+                            ->whereExists(function ($ex) use ($participantsTable, $messagesTable, $legacyActorId, $legacyActorType) {
                                 $ex->select(DB::raw(1))
                                     ->from($participantsTable)
-                                    ->whereColumn("$participantsTable.id", "$actionsTable.actor_id") // actor_id (actions) = participants.id
+                                    ->whereColumn("$participantsTable.id", 'actor_id') // actor_id (actions) = participants.id
                                     ->whereColumn("$participantsTable.conversation_id", "$messagesTable.conversation_id")
                                     ->where("$participantsTable.participantable_id", $legacyActorId)
                                     ->where("$participantsTable.participantable_type", $legacyActorType);

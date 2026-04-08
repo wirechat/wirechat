@@ -20,7 +20,7 @@ class BroadcastMessage implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    protected $participantable;
+    protected $auth;
 
     protected $messagesTable;
 
@@ -31,7 +31,7 @@ class BroadcastMessage implements ShouldQueue
         $this->resolvePanel($panel);
         //
         $this->onQueue($this->getPanel()->getMessagesQueue());
-        $this->participantable = Wirechat::getParticipantable();
+        $this->auth = auth()->user();
 
         // Get table
         $this->messagesTable = Wirechat::messageModelTable();

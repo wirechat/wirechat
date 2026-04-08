@@ -33,7 +33,7 @@ use Wirechat\Wirechat\Models\Participant;
  *
  * Handles group, private and self conversations .
  *
- * @property \Wirechat\Wirechat\Contracts\Participantable|null $participantable
+ * @property \Illuminate\Contracts\Auth\Authenticatable|null $auth
  */
 class Chat extends Component
 {
@@ -116,9 +116,7 @@ class Chat extends Component
 
             $peerParticipant = Wirechat::participantModelClass()::find($event['message']['participant_id']);
 
-            if ($peerParticipant?->participantable_id == $this->participantable->getKey()
-                && $peerParticipant?->participantable_type === $this->participantable->getMorphClass()
-            ) {
+            if ($peerParticipant?->isParticipantable(auth()->user())) {
                 return null;
             }
 
@@ -155,13 +153,9 @@ class Chat extends Component
             $newMessage = Wirechat::messageModelClass()::find($event['message']['id']);
             // dd($newMessage);
 
-            // Ensure message exists
-            if (! $newMessage instanceof \Wirechat\Wirechat\Models\Message) {
-                return null;
-            }
-
             // Make sure message does not belong to auth
-            if ($newMessage->belongsToAuth()) {
+
+            if ($newMessage?->isParticipantable(auth()->user())) {
                 return null;
             }
 
@@ -200,7 +194,7 @@ class Chat extends Component
         $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
 
         // check if user belongs to message
-        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
+        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
 
         // abort if message does not belong to this conversation or is not owned by any participant
         abort_unless($message->conversation_id == $this->conversation->id, 403);
@@ -271,7 +265,7 @@ class Chat extends Component
         abort_unless(auth()->check(), 401);
 
         // delete conversation
-        $this->conversation->deleteFor($this->participantable);
+        $this->conversation->deleteFor($this->auth);
 
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatsRoute(),
@@ -289,7 +283,7 @@ class Chat extends Component
         abort_unless(auth()->check(), 401);
 
         // delete conversation
-        $this->conversation->clearFor($this->participantable);
+        $this->conversation->clearFor($this->auth);
 
         $this->reset('loadedMessages', 'media', 'files', 'body');
 
@@ -322,15 +316,17 @@ class Chat extends Component
     {
         abort_unless(auth()->check(), 401);
 
+        $auth = $this->auth;
+
         // make sure conversation is neigher self nor private
 
         abort_unless($this->conversation->isGroup(), 403, __('wirechat::chat.messages.cannot_exit_self_or_private_conversation'));
 
         // make sure owner if group cannot be removed from chat
-        abort_if($this->participantable?->isOwnerOf($this->conversation), 403, __('wirechat::chat.messages.owner_cannot_exit_conversation'));
+        abort_if($auth->isOwnerOf($this->conversation), 403, __('wirechat::chat.messages.owner_cannot_exit_conversation'));
 
         // delete conversation
-        $this->participantable?->exitConversation($this->conversation);
+        $auth->exitConversation($this->conversation);
 
         // Dispatach event instead if isWidget
         if ($this->isWidget()) {
@@ -541,7 +537,7 @@ class Chat extends Component
 
         // make sure user belongs to conversation from the message
         // We are checking the $message->conversation for extra security because the param might be tempered with
-        abort_unless($this->participantable?->belongsToConversation($message->conversation), 403);
+        abort_unless($this->auth->belongsToConversation($message->conversation), 403);
 
         // remove message from collection
         $this->removeMessage($message);
@@ -550,7 +546,7 @@ class Chat extends Component
         $this->dispatch('refresh')->to(Chats::class);
 
         // delete For $user
-        $message->deleteFor($this->participantable);
+        $message->deleteFor($this->auth);
     }
 
     /**
@@ -571,18 +567,18 @@ class Chat extends Component
         }
 
         $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
-        $authParticipant = $this->conversation->participant($this->participantable);
+        $authParticipant = $this->conversation->participant($this->auth);
 
         // make sure user is authenticated
 
         abort_unless(auth()->check(), 401);
 
         // make sure user owns message OR allow if is admin in group
-        abort_unless($message->ownedBy($this->participantable) || ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
+        abort_unless($message->ownedBy($this->auth) || ($authParticipant->isAdmin() && $this->conversation->isGroup()), 403);
 
         // make sure user belongs to conversation from the message
         // We are checking the $message->conversation for extra security because the  might be tempered with
-        abort_unless($this->participantable?->belongsToConversation($message->conversation), 403);
+        abort_unless($this->auth->belongsToConversation($message->conversation), 403);
 
         // remove message from collection
         $this->removeMessage($message);
@@ -820,7 +816,7 @@ class Chat extends Component
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
         $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $this->conversation->id)->count();
-        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
+        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
     }
 
     /**
@@ -828,14 +824,14 @@ class Chat extends Component
      * */
 
     /**
-     * Returns the authenticated participantable.
+     * Returns the authenticated user.
      *
-     * @return \Wirechat\Wirechat\Contracts\Participantable|null
+     * @return \Illuminate\Contracts\Auth\Authenticatable|null
      */
     #[Computed(persist: true)]
-    public function participantable()
+    public function auth()
     {
-        return Wirechat::getParticipantable();
+        return auth()->user();
     }
 
     private function initializeParticipants()
@@ -844,9 +840,9 @@ class Chat extends Component
             $this->conversation->load('participants.participantable');
             $participants = $this->conversation->participants();
 
-            $this->authParticipant = $participants->whereParticipantable($this->participantable)->first();
+            $this->authParticipant = $participants->whereParticipantable($this->auth)->first();
 
-            $this->receiverParticipant = $this->conversation->peerParticipant($this->participantable);
+            $this->receiverParticipant = $this->conversation->peerParticipant($this->auth);
 
             // If conversation is self then receiver is auth;
             if ($this->conversation->type == ConversationType::SELF) {
@@ -861,7 +857,7 @@ class Chat extends Component
                 : null;
 
         } else {
-            $this->authParticipant = Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)->whereParticipantable($this->participantable)->first();
+            $this->authParticipant = Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
             $this->receiver = null;
         }
     }

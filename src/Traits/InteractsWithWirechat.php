@@ -36,7 +36,7 @@ trait InteractsWithWirechat
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<Conversation, static>
      */
-    public function conversations(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    public function conversations()
     {
         return $this->morphToMany(
             Wirechat::conversationModelClass(), // The related model
@@ -208,7 +208,7 @@ trait InteractsWithWirechat
                 ! in_array(InteractsWithWirechat::class, class_uses($model)) &&
                 ! in_array(Chatable::class, class_uses($model))
             ) {
-                abort(403, 'The model must use `InteractsWithWirechat` trait and must implement Participantable');
+                abort(403, 'The model must use `InteractsWithWirechat` trait and must implement WirechatUser');
             }
 
             // Deprecation notice if Chatable is still in use
@@ -380,7 +380,7 @@ trait InteractsWithWirechat
     /**
      * Clear a conversation
      */
-    public function clearConversation(Conversation $conversation): void
+    public function clearConversation(Conversation $conversation)
     {
 
         // use already created methods inside conversation model

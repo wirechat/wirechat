@@ -2,7 +2,6 @@
 
 namespace Wirechat\Wirechat\Livewire\New;
 
-use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
@@ -55,7 +54,7 @@ class Chat extends ModalComponent
         $model = $model::find($id);
 
         if ($model) {
-            $createdConversation = Wirechat::getParticipantable()?->createConversationWith($model);
+            $createdConversation = auth()->user()->createConversationWith($model);
 
             if ($createdConversation) {
 

@@ -7,12 +7,7 @@ run() {
   "$@"
 }
 
-# Check if kool is installed and use it for running tools in Docker
-# This ensures consistent PHP version and environment
-# See: https://kool.dev/docs/getting-started/introduction
-if command -v kool >/dev/null 2>&1; then
-  run "Pint (code style)" kool docker kooldev/php:8.4 vendor/bin/pint
-elif [ -f vendor/bin/pint ]; then
+if [ -f vendor/bin/pint ]; then
   run "Pint (code style)" vendor/bin/pint
 fi
 

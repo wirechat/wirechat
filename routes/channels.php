@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
@@ -31,20 +32,26 @@ foreach ($panels as $panel) {
 
     // Conversation channel
     Broadcast::channel("{$panelId}.conversation.{conversationId}", function ($user, $conversationId) use ($guards) {
-        $participantable = $user;
+        // If $user is already authenticated by the application's broadcast auth, use it
+        if (! $user) {
+            // Fallback to checking each guard defined in the panel
+            $authenticatedUser = null;
+            foreach ($guards as $guard) {
+                if (Auth::guard($guard)->check()) {
+                    $authenticatedUser = Auth::guard($guard)->user();
+                    break;
+                }
+            }
+            $user = $authenticatedUser ?? null;
 
-        // If the provided user doesn't implement Participantable, try to resolve via guards
-        if (! $participantable instanceof \Wirechat\Wirechat\Contracts\Participantable) {
-            $participantable = Wirechat::getParticipantable($guards);
-        }
-
-        if (! $participantable) {
-            return false;
+            if (! $user) {
+                return false;
+            }
         }
 
         $conversation = Wirechat::conversationModelClass()::find($conversationId);
 
-        return $conversation && $participantable->belongsToConversation($conversation);
+        return $conversation && $user->belongsToConversation($conversation);
     }, [
         'guards' => $guards,
         'middleware' => $middleware,
@@ -52,20 +59,26 @@ foreach ($panels as $panel) {
 
     // Participant channel
     Broadcast::channel("{$panelId}.participant.{encodedType}.{id}", function ($user, $encodedType, $id) use ($guards) {
-        $participantable = $user;
+        // If $user is already authenticated by the application's broadcast auth, use it
+        if (! $user) {
+            // Fallback to checking each guard defined in the panel
+            $authenticatedUser = null;
+            foreach ($guards as $guard) {
+                if (Auth::guard($guard)->check()) {
+                    $authenticatedUser = Auth::guard($guard)->user();
+                    break;
+                }
+            }
+            $user = $authenticatedUser ?? null;
 
-        // If the provided user doesn't implement Participantable, try to resolve via guards
-        if (! $participantable instanceof \Wirechat\Wirechat\Contracts\Participantable) {
-            $participantable = Wirechat::getParticipantable($guards);
-        }
-
-        if (! $participantable) {
-            return false;
+            if (! $user) {
+                return false;
+            }
         }
 
         $morphType = MorphClassResolver::decode($encodedType);
 
-        return $participantable->getKey() == $id && $participantable->getMorphClass() == $morphType;
+        return $user->id == $id && $user->getMorphClass() == $morphType;
     }, [
         'guards' => $guards,
         'middleware' => $middleware,

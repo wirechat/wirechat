@@ -7,7 +7,6 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
@@ -15,7 +14,7 @@ use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
 
 /**
- * @property-read \Wirechat\Wirechat\Contracts\Participantable|null $participantable
+ * @property-read \Illuminate\Contracts\Auth\Authenticatable|null $auth
  * @property-read \Illuminate\Support\Collection<int, \Wirechat\Wirechat\Models\Conversation> $conversations
  * @property int|string|null $selectedConversationId
  * @property array<int, int|string> $conversationIds
@@ -71,9 +70,9 @@ class Chats extends Component
 
     public function getListeners(): array
     {
-        $participantable = $this->participantable;
-        $encodedType = MorphClassResolver::encode($participantable?->getMorphClass());
-        $participantableId = $participantable?->getKey();
+        $user = $this->auth;
+        $encodedType = MorphClassResolver::encode($user?->getMorphClass());
+        $userId = $user?->getKey();
 
         $listeners = [
             'refresh' => '$refresh',
@@ -87,21 +86,16 @@ class Chats extends Component
         }
 
         $panelId = $this->panel()->getId();
-        $channelName = "$panelId.participant.$encodedType.$participantableId";
+        $channelName = "$panelId.participant.$encodedType.$userId";
         $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\NotifyParticipant"] = 'refreshComponent';
 
         return $listeners;
     }
 
-    /**
-     * Returns the authenticated participantable.
-     *
-     * @return \Wirechat\Wirechat\Contracts\Participantable|null
-     */
     #[Computed(persist: true)]
-    public function participantable()
+    public function auth()
     {
-        return Wirechat::getParticipantable();
+        return auth()->user();
     }
 
     /**
@@ -120,7 +114,7 @@ class Chats extends Component
             return collect();
         }
 
-        $participantable = $this->participantable;
+        $user = $this->auth;
         $ids = $this->conversationIds;
         $positions = array_flip($ids);
         $table = (new Conversation)->getTable();
@@ -144,10 +138,10 @@ class Chats extends Component
             ->values();
 
         // Set peer/auth participants without extra queries (participants already loaded)
-        $conversations->each(function (Conversation $conversation) use ($participantable) {
+        $conversations->each(function (Conversation $conversation) use ($user) {
             if ($conversation->isPrivate() || $conversation->isSelf()) {
-                $conversation->auth_participant = $conversation->participant($participantable);
-                $conversation->peer_participant = $conversation->peerParticipant($participantable);
+                $conversation->auth_participant = $conversation->participant($user);
+                $conversation->peer_participant = $conversation->peerParticipant($user);
             }
         });
 
@@ -160,14 +154,14 @@ class Chats extends Component
      */
     protected function loadConversationIds(): void
     {
-        $participantable = $this->participantable;
-        abort_if($participantable == null, 401);
+        $auth = $this->auth;
+        abort_if($auth == null, 401);
 
         $table = (new Conversation)->getTable();
         $perPage = 10;
 
-        // In free version, we use the participant's relation as before
-        $baseQuery = $participantable->conversations()
+        // In free version, we use the user's relation as before
+        $baseQuery = $auth->conversations()
             ->with([]) // ids only
             ->when(trim($this->search ?? '') !== '', fn ($q) => $this->applySearchConditions($q))
             ->when(trim($this->search ?? '') === '', function ($q) {

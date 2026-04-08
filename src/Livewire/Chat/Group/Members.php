@@ -80,7 +80,7 @@ class Members extends ModalComponent
         // Load missing relationship in case of strict models types
         $participant->loadMissing('participantable');
 
-        $conversation = Wirechat::getParticipantable()?->createConversationWith($participant->participantable);
+        $conversation = auth()->user()->createConversationWith($participant->participantable);
 
         $this->handleComponentTermination(
             redirectRoute: $this->panel()->chatRoute($conversation->id),
@@ -200,13 +200,13 @@ class Members extends ModalComponent
         abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
 
         // abort if auth is not admin
-        abort_unless(Wirechat::getParticipantable()?->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
 
         // abort if user participants is owner
         abort_if($participant->isOwner(), 403, 'Owner cannot be removed from group');
 
         // determine the admin's participant in this conversation to use as the actor
-        $adminParticipant = $this->conversation->participant(Wirechat::getParticipantable());
+        $adminParticipant = $this->conversation->participant(auth()->user());
 
         // ensure the admin participant exists
         if (! $adminParticipant) {
@@ -275,7 +275,7 @@ class Members extends ModalComponent
 
         // Pass data to the view
         return view('wirechat::livewire.chat.group.members', [
-            'participant' => $this->conversation->participant(Wirechat::getParticipantable()),
+            'participant' => $this->conversation->participant(auth()->user()),
 
         ]);
     }

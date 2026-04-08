@@ -2,11 +2,11 @@
 
 namespace Wirechat\Wirechat\Models;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Wirechat\Wirechat\Contracts\Participantable;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
@@ -105,11 +105,8 @@ class Group extends Model
     /**
      * Check if group is owned by
      */
-    public function isOwnedBy(?Participantable $user): bool
+    public function isOwnedBy(Model|Authenticatable $user): bool
     {
-        if ($user === null) {
-            return false;
-        }
 
         $conversation = $this->conversation;
 

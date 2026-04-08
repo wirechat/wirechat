@@ -2,7 +2,6 @@
 
 namespace Wirechat\Wirechat\Services;
 
-use Wirechat\Wirechat\Contracts\Participantable;
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
@@ -265,41 +264,6 @@ class WirechatService
     public static function usesUuid(): bool
     {
         return static::usesUuidForConversations();
-    }
-
-    /**
-     * Get the model that should be used as the participantable when creating Messages.
-     *
-     * By default returns the authenticated user. Override this method in a custom
-     * WirechatService subclass to return a different entity (e.g. a bot, system, etc.).
-     *
-     * @param  array<int, string>  $guards  The authentication guards to check. Empty array uses default guard.
-     * @return Participantable|null The model to use as participantable
-     */
-    public function getParticipantable(array $guards = []): ?Participantable
-    {
-        if (empty($guards)) {
-            $user = auth()->user();
-
-            return $user instanceof Participantable ? $user : null;
-        }
-
-        foreach ($guards as $guard) {
-            try {
-                if (auth()->guard($guard)->check()) {
-                    $user = auth()->guard($guard)->user();
-
-                    if ($user instanceof Participantable) {
-                        return $user;
-                    }
-                }
-            } catch (\InvalidArgumentException $e) {
-                // Guard doesn't exist, skip it
-                continue;
-            }
-        }
-
-        return null;
     }
 
     /**

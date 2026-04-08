@@ -7,12 +7,7 @@ run() {
   "$@"
 }
 
-# Check if kool is installed and use it for running tools in Docker
-# This ensures consistent PHP version and environment
-# See: https://kool.dev/docs/getting-started/introduction
-if command -v kool >/dev/null 2>&1; then
-  run "PHPStan (static analysis)" kool docker kooldev/php:8.4 vendor/bin/phpstan --memory-limit=512M
-elif [ -f vendor/bin/phpstan ]; then
+if [ -f vendor/bin/phpstan ]; then
   run "PHPStan (static analysis)" vendor/bin/phpstan analyse
 fi
 

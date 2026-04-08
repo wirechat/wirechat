@@ -4,7 +4,6 @@ namespace Wirechat\Wirechat\Livewire\New;
 
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
-use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
@@ -154,22 +153,16 @@ class Group extends ModalComponent
 
         $this->validate();
 
-        $participantable = Wirechat::getParticipantable();
-
-        if (! $participantable) {
-            abort(401, 'No authenticated participantable entity could be resolved.');
-        }
-
         // create group
         /* @var $conversation */
-        $conversation = $participantable->createGroup($this->name, $this->description, $this->photo);
+        $conversation = auth()->user()->createGroup($this->name, $this->description, $this->photo);
 
         // Add participants
         foreach ($this->selectedMembers as $key => $participant) {
 
             // make sure user does not belong to conversation already
             // mostly this is the auth user
-            $alreadyExists = $conversation->participants()->where('participantable_id', $participant->getKey())->where('participantable_type', $participant->getMorphClass())->exists();
+            $alreadyExists = $conversation->participants()->where('participantable_id', $participant->id)->where('participantable_type', $participant->getMorphClass())->exists();
             if (! $alreadyExists) {
                 $conversation->addParticipant($participant);
             }
@@ -194,7 +187,7 @@ class Group extends ModalComponent
     {
 
         abort_unless(auth()->check(), 401);
-        abort_unless(Wirechat::getParticipantable()?->canCreateGroups(), 403, 'You do not have permission to create groups.');
+        abort_unless(auth()->user()->canCreateGroups(), 403, 'You do not have permission to create groups.');
 
         $this->selectedMembers = collect();
     }

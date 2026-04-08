@@ -2,20 +2,13 @@
 
 namespace Wirechat\Wirechat\Livewire\Chat;
 
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
-use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Conversation;
 
-/**
- * Info Component
- *
- * @property \Wirechat\Wirechat\Contracts\Participantable|null $participantable
- */
 class Info extends ModalComponent
 {
     use HasPanel;
@@ -30,17 +23,6 @@ class Info extends ModalComponent
     }
 
     /**
-     * Returns the authenticated participantable.
-     *
-     * @return \Wirechat\Wirechat\Contracts\Participantable|null
-     */
-    #[Computed(persist: true)]
-    public function participantable()
-    {
-        return Wirechat::getParticipantable();
-    }
-
-    /**
      * -----------------------------
      * Delete Chat
      * */
@@ -48,11 +30,11 @@ class Info extends ModalComponent
     {
         abort_unless(auth()->check(), 401);
 
-        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
         abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
 
         // delete conversation
-        $this->conversation->deleteFor($this->participantable);
+        $this->conversation->deleteFor(auth()->user());
 
         // redirect to chats page pr
         // Dispatach event instead if isWidget
@@ -83,7 +65,7 @@ class Info extends ModalComponent
         abort_if(empty($this->conversation), 404);
 
         abort_unless(auth()->check(), 401);
-        abort_unless($this->participantable?->belongsToConversation($this->conversation), 403);
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
 
         abort_if($this->conversation->isGroup(), 403, __('wirechat::chat.info.messages.invalid_conversation_type_error'));
 
@@ -95,7 +77,7 @@ class Info extends ModalComponent
     public function render()
     {
 
-        $receiver = $this->conversation->peerParticipant($this->participantable)?->participantable;
+        $receiver = $this->conversation->peerParticipant(auth()->user())?->participantable;
 
         // Pass data to the view
         return view('wirechat::livewire.chat.info', [

@@ -147,19 +147,19 @@
 
 
                                     @php
-                                    $sender = $message?->ownedBy($this->participantable)
+                                    $sender = $message?->ownedBy($this->auth)
                                         ? __('wirechat::chat.labels.you')
                                         : ($message->sendable?->wirechat_name ?? __('wirechat::chat.labels.user'));
 
-                                    $receiver = $parent?->ownedBy($this->participantable)
+                                    $receiver = $parent?->ownedBy($this->auth)
                                         ? __('wirechat::chat.labels.you')
                                         : ($parent->sendable?->wirechat_name ?? __('wirechat::chat.labels.user'));
                                     @endphp
 
                                     <h6 class="text-xs text-gray-500 dark:text-gray-300 px-2">
-                                        @if ($parent?->ownedBy($this->participantable) && $message?->ownedBy($this->participantable))
+                                        @if ($parent?->ownedBy($this->auth) && $message?->ownedBy($this->auth))
                                             {{ __('wirechat::chat.labels.you_replied_to_yourself') }}
-                                        @elseif ($parent?->ownedBy($this->participantable))
+                                        @elseif ($parent?->ownedBy($this->auth))
                                             {{ __('wirechat::chat.labels.participant_replied_to_you', ['sender' => $sender]) }}
                                         @elseif ($message?->ownedBy($parent->sendable))
                                             {{ __('wirechat::chat.labels.participant_replied_to_themself', ['sender' => $sender]) }}
@@ -224,7 +224,7 @@
                                         </x-slot>
                                         <x-slot name="content">
 
-                                            @if (($message->ownedBy($this->participantable)|| ($authParticipant->isAdmin() && $isGroup)) && $this->panel()->hasDeleteMessageActions())
+                                            @if (($message->ownedBy($this->auth)|| ($authParticipant->isAdmin() && $isGroup)) && $this->panel()->hasDeleteMessageActions())
                                                 <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ encrypt($message->id) }}')"
                                                     wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
@@ -272,8 +272,7 @@
                                             <div style="color:  var(--wc-brand-primary);" @class([
                                                 'shrink-0 font-medium text-sm sm:text-base',
                                                 // Hide avatar if the next message is from the same user
-                                                'hidden' =>
-                                                    $message?->sendable?->is($previousMessage?->sendable),
+                                                'hidden' => $message?->sendable?->is($previousMessage?->sendable),
                                             ])>
                                                 {{ $message->sendable?->wirechat_name }}
                                             </div>
@@ -282,11 +281,12 @@
                                         {{-- Attachemnt is Video/ --}}
                                         @if ($attachment->isVideo())
                                             <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
+
                                         {{-- Attachemnt is image/ --}}
                                         @elseif($attachment->isImage())
                                             @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
-                                        {{-- Attachemnt is Application/ --}}
                                         @else
+                                         {{-- Attachemnt is Application/ --}}
                                           @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
                                         @endif
 

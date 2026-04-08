@@ -2,6 +2,7 @@
 
 namespace Wirechat\Wirechat\Models;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
-use Wirechat\Wirechat\Contracts\Participantable;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
@@ -153,7 +153,7 @@ class Participant extends Model
      *
      * @param  Builder<Model>  $query
      */
-    public function scopeWhereParticipantable(Builder $query, Participantable $model): void
+    public function scopeWhereParticipantable(Builder $query, Model|Authenticatable $model): void
     {
         $query->where('participantable_id', $model->getKey())
             ->where('participantable_type', $model->getMorphClass());
@@ -241,7 +241,7 @@ class Participant extends Model
     /**
      * Remove a participant and log the action if not already logged.
      */
-    public function removeByAdmin(Participantable $admin): void
+    public function removeByAdmin(Model|Authenticatable $admin): void
     {
         // Resolve admin as participant in this conversation
         $adminParticipant = $this->conversation->participant($admin);
@@ -314,12 +314,17 @@ class Participant extends Model
      * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
-    public function scopeWithoutParticipantable($query, Participantable $user): Builder
+    public function scopeWithoutParticipantable($query, Model|Authenticatable $user): Builder
     {
 
         return $query->where(function ($query) use ($user) {
             $query->where('participantable_id', '<>', $user->getKey())
                 ->orWhere('participantable_type', '<>', $user->getMorphClass());
         });
+    }
+
+    public function isParticipantable(?Model $user): bool
+    {
+        return $this->participantable?->is($user);
     }
 }

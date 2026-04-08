@@ -5,7 +5,6 @@ namespace Wirechat\Wirechat\Livewire\Chat\Group;
 use Livewire\Attributes\Locked;
 // use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
-use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
@@ -64,9 +63,9 @@ class Permissions extends ModalComponent
     public function mount()
     {
         abort_unless(auth()->check(), 401);
-        abort_unless(Wirechat::getParticipantable()?->belongsToConversation($this->conversation), 403, 'You do not have permission to access this resource');
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'You do not have permission to access this resource');
 
-        abort_unless($this->conversation->isOwner(Wirechat::getParticipantable()), 403, 'You do not have permission to edit group permissions');
+        abort_unless($this->conversation->isOwner(auth()->user()), 403, 'You do not have permission to edit group permissions');
 
         abort_if($this->conversation->isPrivate(), 403, 'This feature is only available for groups');
 
