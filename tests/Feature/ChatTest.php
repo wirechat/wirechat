@@ -55,10 +55,48 @@ test('it applies ui classes and styles to the chat shell only', function () {
     $html = $response->html();
 
     preg_match_all('/class="[^"]*chat-shell-test[^"]*"/', $html, $classMatches);
-    preg_match_all('/style="contain:content; min-height: 24rem;"/', $html, $styleMatches);
+    preg_match_all('/style="[^"]*min-height: 24rem;[^"]*"/', $html, $styleMatches);
 
     expect($classMatches[0])->toHaveCount(1)
         ->and($styleMatches[0])->toHaveCount(1);
+});
+
+test('it renders stable message anchors for scroll restoration', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+    $message = $conversation->messages()->firstOrFail();
+
+    $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+    expect($html)
+        ->toContain('x-ref="main-chat-body"')
+        ->toContain('data-message-id="'.$message->id.'"')
+        ->toContain('id="message-'.$message->id.'"')
+        ->toContain('wire:key="msg-'.$message->id.'"');
+});
+
+test('it loads older messages from the top using the pro-style older window', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 15) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    $initialMessages = collect($component->instance()->loadedMessages)->flatten(1);
+
+    expect($initialMessages)->toHaveCount(10)
+        ->and($component->instance()->canLoadOlder)->toBeTrue();
+
+    $component->call('loadOlder');
+
+    $loadedMessages = collect($component->instance()->loadedMessages)->flatten(1);
+
+    expect($loadedMessages)->toHaveCount(15)
+        ->and($component->instance()->canLoadOlder)->toBeFalse();
 });
 
 test('returns 404 if conversation is not found', function () {
@@ -1500,7 +1538,6 @@ describe('Sending messages ', function () {
             ->toContain('dusk="message-link"')
             ->toContain('href="https://example.com"');
     });
-
     test('it renders message urls as plain text when linkify messages is disabled', function () {
         testPanelProvider()->parseMessageUrls(false);
 

@@ -698,7 +698,6 @@ describe('List', function () {
             ->toContain('dusk="unreadMessagesCount"')
             ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</');
     });
-
     it('uses reactive preview classes so unread text de-emphasizes immediately when a chat is opened', function () {
 
         $auth = User::factory()->create();

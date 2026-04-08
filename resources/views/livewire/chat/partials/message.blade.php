@@ -9,7 +9,7 @@
    $isNotSameAsPrevious = !$isSameAsPrevious;
    $canParseMessageUrls = $this->panel()->canParseMessageUrls();
    $body = (string) ($message?->body ?? '');
-   $segments = ($canParseMessageUrls && $message?->isLink())
+   $segments = ($canParseMessageUrls && Wirechat::containsLink($body))
         ? Wirechat::linkifyMessage($body)
         : [[
             'text' => $body,
