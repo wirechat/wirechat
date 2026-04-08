@@ -1080,6 +1080,10 @@ class Chat extends Component
 
         $this->conversation->markAsRead();
 
+        if ($this->isWidget()) {
+            $this->dispatch('refresh')->to(Chats::class);
+        }
+
         if ($this->authParticipant) {
 
             $this->authParticipant->update(['last_active_at' => now()]);

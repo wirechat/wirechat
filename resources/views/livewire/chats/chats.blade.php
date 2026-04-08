@@ -4,8 +4,10 @@
     $chatsShellStyles = $this->getUiStyles();
 @endphp
 <div
-    x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
+    x-data="{ selectedConversationId: @js(request()->conversation ?? $selectedConversationId) }"
      x-on:open-chat.window="selectedConversationId = $event.detail.conversation; $wire.selectedConversationId = $event.detail.conversation;"
+     x-on:chat-opened.window="selectedConversationId = $event.detail.conversation"
+     x-on:chat-closed.window="selectedConversationId = null"
      x-init="
         const container = document.getElementById('wirechat-chats-scrollable-container');
 
