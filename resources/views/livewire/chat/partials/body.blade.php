@@ -3,6 +3,7 @@
     height: 0,
     previousHeight: 0,
     booting: true,
+    loadingMore: false,
     restorePending: false,
     restoreScrollTop: 0,
     restoreScrollHeight: 0,
@@ -21,11 +22,16 @@
         const newHeight = $el.scrollHeight;
         $el.scrollTop = newHeight - this.restoreScrollHeight + this.restoreScrollTop;
     },
-    onScroll() {
+    async onScroll() {
         const scrollTop = $el.scrollTop;
-        if ((scrollTop <= 0) && $wire.canLoadMore) {
+        if ((scrollTop <= 0) && $wire.canLoadMore && !this.loadingMore) {
+            this.loadingMore = true;
             this.prepareRestore();
-            $wire.loadMore();
+            try {
+                await $wire.loadMore();
+            } finally {
+                this.loadingMore = false;
+            }
         }
     },
     updateScrollPosition: function() {
