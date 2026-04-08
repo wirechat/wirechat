@@ -1500,7 +1500,6 @@ describe('Sending messages ', function () {
             ->toContain('dusk="message-link"')
             ->toContain('href="https://example.com"');
     });
-
     test('it renders message urls as plain text when linkify messages is disabled', function () {
         testPanelProvider()->parseMessageUrls(false);
 

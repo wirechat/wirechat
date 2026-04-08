@@ -198,7 +198,6 @@ describe('WirechatService Model Resolution', function () {
             expect(collect($segments)->where('is_link', true)->pluck('href')->all())
                 ->toContain('https://whatsapp.com');
         });
-
         it('linkifies email addresses as mailto links', function () {
             config([
                 'wirechat.message_url_parsing.allow_bare_domains' => true,
