@@ -65,6 +65,7 @@
         restoreAfterOlderLoaded() {
             if (!this.pendingPrependRestore) return;
             this.pendingPrependRestore = false;
+            this.loadingOlder = false;
 
             requestAnimationFrame(() => {
                 this.restoreToAnchor();
@@ -74,7 +75,7 @@
 
         isNearTop() {
             const c = this.el;
-            return c && c.scrollTop <= 10 && !this.loadingOlder;
+            return c && c.scrollTop <= 10 && !this.loadingOlder && !this.pendingPrependRestore;
         },
 
         isNearBottom() {
@@ -82,8 +83,8 @@
             return c && (c.scrollHeight - (c.scrollTop + c.clientHeight)) <= 30 && !this.loadingNewer;
         },
 
-        loadOlderWithStableScroll() {
-            if (this.loadingOlder) return;
+        async loadOlderWithStableScroll() {
+            if (this.loadingOlder || this.pendingPrependRestore) return;
             if (!$wire.canLoadOlder) return;
 
             this.jumpTargetId = null;
@@ -92,9 +93,16 @@
             this.captureAnchor();
             this.pendingPrependRestore = true;
 
-            $wire.loadOlder().finally(() => {
+            try {
+                await $wire.loadOlder();
+
+                if (!this.pendingPrependRestore) {
+                    this.loadingOlder = false;
+                }
+            } catch (error) {
+                this.pendingPrependRestore = false;
                 this.loadingOlder = false;
-            });
+            }
         },
 
         loadNewerIfNeeded() {
