@@ -223,15 +223,6 @@
     @scroll="onScroll()"
     x-on:load.capture="$data.onAnyMediaLoad()"
     x-on:error.capture="$data.onAnyMediaLoad()"
-    @update-height.window="
-        requestAnimationFrame(() => {
-            if (pendingPrependRestore) {
-                restoreAfterOlderLoaded();
-            } else {
-                loadingOlder = false;
-            }
-          });
-        "
 
         @scroll-bottom.window="
         requestAnimationFrame(() => {

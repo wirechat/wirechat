@@ -180,10 +180,6 @@ class Chat extends Component
             // push message
             $this->pushMessage($newMessage);
 
-            $flat = $this->flattenLoadedMessages();
-            $this->syncCursorsFromFlat($flat);
-            $this->syncCanLoadFlags();
-
             // mark as read
             $this->conversation->markAsRead();
 
@@ -937,6 +933,7 @@ class Chat extends Component
         if ($older->isEmpty()) {
             $this->canLoadOlder = false;
             $this->canLoadMore = false;
+            $this->dispatch('older-loaded');
 
             return;
         }
