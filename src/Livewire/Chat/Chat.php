@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Livewire\Chat;
 
 use Composer\InstalledVersions;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -144,13 +145,15 @@ class Chat extends Component
 
             foreach ($this->loadedMessages as $groupKey => $messages) {
                 // Remove the message from the specific group
-                $this->loadedMessages[$groupKey] = $messages->reject(function ($loadedMessage) use ($messageId) {
+                $remainingMessages = collect($messages)->reject(function ($loadedMessage) use ($messageId) {
                     return $loadedMessage->id == $messageId;
                 })->values();
 
                 // Optionally, remove the group if it's empty
-                if ($this->loadedMessages[$groupKey]->isEmpty()) {
+                if ($remainingMessages->isEmpty()) {
                     $this->loadedMessages->forget($groupKey);
+                } else {
+                    $this->loadedMessages[$groupKey] = new EloquentCollection($remainingMessages->all());
                 }
             }
 
@@ -638,7 +641,9 @@ class Chat extends Component
         $this->loadedMessages = collect($this->loadedMessages);
 
         // Use tap to create a new group if it doesn’t exist, then push the message
-        $this->loadedMessages->put($groupKey, $this->loadedMessages->get($groupKey, collect())->push($message));
+        $group = $this->loadedMessages->get($groupKey, new EloquentCollection);
+        $group->push($message);
+        $this->loadedMessages->put($groupKey, new EloquentCollection($group->values()->all()));
 
         $flat = $this->flattenLoadedMessages();
         $this->syncCursorsFromFlat($flat);
@@ -649,7 +654,7 @@ class Chat extends Component
     {
         $this->loadedMessages = collect($messages)
             ->groupBy(fn (Message $message) => $this->messageGroupKey($message))
-            ->map->values();
+            ->map(fn ($group) => new EloquentCollection(collect($group)->values()->all()));
     }
 
     private function flattenLoadedMessages()
@@ -740,11 +745,13 @@ class Chat extends Component
      */
     public function hydrateLoadedMessages()
     {
-        $this->loadedMessages = $this->loadedMessages->map(function ($group) {
-            return $group->map(function ($message) {
-                return $message->loadMissing('participant.participantable', 'parent.participant.participantable', 'attachment');
-            });
-        });
+        $this->loadedMessages = collect($this->loadedMessages)
+            ->map(function ($group) {
+                return new EloquentCollection(collect($group)->filter()->map(function ($message) {
+                    return $message->loadMissing('participant.participantable', 'parent.participant.participantable', 'attachment');
+                })->values()->all());
+            })
+            ->filter(fn (EloquentCollection $group) => $group->isNotEmpty());
     }
 
     // Method to remove method from collection
@@ -755,13 +762,15 @@ class Chat extends Component
 
         // Remove the message from the correct group
         if ($this->loadedMessages->has($groupKey)) {
-            $this->loadedMessages[$groupKey] = $this->loadedMessages[$groupKey]->reject(function ($loadedMessage) use ($message) {
+            $remainingMessages = collect($this->loadedMessages[$groupKey])->reject(function ($loadedMessage) use ($message) {
                 return $loadedMessage->id == $message->id;
             })->values();
 
             // Optionally, remove the group if it's empty
-            if ($this->loadedMessages[$groupKey]->isEmpty()) {
+            if ($remainingMessages->isEmpty()) {
                 $this->loadedMessages->forget($groupKey)->values();
+            } else {
+                $this->loadedMessages[$groupKey] = new EloquentCollection($remainingMessages->all());
             }
 
             $flat = $this->flattenLoadedMessages();

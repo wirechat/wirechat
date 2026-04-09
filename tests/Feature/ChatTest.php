@@ -3306,16 +3306,16 @@ describe('deleteMessage ForEveryone', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // assert count 4
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 4;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 4;
         });
 
         // call deleteForMe
         $request->call('deleteForEveryone', encrypt($authMessage->id));
 
         // assert count no 3
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 3;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 3;
         });
     });
     test('it throws DecryptException if id is not Encrypted', function () {
@@ -3336,8 +3336,8 @@ describe('deleteMessage ForEveryone', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // assert count 4
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 4;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 4;
         });
 
         // call deleteForMe
@@ -3510,6 +3510,25 @@ describe('deleteMessage ForEveryone', function () {
             return $event->message->id === $authMessage->id;
         });
     });
+
+    test('other participant can refresh after delete for everyone without hitting a missing-model hydration error', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $deletedMessage = $auth->sendMessageTo($receiver, message: 'message-2');
+
+        $receiverChat = Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('message-2');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForEveryone', encrypt($deletedMessage->id));
+
+        $receiverChat->call('$refresh')
+            ->assertStatus(200)
+            ->assertDontSee('message-2');
+    });
 });
 
 describe('deletForMe', function () {
@@ -3596,16 +3615,16 @@ describe('deletForMe', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // assert count 4
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 4;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 4;
         });
 
         // call deleteForMe
         $request->call('deleteForMe', encrypt($authMessage->id));
 
         // assert count no 3
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 3;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 3;
         });
     });
 
