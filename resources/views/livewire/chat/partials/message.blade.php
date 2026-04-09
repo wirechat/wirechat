@@ -16,7 +16,7 @@
             'href' => null,
             'is_link' => false,
         ]];
-   $messageTextClasses = 'whitespace-pre-wrap tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal';
+   $messageTextClasses = 'whitespace-pre-wrap tracking-normal wrap-normal max-w-full text-sm md:text-base dark:text-white lg:tracking-normal';
 @endphp
 
 <div
@@ -79,7 +79,7 @@
                 dusk="message-link"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="underline tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
+                class="underline tracking-normal wrap-normal max-w-full text-sm md:text-base dark:text-white lg:tracking-normal"
                 href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
 
 {{-- Display the created time based on different conditions --}}
