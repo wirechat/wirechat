@@ -87,7 +87,7 @@
 @class(['text-[11px] ml-auto ',  'text-gray-700 dark:text-gray-300' => !$belongsToAuth,'text-gray-100' => $belongsToAuth])>
     @php
         // If the message was created today, show only the time (e.g., 1:00 AM)
-        echo $message?->created_at?->locale(app()->getLocale())?->translatedFormat('H:i');
+        echo $message?->created_at?->format('H:i');
     @endphp
 </span>
 
