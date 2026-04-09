@@ -93,7 +93,23 @@ describe('presence test', function () {
 
         $request
             ->assertSeeHtml('x-anchor.bottom-end="$refs.button"')
-            ->assertSeeHtml('class="z-20 ml-auto bg-[var(--wc-light-secondary)]');
+            ->assertSeeHtml('class="z-20')
+            ->assertSeeHtml('bg-[var(--wc-light-secondary)]');
+    });
+
+    test('member action menu uses a shared open state and closes on outside click', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $conversation->addParticipant(User::factory()->create(['name' => 'John']));
+
+        $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+
+        $request
+            ->assertSeeHtml('x-data="{ openMemberMenu: null }"')
+            ->assertSeeHtml('@click.outside="openMemberMenu = null"')
+            ->assertSeeHtml('@click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"')
+            ->assertSeeHtml('x-show="openMemberMenu === memberMenuId"');
     });
 
     test('it show label "You" if member in loop is auth user', function () {
