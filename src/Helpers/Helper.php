@@ -43,18 +43,17 @@ class Helper
      */
     public static function formatChatDate(Carbon $timestamp): string
     {
-
-        $messageDate = $timestamp;
+        $messageDate = $timestamp->copy()->locale(app()->getLocale());
 
         $groupKey = '';
         if ($messageDate->isToday()) {
-            $groupKey = 'Today';
+            $groupKey = __('wirechat::chat.message_groups.today');
         } elseif ($messageDate->isYesterday()) {
-            $groupKey = 'Yesterday';
+            $groupKey = __('wirechat::chat.message_groups.yesterday');
         } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
-            $groupKey = $messageDate->format('l');
+            $groupKey = $messageDate->translatedFormat('l');
         } else {
-            $groupKey = $messageDate->format('d/m/Y');
+            $groupKey = $messageDate->translatedFormat('d/m/Y');
         }
 
         return $groupKey;

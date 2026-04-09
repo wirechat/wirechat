@@ -19,6 +19,7 @@ use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageDeleted;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
@@ -625,19 +626,7 @@ class Chat extends Component
 
     private function messageGroupKey(Message $message): string
     {
-        $messageDate = $message->created_at;
-        $groupKey = '';
-        if ($messageDate->isToday()) {
-            $groupKey = __('wirechat::chat.message_groups.today');
-        } elseif ($messageDate->isYesterday()) {
-            $groupKey = __('wirechat::chat.message_groups.yesterday');
-        } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
-            $groupKey = $messageDate->format('l'); // Day name
-        } else {
-            $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
-        }
-
-        return $groupKey;
+        return Helper::formatChatDate($message->created_at);
     }
 
     // helper to push message to loadedMessages

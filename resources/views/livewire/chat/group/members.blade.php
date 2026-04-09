@@ -5,8 +5,12 @@
 
     @endphp
 
-
-<div x-ref="members"
+<div x-data="{ openMemberMenu: null }"
+    x-ref="members"
+    x-init="$watch('openMemberMenu', value => {
+        $refs.members.style.overflow = value === null ? '' : 'hidden';
+    })"
+    @click.outside="openMemberMenu = null"
     class="h-[calc(100vh_-_6rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  overflow-y-auto overflow-x-hidden  ">
 
     <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
@@ -37,8 +41,6 @@
         </section>
 
     </header>
-
-
     <div class="relative w-full p-2 ">
         {{-- <h5 class="text font-semibold text-gray-800 dark:text-gray-100">Recent Chats</h5> --}}
         <section class="my-4 grid">
@@ -52,14 +54,12 @@
                                 $participant->participantable_id == auth()->id() &&
                                 $participant->participantable_type == auth()->user()->getMorphClass();
                         @endphp
-                        <li x-data="{ open: false }" x-ref="button" @click="open = ! open" x-init="$watch('open', value => {
-                            $refs.members.style.overflow = value ? 'hidden' : '';
-                        })"
+                        <li x-data="{ memberMenuId: {{ $participant->id }} }" x-ref="button"
+                            @click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"
                             aria-modal="true"
                             tabindex="0"
-                            x-on:keydown.escape.stop="open=false"
-                            @click.away ="open=false;" wire:key="users-{{ $key }}"
-                            :class="!open || 'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]'"
+                            x-on:keydown.escape.stop="openMemberMenu = null"
+                            :class="openMemberMenu !== memberMenuId || 'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]'"
                             class="flex cursor-pointer group gap-2 items-center overflow-x-hidden p-2 py-3">
 
                             <label class="flex cursor-pointer gap-2 items-center w-full">
@@ -70,15 +70,16 @@
                                     <h6 @class(['transition-all truncate group-hover:underline col-span-10' ])>
                                         {{ $loopParticipantIsAuth ? 'You' : $participant->participantable->wirechat_name }}</h6>
                                         @if ($participant->isOwner()|| $participant->isAdmin())
-                                        <span  style="background-color: var(--wirechat-primary-color);" class=" flex items-center col-span-2 text-white text-xs font-medium ml-auto px-2.5 py-px rounded-sm ">
+                                        <span  style="background-color: var(--wirechat-primary-color);" class=" flex items-center col-span-2 dark:text-white text-xs font-medium ml-auto px-2.5 py-px rounded-sm ">
                                             {{$participant->isOwner()? __('wirechat::chat.group.members.labels.owner'): __('wirechat::chat.group.members.labels.admin')}}
                                         </span>
                                         @endif
 
                                 </div>
 
-                                <div x-show="open" x-anchor.bottom-end="$refs.button"
-                                    class="z-20 ml-auto bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] border-[var(--wc-light-primary)] dark:border-[var(--wc-dark-primary)] py-4 shadow-sm border rounded-md grid space-y-2 w-52">
+                                <div x-cloak x-show="openMemberMenu === memberMenuId" @click.stop
+                                    x-anchor.bottom-end="$refs.button"
+                                    class="z-20 ml-auto  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] border dark:border-zinc-700 py-4 shadow-lg rounded-md grid space-y-2 w-52">
                                     {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-600 dark:text-gray-300  w-6 h-6">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>   --}}

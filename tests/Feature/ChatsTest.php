@@ -894,6 +894,38 @@ describe('List', function () {
             ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
     });
 
+    it('translates short absolute diff for humans when the locale is configured globally', function () {
+        $originalLocale = app()->getLocale();
+        $originalCarbonLocale = Carbon::getLocale();
+
+        try {
+            app()->setLocale('tr');
+            Carbon::setLocale('tr');
+
+            $auth = User::factory()->create();
+            $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+            $conversation = $auth->createConversationWith($user1);
+            $participant = $conversation->participant($auth);
+
+            Carbon::setTestNowAndTimezone(now());
+            $lastMessage = Message::create([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => 'How are you doing',
+            ]);
+
+            Carbon::setTestNowAndTimezone(now()->addHours(3));
+
+            Livewire::actingAs($auth)->test(Chatlist::class)
+                ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
+        } finally {
+            Carbon::setTestNow();
+            app()->setLocale($originalLocale);
+            Carbon::setLocale($originalCarbonLocale);
+        }
+    });
+
     it('it shows attatchment lable if message contains file or image', function () {
 
         $auth = User::factory()->create();
