@@ -511,6 +511,31 @@ describe('List', function () {
             });
     });
 
+    it('reloads conversation ids when refresh is dispatched after a blank conversation gets its first message', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+        $user2 = User::factory()->create(['name' => 'iam user 2']);
+
+        // Load one existing non-blank conversation into the chat list ids.
+        $auth->createConversationWith($user2, 'existing message');
+
+        // Keep another conversation blank at first so it is excluded from the initial ids.
+        $auth->createConversationWith($user1);
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSee('existing message')
+            ->assertDontSee('first message');
+
+        // Sending to the same user reuses the existing blank conversation and gives it its first message.
+        $auth->sendMessageTo($user1, 'first message');
+
+        $component->dispatch('refresh')
+            ->assertSee('first message')
+            ->assertSee('iam user 1');
+    });
+
     it('does not load deleted conversations by user', function () {
 
         $auth = User::factory()->create();

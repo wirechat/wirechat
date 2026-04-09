@@ -76,7 +76,7 @@ class Chats extends Component
         $userId = $user?->getKey();
 
         $listeners = [
-            'refresh' => '$refresh',
+            'refresh' => 'hardRefresh',
             'hardRefresh',
         ];
 
