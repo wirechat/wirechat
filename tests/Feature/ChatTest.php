@@ -55,10 +55,143 @@ test('it applies ui classes and styles to the chat shell only', function () {
     $html = $response->html();
 
     preg_match_all('/class="[^"]*chat-shell-test[^"]*"/', $html, $classMatches);
-    preg_match_all('/style="contain:content; min-height: 24rem;"/', $html, $styleMatches);
+    preg_match_all('/style="[^"]*min-height: 24rem;[^"]*"/', $html, $styleMatches);
 
     expect($classMatches[0])->toHaveCount(1)
         ->and($styleMatches[0])->toHaveCount(1);
+});
+
+test('it renders stable message anchors for scroll restoration', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+    $message = $conversation->messages()->firstOrFail();
+
+    $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+    expect($html)
+        ->toContain('x-ref="main-chat-body"')
+        ->toContain('data-message-id="'.$message->id.'"')
+        ->toContain('id="message-'.$message->id.'"')
+        ->toContain('wire:key="msg-'.$message->id.'"');
+});
+
+test('it loads older messages from the top using the pro-style older window', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 15) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    $initialMessages = collect($component->instance()->loadedMessages)->flatten(1);
+
+    expect($initialMessages)->toHaveCount(10)
+        ->and($component->instance()->canLoadOlder)->toBeTrue();
+
+    $component->call('loadOlder');
+
+    $loadedMessages = collect($component->instance()->loadedMessages)->flatten(1);
+
+    expect($loadedMessages)->toHaveCount(15)
+        ->and($component->instance()->canLoadOlder)->toBeFalse();
+});
+
+test('it dispatches older-loaded when a stale older cursor returns no messages', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 15) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $oldestMessage = $conversation->messages()
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->firstOrFail();
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    $component
+        ->set('canLoadOlder', true)
+        ->set('olderCreatedAt', $oldestMessage->created_at->toDateTimeString())
+        ->set('olderId', $oldestMessage->id)
+        ->call('loadOlder')
+        ->assertDispatched('older-loaded');
+
+    expect($component->instance()->canLoadOlder)->toBeFalse()
+        ->and($component->instance()->canLoadMore)->toBeFalse();
+});
+
+test('it rebuilds the loaded window around the requested message when jumping', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 30) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $orderedMessages = $conversation->messages()
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->get()
+        ->values();
+
+    $targetMessage = $orderedMessages->get(11);
+    $expectedWindowIds = $orderedMessages->slice(1, 21)->pluck('id')->all();
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    expect(collect($component->instance()->loadedMessages)->flatten(1)->pluck('id')->all())
+        ->not->toContain($targetMessage->id);
+
+    $component
+        ->call('jumpToMessage', $targetMessage->id)
+        ->assertDispatched('scroll-to-message');
+
+    $loadedIds = collect($component->instance()->loadedMessages)->flatten(1)->pluck('id')->all();
+
+    expect($component->instance()->anchorId)->toBe($targetMessage->id)
+        ->and($loadedIds)->toBe($expectedWindowIds)
+        ->and($component->instance()->canLoadOlder)->toBeTrue()
+        ->and($component->instance()->canLoadNewer)->toBeTrue();
+});
+
+test('it loads newer messages after jumping to an older window', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 30) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $orderedMessages = $conversation->messages()
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->get()
+        ->values();
+
+    $targetMessage = $orderedMessages->get(11);
+    $expectedIdsAfterLoadNewer = $orderedMessages->slice(1)->pluck('id')->all();
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    $component->call('jumpToMessage', $targetMessage->id);
+
+    expect($component->instance()->canLoadNewer)->toBeTrue();
+
+    $component->call('loadNewer');
+
+    $loadedIds = collect($component->instance()->loadedMessages)->flatten(1)->pluck('id')->all();
+
+    expect($loadedIds)->toBe($expectedIdsAfterLoadNewer)
+        ->and($component->instance()->canLoadNewer)->toBeFalse()
+        ->and($component->instance()->canLoadOlder)->toBeTrue();
 });
 
 test('returns 404 if conversation is not found', function () {
@@ -375,6 +508,20 @@ describe('mount()', function () {
         $request
             ->assertStatus(200)
             ->assertNotDispatched('refresh');
+    });
+
+    test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
+        $auth = User::factory()->create();
+        $user = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($user, 'hi');
+        $user->sendMessageTo($auth, 'new unread');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+        $request
+            ->assertStatus(200)
+            ->assertDispatched('refresh');
     });
 
     // test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {

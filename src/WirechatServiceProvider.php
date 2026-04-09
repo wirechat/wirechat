@@ -237,6 +237,9 @@ class WirechatServiceProvider extends ServiceProvider
 
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
                                         .listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
+                                            if (window.Livewire) {
+                                                window.Livewire.dispatch('refresh-chats');
+                                            }
 
                                             if (e.redirect_url !== window.location.href) {
                                                 if (Notification.permission === 'granted') {
