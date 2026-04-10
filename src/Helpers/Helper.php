@@ -2,7 +2,7 @@
 
 namespace Wirechat\Wirechat\Helpers;
 
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 
 class Helper
 {
@@ -41,9 +41,9 @@ class Helper
     /**
      * format date for chats
      */
-    public static function formatChatDate(Carbon $timestamp): string
+    public static function formatChatDate(CarbonInterface $timestamp): string
     {
-        $messageDate = $timestamp->copy()->locale(app()->getLocale());
+        $messageDate = $timestamp->avoidMutation()->locale(app()->getLocale());
 
         $groupKey = '';
         if ($messageDate->isToday()) {
