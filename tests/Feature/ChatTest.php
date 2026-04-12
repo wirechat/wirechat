@@ -1,9 +1,11 @@
 <?php
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -328,6 +330,36 @@ describe('Presense', function () {
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
             ->assertSee('Older message');
+    });
+
+    test('it can render grouped messages when the app uses immutable dates', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+        $participant = $conversation->participant($auth);
+
+        try {
+            Date::use(CarbonImmutable::class);
+            CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-09 12:00:00'));
+
+            $message = Message::create([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => 'Immutable message',
+            ]);
+
+            expect($message->fresh()->created_at)->toBeInstanceOf(CarbonImmutable::class);
+
+            $expectedGroup = Helper::formatChatDate($message->fresh()->created_at);
+
+            Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSee($expectedGroup)
+                ->assertSee('Immutable message');
+        } finally {
+            CarbonImmutable::setTestNow();
+            Date::useDefault();
+        }
     });
 
     test('it_doesnt_show_upload_trigger_if_attachments_not_enabled', function () {
