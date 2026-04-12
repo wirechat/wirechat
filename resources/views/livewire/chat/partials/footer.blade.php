@@ -507,7 +507,6 @@
                         <div>
                             <button
                                 x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
-                                x-transition.duration.300ms
                                 wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
                                 id="sendMessageButton" class="bg-[var(--wc-brand-primary)] dark:bg-[var(--wc-brand-primary)] rounded-full p-2 cursor-pointer hover:text-white transition-colors ml-auto disabled:cursor-progress font-bold">
 
