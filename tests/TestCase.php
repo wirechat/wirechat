@@ -64,6 +64,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             //            ]);
 
             $config->set('wirechat.user_model', \Workbench\App\Models\User::class);
+            $wirechatConfig = require __DIR__.'/../config/wirechat.php';
+            $config->set('wirechat.message_url_parsing', $wirechatConfig['message_url_parsing'] ?? []);
 
             $config->set('queue.batching.database', 'testbench');
             $config->set('queue.failed.database', 'testbench');
