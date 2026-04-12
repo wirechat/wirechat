@@ -93,7 +93,7 @@ class Chats extends Component
         return $listeners;
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function auth()
     {
         return auth()->user();
