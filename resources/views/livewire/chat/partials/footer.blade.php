@@ -529,7 +529,7 @@
                             @if($this->panel()->hasHeart())
                                 <button
                                     x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )"
-                                    wire:loading.attr="disabled" wire:target="sendMessage" wire:click='sendLike()'
+                                    wire:loading.attr="disabled" wire:target="sendLike" wire:click='sendLike()'
                                     dusk="heart-button"
                                     type="button" class="hover:scale-105 cursor-pointer group disabled:cursor-progress">
 
