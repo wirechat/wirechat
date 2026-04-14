@@ -323,9 +323,9 @@ class Participant extends Model
         });
     }
 
-    public function isParticipantable(?Model $user): bool
+    public function isParticipantable(Model|Authenticatable|null $user): bool
     {
-        if ($user === null) {
+        if (! $user instanceof Model) {
             return false;
         }
 

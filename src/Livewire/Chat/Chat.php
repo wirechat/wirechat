@@ -175,9 +175,13 @@ class Chat extends Component
             $newMessage = Wirechat::messageModelClass()::find($event['message']['id']);
             // dd($newMessage);
 
+            if (! $newMessage) {
+                return null;
+            }
+
             // Make sure message does not belong to auth
 
-            if ($newMessage?->participant?->isParticipantable(auth()->user())) {
+            if ($newMessage->participant?->isParticipantable(auth()->user())) {
                 return null;
             }
 
