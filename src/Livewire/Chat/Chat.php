@@ -155,7 +155,7 @@ class Chat extends Component
 
             // Make sure message does not belong to auth
 
-            if ($newMessage?->isParticipantable(auth()->user())) {
+            if ($newMessage?->participant?->isParticipantable(auth()->user())) {
                 return null;
             }
 

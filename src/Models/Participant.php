@@ -325,6 +325,6 @@ class Participant extends Model
 
     public function isParticipantable(?Model $user): bool
     {
-        return $this->participantable?->is($user);
+        return $this->participantable->is($user);
     }
 }
