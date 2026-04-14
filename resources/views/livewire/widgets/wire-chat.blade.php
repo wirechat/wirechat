@@ -103,6 +103,9 @@
                         if (this.activeWidgetComponent === false) {
                             this.activeWidgetComponent = id
                             this.showActiveComponent = true;
+                            this.$nextTick(() => {
+                                this.dispatchScrollBottom();
+                            });
                         } else {
 
                             this.showActiveComponent = false;
@@ -111,6 +114,9 @@
                             setTimeout(() => {
                                 this.activeWidgetComponent = id;
                                 this.showActiveComponent = true;
+                                this.$nextTick(() => {
+                                    this.dispatchScrollBottom();
+                                });
                             }, 300);
                         }
 
@@ -132,10 +138,19 @@
                             }
                         });
                     },
+                    dispatchScrollBottom() {
+                        requestAnimationFrame(() => {
+                            window.dispatchEvent(new CustomEvent('scroll-bottom'));
+                        });
+                    },
 
                     setShowPropertyTo(show) {
                         this.show = show;
                         if (!show) {
+                            Livewire.dispatch('closeChatDrawer', {
+                                force: true
+                            });
+
                             setTimeout(() => {
                                 this.activeWidgetComponent = false;
                                 this.$wire.resetState();
@@ -192,7 +207,12 @@
       </div>
       <main
            x-data="ChatWidget()"
-           x-on:open-chat.window="$wire.selectedConversationId= $event.detail.conversation;"
+           x-on:open-chat.window="
+                if ($wire.selectedConversationId !== null && $wire.selectedConversationId != $event.detail.conversation) {
+                    Livewire.dispatch('closeChatDrawer', { force: true });
+                }
+                $wire.selectedConversationId = $event.detail.conversation;
+           "
            x-on:close-chat.stop.window="setShowPropertyTo(false)"
            x-on:keydown.escape.stop.window="closeChatWidgetOnEscape({ modalType: 'ChatWidget', event: $event });"
            aria-modal="true"
@@ -219,6 +239,8 @@
                 @empty
                 @endforelse
             </div>
+            {{-- In widget mode, the drawer lives at the shell level so it survives chat component refreshes. --}}
+            <livewire:wirechat.chat.drawer wire:key="widget-chat-drawer" />
 
             <div  x-show="!show && !chatIsOpen " class="m-auto  justify-center flex gap-3 flex-col  items-center ">
 
