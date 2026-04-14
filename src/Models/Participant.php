@@ -325,6 +325,11 @@ class Participant extends Model
 
     public function isParticipantable(?Model $user): bool
     {
-        return $this->participantable->is($user);
+        if ($user === null) {
+            return false;
+        }
+
+        return $this->participantable_id == $user->getKey()
+            && $this->participantable_type === $user->getMorphClass();
     }
 }
