@@ -454,7 +454,6 @@
                                         @if ($attachment->isVideo())
                                             <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
 
-                                        {{-- Attachemnt is image/ --}}
                                         @elseif($attachment->isImage())
                                             @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
                                         @else
