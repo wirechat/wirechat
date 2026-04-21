@@ -626,6 +626,31 @@ describe('List', function () {
             });
     });
 
+    it('reloads conversation ids when refresh is dispatched after a blank conversation gets its first message', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+        $user2 = User::factory()->create(['name' => 'iam user 2']);
+
+        // Load one existing non-blank conversation into the chat list ids.
+        $auth->createConversationWith($user2, 'existing message');
+
+        // Keep another conversation blank at first so it is excluded from the initial ids.
+        $auth->createConversationWith($user1);
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSee('existing message')
+            ->assertDontSee('first message');
+
+        // Sending to the same user reuses the existing blank conversation and gives it its first message.
+        $auth->sendMessageTo($user1, 'first message');
+
+        $component->dispatch('refresh')
+            ->assertSee('first message')
+            ->assertSee('iam user 1');
+    });
+
     it('does not load deleted conversations by user', function () {
 
         $auth = User::factory()->create();
@@ -701,6 +726,7 @@ describe('List', function () {
         // dd($conversations,$messages);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="1"')
             ->assertSeeHtml('dusk="unreadMessagesDot"')
             ->assertDontSeeHtml('dusk="unreadMessagesCount"');
     });
@@ -774,6 +800,66 @@ describe('List', function () {
             ->and($loadedConversation?->getAttribute('unread_messages_count'))->toBe(2);
     });
 
+    it('refreshes unread dot when refresh-chats event is dispatched after a new incoming message', function () {
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="0"');
+
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+
+        $component->dispatch('refresh-chats')
+            ->assertSeeHtml('data-show-unread-status="1"')
+            ->assertSeeHtml('dusk="unreadMessagesDot"');
+    });
+
+    it('refreshes unread count badge when refresh-chats event is dispatched after a new incoming message', function () {
+
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="0"');
+
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+
+        $component->dispatch('refresh-chats')
+            ->assertSeeHtml('data-show-unread-status="1"')
+            ->assertSeeHtml('dusk="unreadMessagesCount"')
+            ->assertSee('1');
+    });
+
+    it('shows unread indicator for another conversation while one chat is selected', function () {
+
+        $auth = User::factory()->create();
+        $userA = User::factory()->create(['name' => 'iam user a']);
+        $userB = User::factory()->create(['name' => 'iam user b']);
+
+        $conversationA = $auth->createConversationWith($userA, message: 'How are you doing');
+        $conversationB = $auth->createConversationWith($userB, message: 'You there?');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->set('selectedConversationId', (string) $conversationA->id)
+            ->assertSeeHtml('data-show-unread-status="0"');
+
+        sleep(1);
+        $userB->sendMessageTo($auth, message: 'I am good');
+
+        $component->dispatch('refresh-chats')
+            ->assertSeeHtml('data-show-unread-status="1"')
+            ->assertSeeHtml('dusk="unreadMessagesDot"');
+    });
+
     it('keeps the unread dot visible when unread messages remain after auth sends the latest message', function () {
 
         $auth = User::factory()->create();
@@ -813,7 +899,6 @@ describe('List', function () {
             ->toContain('dusk="unreadMessagesCount"')
             ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</');
     });
-
     it('uses reactive preview classes so unread text de-emphasizes immediately when a chat is opened', function () {
 
         $auth = User::factory()->create();
@@ -829,9 +914,9 @@ describe('List', function () {
         expect($html)
             ->toContain('dusk="messagePreviewBody"')
             ->toContain('dusk="messagePreviewTime"')
-            ->toContain('showUnreadStatus && !false')
             ->toContain('font-semibold text-black')
-            ->toContain('font-normal text-gray-600');
+            ->toContain('font-medium text-gray-800')
+            ->not->toContain('showUnreadStatus && !false');
     });
     it('Doesnt show unread message Dot if message does not belong to Auth and is Read', function () {
 
@@ -853,7 +938,7 @@ describe('List', function () {
         $conversation->markAsRead($auth);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertDontSeeHtml('dusk="unreadMessagesDot"');
+            ->assertSeeHtml('data-show-unread-status="0"');
     });
 
     it('still shows unread message Dot even if message belongs to Participant of Different Model', function () {
@@ -873,6 +958,7 @@ describe('List', function () {
         // dd($conversations,$messages);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="1"')
             ->assertSeeHtml('dusk="unreadMessagesDot"');
     });
 
@@ -900,7 +986,7 @@ describe('List', function () {
         $unreadCount = $conversation->getUnreadCountFor($auth);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertDontSeeHtml('dusk="unreadMessagesDot"');
+            ->assertSeeHtml('data-show-unread-status="0"');
     });
 
     it('shows message time AS "now"  if less than a minute old', function () {
@@ -946,6 +1032,38 @@ describe('List', function () {
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSeeText('now')
             ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
+    });
+
+    it('translates short absolute diff for humans when the locale is configured globally', function () {
+        $originalLocale = app()->getLocale();
+        $originalCarbonLocale = Carbon::getLocale();
+
+        try {
+            app()->setLocale('tr');
+            Carbon::setLocale('tr');
+
+            $auth = User::factory()->create();
+            $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+            $conversation = $auth->createConversationWith($user1);
+            $participant = $conversation->participant($auth);
+
+            Carbon::setTestNowAndTimezone(now());
+            $lastMessage = Message::create([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => 'How are you doing',
+            ]);
+
+            Carbon::setTestNowAndTimezone(now()->addHours(3));
+
+            Livewire::actingAs($auth)->test(Chatlist::class)
+                ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
+        } finally {
+            Carbon::setTestNow();
+            app()->setLocale($originalLocale);
+            Carbon::setLocale($originalCarbonLocale);
+        }
     });
 
     it('it shows attatchment lable if message contains file or image', function () {

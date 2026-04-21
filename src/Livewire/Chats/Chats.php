@@ -78,7 +78,7 @@ class Chats extends Component
         $userId = $user?->getKey();
 
         $listeners = [
-            'refresh' => '$refresh',
+            'refresh' => 'hardRefresh',
             'hardRefresh',
         ];
 
@@ -96,7 +96,7 @@ class Chats extends Component
         return $listeners;
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function auth()
     {
         return auth()->user();
