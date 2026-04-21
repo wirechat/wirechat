@@ -41,11 +41,11 @@ return new class extends Migration
             $table->json('data')->nullable();
             $table->timestamps();
 
-            $table->index(['conversation_id', 'status']);
-            $table->index(['sender_id', 'sender_type', 'status', 'wmr_recipient_status_idx']);
-            $table->index(['recipient_id', 'recipient_type', 'status']);
+            $table->index(['conversation_id', 'status'], 'wmr_conversation_status_idx');
+            $table->index(['sender_id', 'sender_type', 'status'], 'wmr_sender_status_idx');
+            $table->index(['recipient_id', 'recipient_type', 'status'], 'wmr_recipient_status_idx');
             $table->index(['sender_id', 'sender_type', 'recipient_id', 'recipient_type'], 'wirechat_message_requests_pair_index');
-            $table->index(['reviewed_by_id', 'reviewed_by_type']);
+            $table->index(['reviewed_by_id', 'reviewed_by_type'], 'wmr_reviewed_by_idx');
         });
     }
 
