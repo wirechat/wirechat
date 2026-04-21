@@ -808,6 +808,12 @@ class Chat extends Component
             return;
         }
 
+        // Keep pending request threads local to the sender until the
+        // recipient explicitly accepts the request.
+        if ($this->conversation->isPrivate() && $this->conversation->hasActiveMessageRequest()) {
+            return;
+        }
+
         // send broadcast message only to others
         // we add try catch to avoid runtime error when broadcasting services are not connected
         // todo create a job to broadcast multiple messages

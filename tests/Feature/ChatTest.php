@@ -248,6 +248,28 @@ describe('Message requests', function () {
             ->assertDontSee(__('wirechat::chat.message_request.actions.dismiss.label'));
     });
 
+    test('pending request messages stay local and do not broadcast before acceptance', function () {
+        Event::fake();
+        Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('body', 'Hello from a pending request')
+            ->call('sendMessage');
+
+        $message = Message::query()->latest('id')->first();
+
+        expect($message)->not->toBeNull()
+            ->and($message?->body)->toBe('Hello from a pending request');
+
+        Event::assertNotDispatched(MessageCreated::class);
+        Queue::assertNotPushed(NotifyParticipants::class);
+    });
+
     test('pending recipient can accept a message request', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
