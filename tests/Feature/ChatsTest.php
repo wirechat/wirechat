@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
@@ -56,6 +57,37 @@ test('requests drawer shows its heading, description, tabs, and empty state', fu
         ->assertSeeHtml('dusk="outgoing-requests-tab"')
         ->assertSee(__('wirechat::chats.requests.labels.empty_state'))
         ->assertSet('activeTab', 'incoming');
+});
+
+test('tabs blade components render labels badges and content shells', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-wirechat::tabs.tabs label="Requests" dusk="requests-tabs">
+            <x-wirechat::tabs.tab :active="true" :badge="3" dusk="incoming-tab">
+                Incoming
+            </x-wirechat::tabs.tab>
+
+            <x-wirechat::tabs.tab :active="false">
+                Outgoing
+            </x-wirechat::tabs.tab>
+        </x-wirechat::tabs.tabs>
+
+        <x-wirechat::tabs.content :active="false" class="tab-panel">
+            Panel body
+        </x-wirechat::tabs.content>
+    BLADE);
+
+    $html = preg_replace('/\s+/', ' ', $html);
+
+    expect($html)
+        ->toContain('role="tablist"')
+        ->toContain('aria-label="Requests"')
+        ->toContain('dusk="incoming-tab"')
+        ->toContain('Incoming')
+        ->toContain('3')
+        ->toContain('role="tabpanel"')
+        ->toContain('aria-hidden="true"')
+        ->toContain('hidden')
+        ->toContain('Panel body');
 });
 
 test('requests drawer defaults to the incoming tab when incoming requests exist', function () {

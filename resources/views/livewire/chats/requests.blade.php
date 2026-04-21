@@ -32,44 +32,28 @@
     @endphp
 
     <div class="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <div class="grid grid-cols-2 gap-2 rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-800/80" role="tablist" aria-label="{{ __('wirechat::chats.requests.heading') }}" dusk="requests-tabs">
-            <button
-                type="button"
+        <x-wirechat::tabs.tabs :label="__('wirechat::chats.requests.heading')" dusk="requests-tabs">
+            <x-wirechat::tabs.tab
+                :active="$isIncomingTab"
+                :badge="$incomingRequests->count()"
                 wire:click="setActiveTab('incoming')"
                 dusk="incoming-requests-tab"
-                @class([
-                    'rounded-xl px-3 py-2 text-sm font-medium transition',
-                    'bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-zinc-100' => $isIncomingTab,
-                    'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100' => ! $isIncomingTab,
-                ])
-                aria-pressed="{{ $isIncomingTab ? 'true' : 'false' }}"
             >
-                <span>{{ __('wirechat::chats.requests.labels.incoming') }}</span>
-                <span class="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-200 px-1.5 py-0.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
-                    {{ $incomingRequests->count() }}
-                </span>
-            </button>
+                {{ __('wirechat::chats.requests.labels.incoming') }}
+            </x-wirechat::tabs.tab>
 
-            <button
-                type="button"
+            <x-wirechat::tabs.tab
+                :active="! $isIncomingTab"
+                :badge="$outgoingRequests->count()"
                 wire:click="setActiveTab('outgoing')"
                 dusk="outgoing-requests-tab"
-                @class([
-                    'rounded-xl px-3 py-2 text-sm font-medium transition',
-                    'bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-zinc-100' => ! $isIncomingTab,
-                    'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100' => $isIncomingTab,
-                ])
-                aria-pressed="{{ ! $isIncomingTab ? 'true' : 'false' }}"
             >
-                <span>{{ __('wirechat::chats.requests.labels.outgoing') }}</span>
-                <span class="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-200 px-1.5 py-0.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
-                    {{ $outgoingRequests->count() }}
-                </span>
-            </button>
-        </div>
+                {{ __('wirechat::chats.requests.labels.outgoing') }}
+            </x-wirechat::tabs.tab>
+        </x-wirechat::tabs.tabs>
     </div>
 
-    <div class="flex-1 px-4 py-4">
+    <x-wirechat::tabs.content class="flex-1 px-4 py-4">
         @if (! $hasRequests)
             <div class="flex min-h-56 items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 text-center dark:border-zinc-700 dark:bg-zinc-950" dusk="requests-empty-state">
                 <p class="max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
@@ -127,5 +111,5 @@
                 @endforeach
             </div>
         @endif
-    </div>
+    </x-wirechat::tabs.content>
 </div>
