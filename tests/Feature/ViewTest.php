@@ -77,6 +77,19 @@ test('recipient can access a pending message request conversation', function () 
         ->assertStatus(200);
 });
 
+test('recipient cannot access a pending message request conversation when the panel disables message requests', function () {
+    testPanelProvider()->messageRequests(false);
+
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $auth->sendMessageRequestTo($receiver);
+
+    $this->actingAs($receiver)
+        ->get(testPanelProvider()->chatRoute($conversation->id))
+        ->assertStatus(403);
+});
+
 test('it marks messages as read when conversation is open ', function () {
     $auth = User::factory()->create();
 

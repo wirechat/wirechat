@@ -1,5 +1,9 @@
 @use("Wirechat\Wirechat\Facades\Wirechat")
 
+@php
+    $hasMessageRequests = $this->panel()->hasMessageRequests();
+@endphp
+
 <header class="px-3 z-10 sticky top-0 w-full py-2 " dusk="header">
 
 
@@ -16,21 +20,23 @@
 
         <div class="flex gap-x-4 items-center  ">
 
-            <x-wirechat::actions.open-chats-drawer component="wirechat.chats.requests" widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
-                <button
-                    id="open-requests-drawer-button"
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                >
-                    <span>{{ __('wirechat::chats.requests.actions.open.label') }}</span>
+            @if ($hasMessageRequests)
+                <x-wirechat::actions.open-chats-drawer component="wirechat.chats.requests" widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
+                    <button
+                        id="open-requests-drawer-button"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    >
+                        <span>{{ __('wirechat::chats.requests.actions.open.label') }}</span>
 
-                    @if ($this->pendingMessageRequestsCount() > 0)
-                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1.5 py-0.5 text-xs font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
-                            {{ $this->pendingMessageRequestsCount() }}
-                        </span>
-                    @endif
-                </button>
-            </x-wirechat::actions.open-chats-drawer>
+                        @if ($this->pendingMessageRequestsCount() > 0)
+                            <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1.5 py-0.5 text-xs font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
+                                {{ $this->pendingMessageRequestsCount() }}
+                            </span>
+                        @endif
+                    </button>
+                </x-wirechat::actions.open-chats-drawer>
+            @endif
 
             {{-- Widget-Action:Redirect to home --}}
             @php $homeUrl = $this->panel()->getHomeUrl(); @endphp

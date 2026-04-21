@@ -1,5 +1,6 @@
 <?php
 
+use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Wirechat\Wirechat\Support\Enums\UnReadType;
 use Workbench\App\Models\User;
@@ -44,6 +45,16 @@ test('legacy unread messages panel aliases still work', function () {
     expect(testPanelProvider()->hasUnReadMessages())->toBeTrue()
         ->and(testPanelProvider()->getUnReadMessagesType())->toBe(UnReadType::Count)
         ->and(testPanelProvider()->getUnreadIndicatorType())->toBe(UnreadIndicatorType::Count);
+});
+
+test('panel message requests are disabled by default and can be enabled', function () {
+    $panel = new Panel;
+
+    expect($panel->hasMessageRequests())->toBeFalse();
+
+    $panel->messageRequests();
+
+    expect($panel->hasMessageRequests())->toBeTrue();
 });
 
 describe('Chats Route', function () {

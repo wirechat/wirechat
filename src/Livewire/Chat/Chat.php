@@ -121,7 +121,7 @@ class Chat extends Component
 
         $user = $this->auth;
 
-        if ($this->panel() !== null && $user) {
+        if ($this->panel() !== null && $user && $this->panel()->hasMessageRequests()) {
             $panelId = $this->panel()->getId();
             $encodedType = MorphClassResolver::encode($user->getMorphClass());
             $listeners["echo-private:{$panelId}.participant.{$encodedType}.{$user->getKey()},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated"] = 'handleMessageRequestUpdated';
@@ -1017,6 +1017,7 @@ class Chat extends Component
 
     public function mount($conversation = null)
     {
+        $this->initializePanel($this->panel);
         $this->initializeConversation($conversation);
         $this->initializeParticipants();
         $this->syncMessageRequestState();
@@ -1068,7 +1069,14 @@ class Chat extends Component
     private function initializeParticipants()
     {
         if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
-            $this->conversation->load('participants.participantable', 'messageRequests.sender', 'messageRequests.recipient');
+            $relations = ['participants.participantable'];
+
+            if ($this->panel()->hasMessageRequests()) {
+                $relations[] = 'messageRequests.sender';
+                $relations[] = 'messageRequests.recipient';
+            }
+
+            $this->conversation->load($relations);
             $participants = $this->conversation->participants();
 
             $this->authParticipant = $participants->whereParticipantable($this->auth)->first();
@@ -1113,7 +1121,7 @@ class Chat extends Component
         $this->canRespondToMessageRequest = false;
         $this->hasPendingOutgoingMessageRequest = false;
 
-        if (! $this->conversation->isPrivate()) {
+        if (! $this->panel()->hasMessageRequests() || ! $this->conversation->isPrivate()) {
             return;
         }
 
@@ -1154,6 +1162,7 @@ class Chat extends Component
     public function acceptMessageRequest(): void
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasMessageRequests(), 404);
         abort_unless($this->canRespondToMessageRequest, 403);
 
         $request = $this->conversation->pendingMessageRequestFor($this->auth);
@@ -1174,6 +1183,7 @@ class Chat extends Component
     public function dismissMessageRequest()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasMessageRequests(), 404);
         abort_unless($this->canRespondToMessageRequest, 403);
 
         $request = $this->conversation->pendingMessageRequestFor($this->auth);
@@ -1199,6 +1209,10 @@ class Chat extends Component
 
     public function handleMessageRequestUpdated($event)
     {
+        if (! $this->panel()->hasMessageRequests()) {
+            return;
+        }
+
         if ((string) ($event['conversation_id'] ?? '') !== (string) $this->conversation?->id) {
             return;
         }

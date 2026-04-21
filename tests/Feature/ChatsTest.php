@@ -37,6 +37,15 @@ test('it shows the requests drawer button in the chats header', function () {
         ->assertSeeHtml('id="open-requests-drawer-button"');
 });
 
+test('it hides the requests drawer button when message requests are disabled on the panel', function () {
+    testPanelProvider()->messageRequests(false);
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSeeHtml('id="open-requests-drawer-button"');
+});
+
 test('pending request conversations stay out of the normal chats list', function () {
     $auth = User::factory()->create(['name' => 'Auth']);
     $receiver = User::factory()->create(['name' => 'Pending User']);
@@ -57,6 +66,15 @@ test('requests drawer shows its heading, description, tabs, and empty state', fu
         ->assertSeeHtml('dusk="outgoing-requests-tab"')
         ->assertSee(__('wirechat::chats.requests.labels.empty_state'))
         ->assertSet('activeTab', 'incoming');
+});
+
+test('requests drawer is unavailable when message requests are disabled on the panel', function () {
+    testPanelProvider()->messageRequests(false);
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertNotFound();
 });
 
 test('tabs blade components render labels badges and content shells', function () {

@@ -2,7 +2,8 @@
 
 @php
     $group = $conversation->group;
-    $hasActiveMessageRequest = $conversation->isPrivate() && $conversation->hasActiveMessageRequest();
+    $hasMessageRequests = $this->panel()->hasMessageRequests();
+    $hasActiveMessageRequest = $hasMessageRequests && $conversation->isPrivate() && $conversation->hasActiveMessageRequest();
 @endphp
 
 <header

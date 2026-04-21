@@ -19,6 +19,8 @@ class Requests extends ModalComponent
     public function mount(): void
     {
         abort_unless(auth()->check(), 401);
+        $this->initializePanel($this->panel);
+        abort_unless($this->panel()->hasMessageRequests(), 404);
 
         $this->activeTab = $this->resolveDefaultTab();
     }
@@ -51,6 +53,10 @@ class Requests extends ModalComponent
     #[Computed]
     public function incomingRequests()
     {
+        if (! $this->panel()->hasMessageRequests()) {
+            return collect();
+        }
+
         return Wirechat::messageRequestModelClass()::query()
             ->pending()
             ->whereRecipient($this->auth)
@@ -66,6 +72,10 @@ class Requests extends ModalComponent
     #[Computed]
     public function outgoingRequests()
     {
+        if (! $this->panel()->hasMessageRequests()) {
+            return collect();
+        }
+
         return Wirechat::messageRequestModelClass()::query()
             ->pending()
             ->whereSender($this->auth)
@@ -102,6 +112,8 @@ class Requests extends ModalComponent
 
     public function openConversation(int $requestId)
     {
+        abort_unless($this->panel()->hasMessageRequests(), 404);
+
         /** @var MessageRequest $request */
         $request = Wirechat::messageRequestModelClass()::query()
             ->pending()

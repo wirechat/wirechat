@@ -16,6 +16,7 @@ use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelRegistry;
 
 /**
  * @property-read string|null $cover_url
@@ -359,6 +360,12 @@ trait InteractsWithWirechat
 
     public function canAccessConversation(Conversation $conversation): bool
     {
+        $panel = app(PanelRegistry::class)->getCurrent();
+
+        if ($panel && ! $panel->hasMessageRequests() && ! $this->belongsToConversation($conversation)) {
+            return false;
+        }
+
         return $conversation->canBeAccessedBy($this);
     }
 

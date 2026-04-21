@@ -91,7 +91,10 @@ class Chats extends Component
         $panelId = $this->panel()->getId();
         $channelName = "$panelId.participant.$encodedType.$userId";
         $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\NotifyParticipant"] = 'refreshComponent';
-        $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated"] = 'refreshComponent';
+
+        if ($this->panel()->hasMessageRequests()) {
+            $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated"] = 'refreshComponent';
+        }
 
         return $listeners;
     }
@@ -106,7 +109,7 @@ class Chats extends Component
     {
         $user = $this->auth;
 
-        if (! $user) {
+        if (! $user || ! $this->panel()->hasMessageRequests()) {
             return 0;
         }
 

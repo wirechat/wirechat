@@ -142,6 +142,26 @@ describe('Creating conversation', function () {
 
     });
 
+    test('it creates a direct conversation when message requests are disabled on the panel', function () {
+        testPanelProvider()->messageRequests(false);
+
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        Livewire::actingAs($auth)->test(NewChat::class)
+            ->set('search', 'Joh')
+            ->assertSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        $conversation = $auth->conversations()->first();
+
+        expect($conversation)->not->toBeNull()
+            ->and($auth->hasConversationWith($otherUser))->toBeTrue()
+            ->and($conversation?->participant($auth))->not->toBeNull()
+            ->and($conversation?->participant($otherUser))->not->toBeNull()
+            ->and(MessageRequest::query()->count())->toBe(0);
+    });
+
     test('it reuses an existing direct conversation without creating a request', function () {
         $auth = ModelsUser::factory()->create();
         $otherUser = ModelsUser::factory()->create(['name' => 'John']);
