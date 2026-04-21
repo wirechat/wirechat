@@ -72,7 +72,7 @@ return [
     'message_url_parsing' => [
         'allow_bare_domains' => true,
         'allowed_tlds' => [
-            'net', 'org', 'io', 'co', 'me', 'app', 'dev', 'ai', 'gg', 'tv',
+            'com', 'net', 'org', 'io', 'co', 'me', 'app', 'dev', 'ai', 'gg', 'tv',
             'info', 'biz', 'xyz', 'site', 'store', 'shop', 'pro', 'cloud',
         ],
     ],
