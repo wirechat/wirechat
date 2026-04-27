@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Livewire\Chats;
 
 use Livewire\Attributes\Computed;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
@@ -41,6 +42,22 @@ class Requests extends ModalComponent
         return auth()->user();
     }
 
+    public function getListeners(): array
+    {
+        $user = $this->auth;
+
+        if (! $user || ! $this->panel()->hasMessageRequests()) {
+            return [];
+        }
+
+        $panelId = $this->panel()->getId();
+        $encodedType = MorphClassResolver::encode($user->getMorphClass());
+
+        return [
+            "echo-private:{$panelId}.participant.{$encodedType}.{$user->getKey()},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated" => 'refreshRequests',
+        ];
+    }
+
     public function setActiveTab(string $tab): void
     {
         if (! in_array($tab, ['incoming', 'outgoing'], true)) {
@@ -48,6 +65,13 @@ class Requests extends ModalComponent
         }
 
         $this->activeTab = $tab;
+    }
+
+    public function refreshRequests(): void
+    {
+        if ($this->currentRequests->isEmpty()) {
+            $this->activeTab = $this->resolveDefaultTab();
+        }
     }
 
     #[Computed]

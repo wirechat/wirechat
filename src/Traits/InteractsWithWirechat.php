@@ -8,7 +8,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Events\MessageRequestUpdated;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
@@ -67,24 +69,35 @@ trait InteractsWithWirechat
         $isSelf = ($authId === $peerId) && ($authType === $peerType);
         $type = $isSelf ? ConversationType::SELF : ConversationType::PRIVATE;
 
-        // Find existing conversation (requires unique (conversation_id, participantable_type, participantable_id))
-        $existing = Wirechat::conversationModelClass()::withoutGlobalScopes()
-            ->where('type', $type)
-            // must contain auth participant
-            ->whereHas('participants', function ($q) use ($authType, $authId) {
-                $q->where('participantable_type', $authType)
-                    ->where('participantable_id', $authId);
-            })
-            // and (if not self) must also contain peer participant
-            ->when(! $isSelf, function ($q) use ($peerType, $peerId) {
-                $q->whereHas('participants', function ($qq) use ($peerType, $peerId) {
-                    $qq->where('participantable_type', $peerType)
-                        ->where('participantable_id', $peerId);
-                });
-            })
-            ->first();
+        $existing = $isSelf
+            ? Wirechat::conversationModelClass()::withoutGlobalScopes()
+                ->where('type', $type)
+                ->whereHas('participants', function ($q) use ($authType, $authId) {
+                    $q->where('participantable_type', $authType)
+                        ->where('participantable_id', $authId);
+                })
+                ->first()
+            : $this->findExistingPrivateConversationForPair(
+                authType: $authType,
+                authId: $authId,
+                peerType: $peerType,
+                peerId: $peerId,
+            );
 
         if ($existing) {
+            if (! $isSelf) {
+                $incomingRequest = $existing->pendingMessageRequestFor($this);
+                $sender = $incomingRequest?->sender;
+
+                if ($incomingRequest) {
+                    $existing->acceptMessageRequestFor($this, $this);
+                    $existing->touch();
+                    $this->dispatchMessageRequestRealtimeUpdate($sender, $existing, MessageRequestStatus::ACCEPTED);
+
+                    return $existing->fresh();
+                }
+            }
+
             return $existing;
         }
 
@@ -149,7 +162,59 @@ trait InteractsWithWirechat
             return $this->createConversationWith($peer);
         }
 
-        $existingConversation = Wirechat::conversationModelClass()::withoutGlobalScopes()
+        $existingConversation = $this->findExistingPrivateConversationForPair(
+            authType: $authType,
+            authId: $authId,
+            peerType: $peerType,
+            peerId: $peerId,
+        );
+
+        if ($existingConversation) {
+            $incomingRequest = $existingConversation->pendingMessageRequestFor($this);
+            $sender = $incomingRequest?->sender;
+
+            if ($incomingRequest) {
+                $existingConversation->acceptMessageRequestFor($this, $this);
+                $existingConversation->touch();
+                $this->dispatchMessageRequestRealtimeUpdate($sender, $existingConversation, MessageRequestStatus::ACCEPTED);
+
+                return $existingConversation->fresh();
+            }
+
+            return $existingConversation;
+        }
+
+        $conversation = DB::transaction(function () use ($authType, $authId, $peer) {
+            $conversation = Wirechat::conversationModel();
+            $conversation->type = ConversationType::PRIVATE;
+            $conversation->save();
+
+            Wirechat::participantModelClass()::firstOrCreate(
+                [
+                    'conversation_id' => $conversation->getKey(),
+                    'participantable_type' => $authType,
+                    'participantable_id' => $authId,
+                ],
+                ['role' => ParticipantRole::OWNER]
+            );
+
+            $conversation->createMessageRequestFor($peer, $this);
+
+            return $conversation;
+        });
+
+        $this->dispatchMessageRequestRealtimeUpdate($peer, $conversation, MessageRequestStatus::PENDING);
+
+        return $conversation;
+    }
+
+    protected function findExistingPrivateConversationForPair(
+        string $authType,
+        string $authId,
+        string $peerType,
+        string $peerId
+    ): ?Conversation {
+        return Wirechat::conversationModelClass()::withoutGlobalScopes()
             ->where('type', ConversationType::PRIVATE)
             ->where(function ($query) use ($authType, $authId, $peerType, $peerId) {
                 $query
@@ -186,47 +251,30 @@ trait InteractsWithWirechat
             })
             ->latest('updated_at')
             ->first();
+    }
 
-        if ($existingConversation) {
-            $incomingRequest = $existingConversation->pendingMessageRequestFor($this);
-
-            if ($incomingRequest) {
-                $existingConversation->acceptMessageRequestFor($this, $this);
-                $existingConversation->touch();
-
-                return $existingConversation->fresh();
-            }
-
-            return $existingConversation;
+    protected function dispatchMessageRequestRealtimeUpdate(
+        ?Model $participantable,
+        Conversation $conversation,
+        MessageRequestStatus $status
+    ): void {
+        if (! $participantable) {
+            return;
         }
 
-        return DB::transaction(function () use ($authType, $authId, $peer) {
-            $conversation = Wirechat::conversationModel();
-            $conversation->type = ConversationType::PRIVATE;
-            $conversation->save();
+        $panelId = Wirechat::currentPanel()?->getId();
 
-            Wirechat::participantModelClass()::firstOrCreate(
-                [
-                    'conversation_id' => $conversation->getKey(),
-                    'participantable_type' => $authType,
-                    'participantable_id' => $authId,
-                ],
-                ['role' => ParticipantRole::OWNER]
-            );
+        if (! $panelId) {
+            try {
+                $panelId = Wirechat::getDefaultPanel()?->getId();
+            } catch (\Throwable) {
+                return;
+            }
+        }
 
-            $conversation->createMessageRequestFor($peer, $this);
-
-            return $conversation;
-        });
+        event(new MessageRequestUpdated($participantable, $conversation->getKey(), $status, $panelId));
     }
 
-    /**
-     * @deprecated Use sendMessageRequestTo() instead.
-     */
-    public function createMessageRequestConversationWith(Model $peer): ?Conversation
-    {
-        return $this->sendMessageRequestTo($peer);
-    }
     /**
      * Room configuration
      */
