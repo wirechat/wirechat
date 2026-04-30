@@ -248,7 +248,7 @@ describe('Message requests', function () {
             ->assertDontSee(__('wirechat::chat.message_request.actions.dismiss.label'));
     });
 
-    test('pending request messages stay local and do not broadcast before acceptance', function () {
+    test('pending request messages broadcast in real-time but do not trigger notifications', function () {
         Event::fake();
         Queue::fake();
 
@@ -266,7 +266,9 @@ describe('Message requests', function () {
         expect($message)->not->toBeNull()
             ->and($message?->body)->toBe('Hello from a pending request');
 
-        Event::assertNotDispatched(MessageCreated::class);
+        // Message is broadcast so the recipient's chat view updates in real-time
+        Event::assertDispatched(MessageCreated::class);
+        // But no notification is sent while the request is still pending
         Queue::assertNotPushed(NotifyParticipants::class);
     });
 

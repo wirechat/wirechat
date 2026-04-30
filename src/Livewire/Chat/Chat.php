@@ -808,11 +808,7 @@ class Chat extends Component
             return;
         }
 
-        // Keep pending request threads local to the sender until the
-        // recipient explicitly accepts the request.
-        if ($this->conversation->isPrivate() && $this->conversation->hasActiveMessageRequest()) {
-            return;
-        }
+        $hasPendingRequest = $this->conversation->isPrivate() && $this->conversation->hasActiveMessageRequest();
 
         // send broadcast message only to others
         // we add try catch to avoid runtime error when broadcasting services are not connected
@@ -826,10 +822,10 @@ class Chat extends Component
             // sleep(3);
             broadcast(new MessageCreated($message, $this->panel()->getId()))->toOthers();
 
-            // notify participants if conversation is NOT self
+            // notify participants if conversation is NOT self and has no pending request
             $isSelf = $this->conversation->isSelf();
             /** @var bool $isSelf */
-            if (! $isSelf) {
+            if (! $isSelf && ! $hasPendingRequest) {
 
                 NotifyParticipants::dispatch($this->conversation, $message, $this->panel);
             }
