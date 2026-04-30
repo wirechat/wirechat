@@ -275,6 +275,27 @@ describe('Message requests', function () {
         Event::assertDispatched(NotifyParticipant::class);
     });
 
+    test('deleting a message in a pending request notifies the recipient directly', function () {
+        Event::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+        $message = $auth->sendMessageTo($conversation, 'Hello');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForEveryone', encrypt($message->id));
+
+        // MessageDeleted broadcast fires on the conversation channel
+        Event::assertDispatched(MessageDeleted::class);
+        // NotifyParticipant is also broadcast directly so the recipient's
+        // Requests list refreshes (recipient is not a participant yet)
+        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($receiver) {
+            return (string) $event->participantId === (string) $receiver->getKey();
+        });
+    });
+
     test('pending recipient can accept a message request', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create();

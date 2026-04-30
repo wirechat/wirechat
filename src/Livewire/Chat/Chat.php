@@ -629,6 +629,14 @@ class Chat extends Component
 
         try {
             MessageDeleted::dispatch($message);
+
+            if ($this->conversation->isPrivate() && $this->conversation->hasActiveMessageRequest()) {
+                $messageRequest = $this->conversation->pendingMessageRequests()->first();
+                $recipient = $messageRequest?->recipient;
+                if ($recipient) {
+                    broadcast(new NotifyParticipant($recipient, $message, $this->panel()->getId()));
+                }
+            }
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }
