@@ -308,9 +308,14 @@ class Chats extends Component
 
     /**
      * Real-time notify: reset so latest conversation can jump to top.
+     * Skip for message requests — those are handled by the Requests component.
      */
     public function refreshComponent($event): void
     {
+        if (! empty($event['is_request'])) {
+            return;
+        }
+
         $this->hardRefresh();
     }
 

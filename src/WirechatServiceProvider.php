@@ -235,10 +235,14 @@ class WirechatServiceProvider extends ServiceProvider
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
                                         .listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
                                             if (window.Livewire) {
-                                                window.Livewire.dispatch('refresh-chats');
+                                                if (e.is_request) {
+                                                    window.Livewire.dispatch('refresh-requests');
+                                                } else {
+                                                    window.Livewire.dispatch('refresh-chats');
+                                                }
                                             }
 
-                                            if (e.redirect_url !== window.location.href) {
+                                            if (!e.is_request && e.redirect_url !== window.location.href) {
                                                 if (Notification.permission === 'granted') {
                                                     showNotification(e);
                                                 } else if (Notification.permission !== 'denied') {

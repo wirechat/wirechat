@@ -16,6 +16,7 @@ use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Jobs\BroadcastMessage;
@@ -268,8 +269,10 @@ describe('Message requests', function () {
 
         // Message is broadcast so the recipient's chat view updates in real-time
         Event::assertDispatched(MessageCreated::class);
-        // But no notification is sent while the request is still pending
+        // Recipient is not a participant yet, so the job is skipped;
+        // NotifyParticipant is broadcast directly to the request recipient instead
         Queue::assertNotPushed(NotifyParticipants::class);
+        Event::assertDispatched(NotifyParticipant::class);
     });
 
     test('pending recipient can accept a message request', function () {

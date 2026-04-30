@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Livewire\Chats;
 
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
@@ -52,9 +53,11 @@ class Requests extends ModalComponent
 
         $panelId = $this->panel()->getId();
         $encodedType = MorphClassResolver::encode($user->getMorphClass());
+        $userId = $user->getKey();
 
         return [
-            "echo-private:{$panelId}.participant.{$encodedType}.{$user->getKey()},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated" => 'refreshRequests',
+            "echo-private:{$panelId}.participant.{$encodedType}.{$userId},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated" => 'refreshRequests',
+            "echo-private:{$panelId}.participant.{$encodedType}.{$userId},.Wirechat\\Wirechat\\Events\\NotifyParticipant" => 'refreshFromNotify',
         ];
     }
 
@@ -72,6 +75,23 @@ class Requests extends ModalComponent
         if ($this->currentRequests->isEmpty()) {
             $this->activeTab = $this->resolveDefaultTab();
         }
+    }
+
+    public function refreshFromNotify(array $event): void
+    {
+        if (empty($event['is_request'])) {
+            return;
+        }
+
+        unset($this->incomingRequests, $this->outgoingRequests, $this->currentRequests);
+        $this->refreshRequests();
+    }
+
+    #[On('refresh-requests')]
+    public function refreshFromJs(): void
+    {
+        unset($this->incomingRequests, $this->outgoingRequests, $this->currentRequests);
+        $this->refreshRequests();
     }
 
     #[Computed]
