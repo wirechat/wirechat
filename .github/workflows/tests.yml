@@ -18,7 +18,7 @@ jobs:
       matrix:
         include:
           # Laravel 11 (light support)
-          - php: 8.4
+          - php: 8.5
             laravel: "11.*"
             testbench: "9.*"
             pest: ^3.7.4
@@ -26,7 +26,7 @@ jobs:
             dependency-version: prefer-stable
 
           # Laravel 12 (medium support)
-          - php: 8.4
+          - php: 8.5
             laravel: "12.*"
             testbench: "10.*"
             pest: ^3.7.4
