@@ -50,7 +50,7 @@ class Helper
             $groupKey = __('wirechat::chat.message_groups.today');
         } elseif ($messageDate->isYesterday()) {
             $groupKey = __('wirechat::chat.message_groups.yesterday');
-        } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
+        } elseif ($messageDate->greaterThanOrEqualTo($timestamp::now()->subDays(7))) {
             $groupKey = $messageDate->translatedFormat('l');
         } else {
             $groupKey = $messageDate->translatedFormat('d/m/Y');
