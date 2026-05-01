@@ -16,8 +16,6 @@ workbench:
   start: '/'
   install: true
   purge:
-    files:
-      - config/wirechat.php
   discovers:
     web: true
     api: true
