@@ -59,6 +59,7 @@ trait InteractsWithWirechat
     public function createConversationWith(Model $peer, ?string $message = null): ?Conversation
     {
         abort_unless($this->canCreateChats(), 403, 'You do not have permission to create chats.');
+        abort_unless($this->canSendMessageTo($peer), 403, 'You are not allowed to send messages to this user.');
 
         $authType = $this->getMorphClass();
         $authId = (string) $this->getKey();
@@ -149,6 +150,7 @@ trait InteractsWithWirechat
     public function sendMessageRequestTo(Model $peer): ?Conversation
     {
         abort_unless($this->canCreateChats(), 403, 'You do not have permission to create chats.');
+        abort_unless($this->canSendMessageTo($peer), 403, 'You are not allowed to send messages to this user.');
 
         $authType = $this->getMorphClass();
         $authId = (string) $this->getKey();
@@ -404,6 +406,22 @@ trait InteractsWithWirechat
         }
 
         return null;
+    }
+
+    /**
+     * Determine if this user can send a message or message request to the given recipient.
+     * Returns true by default. Override in your User model to enforce blocking,
+     * friendship requirements, or any other custom rule.
+     *
+     * Example:
+     *   public function canSendMessageTo(Model $recipient): bool
+     *   {
+     *       return ! $recipient->hasBlocked($this) && ! $this->hasBlocked($recipient);
+     *   }
+     */
+    public function canSendMessageTo(Model $recipient): bool
+    {
+        return true;
     }
 
     public function canAccessConversation(Conversation $conversation): bool

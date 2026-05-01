@@ -107,7 +107,7 @@ class Chat extends Component
 
     public function getListeners()
     {
-        $conversationId = $this->conversation?->id;
+        $conversationId = $this->conversationId ?? $this->conversation?->id;
 
         if (! $conversationId) {
             return [
@@ -396,6 +396,10 @@ class Chat extends Component
 
         abort_unless(auth()->check(), 401);
         abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
+
+        if ($this->conversation->isPrivate() && $this->receiver instanceof Model) {
+            abort_unless($this->auth->canSendMessageTo($this->receiver), 403, 'You are not allowed to send messages to this user.');
+        }
 
         // rate limit
         $this->rateLimit();
@@ -1065,6 +1069,7 @@ class Chat extends Component
         }
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
+        $this->conversationId = $this->conversation->id;
         $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $this->conversation->id)->count();
         abort_unless($this->auth->canAccessConversation($this->conversation), 403);
     }
@@ -1153,6 +1158,18 @@ class Chat extends Component
 
     protected function refreshConversationContext(bool $reloadMessages = false): void
     {
+        if (! $this->conversation) {
+            $this->handleComponentTermination(
+                redirectRoute: $this->panel()->chatsRoute(),
+                events: [
+                    'close-chat',
+                    Chats::class => 'refresh',
+                ]
+            );
+
+            return;
+        }
+
         $conversationId = $this->conversation->id;
         $this->conversation = Wirechat::conversationModelClass()::find($conversationId);
 
@@ -1231,7 +1248,9 @@ class Chat extends Component
             return;
         }
 
-        if ((string) ($event['conversation_id'] ?? '') !== (string) $this->conversation?->id) {
+        $myConversationId = $this->conversationId ?? $this->conversation?->id;
+
+        if ((string) ($event['conversation_id'] ?? '') !== (string) $myConversationId) {
             return;
         }
 
