@@ -97,7 +97,7 @@ jobs:
           - laravel: 10.*
             php: 8.5
 
-    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }}  - Pest-Plugin${{ matrix.pest-plugin }} -  ${{ matrix.dependency-version }}
+    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }} - Pest-Plugin${{ matrix.pest-plugin }} - ${{ matrix.dependency-version }}
 
     steps:
       - name: Checkout code
