@@ -18,7 +18,7 @@ jobs:
       matrix:
         include:
           # Laravel 11 (light support)
-          - php: 8.5
+          - php: 8.4
             laravel: "11.*"
             testbench: "9.*"
             pest: ^3.7.4
