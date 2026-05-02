@@ -158,7 +158,7 @@ class Chat extends Component
             }
 
             // Dispatch refresh event
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
         }
     }
 
@@ -189,7 +189,7 @@ class Chat extends Component
 
             // refresh chatlist
             // dispatch event 'refresh ' to chatlist
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
 
             // broadcast
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
@@ -479,7 +479,7 @@ class Chat extends Component
                 $this->conversation->save();
 
                 // dispatch event 'refresh ' to chatlist
-                $this->dispatch('refresh')->to(Chats::class);
+                $this->dispatch('refresh')->to('wirechat.chats');
 
                 // broadcast message
                 $this->dispatchMessageCreatedEvent($message);
@@ -517,7 +517,7 @@ class Chat extends Component
             $this->dispatchMessageCreatedEvent($createdMessage);
 
             // dispatch event 'refresh ' to chatlist
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
         }
 
         //     dd('hoting');
@@ -565,7 +565,7 @@ class Chat extends Component
         $this->removeMessage($message);
 
         // dispatch event 'refresh ' to chatlist
-        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('refresh')->to('wirechat.chats');
 
         // delete For $user
         $message->deleteFor($this->auth);
@@ -606,7 +606,7 @@ class Chat extends Component
         $this->removeMessage($message);
 
         // dispatch event 'refresh ' to chatlist
-        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('refresh')->to('wirechat.chats');
 
         try {
             MessageDeleted::dispatch($message);
@@ -839,7 +839,7 @@ class Chat extends Component
         $this->pushMessage($message);
 
         // dispatch event 'refresh ' to chatlist
-        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('refresh')->to('wirechat.chats');
 
         // scroll to bottom
         $this->dispatch('scroll-bottom');
@@ -1079,7 +1079,7 @@ class Chat extends Component
         $this->conversation->markAsRead();
 
         if ($this->isWidget()) {
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
         }
 
         if ($this->authParticipant) {
