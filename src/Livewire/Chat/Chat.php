@@ -301,7 +301,7 @@ class Chat extends Component
     public function deleteConversation()
     {
         abort_unless(auth()->check(), 401);
-        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // delete conversation
         $this->conversation->deleteFor($this->auth);
@@ -320,7 +320,7 @@ class Chat extends Component
     public function clearConversation()
     {
         abort_unless(auth()->check(), 401);
-        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // delete conversation
         $this->conversation->clearFor($this->auth);
@@ -395,7 +395,7 @@ class Chat extends Component
     {
 
         abort_unless(auth()->check(), 401);
-        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         if ($this->conversation->isPrivate() && $this->receiver instanceof Model) {
             abort_unless($this->auth->canSendMessageTo($this->receiver), 403, 'You are not allowed to send messages to this user.');
@@ -858,7 +858,7 @@ class Chat extends Component
     /** Send Like as  message */
     public function sendLike()
     {
-        abort_unless($this->authParticipant, 403, __('wirechat::chat.message_request.messages.accept_required'));
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // sleep(2);
 

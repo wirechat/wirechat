@@ -260,12 +260,17 @@ class Conversation extends Model
 
     /**
      * Pending and historical message requests attached to this conversation.
+     *
+     * @return HasMany<\Wirechat\Wirechat\Models\MessageRequest, $this>
      */
     public function messageRequests(): HasMany
     {
         return $this->hasMany(Wirechat::messageRequestModelClass(), 'conversation_id');
     }
 
+    /**
+     * @return HasMany<\Wirechat\Wirechat\Models\MessageRequest, $this>
+     */
     public function pendingMessageRequests(): HasMany
     {
         return $this->messageRequests()->pending();

@@ -95,7 +95,8 @@ class WithoutRemovedMessages implements Scope
                                     ->orWhereColumn("$messagesTable.created_at", '>', "$participantsTable.conversation_deleted_at");
                             });
                     });
-            })->orWhereHas('conversation.messageRequests', function ($q) use ($user) {
+            })->orWhereHas('conversation.messageRequests', function (Builder $q) use ($user) {
+                /** @phpstan-ignore-next-line method.notFound */
                 $q->pending()->whereRecipient($user);
             });
         });

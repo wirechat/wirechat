@@ -97,7 +97,7 @@ class NotifyParticipant implements ShouldBroadcastNow
         // Use conversation accessor (via participant) to build the redirect URL.
         $conversation = $this->message->conversation ?? $this->message->participant?->conversation;
         $conversationId = $conversation?->id;
-        $isMessageRequest = (bool) ($conversation?->isPrivate() && $conversation?->hasActiveMessageRequest());
+        $isMessageRequest = (bool) ($conversation?->isPrivate() && $conversation->hasActiveMessageRequest());
 
         return [
             'message' => new MessageResource($this->message),

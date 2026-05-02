@@ -11,6 +11,14 @@ use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\MessageRequest;
 
+/**
+ * @property-read \Illuminate\Contracts\Auth\Authenticatable|null $auth
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $incomingRequests
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $outgoingRequests
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $currentRequests
+ * @property-read bool $hasRequests
+ * @property-read string $currentEmptyState
+ */
 class Requests extends ModalComponent
 {
     use HasPanel;
