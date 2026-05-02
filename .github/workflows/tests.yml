@@ -26,7 +26,7 @@ jobs:
             dependency-version: prefer-stable
 
           # Laravel 12 (medium support)
-          - php: 8.5
+          - php: 8.4
             laravel: "12.*"
             testbench: "10.*"
             pest: ^3.7.4
@@ -35,6 +35,20 @@ jobs:
 
           # Laravel 13 (main support)
           - php: 8.3
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-lowest
+
+          - php: 8.3
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-stable
+
+          - php: 8.4
             laravel: "13.*"
             testbench: "11.*"
             pest: ^4.0
@@ -53,21 +67,14 @@ jobs:
             testbench: "11.*"
             pest: ^4.0
             pest-plugin: ^4.0
-            dependency-version: prefer-stable
+            dependency-version: prefer-lowest
 
           - php: 8.5
             laravel: "13.*"
             testbench: "11.*"
             pest: ^4.0
             pest-plugin: ^4.0
-            dependency-version: prefer-lowest
-
-        exclude:
-          - laravel: "13.*"
-            php: 8.2
-
-          - laravel: "11.*"
-            php: 8.3
+            dependency-version: prefer-stable
 
     name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }} - Pest-Plugin${{ matrix.pest-plugin }} - ${{ matrix.dependency-version }}
 
