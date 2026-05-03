@@ -60,7 +60,7 @@
     @if ($primaryInviteUrl)
         <section class="w-full flex  border-zinc-200 px-0 py-3 dark:border-zinc-700">
             <x-wirechat::button type="button"
-                variant="default"
+                variant="filled"
                 x-data
                 x-on:click="{{ $copyPrimaryInviteAction }}"
                 class="w-full gap-2">   

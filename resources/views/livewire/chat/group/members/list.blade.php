@@ -33,23 +33,23 @@
         <section class="flex flex-wrap items-center px-0 border-b dark:border-[var(--wc-dark-secondary)]">
             <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
                 placeholder="{{__('wirechat::chat.group.members.inputs.search.placeholder')}}"
-                class="wc-input w-full border-0 w-auto dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-dark-parimary)] rounded-lg focus:ring-0 hover:ring-0">
+                class="wc-input w-full border-0 p-1 w-auto dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-dark-parimary)] rounded-lg focus:ring-0 hover:ring-0">
         </section>
 
         @if ($authIsAdminInGroup || $authIsOwner)
             <section class="grid grid-cols-2 gap-2 pt-3">
                 <x-wirechat::actions.open-modal component="wirechat.chat.group.members.past"
-                    conversation="{{ $conversation?->id }}" :panel="$this->panel">
-                    <button type="button" class="w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
+                    conversation="{{ $conversation?->id }}"  :panel="$this->panel">
+                    <x-wirechat::button variant="filled"  type="button" class="w-full" >
                         {{ __('wirechat::chat.group.members.actions.past_members.label') }}
-                    </button>
+                    </x-wirechat::button>
                 </x-wirechat::actions.open-modal>
 
                 <x-wirechat::actions.open-modal component="wirechat.chat.group.members.blocked"
-                    conversation="{{ $conversation?->id }}" :panel="$this->panel">
-                    <button type="button" class="w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
+                    conversation="{{ $conversation?->id }}"  :panel="$this->panel">
+                    <x-wirechat::button variant="filled" type="button" class="w-full" >
                         {{ __('wirechat::chat.group.members.actions.blocked_members.label') }}
-                    </button>
+                    </x-wirechat::button>
                 </x-wirechat::actions.open-modal>
             </section>
         @endif

@@ -15,7 +15,7 @@
         <section class="flex flex-wrap items-center px-0 border-b border-zinc-200 dark:border-zinc-700">
             <input type="search" wire:model.live.debounce="search" autocomplete="off"
                 placeholder="{{ __('wirechat::chat.group.blocked_members.inputs.search.placeholder') }}"
-                class="wc-input w-full border-0 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
+                class="wc-input w-full border-0 p-1 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
         </section>
     </header>
 
