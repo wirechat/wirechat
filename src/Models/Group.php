@@ -207,7 +207,7 @@ class Group extends Model
             return false;
         }
 
-        return $participant->isBlockedByAdmin();
+        return $participant->isBannedByAdmin();
     }
 
     public function hasPendingJoinRequest(Model|Authenticatable $user): bool

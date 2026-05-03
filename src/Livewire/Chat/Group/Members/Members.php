@@ -242,7 +242,7 @@ class Members extends ModalComponent
     {
         $this->authorizeAdminAction($participant, 'block');
 
-        $participant->blockByAdmin(auth()->user());
+        $participant->banByAdmin(auth()->user());
 
         $this->participants = $this->participants->reject(function ($member) use ($participant) {
             return $member->id == $participant->id && get_class($member) == get_class($participant);

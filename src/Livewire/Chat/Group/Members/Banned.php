@@ -66,9 +66,9 @@ class Banned extends ModalComponent
             ->whereKey($participantId)
             ->firstOrFail();
         /** @var Participant $participant */
-        abort_unless($participant->isBlockedByAdmin(), 404, 'Member is not blocked.');
+        abort_unless($participant->isBannedByAdmin(), 404, 'Member is not blocked.');
 
-        $participant->liftBlockByAdmin();
+        $participant->liftBanByAdmin();
 
         $this->loadBannedMembers();
 
@@ -97,7 +97,7 @@ class Banned extends ModalComponent
             ->withoutGlobalScopes()
             ->with(['participantable', 'actions.actor.participantable'])
             ->whereHas('actions', function ($query) {
-                $query->where('type', Actions::BLOCKED_BY_ADMIN->value);
+                $query->where('type', Actions::BANNED_BY_ADMIN->value);
             })
             ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
                 $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {

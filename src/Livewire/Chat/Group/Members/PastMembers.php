@@ -101,7 +101,7 @@ class PastMembers extends ModalComponent
                     ->orWhereHas('actions', function ($actionQuery) {
                         $actionQuery->whereIn('type', [
                             Actions::REMOVED_BY_ADMIN->value,
-                            Actions::BLOCKED_BY_ADMIN->value,
+                            Actions::BANNED_BY_ADMIN->value,
                         ]);
                     });
             })

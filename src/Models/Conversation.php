@@ -189,7 +189,7 @@ class Conversation extends Model
         // Check if the participant already exists (with or without global scopes)
         if ($participant) {
             abort_if(
-                $participant->isBlockedByAdmin(),
+                $participant->isBannedByAdmin(),
                 403,
                 'Cannot add '.$user->wirechat_name.' because they were blocked from the group by an Admin.'
             );
@@ -273,7 +273,7 @@ class Conversation extends Model
         }
 
         abort_if(
-            $participant->isBlockedByAdmin(),
+            $participant->isBannedByAdmin(),
             403,
             'You cannot join this group because you were blocked by an admin.'
         );

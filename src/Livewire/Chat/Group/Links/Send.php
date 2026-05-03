@@ -174,7 +174,7 @@ class Send extends ModalComponent
             return true;
         }
 
-        if ($participant->isBlockedByAdmin()) {
+        if ($participant->isBannedByAdmin()) {
             abort_if($shouldAbort, 403, __('wirechat::chat.group.invite_link.send_via_chat.messages.unavailable_blocked', ['member' => $model->wirechat_name]));
 
             return false;

@@ -241,14 +241,30 @@ class Participant extends Model
         return $this->latestActionOfType(Actions::REMOVED_BY_ADMIN);
     }
 
-    public function isBlockedByAdmin(): bool
+    public function isBannedByAdmin(): bool
     {
-        return $this->blockedByAdminAction() !== null;
+        return $this->bannedByAdminAction() !== null;
     }
 
+    public function bannedByAdminAction(): ?Action
+    {
+        return $this->latestActionOfType(Actions::BANNED_BY_ADMIN);
+    }
+
+    /**
+     * @deprecated Use isBannedByAdmin() instead.
+     */
+    public function isBlockedByAdmin(): bool
+    {
+        return $this->isBannedByAdmin();
+    }
+
+    /**
+     * @deprecated Use bannedByAdminAction() instead.
+     */
     public function blockedByAdminAction(): ?Action
     {
-        return $this->latestActionOfType(Actions::BLOCKED_BY_ADMIN);
+        return $this->bannedByAdminAction();
     }
 
     public function latestActionOfType(Actions $type): ?Action
@@ -319,7 +335,7 @@ class Participant extends Model
         $this->forgetLoadedActions();
     }
 
-    public function blockByAdmin(Model|Authenticatable $admin): void
+    public function banByAdmin(Model|Authenticatable $admin): void
     {
         $this->removeByAdmin($admin);
 
@@ -331,7 +347,7 @@ class Participant extends Model
 
         $exists = Action::where('actionable_id', $this->getKey())
             ->where('actionable_type', $this->getMorphClass())
-            ->where('type', Actions::BLOCKED_BY_ADMIN)
+            ->where('type', Actions::BANNED_BY_ADMIN)
             ->where('actor_id', $adminParticipant->getKey())
             ->where('actor_type', $adminParticipant->getMorphClass())
             ->exists();
@@ -342,14 +358,22 @@ class Participant extends Model
                 'actionable_type' => $this->getMorphClass(),
                 'actor_id' => $adminParticipant->getKey(),
                 'actor_type' => $adminParticipant->getMorphClass(),
-                'type' => Actions::BLOCKED_BY_ADMIN,
+                'type' => Actions::BANNED_BY_ADMIN,
             ]);
         }
 
         $this->forgetLoadedActions();
     }
 
-    public function liftBlockByAdmin(): void
+    /**
+     * @deprecated Use banByAdmin() instead.
+     */
+    public function blockByAdmin(Model|Authenticatable $admin): void
+    {
+        $this->banByAdmin($admin);
+    }
+
+    public function liftBanByAdmin(): void
     {
         if (! $this->hasExited()) {
             $this->forceFill([
@@ -359,10 +383,18 @@ class Participant extends Model
         }
 
         $this->actions()
-            ->where('type', Actions::BLOCKED_BY_ADMIN->value)
+            ->where('type', Actions::BANNED_BY_ADMIN->value)
             ->delete();
 
         $this->forgetLoadedActions();
+    }
+
+    /**
+     * @deprecated Use liftBanByAdmin() instead.
+     */
+    public function liftBlockByAdmin(): void
+    {
+        $this->liftBanByAdmin();
     }
 
     public function pastMembershipReason(): ?string
