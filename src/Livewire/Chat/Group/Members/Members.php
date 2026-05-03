@@ -273,7 +273,7 @@ class Members extends ModalComponent
         do {
             $this->page++;
             $addedCount = $this->loadParticipants();
-        } while ($addedCount === 0 && $this->canLoadMore);
+        } while ($addedCount === 0);
     }
 
     public function mount(Conversation $conversation)

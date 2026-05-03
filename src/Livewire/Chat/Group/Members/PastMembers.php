@@ -73,7 +73,7 @@ class PastMembers extends ModalComponent
         do {
             $this->page++;
             $addedCount = $this->loadPastMembers();
-        } while ($addedCount === 0 && $this->canLoadMore);
+        } while ($addedCount === 0);
     }
 
     public function render()
@@ -125,9 +125,12 @@ class PastMembers extends ModalComponent
             ->latest('updated_at')
             ->paginate($this->perPage, ['*'], 'page', $this->page);
 
+        /** @var \Illuminate\Support\Collection<int, Participant> $participantItems */
+        $participantItems = collect($participants->items());
+
         /** @var \Illuminate\Support\Collection<int, Participant> $filtered */
-        $filtered = collect($participants->items())
-            ->filter(fn (Participant $participant) => $participant->pastMembershipReason() !== null)
+        $filtered = $participantItems
+            ->filter(fn (Participant $participant): bool => $participant->pastMembershipReason() !== null)
             ->values();
 
         $this->pastMembers = $this->pastMembers->merge($filtered)->unique('id')->values();
