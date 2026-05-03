@@ -42,6 +42,8 @@ class Members extends ModalComponent
 
     public $canLoadMore;
 
+    public int $perPage = 10;
+
     #[Locked]
     public $newTotalCount;
 
@@ -183,7 +185,7 @@ class Members extends ModalComponent
                 ParticipantRole::PARTICIPANT->value,
             ])
             ->latest('updated_at')
-            ->paginate(10, ['*'], 'page', $this->page);
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
         // Merge participants and remove duplicates
         $this->participants = $this->participants->merge($additionalParticipants->items())->unique('id')->values();
 

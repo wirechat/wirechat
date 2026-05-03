@@ -15,7 +15,7 @@
         <section class="flex flex-wrap items-center px-0 border-b border-zinc-200 dark:border-zinc-700">
             <input type="search" wire:model.live.debounce="search" autocomplete="off"
                 placeholder="{{ __('wirechat::chat.group.past_members.inputs.search.placeholder') }}"
-                class="wc-input w-full border-0 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
+                class="wc-input w-full border-0 p-1 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
         </section>
     </header>
 
@@ -51,6 +51,15 @@
                         </li>
                     @endforeach
                 </ul>
+
+                @if ($canLoadMore)
+                    <section class="w-full justify-center flex my-3">
+                        <button type="button" wire:click="loadMore"
+                            class="text-sm dark:text-white hover:text-gray-700 transition-colors dark:hover:text-gray-500 dark:gray-200">
+                            {{ __('wirechat::chat.group.members.actions.load_more.label') }}
+                        </button>
+                    </section>
+                @endif
             @endif
         </section>
     </div>

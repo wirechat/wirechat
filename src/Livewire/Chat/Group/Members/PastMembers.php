@@ -23,6 +23,12 @@ class PastMembers extends ModalComponent
 
     public $pastMembers;
 
+    public int $perPage = 10;
+
+    public int $page = 1;
+
+    public bool $canLoadMore = false;
+
     protected ?Participant $authParticipant = null;
 
     public static function modalAttributes(): array
@@ -54,7 +60,20 @@ class PastMembers extends ModalComponent
 
     public function updatedSearch(): void
     {
+        $this->page = 1;
         $this->loadPastMembers();
+    }
+
+    public function loadMore(): void
+    {
+        if (! $this->canLoadMore) {
+            return;
+        }
+
+        do {
+            $this->page++;
+            $addedCount = $this->loadPastMembers();
+        } while ($addedCount === 0 && $this->canLoadMore);
     }
 
     public function render()
@@ -62,10 +81,17 @@ class PastMembers extends ModalComponent
         return view('wirechat::livewire.chat.group.members.past');
     }
 
-    protected function loadPastMembers(): void
+    protected function loadPastMembers(): int
     {
         $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = [];
+
+        $this->pastMembers = $this->pastMembers ?? collect();
+        if ($this->page === 1) {
+            $this->pastMembers = collect();
+        }
+
+        $beforeCount = $this->pastMembers->count();
 
         $participants = $this->conversation->participants()
             ->withoutGlobalScopes()
@@ -97,11 +123,16 @@ class PastMembers extends ModalComponent
                 });
             })
             ->latest('updated_at')
-            ->get();
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
 
-        /** @var \Illuminate\Support\Collection<int, Participant> $participants */
-        $this->pastMembers = $participants
+        /** @var \Illuminate\Support\Collection<int, Participant> $filtered */
+        $filtered = collect($participants->items())
             ->filter(fn (Participant $participant) => $participant->pastMembershipReason() !== null)
             ->values();
+
+        $this->pastMembers = $this->pastMembers->merge($filtered)->unique('id')->values();
+        $this->canLoadMore = $participants->hasMorePages();
+
+        return $this->pastMembers->count() - $beforeCount;
     }
 }
