@@ -76,6 +76,7 @@ class AddMembers extends ModalComponent
                         'wirechat_name' => $model->wirechat_name,
                         'wirechat_avatar_url' => $model->wirechat_avatar_url,
                         'belongsToConversation' => $model->belongsToConversation($this->conversation),
+                        'isBanned' => (bool) $this->conversation->participant($model, withoutGlobalScopes: true)?->isBannedByAdmin(),
                     ];
                 });
         }
@@ -101,7 +102,15 @@ class AddMembers extends ModalComponent
 
                 $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
 
-                abort_if($participant?->isBannedByAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were blocked from the group by an Admin.');
+                if ($participant?->isBannedByAdmin()) {
+                    $this->dispatch(
+                        'wirechat-toast',
+                        type: 'warning',
+                        message: 'Cannot add '.$model->wirechat_name.' because they were banned from the group by an Admin.'
+                    );
+
+                    return;
+                }
                 abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->wirechat_name.' because they left the group');
 
                 if ($participant?->isRemovedByAdmin()) {

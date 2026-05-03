@@ -115,9 +115,16 @@
 
                 @foreach ($users as $key => $user)
                     @php
-                        $isAlreadyAParticipant= $user['belongsToConversation']
+                        $isAlreadyAParticipant = $user['belongsToConversation'];
+                        $isBanned = (bool) ($user['isBanned'] ?? false);
                     @endphp
-                    <li wire:key="users-{{$key}}" class="flex cursor-pointer group gap-2 items-center p-2">
+                    <li
+                        wire:key="users-{{$key}}"
+                        @class([
+                            'flex group gap-2 items-center p-2',
+                            'cursor-not-allowed opacity-60' => $isBanned,
+                            'cursor-pointer' => ! $isBanned,
+                        ])>
 
                         <label
                         {{-- The wire:click attribute is only rendered if $isAlreadyAParticipant is false. --}}
@@ -125,10 +132,14 @@
                          wire:click="toggleMember('{{ $user['id'] }}', {{ json_encode($user['type']) }})"
                          @endif
 
-                            class="flex cursor-pointer gap-2 items-center w-full">
+                            @class([
+                                'flex gap-2 items-center w-full',
+                                'cursor-not-allowed' => $isBanned,
+                                'cursor-pointer' => ! $isBanned,
+                            ])>
                             <x-wirechat::avatar src="{{$user['wirechat_avatar_url']}}" class="w-10 h-10" />
 
-                           <div @class(['opacity-70' => $isAlreadyAParticipant]) >
+                           <div @class(['opacity-70' => $isAlreadyAParticipant || $isBanned]) >
                             <p
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
                                 {{ $user['wirechat_name'] }}</p>
@@ -137,6 +148,8 @@
                              @class(['text-gray-600 dark:text-gray-400 text-sm'])>
                                 @if ($isAlreadyAParticipant)
                                 {{__('wirechat::chat.group.add_members.messages.member_already_exists')}}
+                                @elseif ($isBanned)
+                                {{ __('wirechat::chat.group.join.lobby.labels.join_blocked') }}
                                 @endif
                              </span>
                            </div>

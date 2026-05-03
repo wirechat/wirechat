@@ -262,7 +262,7 @@ describe('actions test', function () {
 
     });
 
-    test('it aborts if admin tries to add a banned past member', function () {
+    test('it shows warning toast and does not select banned past member', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -272,7 +272,9 @@ describe('actions test', function () {
 
         Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->call('toggleMember', $blockedUser->id, $blockedUser->getMorphClass())
-            ->assertStatus(403, "Cannot add {$blockedUser->wirechat_name} because they were blocked from the group by an Admin.");
+            ->assertStatus(200)
+            ->assertDispatched('wirechat-toast', type: 'warning')
+            ->assertSet('selectedMembers', collect());
     });
 
     test('it does not abort if ADMIN tries to add a member removed by admin', function () {
