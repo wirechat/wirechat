@@ -47,23 +47,24 @@
     <section class="flex flex-wrap items-center px-0 border-b border-zinc-200 dark:border-zinc-700">
         <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
             placeholder="{{ __('wirechat::chat.group.add_members.inputs.search.placeholder') }}"
-            class="wc-input  w-full border-0 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
+            class="wc-input  w-full border-0 w-auto p-1 dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
     </section>
 
     @if ($primaryInviteUrl)
-        <section class="w-full border-zinc-200 px-0 py-3 dark:border-zinc-700">
-            <button type="button"
+        <section class="w-full flex  border-zinc-200 px-0 py-3 dark:border-zinc-700">
+            <x-wirechat::button type="button"
+                variant="default"
                 x-data
                 @click="if (navigator.clipboard) { navigator.clipboard.writeText(@js($primaryInviteUrl)); $dispatch('wirechat-toast', { type: 'success', message: @js(__('wirechat::chat.group.invite_link.messages.copied_success')) }); } else { window.prompt('Copy this link', @js($primaryInviteUrl)); }"
-                class="inline-flex w-full text-center justify-center items-center gap-2 rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
+                class="w-full gap-2">   
                <x-wirechat::icons.link class="size-5" />
 
                 <span>{{ __('wirechat::chat.group.add_members.actions.invite_via_link.label') }}</span>
-            </button>
+            </x-wirechat::button>
         </section>
     @endif
 
-    <section class="  overflow-x-hidden my-2  ">
+    <section class="  overflow-x-hidden my-1">
         <ul style="-ms-overflow-style: none;scrollbar-width: none;
           "
          class="flex w-full overflow-x-auto gap-3">
