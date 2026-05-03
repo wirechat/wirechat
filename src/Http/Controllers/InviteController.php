@@ -29,7 +29,7 @@ class InviteController extends Controller
         return $invite;
     }
 
-    public function show(Request $request, string $token): View
+    public function show(Request $request, string $token): View|RedirectResponse
     {
         $invite = $this->resolveInvite($token);
         $group = $invite->inviteable;
@@ -46,8 +46,15 @@ class InviteController extends Controller
 
         if ($auth !== null) {
             $isMember = $auth->belongsToConversation($conversation);
-            $hasPendingJoinRequest = ! $isMember && $group->hasPendingJoinRequest($auth);
-            $joinBlocked = ! $isMember && $group->inviteJoinBlockedFor($auth);
+
+            // If the user is already a member, skip the invite preview entirely
+            // and route them straight into the conversation.
+            if ($isMember) {
+                return redirect()->to(Wirechat::currentPanel()->chatRoute($conversation->id));
+            }
+
+            $hasPendingJoinRequest = $group->hasPendingJoinRequest($auth);
+            $joinBlocked = $group->inviteJoinBlockedFor($auth);
         }
 
         return view('wirechat::pages.invite', [

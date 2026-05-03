@@ -490,6 +490,45 @@ it('shows the invite preview page to guests', function () {
         ->assertSee(testPanelProvider()->inviteJoinRoute($invite->token), escape: false);
 });
 
+it('redirects existing members from the invite preview to the group chat', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $member = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test Group');
+    $conversation->addParticipant($member);
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->actingAs($member)
+        ->get(testPanelProvider()->inviteRoute($invite->token))
+        ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+});
+
+it('still shows the invite preview to authenticated non-members', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $outsider = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test Group');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->actingAs($outsider)
+        ->get(testPanelProvider()->inviteRoute($invite->token))
+        ->assertOk()
+        ->assertSee(__('wirechat::chat.group.invite_link.page.actions.continue.label'));
+});
+
 it('renders invite preview page using translations', function () {
     app()->setLocale('tr');
 

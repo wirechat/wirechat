@@ -228,6 +228,51 @@ describe('Presense', function () {
             ->assertSee($invite->url(testPanelProvider()));
     });
 
+    test('it renders an inline invite link without target=_blank so the controller redirect can run', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $inviteUrl = $invite->url(testPanelProvider());
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Join here: '.$inviteUrl.' and also https://example.com'
+        )->conversation;
+
+        $rendered = Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        preg_match_all('~<a[^>]*dusk="message-link"[^>]*>~', $rendered, $matches);
+        $linkTags = $matches[0];
+
+        // Two inline links: the invite URL, and the unrelated external URL.
+        expect($linkTags)->toHaveCount(2);
+
+        $inviteAnchor = collect($linkTags)
+            ->first(fn (string $tag) => str_contains($tag, $inviteUrl));
+        $externalAnchor = collect($linkTags)
+            ->first(fn (string $tag) => str_contains($tag, 'https://example.com'));
+
+        expect($inviteAnchor)->toContain('data-invite-link="true"')
+            ->and($inviteAnchor)->not->toContain('target="_blank"');
+
+        expect($externalAnchor)->toContain('target="_blank"')
+            ->and($externalAnchor)->not->toContain('data-invite-link="true"');
+    });
+
     test('it does not render a group invite preview card for foreign or edited text without a valid wirechat invite link', function () {
         $sender = User::factory()->create(['name' => 'Sender']);
         $receiver = User::factory()->create(['name' => 'Receiver']);

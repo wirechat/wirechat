@@ -8,6 +8,7 @@
    $isSameAsPrevious = ($message?->sendable_id === $previousMessage?->sendable_id) && ($message?->sendable_type === $previousMessage?->sendable_type);
    $isNotSameAsPrevious = !$isSameAsPrevious;
    $groupInvitePreview = $message?->groupInvitePreview($this->panel());
+   $inviteUrl = $groupInvitePreview['url'] ?? null;
    $canParseMessageUrls = $this->panel()->canParseMessageUrls();
    $body = (string) ($message?->body ?? '');
    $segments = ($canParseMessageUrls && $message?->isLink())
@@ -83,10 +84,9 @@
 <pre
     dusk="message-text"
     class="{{ $messageTextClasses }}"
-    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])<a
+    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php $isInviteLink = $inviteUrl !== null && $segment['href'] === $inviteUrl; @endphp<a
                 dusk="message-link"
-                target="_blank"
-                rel="noopener noreferrer"
+                @if ($isInviteLink) data-invite-link="true" @else target="_blank" rel="noopener noreferrer" @endif
                 class="underline tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
                 href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
 
@@ -100,7 +100,7 @@
 </span>
 
 @if ($groupInvitePreview)
-    <a href="{{ $groupInvitePreview['url'] }}"
+    <a  href="{{ $groupInvitePreview['url'] }}"
         @class([
             'mt-2 -mx-2.5  block border-t px-4 py-2 text-center text-sm font-semibold transition hover:opacity-95',
             'border-white/20 text-white/90' => $belongsToAuth,
