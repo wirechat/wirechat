@@ -1,3 +1,10 @@
+@php
+    $primaryInviteUrlJs = (string) \Illuminate\Support\Js::from($primaryInviteUrl ?? null);
+    $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copied_success'));
+    $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copy_prompt'));
+    $copyPrimaryInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$primaryInviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$primaryInviteUrlJs}); }";
+@endphp
+
 <div class="h-[calc(100vh_-_10rem)] rounded-xl  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-zinc-200 dark:border-zinc-700 overflow-y-auto overflow-x-hidden  ">
 
 <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
@@ -55,7 +62,7 @@
             <x-wirechat::button type="button"
                 variant="default"
                 x-data
-                @click="if (navigator.clipboard) { navigator.clipboard.writeText(@js($primaryInviteUrl)); $dispatch('wirechat-toast', { type: 'success', message: @js(__('wirechat::chat.group.invite_link.messages.copied_success')) }); } else { window.prompt('Copy this link', @js($primaryInviteUrl)); }"
+                x-on:click="{{ $copyPrimaryInviteAction }}"
                 class="w-full gap-2">   
                <x-wirechat::icons.link class="size-5" />
 
