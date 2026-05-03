@@ -142,13 +142,15 @@ class Members extends ModalComponent
 
     }
 
-    protected function loadParticipants(): void
+    protected function loadParticipants(): int
     {
 
         $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = []; // Initialize cache for column checks
         // Check if $this->participants is initialized
         $this->participants = $this->participants ?? collect();
+
+        $beforeCount = $this->participants->count();
 
         $additionalParticipants = $this->conversation->participants()
             ->with('participantable')
@@ -182,12 +184,14 @@ class Members extends ModalComponent
             ])
             ->latest('updated_at')
             ->paginate(10, ['*'], 'page', $this->page);
-        // Check if cannot load more
+        // Merge participants and remove duplicates
+        $this->participants = $this->participants->merge($additionalParticipants->items())->unique('id')->values();
+
+        // Only allow loading more if paginator has more pages AND this page added new unique members.
+        $addedCount = $this->participants->count() - $beforeCount;
         $this->canLoadMore = $additionalParticipants->hasMorePages();
 
-        // Merge current participants with the additional ones
-        // Merge current participants with the additional ones and remove duplicates
-        $this->participants = $this->participants->merge($additionalParticipants->items())->unique('id');
+        return $addedCount;
     }
 
     /* Deleting from group */
@@ -258,9 +262,11 @@ class Members extends ModalComponent
         if (! $this->canLoadMore) {
             return null;
         }
-        // Load the next page
-        $this->page++;
-        $this->loadParticipants();
+        // Skip empty/duplicate-only pages in one click.
+        do {
+            $this->page++;
+            $addedCount = $this->loadParticipants();
+        } while ($addedCount === 0 && $this->canLoadMore);
     }
 
     public function mount(Conversation $conversation)
