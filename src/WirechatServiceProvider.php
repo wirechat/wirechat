@@ -25,7 +25,7 @@ use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Show;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers;
-use Wirechat\Wirechat\Livewire\Chat\Group\Members\BlockedMembers;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\Banned;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\Members;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\PastMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
@@ -184,7 +184,7 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.members.add', AddMembers::class);
         Livewire::component('wirechat.chat.group.members.list', Members::class);
         Livewire::component('wirechat.chat.group.members.past', PastMembers::class);
-        Livewire::component('wirechat.chat.group.members.blocked', BlockedMembers::class);
+        Livewire::component('wirechat.chat.group.members.banned', Banned::class);
         Livewire::component('wirechat.chat.group.permissions', Permissions::class);
         Livewire::component('wirechat.chat.group.links.links', Links::class);
         Livewire::component('wirechat.chat.group.links.list', \Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks::class);
@@ -198,7 +198,7 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.add-members', AddMembers::class);
         Livewire::component('wirechat.chat.group.members', Members::class);
         Livewire::component('wirechat.chat.group.past-members', PastMembers::class);
-        Livewire::component('wirechat.chat.group.blocked-members', BlockedMembers::class);
+        Livewire::component('wirechat.chat.group.banned-members', Banned::class);
         Livewire::component('wirechat.chat.group.link.list', Links::class);
         Livewire::component('wirechat.chat.group.link.create', Create::class);
         Livewire::component('wirechat.chat.group.link.show', Show::class);

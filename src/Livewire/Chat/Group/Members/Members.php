@@ -254,6 +254,11 @@ class Members extends ModalComponent
         $this->dispatch('refresh')->self();
     }
 
+    public function banMember(Participant $participant)
+    {
+        $this->blockMember($participant);
+    }
+
     /**
      * loadmore conversation
      */

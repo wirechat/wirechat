@@ -10,7 +10,7 @@ use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
-class BlockedMembers extends ModalComponent
+class Banned extends ModalComponent
 {
     use HasPanel;
 
@@ -21,7 +21,7 @@ class BlockedMembers extends ModalComponent
 
     public $search;
 
-    public $blockedMembers;
+    public $bannedMembers;
 
     protected ?Participant $authParticipant = null;
 
@@ -46,19 +46,19 @@ class BlockedMembers extends ModalComponent
         $this->conversation = $this->conversation->load('group');
         $this->group = $this->conversation->group;
 
-        $this->authorizeBlockedMembersAccess('You do not have permission to view blocked members');
+        $this->authorizeBannedMembersAccess('You do not have permission to view banned members');
 
-        $this->loadBlockedMembers();
+        $this->loadBannedMembers();
     }
 
     public function updatedSearch(): void
     {
-        $this->loadBlockedMembers();
+        $this->loadBannedMembers();
     }
 
-    public function liftBlock(int $participantId): void
+    public function liftBan(int $participantId): void
     {
-        $this->authorizeBlockedMembersAccess('You do not have permission to lift blocks');
+        $this->authorizeBannedMembersAccess('You do not have permission to lift bans');
 
         $participant = $this->conversation->participants()
             ->withoutGlobalScopes()
@@ -70,30 +70,30 @@ class BlockedMembers extends ModalComponent
 
         $participant->liftBlockByAdmin();
 
-        $this->loadBlockedMembers();
+        $this->loadBannedMembers();
 
-        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.blocked_members.messages.unblocked_success', ['member' => $participant->participantable->wirechat_name]));
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.banned_members.messages.unbanned_success', ['member' => $participant->participantable->wirechat_name]));
         $this->dispatch('refresh')->to(Members::class);
     }
 
     public function render()
     {
-        return view('wirechat::livewire.chat.group.members.blocked');
+        return view('wirechat::livewire.chat.group.members.banned');
     }
 
-    protected function authorizeBlockedMembersAccess(string $message): void
+    protected function authorizeBannedMembersAccess(string $message): void
     {
         $this->authParticipant = $this->conversation->participant(auth()->user());
 
         abort_unless($this->authParticipant?->isAdmin(), 403, $message);
     }
 
-    protected function loadBlockedMembers(): void
+    protected function loadBannedMembers(): void
     {
         $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = [];
 
-        $this->blockedMembers = $this->conversation->participants()
+        $this->bannedMembers = $this->conversation->participants()
             ->withoutGlobalScopes()
             ->with(['participantable', 'actions.actor.participantable'])
             ->whereHas('actions', function ($query) {

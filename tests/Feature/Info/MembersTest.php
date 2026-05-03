@@ -4,7 +4,7 @@ use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
-use Wirechat\Wirechat\Livewire\Chat\Group\Members\BlockedMembers;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\Banned;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\Members;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\PastMembers;
 use Wirechat\Wirechat\Models\Action;
@@ -456,7 +456,7 @@ describe('presence test', function () {
 
         Livewire::actingAs($admin)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee(__('wirechat::chat.group.members.actions.past_members.label'))
-            ->assertSee(__('wirechat::chat.group.members.actions.blocked_members.label'));
+            ->assertSee(__('wirechat::chat.group.members.actions.banned_members.label'));
     });
 
 });
@@ -822,7 +822,7 @@ describe('actions test', function () {
             ->assertSee(__('wirechat::chat.group.past_members.labels.reason_blocked'));
     });
 
-    test('blocked members drawer can lift a block without restoring active membership', function () {
+    test('banned members drawer can lift a ban without restoring active membership', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -830,9 +830,9 @@ describe('actions test', function () {
         $participant = $conversation->addParticipant($blockedUser);
         $participant->blockByAdmin($auth);
 
-        Livewire::actingAs($auth)->test(BlockedMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        Livewire::actingAs($auth)->test(Banned::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee($blockedUser->wirechat_name)
-            ->call('liftBlock', $participant->id)
+            ->call('liftBan', $participant->id)
             ->assertDontSee($blockedUser->wirechat_name);
 
         $participant->refresh();

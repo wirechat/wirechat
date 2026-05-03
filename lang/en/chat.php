@@ -218,11 +218,18 @@ return [
                     'label' => 'Block Member',
                     'confirmation_message' => 'Are you sure you want to block :member from this group ?.',
                 ],
+                'ban_member' => [
+                    'label' => 'Ban Member',
+                    'confirmation_message' => 'Are you sure you want to ban :member from this group ?.',
+                ],
                 'past_members' => [
                     'label' => 'Past Members',
                 ],
                 'blocked_members' => [
                     'label' => 'Blocked Members',
+                ],
+                'banned_members' => [
+                    'label' => 'Banned Members',
                 ],
                 'load_more' => [
                     'label' => 'Load more',
@@ -596,6 +603,29 @@ return [
             ],
             'messages' => [
                 'unblocked_success' => ':member can join again with a group invite link.',
+            ],
+        ],
+        'banned_members' => [
+            'heading' => [
+                'label' => 'Banned Members',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Search banned members',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'No banned members found',
+                'helper' => 'Banned members cannot rejoin until the ban is lifted.',
+            ],
+            'actions' => [
+                'lift_ban' => [
+                    'label' => 'Lift Ban',
+                    'confirmation_message' => 'Are you sure you want to lift the ban for :member ?.',
+                ],
+            ],
+            'messages' => [
+                'unbanned_success' => ':member can join again with a group invite link.',
             ],
         ],
 

@@ -45,10 +45,10 @@
                     </x-wirechat::button>
                 </x-wirechat::actions.open-modal>
 
-                <x-wirechat::actions.open-modal component="wirechat.chat.group.members.blocked"
+                <x-wirechat::actions.open-modal component="wirechat.chat.group.members.banned"
                     conversation="{{ $conversation?->id }}"  :panel="$this->panel">
                     <x-wirechat::button variant="filled" type="button" class="w-full" >
-                        {{ __('wirechat::chat.group.members.actions.blocked_members.label') }}
+                        {{ __('wirechat::chat.group.members.actions.banned_members.label') }}
                     </x-wirechat::button>
                 </x-wirechat::actions.open-modal>
             </section>
@@ -143,10 +143,10 @@
                                             </x-wirechat::dropdown-button>
 
                                             <x-wirechat::dropdown-button
-                                                wire:click="blockMember('{{ $participant->id }}')"
-                                                wire:confirm="{{__('wirechat::chat.group.members.actions.block_member.confirmation_message',['member'=>$participant->participantable?->wirechat_name])}}"
+                                                wire:click="banMember('{{ $participant->id }}')"
+                                                wire:confirm="{{__('wirechat::chat.group.members.actions.ban_member.confirmation_message',['member'=>$participant->participantable?->wirechat_name])}}"
                                                 class="text-red-500 ">
-                                                {{__('wirechat::chat.group.members.actions.block_member.label')}}
+                                                {{__('wirechat::chat.group.members.actions.ban_member.label')}}
                                             </x-wirechat::dropdown-button>
                                             @endif
 
