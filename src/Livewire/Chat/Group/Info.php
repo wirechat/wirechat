@@ -96,6 +96,15 @@ class Info extends ModalComponent
         $this->conversation->group?->updateOrCreate(['conversation_id' => $this->conversation->id], ['description' => $value]);
     }
 
+    public function saveDescription(?string $value = null): void
+    {
+        if ($value !== null) {
+            $this->description = $value;
+        }
+
+        $this->updatedDescription($this->description);
+    }
+
     /* Update Group name when for submittted */
     public function updateGroupName()
     {

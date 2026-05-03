@@ -105,7 +105,7 @@
 
                             </button>
 
-                            <button x-cloak @click="editing=false" x-show="editing">
+                            <button x-cloak @click="$wire.saveDescription(); editing=false" x-show="editing">
                                 {{-- check/submit --}}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                     fill="currentColor" class="bi bi-check-lg w-5 h-5" viewBox="0 0 16 16">
@@ -140,7 +140,7 @@
                                 @endif
                             </div>
 
-                            <textarea x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur='description'
+                            <textarea x-ref="groupDescriptionInput" x-cloak maxlength="501" x-show="editing" id='description' type="text" wire:model.blur='description'
                                 class="resize-none font-medium w-full border-0 px-0 py-0 py-0 border-b border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
                             </textarea>
 
@@ -162,7 +162,7 @@
 
                             </button>
 
-                            <button x-cloak @click="editing=false" x-show="editing">
+                            <button x-cloak @click="$wire.saveDescription($refs.groupDescriptionInput?.value ?? ''); editing=false" x-show="editing">
                                 {{-- check --}}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                     fill="currentColor" class="bi bi-check-lg w-5 h-5" viewBox="0 0 16 16">
