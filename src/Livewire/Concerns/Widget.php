@@ -77,9 +77,9 @@ trait Widget
     /**
      * A method to dispatch open chat widget
      */
-    public function openChat(int $conversation): void
+    public function openChat(int|string $conversation): void
     {
-        $this->dispatch('open-chat', ['conversation' => $conversation]);
+        $this->dispatch('open-chat', conversation: $conversation);
     }
 
     /**

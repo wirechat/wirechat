@@ -267,10 +267,23 @@ describe('Presense', function () {
             ->first(fn (string $tag) => str_contains($tag, 'https://example.com'));
 
         expect($inviteAnchor)->toContain('data-invite-link="true"')
+            ->and($inviteAnchor)->toContain('wire:click.prevent="handleOpenChat(')
             ->and($inviteAnchor)->not->toContain('target="_blank"');
 
+        // The wire:click param must be encrypted — the raw token/URL must NOT
+        // appear inside the wire:click attribute itself, only inside the href.
+        preg_match("~wire:click\.prevent=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAnchor, $clickMatch);
+
+        expect($clickMatch[1] ?? '')->not->toBe('')
+            ->and($clickMatch[1])->not->toBe($inviteUrl)
+            ->and($clickMatch[1])->not->toBe($invite->token);
+
+        // And the encrypted payload must round-trip back to the canonical URL.
+        expect(decrypt($clickMatch[1]))->toBe($inviteUrl);
+
         expect($externalAnchor)->toContain('target="_blank"')
-            ->and($externalAnchor)->not->toContain('data-invite-link="true"');
+            ->and($externalAnchor)->not->toContain('data-invite-link="true"')
+            ->and($externalAnchor)->not->toContain('handleOpenChat');
     });
 
     test('it does not render a group invite preview card for foreign or edited text without a valid wirechat invite link', function () {

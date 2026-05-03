@@ -510,6 +510,275 @@ it('redirects existing members from the invite preview to the group chat', funct
         ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
 });
 
+it('handleOpenChat redirects existing members to the chat in non-widget mode', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host'); // unrelated chat we render Chat in
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $groupConversation->addParticipant($member);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
+});
+
+it('handleOpenChat dispatches open-chat in widget mode for existing members', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $groupConversation->addParticipant($member);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, [
+            'conversation' => $hostConversation->id,
+            'panel' => testPanelProvider()->getId(),
+            'widget' => true,
+        ])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertNoRedirect()
+        ->assertDispatched('open-chat');
+});
+
+it('handleOpenChat opens the lobby modal for non-members in non-widget mode', function () {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($outsider);
+
+    $groupConversation = $owner->createGroup('Target');
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $component = Livewire::actingAs($outsider)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertNoRedirect();
+
+    $jsEffects = data_get($component->effects, 'xjs', []);
+    $payload = collect($jsEffects)->map(fn ($entry) => is_array($entry) ? ($entry['expression'] ?? '') : $entry)->implode("\n");
+
+    expect($payload)->toContain("Livewire.dispatch('openWirechatModal'")
+        ->and($payload)->toContain('wirechat.chat.group.join.lobby')
+        ->and($payload)->toContain($invite->token);
+
+    // No mutation has happened — the lobby will own the join confirmation.
+    expect($outsider->belongsToConversation($groupConversation))->toBeFalse()
+        ->and($invite->fresh()->usages)->toBe(0);
+});
+
+it('handleOpenChat opens the lobby modal for non-members in widget mode', function () {
+    $owner = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($outsider);
+
+    $groupConversation = $owner->createGroup('Target');
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $component = Livewire::actingAs($outsider)
+        ->test(Chat::class, [
+            'conversation' => $hostConversation->id,
+            'panel' => testPanelProvider()->getId(),
+            'widget' => true,
+        ])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertNoRedirect();
+
+    $jsEffects = data_get($component->effects, 'xjs', []);
+    $payload = collect($jsEffects)->map(fn ($entry) => is_array($entry) ? ($entry['expression'] ?? '') : $entry)->implode("\n");
+
+    expect($payload)->toContain("Livewire.dispatch('openWirechatModal'")
+        ->and($payload)->toContain('"widget":true')
+        ->and($payload)->toContain($invite->token);
+
+    expect($outsider->belongsToConversation($groupConversation))->toBeFalse();
+});
+
+it('handleOpenChat accepts the full invite URL and not just the token', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $groupConversation->addParticipant($member);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->url(testPanelProvider())))
+        ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
+});
+
+it('handleOpenChat returns 404 for unrelated URLs', function () {
+    $owner = User::factory()->create();
+    $auth = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($auth);
+
+    Livewire::actingAs($auth)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt('https://example.com/not-an-invite'))
+        ->assertStatus(404);
+});
+
+it('handleOpenChat returns 404 for tampered (non-encrypted) input', function () {
+    $owner = User::factory()->create();
+    $auth = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($auth);
+
+    $groupConversation = $owner->createGroup('Target');
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    // Sending the raw (un-encrypted) token must not bypass the encryption gate.
+    Livewire::actingAs($auth)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', $invite->token)
+        ->assertStatus(404);
+});
+
+it('handleOpenChat returns 404 when the panel has group invitations disabled', function () {
+    testPanelProvider()->groupInvitations(false);
+
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertStatus(404);
+});
+
+it('handleOpenChat returns 404 for short tokens that fall outside the route regex', function () {
+    $owner = User::factory()->create();
+    $auth = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($auth);
+
+    Livewire::actingAs($auth)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt('abc'))
+        ->assertStatus(404);
+});
+
+it('handleOpenChat throttles excessive calls', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    \Illuminate\Support\Facades\RateLimiter::clear('wirechat-open-chat:'.$member->getKey());
+
+    $groupConversation = $owner->createGroup('Target');
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    \Illuminate\Support\Facades\RateLimiter::increment('wirechat-open-chat:'.$member->getKey(), 60, 60);
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertStatus(429);
+});
+
+it('handleOpenChat returns 410 for revoked invite tokens', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+    $invite->revoke();
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertStatus(410);
+});
+
 it('still shows the invite preview to authenticated non-members', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $outsider = User::factory()->create();

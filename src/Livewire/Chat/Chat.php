@@ -25,6 +25,8 @@ use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
 
@@ -876,6 +878,135 @@ class Chat extends Component
                 $this->authParticipant->update(['conversation_deleted_at' => null]);
             }
         }
+    }
+
+    /**
+     * Resolve a click on an in-message group invite link.
+     *
+     * The blade renders the link param via `encrypt()`, so the raw invite URL
+     * is never exposed in `wire:click` attributes — only ciphertext bound to
+     * this app key. We decrypt, validate the resulting URL is for the current
+     * panel, then resolve the invite as usual.
+     *
+     * Outcomes:
+     * - Already a member → open chat (widget) or redirect to it (non-widget).
+     * - Not a member → open the lobby modal with the resolved invite token.
+     */
+    public function handleOpenChat(string $link): mixed
+    {
+        abort_unless(auth()->check(), 401);
+
+        $this->handleOpenChatRateLimit();
+
+        $panel = $this->panel();
+
+        abort_if($panel === null || ! $panel->hasGroupInvitations(), 404);
+
+        $token = $this->extractInviteToken($link);
+
+        abort_if($token === null, 404);
+
+        /** @var Invite|null $invite */
+        $invite = Invite::query()
+            ->where('panel_id', $panel->getId())
+            ->where('token', $token)
+            ->with('inviteable.conversation')
+            ->first();
+
+        abort_if($invite === null, 404);
+        abort_unless($invite->isActive(), 410);
+
+        $group = $invite->inviteable;
+
+        abort_unless($group instanceof Group, 404);
+
+        /** @var Conversation $conversation */
+        $conversation = $group->conversation;
+
+        if ($this->auth->belongsToConversation($conversation)) {
+            if ($this->isWidget()) {
+                $this->openChat($conversation->id);
+
+                return null;
+            }
+
+            return $this->redirect($panel->chatRoute($conversation->id));
+        }
+
+        // Non-member: surface the lobby directly. The public preview page is
+        // only needed for cold-start entries (browser nav from outside the app).
+        // Note: dispatch via the JS bridge (matching the rest of the codebase's
+        // `Livewire.dispatch(...)` pattern) so the global Modal listener — which
+        // is registered by `@wirechatAssets` on the host layout — actually
+        // catches it. PHP `$this->dispatch` does not consistently propagate
+        // across the parent/child boundary used by the modal stack.
+        $payload = json_encode([
+            'component' => 'wirechat.chat.group.join.lobby',
+            'arguments' => [
+                'token' => $token,
+                'panel' => $panel->getId(),
+                'widget' => $this->isWidget(),
+            ],
+        ], JSON_THROW_ON_ERROR);
+
+        $this->js("Livewire.dispatch('openWirechatModal', {$payload})");
+
+        return null;
+    }
+
+    /**
+     * Decrypt the link payload (rendered server-side via `encrypt()`),
+     * then pull a wirechat invite token out of either a full URL or a
+     * bare token. Tampered or non-invite payloads return null so the
+     * caller can `abort(404)` without leaking what failed.
+     */
+    protected function extractInviteToken(string $link): ?string
+    {
+        try {
+            $link = decrypt($link);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        if (! is_string($link)) {
+            return null;
+        }
+
+        $link = trim($link);
+
+        if ($link === '' || strlen($link) > 2048) {
+            return null;
+        }
+
+        // Bare token form (no slashes / scheme). Match the route regex so we
+        // never resolve tokens that the public invite route itself would 404.
+        if (preg_match('~^[A-Za-z0-9]{16,64}$~', $link)) {
+            return $link;
+        }
+
+        $path = parse_url($link, PHP_URL_PATH);
+
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        if (preg_match('~/invites/(?P<token>[A-Za-z0-9]{16,64})$~', $path, $matches)) {
+            return $matches['token'];
+        }
+
+        return null;
+    }
+
+    protected function handleOpenChatRateLimit(): void
+    {
+        $key = 'wirechat-open-chat:'.auth()->id();
+        $perMinute = 60;
+
+        if (RateLimiter::tooManyAttempts($key, $perMinute)) {
+            abort(429, __('wirechat::chat.messages.rate_limit'));
+        }
+
+        RateLimiter::increment($key);
     }
 
     public function render()
