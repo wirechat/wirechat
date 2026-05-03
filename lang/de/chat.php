@@ -218,11 +218,18 @@ return [
                     'label' => 'Mitglied blockieren',
                     'confirmation_message' => 'Möchten Sie :member wirklich für diese Gruppe blockieren?',
                 ],
+                'ban_member' => [
+                    'label' => 'Mitglied sperren',
+                    'confirmation_message' => 'Möchten Sie :member wirklich für diese Gruppe sperren?',
+                ],
                 'past_members' => [
                     'label' => 'Ehemalige Mitglieder',
                 ],
                 'blocked_members' => [
                     'label' => 'Blockierte Mitglieder',
+                ],
+                'banned_members' => [
+                    'label' => 'Gesperrte Mitglieder',
                 ],
                 'load_more' => [
                     'label' => 'Mehr laden',
@@ -596,6 +603,29 @@ return [
             ],
             'messages' => [
                 'unblocked_success' => ':member kann mit einem Gruppeneinladungslink wieder beitreten.',
+            ],
+        ],
+        'banned_members' => [
+            'heading' => [
+                'label' => 'Gesperrte Mitglieder',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Gesperrte Mitglieder suchen',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Keine gesperrten Mitglieder gefunden',
+                'helper' => 'Gesperrte Mitglieder können nicht erneut beitreten, bis die Sperre aufgehoben wird.',
+            ],
+            'actions' => [
+                'lift_ban' => [
+                    'label' => 'Sperre aufheben',
+                    'confirmation_message' => 'Möchten Sie die Sperre für :member wirklich aufheben?',
+                ],
+            ],
+            'messages' => [
+                'unbanned_success' => ':member kann mit einem Gruppeneinladungslink wieder beitreten.',
             ],
         ],
 

@@ -1,4 +1,4 @@
-<div class="h-[calc(100vh_-_10rem)] sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] overflow-y-auto overflow-x-hidden">
+<div class="h-[calc(100vh_-_10rem)] sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] overflow-y-auto overflow-x-hidden rounded-xl">
     <header class="sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
         <div class="flex items-center pb-2">
             <x-wirechat::actions.close-modal>
@@ -24,7 +24,7 @@
         <section class="flex flex-wrap items-center px-0 border-b border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]">
             <input type="search" wire:model.live.debounce="search" autocomplete="off"
                 placeholder="{{ __('wirechat::chat.group.invite_link.send_via_chat.inputs.search.placeholder') }}"
-                class="wc-input w-full border-0 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
+                class="wc-input w-full border-0 p-2 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
         </section>
 
         <section class="overflow-x-hidden my-2">

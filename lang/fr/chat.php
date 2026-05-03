@@ -204,11 +204,18 @@ return [
                     'label' => 'Bloquer le membre',
                     'confirmation_message' => 'Voulez-vous vraiment bloquer :member de ce groupe?',
                 ],
+                'ban_member' => [
+                    'label' => 'Bannir le membre',
+                    'confirmation_message' => 'Voulez-vous vraiment bannir :member de ce groupe?',
+                ],
                 'past_members' => [
                     'label' => 'Anciens membres',
                 ],
                 'blocked_members' => [
                     'label' => 'Membres bloqués',
+                ],
+                'banned_members' => [
+                    'label' => 'Membres bannis',
                 ],
                 'load_more' => [
                     'label' => 'Charger plus',
@@ -574,6 +581,29 @@ return [
             ],
             'messages' => [
                 'unblocked_success' => ':member peut à nouveau rejoindre avec un lien d\'invitation de groupe.',
+            ],
+        ],
+        'banned_members' => [
+            'heading' => [
+                'label' => 'Membres bannis',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Rechercher les membres bannis',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Aucun membre banni trouvé',
+                'helper' => 'Les membres bannis ne peuvent pas revenir tant que le bannissement n\'est pas levé.',
+            ],
+            'actions' => [
+                'lift_ban' => [
+                    'label' => 'Lever le bannissement',
+                    'confirmation_message' => 'Voulez-vous vraiment lever le bannissement pour :member?',
+                ],
+            ],
+            'messages' => [
+                'unbanned_success' => ':member peut à nouveau rejoindre avec un lien d\'invitation de groupe.',
             ],
         ],
     ],

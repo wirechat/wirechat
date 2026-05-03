@@ -201,11 +201,18 @@ return [
                     'label' => 'Üyeyi Engelle',
                     'confirmation_message' => ':member kullanıcısını bu grupta engellemek istediğinizden emin misiniz?',
                 ],
+                'ban_member' => [
+                    'label' => 'Üyeyi Yasakla',
+                    'confirmation_message' => ':member kullanıcısını bu grupta yasaklamak istediğinizden emin misiniz?',
+                ],
                 'past_members' => [
                     'label' => 'Geçmiş Üyeler',
                 ],
                 'blocked_members' => [
                     'label' => 'Engellenen Üyeler',
+                ],
+                'banned_members' => [
+                    'label' => 'Yasaklı Üyeler',
                 ],
                 'load_more' => [
                     'label' => 'Daha fazla yükle',
@@ -574,6 +581,29 @@ return [
             ],
             'messages' => [
                 'unblocked_success' => ':member artık grup davet bağlantısıyla yeniden katılabilir.',
+            ],
+        ],
+        'banned_members' => [
+            'heading' => [
+                'label' => 'Yasaklı Üyeler',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Yasaklı üyeleri ara',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Yasaklı üye bulunamadı',
+                'helper' => 'Yasaklı üyeler, yasak kaldırılana kadar yeniden katılamaz.',
+            ],
+            'actions' => [
+                'lift_ban' => [
+                    'label' => 'Yasağı Kaldır',
+                    'confirmation_message' => ':member için yasağı kaldırmak istediğinizden emin misiniz?',
+                ],
+            ],
+            'messages' => [
+                'unbanned_success' => ':member artık grup davet bağlantısıyla yeniden katılabilir.',
             ],
         ],
 
