@@ -51,19 +51,21 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <button type="button"
+        <div class="grid grid-cols-1 max-h-fit gap-3 sm:grid-cols-2">
+            <x-wirechat::button type="button"
+                 size='sm'
+                  variant='default'
                 x-data="{}"
-                x-on:click="{{ $copyInviteAction }}"
-                class="inline-flex items-center justify-center rounded-xl bg-[var(--wc-brand-primary)] px-4 py-3 text-sm font-medium text-white">
+                x-on:click="{{ $copyInviteAction }}">
                 {{ __('wirechat::chat.group.invite_link.show.actions.copy_link.label') }}
-            </button>
-
-            <button type="button"
-                onclick="{{ $openSendInviteLinkAction }}"
-                class="inline-flex items-center justify-center rounded-xl border border-[var(--wc-light-border)] px-4 py-3 text-sm font-medium dark:border-[var(--wc-dark-border)]">
+            </x-wirechat::button>
+            
+            <x-wirechat::button 
+             variant='outline'
+            type="button"
+                onclick="{{ $openSendInviteLinkAction }}">
                 {{ __('wirechat::chat.group.invite_link.show.actions.share_link.label') }}
-            </button>
+            </x-wirechat::button>
         </div>
 
         @if ($canRevokeLink)

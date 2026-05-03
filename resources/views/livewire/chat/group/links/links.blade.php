@@ -63,7 +63,7 @@
                     </x-wirechat::button>
 
                     <x-wirechat::button
-                        variant="secondary"
+                        variant="outline"
                         onclick="{{ $openSendInviteLinkAction }}"
                     >
                         {{ __('wirechat::chat.group.invite_link.actions.send_via_chat.label') }}
