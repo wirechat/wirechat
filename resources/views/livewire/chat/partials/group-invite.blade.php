@@ -3,7 +3,7 @@
 <div
     @class([
         ' -mt-1.5  mx-auto mb-2 w-full overflow-hidden rounded-lg',
-         'opacity-90 bg-primary-300/40 text-zinc-900' => $belongsToAuth,
+         'opacity-90 bg-[color-mix(in_srgb,var(--primary-300)_40%,transparent)] text-zinc-900' => $belongsToAuth,
         ' text-zinc-900   bg-zinc-200/70 dark:bg-zinc-700/70 dark:text-white' => ! $belongsToAuth,
     ])>
     <div class="flex items-start gap-3 px-4 py-3">

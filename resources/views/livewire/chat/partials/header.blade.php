@@ -261,11 +261,11 @@
                     <div class="flex items-center gap-2">
                         <x-wirechat::icons.user-clock class="ml-1 size-5 dark:text-zinc-300" />
 
-                        <span class="font-bold text-primary-500">
+                        <span class="font-bold text-[var(--primary-500)]">
                             {{ __('wirechat::chat.group.join.requests.labels.review') }}
                         </span>
 
-                        <span class="font-medium text-primary-500" x-text="pendingCount">
+                        <span class="font-medium text-[var(--primary-500)]" x-text="pendingCount">
                             {{ $pendingJoinRequestsCount }}
                         </span>
 

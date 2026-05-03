@@ -21,7 +21,7 @@
         {{-- Invite Link --}}
         <div class="rounded-xl border border-dashed border-[var(--wc-light-border)] p-4 dark:border-[var(--wc-dark-border)]">
             <p class="text-sm   text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.show.labels.link') }}</p>
-            <p class="mt-3 break-all text-primary-500 text-sm">{{ $inviteUrl }}</p>
+            <p class="mt-3 break-all text-[var(--primary-500)] text-sm">{{ $inviteUrl }}</p>
         </div>
 
         {{-- Created By --}}

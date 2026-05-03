@@ -88,7 +88,7 @@
                                 type="button"
                                      wire:loading.attr="disabled"
                                 wire:click="approve({{ $request->id }})"
-                                class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all size-10 items-center justify-center rounded-full bg-primary-50 text-primary-700  hover:bg-primary-100 dark:bg-primary-700/20 dark:text-primary-300 dark:hover:bg-primary-700/30"
+                                class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all size-10 items-center justify-center rounded-full bg-[var(--primary-50)] text-[var(--primary-700)] hover:bg-[var(--primary-100)] dark:bg-[color-mix(in_srgb,var(--primary-700)_20%,transparent)] dark:text-[var(--primary-300)] dark:hover:bg-[color-mix(in_srgb,var(--primary-700)_30%,transparent)]"
                                 aria-label="{{ __('wirechat::chat.group.join.requests.actions.approve.label') }}"
                                 title="{{ __('wirechat::chat.group.join.requests.actions.approve.label') }}">
                                 <x-wirechat::icons.check class="size-5 !text-current" />

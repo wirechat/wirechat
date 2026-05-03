@@ -23,7 +23,7 @@
                 <form method="POST" action="{{ \Wirechat\Wirechat\Facades\Wirechat::currentPanel()->inviteJoinRoute($invite->token) }}">
                     @csrf
                     <button type="submit"
-                        class="w-full w-full inline-flex justify-center items-center rounded-xl px-5 py-3 bg-primary-500 hover:opacity-85 transition-all dark:text-white">
+                        class="w-full w-full inline-flex justify-center items-center rounded-xl px-5 py-3 bg-[var(--primary-500)] hover:opacity-85 transition-all dark:text-white">
                         {{ __('wirechat::chat.group.invite_link.page.actions.continue.label') }}
                     </button>
                 </form>

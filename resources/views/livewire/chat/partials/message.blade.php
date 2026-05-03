@@ -32,7 +32,7 @@
 
 @class([
     'flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-    'text-white  bg-primary-500 opacity-90' => $belongsToAuth, // Background color for messages sent by the authenticated user
+    'text-white bg-[var(--primary-500)] opacity-90' => $belongsToAuth, // Background color for messages sent by the authenticated user
     'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
@@ -107,7 +107,7 @@
         @class([
             'mt-2 -mx-2.5  block border-t px-4 py-2 text-center text-sm font-semibold transition hover:opacity-95',
             'border-white/20 text-white/90' => $belongsToAuth,
-            'border-[var(--wc-light-border)] text-primary-500 dark:border-[var(--wc-dark-border)] dark:text-primary-300' => ! $belongsToAuth,
+            'border-[var(--wc-light-border)] text-[var(--primary-500)] dark:border-[var(--wc-dark-border)] dark:text-[var(--primary-300)]' => ! $belongsToAuth,
         ])>
         {{ __('wirechat::chat.group.invite_message.actions.view_group.label') }}
     </a>

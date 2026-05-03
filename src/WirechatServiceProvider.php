@@ -429,7 +429,17 @@ class WirechatServiceProvider extends ServiceProvider
                             --wc-primary-800: {$primary800};
                             --wc-primary-900: {$primary900};
                             --wc-primary-950: {$primary950};
-                            --wc-brand-primary: var(--wc-primary-500);
+                            --wc-brand-primary: {$primary500};
+                            --primary-50: {$primary50};
+                            --primary-100:{$primary100};
+                            --primary-200: {$primary200};
+                            --primary-300: {$primary300};
+                            --primary-400: {$primary400};
+                            --primary-500: {$primary500};
+                            --primary-600: {$primary600};
+                            --primary-700: {$primary700};
+                            --primary-800: {$primary800};
+                            --primary-900: {$primary900};
 
                         --wc-light-primary: #fff;  /* white */
                         --wc-light-secondary: {$lightSecondary};/* --color-zinc-100 */
