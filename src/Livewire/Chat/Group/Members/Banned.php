@@ -97,7 +97,7 @@ class Banned extends ModalComponent
             ->withoutGlobalScopes()
             ->with(['participantable', 'actions.actor.participantable'])
             ->whereHas('actions', function ($query) {
-                $query->where('type', Actions::BANNED_BY_ADMIN->value);
+                $query->whereIn('type', Actions::bannedValues());
             })
             ->when($this->search, function ($query) use ($searchableFields, &$columnCache) {
                 $query->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {

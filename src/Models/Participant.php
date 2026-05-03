@@ -248,7 +248,25 @@ class Participant extends Model
 
     public function bannedByAdminAction(): ?Action
     {
-        return $this->latestActionOfType(Actions::BANNED_BY_ADMIN);
+        if ($this->relationLoaded('actions')) {
+            /** @var ?Action $action */
+            $action = $this->actions
+                ->filter(function (Action $action): bool {
+                    return in_array($action->type->value, Actions::bannedValues(), true);
+                })
+                ->sortByDesc('id')
+                ->first();
+
+            return $action;
+        }
+
+        /** @var ?Action $action */
+        $action = $this->actions()
+            ->whereIn('type', Actions::bannedValues())
+            ->latest('id')
+            ->first();
+
+        return $action;
     }
 
     /**
@@ -347,7 +365,7 @@ class Participant extends Model
 
         $exists = Action::where('actionable_id', $this->getKey())
             ->where('actionable_type', $this->getMorphClass())
-            ->where('type', Actions::BANNED_BY_ADMIN)
+            ->whereIn('type', Actions::bannedValues())
             ->where('actor_id', $adminParticipant->getKey())
             ->where('actor_type', $adminParticipant->getMorphClass())
             ->exists();
@@ -383,7 +401,7 @@ class Participant extends Model
         }
 
         $this->actions()
-            ->where('type', Actions::BANNED_BY_ADMIN->value)
+            ->whereIn('type', Actions::bannedValues())
             ->delete();
 
         $this->forgetLoadedActions();
