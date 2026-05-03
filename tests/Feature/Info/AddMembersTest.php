@@ -262,13 +262,13 @@ describe('actions test', function () {
 
     });
 
-    test('it aborts if admin tries to add a blocked past member', function () {
+    test('it aborts if admin tries to add a banned past member', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
         $blockedUser = User::factory()->create(['name' => 'Blocked User']);
         $participant = $conversation->addParticipant($blockedUser);
-        $participant->blockByAdmin($auth);
+        $participant->banByAdmin($auth);
 
         Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->call('toggleMember', $blockedUser->id, $blockedUser->getMorphClass())

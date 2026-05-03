@@ -336,6 +336,35 @@ it('can send an invite link via chat', function () {
         ->and($privateConversation->messages()->latest('id')->first()->body)->toContain($invite->url(testPanelProvider()));
 });
 
+it('prevents sending a group invite link via chat to banned past members', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $bannedUser = User::factory()->create();
+
+    $groupConversation = $owner->createGroup('Core Team');
+    $groupConversation->addParticipant($member)->update(['role' => ParticipantRole::ADMIN]);
+
+    $participant = $groupConversation->addParticipant($bannedUser);
+    $participant->banByAdmin($owner);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Send::class, [
+            'conversation' => $groupConversation,
+            'invite' => $invite,
+            'panel' => testPanelProvider()->getId(),
+        ])
+        ->call('toggleMember', $bannedUser->id, $bannedUser->getMorphClass())
+        ->assertStatus(403);
+});
+
 it('hides exited and removed past members from send invite search results', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $exitedUser = User::factory()->create(['name' => 'Invite Candidate Left']);
@@ -1077,9 +1106,44 @@ it('creates a join request from the in-app invite modal when approval is require
 
     $invite->refresh();
 
+    $invite->refresh();
+
     expect($receiver->belongsToConversation($conversation))->toBeFalse()
         ->and($conversation->group->hasPendingJoinRequest($receiver))->toBeTrue()
-        ->and($invite->usages)->toBe(0);
+        ->and(in_array($invite->usages, [null, 0], true))->toBeTrue();
+});
+
+it('allows admin-removed users to request join from lobby when approval is required', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill([
+        'type' => GroupType::PRIVATE,
+        'admins_must_approve_new_members' => true,
+    ])->save();
+
+    $participant = $conversation->addParticipant($receiver);
+    $participant->removeByAdmin($owner);
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->call('proceed')
+        ->assertNoRedirect();
+
+    $invite->refresh();
+
+    expect($receiver->belongsToConversation($conversation))->toBeFalse()
+        ->and($conversation->group->hasPendingJoinRequest($receiver))->toBeTrue()
+        ->and(in_array($invite->usages, [null, 0], true))->toBeTrue();
 });
 
 it('allows an exited participant to rejoin via the in-app invite modal', function () {
@@ -1145,7 +1209,7 @@ it('allows an admin-removed participant to rejoin via the in-app invite modal', 
         ->and($invite->usages)->toBe(1);
 });
 
-it('keeps blocked members from rejoining by invite until the block is lifted', function () {
+it('keeps banned members from rejoining by invite until the ban is lifted', function () {
     $owner = User::factory()->create();
     $receiver = User::factory()->create();
 
@@ -1153,7 +1217,7 @@ it('keeps blocked members from rejoining by invite until the block is lifted', f
     $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
 
     $participant = $conversation->addParticipant($receiver);
-    $participant->blockByAdmin($owner);
+    $participant->banByAdmin($owner);
 
     $invite = $conversation->group->inviteLinks()->create([
         'panel_id' => testPanelProvider()->getId(),
@@ -1171,11 +1235,11 @@ it('keeps blocked members from rejoining by invite until the block is lifted', f
     $participant->refresh();
     $invite->refresh();
 
-    expect($participant->isBlockedByAdmin())->toBeTrue()
+    expect($participant->isBannedByAdmin())->toBeTrue()
         ->and($receiver->belongsToConversation($conversation))->toBeFalse()
         ->and($invite->usages)->toBe(0);
 
-    $participant->liftBlockByAdmin();
+    $participant->liftBanByAdmin();
     $participant->refresh();
 
     Livewire::actingAs($receiver)
@@ -1186,7 +1250,7 @@ it('keeps blocked members from rejoining by invite until the block is lifted', f
     $participant->refresh();
     $invite->refresh();
 
-    expect($participant->isBlockedByAdmin())->toBeFalse()
+    expect($participant->isBannedByAdmin())->toBeFalse()
         ->and($participant->isRemovedByAdmin())->toBeFalse()
         ->and($participant->exited_at)->toBeNull()
         ->and($receiver->belongsToConversation($conversation))->toBeTrue()

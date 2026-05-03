@@ -41,7 +41,12 @@
             </div>
         @endif
 
-        <div class="rounded-xl bg-[var(--wc-light-secondary)] px-4 py-3 text-sm leading-6 text-gray-700 dark:bg-[var(--wc-dark-secondary)] dark:text-gray-200">
+        <div
+            @class([
+                'rounded-xl px-4 py-3 text-sm leading-6',
+                'bg-[var(--wc-light-secondary)] text-gray-700 dark:bg-[var(--wc-dark-secondary)] dark:text-gray-200' => ! $joinBlocked,
+                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800/50' => $joinBlocked,
+            ])>
             @if ($isMember)
                 {{ __('wirechat::chat.group.join.lobby.labels.already_member') }}
             @elseif ($joinBlocked)
@@ -63,21 +68,23 @@
             >
                {{ __('wirechat::chat.group.join.lobby.actions.cancel.label') }}
             </x-wirechat::button>
-            <x-wirechat::button
-                wire:click="proceed"
-                wire:loading.attr="disabled"
-                ::disabled="{{ ($joinBlocked || $hasPendingJoinRequest) }}"
-                class="inline-flex items-center justify-center rounded-2xl bg-[var(--wc-brand-primary)] px-5 py-3 text-sm font-medium text-white">
-                @if ($isMember)
-                    {{ __('wirechat::chat.group.join.lobby.actions.open_group.label') }}
-                @elseif ($hasPendingJoinRequest)
-                    {{ __('wirechat::chat.group.join.lobby.actions.request_pending.label') }}
-                @elseif ($requiresApproval)
-                    {{ __('wirechat::chat.group.join.lobby.actions.request_to_join.label') }}
-                @else
-                    {{ __('wirechat::chat.group.join.lobby.actions.join_group.label') }}
-                @endif
-            </x-wirechat::button>
+            @if (! $joinBlocked)
+                <x-wirechat::button
+                    wire:click="proceed"
+                    wire:loading.attr="disabled"
+                    size="sm"
+                    >
+                    @if ($isMember)
+                        {{ __('wirechat::chat.group.join.lobby.actions.open_group.label') }}
+                    @elseif ($hasPendingJoinRequest)
+                        {{ __('wirechat::chat.group.join.lobby.actions.request_pending.label') }}
+                    @elseif ($requiresApproval)
+                        {{ __('wirechat::chat.group.join.lobby.actions.request_to_join.label') }}
+                    @else
+                        {{ __('wirechat::chat.group.join.lobby.actions.join_group.label') }}
+                    @endif
+                </x-wirechat::button>
+            @endif
 
          
         </div>
