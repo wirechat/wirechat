@@ -11,19 +11,25 @@
         </span>
     @endif
 
-    <p @class([
-        'truncate text-sm dark:text-white  gap-2 items-center',
-        'font-semibold text-black' =>
-            !$isReadByAuth && !$lastMessage?->ownedBy($this->auth),
-        'font-normal text-gray-600' =>
-            $isReadByAuth && !$lastMessage?->ownedBy($this->auth),
-        'font-normal text-gray-600' =>
-            $isReadByAuth && $lastMessage?->ownedBy($this->auth),
-    ])>
+    <p
+        dusk="messagePreviewBody"
+        class="truncate text-sm dark:text-white gap-2 items-center"
+        @class([
+            'font-semibold text-black' => $showUnreadStatus && ! $belongsToAuth,
+            'font-normal text-gray-600' => ! ($showUnreadStatus && ! $belongsToAuth),
+        ])
+    >
         {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->isAttachment() ? '📎 '.__('wirechat::chats.labels.attachment') : '') }}
     </p>
 
-    <span class="font-medium px-1 text-xs shrink-0 text-gray-800 dark:text-gray-50">
+    <span
+        dusk="messagePreviewTime"
+        class="px-1 text-xs shrink-0 dark:text-gray-50"
+        @class([
+            'font-medium text-gray-800' => $showUnreadStatus && ! $belongsToAuth,
+            'font-normal text-gray-500' => ! ($showUnreadStatus && ! $belongsToAuth),
+        ])
+    >
         @if ($lastMessage->created_at->diffInMinutes(now()) < 1)
           @lang('wirechat::chats.labels.now')
         @else

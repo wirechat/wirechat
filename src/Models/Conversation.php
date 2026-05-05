@@ -16,7 +16,6 @@ use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Concerns\HasDynamicIds;
-use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
 use Wirechat\Wirechat\Traits\Actionable;
 use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
 
@@ -27,6 +26,8 @@ use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
  * @property int|null $disappearing_duration
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Wirechat\Wirechat\Models\Participant|null $auth_participant
+ * @property \Wirechat\Wirechat\Models\Participant|null $peer_participant
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
  * @property-read int|null $actions_count
  * @property-read Group|null $group
@@ -47,9 +48,10 @@ use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
  * @method static Builder|Conversation whereType($value)
  * @method static Builder|Conversation whereUpdatedAt($value)
  * @method static Builder withDeleted()
- * @method static Builder|Conversation withoutBlanks()
  * @method static Builder|Conversation withoutCleared()
- * @method static Builder|Conversation withoutDeleted()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> withoutDeleted()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> withoutBlanks()
+ * @method \Illuminate\Database\Eloquent\Relations\HasOne group()
  */
 class Conversation extends Model
 {
@@ -75,10 +77,8 @@ class Conversation extends Model
         parent::__construct($attributes);
     }
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         // static::addGlobalScope(new WithoutDeletedScope());
         // DELETED event
         static::deleted(function ($conversation) {
@@ -137,7 +137,7 @@ class Conversation extends Model
      */
     public function participants(): HasMany
     {
-        return $this->hasMany(Participant::class, 'conversation_id', 'id');
+        return $this->hasMany(Wirechat::participantModelClass(), 'conversation_id', 'id');
     }
 
     /**
@@ -248,12 +248,12 @@ class Conversation extends Model
      */
     public function messages(): hasMany
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(Wirechat::messageModelClass());
     }
 
     public function lastMessage(): hasOne
     {
-        return $this->hasOne(Message::class, 'conversation_id')->latestOfMany();
+        return $this->hasOne(Wirechat::messageModelClass(), 'conversation_id')->latestOfMany();
     }
 
     /**
@@ -274,17 +274,44 @@ class Conversation extends Model
      */
     public function scopeWithoutBlanks(Builder $builder): void
     {
-        $user = auth()->user(); // Get the authenticated user
-        if ($user) {
-
-            $builder->whereHas('messages', function ($q) use ($user) {
-                /* !we only exclude one scope not all because we don't want to check aginast soft delete messages */
-                $q->withoutGlobalScope(WithoutRemovedMessages::class)->whereDoesntHave('actions', function ($q) use ($user) {
-                    $q->whereActor($user)
-                        ->where('type', Actions::DELETE);
-                });
-            });
+        $user = auth()->user();
+        if (! $user) {
+            return;
         }
+
+        $messagesTable = Wirechat::messageModelTable();
+        $participantsTable = Wirechat::participantModelTable();
+
+        $builder->whereHas('messages', function (Builder $q) use ($user, $messagesTable, $participantsTable) {
+            // Remove the global scope that hides removed messages so we can apply our own logic here
+            $q->withoutGlobalScope(\Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages::class)
+
+                // We only want messages that are NOT deleted by the current user's participant in this conversation
+                ->whereDoesntHave('actions', function ($aq) use ($user, $messagesTable, $participantsTable) {
+                    $participantClass = Wirechat::participantModelClass();
+                    $participantMorphAlias = app($participantClass)->getMorphClass();
+
+                    $aq->where('type', Actions::DELETE)
+                        ->where(function ($actorTypeQuery) use ($participantClass, $participantMorphAlias) {
+                            $actorTypeQuery->where('actor_type', $participantClass)
+                                ->orWhere('actor_type', $participantMorphAlias);
+                        })
+
+                        // actor_id (actions) must reference a participant row that belongs to the same conversation
+                        // AND that participant row must belong to the current authenticated user.
+                        ->whereExists(function ($ex) use ($user, $participantsTable, $messagesTable) {
+                            $ex->select(DB::raw(1))
+                                ->from($participantsTable)
+                                // actions.actor_id = participants.id
+                                ->whereColumn("$participantsTable.id", 'actor_id')
+                                // participants.conversation_id = messages.conversation_id
+                                ->whereColumn("$participantsTable.conversation_id", "$messagesTable.conversation_id")
+                                // participant belongs to current auth user
+                                ->where("$participantsTable.participantable_id", $user->getKey())
+                                ->where("$participantsTable.participantable_type", $user->getMorphClass());
+                        });
+                });
+        });
     }
 
     /**
@@ -299,7 +326,7 @@ class Conversation extends Model
         if ($user) {
 
             // Get the table name for conversations dynamically to avoid hardcoding.
-            $conversationsTableName = (new Conversation)->getTable();
+            $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
@@ -320,7 +347,7 @@ class Conversation extends Model
 
         if ($user) {
             // Get the table name for conversations dynamically to avoid hardcoding.
-            $conversationsTableName = (new Conversation)->getTable();
+            $conversationsTableName = Wirechat::conversationModelTable();
 
             // Apply the "without deleted conversations" scope
             $builder->whereHas('participants', function ($query) use ($user, $conversationsTableName) {
@@ -429,7 +456,7 @@ class Conversation extends Model
     {
         $user = auth()->user();
 
-        return $this->hasOne(Participant::class)
+        return $this->hasOne(Wirechat::participantModelClass())
             ->withoutParticipantable($user)
             ->where('role', ParticipantRole::OWNER)
             ->withWhereHas('conversation', function ($query) {
@@ -447,7 +474,7 @@ class Conversation extends Model
     {
         $user = auth()->user();
 
-        return $this->hasOne(Participant::class)
+        return $this->hasOne(Wirechat::participantModelClass())
             ->whereParticipantable($user)
             ->where('role', ParticipantRole::OWNER);
     }
@@ -560,14 +587,130 @@ class Conversation extends Model
     }
 
     /**
+     * Build a correlated subquery for unread messages for a specific user.
+     *
+     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     */
+    protected static function unreadSubqueryFor(Model|Authenticatable $user): Builder
+    {
+        $messagesTable = Wirechat::messageModelTable();
+        $conversationsTable = Wirechat::conversationModelTable();
+
+        $participantSubquery = Wirechat::participantModelClass()::query()
+            ->select('conversation_id', 'conversation_read_at')
+            ->where('participantable_id', $user->getKey())
+            ->where('participantable_type', $user->getMorphClass());
+
+        return Wirechat::messageModelClass()::query()
+            ->joinSub($participantSubquery, 'auth_participant', function ($join) use ($messagesTable) {
+                $join->on('auth_participant.conversation_id', '=', $messagesTable.'.conversation_id');
+            })
+            ->whereColumn($messagesTable.'.conversation_id', $conversationsTable.'.id')
+            ->whereIsNotOwnedBy($user)
+            ->where(function ($query) use ($messagesTable) {
+                $query->whereNull('auth_participant.conversation_read_at')
+                    ->orWhereColumn($messagesTable.'.created_at', '>', 'auth_participant.conversation_read_at');
+            });
+    }
+
+    /**
+     * Build a correlated subquery for unread message counts for a specific user.
+     *
+     * This is useful for preloading unread counts on conversation lists without
+     * triggering one unread query per conversation row during rendering.
+     *
+     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     */
+    public static function unreadCountSubqueryFor(Model|Authenticatable $user): Builder
+    {
+        return static::unreadSubqueryFor($user)
+            ->selectRaw('COUNT(*)');
+    }
+
+    /**
+     * Build a correlated subquery that reports whether unread messages exist.
+     *
+     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     */
+    public static function unreadExistsSubqueryFor(Model|Authenticatable $user): Builder
+    {
+        return static::unreadSubqueryFor($user)
+            ->selectRaw('1')
+            ->limit(1);
+    }
+
+    /**
+     * Add a preloaded unread-count subquery to the conversation query.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeWithUnreadCountFor(
+        Builder $query,
+        Model|Authenticatable $user,
+        string $column = 'unread_messages_count'
+    ): Builder {
+        return $query->addSelect([$column => static::unreadCountSubqueryFor($user)]);
+    }
+
+    /**
+     * Add a preloaded unread-exists subquery to the conversation query.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeWithUnreadExistsFor(
+        Builder $query,
+        Model|Authenticatable $user,
+        string $column = 'has_unread_messages'
+    ): Builder {
+        return $query->addSelect([$column => static::unreadExistsSubqueryFor($user)]);
+    }
+
+    /**
+     * Get the total unread message count across all conversations for the specified user.
+     */
+    public static function getTotalUnreadCountFor(Model|Authenticatable $user): int
+    {
+        $messagesTable = Wirechat::messageModelTable();
+        $participantSubquery = Wirechat::participantModelClass()::query()
+            ->select('conversation_id', 'conversation_read_at')
+            ->where('participantable_id', $user->getKey())
+            ->where('participantable_type', $user->getMorphClass());
+
+        return (int) Wirechat::messageModelClass()::query()
+            ->joinSub($participantSubquery, 'auth_participant', function ($join) use ($messagesTable) {
+                $join->on('auth_participant.conversation_id', '=', $messagesTable.'.conversation_id');
+            })
+            ->whereIsNotOwnedBy($user)
+            ->where(function ($query) use ($messagesTable) {
+                $query->whereNull('auth_participant.conversation_read_at')
+                    ->orWhereColumn($messagesTable.'.created_at', '>', 'auth_participant.conversation_read_at');
+            })
+            ->count();
+    }
+
+    /**
      * Get unread messages count for the specified user.
      */
     public function getUnreadCountFor(Model $model): int
     {
-        // Get unread messages by reusing the unreadMessages method
-        $unreadMessages = $this->unreadMessages($model);
+        if ($this->relationLoaded('messages')) {
+            return $this->unreadMessages($model)->count();
+        }
 
-        return $unreadMessages->count(); // Return the count of unread messages
+        $participant = $this->participant($model);
+
+        if (! $participant) {
+            return 0;
+        }
+
+        return (int) $this->messages()
+            ->whereIsNotOwnedBy($model)
+            ->when($participant->conversation_read_at, function ($query) use ($participant) {
+                $query->where('created_at', '>', $participant->conversation_read_at);
+            })
+            ->count();
     }
 
     /**
@@ -699,7 +842,7 @@ class Conversation extends Model
      */
     public function group()
     {
-        return $this->hasOne(Group::class, 'conversation_id');
+        return $this->hasOne(Wirechat::groupModelClass(), 'conversation_id');
     }
 
     public function isPrivate(): bool

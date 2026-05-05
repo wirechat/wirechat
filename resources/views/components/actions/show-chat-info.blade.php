@@ -1,13 +1,15 @@
 @props([
-    'conversation' => null, //Should be conversation to more flexible when overriding
-    'widget' => false
+    'conversation' => null, //Should be conversation  ID (Int)
+    'widget' => false,
+    'panel' => null,
 ])
 
 
 <x-wirechat::actions.open-chat-drawer 
         component="wirechat.chat.info"
         dusk="show_chat_info"
-        conversation="{{$conversation->id}}"
+        conversation="{{$conversation}}"
+        :panel="$panel"
         :widget="$widget"
         >
 {{$slot}}

@@ -3,15 +3,14 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Wirechat\Wirechat\Models\Action;
-use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        $actionsTable = (new Action)->getTable();
-        $attachmentsTable = (new Attachment)->getTable();
+        $actionsTable = Wirechat::actionModelTable();
+        $attachmentsTable = Wirechat::attachmentModelTable();
 
         // Actions table
         if (Schema::hasTable($actionsTable)) {
@@ -46,8 +45,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        $actionsTable = (new Action)->getTable();
-        $attachmentsTable = (new Attachment)->getTable();
+        $actionsTable = Wirechat::actionModelTable();
+        $attachmentsTable = Wirechat::attachmentModelTable();
 
         // Revert Actions table
         if (Schema::hasTable($actionsTable)) {

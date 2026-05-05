@@ -20,11 +20,6 @@ trait HasRoutes
     protected bool|Closure $hasRoutes = true;
 
     /**
-     * The home URL for the panel, which can be a string, Closure, or null.
-     */
-    protected string|Closure|null $homeUrl = null;
-
-    /**
      * The base path for the panel's routes.
      */
     protected string $path = '';
@@ -54,18 +49,6 @@ trait HasRoutes
     public function registerRoutes(bool|Closure $condition = true): static
     {
         $this->hasRoutes = $condition;
-
-        return $this;
-    }
-
-    /**
-     * Sets the home URL for the panel.
-     *
-     * @param  string|Closure|null  $url  The home URL or a Closure that returns it.
-     */
-    public function homeUrl(string|Closure|null $url): static
-    {
-        $this->homeUrl = $url;
 
         return $this;
     }
@@ -104,16 +87,6 @@ trait HasRoutes
     public function getRoutes(): array
     {
         return $this->routes;
-    }
-
-    /**
-     * Gets the evaluated home URL for the panel.
-     *
-     * @return string|null The home URL, or null if not set.
-     */
-    public function getHomeUrl(): ?string
-    {
-        return $this->evaluate($this->homeUrl);
     }
 
     /**

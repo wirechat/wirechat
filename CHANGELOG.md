@@ -10,12 +10,126 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]  
 
-### Added  
-- Initial changelog setup.  
-- Placeholder for upcoming features.
+### Changed
+- No unreleased changes documented yet.
 
 ---
 
+## [v0.5.5](https://github.com/wirechat/wirechat/releases/tag/v0.5.5) - 2026-04-09
+
+### Added
+- Improved message link handling for email addresses, whitespace-preserving rendering, and dedicated link message parsing.
+- More resilient unread indicator updates across active chat lists.
+
+### Changed
+- Localized grouped chat dates and relative timestamps.
+- Improved member action dropdown behavior so menus switch cleanly instead of stacking.
+- Smoothed initial chat scroll behavior and refined chats input spacing.
+
+### Fixed
+- Prevented delete-for-everyone from rehydrating removed messages and causing 404s for other participants.
+- Fixed realtime unread indicator sync and tightened `loadMore` and scroll stability in chat and chats-list views.
+
+---
+
+## [v0.5.4](https://github.com/wirechat/wirechat/releases/tag/v0.5.4) - 2026-04-06
+
+### Added
+- Configurable unread indicator APIs and reactive chat preview badges.
+- Configurable message link parsing with allowed TLD defaults and message-body URL parsing.
+
+### Changed
+- Renamed the link parsing configuration to `message_links` and the internal parser to `parseMessageUrls`.
+
+### Fixed
+- Kept the widget chat drawer mounted across refreshes.
+- Fixed undefined media handling and message action styling regressions.
+
+---
+
+## [v0.5.3](https://github.com/wirechat/wirechat/releases/tag/v0.5.3) - 2026-03-27
+
+### Fixed
+- Fixed the send message action button background color.
+
+---
+
+## [v0.5.2](https://github.com/wirechat/wirechat/releases/tag/v0.5.2) - 2026-03-27
+
+### Added
+- Widget wrapper UI props and refreshed dark palette options.
+
+### Changed
+- Added Laravel 13 compatibility and aligned upload finalization with Livewire 4.
+- Refactored model boot hooks to use `booted()` and renamed component style properties for consistency.
+
+### Fixed
+- Preserved image attachment detection for Livewire 3 and 4 uploads.
+- Fixed modal and drawer layering plus scroll blocking when widgets or overlays are open.
+
+---
+
+## [v0.5.1](https://github.com/wirechat/wirechat/releases/tag/v0.5.1) - 2026-03-24
+
+### Added
+- Panel chat actions now support custom icons and icon attributes.
+- Improved tooltip accessibility, focus handling, and mobile touch support in header actions.
+- Added cursor-pagination coverage plus configurable service model resolution and storage disk env support.
+
+### Changed
+- Improved chats list pagination, rerender behavior, and responsive widget/sidebar interactions.
+- Updated redirect-to-home handling and return controls for widget and mobile contexts.
+
+### Fixed
+- Fixed UUID-safe load-more ordering with deterministic cursor tie-breakers.
+- Resolved icon rendering, attribute merge, and redirect rendering bugs in chats actions.
+
+---
+
+## [v0.5.0](https://github.com/wirechat/wirechat/releases/tag/v0.5.0) - 2026-01-30
+
+### Changed
+- Updated Wirechat to support **Livewire v4**.
+- Improved internal component resolution for newer Livewire lifecycle behavior.
+- Refined ChatWidget open/close handling for better stability.
+
+### Fixed
+- Updated and stabilized tests for Livewire v4.
+- Fixed duplicate close events caused by multiple dispatches.
+
+---
+
+## [v0.4.1](https://github.com/wirechat/wirechat/releases/tag/v0.4.1) - 2026-01-29
+
+### Fixed
+- Fixed rollback logic so legacy `sendable_id` and `sendable_type` fields are restored correctly.
+
+---
+
+## [v0.4.0](https://github.com/wirechat/wirechat/releases/tag/v0.4.0) - 2026-01-29
+
+### Changed
+- Improved internal message sender handling using participants instead of polymorphic fields.
+
+### Fixed
+- Rollback now correctly restores legacy `sendable_id` and `sendable_type`.
+- General bug fixes and stability improvements.
+
+### Notes
+- Compatible with **Livewire v3**.
+- This line is maintenance-only (no new features).
+
+---
+
+## [0.3.0](https://github.com/namumakwembo/wirechat/releases/tag/0.3.0) - 2025-12-24
+
+### Added
+- Added `hasRoutes()` support so panels can opt out of automatic route registration.
+
+### Fixed
+- Hardened auth-user access checks around route registration for the stable 0.3.0 release.
+
+---
 
 ## [v0.3.0-beta4](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-beta4) - 2025-11-12
 
@@ -86,6 +200,36 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 
 ---
 
+## [v0.3.0-alpha2](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-alpha2) - 2025-09-28
+
+### Fixed
+- Fixed flickering overflow in the group creation flow.
+
+---
+
+## [v0.3.0-alpha1](https://github.com/namumakwembo/wirechat/releases/tag/v0.3.0-alpha1) - 2025-09-28
+
+### Added
+- First alpha of the panel-based architecture, including panel providers, panel-aware search, and UUID migration tooling.
+- Added emoji configuration options, language updates, and panel-aware route/channel resolution.
+
+### Changed
+- Moved attachment URL resolution and UI settings into the panel system.
+
+### Fixed
+- Fixed avatar fallback behavior and a broad set of panel migration and test stability issues.
+
+---
+
+## [v0.2.11](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.11) - 2025-09-26
+
+### Added
+- Added French translations.
+
+### Fixed
+- Fixed long message text wrapping and minor translation cleanup.
+
+-----
 
 ## [v0.2.10](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.10) - 2025-05-22
 
@@ -149,6 +293,16 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 
 ---
 
+## [v0.2.4-beta](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.4-beta) - 2025-03-29
+
+### Added
+- Early Tailwind CSS v4 compatibility pass.
+
+### Fixed
+- Fixed the unwired description property regression.
+
+---
+
 ## [v0.2.4](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.4) - 2025-03-30  
 
 ### Added  
@@ -205,6 +359,13 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
      ],
 ```
 - Added docs about notification
+
+---
+
+## [v0.1.1](https://github.com/namumakwembo/wirechat/releases/tag/v0.1.1) - 2025-02-17
+
+### Fixed
+- Fixed emoji picker styling in system dark mode.
 
 ---
 
@@ -295,7 +456,22 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 
 ---
 
-## [v0.0.1](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.1) - 2024-12-8  
+## [v0.0.3](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.3) - 2024-12-04
+
+### Changed
+- Cleaned up composer and test compatibility for the early Pest 2 and 3 support matrix.
+
+---
+
+## [v0.0.2](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.2) - 2024-12-04
+
+### Changed
+- Added Pest 3 compatibility and moved read tracking to participants.
+- Improved chats query performance and loading transitions.
+
+---
+
+## [0.0.1](https://github.com/namumakwembo/wirechat/releases/tag/0.0.1) - 2024-11-30  
 ### Added  
 - Introduced `Wirechat` package with the following features:  
   - Basic chat functionality for private conversations.  

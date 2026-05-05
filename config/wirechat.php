@@ -30,6 +30,15 @@ return [
     */
     'table_prefix' => 'wirechat_',
 
+    'models' => [
+        'action' => \Wirechat\Wirechat\Models\Action::class,
+        'attachment' => \Wirechat\Wirechat\Models\Attachment::class,
+        'conversation' => \Wirechat\Wirechat\Models\Conversation::class,
+        'group' => \Wirechat\Wirechat\Models\Group::class,
+        'message' => \Wirechat\Wirechat\Models\Message::class,
+        'participant' => \Wirechat\Wirechat\Models\Participant::class,
+    ],
+
     /*
      |--------------------------------------------------------------------------
      | Storage
@@ -40,10 +49,30 @@ return [
      |
      */
     'storage' => [
-        'disk' => 'public',
+        'disk' => env('WIRECHAT_STORAGE_DISK', 'public'),
         'visibility' => 'public',
         'directories' => [
             'attachments' => 'attachments',
+        ],
+    ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Message URL Parsing
+     |--------------------------------------------------------------------------
+     |
+     | Configure how Wirechat detects and links URLs in message bodies.
+     | If allowed_tlds is null, all TLDs are allowed.
+     | If allowed_tlds is an empty array, no TLDs are allowed.
+     | If allowed_tlds is a list, only those TLDs will be recognized.
+     | Defaults shown below.
+     |
+     */
+    'message_url_parsing' => [
+        'allow_bare_domains' => true,
+        'allowed_tlds' => [
+            'com', 'net', 'org', 'io', 'co', 'me', 'app', 'dev', 'ai', 'gg', 'tv',
+            'info', 'biz', 'xyz', 'site', 'store', 'shop', 'pro', 'cloud',
         ],
     ],
 ];

@@ -6,5 +6,4 @@
     @if ($conversation->isSelfConversation())
         <span class="font-medium dark:text-white">({{__('wirechat::chats.labels.you')  }})</span>
     @endif
-
 </div>

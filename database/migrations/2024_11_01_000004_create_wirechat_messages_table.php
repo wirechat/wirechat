@@ -4,8 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Wirechat\Wirechat\Facades\Wirechat;
-use Wirechat\Wirechat\Models\Conversation;
-use Wirechat\Wirechat\Models\Message;
 
 return new class extends Migration
 {
@@ -15,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         $usesUuid = Wirechat::usesUuid();
-        Schema::create((new Message)->getTable(), function (Blueprint $table) use ($usesUuid) {
+        Schema::create(Wirechat::messageModelTable(), function (Blueprint $table) use ($usesUuid) {
             $table->id();
 
             if ($usesUuid) {
@@ -23,13 +21,12 @@ return new class extends Migration
             } else {
                 $table->unsignedBigInteger('conversation_id');
             }
-            $table->foreign('conversation_id')->references('id')->on((new Conversation)->getTable())->cascadeOnDelete();
+            $table->foreign('conversation_id')->references('id')->on(Wirechat::conversationModelTable())->cascadeOnDelete();
 
-            $table->unsignedBigInteger('sendable_id');
-            $table->string('sendable_type');
+            $table->foreignId('participant_id')->references('id')->on(Wirechat::participantModelTable())->cascadeOnDelete();
 
             $table->unsignedBigInteger('reply_id')->nullable();
-            $table->foreign('reply_id')->references('id')->on((new Message)->getTable())->nullOnDelete();
+            $table->foreign('reply_id')->references('id')->on(Wirechat::messageModelTable())->nullOnDelete();
 
             $table->text('body')->nullable();
             $table->string('type')->default('text');
@@ -41,7 +38,6 @@ return new class extends Migration
 
             // Indexes for optimization
             $table->index(['conversation_id']);
-            $table->index(['sendable_id', 'sendable_type']);
         });
     }
 
@@ -50,6 +46,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists((new Message)->getTable());
+        Schema::dropIfExists(Wirechat::messageModelTable());
     }
 };

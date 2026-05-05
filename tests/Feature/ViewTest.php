@@ -86,3 +86,53 @@ test('it marks messages as read when conversation is open ', function () {
     expect($auth->getUnReadCount())->toBe(0);
 
 });
+
+test('it does not mark messages as read when only the chats index is refreshed', function () {
+    $auth = User::factory()->create();
+
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+    $receiver->sendMessageTo($auth, message: 'how is it going');
+    $receiver->sendMessageTo($auth, message: 'i am good thanks');
+
+    expect($conversation->fresh()->getUnreadCountFor($auth))->toBe(2);
+
+    $this->actingAs($auth)->get(testPanelProvider()->chatsRoute())
+        ->assertStatus(200);
+
+    expect($conversation->fresh()->getUnreadCountFor($auth))->toBe(2);
+});
+
+test('it does not mark a different conversation as read when another chat is open', function () {
+    $auth = User::factory()->create();
+
+    $userA = User::factory()->create(['name' => 'John']);
+    $userB = User::factory()->create(['name' => 'Jane']);
+
+    $conversationA = Conversation::factory()->withParticipants([$auth, $userA])->create();
+    $conversationB = Conversation::factory()->withParticipants([$auth, $userB])->create();
+
+    $userA->sendMessageTo($auth, message: 'message 1');
+    $userA->sendMessageTo($auth, message: 'message 2');
+
+    expect($conversationA->fresh()->getUnreadCountFor($auth))->toBe(2)
+        ->and($conversationB->fresh()->getUnreadCountFor($auth))->toBe(0);
+
+    $this->actingAs($auth)->get(testPanelProvider()->chatRoute($conversationB->id))
+        ->assertStatus(200);
+
+    expect($conversationA->fresh()->getUnreadCountFor($auth))->toBe(2)
+        ->and($conversationB->fresh()->getUnreadCountFor($auth))->toBe(0);
+});
+
+test('it does not persist the chats sidebar shell on the chat page', function () {
+    $auth = User::factory()->create();
+    $user = User::factory()->create();
+
+    $conversation = $auth->createConversationWith($user);
+
+    $this->actingAs($auth)->get(testPanelProvider()->chatRoute($conversation->id))
+        ->assertStatus(200)
+        ->assertDontSee('x-persist="chats"', false);
+});

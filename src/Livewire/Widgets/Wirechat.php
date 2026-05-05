@@ -6,20 +6,60 @@ use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
-use Livewire\Mechanisms\ComponentRegistry;
+use Wirechat\Wirechat\Facades\Wirechat as WirechatFacade;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
-use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 
 class Wirechat extends Component
 {
     use HasPanel;
+    use InteractsWithUI;
 
     public ?string $activeWirechatWidgetComponent = null;
 
     public $selectedConversationId = null;
 
     public array $widgetComponents = [];
+
+    #[Locked]
+    public string $chatsClass = '';
+
+    /**
+     * @var array<int|string, mixed>|string|null
+     */
+    #[Locked]
+    public array|string|null $chatsStyles = null;
+
+    #[Locked]
+    public string $chatClass = '';
+
+    /**
+     * @var array<int|string, mixed>|string|null
+     */
+    #[Locked]
+    public array|string|null $chatStyles = null;
+
+    public function getChatsUiClass(): string
+    {
+        return trim($this->chatsClass);
+    }
+
+    public function getChatsUiStyles(): ?string
+    {
+        return $this->formatUiStyles($this->chatsStyles);
+    }
+
+    public function getChatUiClass(): string
+    {
+        return trim($this->chatClass);
+    }
+
+    public function getChatUiStyles(): ?string
+    {
+        return $this->formatUiStyles($this->chatStyles);
+    }
 
     public function resetState(): void
     {
@@ -41,7 +81,6 @@ class Wirechat extends Component
     public function openChatWidget($conversation, $arguments = [], $modalAttributes = []): void
     {
         $component = 'wirechat.chat';
-        // $componentClass = app(ComponentRegistry::class)->getClass($component);
 
         // Generate a unique ID using the conversationId and arguments
         $id = md5($component.$conversation.serialize($arguments));
@@ -104,7 +143,7 @@ class Wirechat extends Component
         $instance = app()->make($parameterClassName);
 
         if (! $model = $instance->resolveRouteBinding($parameterValue)) {
-            throw (new ModelNotFoundException)->setModel(Conversation::class, [$parameterValue]);
+            throw (new ModelNotFoundException)->setModel(WirechatFacade::conversationModelClass(), [$parameterValue]);
         }
 
         return $model;
@@ -141,6 +180,16 @@ class Wirechat extends Component
             'open-chat' => 'openChatWidget',
 
         ];
+    }
+
+    public function closeChatWidget($data = []): void
+    {
+        if ($this->activeWirechatWidgetComponent) {
+            $force = $data['force'] ?? false;
+            $this->destroyChatWidget($this->activeWirechatWidgetComponent);
+            $this->activeWirechatWidgetComponent = null;
+            $this->selectedConversationId = null;
+        }
     }
 
     public function mount(): void

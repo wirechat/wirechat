@@ -1,4 +1,9 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
+@use('Wirechat\Wirechat\Support\Enums\UnreadIndicatorType')
+
+@php
+$unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
+@endphp
 
 <ul wire:loading.delay.long.remove wire:target="search" class="p-2 grid w-full space-y-2">
     @foreach ($conversations as $key=> $conversation)
@@ -8,39 +13,41 @@
     $receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peer_participant?->participantable : $this->auth);
     //$receiver = $conversation->isGroup() ? null : ($conversation->isPrivate() ? $conversation->peerParticipant()?->participantable : $this->auth);
     $lastMessage = $conversation->lastMessage;
-    //mark isReadByAuth true if user has chat opened
-    $isReadByAuth = $conversation?->readBy($conversation->auth_participant??$this->auth) || $selectedConversationId == $conversation->id;
     $belongsToAuth = $lastMessage?->belongsToAuth();
+    $unreadIndicatorCount = $unreadIndicatorType === UnreadIndicatorType::Count
+        ? (int) $conversation->getAttribute('unread_messages_count')
+        : null;
+    $hasUnreadMessages = $unreadIndicatorType === UnreadIndicatorType::Count
+        ? $unreadIndicatorCount > 0
+        : (bool) $conversation->getAttribute('has_unread_messages');
+    $unreadIndicatorKey = $unreadIndicatorType === UnreadIndicatorType::Count
+        ? $unreadIndicatorCount
+        : (int) $hasUnreadMessages;
+    $showUnreadStatus = $this->panel()->hasUnreadIndicator()
+        && $lastMessage != null
+        && $hasUnreadMessages
+        && $selectedConversationId != $conversation->id;
 
 
     @endphp
 
     <li x-data="{
         conversationID: @js($conversation->id),
-        showUnreadStatus: @js(!$isReadByAuth),
         handleChatOpened(event) {
-            // Hide unread dot
             if (event.detail.conversation== this.conversationID) {
-                this.showUnreadStatus= false;
+                selectedConversationId = event.detail.conversation;
             }
-            //update this so that the the selected conversation highlighter can be updated
             $wire.selectedConversationId= event.detail.conversation;
         },
         handleChatClosed(event) {
-                // Clear the globally selected conversation.
-                $wire.selectedConversationId = null;
-                selectedConversationId = null;
-        },
-        handleOpenChat(event) {
-            // Clear the globally selected conversation.
-            if (this.showUnreadStatus==  event.detail.conversation== this.conversationID) {
-                this.showUnreadStatus= false;
-            }
-    }
+            $wire.selectedConversationId = null;
+            selectedConversationId = null;
+        }
     }"
+    data-show-unread-status="{{ $showUnreadStatus ? '1' : '0' }}"
 
     id="conversation-{{ $conversation->id }}"
-        wire:key="conversation-em-{{ $conversation->id }}-{{ $conversation->updated_at->timestamp }}"
+        wire:key="conversation-em-{{ $conversation->id }}-{{ $lastMessage?->id ?? 'none' }}-{{ $unreadIndicatorKey }}"
         x-on:chat-opened.window="handleChatOpened($event)"
         x-on:chat-closed.window="handleChatClosed($event)">
         <a @if ($widget) tabindex="0"
@@ -77,16 +84,28 @@
 
                 {{-- Read status --}}
                 {{-- Only show if AUTH is NOT onwer of message --}}
-                @if ($lastMessage != null && !$lastMessage?->ownedBy($this->auth) && !$isReadByAuth)
-                    <div x-show="showUnreadStatus" dusk="unreadMessagesDot" class=" col-span-2 flex flex-col text-center my-auto">
-                        {{-- Dots icon --}}
-                        <span dusk="unreadDotItem" class="sr-only">unread dot</span>
-                        <svg @style(['color:var(--wc-brand-primary)']) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                            fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
-                            <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
-                        </svg>
+                @if ($showUnreadStatus)
+                    @if ($unreadIndicatorType === UnreadIndicatorType::Count)
+                        <div x-show="selectedConversationId != conversationID" dusk="unreadMessagesCount" class="col-span-2 flex flex-col text-center my-auto items-end">
+                            <span class="sr-only">unread messages count</span>
+                            <span
+                                @style(['background-color:var(--wc-brand-primary)'])
+                                class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold leading-none text-white"
+                            >
+                                {{ $unreadIndicatorCount }}
+                            </span>
+                        </div>
+                    @else
+                        <div x-show="selectedConversationId != conversationID" dusk="unreadMessagesDot" class=" col-span-2 flex flex-col text-center my-auto">
+                            {{-- Dots icon --}}
+                            <span dusk="unreadDotItem" class="sr-only">unread dot</span>
+                            <svg @style(['color:var(--wc-brand-primary)']) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
+                                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+                            </svg>
 
-                    </div>
+                        </div>
+                    @endif
                 @endif
 
 

@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\Mime\MimeTypes;
 use Wirechat\Wirechat\Facades\Wirechat;
 
 /**
@@ -43,6 +46,35 @@ class Attachment extends Model
 {
     use HasFactory;
 
+    protected const GENERIC_MIME_TYPES = [
+        'application/octet-stream',
+        'application/x-empty',
+        'inode/x-empty',
+    ];
+
+    protected const IMAGE_EXTENSIONS = [
+        'png',
+        'jpg',
+        'jpeg',
+        'gif',
+        'webp',
+        'bmp',
+        'svg',
+        'avif',
+        'heic',
+        'heif',
+    ];
+
+    protected const VIDEO_EXTENSIONS = [
+        'mp4',
+        'mov',
+        'avi',
+        'wmv',
+        'webm',
+        'm4v',
+        'mkv',
+    ];
+
     protected $fillable = ['attachable_id', 'attachable_type', 'file_path', 'file_name', 'mime_type', 'url', 'original_name'];
 
     public function __construct(array $attributes = [])
@@ -62,13 +94,9 @@ class Attachment extends Model
         return \Wirechat\Wirechat\Workbench\Database\Factories\AttachmentFactory::new();
     }
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
-        // listen to deleted
         static::deleted(function (Attachment $media) {
-
             $disk = Wirechat::storage()->disk();
 
             if (Storage::disk($disk)->exists($media->file_path)) {
@@ -126,5 +154,61 @@ class Attachment extends Model
     public function getCleanMimeTypeAttribute(): string
     {
         return explode('/', $this->mime_type)[1] ?? 'unknown';
+    }
+
+    public static function resolveMimeType(UploadedFile $file, ?string $storedPath = null, ?string $disk = null): string
+    {
+        $mimeType = $file->getMimeType();
+
+        if (static::hasSpecificMimeType($mimeType)) {
+            return $mimeType;
+        }
+
+        if ($storedPath && $disk) {
+            $storedMimeType = Storage::disk($disk)->mimeType($storedPath);
+
+            if (is_string($storedMimeType) && static::hasSpecificMimeType($storedMimeType)) {
+                return $storedMimeType;
+            }
+        }
+
+        $extension = Str::of($file->getClientOriginalName())->afterLast('.')->lower()->value();
+
+        if ($extension !== '') {
+            $guessedMimeType = MimeTypes::getDefault()->getMimeTypes($extension)[0] ?? null;
+
+            if ($guessedMimeType) {
+                return $guessedMimeType;
+            }
+        }
+
+        return $mimeType ?: 'application/octet-stream';
+    }
+
+    public function isImage(): bool
+    {
+        return Str::startsWith((string) $this->mime_type, 'image/')
+            || $this->hasExtension(static::IMAGE_EXTENSIONS);
+    }
+
+    public function isVideo(): bool
+    {
+        return Str::startsWith((string) $this->mime_type, 'video/')
+            || $this->hasExtension(static::VIDEO_EXTENSIONS);
+    }
+
+    protected static function hasSpecificMimeType(?string $mimeType): bool
+    {
+        return filled($mimeType) && ! in_array($mimeType, static::GENERIC_MIME_TYPES, true);
+    }
+
+    protected function hasExtension(array $extensions): bool
+    {
+        $extension = Str::of($this->original_name ?: $this->file_name)
+            ->afterLast('.')
+            ->lower()
+            ->value();
+
+        return $extension !== '' && in_array($extension, $extensions, true);
     }
 }
