@@ -1,11 +1,18 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
+@php
+    $chatsShellClass = trim('flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full sm:p-3 '.$this->getUiClass());
+    $chatsShellStyles = $this->getUiStyles();
+@endphp
 <div
-    x-data="{ selectedConversationId: '{{ request()->conversation ?? $selectedConversationId }}' }"
+    x-data="{ selectedConversationId: @js(request()->conversation ?? $selectedConversationId) }"
      x-on:open-chat.window="selectedConversationId = $event.detail.conversation; $wire.selectedConversationId = $event.detail.conversation;"
+     x-on:chat-opened.window="selectedConversationId = $event.detail.conversation"
+     x-on:chat-closed.window="selectedConversationId = null"
      x-init="
         const container = document.getElementById('wirechat-chats-scrollable-container');
 
         function scrollToConversation(attempts = 10, delay = 200) {
+            requestAnimationFrame(() => {
             const el = document.getElementById('conversation-' + selectedConversationId);
             if (!container || !el || !selectedConversationId) {
                 if (attempts > 0) {
@@ -27,7 +34,7 @@
             const finalScroll = Math.max(0, Math.min(scrollOffset, maxScroll));
 
             // Animate scroll
-            requestAnimationFrame(() => {
+        
                 container.scrollTo({ top: finalScroll, behavior: 'smooth' });
             });
         }
@@ -47,11 +54,8 @@
         //});
         //observer.observe(container, { childList: true, subtree: true });
     "
-
-
-
-
-     class="flex flex-col bg-[var(--wc-light-primary)]  dark:bg-[var(--wc-dark-primary)]  transition-all h-full overflow-hidden w-full sm:p-3">
+     class="{{ $chatsShellClass }}"
+     @if($chatsShellStyles) style="{{ $chatsShellStyles }}" @endif>
 
     @php
         /* Show header if any of these conditions are true  */
@@ -77,6 +81,7 @@
             }
             "
           id="wirechat-chats-scrollable-container"
+          wire:navigate:scroll
         class=" overflow-y-auto py-2  wc-scrollbar-theme  grow  h-full relative " style="contain:content">
 
         {{-- loading indicator --}}

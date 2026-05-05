@@ -4,6 +4,11 @@
 @php
 $primaryColor = isset($this->panel()->getColors()['primary']) ? $this->panel()->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';
 $hasEmojiPicker= $this->panel()->hasEmojiPicker();
+$chatShellClass = trim('w-full transition wc-scrollbar-theme bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] overflow-hidden h-full relative '.$this->getUiClass());
+$chatShellStyles = trim(implode(' ', array_filter([
+    'contain:content;',
+    $this->getUiStyles(),
+])));
 @endphp
 
 
@@ -119,7 +124,8 @@ $hasEmojiPicker= $this->panel()->hasEmojiPicker();
 
 
 "
-    class="w-full transition wc-scrollbar-theme  bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] overflow-hidden h-full relative" style="contain:content">
+    class="{{ $chatShellClass }}"
+    style="{{ $chatShellStyles }}">
 
     <div class=" flex flex-col  grow h-full   relative ">
         {{-- ---------- --}}
@@ -138,8 +144,10 @@ $hasEmojiPicker= $this->panel()->hasEmojiPicker();
         @endif
 
     </div>
-
-    <livewire:wirechat.chat.drawer />
+    {{-- Widget mode keeps a single shared drawer in the widget shell so chat refreshes do not tear it down. --}}
+    @unless($this->isWidget())
+        <livewire:wirechat.chat.drawer />
+    @endunless
 
     @script
 

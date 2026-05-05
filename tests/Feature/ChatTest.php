@@ -1,9 +1,11 @@
 <?php
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -38,6 +40,160 @@ test('authenticaed user can access chatbox ', function () {
 
     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertStatus(200);
+});
+
+test('it applies ui classes and styles to the chat shell only', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+
+    $response = Livewire::actingAs($auth)->test(ChatBox::class, [
+        'conversation' => $conversation->id,
+        'class' => 'chat-shell-test',
+        'styles' => [
+            'min-height' => '24rem',
+        ],
+    ]);
+
+    $html = $response->html();
+
+    preg_match_all('/class="[^"]*chat-shell-test[^"]*"/', $html, $classMatches);
+    preg_match_all('/style="[^"]*min-height: 24rem;[^"]*"/', $html, $styleMatches);
+
+    expect($classMatches[0])->toHaveCount(1)
+        ->and($styleMatches[0])->toHaveCount(1);
+});
+
+test('it renders stable message anchors for scroll restoration', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+    $message = $conversation->messages()->firstOrFail();
+
+    $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+    expect($html)
+        ->toContain('x-ref="main-chat-body"')
+        ->toContain('data-message-id="'.$message->id.'"')
+        ->toContain('id="message-'.$message->id.'"')
+        ->toContain('wire:key="msg-'.$message->id.'"');
+});
+
+test('it loads older messages from the top using the pro-style older window', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 15) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    $initialMessages = collect($component->instance()->loadedMessages)->flatten(1);
+
+    expect($initialMessages)->toHaveCount(10)
+        ->and($component->instance()->canLoadOlder)->toBeTrue();
+
+    $component->call('loadOlder');
+
+    $loadedMessages = collect($component->instance()->loadedMessages)->flatten(1);
+
+    expect($loadedMessages)->toHaveCount(15)
+        ->and($component->instance()->canLoadOlder)->toBeFalse();
+});
+
+test('it dispatches older-loaded when a stale older cursor returns no messages', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 15) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $oldestMessage = $conversation->messages()
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->firstOrFail();
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    $component
+        ->set('canLoadOlder', true)
+        ->set('olderCreatedAt', $oldestMessage->created_at->toDateTimeString())
+        ->set('olderId', $oldestMessage->id)
+        ->call('loadOlder')
+        ->assertDispatched('older-loaded');
+
+    expect($component->instance()->canLoadOlder)->toBeFalse()
+        ->and($component->instance()->canLoadMore)->toBeFalse();
+});
+
+test('it rebuilds the loaded window around the requested message when jumping', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 30) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $orderedMessages = $conversation->messages()
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->get()
+        ->values();
+
+    $targetMessage = $orderedMessages->get(11);
+    $expectedWindowIds = $orderedMessages->slice(1, 21)->pluck('id')->all();
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    expect(collect($component->instance()->loadedMessages)->flatten(1)->pluck('id')->all())
+        ->not->toContain($targetMessage->id);
+
+    $component
+        ->call('jumpToMessage', $targetMessage->id)
+        ->assertDispatched('scroll-to-message');
+
+    $loadedIds = collect($component->instance()->loadedMessages)->flatten(1)->pluck('id')->all();
+
+    expect($component->instance()->anchorId)->toBe($targetMessage->id)
+        ->and($loadedIds)->toBe($expectedWindowIds)
+        ->and($component->instance()->canLoadOlder)->toBeTrue()
+        ->and($component->instance()->canLoadNewer)->toBeTrue();
+});
+
+test('it loads newer messages after jumping to an older window', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $receiver = User::factory()->create(['name' => 'John']);
+    $conversation = $auth->createConversationWith($receiver, 'Message 1');
+
+    foreach (range(2, 30) as $index) {
+        $auth->sendMessageTo($conversation, "Message {$index}");
+    }
+
+    $orderedMessages = $conversation->messages()
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->get()
+        ->values();
+
+    $targetMessage = $orderedMessages->get(11);
+    $expectedIdsAfterLoadNewer = $orderedMessages->slice(1)->pluck('id')->all();
+
+    $component = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+    $component->call('jumpToMessage', $targetMessage->id);
+
+    expect($component->instance()->canLoadNewer)->toBeTrue();
+
+    $component->call('loadNewer');
+
+    $loadedIds = collect($component->instance()->loadedMessages)->flatten(1)->pluck('id')->all();
+
+    expect($loadedIds)->toBe($expectedIdsAfterLoadNewer)
+        ->and($component->instance()->canLoadNewer)->toBeFalse()
+        ->and($component->instance()->canLoadOlder)->toBeTrue();
 });
 
 test('returns 404 if conversation is not found', function () {
@@ -174,6 +330,36 @@ describe('Presense', function () {
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
             ->assertSee('Older message');
+    });
+
+    test('it can render grouped messages when the app uses immutable dates', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->createConversationWith($receiver);
+        $participant = $conversation->participant($auth);
+
+        try {
+            Date::use(CarbonImmutable::class);
+            CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-09 12:00:00'));
+
+            $message = Message::create([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => 'Immutable message',
+            ]);
+
+            expect($message->fresh()->created_at)->toBeInstanceOf(CarbonImmutable::class);
+
+            $expectedGroup = Helper::formatChatDate($message->fresh()->created_at);
+
+            Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSee($expectedGroup)
+                ->assertSee('Immutable message');
+        } finally {
+            CarbonImmutable::setTestNow();
+            Date::useDefault();
+        }
     });
 
     test('it_doesnt_show_upload_trigger_if_attachments_not_enabled', function () {
@@ -354,6 +540,20 @@ describe('mount()', function () {
         $request
             ->assertStatus(200)
             ->assertNotDispatched('refresh');
+    });
+
+    test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
+        $auth = User::factory()->create();
+        $user = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($user, 'hi');
+        $user->sendMessageTo($auth, 'new unread');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id, 'widget' => true]);
+
+        $request
+            ->assertStatus(200)
+            ->assertDispatched('refresh');
     });
 
     // test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
@@ -1436,6 +1636,72 @@ describe('Sending messages ', function () {
         expect($message->type)->toBe(MessageType::TEXT);
     });
 
+    test('it linkifies message urls when linkify messages is enabled', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"');
+    });
+
+    test('it preserves whitespace formatting when rendering linkified messages', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, "hello\nhttps://example.com\nworld");
+        $message->type = MessageType::TEXT;
+        $message->body = "hello\nhttps://example.com\nworld";
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-text"')
+            ->toContain('whitespace-pre-wrap')
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"');
+    });
+    test('it renders message urls as plain text when linkify messages is disabled', function () {
+        testPanelProvider()->parseMessageUrls(false);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->not->toContain('dusk="message-link"')
+            ->toContain('dusk="message-text"')
+            ->toContain('https://example.com')
+            ->toMatch('/dusk="message-text"[^>]*>[\\s\\S]*hello[\\s\\S]*https:\\/\\/example\\.com[\\s\\S]*world/');
+    });
+
     test('it dispatches livewire event "refresh" & "scroll-bottom" when message is sent', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
@@ -1869,6 +2135,71 @@ describe('Sending messages ', function () {
 
         $messageExists = Attachment::all();
         expect(count($messageExists))->toBe(1);
+    });
+
+    test('it appends media uploaded one by one and preserves image metadata when sent', function () {
+        Storage::fake('public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+
+        $firstImage = UploadedFile::fake()->image('first-photo.png');
+        $secondImage = UploadedFile::fake()->image('second-photo.jpg');
+
+        $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
+
+        $request->upload('media', [$firstImage]);
+        $request->upload('media', [$secondImage]);
+
+        $uploadedMedia = $request->get('media');
+
+        expect($uploadedMedia)->toHaveCount(2)
+            ->and(collect($uploadedMedia)->map->getClientOriginalName()->all())
+            ->toBe(['first-photo.png', 'second-photo.jpg']);
+
+        $request->call('sendMessage')
+            ->assertSet('media', []);
+
+        $attachments = Attachment::query()
+            ->orderBy('id')
+            ->get(['original_name', 'mime_type', 'file_path']);
+
+        expect($attachments)->toHaveCount(2)
+            ->and($attachments->pluck('original_name')->all())
+            ->toBe(['first-photo.png', 'second-photo.jpg'])
+            ->and($attachments->pluck('mime_type')->all())
+            ->toBe(['image/png', 'image/jpeg']);
+
+        foreach ($attachments as $attachment) {
+            Storage::disk('public')->assertExists($attachment->file_path);
+        }
+    });
+
+    test('it renders stored generic image attachments as images using the original extension', function () {
+        Storage::fake('public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $message->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/legacy-photo.png',
+            'file_name' => 'legacy-photo.png',
+            'original_name' => 'legacy-photo.png',
+            'mime_type' => 'application/octet-stream',
+            'url' => '/storage/'.Wirechat::storage()->attachmentsDirectory().'/legacy-photo.png',
+        ]);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSeeHtml('<img ');
     });
 
     test('it saves image to storage when created & clears files properties when done', function () {
@@ -3007,16 +3338,16 @@ describe('deleteMessage ForEveryone', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // assert count 4
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 4;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 4;
         });
 
         // call deleteForMe
         $request->call('deleteForEveryone', encrypt($authMessage->id));
 
         // assert count no 3
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 3;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 3;
         });
     });
     test('it throws DecryptException if id is not Encrypted', function () {
@@ -3037,8 +3368,8 @@ describe('deleteMessage ForEveryone', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // assert count 4
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 4;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 4;
         });
 
         // call deleteForMe
@@ -3211,6 +3542,25 @@ describe('deleteMessage ForEveryone', function () {
             return $event->message->id === $authMessage->id;
         });
     });
+
+    test('other participant can refresh after delete for everyone without hitting a missing-model hydration error', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->sendMessageTo($receiver, message: 'message-1')->conversation;
+        $deletedMessage = $auth->sendMessageTo($receiver, message: 'message-2');
+
+        $receiverChat = Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('message-2');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForEveryone', encrypt($deletedMessage->id));
+
+        $receiverChat->call('$refresh')
+            ->assertStatus(200)
+            ->assertDontSee('message-2');
+    });
 });
 
 describe('deletForMe', function () {
@@ -3297,16 +3647,16 @@ describe('deletForMe', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         // assert count 4
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 4;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 4;
         });
 
         // call deleteForMe
         $request->call('deleteForMe', encrypt($authMessage->id));
 
         // assert count no 3
-        $request->assertViewHas('loadedMessages', function ($messages) {
-            return count($messages->flatten()) == 3;
+        $request->assertSet('loadedMessages', function ($messages) {
+            return collect($messages)->flatten(1)->count() == 3;
         });
     });
 

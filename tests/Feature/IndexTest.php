@@ -54,3 +54,11 @@ test('it shows label "Send private photos and messages" ', function () {
     $response->assertSee('Select a conversation to start messaging');
 
 });
+
+test('it does not persist the chats sidebar shell on the chats index page', function () {
+    $auth = User::factory()->create();
+
+    $this->actingAs($auth)->get(testPanelProvider()->chatsRoute())
+        ->assertStatus(200)
+        ->assertDontSee('x-persist="chats"', false);
+});

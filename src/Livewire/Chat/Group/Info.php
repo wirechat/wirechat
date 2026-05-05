@@ -13,6 +13,7 @@ use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
+use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 
 class Info extends ModalComponent
@@ -150,15 +151,19 @@ class Info extends ModalComponent
                 'file_path' => $path,
                 'file_name' => basename($path),
                 'original_name' => $photo->getClientOriginalName(),
-                'mime_type' => $photo->getMimeType(),
+                'mime_type' => Attachment::resolveMimeType(
+                    $photo,
+                    $path,
+                    Wirechat::storage()->disk()
+                ),
                 'url' => $url,
             ]);
 
             $this->cover_url = $url;
             $this->reset('photo');
 
-            $this->dispatch('refresh')->to(Chats::class);
-            $this->dispatch('refresh')->to(Chat::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
+            $this->dispatch('refresh')->to('wirechat.chat');
 
         }
 
