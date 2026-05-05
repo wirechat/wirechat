@@ -62,6 +62,8 @@ trait HasActions
     public function showLeftActions(bool|Closure $condition = true): static
     {
         $this->showLeftActions = $condition;
+
+        return $this;
     }
 
     public function homeUrl(string|Closure|null $url): static
