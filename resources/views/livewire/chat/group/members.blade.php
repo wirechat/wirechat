@@ -50,9 +50,7 @@
 
                     @foreach ($participants as $key => $participant)
                         @php
-                            $loopParticipantIsAuth =
-                                $participant->participantable_id == auth()->id() &&
-                                $participant->participantable_type == auth()->user()->getMorphClass();
+                            $loopParticipantIsAuth = $participant->isParticipantable(auth()->user());
                         @endphp
                         <li x-data="{ memberMenuId: {{ $participant->id }} }" x-ref="button"
                             @click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"

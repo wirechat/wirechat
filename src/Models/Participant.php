@@ -322,4 +322,14 @@ class Participant extends Model
                 ->orWhere('participantable_type', '<>', $user->getMorphClass());
         });
     }
+
+    public function isParticipantable(Model|Authenticatable|null $user): bool
+    {
+        if (! $user instanceof Model) {
+            return false;
+        }
+
+        return $this->participantable_id == $user->getKey()
+            && $this->participantable_type === $user->getMorphClass();
+    }
 }

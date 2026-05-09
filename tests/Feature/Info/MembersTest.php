@@ -120,9 +120,20 @@ describe('presence test', function () {
         $conversation->addParticipant(User::factory()->create(['name' => 'John']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Lemon']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Cold']));
+
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+
         $request
-            ->assertSee('You');
+            ->assertSeeText('You')
+            ->assertSeeText('John')
+            ->assertSeeText('Lemon')
+            ->assertSeeText('Cold');
+
+        $html = $request->html();
+
+        preg_match_all('/>\s*You\s*<\/h6>/', $html, $youLabels);
+
+        expect($youLabels[0])->toHaveCount(1);
     });
 
     test('it shows load more if user can load more thatn 10', function () {

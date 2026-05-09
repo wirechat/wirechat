@@ -31,7 +31,10 @@ test('format chat date accepts immutable timestamps', function () {
 
     try {
         app()->setLocale('tr');
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-09 12:00:00'));
+        $frozenNow = CarbonImmutable::parse('2026-04-09 12:00:00');
+
+        Carbon::setTestNow($frozenNow);
+        CarbonImmutable::setTestNow($frozenNow);
 
         $today = CarbonImmutable::parse('2026-04-09 09:00:00');
         $yesterday = CarbonImmutable::parse('2026-04-08 09:00:00');
