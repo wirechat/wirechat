@@ -46,6 +46,34 @@ test('it hides the requests drawer button when message requests are disabled on 
         ->assertDontSeeHtml('id="open-requests-drawer-button"');
 });
 
+test('it shows the new group button in the chats header when panel allows group creation', function () {
+    testPanelProvider()->createGroupAction();
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('dusk="open_new_group_modal_button_in_header"');
+});
+
+test('it hides the new group button when group creation is disabled on the panel', function () {
+    testPanelProvider()->createGroupAction(false);
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSeeHtml('dusk="open_new_group_modal_button_in_header"');
+});
+
+test('it hides the new group button when user cannot create groups', function () {
+    testPanelProvider()->createGroupAction();
+
+    $auth = \Mockery::mock(User::class)->makePartial();
+    $auth->shouldReceive('canCreateGroups')->andReturn(false);
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSeeHtml('dusk="open_new_group_modal_button_in_header"');
+});
+
 test('pending request conversations stay out of the normal chats list', function () {
     $auth = User::factory()->create(['name' => 'Auth']);
     $receiver = User::factory()->create(['name' => 'Pending User']);

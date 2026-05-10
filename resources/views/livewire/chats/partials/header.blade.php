@@ -59,11 +59,11 @@
                     </x-slot>
                     <x-slot name="content">
 
+                        {{-- Message Requests --}}
                        @if ($hasMessageRequests) 
                         <x-wirechat::actions.open-chats-drawer component="wirechat.chats.requests" widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
                                 <x-wirechat::dropdown-item icon="wirechat::icons.user"  id="open-requests-drawer-button">
                                 <span>{{ __('wirechat::chats.requests.actions.open.label') }}</span>
-
                                     @if ($this->pendingMessageRequestsCount() > 0)
                                         <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1.5 py-0.5 text-xs font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
                                             {{ $this->pendingMessageRequestsCount() }}
@@ -73,6 +73,14 @@
                         </x-wirechat::actions.open-chats-drawer>
                         @endif
 
+                        {{-- New Group Action --}}
+                        @if ($this->panel()->hasCreateGroupAction() && auth()->user()->canCreateGroups())
+                            <x-wirechat::actions.new-group widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
+                                    <x-wirechat::dropdown-item  dusk="open_new_group_modal_button_in_header" icon="wirechat::icons.untitledui-users-plus"  id="open-requests-drawer-button">
+                                            <span>New Group</span>
+                                    </x-wirechat::dropdown-item>
+                            </x-wirechat::actions.new-group>
+                        @endif
                     </x-slot>
                 </x-wirechat::dropdown>
 
