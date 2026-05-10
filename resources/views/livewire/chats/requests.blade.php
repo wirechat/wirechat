@@ -55,13 +55,13 @@
 
     <x-wirechat::tabs.content class="flex-1 px-4 py-4">
         @if (! $hasRequests)
-            <div class="flex min-h-56 items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 text-center dark:border-zinc-700 dark:bg-zinc-950" dusk="requests-empty-state">
+            <div class="flex min-h-56 items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 text-center dark:border-zinc-700 dark:bg-zinc-900" dusk="requests-empty-state">
                 <p class="max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
                     {{ __('wirechat::chats.requests.labels.empty_state') }}
                 </p>
             </div>
         @elseif ($currentRequests->isEmpty())
-            <div class="flex min-h-56 items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 text-center dark:border-zinc-700 dark:bg-zinc-950" dusk="tab-empty-state">
+            <div class="flex min-h-56 items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 text-center dark:border-zinc-700 dark:bg-zinc-900" dusk="tab-empty-state">
                 <p class="max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
                     {{ $this->currentEmptyState }}
                 </p>
@@ -81,7 +81,7 @@
                         wire:click="openConversation({{ $request->id }})"
                         @class([
                             'flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-left transition',
-                            'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:hover:bg-zinc-900',
+                            'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-900',
                         ])
                     >
                         <x-wirechat::avatar :src="$peer?->wirechat_avatar_url ?? null" class="size-11 shrink-0" />
