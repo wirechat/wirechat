@@ -18,25 +18,9 @@
 
 
 
-        <div class="flex gap-x-4 items-center  ">
+        <div class="flex gap-x-4 items-center  border ">
 
-            @if ($hasMessageRequests)
-                <x-wirechat::actions.open-chats-drawer component="wirechat.chats.requests" widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
-                    <button
-                        id="open-requests-drawer-button"
-                        type="button"
-                        class="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                    >
-                        <span>{{ __('wirechat::chats.requests.actions.open.label') }}</span>
-
-                        @if ($this->pendingMessageRequestsCount() > 0)
-                            <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1.5 py-0.5 text-xs font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
-                                {{ $this->pendingMessageRequestsCount() }}
-                            </span>
-                        @endif
-                    </button>
-                </x-wirechat::actions.open-chats-drawer>
-            @endif
+         
 
             {{-- Widget-Action:Redirect to home --}}
             @php $homeUrl = $this->panel()->getHomeUrl(); @endphp
@@ -45,7 +29,7 @@
                       <x-wirechat::icon
                                 :icon="$this->panel()->redirectToHomeActionIcon()"
                                  default="wirechat::icons.logout"
-                                class="size-5 sm:size-6.5"
+                                class="size-6.5"
                                 :icon-attributes="$this->panel()->redirectToHomeActionIconAttributes()" 
                             />
             </a>
@@ -54,16 +38,45 @@
             {{-- Panel-action:Create Chat Action--}}
             @if ($createChatAction)
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
-                <button id="open-new-chat-modal-button" class=" flex items-center focus:outline-hidden">
+                <button id="open-new-chat-modal-button" class="border flex items-center focus:outline-hidden">
                          <x-wirechat::icon
                                 :icon="$this->panel()->createChatActionIcon()"
                                 default="wirechat::icons.messages-plus"
-                                class="size-5"
+                                class="size-6"
                                 :icon-attributes="$this->panel()->createChatActionIconAttributes()"
                             />
                     </button>
             </x-wirechat::actions.new-chat>
             @endif
+
+               {{-- Header Actions --}}
+            <div class=" my-auto items-center ml-auto col-span-1">
+                <x-wirechat::dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button type="button" class="my-auto border"> 
+                               <x-wirechat::icon icon="wirechat::icons.ellipsis-vertical" class="size-6" />
+                         </button>
+                    </x-slot>
+                    <x-slot name="content">
+
+                       @if ($hasMessageRequests) 
+                        <x-wirechat::actions.open-chats-drawer component="wirechat.chats.requests" widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
+                                <x-wirechat::dropdown-item icon="wirechat::icons.user"  id="open-requests-drawer-button">
+                                <span>{{ __('wirechat::chats.requests.actions.open.label') }}</span>
+
+                                    @if ($this->pendingMessageRequestsCount() > 0)
+                                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1.5 py-0.5 text-xs font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
+                                            {{ $this->pendingMessageRequestsCount() }}
+                                        </span>
+                                    @endif
+                            </x-wirechat::dropdown-item>
+                        </x-wirechat::actions.open-chats-drawer>
+                        @endif
+
+                    </x-slot>
+                </x-wirechat::dropdown>
+
+            </div>
 
 
         </div>

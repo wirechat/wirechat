@@ -108,6 +108,16 @@ test('tabs blade components render labels badges and content shells', function (
         ->toContain('Panel body');
 });
 
+test('icon component forwards custom classes to the rendered icon', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-wirechat::icon default="wirechat::icons.logout" class="size-4 text-red-500" />
+    BLADE);
+
+    expect($html)
+        ->toContain('size-4')
+        ->toContain('text-red-500');
+});
+
 test('requests drawer defaults to the incoming tab when incoming requests exist', function () {
     $auth = User::factory()->create(['name' => 'Auth']);
     $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
