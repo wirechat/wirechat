@@ -18,18 +18,18 @@
 
 
 
-        <div class="flex gap-x-4 items-center   ">
+        <div class="flex gap-x-1 items-center   ">
 
          
 
             {{-- Widget-Action:Redirect to home --}}
             @php $homeUrl = $this->panel()->getHomeUrl(); @endphp
             @if ($redirectToHomeAction && $homeUrl)
-            <a id="redirect-button" href="{{ $homeUrl }}" class="flex items-center">
+            <a id="redirect-button" href="{{ $homeUrl }}" class="flex items-center hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-full p-2 px-2.5 transition-colors shrink-0">
                       <x-wirechat::icon
                                 :icon="$this->panel()->redirectToHomeActionIcon()"
                                  default="wirechat::icons.logout"
-                                class="size-6.5 hover:bg-zinc-100 rounded-full p-2 px3"
+                                class="size-6.5"
                                 :icon-attributes="$this->panel()->redirectToHomeActionIconAttributes()" 
                             />
             </a>
@@ -38,11 +38,11 @@
             {{-- Panel-action:Create Chat Action--}}
             @if ($createChatAction)
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
-                <button id="open-new-chat-modal-button" class=" flex m-0 items-center focus:outline-hidden">
+                <button id="open-new-chat-modal-button" class="hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-full p-2 px-2.5 transition-colors shrink-0 flex  items-center focus:outline-hidden">
                          <x-wirechat::icon
                                 :icon="$this->panel()->createChatActionIcon()"
                                 default="wirechat::icons.messages-plus"
-                                class="size-6 hover:bg-zinc-100 rounded-full p-2 px3"
+                                class="size-6"
                                 :icon-attributes="$this->panel()->createChatActionIconAttributes()"
                             />
                     </button>
@@ -52,9 +52,9 @@
                {{-- Header Actions --}}
             <div class="ml-auto my-auto flex items-center">
                 <x-wirechat::dropdown align="right" width="48">
-                    <x-slot name="trigger" class="size-8 flex items-center justify-center">
-                        <button type="button">
-                               <x-wirechat::icon icon="wirechat::icons.ellipsis-vertical" class="size-4 hover:bg-zinc-100 rounded-full p-2 px3" />
+                    <x-slot name="trigger" class="size-8 mt-1 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-full p-2 px-2.5 transition-colors shrink-0">
+                        <button type="button" >
+                               <x-wirechat::icon icon="wirechat::icons.ellipsis-vertical" class="size-7 " />
                          </button>
                     </x-slot>
                     <x-slot name="content">
