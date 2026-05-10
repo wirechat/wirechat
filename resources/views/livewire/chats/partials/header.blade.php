@@ -18,7 +18,7 @@
 
 
 
-        <div class="flex gap-x-4 items-center  border ">
+        <div class="flex gap-x-4 items-center   ">
 
          
 
@@ -29,7 +29,7 @@
                       <x-wirechat::icon
                                 :icon="$this->panel()->redirectToHomeActionIcon()"
                                  default="wirechat::icons.logout"
-                                class="size-6.5"
+                                class="size-6.5 hover:bg-zinc-100 rounded-full p-2 px3"
                                 :icon-attributes="$this->panel()->redirectToHomeActionIconAttributes()" 
                             />
             </a>
@@ -38,11 +38,11 @@
             {{-- Panel-action:Create Chat Action--}}
             @if ($createChatAction)
             <x-wirechat::actions.new-chat widget="{{$this->isWidget()}}" panel="{{$this->panel}}" >
-                <button id="open-new-chat-modal-button" class="border flex items-center focus:outline-hidden">
+                <button id="open-new-chat-modal-button" class=" flex m-0 items-center focus:outline-hidden">
                          <x-wirechat::icon
                                 :icon="$this->panel()->createChatActionIcon()"
                                 default="wirechat::icons.messages-plus"
-                                class="size-6"
+                                class="size-6 hover:bg-zinc-100 rounded-full p-2 px3"
                                 :icon-attributes="$this->panel()->createChatActionIconAttributes()"
                             />
                     </button>
@@ -50,11 +50,11 @@
             @endif
 
                {{-- Header Actions --}}
-            <div class=" my-auto items-center ml-auto col-span-1">
+            <div class="ml-auto my-auto flex items-center">
                 <x-wirechat::dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button type="button" class="my-auto border"> 
-                               <x-wirechat::icon icon="wirechat::icons.ellipsis-vertical" class="size-6" />
+                    <x-slot name="trigger" class="size-8 flex items-center justify-center">
+                        <button type="button">
+                               <x-wirechat::icon icon="wirechat::icons.ellipsis-vertical" class="size-4 hover:bg-zinc-100 rounded-full p-2 px3" />
                          </button>
                     </x-slot>
                     <x-slot name="content">

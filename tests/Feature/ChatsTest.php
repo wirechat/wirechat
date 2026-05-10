@@ -118,6 +118,25 @@ test('icon component forwards custom classes to the rendered icon', function () 
         ->toContain('text-red-500');
 });
 
+test('dropdown trigger slot classes are applied to the trigger wrapper', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-wirechat::dropdown>
+            <x-slot name="trigger" class="inline-flex items-center justify-center trigger-slot-test">
+                <button type="button">Trigger</button>
+            </x-slot>
+
+            <x-slot name="content">
+                Content
+            </x-slot>
+        </x-wirechat::dropdown>
+    BLADE);
+
+    expect($html)
+        ->toContain('trigger-slot-test')
+        ->toContain('Trigger')
+        ->toContain('Content');
+});
+
 test('requests drawer defaults to the incoming tab when incoming requests exist', function () {
     $auth = User::factory()->create(['name' => 'Auth']);
     $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);

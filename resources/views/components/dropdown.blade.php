@@ -22,7 +22,7 @@ switch ($width) {
 @endphp
 
 <div x-ref="button" class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
-    <div c @click="open = ! open">
+    <div {{ $trigger->attributes->class('inline-flex items-center justify-center') }} @click="open = ! open">
         {{ $trigger }}
     </div>
 
