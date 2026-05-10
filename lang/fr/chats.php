@@ -41,4 +41,8 @@ return [
             'outgoing_empty_state' => 'Vous n’avez envoyé aucune demande de message active pour le moment.',
         ],
     ],
-];
+    'actions' => [
+        'new_group' => [
+            'label' => 'Nouveau Groupe',
+        ],
+    ], ];

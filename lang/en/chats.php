@@ -43,4 +43,10 @@ return [
             'outgoing_empty_state' => 'You have not sent any active message requests right now.',
         ],
     ],
+
+    'actions' => [
+        'new_group' => [
+            'label' => 'New Group',
+        ],
+    ],
 ];

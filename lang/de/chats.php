@@ -43,4 +43,10 @@ return [
             'outgoing_empty_state' => 'Du hast aktuell keine aktiven gesendeten Nachrichtenanfragen.',
         ],
     ],
+
+    'actions' => [
+        'new_group' => [
+            'label' => 'Neue Gruppe',
+        ],
+    ],
 ];

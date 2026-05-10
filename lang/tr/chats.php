@@ -43,4 +43,10 @@ return [
             'outgoing_empty_state' => 'Şu anda gönderilmiş aktif bir mesaj isteğin yok.',
         ],
     ],
+
+    'actions' => [
+        'new_group' => [
+            'label' => 'Yeni Grup',
+        ],
+    ],
 ];

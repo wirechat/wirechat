@@ -77,7 +77,7 @@
                         @if ($this->panel()->hasCreateGroupAction() && auth()->user()->canCreateGroups())
                             <x-wirechat::actions.new-group widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
                                     <x-wirechat::dropdown-item  dusk="open_new_group_modal_button_in_header" icon="wirechat::icons.untitledui-users-plus"  id="open-requests-drawer-button">
-                                            <span>New Group</span>
+                                            <span>{{ __('wirechat::chats.actions.new_group.label') }}</span>
                                     </x-wirechat::dropdown-item>
                             </x-wirechat::actions.new-group>
                         @endif
