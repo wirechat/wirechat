@@ -22,6 +22,7 @@ use Wirechat\Wirechat\Panel\Concerns\HasHeart;
 use Wirechat\Wirechat\Panel\Concerns\HasId;
 use Wirechat\Wirechat\Panel\Concerns\HasLayout;
 use Wirechat\Wirechat\Panel\Concerns\HasMessageLinks;
+use Wirechat\Wirechat\Panel\Concerns\HasMessageRequests;
 use Wirechat\Wirechat\Panel\Concerns\HasMiddleware;
 use Wirechat\Wirechat\Panel\Concerns\HasRoutes;
 use Wirechat\Wirechat\Panel\Concerns\HasSearchableAttributes;
@@ -52,6 +53,7 @@ class Panel
     use HasId;
     use HasLayout;
     use HasMessageLinks;
+    use HasMessageRequests;
     use HasMiddleware;
     use HasRoutes;
     use HasSearchableAttributes;

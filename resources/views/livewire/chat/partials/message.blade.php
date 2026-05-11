@@ -12,14 +12,14 @@
    $encryptedInviteLink = $inviteUrl !== null ? encrypt($inviteUrl) : null;
    $canParseMessageUrls = $this->panel()->canParseMessageUrls();
    $body = (string) ($message?->body ?? '');
-   $segments = ($canParseMessageUrls && $message?->isLink())
+   $segments = ($canParseMessageUrls && Wirechat::containsLink($body))
         ? Wirechat::linkifyMessage($body)
         : [[
             'text' => $body,
             'href' => null,
             'is_link' => false,
         ]];
-   $messageTextClasses = 'whitespace-pre-wrap tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal';
+   $messageTextClasses = 'whitespace-pre-wrap tracking-normal wrap-anywhere text-sm md:text-base dark:text-white lg:tracking-normal';
 @endphp
 
 <div
@@ -88,7 +88,7 @@
     style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php $isInviteLink = $inviteUrl !== null && $segment['href'] === $inviteUrl; @endphp<a
                 dusk="message-link"
                 @if ($isInviteLink) data-invite-link="true" wire:click.prevent="handleOpenChat('{{ $encryptedInviteLink }}')" @else target="_blank" rel="noopener noreferrer" @endif
-                class="underline tracking-normal break-all text-sm md:text-base dark:text-white lg:tracking-normal"
+                class="underline tracking-normal wrap-anywhere text-sm md:text-base dark:text-white lg:tracking-normal"
                 href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
 
 {{-- Display the created time based on different conditions --}}
@@ -96,7 +96,7 @@
 @class(['text-[11px] ml-auto ',  'text-gray-700 dark:text-gray-300' => !$belongsToAuth,'text-gray-100' => $belongsToAuth])>
     @php
         // If the message was created today, show only the time (e.g., 1:00 AM)
-        echo $message?->created_at->format('H:i');
+        echo $message?->created_at?->format('H:i');
     @endphp
 </span>
 

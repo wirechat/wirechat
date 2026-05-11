@@ -138,7 +138,7 @@ class AddMembers extends ModalComponent
 
         $this->closeWirechatModal();
 
-        $this->dispatch('participantsCountUpdated', $this->newTotalCount)->to(\Wirechat\Wirechat\Livewire\Chat\Group\Info::class);
+        $this->dispatch('participantsCountUpdated', $this->newTotalCount)->to('wirechat.chat.group.info');
     }
 
     public function mount()

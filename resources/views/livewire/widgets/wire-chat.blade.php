@@ -103,6 +103,9 @@
                         if (this.activeWidgetComponent === false) {
                             this.activeWidgetComponent = id
                             this.showActiveComponent = true;
+                            this.$nextTick(() => {
+                                this.dispatchScrollBottom();
+                            });
                         } else {
 
                             this.showActiveComponent = false;
@@ -111,6 +114,9 @@
                             setTimeout(() => {
                                 this.activeWidgetComponent = id;
                                 this.showActiveComponent = true;
+                                this.$nextTick(() => {
+                                    this.dispatchScrollBottom();
+                                });
                             }, 300);
                         }
 
@@ -130,6 +136,11 @@
                                     focusable.focus();
                                 }, focusableTimeout);
                             }
+                        });
+                    },
+                    dispatchScrollBottom() {
+                        requestAnimationFrame(() => {
+                            window.dispatchEvent(new CustomEvent('scroll-bottom'));
                         });
                     },
 

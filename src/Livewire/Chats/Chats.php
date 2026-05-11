@@ -7,6 +7,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
@@ -83,7 +85,7 @@ class Chats extends Component
         $userId = $user?->getKey();
 
         $listeners = [
-            'refresh' => '$refresh',
+            'refresh' => 'hardRefresh',
             'hardRefresh',
         ];
 
@@ -97,13 +99,38 @@ class Chats extends Component
         $channelName = "$panelId.participant.$encodedType.$userId";
         $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\NotifyParticipant"] = 'refreshComponent';
 
+        if ($this->panel()->hasMessageRequests()) {
+            $listeners["echo-private:{$channelName},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated"] = 'refreshComponent';
+        }
+
         return $listeners;
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function auth()
     {
         return auth()->user();
+    }
+
+    public function pendingMessageRequestsCount(): int
+    {
+        $user = $this->auth;
+
+        if (! $user || ! $this->panel()->hasMessageRequests()) {
+            return 0;
+        }
+
+        return Wirechat::messageRequestModelClass()::query()
+            ->pending()
+            ->whereHas('conversation')
+            ->where(function ($query) use ($user) {
+                $query->where(function ($recipientQuery) use ($user) {
+                    $recipientQuery->whereRecipient($user);
+                })->orWhere(function ($senderQuery) use ($user) {
+                    $senderQuery->whereSender($user);
+                });
+            })
+            ->count();
     }
 
     /**
@@ -181,6 +208,14 @@ class Chats extends Component
         // In free version, we use the user's relation as before
         $baseQuery = $auth->conversations()
             ->with([]) // ids only
+            ->where(function ($query) {
+                $query->where('type', ConversationType::GROUP)
+                    ->orWhere('type', ConversationType::SELF)
+                    ->orWhere(function ($privateQuery) {
+                        $privateQuery->where('type', ConversationType::PRIVATE)
+                            ->has('participants', '=', 2);
+                    });
+            })
             ->when(trim($this->search ?? '') !== '', fn ($q) => $this->applySearchConditions($q))
             ->when(trim($this->search ?? '') === '', function ($q) {
                 /** @phpstan-ignore-next-line */
@@ -280,9 +315,14 @@ class Chats extends Component
 
     /**
      * Real-time notify: reset so latest conversation can jump to top.
+     * Skip for message requests — those are handled by the Requests component.
      */
     public function refreshComponent($event): void
     {
+        if (! empty($event['is_request'])) {
+            return;
+        }
+
         $this->hardRefresh();
     }
 

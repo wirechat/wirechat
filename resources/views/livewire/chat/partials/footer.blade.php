@@ -2,16 +2,53 @@
 
     $hasEmojiPicker= $this->panel()->hasEmojiPicker();
     $floatingEmojiPicker=$this->panel()->emojiPickerPosition()===\Wirechat\Wirechat\Support\Enums\EmojiPickerPosition::Floating;
+    $authIsAdmin = $authParticipant?->isAdmin() ?? false;
 @endphp
 <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 
     {{-- Check if group allows :sending messages --}}
-    @if ($conversation->isGroup() && !$conversation->group?->allowsMembersToSendMessages() && !$authParticipant->isAdmin())
+    @if ($canRespondToMessageRequest)
+        <div class="border-t border-zinc-200 bg-zinc-50 px-4 py-4 dark:border-zinc-700 dark:bg-zinc-900">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h6 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        {{ __('wirechat::chat.message_request.labels.heading') }}
+                    </h6>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                        {{ __('wirechat::chat.message_request.labels.description') }}
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        wire:click="dismissMessageRequest"
+                        class="inline-flex items-center justify-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    >
+                        {{ __('wirechat::chat.message_request.actions.dismiss.label') }}
+                    </button>
+
+                    <button
+                        type="button"
+                        wire:click="acceptMessageRequest"
+                        class="inline-flex items-center justify-center rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                    >
+                        {{ __('wirechat::chat.message_request.actions.accept.label') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @elseif ($conversation->isGroup() && !$conversation->group?->allowsMembersToSendMessages() && !$authIsAdmin)
         <div
             class="dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)] w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 ">
             Only admins can send messages
         </div>
     @else
+        @if ($hasPendingOutgoingMessageRequest)
+            <div class="border-t border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+                {{ __('wirechat::chat.message_request.labels.outgoing_notice') }}
+            </div>
+        @endif
         <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
             class=" px-3 md:px-1 border-t  shadow-sm bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-border)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
 
@@ -504,60 +541,54 @@
                     <div x-cloak @class(['w-[5%] justify-end min-w-max  items-center gap-2 '])>
 
                         {{--  Submit button --}}
-                        <div class="w-7 h-7">
+                        <div>
                             <button
                                 x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
-                                x-transition:enter="transition ease-out duration-100"
-                                x-transition:enter-start="opacity-0 translate-y-1"
-                                x-transition:enter-end="opacity-100 translate-y-0"  
-                                x-transition:leave="transition ease-in duration-150"
-                                x-transition:leave-start="opacity-100 translate-y-0"
-                                x-transition:leave-end="opacity-0 translate-y-1"
                                 wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
                                 id="sendMessageButton" class="bg-[var(--primary-500)] rounded-full p-2 cursor-pointer hover:text-[var(--primary-500)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
 
                                 <svg class="size-4.5 text-white  dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
                                     width="36" height="36" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
-                                    stroke-linejoin="round" class="ai ai-Send">
+                                    stroke-linejoin="round">
                                     <path
                                         d="M9.912 12H4L2.023 4.135A.662.662 0 0 1 2 3.995c-.022-.721.772-1.221 1.46-.891L22 12 3.46 20.896c-.68.327-1.464-.159-1.46-.867a.66.66 0 0 1 .033-.186L3.5 15" />
                                 </svg>
 
                             </button>
+                               {{-- send Like button --}}
+                            @if($this->panel()->hasHeart())
+                                <button
+                                    x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )"
+                                    wire:loading.attr="disabled" wire:target="sendLike" wire:click='sendLike()'
+                                    dusk="heart-button"
+                                    type="button" class="hover:scale-105 cursor-pointer group disabled:cursor-progress">
+
+                                    <!-- outlined heart -->
+                                    <span class=" group-hover:hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            class="w-7 h-7 text-gray-600 dark:text-white/90 stroke-[1.4] dark:stroke-[1.4]">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                        </svg>
+                                    </span>
+                                    <!--  filled heart -->
+                                    <span class="hidden group-hover:block " x-bounce>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                            class="size-6 w-7 h-7   text-red-500">
+                                            <path
+                                                d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                        </svg>
+                                    </span>
+
+                                </button>
+                            @endif
                         </div>
 
 
 
-                        {{-- send Like button --}}
-                        @if($this->panel()->hasHeart())
 
-                        <button
-                            x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )"
-                            wire:loading.attr="disabled" wire:target="sendMessage" wire:click='sendLike()'
-                            dusk="heart-button"
-                            type="button" class="hover:scale-105 transition-transform cursor-pointer group disabled:cursor-progress">
-
-                            <!-- outlined heart -->
-                            <span class=" group-hover:hidden transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    class="w-7 h-7 text-gray-600 dark:text-white/90 stroke-[1.4] dark:stroke-[1.4]">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                </svg>
-                            </span>
-                            <!--  filled heart -->
-                            <span class="hidden group-hover:block transition " x-bounce>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                    class="size-6 w-7 h-7   text-red-500">
-                                    <path
-                                        d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
-                                </svg>
-                            </span>
-
-                        </button>
-                        @endif
 
 
                     </div>

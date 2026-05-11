@@ -86,6 +86,27 @@ return [
         'invalid_conversation_input' => 'Entrée de conversation non valide.',
     ],
 
+    'message_request' => [
+        'labels' => [
+            'heading' => 'Demande de message',
+            'description' => 'Ouvrez la conversation et acceptez-la avant de pouvoir répondre.',
+            'outgoing_notice' => 'Cette demande de message est toujours en attente. Le destinataire peut consulter le fil avant de le rejoindre.',
+        ],
+        'actions' => [
+            'accept' => [
+                'label' => 'Accepter',
+            ],
+            'dismiss' => [
+                'label' => 'Refuser',
+            ],
+        ],
+        'messages' => [
+            'accepted' => 'Demande de message acceptée.',
+            'dismissed' => 'Demande de message refusée.',
+            'accept_required' => 'Acceptez cette demande de message avant d’envoyer des messages.',
+        ],
+    ],
+
     /**-------------------------
      * Info Component
      *------------------------*/

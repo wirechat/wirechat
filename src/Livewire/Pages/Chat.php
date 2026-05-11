@@ -22,7 +22,7 @@ class Chat extends Component
         $this->conversation = Wirechat::conversationModelClass()::where('id', $this->conversation)->firstOrFail();
 
         // Check if the user belongs to the conversation
-        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
+        abort_unless(auth()->user()->canAccessConversation($this->conversation), 403);
 
     }
 

@@ -31,6 +31,8 @@ use Wirechat\Wirechat\Livewire\Chat\Group\Members\PastMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
 use Wirechat\Wirechat\Livewire\Chat\Info;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
+use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Requests as ChatsRequests;
 use Wirechat\Wirechat\Livewire\Modals\Modal;
 use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
 use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
@@ -104,7 +106,6 @@ class WirechatServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../stubs/add_participant_id_to_messages_table.stub' => database_path('migrations/'.date('Y_m_d_His').'_add_participant_id_to_messages_table.php'),
             ], 'wirechat-upgrade-0.4');
-
         }
 
         /* Load channel routes */
@@ -121,7 +122,6 @@ class WirechatServiceProvider extends ServiceProvider
 
         // load translations
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'wirechat');
-
     }
 
     protected function bootColors()
@@ -169,6 +169,8 @@ class WirechatServiceProvider extends ServiceProvider
 
         // Chats
         Livewire::component('wirechat.chats', Chats::class);
+        Livewire::component('wirechat.chats.drawer', ChatsDrawer::class);
+        Livewire::component('wirechat.chats.requests', ChatsRequests::class);
 
         // modal
         Livewire::component('wirechat.modal', Modal::class);
@@ -243,24 +245,23 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
-            $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
-
             $script = '';
 
-            if ($hasWebPushNotifications && auth()->check()) {
+            if ($currentPanel->hasWebPushNotifications() && auth()->check()) {
+                $panelId = $currentPanel->getId();
                 $userId = auth()->id();
                 $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
 
                 $script = <<<HTML
                              <script>
                                 document.addEventListener("DOMContentLoaded", function() {
-
 
                                    if ('serviceWorker' in navigator) {
                                         window.addEventListener('load', async () => {
@@ -282,14 +283,17 @@ class WirechatServiceProvider extends ServiceProvider
                                         });
                                     }
 
-
-
-
-
                                     Echo.private(`{$panelId}.participant.{$encodedType}.{$userId}`)
                                         .listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant', (e) => {
+                                            if (window.Livewire) {
+                                                if (e.is_request) {
+                                                    window.Livewire.dispatch('refresh-requests');
+                                                } else {
+                                                    window.Livewire.dispatch('refresh-chats');
+                                                }
+                                            }
 
-                                            if (e.redirect_url !== window.location.href) {
+                                            if (!e.is_request && e.redirect_url !== window.location.href) {
                                                 if (Notification.permission === 'granted') {
                                                     showNotification(e);
                                                 } else if (Notification.permission !== 'denied') {
@@ -349,8 +353,6 @@ class WirechatServiceProvider extends ServiceProvider
                         echo Blade::render('<x-wirechat::toast/>');
                     ?>
 
-
-
                     {$script}
 
                <?php endif; ?>
@@ -366,8 +368,10 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
             } else {
+
                 $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 

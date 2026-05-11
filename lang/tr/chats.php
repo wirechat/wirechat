@@ -21,4 +21,32 @@ return [
             'placeholder' => 'Ara',
         ],
     ],
+
+    'requests' => [
+        'heading' => 'Mesaj istekleri',
+        'actions' => [
+            'open' => [
+                'label' => 'İstekler',
+            ],
+            'close' => [
+                'label' => 'İstekleri kapat',
+            ],
+        ],
+        'labels' => [
+            'description' => 'Gelen istekleri gözden geçir ve gönderdiğin istekleri takip et.',
+            'incoming' => 'Gelen',
+            'outgoing' => 'Gönderilen',
+            'pending' => 'Beklemede',
+            'no_message' => 'Henüz mesaj yok',
+            'empty_state' => 'Şu anda aktif bir mesaj isteğin yok.',
+            'incoming_empty_state' => 'Şu anda gelen bir mesaj isteğin yok.',
+            'outgoing_empty_state' => 'Şu anda gönderilmiş aktif bir mesaj isteğin yok.',
+        ],
+    ],
+
+    'actions' => [
+        'new_group' => [
+            'label' => 'Yeni Grup',
+        ],
+    ],
 ];

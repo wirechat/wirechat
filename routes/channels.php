@@ -51,7 +51,7 @@ foreach ($panels as $panel) {
 
         $conversation = Wirechat::conversationModelClass()::find($conversationId);
 
-        return $conversation && $user->belongsToConversation($conversation);
+        return $conversation && $user->canAccessConversation($conversation);
     }, [
         'guards' => $guards,
         'middleware' => $middleware,

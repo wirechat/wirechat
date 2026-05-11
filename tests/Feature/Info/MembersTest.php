@@ -95,7 +95,23 @@ describe('presence test', function () {
 
         $request
             ->assertSeeHtml('x-anchor.bottom-end="$refs.button"')
-            ->assertSeeHtml('class="z-20 ml-auto bg-[var(--wc-light-secondary)]');
+            ->assertSeeHtml('class="z-20')
+            ->assertSeeHtml('bg-[var(--wc-light-secondary)]');
+    });
+
+    test('member action menu uses a shared open state and closes on outside click', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $conversation->addParticipant(User::factory()->create(['name' => 'John']));
+
+        $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+
+        $request
+            ->assertSeeHtml('x-data="{ openMemberMenu: null }"')
+            ->assertSeeHtml('@click.outside="openMemberMenu = null"')
+            ->assertSeeHtml('@click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"')
+            ->assertSeeHtml('x-show="openMemberMenu === memberMenuId"');
     });
 
     test('it show label "You" if member in loop is auth user', function () {
@@ -106,9 +122,20 @@ describe('presence test', function () {
         $conversation->addParticipant(User::factory()->create(['name' => 'John']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Lemon']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Cold']));
+
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+
         $request
-            ->assertSee('You');
+            ->assertSeeText('You')
+            ->assertSeeText('John')
+            ->assertSeeText('Lemon')
+            ->assertSeeText('Cold');
+
+        $html = $request->html();
+
+        preg_match_all('/>\s*You\s*<\/h6>/', $html, $youLabels);
+
+        expect($youLabels[0])->toHaveCount(1);
     });
 
     test('it shows load more if user can load more thatn 10', function () {

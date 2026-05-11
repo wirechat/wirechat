@@ -1,105 +1,254 @@
+<main
+    x-ref="main-chat-body"
+    x-data="{
+        el: null,
 
-<main x-data="{
-    height: 0,
-    previousHeight: 0,
-    booting: true,
-    restorePending: false,
-    restoreScrollTop: 0,
-    restoreScrollHeight: 0,
-    scrollToBottom() {
-        this.height = $el.scrollHeight;
-        $el.scrollTop = this.height;
-    },
-    prepareRestore() {
-        this.restorePending = true;
-        this.restoreScrollTop = $el.scrollTop;
-        this.restoreScrollHeight = $el.scrollHeight;
-    },
-    restoreAfterOlderLoaded() {
-        if (!this.restorePending) return;
-        this.restorePending = false;
-        const newHeight = $el.scrollHeight;
-        $el.scrollTop = newHeight - this.restoreScrollHeight + this.restoreScrollTop;
-    },
-    onScroll() {
-        const scrollTop = $el.scrollTop;
-        if ((scrollTop <= 0) && $wire.canLoadMore) {
-            this.prepareRestore();
-            $wire.loadMore();
-        }
-    },
-    updateScrollPosition: function() {
-        // Calculate the difference in height
+        // paging guards
+        loadingOlder: false,
+        loadingNewer: false,
+        pendingPrependRestore: false,
 
-        newHeight = $el.scrollHeight;
+        // prepend anchor
+        anchorId: null,
+        anchorOffset: 0,
 
-        {{-- console.log('old height' + height);
-        console.log('new height' + document.getElementById('conversation').scrollHeight); --}}
-        heightDifference = newHeight - height;
+        // jump target (only valid for a short time)
+        jumpTargetId: null,
+        jumpLockUntil: 0,
 
-        {{-- console.log('conversationElement.scrollTop ' + conversationElement.scrollTop);
-        console.log('heightDifference' + heightDifference); --}}
+        // cancels old retries
+        jumpSeq: 0,
 
-        $el.scrollTop += heightDifference;
-        // Update the previous height to the new height
-        height = newHeight;
+        // prevent infinite spam on load events
+        mediaFixQueued: false,
 
-    }
+        // manual scroll detection
+        lastScrollTop: 0,
 
+        // initial load guard
+        initializing: true,
+
+        captureAnchor() {
+            const container = this.el;
+            if (!container) return;
+
+            const containerTop = container.getBoundingClientRect().top;
+            const nodes = container.querySelectorAll('[data-message-id]');
+
+            for (const node of nodes) {
+                const rect = node.getBoundingClientRect();
+                if (rect.bottom >= containerTop + 1) {
+                    this.anchorId = node.getAttribute('data-message-id');
+                    this.anchorOffset = rect.top - containerTop;
+                    return;
+                }
+            }
+
+            this.anchorId = null;
+            this.anchorOffset = 0;
+        },
+
+        restoreToAnchor() {
+            const container = this.el;
+            if (!container || !this.anchorId) return;
+
+            const containerTop = container.getBoundingClientRect().top;
+            const node = container.querySelector(`[data-message-id='${this.anchorId}']`);
+            if (!node) return;
+
+            const rect = node.getBoundingClientRect();
+            const newOffset = rect.top - containerTop;
+
+            container.scrollTop += (newOffset - this.anchorOffset);
+        },
+
+        restoreAfterOlderLoaded() {
+            if (!this.pendingPrependRestore) return;
+            this.pendingPrependRestore = false;
+            this.loadingOlder = false;
+
+            requestAnimationFrame(() => {
+                this.restoreToAnchor();
+                requestAnimationFrame(() => this.restoreToAnchor());
+            });
+        },
+
+        isNearTop() {
+            const c = this.el;
+            return c && c.scrollTop <= 10 && !this.loadingOlder && !this.pendingPrependRestore;
+        },
+
+        isNearBottom() {
+            const c = this.el;
+            return c && (c.scrollHeight - (c.scrollTop + c.clientHeight)) <= 30 && !this.loadingNewer;
+        },
+
+        async loadOlderWithStableScroll() {
+            if (this.loadingOlder || this.pendingPrependRestore) return;
+            if (!$wire.canLoadOlder) return;
+
+            this.jumpTargetId = null;
+            this.jumpLockUntil = 0;
+            this.loadingOlder = true;
+            this.captureAnchor();
+            this.pendingPrependRestore = true;
+
+            try {
+                await $wire.loadOlder();
+
+                if (!this.pendingPrependRestore) {
+                    this.loadingOlder = false;
+                }
+            } catch (error) {
+                this.pendingPrependRestore = false;
+                this.loadingOlder = false;
+            }
+        },
+
+        loadNewerIfNeeded() {
+            if (this.loadingNewer) return;
+            if (!$wire.canLoadNewer) return;
+
+            this.loadingNewer = true;
+
+            $wire.loadNewer().finally(() => {
+                this.loadingNewer = false;
+            });
+        },
+
+        scrollToMessageCenter(id) {
+            const container = this.el;
+            if (!container) return false;
+
+            const node = container.querySelector(`[data-message-id='${id}']`);
+            if (!node) return false;
+
+            const nodeTop = node.offsetTop;
+            const nodeH = node.offsetHeight;
+            const cH = container.clientHeight;
+
+            const target = Math.max(0, nodeTop - (cH / 2) + (nodeH / 2));
+            container.scrollTop = target;
+
+            node.classList.add('ring-2', 'ring-offset-2', 'ring-primary-500');
+            setTimeout(() => node.classList.remove('ring-2', 'ring-offset-2', 'ring-primary-500'), 1200);
+
+            return true;
+        },
+
+        scrollToMessageCenterWithRetry(id, tries = 40) {
+            this.jumpSeq++;
+            const seq = this.jumpSeq;
+
+            this.jumpTargetId = id;
+            this.jumpLockUntil = Date.now() + 1200;
+
+            const tick = () => {
+                if (seq !== this.jumpSeq) return;
+
+                if (this.scrollToMessageCenter(id)) return;
+                if (tries <= 0) return;
+
+                tries--;
+                requestAnimationFrame(tick);
+            };
+
+            requestAnimationFrame(tick);
+        },
+
+        onAnyMediaLoad() {
+            if (this.mediaFixQueued) return;
+            this.mediaFixQueued = true;
+
+            requestAnimationFrame(() => {
+                this.mediaFixQueued = false;
+
+                if (this.pendingPrependRestore || this.loadingOlder) {
+                    this.restoreToAnchor();
+                    requestAnimationFrame(() => this.restoreToAnchor());
+                    return;
+                }
+
+                if (this.initializing) {
+                    this.scrollToBottom();
+                    requestAnimationFrame(() => this.scrollToBottom());
+                    return;
+                }
+
+                if (this.jumpTargetId && Date.now() < this.jumpLockUntil) {
+                    this.scrollToMessageCenter(this.jumpTargetId);
+                    requestAnimationFrame(() => this.scrollToMessageCenter(this.jumpTargetId));
+                }
+            });
+        },
+
+        scrollToBottom() {
+            if (!this.el) return;
+            this.el.scrollTop = this.el.scrollHeight;
+            this.lastScrollTop = this.el.scrollTop;
+        },
+
+        onScroll() {
+            const c = this.el;
+            if (!c) return;
+
+            const currentTop = c.scrollTop;
+            const delta = Math.abs(currentTop - this.lastScrollTop);
+
+            if (delta > 8) {
+                this.jumpTargetId = null;
+                this.jumpLockUntil = 0;
+            }
+
+            this.lastScrollTop = currentTop;
+
+            if (this.isNearTop()) this.loadOlderWithStableScroll();
+            if (this.isNearBottom()) this.loadNewerIfNeeded();
+        },
     }"
         x-init="
-        $nextTick(() => {
-            scrollToBottom();
+        el = $el;
+        lastScrollTop = el.scrollTop;
+
+        setTimeout(() => {
             requestAnimationFrame(() => {
                 scrollToBottom();
             });
-            setTimeout(() => {
-                booting = false;
-            }, 120);
-        });
+        }, 100);
+
+        setTimeout(() => {
+            initializing = false;
+        }, 220);
         "
     @scroll="onScroll()"
-    @update-height.window="
-        requestAnimationFrame(() => {
-            if (restorePending) {
-                restoreAfterOlderLoaded();
-            } else {
-                updateScrollPosition();
-            }
-          });
-        "
+    x-on:load.capture="$data.onAnyMediaLoad()"
+    x-on:error.capture="$data.onAnyMediaLoad()"
 
         @scroll-bottom.window="
         requestAnimationFrame(() => {
-            {{-- overflow-y: hidden; is used to hide the vertical scrollbar initially. --}}
-            $el.style.overflowY='hidden';
-
-
-
-            {{-- scroll the element down --}}
-            $el.scrollTop = $el.scrollHeight;
-
-            {{-- After updating the chat height, overflowY is set back to 'auto',
-                which allows the browser to determine whether to display the scrollbar
-                based on the content height.  --}}
-               $el.style.overflowY='auto';
+            el.style.overflowY = 'hidden';
+            scrollToBottom();
+            el.style.overflowY = 'auto';
         });
     "
 
+        @scroll-to-message.window="$data.scrollToMessageCenterWithRetry($event.detail.id)"
+        @older-loaded.window="$data.restoreAfterOlderLoaded()"
 
     x-cloak
-    x-bind:class="{'opacity-0 pointer-events-none': booting}"
-     class='flex flex-col h-full transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8  grow  overscroll-contain overflow-x-hidden w-full my-auto'
-    style="contain: content" >
+    x-bind:class="{'opacity-0 pointer-events-none': initializing}"
+     class='flex flex-col h-full transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8 grow overscroll-contain overflow-x-hidden w-full my-auto'
+    style="contain: layout paint"
+>
 
-
-
-    <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadMore" class="invisible transition-all duration-300 ">
+    <div x-cloak wire:loading.delay.class.remove="invisible" wire:target="loadOlder" class="invisible transition-all duration-300 ">
         <x-wirechat::loading-spin />
     </div>
+
     {{-- Define previous message outside the loop --}}
     @php
         $previousMessage = null;
+        $authIsAdmin = $authParticipant?->isAdmin() ?? false;
     @endphp
 
     <!--Message-->
@@ -108,7 +257,7 @@
         @foreach ($loadedMessages as $date => $messageGroup)
 
             {{-- Date  --}}
-            <div  class="sticky top-0 uppercase p-2 shadow-xs px-2.5 z-50 rounded-xl border dark:border-[var(--wc-dark-primary)] border-[var(--wc-light-primary)] text-sm flex text-center justify-center  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white  w-28 mx-auto ">
+            <div wire:key="group-{{ md5($date) }}"  class="sticky top-0 uppercase p-2 shadow-xs px-2.5 z-50 rounded-xl border dark:border-[var(--wc-dark-primary)] border-[var(--wc-light-primary)] text-sm flex text-center justify-center  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white  w-28 mx-auto ">
                 {{ $date }}
             </div>
 
@@ -131,9 +280,12 @@
                     // Get the next message
                     $nextMessage = $key < $messageGroup->count() - 1 ? $messageGroup->get($key + 1) : null;
                 @endphp
-
-
-                <div class="flex gap-2" wire:key="message-{{ $key }}" >
+                <div
+                    class="flex gap-2"
+                    data-message-id="{{ $message->id }}"
+                    id="message-{{ $message->id }}"
+                    wire:key="msg-{{ $message->id }}"
+                >
 
                     {{-- Message user Avatar --}}
                     {{-- Hide avatar if message belongs to auth --}}
@@ -214,7 +366,7 @@
                             ])>
 
                                 {{-- Message Actions --}}
-                                @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authParticipant->isAdmin())
+                                @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authIsAdmin)
                                 <div dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
                                     <button wire:click="setReply('{{ encrypt($message->id) }}')"
@@ -244,7 +396,7 @@
                                         </x-slot>
                                         <x-slot name="content">
 
-                                            @if (($message->ownedBy($this->auth)|| ($authParticipant->isAdmin() && $isGroup)) && $this->panel()->hasDeleteMessageActions())
+                                            @if (($message->ownedBy($this->auth)|| ($authIsAdmin && $isGroup)) && $this->panel()->hasDeleteMessageActions())
                                                 <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ encrypt($message->id) }}')"
                                                     wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
@@ -302,7 +454,6 @@
                                         @if ($attachment->isVideo())
                                             <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
 
-                                        {{-- Attachemnt is image/ --}}
                                         @elseif($attachment->isImage())
                                             @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
                                         @else

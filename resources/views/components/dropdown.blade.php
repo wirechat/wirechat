@@ -22,7 +22,7 @@ switch ($width) {
 @endphp
 
 <div x-ref="button" class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
-    <div @click="open = ! open">
+    <div {{ $trigger->attributes->class('inline-flex items-center justify-center') }} @click="open = ! open">
         {{ $trigger }}
     </div>
 
@@ -36,7 +36,7 @@ switch ($width) {
             x-transition:leave-end="opacity-0 scale-95"
 
             {{-- class="absolute z-50 mt-2 shadow-lg {{ $alignmentClasses }}" --}}
-            {{$attributes->merge(['class'=>"rounded-lg absolute z-50 mt-2 shadow-lg w-48 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] rounded-md border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] shadow-sm overflow-hidden"])}}
+            {{$attributes->merge(['class'=>"rounded-lg absolute z-50 mt-2 p-1  shadow-xs w-48 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden"])}}
             style="display: none;"
             @click="open = false">
         <div>

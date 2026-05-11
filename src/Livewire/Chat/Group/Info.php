@@ -175,8 +175,8 @@ class Info extends ModalComponent
             $this->cover_url = $url;
             $this->reset('photo');
 
-            $this->dispatch('refresh')->to(Chats::class);
-            $this->dispatch('refresh')->to(Chat::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
+            $this->dispatch('refresh')->to('wirechat.chat');
 
         }
 

@@ -3,6 +3,8 @@
 namespace Wirechat\Wirechat\Livewire\Chat;
 
 use Composer\InstalledVersions;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,10 +16,15 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Events\MessageRequestUpdated;
+use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Helpers\Helper;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
@@ -61,9 +68,25 @@ class Chat extends Component
 
     public $loadedMessages;
 
+    public int $chunk = 10;
+
     public int $paginate_var = 10;
 
     public bool $canLoadMore;
+
+    public bool $canLoadOlder = false;
+
+    public bool $canLoadNewer = false;
+
+    public ?string $olderCreatedAt = null;
+
+    public ?int $olderId = null;
+
+    public ?string $newerCreatedAt = null;
+
+    public ?int $newerId = null;
+
+    public ?int $anchorId = null;
 
     #[Locked]
     public $totalMessageCount;
@@ -80,9 +103,13 @@ class Chat extends Component
     // Theme
     public $replyMessage = null;
 
+    public bool $canRespondToMessageRequest = false;
+
+    public bool $hasPendingOutgoingMessageRequest = false;
+
     public function getListeners()
     {
-        $conversationId = $this->conversation?->id;
+        $conversationId = $this->conversationId ?? $this->conversation?->id;
 
         if (! $conversationId) {
             return [
@@ -92,7 +119,16 @@ class Chat extends Component
 
         $listeners = [
             'refresh' => '$refresh',
+            'open-attachment' => 'jumpToMessage',
         ];
+
+        $user = $this->auth;
+
+        if ($this->panel() !== null && $user && $this->panel()->hasMessageRequests()) {
+            $panelId = $this->panel()->getId();
+            $encodedType = MorphClassResolver::encode($user->getMorphClass());
+            $listeners["echo-private:{$panelId}.participant.{$encodedType}.{$user->getKey()},.Wirechat\\Wirechat\\Events\\MessageRequestUpdated"] = 'handleMessageRequestUpdated';
+        }
 
         if ($this->panel() == null) {
             \Illuminate\Support\Facades\Log::warning('Wirechat:No panels registered in Chat Component');
@@ -118,7 +154,7 @@ class Chat extends Component
 
             $peerParticipant = Wirechat::participantModelClass()::find($event['message']['participant_id']);
 
-            if ($peerParticipant?->participantable_id == auth()->id() && $peerParticipant?->participantable_type === $this->auth->getMorphClass()) {
+            if ($peerParticipant?->isParticipantable(auth()->user())) {
                 return null;
             }
 
@@ -127,18 +163,20 @@ class Chat extends Component
 
             foreach ($this->loadedMessages as $groupKey => $messages) {
                 // Remove the message from the specific group
-                $this->loadedMessages[$groupKey] = $messages->reject(function ($loadedMessage) use ($messageId) {
+                $remainingMessages = collect($messages)->reject(function ($loadedMessage) use ($messageId) {
                     return $loadedMessage->id == $messageId;
                 })->values();
 
                 // Optionally, remove the group if it's empty
-                if ($this->loadedMessages[$groupKey]->isEmpty()) {
+                if ($remainingMessages->isEmpty()) {
                     $this->loadedMessages->forget($groupKey);
+                } else {
+                    $this->loadedMessages[$groupKey] = new EloquentCollection($remainingMessages->all());
                 }
             }
 
             // Dispatch refresh event
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
         }
     }
 
@@ -155,9 +193,13 @@ class Chat extends Component
             $newMessage = Wirechat::messageModelClass()::find($event['message']['id']);
             // dd($newMessage);
 
+            if (! $newMessage) {
+                return null;
+            }
+
             // Make sure message does not belong to auth
 
-            if ($newMessage->participant->participantable_id == auth()->id() && $newMessage->participant->participantable_type == $this->auth->getMorphClass()) {
+            if ($newMessage->participant?->isParticipantable(auth()->user())) {
                 return null;
             }
 
@@ -169,7 +211,7 @@ class Chat extends Component
 
             // refresh chatlist
             // dispatch event 'refresh ' to chatlist
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
 
             // broadcast
             // $this->selectedConversation->getReceiver()->notify(new MessageRead($this->selectedConversation->id));
@@ -265,6 +307,7 @@ class Chat extends Component
     public function deleteConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // delete conversation
         $this->conversation->deleteFor($this->auth);
@@ -283,6 +326,7 @@ class Chat extends Component
     public function clearConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // delete conversation
         $this->conversation->clearFor($this->auth);
@@ -357,6 +401,11 @@ class Chat extends Component
     {
 
         abort_unless(auth()->check(), 401);
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
+
+        if ($this->conversation->isPrivate() && $this->receiver instanceof Model) {
+            abort_unless($this->auth->canSendMessageTo($this->receiver), 403, 'You are not allowed to send messages to this user.');
+        }
 
         // rate limit
         $this->rateLimit();
@@ -459,7 +508,7 @@ class Chat extends Component
                 $this->conversation->save();
 
                 // dispatch event 'refresh ' to chatlist
-                $this->dispatch('refresh')->to(Chats::class);
+                $this->dispatch('refresh')->to('wirechat.chats');
 
                 // broadcast message
                 $this->dispatchMessageCreatedEvent($message);
@@ -497,7 +546,7 @@ class Chat extends Component
             $this->dispatchMessageCreatedEvent($createdMessage);
 
             // dispatch event 'refresh ' to chatlist
-            $this->dispatch('refresh')->to(Chats::class);
+            $this->dispatch('refresh')->to('wirechat.chats');
         }
 
         //     dd('hoting');
@@ -545,7 +594,7 @@ class Chat extends Component
         $this->removeMessage($message);
 
         // dispatch event 'refresh ' to chatlist
-        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('refresh')->to('wirechat.chats');
 
         // delete For $user
         $message->deleteFor($this->auth);
@@ -586,10 +635,18 @@ class Chat extends Component
         $this->removeMessage($message);
 
         // dispatch event 'refresh ' to chatlist
-        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('refresh')->to('wirechat.chats');
 
         try {
             MessageDeleted::dispatch($message);
+
+            if ($this->conversation->isPrivate() && $this->conversation->hasActiveMessageRequest()) {
+                $messageRequest = $this->conversation->pendingMessageRequests()->first();
+                $recipient = $messageRequest?->recipient;
+                if ($recipient) {
+                    broadcast(new NotifyParticipant($recipient, $message, $this->panel()->getId()));
+                }
+            }
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }
@@ -609,19 +666,7 @@ class Chat extends Component
 
     private function messageGroupKey(Message $message): string
     {
-        $messageDate = $message->created_at;
-        $groupKey = '';
-        if ($messageDate->isToday()) {
-            $groupKey = __('wirechat::chat.message_groups.today');
-        } elseif ($messageDate->isYesterday()) {
-            $groupKey = __('wirechat::chat.message_groups.yesterday');
-        } elseif ($messageDate->greaterThanOrEqualTo(now()->subDays(7))) {
-            $groupKey = $messageDate->format('l'); // Day name
-        } else {
-            $groupKey = $messageDate->format('d/m/Y'); // Older than 7 days, dd/mm/yyyy
-        }
-
-        return $groupKey;
+        return Helper::formatChatDate($message->created_at);
     }
 
     // helper to push message to loadedMessages
@@ -633,7 +678,98 @@ class Chat extends Component
         $this->loadedMessages = collect($this->loadedMessages);
 
         // Use tap to create a new group if it doesn’t exist, then push the message
-        $this->loadedMessages->put($groupKey, $this->loadedMessages->get($groupKey, collect())->push($message));
+        $group = $this->loadedMessages->get($groupKey, new EloquentCollection);
+        $group->push($message);
+        $this->loadedMessages->put($groupKey, new EloquentCollection($group->values()->all()));
+
+        $flat = $this->flattenLoadedMessages();
+        $this->syncCursorsFromFlat($flat);
+        $this->syncCanLoadFlags();
+    }
+
+    private function setLoadedMessagesFromFlat($messages): void
+    {
+        $this->loadedMessages = collect($messages)
+            ->groupBy(fn (Message $message) => $this->messageGroupKey($message))
+            ->map(fn ($group) => new EloquentCollection(collect($group)->values()->all()));
+    }
+
+    private function flattenLoadedMessages()
+    {
+        return collect($this->loadedMessages)->flatten(1)->values();
+    }
+
+    private function syncCursorsFromFlat($messages): void
+    {
+        $messages = collect($messages);
+        $oldest = $messages->first();
+        $newest = $messages->last();
+
+        if (! $oldest || ! $newest) {
+            $this->olderCreatedAt = null;
+            $this->olderId = null;
+            $this->newerCreatedAt = null;
+            $this->newerId = null;
+
+            return;
+        }
+
+        $this->olderCreatedAt = $oldest->created_at->toDateTimeString();
+        $this->olderId = $oldest->id;
+        $this->newerCreatedAt = $newest->created_at->toDateTimeString();
+        $this->newerId = $newest->id;
+    }
+
+    private function syncCanLoadFlags(): void
+    {
+        $flat = $this->flattenLoadedMessages();
+        $oldest = $flat->first();
+        $newest = $flat->last();
+
+        if (! $oldest || ! $newest) {
+            $this->canLoadOlder = false;
+            $this->canLoadNewer = false;
+            $this->canLoadMore = false;
+
+            return;
+        }
+
+        $this->canLoadOlder = $this->conversation->messages()
+            ->where(function (Builder $query) use ($oldest): void {
+                $query->where('created_at', '<', $oldest->created_at)
+                    ->orWhere(function (Builder $query) use ($oldest): void {
+                        $query->where('created_at', '=', $oldest->created_at)
+                            ->where('id', '<', $oldest->id);
+                    });
+            })
+            ->exists();
+
+        $this->canLoadNewer = $this->conversation->messages()
+            ->where(function (Builder $query) use ($newest): void {
+                $query->where('created_at', '>', $newest->created_at)
+                    ->orWhere(function (Builder $query) use ($newest): void {
+                        $query->where('created_at', '=', $newest->created_at)
+                            ->where('id', '>', $newest->id);
+                    });
+            })
+            ->exists();
+
+        $this->canLoadMore = $this->canLoadOlder;
+    }
+
+    public function loadLatestWindow(): void
+    {
+        $messages = $this->conversation->messages()
+            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->take($this->chunk)
+            ->get()
+            ->reverse();
+
+        $this->setLoadedMessagesFromFlat($messages);
+        $this->syncCursorsFromFlat($messages);
+        $this->syncCanLoadFlags();
     }
 
     /**
@@ -646,11 +782,13 @@ class Chat extends Component
      */
     public function hydrateLoadedMessages()
     {
-        $this->loadedMessages = $this->loadedMessages->map(function ($group) {
-            return $group->map(function ($message) {
-                return $message->loadMissing('participant.participantable', 'parent.participant.participantable', 'attachment');
-            });
-        });
+        $this->loadedMessages = collect($this->loadedMessages)
+            ->map(function ($group) {
+                return new EloquentCollection(collect($group)->filter()->map(function ($message) {
+                    return $message->loadMissing('participant.participantable', 'parent.participant.participantable', 'attachment');
+                })->values()->all());
+            })
+            ->filter(fn (EloquentCollection $group) => $group->isNotEmpty());
     }
 
     // Method to remove method from collection
@@ -661,16 +799,20 @@ class Chat extends Component
 
         // Remove the message from the correct group
         if ($this->loadedMessages->has($groupKey)) {
-            $this->loadedMessages[$groupKey] = $this->loadedMessages[$groupKey]->reject(function ($loadedMessage) use ($message) {
+            $remainingMessages = collect($this->loadedMessages[$groupKey])->reject(function ($loadedMessage) use ($message) {
                 return $loadedMessage->id == $message->id;
             })->values();
 
             // Optionally, remove the group if it's empty
-            if ($this->loadedMessages[$groupKey]->isEmpty()) {
+            if ($remainingMessages->isEmpty()) {
                 $this->loadedMessages->forget($groupKey)->values();
+            } else {
+                $this->loadedMessages[$groupKey] = new EloquentCollection($remainingMessages->all());
             }
 
-            //  $this->loadedMessages;
+            $flat = $this->flattenLoadedMessages();
+            $this->syncCursorsFromFlat($flat);
+            $this->syncCanLoadFlags();
         }
     }
 
@@ -701,8 +843,17 @@ class Chat extends Component
             $isSelf = $this->conversation->isSelf();
             /** @var bool $isSelf */
             if (! $isSelf) {
-
-                NotifyParticipants::dispatch($this->conversation, $message, $this->panel);
+                if ($this->conversation->isPrivate() && $this->conversation->hasActiveMessageRequest()) {
+                    // Recipient is not a participant yet, so NotifyParticipants job would find nobody.
+                    // Fetch the pending request and notify the recipient directly.
+                    $messageRequest = $this->conversation->pendingMessageRequests()->first();
+                    $recipient = $messageRequest?->recipient;
+                    if ($recipient) {
+                        broadcast(new NotifyParticipant($recipient, $message, $this->panel()->getId()));
+                    }
+                } else {
+                    NotifyParticipants::dispatch($this->conversation, $message, $this->panel);
+                }
             }
         } catch (\Throwable $th) {
 
@@ -713,6 +864,7 @@ class Chat extends Component
     /** Send Like as  message */
     public function sendLike()
     {
+        abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         // sleep(2);
 
@@ -734,7 +886,7 @@ class Chat extends Component
         $this->pushMessage($message);
 
         // dispatch event 'refresh ' to chatlist
-        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('refresh')->to('wirechat.chats');
 
         // scroll to bottom
         $this->dispatch('scroll-bottom');
@@ -743,41 +895,145 @@ class Chat extends Component
         $this->dispatchMessageCreatedEvent($message);
     }
 
-    // load more messages
-    public function loadMore()
+    public function jumpToMessage(int $messageId): void
     {
-        // increment
-        $this->paginate_var += 10;
-        // call loadMessage
-        $this->loadMessages();
+        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
 
-        // dispatch event- update height
-        $this->dispatch('update-height');
+        $flat = $this->flattenLoadedMessages();
+
+        if ($flat->contains(fn (Message $message) => $message->id === $messageId)) {
+            $this->anchorId = $messageId;
+            $this->dispatch('scroll-to-message', id: $messageId);
+
+            return;
+        }
+
+        /** @var Message $anchor */
+        $anchor = $this->conversation->messages()
+            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
+            ->whereKey($messageId)
+            ->firstOrFail();
+
+        $before = $this->conversation->messages()
+            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
+            ->where(function (Builder $query) use ($anchor): void {
+                $query->where('created_at', '<', $anchor->created_at)
+                    ->orWhere(function (Builder $query) use ($anchor): void {
+                        $query->where('created_at', '=', $anchor->created_at)
+                            ->where('id', '<', $anchor->id);
+                    });
+            })
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->take($this->chunk)
+            ->get()
+            ->reverse();
+
+        $after = $this->conversation->messages()
+            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
+            ->where(function (Builder $query) use ($anchor): void {
+                $query->where('created_at', '>', $anchor->created_at)
+                    ->orWhere(function (Builder $query) use ($anchor): void {
+                        $query->where('created_at', '=', $anchor->created_at)
+                            ->where('id', '>', $anchor->id);
+                    });
+            })
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')
+            ->take($this->chunk)
+            ->get();
+
+        $messages = $before->concat([$anchor])->concat($after);
+
+        $this->anchorId = $anchor->id;
+
+        $this->setLoadedMessagesFromFlat($messages);
+        $this->syncCursorsFromFlat($messages);
+        $this->syncCanLoadFlags();
+
+        $this->dispatch('scroll-to-message', id: $anchor->id);
     }
 
+    public function loadOlder(): void
+    {
+        if (! $this->canLoadOlder || ! $this->olderCreatedAt || ! $this->olderId) {
+            return;
+        }
+
+        $older = $this->conversation->messages()
+            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
+            ->where(function (Builder $query): void {
+                $query->where('created_at', '<', $this->olderCreatedAt)
+                    ->orWhere(function (Builder $query): void {
+                        $query->where('created_at', '=', $this->olderCreatedAt)
+                            ->where('id', '<', $this->olderId);
+                    });
+            })
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->take($this->chunk)
+            ->get()
+            ->reverse();
+
+        if ($older->isEmpty()) {
+            $this->canLoadOlder = false;
+            $this->canLoadMore = false;
+            $this->dispatch('older-loaded');
+
+            return;
+        }
+
+        $all = $older->concat($this->flattenLoadedMessages());
+
+        $this->setLoadedMessagesFromFlat($all);
+        $this->syncCursorsFromFlat($all);
+        $this->syncCanLoadFlags();
+        $this->dispatch('older-loaded');
+    }
+
+    public function loadNewer(): void
+    {
+        if (! $this->canLoadNewer || ! $this->newerCreatedAt || ! $this->newerId) {
+            return;
+        }
+
+        $newer = $this->conversation->messages()
+            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
+            ->where(function (Builder $query): void {
+                $query->where('created_at', '>', $this->newerCreatedAt)
+                    ->orWhere(function (Builder $query): void {
+                        $query->where('created_at', '=', $this->newerCreatedAt)
+                            ->where('id', '>', $this->newerId);
+                    });
+            })
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')
+            ->take($this->chunk)
+            ->get();
+
+        if ($newer->isEmpty()) {
+            $this->canLoadNewer = false;
+
+            return;
+        }
+
+        $all = $this->flattenLoadedMessages()->concat($newer);
+
+        $this->setLoadedMessagesFromFlat($all);
+        $this->syncCursorsFromFlat($all);
+        $this->syncCanLoadFlags();
+    }
+
+    // Legacy alias kept for backward compatibility.
+    public function loadMore()
+    {
+        $this->loadOlder();
+    }
+
+    // Legacy alias kept for backward compatibility.
     public function loadMessages()
     {
-        // Get total message count
-
-        // Fetch paginated messages
-        /* @var Message $message */
-        $messages = $this->conversation->messages()
-            ->with('participant.participantable', 'parent.participant.participantable', 'attachment')
-            ->orderBy('created_at', 'asc')
-            ->skip($this->totalMessageCount - $this->paginate_var)
-            ->take($this->paginate_var)
-            ->get();  // Fetch messages as Eloquent collection
-
-        // Calculate whether more messages can be loaded
-        // Group the messages
-        $this->loadedMessages = $messages
-            ->groupBy(function ($message) {
-                /** @var \Wirechat\Wirechat\Models\Message $message */
-                return $this->messageGroupKey($message);
-            })
-            ->map->values();  // Re-index each group
-
-        $this->canLoadMore = $this->totalMessageCount > $messages->count();
+        $this->loadLatestWindow();
 
         return $this->loadedMessages;
     }
@@ -789,10 +1045,12 @@ class Chat extends Component
 
     public function mount($conversation = null)
     {
+        $this->initializePanel($this->panel);
         $this->initializeConversation($conversation);
         $this->initializeParticipants();
+        $this->syncMessageRequestState();
         $this->finalizeConversationState();
-        $this->loadMessages();
+        $this->loadLatestWindow();
     }
 
     private function initializeConversation($conversation)
@@ -817,8 +1075,9 @@ class Chat extends Component
         }
 
         // $this->conversation = Conversation::where('id', $conversation)->firstOr(fn () => abort(404));
+        $this->conversationId = $this->conversation->id;
         $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $this->conversation->id)->count();
-        abort_unless($this->auth->belongsToConversation($this->conversation), 403);
+        abort_unless($this->auth->canAccessConversation($this->conversation), 403);
     }
 
     /**
@@ -830,7 +1089,7 @@ class Chat extends Component
      *
      * @return \Illuminate\Contracts\Auth\Authenticatable|null
      */
-    #[Computed(persist: true)]
+    #[Computed]
     public function auth()
     {
         return auth()->user();
@@ -839,7 +1098,14 @@ class Chat extends Component
     private function initializeParticipants()
     {
         if (in_array($this->conversation->type, [ConversationType::PRIVATE, ConversationType::SELF])) {
-            $this->conversation->load('participants.participantable');
+            $relations = ['participants.participantable'];
+
+            if ($this->panel()->hasMessageRequests()) {
+                $relations[] = 'messageRequests.sender';
+                $relations[] = 'messageRequests.recipient';
+            }
+
+            $this->conversation->load($relations);
             $participants = $this->conversation->participants();
 
             $this->authParticipant = $participants->whereParticipantable($this->auth)->first();
@@ -851,12 +1117,7 @@ class Chat extends Component
                 $this->receiverParticipant = $this->authParticipant;
             }
 
-            /** @var \Wirechat\Wirechat\Models\Participant|null $participant */
-            $participant = $this->receiverParticipant;
-
-            $this->receiver = $participant
-                ? $participant->participantable
-                : null;
+            $this->receiver = $this->conversation->displayPeer($this->auth);
 
         } else {
             $this->authParticipant = Wirechat::participantModelClass()::where('conversation_id', $this->conversation->id)->whereParticipantable($this->auth)->first();
@@ -868,6 +1129,10 @@ class Chat extends Component
     {
 
         $this->conversation->markAsRead();
+
+        if ($this->isWidget()) {
+            $this->dispatch('refresh')->to('wirechat.chats');
+        }
 
         if ($this->authParticipant) {
 
@@ -1007,6 +1272,134 @@ class Chat extends Component
         }
 
         RateLimiter::increment($key);
+    }
+
+    protected function syncMessageRequestState(): void
+    {
+        $this->canRespondToMessageRequest = false;
+        $this->hasPendingOutgoingMessageRequest = false;
+
+        if (! $this->panel()->hasMessageRequests() || ! $this->conversation->isPrivate()) {
+            return;
+        }
+
+        $this->canRespondToMessageRequest = ! $this->authParticipant
+            && $this->conversation->hasPendingMessageRequestFor($this->auth);
+
+        $this->hasPendingOutgoingMessageRequest = (bool) $this->authParticipant
+            && $this->receiverParticipant === null
+            && $this->conversation->hasPendingMessageRequestFrom($this->auth);
+    }
+
+    protected function refreshConversationContext(bool $reloadMessages = false): void
+    {
+        if (! $this->conversation) {
+            $this->handleComponentTermination(
+                redirectRoute: $this->panel()->chatsRoute(),
+                events: [
+                    'close-chat',
+                    Chats::class => 'refresh',
+                ]
+            );
+
+            return;
+        }
+
+        $conversationId = $this->conversation->id;
+        $this->conversation = Wirechat::conversationModelClass()::find($conversationId);
+
+        if (! $this->conversation || ! $this->auth->canAccessConversation($this->conversation)) {
+            $this->handleComponentTermination(
+                redirectRoute: $this->panel()->chatsRoute(),
+                events: [
+                    'close-chat',
+                    Chats::class => 'refresh',
+                ]
+            );
+
+            return;
+        }
+
+        $this->initializeParticipants();
+        $this->syncMessageRequestState();
+
+        if ($reloadMessages) {
+            $this->totalMessageCount = Wirechat::messageModelClass()::where('conversation_id', $conversationId)->count();
+            $this->loadMessages();
+        }
+    }
+
+    public function acceptMessageRequest(): void
+    {
+        abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasMessageRequests(), 404);
+        abort_unless($this->canRespondToMessageRequest, 403);
+
+        $request = $this->conversation->pendingMessageRequestFor($this->auth);
+        $sender = $request?->sender;
+
+        $this->conversation->acceptMessageRequestFor($this->auth, $this->auth);
+        $this->conversation->touch();
+
+        if ($sender instanceof Model) {
+            event(new MessageRequestUpdated($sender, $this->conversation->id, MessageRequestStatus::ACCEPTED, $this->panel()->getId()));
+        }
+
+        $this->refreshConversationContext();
+        $this->dispatch('refresh')->to(Chats::class);
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.message_request.messages.accepted'));
+    }
+
+    public function dismissMessageRequest()
+    {
+        abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasMessageRequests(), 404);
+        abort_unless($this->canRespondToMessageRequest, 403);
+
+        $request = $this->conversation->pendingMessageRequestFor($this->auth);
+        $sender = $request?->sender;
+        $conversationId = $this->conversation->id;
+
+        $this->conversation->dismissMessageRequestFor($this->auth, $this->auth);
+
+        if ($sender instanceof Model) {
+            event(new MessageRequestUpdated($sender, $conversationId, MessageRequestStatus::DISMISSED, $this->panel()->getId()));
+        }
+
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.message_request.messages.dismissed'));
+
+        return $this->handleComponentTermination(
+            redirectRoute: $this->panel()->chatsRoute(),
+            events: [
+                'close-chat',
+                Chats::class => 'refresh',
+            ]
+        );
+    }
+
+    public function handleMessageRequestUpdated($event)
+    {
+        if (! $this->panel()->hasMessageRequests()) {
+            return;
+        }
+
+        $myConversationId = $this->conversationId ?? $this->conversation?->id;
+
+        if ((string) ($event['conversation_id'] ?? '') !== (string) $myConversationId) {
+            return;
+        }
+
+        if (($event['status'] ?? null) === MessageRequestStatus::DISMISSED->value) {
+            return $this->handleComponentTermination(
+                redirectRoute: $this->panel()->chatsRoute(),
+                events: [
+                    'close-chat',
+                    Chats::class => 'refresh',
+                ]
+            );
+        }
+
+        $this->refreshConversationContext();
     }
 
     public function render()

@@ -235,7 +235,7 @@ class Members extends ModalComponent
 
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
-        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(\Wirechat\Wirechat\Livewire\Chat\Group\Info::class);
+        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to('wirechat.chat.group.info');
     }
 
     public function blockMember(Participant $participant)
@@ -250,7 +250,7 @@ class Members extends ModalComponent
 
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
-        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to(\Wirechat\Wirechat\Livewire\Chat\Group\Info::class);
+        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to('wirechat.chat.group.info');
         $this->dispatch('refresh')->self();
     }
 

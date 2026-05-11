@@ -14,6 +14,7 @@ class TestPanelProvider extends PanelProvider
         return $panel
             ->id('test')
             ->path('test')
+            ->messageRequests()
             ->chatsSearch(true)
             ->searchUsersUsing(function ($needle) {
                 return WirechatUserResource::collection(

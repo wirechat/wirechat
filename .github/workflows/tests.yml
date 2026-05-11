@@ -13,78 +13,74 @@ jobs:
   php-tests:
     runs-on: ubuntu-latest
 
-    continue-on-error: false
-
     strategy:
+      fail-fast: false
       matrix:
-        php: [8.2, 8.3, 8.4]
-        laravel: ['10.*', '11.*', '12.*', '13.*']
-        dependency-version: [prefer-lowest, prefer-stable]
         include:
-          - laravel: 10.*
-            testbench: 8.*
-            pest: ^2.34
-            pest-plugin: ^2.4
-            php: 8.2
-          - laravel: 10.*
-            testbench: 8.*
-            pest: ^2.34
-            pest-plugin: ^2.4
-            php: 8.3
-          - laravel: 10.*
-            testbench: 8.*
-            pest: ^2.34
-            pest-plugin: ^2.4
-            php: 8.4
-          - laravel: 11.*
-            testbench: 9.*
+          # Laravel 11 (light support)
+          - php: 8.4
+            laravel: "11.*"
+            testbench: "9.*"
             pest: ^3.7.4
             pest-plugin: ^3.0
-            php: 8.2
-          - laravel: 11.*
-            testbench: 9.*
-            pest: ^3.7.4
-            pest-plugin: ^3.0
-            php: 8.3
-          - laravel: 11.*
-            testbench: 9.*
-            pest: ^3.7.4
-            pest-plugin: ^3.0
-            php: 8.4
-          - laravel: 12.*
-            testbench: 10.*
-            pest: ^3.7.4
-            pest-plugin: ^3.0
-            php: 8.2
-          - laravel: 12.*
-            testbench: 10.*
-            pest: ^3.7.4
-            pest-plugin: ^3.0
-            php: 8.3
-          - laravel: 12.*
-            testbench: 10.*
-            pest: ^3.7.4
-            pest-plugin: ^3.0
-            php: 8.4
-          - laravel: 13.*
-            testbench: 11.*
-            pest: ^4.0
-            pest-plugin: ^4.0
-            php: 8.3
-          - laravel: 13.*
-            testbench: 11.*
-            pest: ^4.0
-            pest-plugin: ^4.0
-            php: 8.4
-        exclude:
-          - laravel: 13.*
-            php: 8.2
+            dependency-version: prefer-stable
 
-    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }}  - Pest-Plugin${{ matrix.pest-plugin }} -  ${{ matrix.dependency-version }}
+          # Laravel 12 (medium support)
+          - php: 8.4
+            laravel: "12.*"
+            testbench: "10.*"
+            pest: ^3.7.4
+            pest-plugin: ^3.0
+            dependency-version: prefer-stable
+
+          # Laravel 13 (main support)
+          - php: 8.3
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-lowest
+
+          - php: 8.3
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-stable
+
+          - php: 8.4
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-lowest
+
+          - php: 8.4
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-stable
+
+          - php: 8.5
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-lowest
+
+          - php: 8.5
+            laravel: "13.*"
+            testbench: "11.*"
+            pest: ^4.0
+            pest-plugin: ^4.0
+            dependency-version: prefer-stable
+
+    name: PHP${{ matrix.php }} - Laravel${{ matrix.laravel }} - Testbench${{ matrix.testbench }} - Pest${{ matrix.pest }} - Pest-Plugin${{ matrix.pest-plugin }} - ${{ matrix.dependency-version }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -111,36 +107,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.4
           extensions: mbstring, dom, curl
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction
+      - run: composer install --no-interaction
 
-      - name: Run Pint for linting
-        run: vendor/bin/pint --test
+      - run: vendor/bin/pint --test
 
   phpstan-tests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.4
           extensions: mbstring, dom, curl
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction
+      - run: composer install --no-interaction
 
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse
+      - run: vendor/bin/phpstan analyse

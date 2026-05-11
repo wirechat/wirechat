@@ -1,13 +1,16 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
+use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
@@ -25,6 +28,225 @@ test('authenticaed user can access chatlist ', function () {
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertStatus(200);
+});
+
+test('it shows the requests drawer button in the chats header', function () {
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('id="open-requests-drawer-button"');
+});
+
+test('it hides the requests drawer button when message requests are disabled on the panel', function () {
+    testPanelProvider()->messageRequests(false);
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSeeHtml('id="open-requests-drawer-button"');
+});
+
+test('it shows the new group button in the chats header when panel allows group creation', function () {
+    testPanelProvider()->createGroupAction();
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('dusk="open_new_group_modal_button_in_header"');
+});
+
+test('it hides the new group button when group creation is disabled on the panel', function () {
+    testPanelProvider()->createGroupAction(false);
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSeeHtml('dusk="open_new_group_modal_button_in_header"');
+});
+
+test('it hides the new group button when user cannot create groups', function () {
+    testPanelProvider()->createGroupAction();
+
+    $auth = \Mockery::mock(User::class)->makePartial();
+    $auth->shouldReceive('canCreateGroups')->andReturn(false);
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSeeHtml('dusk="open_new_group_modal_button_in_header"');
+});
+
+test('pending request conversations stay out of the normal chats list', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $receiver = User::factory()->create(['name' => 'Pending User']);
+
+    $auth->sendMessageRequestTo($receiver);
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSee('Pending User');
+});
+
+test('requests drawer shows its heading, description, tabs, and empty state', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSee(__('wirechat::chats.requests.heading'))
+        ->assertSee(__('wirechat::chats.requests.labels.description'))
+        ->assertSeeHtml('dusk="incoming-requests-tab"')
+        ->assertSeeHtml('dusk="outgoing-requests-tab"')
+        ->assertSee(__('wirechat::chats.requests.labels.empty_state'))
+        ->assertSet('activeTab', 'incoming');
+});
+
+test('requests drawer is unavailable when message requests are disabled on the panel', function () {
+    testPanelProvider()->messageRequests(false);
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertNotFound();
+});
+
+test('tabs blade components render labels badges and content shells', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-wirechat::tabs.tabs label="Requests" dusk="requests-tabs">
+            <x-wirechat::tabs.tab :active="true" :badge="3" dusk="incoming-tab">
+                Incoming
+            </x-wirechat::tabs.tab>
+
+            <x-wirechat::tabs.tab :active="false">
+                Outgoing
+            </x-wirechat::tabs.tab>
+        </x-wirechat::tabs.tabs>
+
+        <x-wirechat::tabs.content :active="false" class="tab-panel">
+            Panel body
+        </x-wirechat::tabs.content>
+    BLADE);
+
+    $html = preg_replace('/\s+/', ' ', $html);
+
+    expect($html)
+        ->toContain('role="tablist"')
+        ->toContain('aria-label="Requests"')
+        ->toContain('dusk="incoming-tab"')
+        ->toContain('Incoming')
+        ->toContain('3')
+        ->toContain('role="tabpanel"')
+        ->toContain('aria-hidden="true"')
+        ->toContain('hidden')
+        ->toContain('Panel body');
+});
+
+test('icon component forwards custom classes to the rendered icon', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-wirechat::icon default="wirechat::icons.logout" class="size-4 text-red-500" />
+    BLADE);
+
+    expect($html)
+        ->toContain('size-4')
+        ->toContain('text-red-500');
+});
+
+test('dropdown trigger slot classes are applied to the trigger wrapper', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-wirechat::dropdown>
+            <x-slot name="trigger" class="inline-flex items-center justify-center trigger-slot-test">
+                <button type="button">Trigger</button>
+            </x-slot>
+
+            <x-slot name="content">
+                Content
+            </x-slot>
+        </x-wirechat::dropdown>
+    BLADE);
+
+    expect($html)
+        ->toContain('trigger-slot-test')
+        ->toContain('Trigger')
+        ->toContain('Content');
+});
+
+test('requests drawer defaults to the incoming tab when incoming requests exist', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $incomingSender->sendMessageRequestTo($auth);
+    $auth->sendMessageRequestTo($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'incoming')
+        ->assertSee('Incoming Sender')
+        ->assertDontSee('Outgoing Recipient');
+});
+
+test('requests drawer defaults to the outgoing tab when only outgoing requests exist', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $auth->sendMessageRequestTo($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'outgoing')
+        ->assertSee('Outgoing Recipient')
+        ->assertDontSee(__('wirechat::chats.requests.labels.empty_state'));
+});
+
+test('requests drawer can switch between incoming and outgoing tabs', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $incomingSender->sendMessageRequestTo($auth);
+    $auth->sendMessageRequestTo($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'incoming')
+        ->assertSee('Incoming Sender')
+        ->assertDontSee('Outgoing Recipient')
+        ->call('setActiveTab', 'outgoing')
+        ->assertSet('activeTab', 'outgoing')
+        ->assertSee('Outgoing Recipient')
+        ->assertDontSee('Incoming Sender');
+});
+
+test('requests drawer shows a tab-specific empty state when the selected tab has no items', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
+
+    $auth->sendMessageRequestTo($outgoingRecipient);
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->assertSet('activeTab', 'outgoing')
+        ->call('setActiveTab', 'incoming')
+        ->assertSee(__('wirechat::chats.requests.labels.incoming_empty_state'))
+        ->assertDontSee(__('wirechat::chats.requests.labels.empty_state'));
+});
+
+test('requests drawer redirects to the conversation in full-page mode', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+
+    $conversation = $incomingSender->sendMessageRequestTo($auth);
+    $request = MessageRequest::query()->pending()->firstOrFail();
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->call('openConversation', $request->id)
+        ->assertDispatched('closeChatListDrawer')
+        ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+});
+
+test('requests drawer opens the conversation in widget mode without redirecting', function () {
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+
+    $incomingSender->sendMessageRequestTo($auth);
+    $request = MessageRequest::query()->pending()->firstOrFail();
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class, ['widget' => true])
+        ->call('openConversation', $request->id)
+        ->assertDispatched('closeChatListDrawer')
+        ->assertDispatched('open-chat')
+        ->assertNoRedirect();
 });
 
 test('it applies ui classes and styles to the chats shell only', function () {
@@ -511,6 +733,31 @@ describe('List', function () {
             });
     });
 
+    it('reloads conversation ids when refresh is dispatched after a blank conversation gets its first message', function () {
+
+        $auth = User::factory()->create();
+
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+        $user2 = User::factory()->create(['name' => 'iam user 2']);
+
+        // Load one existing non-blank conversation into the chat list ids.
+        $auth->createConversationWith($user2, 'existing message');
+
+        // Keep another conversation blank at first so it is excluded from the initial ids.
+        $auth->createConversationWith($user1);
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSee('existing message')
+            ->assertDontSee('first message');
+
+        // Sending to the same user reuses the existing blank conversation and gives it its first message.
+        $auth->sendMessageTo($user1, 'first message');
+
+        $component->dispatch('refresh')
+            ->assertSee('first message')
+            ->assertSee('iam user 1');
+    });
+
     it('does not load deleted conversations by user', function () {
 
         $auth = User::factory()->create();
@@ -586,6 +833,7 @@ describe('List', function () {
         // dd($conversations,$messages);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="1"')
             ->assertSeeHtml('dusk="unreadMessagesDot"')
             ->assertDontSeeHtml('dusk="unreadMessagesCount"');
     });
@@ -659,6 +907,66 @@ describe('List', function () {
             ->and($loadedConversation?->getAttribute('unread_messages_count'))->toBe(2);
     });
 
+    it('refreshes unread dot when refresh-chats event is dispatched after a new incoming message', function () {
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="0"');
+
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+
+        $component->dispatch('refresh-chats')
+            ->assertSeeHtml('data-show-unread-status="1"')
+            ->assertSeeHtml('dusk="unreadMessagesDot"');
+    });
+
+    it('refreshes unread count badge when refresh-chats event is dispatched after a new incoming message', function () {
+
+        testPanelProvider()->unreadIndicator(type: UnreadIndicatorType::Count);
+
+        $auth = User::factory()->create();
+        $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+        $auth->createConversationWith($user1, message: 'How are you doing');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="0"');
+
+        sleep(1);
+        $user1->sendMessageTo($auth, message: 'I am good');
+
+        $component->dispatch('refresh-chats')
+            ->assertSeeHtml('data-show-unread-status="1"')
+            ->assertSeeHtml('dusk="unreadMessagesCount"')
+            ->assertSee('1');
+    });
+
+    it('shows unread indicator for another conversation while one chat is selected', function () {
+
+        $auth = User::factory()->create();
+        $userA = User::factory()->create(['name' => 'iam user a']);
+        $userB = User::factory()->create(['name' => 'iam user b']);
+
+        $conversationA = $auth->createConversationWith($userA, message: 'How are you doing');
+        $conversationB = $auth->createConversationWith($userB, message: 'You there?');
+
+        $component = Livewire::actingAs($auth)->test(Chatlist::class)
+            ->set('selectedConversationId', (string) $conversationA->id)
+            ->assertSeeHtml('data-show-unread-status="0"');
+
+        sleep(1);
+        $userB->sendMessageTo($auth, message: 'I am good');
+
+        $component->dispatch('refresh-chats')
+            ->assertSeeHtml('data-show-unread-status="1"')
+            ->assertSeeHtml('dusk="unreadMessagesDot"');
+    });
+
     it('keeps the unread dot visible when unread messages remain after auth sends the latest message', function () {
 
         $auth = User::factory()->create();
@@ -698,7 +1006,6 @@ describe('List', function () {
             ->toContain('dusk="unreadMessagesCount"')
             ->toMatch('/dusk="unreadMessagesCount"[\s\S]*?>\s*2\s*</');
     });
-
     it('uses reactive preview classes so unread text de-emphasizes immediately when a chat is opened', function () {
 
         $auth = User::factory()->create();
@@ -714,9 +1021,9 @@ describe('List', function () {
         expect($html)
             ->toContain('dusk="messagePreviewBody"')
             ->toContain('dusk="messagePreviewTime"')
-            ->toContain('showUnreadStatus && !false')
             ->toContain('font-semibold text-black')
-            ->toContain('font-normal text-gray-600');
+            ->toContain('font-medium text-gray-800')
+            ->not->toContain('showUnreadStatus && !false');
     });
     it('Doesnt show unread message Dot if message does not belong to Auth and is Read', function () {
 
@@ -738,7 +1045,7 @@ describe('List', function () {
         $conversation->markAsRead($auth);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertDontSeeHtml('dusk="unreadMessagesDot"');
+            ->assertSeeHtml('data-show-unread-status="0"');
     });
 
     it('still shows unread message Dot even if message belongs to Participant of Different Model', function () {
@@ -758,6 +1065,7 @@ describe('List', function () {
         // dd($conversations,$messages);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('data-show-unread-status="1"')
             ->assertSeeHtml('dusk="unreadMessagesDot"');
     });
 
@@ -785,7 +1093,7 @@ describe('List', function () {
         $unreadCount = $conversation->getUnreadCountFor($auth);
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertDontSeeHtml('dusk="unreadMessagesDot"');
+            ->assertSeeHtml('data-show-unread-status="0"');
     });
 
     it('shows message time AS "now"  if less than a minute old', function () {
@@ -831,6 +1139,38 @@ describe('List', function () {
         Livewire::actingAs($auth)->test(Chatlist::class)
             ->assertDontSeeText('now')
             ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
+    });
+
+    it('translates short absolute diff for humans when the locale is configured globally', function () {
+        $originalLocale = app()->getLocale();
+        $originalCarbonLocale = Carbon::getLocale();
+
+        try {
+            app()->setLocale('tr');
+            Carbon::setLocale('tr');
+
+            $auth = User::factory()->create();
+            $user1 = User::factory()->create(['name' => 'iam user 1']);
+
+            $conversation = $auth->createConversationWith($user1);
+            $participant = $conversation->participant($auth);
+
+            Carbon::setTestNowAndTimezone(now());
+            $lastMessage = Message::create([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => 'How are you doing',
+            ]);
+
+            Carbon::setTestNowAndTimezone(now()->addHours(3));
+
+            Livewire::actingAs($auth)->test(Chatlist::class)
+                ->assertSeeText($lastMessage->created_at->shortAbsoluteDiffForHumans());
+        } finally {
+            Carbon::setTestNow();
+            app()->setLocale($originalLocale);
+            Carbon::setLocale($originalCarbonLocale);
+        }
     });
 
     it('it shows attatchment lable if message contains file or image', function () {
