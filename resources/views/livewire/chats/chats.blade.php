@@ -1,6 +1,6 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
 @php
-    $chatsShellClass = trim('flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full sm:p-3 '.$this->getUiClass());
+    $chatsShellClass = trim('flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full'.$this->getUiClass());
     $chatsShellStyles = $this->getUiStyles();
 @endphp
 <div
@@ -99,5 +99,7 @@
             </div>
         @endif
     </main>
+
+    <livewire:wirechat.chats.drawer wire:key="chats-drawer" />
 
 </div>

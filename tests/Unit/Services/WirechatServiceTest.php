@@ -6,6 +6,7 @@ use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
 
 describe('WirechatService Model Resolution', function () {
@@ -17,6 +18,7 @@ describe('WirechatService Model Resolution', function () {
             'wirechat.models.conversation' => Conversation::class,
             'wirechat.models.group' => Group::class,
             'wirechat.models.message' => Message::class,
+            'wirechat.models.message_request' => MessageRequest::class,
             'wirechat.models.participant' => Participant::class,
         ]);
     });
@@ -40,6 +42,10 @@ describe('WirechatService Model Resolution', function () {
 
         it('returns correct message model class', function () {
             expect(Wirechat::messageModelClass())->toBe(Message::class);
+        });
+
+        it('returns correct message request model class', function () {
+            expect(Wirechat::messageRequestModelClass())->toBe(MessageRequest::class);
         });
 
         it('returns correct participant model class', function () {
@@ -95,6 +101,19 @@ describe('WirechatService Model Resolution', function () {
                 ->and($model->body)->toBe('Hello World');
         });
 
+        it('creates message request model instance', function () {
+            $model = Wirechat::messageRequestModel([
+                'sender_id' => 1,
+                'sender_type' => 'User',
+                'recipient_id' => 2,
+                'recipient_type' => 'User',
+            ]);
+
+            expect($model)->toBeInstanceOf(MessageRequest::class)
+                ->and($model->sender_id)->toBe(1)
+                ->and($model->recipient_id)->toBe(2);
+        });
+
         it('creates participant model instance', function () {
             $model = Wirechat::participantModel([
                 'participantable_id' => 1,
@@ -116,6 +135,7 @@ describe('WirechatService Model Resolution', function () {
                 'wirechat.models.conversation' => Conversation::class,
                 'wirechat.models.group' => Group::class,
                 'wirechat.models.message' => Message::class,
+                'wirechat.models.message_request' => MessageRequest::class,
                 'wirechat.models.participant' => Participant::class,
             ]);
         });
@@ -139,13 +159,14 @@ describe('WirechatService Model Resolution', function () {
                 'conversation' => Conversation::class,
                 'group' => Group::class,
                 'message' => Message::class,
+                'message_request' => MessageRequest::class,
                 'participant' => Participant::class,
             ];
 
             foreach ($modelTypes as $type => $expectedClass) {
                 config(["wirechat.models.{$type}" => 'NonExistentClass']);
 
-                $method = "{$type}ModelClass";
+                $method = \Illuminate\Support\Str::camel("{$type}_model_class");
 
                 expect(fn () => Wirechat::{$method}())
                     ->toThrow(InvalidArgumentException::class, "Model class 'NonExistentClass' configured in 'wirechat.models.{$type}' does not exist.");
@@ -163,6 +184,7 @@ describe('WirechatService Model Resolution', function () {
                 ->and(Wirechat::conversationModelTable())->toBe((new Conversation)->getTable())
                 ->and(Wirechat::groupModelTable())->toBe((new Group)->getTable())
                 ->and(Wirechat::messageModelTable())->toBe((new Message)->getTable())
+                ->and(Wirechat::messageRequestModelTable())->toBe((new MessageRequest)->getTable())
                 ->and(Wirechat::participantModelTable())->toBe((new Participant)->getTable());
         });
     });

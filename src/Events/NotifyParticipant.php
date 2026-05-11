@@ -95,11 +95,14 @@ class NotifyParticipant implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         // Use conversation accessor (via participant) to build the redirect URL.
-        $conversationId = optional($this->message->conversation)->id ?? $this->message->participant?->conversation?->id;
+        $conversation = $this->message->conversation ?? $this->message->participant?->conversation;
+        $conversationId = $conversation?->id;
+        $isMessageRequest = (bool) ($conversation?->isPrivate() && $conversation->hasActiveMessageRequest());
 
         return [
             'message' => new MessageResource($this->message),
             'redirect_url' => $this->getPanel()->chatRoute($conversationId),
+            'is_request' => $isMessageRequest,
         ];
     }
 }

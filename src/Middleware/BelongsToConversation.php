@@ -22,8 +22,7 @@ class BelongsToConversation
 
         $conversation = Wirechat::conversationModelClass()::findOrFail($conversationId);
 
-        if (! $user || ! $user->belongsToConversation($conversation)
-        ) {
+        if (! $user || ! $user->canAccessConversation($conversation)) {
             abort(403, 'Forbidden');
         }
 

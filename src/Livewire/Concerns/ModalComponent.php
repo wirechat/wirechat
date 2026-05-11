@@ -51,12 +51,18 @@ abstract class ModalComponent extends Component
         $this->dispatch('closeChatDrawer', force: $this->forceClose, skipPreviousModals: $this->skipModals, destroySkipped: $this->destroySkipped);
     }
 
+    public function closeChatListDrawer(): void
+    {
+        $this->dispatch('closeChatListDrawer', force: $this->forceClose, skipPreviousModals: $this->skipModals, destroySkipped: $this->destroySkipped);
+    }
+
     public function closeModalWithEvents(array $events): void
     {
         $this->emitModalEvents($events);
         // $this->closeModal();
         $this->closeWirechatModal();
         $this->closeChatDrawer();
+        $this->closeChatListDrawer();
     }
 
     public static function modalAttributes(): array

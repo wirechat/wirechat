@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Jobs\BroadcastMessage;
@@ -24,6 +26,7 @@ use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -210,6 +213,118 @@ test('returns 403(Forbidden) if user doesnt not bleong to conversation', functio
 
     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertStatus(403);
+});
+
+describe('Message requests', function () {
+    test('pending recipient can review the thread and sees accept and reject actions', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+        $participant = $conversation->participant($auth);
+
+        Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'body' => 'Hello from a request',
+        ]);
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Hello from a request')
+            ->assertSee(__('wirechat::chat.message_request.actions.accept.label'))
+            ->assertSee(__('wirechat::chat.message_request.actions.dismiss.label'))
+            ->assertDontSee(__('wirechat::chat.inputs.message.placeholder'));
+    });
+
+    test('sender sees the outgoing pending notice while keeping the composer', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee(__('wirechat::chat.message_request.labels.outgoing_notice'))
+            ->assertSee(__('wirechat::chat.inputs.message.placeholder'))
+            ->assertDontSee(__('wirechat::chat.message_request.actions.accept.label'))
+            ->assertDontSee(__('wirechat::chat.message_request.actions.dismiss.label'));
+    });
+
+    test('pending request messages broadcast in real-time but do not trigger notifications', function () {
+        Event::fake();
+        Queue::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('body', 'Hello from a pending request')
+            ->call('sendMessage');
+
+        $message = Message::query()->latest('id')->first();
+
+        expect($message)->not->toBeNull()
+            ->and($message?->body)->toBe('Hello from a pending request');
+
+        // Message is broadcast so the recipient's chat view updates in real-time
+        Event::assertDispatched(MessageCreated::class);
+        // Recipient is not a participant yet, so the job is skipped;
+        // NotifyParticipant is broadcast directly to the request recipient instead
+        Queue::assertNotPushed(NotifyParticipants::class);
+        Event::assertDispatched(NotifyParticipant::class);
+    });
+
+    test('deleting a message in a pending request notifies the recipient directly', function () {
+        Event::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+        $message = $auth->sendMessageTo($conversation, 'Hello');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForEveryone', encrypt($message->id));
+
+        // MessageDeleted broadcast fires on the conversation channel
+        Event::assertDispatched(MessageDeleted::class);
+        // NotifyParticipant is also broadcast directly so the recipient's
+        // Requests list refreshes (recipient is not a participant yet)
+        Event::assertDispatched(NotifyParticipant::class, function ($event) use ($receiver) {
+            return (string) $event->participantId === (string) $receiver->getKey();
+        });
+    });
+
+    test('pending recipient can accept a message request', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+        $request = MessageRequest::query()->pending()->where('conversation_id', $conversation->id)->firstOrFail();
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('acceptMessageRequest');
+
+        expect($conversation->fresh()->participant($receiver))->not->toBeNull()
+            ->and(MessageRequest::query()->whereKey($request->id)->exists())->toBeFalse();
+    });
+
+    test('rejecting a message request dismisses it and removes the pending conversation', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+        $request = MessageRequest::query()->pending()->where('conversation_id', $conversation->id)->firstOrFail();
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('dismissMessageRequest')
+            ->assertRedirect(testPanelProvider()->chatsRoute());
+
+        expect(Conversation::find($conversation->id))->toBeNull()
+            ->and($request->fresh()->status)->toBe(MessageRequestStatus::DISMISSED)
+            ->and($request->fresh()->conversation_id)->toBeNull();
+    });
 });
 
 describe('Presense', function () {

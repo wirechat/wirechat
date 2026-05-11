@@ -11,5 +11,9 @@ if [ -f vendor/bin/pint ]; then
   run "Pint (code style)" vendor/bin/pint
 fi
 
-git update-index --again
+# future tools go here
+# run "PHPStan" vendor/bin/phpstan analyse
+# run "Tests" vendor/bin/pest
 
+echo "Re-staging files..."
+git update-index --again

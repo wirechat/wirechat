@@ -44,7 +44,7 @@ trait Widget
         // set events to dispatch on termination
         if ($events == null) {
             $events = [
-                ['close-chat',  ['conversation' => $this->conversation->id]],
+                ['close-chat', ['conversation' => $this->resolveConversationId()]],
             ];
         }
         if ($this->isWidget()) {
@@ -77,9 +77,9 @@ trait Widget
     /**
      * A method to dispatch open chat widget
      */
-    public function openChat(int $conversation): void
+    public function openChat(int|string $conversation): void
     {
-        $this->dispatch('open-chat', ['conversation' => $conversation]);
+        $this->dispatch('open-chat', conversation: $conversation);
     }
 
     /**
@@ -88,5 +88,18 @@ trait Widget
     public function closeChat(): void
     {
         $this->dispatch('close-chat');
+    }
+
+    /**
+     * Resolve the current conversation id from either $conversation or $conversationId.
+     */
+    protected function resolveConversationId(): int|string|null
+    {
+        if (isset($this->conversation)) {
+            return $this->conversation->id;
+        }
+
+        /** @phpstan-ignore-next-line */
+        return $this->conversationId ?? null;
     }
 }

@@ -92,6 +92,27 @@ return [
         'invalid_conversation_input' => 'Invalid conversation input.',
     ],
 
+    'message_request' => [
+        'labels' => [
+            'heading' => 'Message request',
+            'description' => 'Open the conversation and accept it before you can reply.',
+            'outgoing_notice' => 'This message request is still pending. The recipient can review the thread before joining.',
+        ],
+        'actions' => [
+            'accept' => [
+                'label' => 'Accept',
+            ],
+            'dismiss' => [
+                'label' => 'Reject',
+            ],
+        ],
+        'messages' => [
+            'accepted' => 'Message request accepted.',
+            'dismissed' => 'Message request rejected.',
+            'accept_required' => 'Accept this message request before sending messages.',
+        ],
+    ],
+
     /**-------------------------
      * Info Component
      *------------------------*/

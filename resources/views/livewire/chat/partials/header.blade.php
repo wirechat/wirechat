@@ -2,12 +2,14 @@
 
 @php
     $group = $conversation->group;
+    $hasMessageRequests = $this->panel()->hasMessageRequests();
+    $hasActiveMessageRequest = $hasMessageRequests && $conversation->isPrivate() && $conversation->hasActiveMessageRequest();
 @endphp
 
 <header
-    class="w-full   sticky inset-x-0 flex pb-[5px] pt-[7px] top-0 z-10 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)]  border-[var(--wc-light-border)] dark:border-[var(--wc-dark-secondary)]   border-b">
+    class="w-full   sticky inset-x-0 flex  top-0 z-10 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)]  border-[var(--wc-light-border)] dark:border-[var(--wc-dark-secondary)]   border-b">
 
-    <div class="  flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
+    <div class=" border-b border-zinc-200/80 dark:border-zinc-700/60    flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
 
         {{-- Return --}}
         @if ($this->isWidget())
@@ -53,11 +55,8 @@
                     </x-wirechat::actions.show-group-info>
                 @else
                     {{-- Not Group --}}
-                    <x-wirechat::actions.show-chat-info 
-                    conversation="{{ $conversation->id }}"
-                        widget="{{ $this->isWidget() }}"
-                        panel="{{$this->panel}}">
-                        <div class="flex items-center gap-2 cursor-pointer ">
+                    @if ($hasActiveMessageRequest)
+                        <div class="flex items-center gap-2">
                             <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                                 :group="false" :src="$receiver?->wirechat_avatar_url ?? null"
                                 class="h-8 w-8 lg:w-10 lg:h-10 " />
@@ -67,7 +66,23 @@
                                 @endif
                             </h6>
                         </div>
-                    </x-wirechat::actions.show-chat-info>
+                    @else
+                        <x-wirechat::actions.show-chat-info 
+                        conversation="{{ $conversation->id }}"
+                            widget="{{ $this->isWidget() }}"
+                            panel="{{$this->panel}}">
+                            <div class="flex items-center gap-2 cursor-pointer ">
+                                <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
+                                    :group="false" :src="$receiver?->wirechat_avatar_url ?? null"
+                                    class="h-8 w-8 lg:w-10 lg:h-10 " />
+                                <h6 class="font-bold text-base text-gray-800 dark:text-white w-full truncate">
+                                    {{ $receiver?->wirechat_name }} @if ($conversation->isSelfConversation())
+                                        ({{ __('wirechat::chat.labels.you') }})
+                                    @endif
+                                </h6>
+                            </div>
+                        </x-wirechat::actions.show-chat-info>
+                    @endif
                 @endif
 
 
@@ -99,7 +114,7 @@
                                     </x-wirechat::dropdown-link>
                                 </button>
                             </x-wirechat::actions.show-group-info>
-                        @else
+                        @elseif (! $hasActiveMessageRequest)
                             {{-- Open chat info button --}}
                             <x-wirechat::actions.show-chat-info conversation="{{ $conversation->id }}"
                                 widget="{{ $this->isWidget() }}">
@@ -124,7 +139,7 @@
 
 
                         {{-- Only show delete and clear if conversation is NOT group --}}
-                        @if (!$conversation->isGroup())
+                        @if (!$conversation->isGroup() && ! $hasActiveMessageRequest)
                             @if($this->panel()->hasClearChatAction())
                             <button dusk="clear-chat-action" class="w-full" wire:click="clearConversation"
                                 wire:confirm="{{ __('wirechat::chat.actions.clear_chat.confirmation_message') }}">

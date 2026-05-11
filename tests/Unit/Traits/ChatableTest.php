@@ -10,6 +10,7 @@ use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -178,6 +179,45 @@ describe('createConversationWith() ', function () {
         expect(count($auth->conversations))->toBe(1);
 
         expect(count($receiver->conversations))->toBe(1);
+
+    });
+
+    it('reuses an existing outgoing pending request instead of creating a second private conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->sendMessageRequestTo($receiver);
+        $request = MessageRequest::query()->pending()->firstOrFail();
+
+        $reusedConversation = $auth->createConversationWith($receiver);
+
+        expect($reusedConversation?->id)->toBe($conversation?->id)
+            ->and(Conversation::query()->count())->toBe(1)
+            ->and(MessageRequest::query()->pending()->count())->toBe(1)
+            ->and(MessageRequest::query()->pending()->first()?->id)->toBe($request->id)
+            ->and($auth->conversations()->count())->toBe(1)
+            ->and($receiver->conversations()->count())->toBe(0);
+
+    });
+
+    it('accepts an incoming pending request instead of creating a duplicate private conversation', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $receiver->sendMessageRequestTo($auth);
+        $request = MessageRequest::query()->pending()->firstOrFail();
+
+        $acceptedConversation = $auth->createConversationWith($receiver);
+
+        expect($acceptedConversation?->id)->toBe($conversation?->id)
+            ->and(Conversation::query()->count())->toBe(1)
+            ->and(MessageRequest::query()->pending()->count())->toBe(0)
+            ->and(MessageRequest::query()->whereKey($request->id)->exists())->toBeFalse()
+            ->and($acceptedConversation?->fresh()->participant($auth))->not->toBeNull()
+            ->and($acceptedConversation?->fresh()->participant($receiver))->not->toBeNull()
+            ->and($auth->hasConversationWith($receiver))->toBeTrue();
 
     });
 

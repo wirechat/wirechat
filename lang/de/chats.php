@@ -21,4 +21,32 @@ return [
             'placeholder' => 'Suchen',
         ],
     ],
+
+    'requests' => [
+        'heading' => 'Nachrichtenanfragen',
+        'actions' => [
+            'open' => [
+                'label' => 'Anfragen',
+            ],
+            'close' => [
+                'label' => 'Anfragen schliessen',
+            ],
+        ],
+        'labels' => [
+            'description' => 'Prüfe eingehende Anfragen und behalte gesendete Anfragen im Blick.',
+            'incoming' => 'Eingehend',
+            'outgoing' => 'Gesendet',
+            'pending' => 'Ausstehend',
+            'no_message' => 'Noch keine Nachricht',
+            'empty_state' => 'Du hast aktuell keine aktiven Nachrichtenanfragen.',
+            'incoming_empty_state' => 'Du hast aktuell keine eingehenden Nachrichtenanfragen.',
+            'outgoing_empty_state' => 'Du hast aktuell keine aktiven gesendeten Nachrichtenanfragen.',
+        ],
+    ],
+
+    'actions' => [
+        'new_group' => [
+            'label' => 'Neue Gruppe',
+        ],
+    ],
 ];

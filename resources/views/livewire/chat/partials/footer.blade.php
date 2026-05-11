@@ -2,16 +2,53 @@
 
     $hasEmojiPicker= $this->panel()->hasEmojiPicker();
     $floatingEmojiPicker=$this->panel()->emojiPickerPosition()===\Wirechat\Wirechat\Support\Enums\EmojiPickerPosition::Floating;
+    $authIsAdmin = $authParticipant?->isAdmin() ?? false;
 @endphp
 <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
 
     {{-- Check if group allows :sending messages --}}
-    @if ($conversation->isGroup() && !$conversation->group?->allowsMembersToSendMessages() && !$authParticipant->isAdmin())
+    @if ($canRespondToMessageRequest)
+        <div class="border-t border-zinc-200 bg-zinc-50 px-4 py-4 dark:border-zinc-700 dark:bg-zinc-900">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h6 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        {{ __('wirechat::chat.message_request.labels.heading') }}
+                    </h6>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                        {{ __('wirechat::chat.message_request.labels.description') }}
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        wire:click="dismissMessageRequest"
+                        class="inline-flex items-center justify-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    >
+                        {{ __('wirechat::chat.message_request.actions.dismiss.label') }}
+                    </button>
+
+                    <button
+                        type="button"
+                        wire:click="acceptMessageRequest"
+                        class="inline-flex items-center justify-center rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                    >
+                        {{ __('wirechat::chat.message_request.actions.accept.label') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @elseif ($conversation->isGroup() && !$conversation->group?->allowsMembersToSendMessages() && !$authIsAdmin)
         <div
             class="dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)] w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 ">
             Only admins can send messages
         </div>
     @else
+        @if ($hasPendingOutgoingMessageRequest)
+            <div class="border-t border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+                {{ __('wirechat::chat.message_request.labels.outgoing_notice') }}
+            </div>
+        @endif
         <div id="chat-footer" x-data="{ 'openEmojiPicker': false }"
             class=" px-3 md:px-1 border-t  shadow-sm bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-secondary)]   z-50   border-[var(--wc-light-border)] dark:border-[var(--wc-dark-primary)] flex flex-col gap-3 items-center  w-full   mx-auto">
 
