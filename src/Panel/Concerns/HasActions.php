@@ -18,8 +18,12 @@ trait HasActions
      * - Htmlable: trusted raw SVG/HTML
      * - Closure: evaluated later
      */
-    protected string|Htmlable|Closure|null $redirectToHomeActionIcon = 'wirechat::icons.logout';
+    protected string|Htmlable|Closure|null $redirectToHomeActionIcon = 'wirechat::icons.home-01';
 
+    /**
+     * Additional attributes for the redirect-to-home action icon.
+     * Can be an array or a Closure that returns an array.
+     */
     protected array|Closure $redirectToHomeActionIconAttributes = [];
 
     /**

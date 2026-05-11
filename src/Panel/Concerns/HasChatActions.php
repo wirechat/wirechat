@@ -12,7 +12,7 @@ trait HasChatActions
 
     protected bool|Closure $createChatAction = false;
 
-    protected string|Htmlable|Closure|null $createChatActionIcon = 'wirechat::icons.messages-plus';
+    protected string|Htmlable|Closure|null $createChatActionIcon = 'wirechat::icons.message-plus-circle';
 
     protected array|Closure $createChatActionIconAttributes = [];
 

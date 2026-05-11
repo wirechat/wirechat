@@ -4,11 +4,11 @@
     $hasMessageRequests = $this->panel()->hasMessageRequests();
 @endphp
 
-<header class="px-3 z-10 sticky top-0 w-full py-2 " dusk="header">
+<header class="px-3 z-10 sticky flex flex-col gap-1.5 top-0 w-full py-2 " dusk="header">
 
 
     {{-- heading/name and Icon --}}
-    <section class=" justify-between flex items-center   pb-2">
+    <section class=" justify-between flex mb-1 items-center">
 
         @if (isset($heading))
             <div class="flex items-center gap-2 truncate  " wire:ignore>
@@ -28,8 +28,8 @@
             <a id="redirect-button" href="{{ $homeUrl }}" class="flex items-center hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-full p-2 px-2.5 transition-colors shrink-0">
                       <x-wirechat::icon
                                 :icon="$this->panel()->redirectToHomeActionIcon()"
-                                 default="wirechat::icons.logout"
-                                class="size-6.5"
+                                 default="wirechat::icons.home-01"
+                                class="size-5.5"
                                 :icon-attributes="$this->panel()->redirectToHomeActionIconAttributes()" 
                             />
             </a>
@@ -41,7 +41,7 @@
                 <button id="open-new-chat-modal-button" class="hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-full p-2 px-2.5 transition-colors shrink-0 flex  items-center focus:outline-hidden">
                          <x-wirechat::icon
                                 :icon="$this->panel()->createChatActionIcon()"
-                                default="wirechat::icons.messages-plus"
+                                default="wirechat::icons.message-plus-circle"
                                 class="size-6"
                                 :icon-attributes="$this->panel()->createChatActionIconAttributes()"
                             />
@@ -95,7 +95,7 @@
 
     {{-- Search input --}}
     @if ($chatsSearch)
-        <section class="mt-4">
+        <section>
             <div class="px-2 rounded-lg dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)]  grid grid-cols-12 items-center">
 
                 <label for="chats-search-field" class="col-span-1">
