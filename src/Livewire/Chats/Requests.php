@@ -45,7 +45,7 @@ class Requests extends ModalComponent
         ];
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function auth()
     {
         return auth()->user();

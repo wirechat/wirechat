@@ -14,7 +14,7 @@
                     closeOnEscapeIsForceful: false,
                     dispatchCloseEvent: false,
                     destroyOnClose: false,
-                    closeModalOnClickAway:false,
+                    closeOnClickAway:false,
 
                     closeChatDrawerOnEscape(trigger) {
 
@@ -36,6 +36,17 @@
                         //check if should also close all children modal when this current on is closed
                         const force = this.closeOnEscapeIsForceful === true;
                         this.closeDrawer(force);
+                    },
+                    closeChatDrawerOnClickAway() {
+                        if (this.closeOnClickAway === false) {
+                            return;
+                        }
+
+                        if (!this.closingModal('closingModalOnClickAway')) {
+                            return;
+                        }
+
+                        this.closeDrawer(true);
                     },
                     closingModal(eventName) {
                         const componentName = this.$wire.get('drawerComponents')[this.activeDrawerComponent].name;
@@ -119,7 +130,7 @@
                         this.closeOnEscapeIsForceful = attributes.closeOnEscapeIsForceful ?? false;
                         this.dispatchCloseEvent = attributes.dispatchCloseEvent ?? false;
                         this.destroyOnClose = attributes.destroyOnClose ?? true; 
-                        this.closeModalOnClickAway = attributes.closeModalOnClickAway ?? false; 
+                        this.closeOnClickAway = attributes.closeOnClickAway ?? false; 
 
 
                         this.$nextTick(() => {
@@ -166,6 +177,7 @@
     data-modal-type="ChatDrawer"
     id="chat-drawer"
     x-data="ChatDrawer()" x-on:close.stop="setShowPropertyTo(false)"
+         x-on:click.self="closeChatDrawerOnClickAway()"
          x-on:keydown.escape.stop="closeChatDrawerOnEscape({ modalType: 'ChatDrawer', event: $event }); "
          x-show="show"
          class="fixed bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  dark:text-white opacity-100 inset-0 z-50 h-full overflow-y-auto overscroll-contain " style="display: none;"

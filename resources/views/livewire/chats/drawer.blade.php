@@ -12,7 +12,7 @@
                     closeOnEscapeIsForceful: false,
                     dispatchCloseEvent: false,
                     destroyOnClose: false,
-                    closeModalOnClickAway: false,
+                    closeOnClickAway: false,
 
                     closeChatListDrawerOnEscape(trigger) {
                         if (trigger.modalType !== 'ChatListDrawer') {
@@ -29,6 +29,18 @@
 
                         const force = this.closeOnEscapeIsForceful === true;
                         this.closeDrawer(force);
+                    },
+
+                    closeChatListDrawerOnClickAway() {
+                        if (this.closeOnClickAway === false) {
+                            return;
+                        }
+
+                        if (!this.closingModal('closingModalOnClickAway')) {
+                            return;
+                        }
+
+                        this.closeDrawer(true);
                     },
 
                     closingModal(eventName) {
@@ -101,7 +113,7 @@
                         this.closeOnEscapeIsForceful = attributes.closeOnEscapeIsForceful ?? false;
                         this.dispatchCloseEvent = attributes.dispatchCloseEvent ?? false;
                         this.destroyOnClose = attributes.destroyOnClose ?? true;
-                        this.closeModalOnClickAway = attributes.closeModalOnClickAway ?? false;
+                        this.closeOnClickAway = attributes.closeOnClickAway ?? false;
 
                         this.$nextTick(() => {
                             const focusable = this.$refs[id]?.querySelector('[autofocus]');
@@ -148,6 +160,7 @@
         id="chats-drawer"
         x-data="ChatListDrawer()"
         x-on:close.stop="setShowPropertyTo(false)"
+        x-on:click.self="closeChatListDrawerOnClickAway()"
         x-on:keydown.escape.stop="closeChatListDrawerOnEscape({ modalType: 'ChatListDrawer', event: $event })"
         x-show="show"
         class="absolute inset-0 z-50 h-full overflow-y-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]"

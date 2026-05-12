@@ -2,6 +2,7 @@
 
 @php
     $hasMessageRequests = $this->panel()->hasMessageRequests();
+    $pendingMessageRequestsCount = $hasMessageRequests ? $this->pendingMessageRequestsCount() : 0;
 @endphp
 
 <header class="px-3 z-10 sticky flex flex-col gap-1.5 top-0 w-full py-2 " dusk="header">
@@ -64,9 +65,9 @@
                         <x-wirechat::actions.open-chats-drawer component="wirechat.chats.requests" widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
                                 <x-wirechat::dropdown-item icon="wirechat::icons.user"  id="open-requests-drawer-button">
                                 <span>{{ __('wirechat::chats.requests.actions.open.label') }}</span>
-                                    @if ($this->pendingMessageRequestsCount() > 0)
+                                    @if ($pendingMessageRequestsCount > 0)
                                         <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1.5 py-0.5 text-xs font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
-                                            {{ $this->pendingMessageRequestsCount() }}
+                                            {{ $pendingMessageRequestsCount }}
                                         </span>
                                     @endif
                             </x-wirechat::dropdown-item>

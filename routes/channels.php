@@ -31,7 +31,9 @@ foreach ($panels as $panel) {
     $middleware = $panel->getMiddleware();
 
     // Conversation channel
-    Broadcast::channel("{$panelId}.conversation.{conversationId}", function ($user, $conversationId) use ($guards) {
+    Broadcast::channel("{$panelId}.conversation.{conversationId}", function ($user, $conversationId) use ($guards, $panelId) {
+        app(PanelRegistry::class)->setCurrent($panelId);
+
         // If $user is already authenticated by the application's broadcast auth, use it
         if (! $user) {
             // Fallback to checking each guard defined in the panel
