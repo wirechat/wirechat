@@ -325,15 +325,56 @@ it('can send an invite link via chat', function () {
 
     Livewire::actingAs($owner)
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', 'Receiver')
         ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
         ->call('save')
-        ->assertDispatched('refresh')
+        ->assertNotDispatched('refresh')
         ->assertDispatched('refresh-chats');
 
     $privateConversation = $owner->createConversationWith($receiver);
 
     expect($privateConversation->messages()->count())->toBe(1)
         ->and($privateConversation->messages()->latest('id')->first()->body)->toContain($invite->url(testPanelProvider()));
+});
+
+it('ignores tampered send invite selections outside the current panel search results', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $receiver = User::factory()->create(['name' => 'Receiver']);
+
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', 'Receiver')
+        ->call('toggleMember', $receiver->getKey(), Invite::class)
+        ->assertSet('selectedMembers', collect());
+});
+
+it('rejects non-group inviteables on the join endpoint', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+    $conversation = $owner->createConversationWith($receiver);
+
+    $invite = Invite::query()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'inviteable_id' => $conversation->getKey(),
+        'inviteable_type' => $conversation->getMorphClass(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertNotFound()
+        ->assertSessionMissing('wirechat_pending_invite_token');
 });
 
 it('prevents sending a group invite link via chat to banned past members', function () {
@@ -361,6 +402,7 @@ it('prevents sending a group invite link via chat to banned past members', funct
             'invite' => $invite,
             'panel' => testPanelProvider()->getId(),
         ])
+        ->set('search', $bannedUser->name)
         ->call('toggleMember', $bannedUser->id, $bannedUser->getMorphClass())
         ->assertStatus(403);
 });
@@ -408,6 +450,7 @@ it('rejects direct send invite selection for an exited past member', function ()
 
     Livewire::actingAs($owner)
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', $exitedUser->name)
         ->call('toggleMember', $exitedUser->getKey(), $exitedUser->getMorphClass())
         ->assertStatus(403);
 });
@@ -1052,6 +1095,34 @@ it('joins a public group from the in-app invite modal', function () {
 
     expect($receiver->belongsToConversation($conversation))->toBeTrue()
         ->and($invite->usages)->toBe(1);
+});
+
+it('refuses an invite that is revoked after the lobby mounts', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $component = Livewire::actingAs($receiver)
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()]);
+
+    $invite->revoke();
+
+    $component
+        ->call('proceed')
+        ->assertDispatched('wirechat-toast', type: 'error');
+
+    expect($receiver->belongsToConversation($conversation))->toBeFalse()
+        ->and($invite->fresh()->usages)->toBe(0);
 });
 
 it('opens the joined group in widget mode from the invite lobby', function () {

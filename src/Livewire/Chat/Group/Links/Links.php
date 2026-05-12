@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Livewire\Chat\Group\Links;
 
 use Livewire\Attributes\Locked;
+use Wirechat\Wirechat\Livewire\Concerns\CreatesGroupInvites;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
@@ -11,6 +12,7 @@ use Wirechat\Wirechat\Models\Participant;
 
 class Links extends ModalComponent
 {
+    use CreatesGroupInvites;
     use HasPanel;
 
     protected $listeners = [
@@ -70,11 +72,10 @@ class Links extends ModalComponent
     {
         $auth = auth()->user();
 
-        return $this->group->inviteLinks()->create(array_merge([
+        return $this->createInviteWithUniqueToken($this->group->inviteLinks(), array_merge([
             'panel_id' => $this->panel()->getId(),
             'created_by_id' => $auth?->getKey(),
             'created_by_type' => $auth?->getMorphClass(),
-            'token' => Invite::generateToken(),
             'is_primary' => $primary,
         ], $attributes));
     }

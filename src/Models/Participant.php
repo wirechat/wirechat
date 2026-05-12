@@ -363,7 +363,7 @@ class Participant extends Model
             return;
         }
 
-        $exists = Action::where('actionable_id', $this->getKey())
+        $exists = Wirechat::actionModelClass()::where('actionable_id', $this->getKey())
             ->where('actionable_type', $this->getMorphClass())
             ->whereIn('type', Actions::bannedValues())
             ->where('actor_id', $adminParticipant->getKey())
@@ -371,7 +371,7 @@ class Participant extends Model
             ->exists();
 
         if (! $exists) {
-            Action::create([
+            Wirechat::actionModelClass()::create([
                 'actionable_id' => $this->getKey(),
                 'actionable_type' => $this->getMorphClass(),
                 'actor_id' => $adminParticipant->getKey(),

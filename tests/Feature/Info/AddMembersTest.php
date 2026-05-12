@@ -163,8 +163,21 @@ describe('actions test', function () {
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal');
+    });
+
+    test('toggleMember() ignores tampered classes outside the current panel search results', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $user = User::factory()->create(['name' => 'Micheal']);
+
+        Livewire::actingAs($auth)
+            ->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Micheal')
+            ->call('toggleMember', $user->id, Conversation::class)
+            ->assertSet('selectedMembers', collect());
     });
 
     test('it updated number when new members are added or removed', function () {
@@ -181,6 +194,7 @@ describe('actions test', function () {
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertSee('2 / 1000')
                 // attempt to remove member
@@ -199,10 +213,12 @@ describe('actions test', function () {
 
         $request
                 // first add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertSee('Micheal')
                 // then remove memener
             ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->set('search', '')
             ->assertDontSee('Micheal');
     });
 
@@ -218,6 +234,7 @@ describe('actions test', function () {
 
         $request
                 // first add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal')
             ->assertStatus(403, $user->wirechat_name.' is already a member');
@@ -237,7 +254,8 @@ describe('actions test', function () {
         $participant->exitConversation();
 
         $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
-        $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
+        $request->set('search', 'Micheal')
+            ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
             ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they left the group");
 
     });
@@ -257,7 +275,8 @@ describe('actions test', function () {
         $participant->removeByAdmin($auth);
 
         $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
-        $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
+        $request->set('search', 'Micheal')
+            ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
             ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they were removed from the group by an Admin.");
 
     });
@@ -271,6 +290,7 @@ describe('actions test', function () {
         $participant->banByAdmin($auth);
 
         Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Blocked User')
             ->call('toggleMember', $blockedUser->id, $blockedUser->getMorphClass())
             ->assertStatus(200)
             ->assertDispatched('wirechat-toast', type: 'warning')
@@ -295,7 +315,8 @@ describe('actions test', function () {
         expect($conversation->participants()->count())->toBe(1);
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
-        $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
+        $request->set('search', 'Micheal')
+            ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
             ->call('save')
             ->assertStatus(200);
 
@@ -330,6 +351,7 @@ describe('actions test', function () {
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
@@ -348,6 +370,7 @@ describe('actions test', function () {
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
@@ -365,6 +388,7 @@ describe('actions test', function () {
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 

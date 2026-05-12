@@ -21,7 +21,7 @@ class InviteController extends Controller
         $invite = Invite::query()
             ->where('panel_id', $panel->getId())
             ->where('token', $token)
-            ->with(['inviteable.conversation', 'inviteable.cover'])
+            ->with('inviteable')
             ->firstOrFail();
 
         abort_unless($invite->isActive(), 410, 'Invite link is no longer active.');
@@ -73,6 +73,8 @@ class InviteController extends Controller
     {
         $invite = $this->resolveInvite($token);
         $panel = Wirechat::currentPanel();
+
+        abort_unless($invite->inviteable instanceof Group, 404);
 
         $request->session()->put('wirechat_pending_invite_token', $invite->token);
         $request->session()->put('wirechat_pending_invite_panel', $panel?->getId());

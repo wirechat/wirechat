@@ -4,14 +4,15 @@ namespace Wirechat\Wirechat\Livewire\Chat\Group\Links;
 
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
+use Wirechat\Wirechat\Livewire\Concerns\CreatesGroupInvites;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Models\Conversation;
-use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Participant;
 
 class Create extends ModalComponent
 {
+    use CreatesGroupInvites;
     use HasPanel;
 
     #[Locked]
@@ -68,11 +69,10 @@ class Create extends ModalComponent
 
         $auth = auth()->user();
 
-        $this->group->inviteLinks()->create([
+        $this->createInviteWithUniqueToken($this->group->inviteLinks(), [
             'panel_id' => $this->panel()->getId(),
             'created_by_id' => $auth?->getKey(),
             'created_by_type' => $auth?->getMorphClass(),
-            'token' => Invite::generateToken(),
             'name' => filled($this->name) ? trim($this->name) : null,
             'limit' => $this->resolveLimit(),
             'expires_at' => $this->resolveExpiry(),

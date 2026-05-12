@@ -4,15 +4,18 @@ namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
+use Wirechat\Wirechat\Livewire\Concerns\CreatesGroupInvites;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Models\Conversation;
-use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Participant;
 
 class AddMembers extends ModalComponent
 {
+    use CreatesGroupInvites;
     use HasPanel;
+    use ResolvesPanelSearchResults;
     use WithFileUploads;
 
     #[Locked]
@@ -86,14 +89,14 @@ class AddMembers extends ModalComponent
     {
         $this->authorizeAddMembersAccess();
 
-        $model = app($class)->find($id);
+        $model = $this->resolvePanelSearchResult($id, $class);
 
         if ($model) {
             abort_if($model->belongsToConversation($this->conversation), 403, $model->wirechat_name.' Is already a member');
 
-            if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
+            if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
                 $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                    return $member->id == $id && get_class($member) == $class;
+                    return $member->getKey() == $id && $member->getMorphClass() == $class;
                 });
             } else {
                 if ($this->newTotalCount >= $this->panel()->getMaxGroupMembers()) {
@@ -195,11 +198,10 @@ class AddMembers extends ModalComponent
         if (! $invite) {
             $auth = auth()->user();
 
-            $invite = $this->group->inviteLinks()->create([
+            $invite = $this->createInviteWithUniqueToken($this->group->inviteLinks(), [
                 'panel_id' => $this->panel()->getId(),
                 'created_by_id' => $auth?->getKey(),
                 'created_by_type' => $auth?->getMorphClass(),
-                'token' => Invite::generateToken(),
                 'is_primary' => true,
             ]);
         }

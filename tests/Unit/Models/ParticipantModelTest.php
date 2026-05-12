@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Participant;
 use Workbench\App\Models\User;
@@ -279,6 +280,36 @@ describe('removeByAdmin()', function () {
         // assert
         expect($participant->role)->toBe(ParticipantRole::PARTICIPANT);
 
+    });
+
+    it('uses the configured action model when banning by admin', function () {
+        $originalActionClass = config('wirechat.models.action');
+
+        $customActionClass = new class extends Action
+        {
+            public static bool $creatingWasCalled = false;
+
+            protected static function booted(): void
+            {
+                self::creating(function (): void {
+                    static::$creatingWasCalled = true;
+                });
+            }
+        };
+
+        config(['wirechat.models.action' => get_class($customActionClass)]);
+
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $participant = $conversation->addParticipant(User::factory()->create());
+
+        $participant->banByAdmin($auth);
+
+        $configuredActionClass = Wirechat::actionModelClass();
+
+        expect($configuredActionClass::$creatingWasCalled)->toBeTrue();
+
+        config(['wirechat.models.action' => $originalActionClass]);
     });
 
 });

@@ -92,6 +92,14 @@ class Lobby extends ModalComponent
     {
         $auth = auth()->user();
 
+        $this->invite = $this->invite->fresh();
+
+        if (! $this->invite->isActive()) {
+            $this->dispatch('wirechat-toast', type: 'error', message: __('wirechat::chat.group.join.lobby.messages.invite_inactive'));
+
+            return null;
+        }
+
         if ($this->isMember) {
             return $this->redirectAfterJoin();
         }

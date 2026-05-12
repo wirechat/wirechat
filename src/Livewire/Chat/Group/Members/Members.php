@@ -265,15 +265,15 @@ class Members extends ModalComponent
     public function loadMore()
     {
 
-        // Check if no more conversations
-        if (! $this->canLoadMore) {
-            return null;
-        }
         // Skip empty/duplicate-only pages in one click.
-        do {
+        while ($this->canLoadMore) {
             $this->page++;
             $addedCount = $this->loadParticipants();
-        } while ($addedCount === 0);
+
+            if ($addedCount > 0) {
+                break;
+            }
+        }
     }
 
     public function mount(Conversation $conversation)

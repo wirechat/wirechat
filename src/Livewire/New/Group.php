@@ -6,12 +6,14 @@ use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 
 class Group extends ModalComponent
 {
     use HasPanel;
+    use ResolvesPanelSearchResults;
     use Widget;
     use WithFileUploads;
 
@@ -88,12 +90,10 @@ class Group extends ModalComponent
     public function addMember($id, string $class)
     {
         try {
-            $model = app($class);
-
-            $model = $model::find($id);
+            $model = $this->resolvePanelSearchResult($id, $class);
 
             if ($model) {
-                if ($model && ! $this->selectedMembers->contains($model)) {
+                if (! $this->selectedMembers->contains($model)) {
                     $this->selectedMembers->push($model);
                 }
             }
@@ -108,20 +108,20 @@ class Group extends ModalComponent
     {
         // Filter out the member with the specified ID and class
         $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-            return $member->id == $id && get_class($member) == $class;
+            return $member->getKey() == $id && $member->getMorphClass() == $class;
         });
     }
 
     public function toggleMember($id, string $class)
     {
 
-        $model = app($class)->find($id);
+        $model = $this->resolvePanelSearchResult($id, $class);
 
         if ($model) {
-            if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
+            if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
                 // Remove member if they are already selected
                 $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                    return $member->id == $id && $member->getMorphClass() == $class;
+                    return $member->getKey() == $id && $member->getMorphClass() == $class;
                 });
             } else {
 

@@ -10,6 +10,7 @@ use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Participant;
@@ -17,6 +18,7 @@ use Wirechat\Wirechat\Models\Participant;
 class Send extends ModalComponent
 {
     use HasPanel;
+    use ResolvesPanelSearchResults;
 
     #[Locked]
     public Conversation $conversation;
@@ -73,7 +75,7 @@ class Send extends ModalComponent
 
         abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to send group invite links');
 
-        $model = app($class)->find($id);
+        $model = $this->resolvePanelSearchResult($id, $class);
 
         if (! $model) {
             return;
@@ -81,9 +83,9 @@ class Send extends ModalComponent
 
         abort_unless($this->canReceiveInviteLink($model, shouldAbort: true), 403);
 
-        if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
+        if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
             $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                return $member->id == $id && get_class($member) == $class;
+                return $member->getKey() == $id && $member->getMorphClass() == $class;
             })->values();
 
             return;
@@ -130,7 +132,6 @@ class Send extends ModalComponent
         }
 
         // Refresh the chat list so newly created or updated DM threads show up immediately.
-        $this->dispatch('refresh')->to(Chats::class);
         $this->dispatch('refresh-chats')->to(Chats::class);
         $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.invite_link.send_via_chat.messages.sent_success', ['count' => $this->selectedMembers->count()]));
         $this->closeWirechatModal();
