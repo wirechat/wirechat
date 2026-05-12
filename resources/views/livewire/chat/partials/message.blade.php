@@ -7,6 +7,9 @@
    $isNotSameAsNext = !$isSameAsNext;
    $isSameAsPrevious = ($message?->sendable_id === $previousMessage?->sendable_id) && ($message?->sendable_type === $previousMessage?->sendable_type);
    $isNotSameAsPrevious = !$isSameAsPrevious;
+   $groupInvitePreview = $message?->groupInvitePreview($this->panel());
+   $inviteUrl = $groupInvitePreview['url'] ?? null;
+   $encryptedInviteLink = $inviteUrl !== null ? encrypt($inviteUrl) : null;
    $canParseMessageUrls = $this->panel()->canParseMessageUrls();
    $body = (string) ($message?->body ?? '');
    $segments = ($canParseMessageUrls && Wirechat::containsLink($body))
@@ -23,13 +26,13 @@
 
 
 {{-- We use style here to make it easy for dynamic and safe injection --}}
-@style([
+{{-- @style([
 'background-color:var(--wc-brand-primary)' => $belongsToAuth==true
-])
+]) --}}
 
 @class([
     'flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-    'text-white' => $belongsToAuth, // Background color for messages sent by the authenticated user
+    'text-white bg-[var(--primary-500)] opacity-90' => $belongsToAuth, // Background color for messages sent by the authenticated user
     'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
@@ -72,13 +75,19 @@
 </div>
 @endif
 
+@if ($groupInvitePreview)
+    @include('wirechat::livewire.chat.partials.group-invite', [
+        'preview' => $groupInvitePreview,
+        'belongsToAuth' => $belongsToAuth,
+    ])
+@endif
+
 <pre
     dusk="message-text"
     class="{{ $messageTextClasses }}"
-    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])<a
+    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php $isInviteLink = $inviteUrl !== null && $segment['href'] === $inviteUrl; @endphp<a
                 dusk="message-link"
-                target="_blank"
-                rel="noopener noreferrer"
+                @if ($isInviteLink) data-invite-link="true" wire:click.prevent="handleOpenChat('{{ $encryptedInviteLink }}')" @else target="_blank" rel="noopener noreferrer" @endif
                 class="underline tracking-normal wrap-anywhere text-sm md:text-base dark:text-white lg:tracking-normal"
                 href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
 
@@ -91,4 +100,16 @@
     @endphp
 </span>
 
+@if ($groupInvitePreview)
+    <a href="{{ $groupInvitePreview['url'] }}"
+        wire:click.prevent="handleOpenChat('{{ $encryptedInviteLink }}')"
+        data-invite-link="true"
+        @class([
+            'mt-2 -mx-2.5  block border-t px-4 py-2 text-center text-sm font-semibold transition hover:opacity-95',
+            'border-white/20 text-white/90' => $belongsToAuth,
+            'border-[var(--wc-light-border)] text-[var(--primary-500)] dark:border-[var(--wc-dark-border)] dark:text-[var(--primary-300)]' => ! $belongsToAuth,
+        ])>
+        {{ __('wirechat::chat.group.invite_message.actions.view_group.label') }}
+    </a>
+@endif
 </div>

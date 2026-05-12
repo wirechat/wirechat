@@ -1,6 +1,6 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
@@ -41,6 +41,8 @@ class Members extends ModalComponent
     public $participants;
 
     public $canLoadMore;
+
+    public int $perPage = 10;
 
     #[Locked]
     public $newTotalCount;
@@ -142,13 +144,15 @@ class Members extends ModalComponent
 
     }
 
-    protected function loadParticipants(): void
+    protected function loadParticipants(): int
     {
 
         $searchableFields = $this->panel()->getSearchableAttributes();
         $columnCache = []; // Initialize cache for column checks
         // Check if $this->participants is initialized
         $this->participants = $this->participants ?? collect();
+
+        $beforeCount = $this->participants->count();
 
         $additionalParticipants = $this->conversation->participants()
             ->with('participantable')
@@ -181,23 +185,23 @@ class Members extends ModalComponent
                 ParticipantRole::PARTICIPANT->value,
             ])
             ->latest('updated_at')
-            ->paginate(10, ['*'], 'page', $this->page);
-        // Check if cannot load more
+            ->paginate($this->perPage, ['*'], 'page', $this->page);
+        // Merge participants and remove duplicates
+        $this->participants = $this->participants->merge($additionalParticipants->items())->unique('id')->values();
+
+        // Only allow loading more if paginator has more pages AND this page added new unique members.
+        $addedCount = $this->participants->count() - $beforeCount;
         $this->canLoadMore = $additionalParticipants->hasMorePages();
 
-        // Merge current participants with the additional ones
-        // Merge current participants with the additional ones and remove duplicates
-        $this->participants = $this->participants->merge($additionalParticipants->items())->unique('id');
+        return $addedCount;
     }
 
     /* Deleting from group */
     public function removeFromGroup(Participant $participant)
     {
+        $this->authorizeAdminAction($participant, 'remove');
 
-        // Load missing relationship in case of strict models types
-        $participant->loadMissing('participantable');
-        // abort if user does not belong to conversation
-        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        $participant->removeByAdmin(auth()->user());
 
         // abort if auth is not admin
         abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
@@ -229,12 +233,30 @@ class Members extends ModalComponent
             return $member->getKey() == $participant->getKey() && get_class($member) == get_class($participant);
         });
 
-        // subtract one from total members and update chat list
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
         $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to('wirechat.chat.group.info');
-        //  $this->dispatch('refresh')->self();
+    }
 
+    public function blockMember(Participant $participant)
+    {
+        $this->authorizeAdminAction($participant, 'block');
+
+        $participant->banByAdmin(auth()->user());
+
+        $this->participants = $this->participants->reject(function ($member) use ($participant) {
+            return $member->id == $participant->id && get_class($member) == get_class($participant);
+        });
+
+        $this->totalMembersCount = $this->totalMembersCount - 1;
+
+        $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to('wirechat.chat.group.info');
+        $this->dispatch('refresh')->self();
+    }
+
+    public function banMember(Participant $participant)
+    {
+        $this->blockMember($participant);
     }
 
     /**
@@ -243,13 +265,15 @@ class Members extends ModalComponent
     public function loadMore()
     {
 
-        // Check if no more conversations
-        if (! $this->canLoadMore) {
-            return null;
+        // Skip empty/duplicate-only pages in one click.
+        while ($this->canLoadMore) {
+            $this->page++;
+            $addedCount = $this->loadParticipants();
+
+            if ($addedCount > 0) {
+                break;
+            }
         }
-        // Load the next page
-        $this->page++;
-        $this->loadParticipants();
     }
 
     public function mount(Conversation $conversation)
@@ -268,13 +292,28 @@ class Members extends ModalComponent
         $this->loadParticipants();
     }
 
+    protected function authorizeAdminAction(Participant $participant, string $action = 'manage'): void
+    {
+        $participant->loadMissing('participantable');
+
+        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+        abort_if($participant->isOwner(), 403, ucfirst($action).' action cannot target the group owner.');
+        abort_if($participant->isAdmin(), 403, ucfirst($action).' action cannot target another admin.');
+        abort_if(
+            $participant->participantable_id == auth()->id() && $participant->participantable_type == auth()->user()->getMorphClass(),
+            403,
+            'You cannot '.strtolower($action).' yourself from the group.'
+        );
+    }
+
     public function render()
     {
 
         //
 
         // Pass data to the view
-        return view('wirechat::livewire.chat.group.members', [
+        return view('wirechat::livewire.chat.group.members.list', [
             'participant' => $this->conversation->participant(auth()->user()),
 
         ]);

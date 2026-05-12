@@ -2,7 +2,7 @@
 <div x-data dusk="new_group_modal">
 
     <div
-        class="relative w-full h-[410px] border overflow-hidden  items-center justify-center border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white sm:max-w-lg sm:rounded-lg">
+        class="relative w-full h-[410px] border overflow-hidden  items-center justify-center border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] overflow-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white sm:max-w-lg rounded-xl">
 
         {{--  Group Details --}}
         <section x-show="$wire.showAddMembers==false"

@@ -233,9 +233,87 @@ class Participant extends Model
      */
     public function isRemovedByAdmin(): bool
     {
-        return $this->actions()
-            ->where('type', Actions::REMOVED_BY_ADMIN->value)
-            ->exists();
+        return $this->removedByAdminAction() !== null;
+    }
+
+    public function removedByAdminAction(): ?Action
+    {
+        return $this->latestActionOfType(Actions::REMOVED_BY_ADMIN);
+    }
+
+    public function isBannedByAdmin(): bool
+    {
+        return $this->bannedByAdminAction() !== null;
+    }
+
+    public function bannedByAdminAction(): ?Action
+    {
+        if ($this->relationLoaded('actions')) {
+            /** @var ?Action $action */
+            $action = $this->actions
+                ->filter(function (Action $action): bool {
+                    return in_array($action->type->value, Actions::bannedValues(), true);
+                })
+                ->sortByDesc('id')
+                ->first();
+
+            return $action;
+        }
+
+        /** @var ?Action $action */
+        $action = $this->actions()
+            ->whereIn('type', Actions::bannedValues())
+            ->latest('id')
+            ->first();
+
+        return $action;
+    }
+
+    /**
+     * @deprecated Use isBannedByAdmin() instead.
+     */
+    public function isBlockedByAdmin(): bool
+    {
+        return $this->isBannedByAdmin();
+    }
+
+    /**
+     * @deprecated Use bannedByAdminAction() instead.
+     */
+    public function blockedByAdminAction(): ?Action
+    {
+        return $this->bannedByAdminAction();
+    }
+
+    public function latestActionOfType(Actions $type): ?Action
+    {
+        if ($this->relationLoaded('actions')) {
+            /** @var ?Action $action */
+            $action = $this->actions
+                ->filter(fn (Action $action): bool => $this->actionMatchesType($action, $type))
+                ->sortByDesc('id')
+                ->first();
+
+            return $action;
+        }
+
+        /** @var ?Action $action */
+        $action = $this->actions()
+            ->where('type', $type->value)
+            ->latest('id')
+            ->first();
+
+        return $action;
+    }
+
+    protected function actionMatchesType(Action $action, Actions $type): bool
+    {
+        return $action->type === $type;
+    }
+
+    protected function forgetLoadedActions(): void
+    {
+        $this->unsetRelation('actions');
     }
 
     /**
@@ -262,8 +340,8 @@ class Participant extends Model
         if (! $exists) {
             Wirechat::actionModelClass()::create([
                 'actionable_id' => $this->getKey(),
-                'actionable_type' => $this->getMorphClass(),          // participant model
-                'actor_id' => $adminParticipant->getKey(),     // admin as participant
+                'actionable_type' => $this->getMorphClass(),
+                'actor_id' => $adminParticipant->getKey(),
                 'actor_type' => $adminParticipant->getMorphClass(),
                 'type' => Actions::REMOVED_BY_ADMIN,
             ]);
@@ -272,6 +350,99 @@ class Participant extends Model
         // downgrade role to normal participant
         $this->role = ParticipantRole::PARTICIPANT;
         $this->save();
+        $this->forgetLoadedActions();
+    }
+
+    public function banByAdmin(Model|Authenticatable $admin): void
+    {
+        $this->removeByAdmin($admin);
+
+        $adminParticipant = $this->conversation->participant($admin);
+
+        if (! $adminParticipant) {
+            return;
+        }
+
+        $exists = Wirechat::actionModelClass()::where('actionable_id', $this->getKey())
+            ->where('actionable_type', $this->getMorphClass())
+            ->whereIn('type', Actions::bannedValues())
+            ->where('actor_id', $adminParticipant->getKey())
+            ->where('actor_type', $adminParticipant->getMorphClass())
+            ->exists();
+
+        if (! $exists) {
+            Wirechat::actionModelClass()::create([
+                'actionable_id' => $this->getKey(),
+                'actionable_type' => $this->getMorphClass(),
+                'actor_id' => $adminParticipant->getKey(),
+                'actor_type' => $adminParticipant->getMorphClass(),
+                'type' => Actions::BANNED_BY_ADMIN,
+            ]);
+        }
+
+        $this->forgetLoadedActions();
+    }
+
+    /**
+     * @deprecated Use banByAdmin() instead.
+     */
+    public function blockByAdmin(Model|Authenticatable $admin): void
+    {
+        $this->banByAdmin($admin);
+    }
+
+    public function liftBanByAdmin(): void
+    {
+        if (! $this->hasExited()) {
+            $this->forceFill([
+                'role' => ParticipantRole::PARTICIPANT,
+                'exited_at' => now(),
+            ])->save();
+        }
+
+        $this->actions()
+            ->whereIn('type', Actions::bannedValues())
+            ->delete();
+
+        $this->forgetLoadedActions();
+    }
+
+    /**
+     * @deprecated Use liftBanByAdmin() instead.
+     */
+    public function liftBlockByAdmin(): void
+    {
+        $this->liftBanByAdmin();
+    }
+
+    public function pastMembershipReason(): ?string
+    {
+        if ($this->isBlockedByAdmin()) {
+            return 'blocked';
+        }
+
+        if ($this->isRemovedByAdmin()) {
+            return 'removed';
+        }
+
+        if ($this->hasExited()) {
+            return 'left';
+        }
+
+        return null;
+    }
+
+    public function pastMembershipAt()
+    {
+        if ($this->isBlockedByAdmin()) {
+            return $this->blockedByAdminAction()?->created_at;
+        }
+
+        if ($this->isRemovedByAdmin()) {
+            return $this->removedByAdminAction()?->created_at;
+        }
+
+        return $this->exited_at;
     }
 
     /**

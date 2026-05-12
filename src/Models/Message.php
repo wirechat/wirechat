@@ -15,6 +15,7 @@ use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
+use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Traits\Actionable;
 
 /**
@@ -62,6 +63,10 @@ class Message extends Model
     use Actionable;
     use HasFactory;
     use SoftDeletes;
+
+    protected static array $groupInvitePreviewCache = [];
+
+    protected static array $groupInviteTokenCache = [];
 
     public $timestamps = true;
 
@@ -361,5 +366,98 @@ class Message extends Model
 
         // Use the isEmoji helper method to check if the message body contains only emojis
         return Helper::isEmoji($this->body);
+    }
+
+    public function groupInvitePreview(Panel|string|null $panel = null): ?array
+    {
+        $resolvedPanel = $panel instanceof Panel
+            ? $panel
+            : Wirechat::getPanel($panel ?: Wirechat::currentPanel()?->getId());
+
+        if (! $resolvedPanel) {
+            return null;
+        }
+
+        $token = $this->extractGroupInviteToken($resolvedPanel);
+
+        if (! $token) {
+            return null;
+        }
+
+        $cacheKey = "{$resolvedPanel->getId()}:{$token}";
+
+        if (array_key_exists($cacheKey, static::$groupInvitePreviewCache)) {
+            return static::$groupInvitePreviewCache[$cacheKey];
+        }
+
+        $invite = Invite::query()
+            ->with('inviteable')
+            ->where('panel_id', $resolvedPanel->getId())
+            ->where('token', $token)
+            ->first();
+
+        if (! $invite || ! $invite->inviteable instanceof Group) {
+            return static::$groupInvitePreviewCache[$cacheKey] = null;
+        }
+
+        /** @var Group $group */
+        $group = $invite->inviteable;
+        $group->loadMissing('cover', 'conversation');
+        $group->conversation->loadCount('participants');
+
+        return static::$groupInvitePreviewCache[$cacheKey] = [
+            'token' => $invite->token,
+            'url' => $invite->url($resolvedPanel),
+            'name' => $group->name ?: __('wirechat::chat.group.join.lobby.labels.default_group_name'),
+            'description' => $group->description,
+            'cover_url' => $group->cover_url,
+            'members_count' => (int) ($group->conversation->participants_count ?? 0),
+        ];
+    }
+
+    protected function extractGroupInviteToken(Panel $panel): ?string
+    {
+        $body = trim((string) $this->body);
+
+        if ($body === '') {
+            return null;
+        }
+
+        $cacheKey = "{$panel->getId()}:{$this->getKey()}:".md5($body);
+
+        if (array_key_exists($cacheKey, static::$groupInviteTokenCache)) {
+            return static::$groupInviteTokenCache[$cacheKey];
+        }
+
+        $placeholder = 'WIRECHAT_INVITE_TOKEN';
+
+        $patterns = array_unique(array_filter([
+            $this->inviteRoutePattern($panel->inviteRoute($placeholder), $placeholder),
+            $this->inviteRoutePattern($panel->inviteRoute($placeholder, false), $placeholder),
+        ]));
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $body, $matches)) {
+                return static::$groupInviteTokenCache[$cacheKey] = $matches['token'] ?? null;
+            }
+        }
+
+        return static::$groupInviteTokenCache[$cacheKey] = null;
+    }
+
+    protected function inviteRoutePattern(string $route, string $placeholder): ?string
+    {
+        $path = parse_url($route, PHP_URL_PATH);
+
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $escapedPath = preg_quote($path, '~');
+        $escapedPlaceholder = preg_quote($placeholder, '~');
+        $tokenPattern = '(?P<token>[A-Za-z0-9]{10,255})';
+        $resolvedPathPattern = str_replace($escapedPlaceholder, $tokenPattern, $escapedPath);
+
+        return "~(?:https?://[^\\s]+)?{$resolvedPathPattern}(?:\\?[^\s]*)?(?=$|\\s)~";
     }
 }

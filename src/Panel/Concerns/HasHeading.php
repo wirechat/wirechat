@@ -10,7 +10,7 @@ use Closure;
  * Manages a heading which can be a string, Closure, explicit null,
  * or default fallback when not set.
  *
- * @method mixed evaluate(mixed $value)
+ * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = [])
  */
 trait HasHeading
 {

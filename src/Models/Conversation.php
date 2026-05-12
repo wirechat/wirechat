@@ -179,7 +179,7 @@ class Conversation extends Model
      * @param  ParticipantRole  $role  enum to assign to member
      * @param  bool  $undoAdminRemovalAction  If the user was recently removed by admin, allow re-adding.
      */
-    public function addParticipant(Model $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false): Participant
+    public function addParticipant(Model $user, ParticipantRole $role = ParticipantRole::PARTICIPANT, bool $undoAdminRemovalAction = false, Model|Authenticatable|null $reviewedBy = null): Participant
     {
         /** @var Participant|null $participant */
         $participant = $this->participants()
@@ -190,6 +190,12 @@ class Conversation extends Model
 
         // Check if the participant already exists (with or without global scopes)
         if ($participant) {
+            abort_if(
+                $participant->isBannedByAdmin(),
+                403,
+                'Cannot add '.$user->wirechat_name.' because they were blocked from the group by an Admin.'
+            );
+
             // Abort if the participant exited themselves
             abort_if(
                 $participant->hasExited(),
@@ -242,7 +248,68 @@ class Conversation extends Model
             'role' => $role,
         ]);
 
+        $this->group?->acceptPendingJoinRequest($user, $reviewedBy, true);
+
         return $participant;
+    }
+
+    /**
+     * Join a group conversation via an invite.
+     *
+     * Allows users who previously exited or were removed by admins to re-join
+     * themselves, while still keeping admin blocks enforced.
+     */
+    public function join(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null): Participant
+    {
+        abort_if($this->isPrivate() || $this->isSelf(), 403, 'Only groups can be joined via invite links.');
+
+        /** @var Participant|null $participant */
+        $participant = $this->participants()
+            ->withoutGlobalScopes()
+            ->where('participantable_id', $user->getKey())
+            ->where('participantable_type', $user->getMorphClass())
+            ->first();
+
+        if (! $participant) {
+            return $this->addParticipant($user, reviewedBy: $reviewedBy);
+        }
+
+        abort_if(
+            $participant->isBannedByAdmin(),
+            403,
+            'You cannot join this group because you were blocked by an admin.'
+        );
+
+        if ($participant->isRemovedByAdmin() && ! $participant->hasExited()) {
+            $participant->forceFill([
+                'role' => ParticipantRole::PARTICIPANT,
+            ])->save();
+
+            $participant->actions()
+                ->where('type', Actions::REMOVED_BY_ADMIN->value)
+                ->delete();
+
+            $this->group?->acceptPendingJoinRequest($user, $reviewedBy, true);
+
+            return $participant->refresh();
+        }
+
+        if ($participant->hasExited()) {
+            $participant->forceFill([
+                'exited_at' => null,
+                'role' => ParticipantRole::PARTICIPANT,
+            ])->save();
+
+            $participant->actions()
+                ->where('type', Actions::REMOVED_BY_ADMIN->value)
+                ->delete();
+
+            $this->group?->acceptPendingJoinRequest($user, $reviewedBy, true);
+
+            return $participant->refresh();
+        }
+
+        abort(422, 'Participant is already in the conversation.');
     }
 
     /**

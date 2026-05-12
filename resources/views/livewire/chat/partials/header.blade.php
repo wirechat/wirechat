@@ -2,14 +2,15 @@
 
 @php
     $group = $conversation->group;
+    $pendingJoinRequestsCount = $conversation->isGroup() && $authParticipant?->isAdmin() && $this->panel()->hasGroupInvitations() ? $conversation->group?->pendingJoinRequests()->count(): 0;
     $hasMessageRequests = $this->panel()->hasMessageRequests();
     $hasActiveMessageRequest = $hasMessageRequests && $conversation->isPrivate() && $conversation->hasActiveMessageRequest();
 @endphp
 
 <header
-    class="w-full   sticky inset-x-0 flex  top-0 z-10 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)]  border-[var(--wc-light-border)] dark:border-[var(--wc-dark-secondary)]   border-b">
+    class="w-full sticky inset-x-0 top-0 z-10 flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)] border-[var(--wc-light-border)] dark:border-[var(--wc-dark-secondary)] border-b">
 
-    <div class=" border-b border-zinc-200/80 dark:border-zinc-700/60    flex  w-full items-center   px-2 py-2   lg:px-4 gap-2 md:gap-5 ">
+    <div class="border-b border-zinc-200/80 dark:border-zinc-700/60 flex w-full items-center px-2 py-2 lg:px-4 gap-2 md:gap-5">
 
         {{-- Return --}}
         @if ($this->isWidget())
@@ -67,7 +68,7 @@
                             </h6>
                         </div>
                     @else
-                        <x-wirechat::actions.show-chat-info 
+                        <x-wirechat::actions.show-chat-info
                         conversation="{{ $conversation->id }}"
                             widget="{{ $this->isWidget() }}"
                             panel="{{$this->panel}}">
@@ -185,5 +186,117 @@
 
 
     </div>
+
+    @if ($conversation->isGroup() && $authParticipant?->isAdmin() && $this->panel()->hasGroupInvitations())
+        <div
+            x-data="{
+                key: @js('wirechat.join-requests-banner.' . $this->panel()->getId() . '.' . $conversation->id),
+                conversationId: @js($conversation->id),
+                pendingCount: @js($pendingJoinRequestsCount),
+                summary: @js(trans_choice('wirechat::chat.group.join.requests.labels.summary', $pendingJoinRequestsCount, ['count' => $pendingJoinRequestsCount])),
+                latestRequestId: @js($pendingJoinRequestsCount > 0 ? $conversation->group?->pendingJoinRequests()->latest('id')->value('id') : 0),
+                joinRequestsBannerDismissed: false,
+                ensureStore() {
+                    if (window.__wirechatJoinRequestsBannerStoreRegistered) {
+                        return;
+                    }
+
+                    Alpine.store('wirechatJoinRequestsBanner', {
+                        ttlMs: 3600000,
+                        getExpiry(key) {
+                            try {
+                                return Number(window.localStorage.getItem(key)) || 0;
+                            } catch (error) {
+                                return 0;
+                            }
+                        },
+                        isDismissed(key) {
+                            const expiresAt = this.getExpiry(key);
+
+                            if (expiresAt > Date.now()) {
+                                return true;
+                            }
+
+                            this.clear(key);
+
+                            return false;
+                        },
+                        dismiss(key) {
+                            try {
+                                window.localStorage.setItem(key, String(Date.now() + this.ttlMs));
+                            } catch (error) {}
+                        },
+                        clear(key) {
+                            try {
+                                window.localStorage.removeItem(key);
+                            } catch (error) {}
+                        },
+                    });
+
+                    window.__wirechatJoinRequestsBannerStoreRegistered = true;
+                },
+                dismissKey() {
+                    return `${this.key}.${this.latestRequestId || 0}`;
+                },
+                init() {
+                    this.ensureStore();
+                    this.joinRequestsBannerDismissed = Alpine.store('wirechatJoinRequestsBanner').isDismissed(this.dismissKey());
+                },
+                handleBannerUpdate(detail = {}) {
+                    if (Number(detail.conversationId) !== Number(this.conversationId)) {
+                        return;
+                    }
+
+                    this.pendingCount = Number(detail.count ?? 0);
+                    this.summary = detail.summary ?? this.summary;
+                    this.latestRequestId = Number(detail.latestRequestId ?? 0);
+
+                    if (this.pendingCount <= 0) {
+                        Alpine.store('wirechatJoinRequestsBanner').clear(this.dismissKey());
+                        this.joinRequestsBannerDismissed = false;
+
+                        return;
+                    }
+
+                    this.joinRequestsBannerDismissed = Alpine.store('wirechatJoinRequestsBanner').isDismissed(this.dismissKey());
+                },
+                dismissBanner() {
+                    this.ensureStore();
+                    Alpine.store('wirechatJoinRequestsBanner').dismiss(this.dismissKey());
+                    this.joinRequestsBannerDismissed = true;
+                },
+            }"
+            x-cloak x-show="pendingCount > 0 && !joinRequestsBannerDismissed"
+            x-on:wirechat-join-requests-banner-updated.window="handleBannerUpdate($event.detail)"
+            class="border-zinc-100 bg-zinc-50 px-2 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/60 lg:px-4">
+            <div class="mx-auto flex w-full items-center justify-between gap-3 rounded-2xl px-1 text-sm">
+                <button type="button"
+                    onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
+                    class="min-w-0 flex-1 text-left">
+                    <div class="flex items-center gap-2">
+                        <x-wirechat::icons.user-clock class="ml-1 size-5 dark:text-zinc-300" />
+
+                        <span class="font-bold text-[var(--primary-500)]">
+                            {{ __('wirechat::chat.group.join.requests.labels.review') }}
+                        </span>
+
+                        <span class="font-medium text-[var(--primary-500)]" x-text="pendingCount">
+                            {{ $pendingJoinRequestsCount }}
+                        </span>
+
+                        <span class="truncate font-medium text-gray-700 dark:text-white/80" x-text="summary">
+                            {{ trans_choice('wirechat::chat.group.join.requests.labels.summary', $pendingJoinRequestsCount, ['count' => $pendingJoinRequestsCount]) }}
+                        </span>
+                    </div>
+                </button>
+
+                <button type="button" @click.stop="dismissBanner()"
+                    class="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-200/70 hover:text-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-700/70 dark:hover:text-white"
+                    aria-label="{{ __('wirechat::chat.group.join.requests.actions.dismiss_banner.label') }}">
+                    <x-wirechat::icons.x class="size-4" />
+                </button>
+            </div>
+        </div>
+    @endif
 
 </header>

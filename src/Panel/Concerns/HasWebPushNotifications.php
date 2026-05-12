@@ -14,7 +14,7 @@ use Closure;
  *   $panel->webPushNotifications(); // enables + sets default asset('sw.js')
  *   $panel->serviceWorkerPath(asset('sw.js')); // optional override
  *
- * @method mixed evaluate(mixed $value) Evaluates closures or returns the given value.
+ * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = []) Evaluates closures or returns the given value.
  */
 trait HasWebPushNotifications
 {

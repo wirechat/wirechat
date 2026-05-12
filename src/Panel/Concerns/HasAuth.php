@@ -9,7 +9,7 @@ use Closure;
  *
  * Supports configuring and resolving authentication across multiple guards.
  *
- * @method mixed evaluate(mixed $value)
+ * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = [])
  */
 trait HasAuth
 {

@@ -6,7 +6,7 @@ Read this before making changes. If the user gives direct instructions that conf
 
 ## What This Package Is
 
-`wirechat` is a Laravel + Livewire chat package for:
+`wirechat` is the base Laravel + Livewire chat package for:
 
 - private chats
 - self chats
@@ -16,7 +16,35 @@ Read this before making changes. If the user gives direct instructions that conf
 - replies, deletes, and group member management
 - panel-based configuration and theming
 
-This is a reusable package, not just an app. Changes should be made with package users in mind.
+This file should read as `wirechat`-first guidance, not as a trimmed copy of pro-only conventions.
+
+Think of this package as the core product surface:
+
+- it should feel complete and coherent on its own
+- it should stay friendly to projects using only the base package
+- it may share concepts or extension seams with pro, but pro is not the default assumption here
+
+Core expectations:
+
+- it is panel-driven
+- it supports polymorphic participants
+- it supports multiple guards and participant model types
+- it supports full-page and widget chat experiences
+- it exposes package APIs through panels, traits, contracts, routes, and model overrides
+
+Changes should preserve package compatibility and keep extension points stable.
+
+## Relationship To Pro
+
+`wirechat-pro` may build on some of the same ideas, naming patterns, or extension surfaces, but this repo should not be shaped around pro-first assumptions.
+
+When working here:
+
+- design and document features so they make sense in the base package on their own
+- avoid language that makes the base package sound incomplete or secondary
+- acknowledge shared concepts with pro when it helps future compatibility
+- do not introduce abstractions that only make sense because of pro unless the user explicitly asks for that direction
+- prefer neutral wording like "shared", "compatible", or "future-friendly" over "pro-only" framing
 
 ## Core Stack
 
@@ -56,7 +84,7 @@ Key files:
 - `src/Services/WirechatService.php`
 - `workbench/app/Providers/Wirechat/TestPanelProvider.php`
 
-If a change affects routes, middleware, search, theming, auth, uploads, or widget behavior, check whether it should be panel-aware.
+If a change affects routes, middleware, search, theming, auth, uploads, group behavior, or widget behavior, check whether it should be panel-aware.
 
 ### 2. Panel configuration is public API
 
@@ -72,6 +100,8 @@ Important panel options currently include:
 - `chatMiddleware()`
 - `guards()`
 - `groups()`
+- `groupInvitations()`
+- `invitePageLayout()`
 - `maxGroupMembers()`
 - `attachments()`
 - `mediaAttachments()`
@@ -137,24 +167,55 @@ Avoid changes that assume:
 - only one user model
 - only `App\Models\User`
 
-### 4. User-facing package capabilities matter more than one-off internals
+### 4. Group flows are first-class package behavior
 
-The long-lived behavior to protect is:
+Groups are not a side feature. They include:
 
-- creating and reopening private conversations
-- self conversations
-- group creation and group permissions
-- owner/admin/participant role flows
-- member add/remove/promote/dismiss flows
-- replies
-- text messages and attachments
-- media rendering
-- search
-- widget embedding
-- panel theming and panel route behavior
-- web push hooks and broadcast integration
+- ownership and admin roles
+- permissions
+- adding members
+- invite links
+- invite landing and join flow
+- join requests
+- past members and blocked members
 
-One-off bug workarounds are less important than preserving these stable package features.
+Important files include:
+
+- `src/Models/Group.php`
+- `src/Models/Invite.php`
+- `src/Models/JoinRequest.php`
+- `src/Livewire/Chat/Group/*`
+- `resources/views/livewire/chat/group/*`
+- `tests/Feature/Chat/Group/*`
+- `tests/Feature/Info/*`
+
+When changing group behavior, think about:
+
+- owner vs admin vs participant permissions
+- self-exited vs admin-removed vs blocked member behavior
+- public vs private group access
+- panel-aware invite URLs and access
+- join-request review flow and counts
+
+Keep the base package implementation solid and self-contained. If a group feature may later be extended in pro, that is fine, but the base package should still feel intentional and complete without needing pro context.
+
+### 5. UI modes are separate UX paths
+
+There are two important presentation modes:
+
+- full-page chat pages
+- embeddable widget mode
+
+Treat them as separate UX paths. A fix in one does not guarantee the other is correct.
+
+Important files:
+
+- `src/Livewire/Pages/*`
+- `src/Livewire/Widgets/Wirechat.php`
+- `resources/views/livewire/widgets/*`
+- `resources/views/livewire/chat/*`
+
+When changing drawers, modals, shell layout, or Alpine event flows, verify both modes.
 
 ## Configuration Surface
 
@@ -193,6 +254,8 @@ Users configure behavior through panel providers. Example providers live in:
 - `workbench/app/Providers/Wirechat/TestPanelProvider.php`
 - `workbench/app/Providers/Wirechat/AdminPanelProvider.php`
 
+Panel APIs should be easy for base-package users to reason about. Do not frame configuration as if advanced or pro-style setups are the default.
+
 ### Model overrides
 
 Users can override:
@@ -201,6 +264,8 @@ Users can override:
 - attachment model
 - conversation model
 - group model
+- invite model
+- join request model
 - message model
 - participant model
 
@@ -223,23 +288,19 @@ Panel access is not just route auth:
 
 Changes in this area should consider both route-level and model-level access checks.
 
-## UI Modes
+## Registered Livewire Components Worth Knowing
 
-There are two important presentation modes:
+Important components include:
 
-- full-page chat pages
-- embeddable widget mode
+- `wirechat`
+- `wirechat.chats`
+- `wirechat.chat`
+- `wirechat.chat.drawer`
+- `wirechat.chat.info`
+- `wirechat.chat.group.*`
+- `wirechat.modal`
 
-Treat them as separate UX paths. A fix in one does not guarantee the other is correct.
-
-Important files:
-
-- `src/Livewire/Pages/*`
-- `src/Livewire/Widgets/Wirechat.php`
-- `resources/views/livewire/widgets/*`
-- `resources/views/livewire/chat/*`
-
-When changing drawers, modals, shell layout, or Alpine event flows, verify both modes.
+If a change affects component names, arguments, or registration, treat that as public integration surface.
 
 ## Search Behavior
 
@@ -247,8 +308,9 @@ Search is panel-driven.
 
 - chat list search uses panel searchable attributes
 - user search for new chats/groups can be customized through `searchUsersUsing()`
+- invite-link send flows also rely on panel user search
 
-Do not hardcode search behavior if a panel callback already exists for that concern.
+Do not hardcode search or filtering behavior if the panel already provides a callback for that concern.
 
 ## Broadcasting and Notifications
 
@@ -266,7 +328,19 @@ Important files:
 - `src/Jobs/*`
 - `src/Events/*`
 
-When changing notification or broadcast flows, remember that panels namespace channels and behavior.
+When changing broadcast or notification flows, remember that panels namespace channels and behavior.
+
+## UI Styling Conventions
+
+Use Tailwind zinc utilities for neutral UI by default. Avoid `--wc-light-*` / `--wc-dark-*` border and surface vars in Blade utility classes unless explicitly needed for runtime theming.
+
+Prefer:
+
+- `border-zinc-200 dark:border-zinc-700`
+- `bg-zinc-50 dark:bg-zinc-800`
+- `text-zinc-500 dark:text-zinc-400`
+
+Reserve `primary-*` utilities for accents, actions, and highlights.
 
 ## Testing Notes
 
@@ -276,6 +350,7 @@ Use these commands from the repo root:
 php vendor/bin/pest
 php vendor/bin/pest tests/Feature/WireChatTest.php
 php vendor/bin/pest tests/Feature/ChatTest.php
+php vendor/bin/pest tests/Feature/Chat/Group/InviteFeatureTest.php
 php vendor/bin/pint --test
 php vendor/bin/phpstan analyse
 composer test
@@ -296,6 +371,8 @@ When changing behavior, prefer adding a focused regression test near the affecte
 High-value directories:
 
 - `src/Livewire` - components and UI state
+- `src/Livewire/Chat` - chat, drawers, group flows
+- `src/Livewire/Widgets` - widget shell
 - `src/Models` - data model behavior
 - `src/Traits` - public integration helpers for user models
 - `src/Panel` - panel options and public configuration surface
@@ -308,10 +385,11 @@ High-value directories:
 ## Working Style For This Repo
 
 - Favor small, targeted changes unless the user asks for broader refactors.
-- Preserve package API stability where possible.
+- Preserve package compatibility and extension points.
+- Treat panel methods, routes, component aliases, and user-model integration as durable public surfaces.
 - Prefer framework- and package-level abstraction points over hardcoded assumptions.
 - Use panel/config/model resolution helpers instead of assuming defaults.
-- When fixing something in `wirechat`, consider whether the same change should exist in `wirechat-pro`.
+- When writing docs, labels, or internal guidance, make the base package feel like the primary product while still leaving room for shared patterns with pro.
 
 ## Good Final Checks
 
@@ -319,6 +397,5 @@ Before wrapping up, try to cover:
 
 1. Does this change respect panel configuration?
 2. Does it still work with multiple guards or participant model types?
-3. Did we preserve public extension points and config behavior?
-4. Did we add or update a focused regression test if behavior changed?
-
+3. Does it preserve package extension points and model overrides?
+4. If the change touched groups, invites, or join requests, is there focused test coverage for the updated behavior?

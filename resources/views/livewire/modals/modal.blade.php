@@ -170,12 +170,12 @@
     <div x-data="WirechatModal()" x-on:close.stop="setShowPropertyTo(false)"
            x-on:keydown.escape.stop="closeModalOnEscape({modalType: 'WirechatModal', event: $event })"
             tabindex="0"
-           x-show="show" class="fixed  inset-0 z-50 overflow-y-auto" style="display: none;">
-        <div class="flex items-end  justify-center min-h-screen px-4 pt-4 pb-10 text-center sm:block sm:p-0">
+        x-show="show" class="fixed   inset-0 z-[60] overflow-y-auto" style="display: none;">
+        <div class="flex items-end   justify-center min-h-screen px-4 pt-4 pb-10 text-center sm:block sm:p-0">
             <div x-show="show" x-on:click="closeModalOnClickAway()" x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0" class="fixed inset-0 z-0 transition-all transform">
+                x-transition:leave-end="opacity-0" class="fixed inset-0 z-0 transition-all">
                 <div class="absolute inset-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] opacity-75"></div>
             </div>
 
@@ -189,8 +189,8 @@
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
 
-                class="relative z-10 inline-block  align-bottom wc-scrollbar-theme rounded-lg text-left overflow-hidden shadow-sm transform transition-all sm:my-8 sm:align-middle w-full sm:max-w-lg"
-                id="chat-dialog-container" x-trap.noscroll.inert="show && showActiveModalComponent" x-on:click.stop aria-modal="true">
+                class="relative z-10 inline-block align-bottom wc-scrollbar-theme rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-full sm:max-w-lg"
+                id="chat-dialog-container" x-trap.noscroll.inert="show && showActiveModalComponent" aria-modal="true">
                 @forelse($components as $id => $component)
                     <div  x-show.immediate="activeModalComponent == '{{ $id }}'" x-ref="{{ $id }}"
                         wire:key="{{ $id }}">

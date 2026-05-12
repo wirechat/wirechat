@@ -1,4 +1,11 @@
-<div class="h-[calc(100vh_-_10rem)]  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] overflow-y-auto overflow-x-hidden  ">
+@php
+    $primaryInviteUrlJs = (string) \Illuminate\Support\Js::from($primaryInviteUrl ?? null);
+    $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copied_success'));
+    $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copy_prompt'));
+    $copyPrimaryInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$primaryInviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$primaryInviteUrlJs}); }";
+@endphp
+
+<div class="h-[calc(100vh_-_10rem)] rounded-xl  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-zinc-200 dark:border-zinc-700 overflow-y-auto overflow-x-hidden  ">
 
 <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
     <div class="flex items-center pb-2">
@@ -44,14 +51,27 @@
        </span>
     </div>
 
-    <section class="flex flex-wrap items-center px-0 border-b border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]">
+    <section class="flex flex-wrap items-center px-0 border-b border-zinc-200 dark:border-zinc-700">
         <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
             placeholder="{{ __('wirechat::chat.group.add_members.inputs.search.placeholder') }}"
-            class="wc-input  w-full border-0 w-auto dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
+            class="wc-input  w-full border-0 w-auto p-1 dark:bg-none dark:bg-transparent outline-hidden focus:outline-hidden bg-none rounded-lg focus:ring-0 hover:ring-0">
     </section>
 
+    @if ($primaryInviteUrl)
+        <section class="w-full flex  border-zinc-200 px-0 py-3 dark:border-zinc-700">
+            <x-wirechat::button type="button"
+                variant="filled"
+                x-data
+                x-on:click="{{ $copyPrimaryInviteAction }}"
+                class="w-full gap-2">   
+               <x-wirechat::icons.link class="size-5" />
 
-    <section class="  overflow-x-hidden my-2  ">
+                <span>{{ __('wirechat::chat.group.add_members.actions.invite_via_link.label') }}</span>
+            </x-wirechat::button>
+        </section>
+    @endif
+
+    <section class="  overflow-x-hidden my-1">
         <ul style="-ms-overflow-style: none;scrollbar-width: none;
           "
          class="flex w-full overflow-x-auto gap-3">
@@ -95,9 +115,16 @@
 
                 @foreach ($users as $key => $user)
                     @php
-                        $isAlreadyAParticipant= $user['belongsToConversation']
+                        $isAlreadyAParticipant = $user['belongsToConversation'];
+                        $isBanned = (bool) ($user['isBanned'] ?? false);
                     @endphp
-                    <li wire:key="users-{{$key}}" class="flex cursor-pointer group gap-2 items-center p-2">
+                    <li
+                        wire:key="users-{{$key}}"
+                        @class([
+                            'flex group gap-2 items-center p-2',
+                            'cursor-not-allowed opacity-60' => $isBanned,
+                            'cursor-pointer' => ! $isBanned,
+                        ])>
 
                         <label
                         {{-- The wire:click attribute is only rendered if $isAlreadyAParticipant is false. --}}
@@ -105,10 +132,14 @@
                          wire:click="toggleMember('{{ $user['id'] }}', {{ json_encode($user['type']) }})"
                          @endif
 
-                            class="flex cursor-pointer gap-2 items-center w-full">
+                            @class([
+                                'flex gap-2 items-center w-full',
+                                'cursor-not-allowed' => $isBanned,
+                                'cursor-pointer' => ! $isBanned,
+                            ])>
                             <x-wirechat::avatar src="{{$user['wirechat_avatar_url']}}" class="w-10 h-10" />
 
-                           <div @class(['opacity-70' => $isAlreadyAParticipant]) >
+                           <div @class(['opacity-70' => $isAlreadyAParticipant || $isBanned]) >
                             <p
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
                                 {{ $user['wirechat_name'] }}</p>
@@ -117,6 +148,8 @@
                              @class(['text-gray-600 dark:text-gray-400 text-sm'])>
                                 @if ($isAlreadyAParticipant)
                                 {{__('wirechat::chat.group.add_members.messages.member_already_exists')}}
+                                @elseif ($isBanned)
+                                {{ __('wirechat::chat.group.join.lobby.labels.join_blocked') }}
                                 @endif
                              </span>
                            </div>

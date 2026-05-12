@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
@@ -28,6 +29,8 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property-read \Wirechat\Wirechat\Models\Conversation $conversation
  * @property-read \Wirechat\Wirechat\Models\Attachment|null $cover
  * @property-read string|null $cover_url
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Invite> $inviteLinks
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\JoinRequest> $joinRequests
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Group newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Group newQuery()
@@ -63,6 +66,7 @@ class Group extends Model
         'allow_members_to_send_messages' => 'boolean',
         'allow_members_to_add_others' => 'boolean',
         'allow_members_to_edit_group_info' => 'boolean',
+        'admins_must_approve_new_members' => 'boolean',
     ];
 
     public function __construct(array $attributes = [])
@@ -75,9 +79,11 @@ class Group extends Model
     {
         static::deleted(function ($group) {
             if ($group->cover?->exists()) {
-                // delete cover
                 $group->cover->delete();
             }
+
+            $group->joinRequests()->delete();
+            $group->inviteLinks()->delete();
         });
     }
 
@@ -99,7 +105,6 @@ class Group extends Model
     public function getCoverUrlAttribute(): ?string
     {
         return $this->cover?->url;
-
     }
 
     /**
@@ -107,20 +112,16 @@ class Group extends Model
      */
     public function isOwnedBy(Model|Authenticatable $user): bool
     {
-
         $conversation = $this->conversation;
 
-        // Check if participants are already loaded
         if ($conversation->relationLoaded('participants')) {
-            // If loaded, simply check the existing collection
             return $conversation->participants->contains(function ($participant) use ($user) {
-                return $participant->participantable_id == $user->getKey() &&
-                    $participant->participantable_type == $user->getMorphClass() &&
-                    $participant->role == ParticipantRole::OWNER;
+                return $participant->participantable_id == $user->getKey()
+                    && $participant->participantable_type == $user->getMorphClass()
+                    && $participant->role == ParticipantRole::OWNER;
             });
         }
 
-        // If not loaded, perform the query
         return $conversation->participants()
             ->where('participantable_id', $user->getKey())
             ->where('participantable_type', $user->getMorphClass())
@@ -128,9 +129,36 @@ class Group extends Model
             ->exists();
     }
 
+    /**
+     * @return MorphOne<\Wirechat\Wirechat\Models\Attachment, $this>
+     */
     public function cover(): MorphOne
     {
         return $this->morphOne(Wirechat::attachmentModelClass(), 'attachable');
+    }
+
+    /**
+     * @return MorphMany<\Wirechat\Wirechat\Models\Invite, $this>
+     */
+    public function inviteLinks(): MorphMany
+    {
+        return $this->morphMany(Invite::class, 'inviteable');
+    }
+
+    /**
+     * @return MorphMany<\Wirechat\Wirechat\Models\JoinRequest, $this>
+     */
+    public function joinRequests(): MorphMany
+    {
+        return $this->morphMany(JoinRequest::class, 'joinable');
+    }
+
+    /**
+     * @return MorphMany<\Wirechat\Wirechat\Models\JoinRequest, $this>
+     */
+    public function pendingJoinRequests(): MorphMany
+    {
+        return $this->joinRequests()->pending();
     }
 
     /**
@@ -149,5 +177,117 @@ class Group extends Model
     public function allowsMembersToEditGroupInfo(): bool
     {
         return $this->allow_members_to_edit_group_info == true;
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->type === GroupType::PUBLIC;
+    }
+
+    public function isPrivateAccess(): bool
+    {
+        return $this->type === GroupType::PRIVATE;
+    }
+
+    public function requiresInviteApproval(): bool
+    {
+        return $this->isPrivateAccess() || (bool) $this->admins_must_approve_new_members;
+    }
+
+    public function inviteJoinBlockedFor(Model|Authenticatable $user): bool
+    {
+        /** @var Participant|null $participant */
+        $participant = $this->conversation
+            ->participants()
+            ->withoutGlobalScopes()
+            ->whereParticipantable($user)
+            ->first();
+
+        if (! $participant) {
+            return false;
+        }
+
+        return $participant->isBannedByAdmin();
+    }
+
+    public function hasPendingJoinRequest(Model|Authenticatable $user): bool
+    {
+        return $this->pendingJoinRequests()
+            ->whereRequester($user)
+            ->exists();
+    }
+
+    public function requestToJoin(Model|Authenticatable $user, ?Invite $invite = null): JoinRequest
+    {
+        /** @var JoinRequest|null $request */
+        $request = $this->pendingJoinRequests()
+            ->whereRequester($user)
+            ->latest('id')
+            ->first();
+
+        if ($request) {
+            if ($invite) {
+                $request->forceFill([
+                    'invite_id' => $invite->getKey(),
+                    'data' => ['invite_id' => $invite->getKey(), 'token' => $invite->token],
+                ])->save();
+            }
+
+            return $request->refresh();
+        }
+
+        /** @var JoinRequest $created */
+        $created = $this->joinRequests()->create([
+            'requester_id' => $user->getKey(),
+            'requester_type' => $user->getMorphClass(),
+            'invite_id' => $invite?->getKey(),
+            'data' => $invite ? ['invite_id' => $invite->getKey(), 'token' => $invite->token] : null,
+        ]);
+
+        return $created;
+    }
+
+    public function acceptPendingJoinRequest(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null, bool $markInviteUsed = false): ?JoinRequest
+    {
+        /** @var JoinRequest|null $request */
+        $request = $this->pendingJoinRequests()
+            ->whereRequester($user)
+            ->with('invite')
+            ->latest('id')
+            ->first();
+
+        if (! $request) {
+            return null;
+        }
+
+        $request->approve($reviewedBy);
+
+        if ($markInviteUsed && $request->invite?->isActive()) {
+            $request->invite->markUsed();
+        }
+
+        return $request->refresh();
+    }
+
+    public function dismissPendingJoinRequest(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null): ?JoinRequest
+    {
+        /** @var JoinRequest|null $request */
+        $request = $this->pendingJoinRequests()
+            ->whereRequester($user)
+            ->latest('id')
+            ->first();
+
+        if (! $request) {
+            return null;
+        }
+
+        $request->dismiss($reviewedBy);
+
+        return $request->refresh();
+    }
+
+    public function clearJoinRequest(Model|Authenticatable $user, Model|Authenticatable|null $reviewedBy = null, bool $markInviteUsed = false): ?JoinRequest
+    {
+        return $this->acceptPendingJoinRequest($user, $reviewedBy, $markInviteUsed);
     }
 }

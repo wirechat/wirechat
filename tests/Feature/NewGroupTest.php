@@ -202,9 +202,21 @@ describe('Add members page', function () {
 
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request
+            ->set('search', 'Micheal')
             ->call('addMember', $user->id, $user->getMorphClass())
             ->assertSee('Micheal');
 
+    });
+
+    test('calling addMember() ignores tampered classes outside the current panel search results', function () {
+        $auth = ModelsUser::factory()->create();
+        $user = ModelsUser::factory()->create(['name' => 'Micheal']);
+
+        Livewire::actingAs($auth)
+            ->test(NewGroup::class)
+            ->set('search', 'Micheal')
+            ->call('addMember', $user->id, Conversation::class)
+            ->assertSet('selectedMembers', collect());
     });
 
     test('calling removeMember() can remove selected members', function () {
@@ -215,10 +227,12 @@ describe('Add members page', function () {
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request
                 // first add member
+            ->set('search', 'Micheal')
             ->call('addMember', $user->id, $user->getMorphClass())
             ->assertSee('Micheal')
                 // then remove memener
             ->call('removeMember', $user->id, $user->getMorphClass())
+            ->set('search', '')
             ->assertDontSee('Micheal');
     });
 
@@ -235,8 +249,11 @@ describe('Add members page', function () {
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request
                 // first add member
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
             ->assertSee(__('wirechat::new.group.messages.members_limit_error', ['count' => 2]));
     });
@@ -264,8 +281,11 @@ describe('Creteing group', function () {
             ->set('description', 'Description Testing')
             ->set('photo', $file)
                 // add members
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
                 // create group
@@ -294,8 +314,11 @@ describe('Creteing group', function () {
             ->set('description', 'Description Testing')
             ->set('photo', $file)
                 // add members
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
                 // create group
@@ -324,8 +347,11 @@ describe('Creteing group', function () {
             ->set('description', 'Description Testing')
             ->set('photo', $file)
                 // add members
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
                 // create group
@@ -358,8 +384,11 @@ describe('Creteing group', function () {
             ->set('description', 'Description Testing')
             ->set('photo', $file)
                 // add members
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
                 // create group
@@ -389,8 +418,11 @@ describe('Creteing group', function () {
             ->set('description', 'Description Testing')
             ->set('photo', $file)
                 // add members
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
                 // create group
@@ -419,8 +451,11 @@ describe('Creteing group', function () {
             ->set('description', 'Description Testing')
             ->set('photo', $file)
                 // add members
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
                 // create group
@@ -452,8 +487,11 @@ describe('Creteing group', function () {
             ->set('description', 'Description Testing')
             ->set('photo', $file)
                 // add members
+            ->set('search', 'Micheal')
             ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
             ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
             ->call('addMember', $member3->id, $member3->getMorphClass())
 
                 // create group

@@ -50,7 +50,7 @@
     x-transition:leave-end="-translate-y-10"
    
     
-    class="fixed  sm:top-2 top-0  z-50 inset-x-0 sm:max-w-md mx-auto sm:ml-auto sm:mx-0 w-full h-auto  py-2.5 duration-300 ease-out bg-white shadow-md sm:border rounded-md " x-cloak>
+    class="fixed sm:top-2 top-0 z-[100] inset-x-0 sm:max-w-md mx-auto sm:ml-auto w-full h-auto py-2.5 mr-2 duration-300 ease-out bg-white dark:bg-zinc-900 shadow-md sm:border border-zinc-200 dark:border-zinc-700 rounded-md text-zinc-900 dark:text-zinc-100" x-cloak>
     <div class="flex items-center justify-between w-full h-full  px-3 mx-auto max-w-7xl ">
         <div class="flex items-center gap-3 w-full h-full ">
 
@@ -73,10 +73,18 @@
                   </svg>
             </span>
 
-            <p class="text-xs  text-black " x-text="message"></p>
+            <p
+                class="text-xs"
+                :class="{
+                    'text-yellow-700 dark:text-yellow-300': type === 'warning',
+                    'text-rose-700 dark:text-rose-300': type === 'danger',
+                    'text-green-700 dark:text-green-300': type === 'success',
+                    'text-zinc-900 dark:text-zinc-100': !['warning', 'danger', 'success'].includes(type),
+                }"
+                x-text="message"></p>
         </div>
 
-        <button @click="closeToast()" class="flex items-center shrink-0 translate-x-1 ease-out duration-150 justify-center w-6 h-6 p-1.5 text-black rounded-full hover:bg-neutral-100">
+        <button @click="closeToast()" class="flex items-center shrink-0 translate-x-1 ease-out duration-150 justify-center w-6 h-6 p-1.5 text-zinc-700 dark:text-zinc-200 rounded-full hover:bg-neutral-100 dark:hover:bg-zinc-800">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     </div>

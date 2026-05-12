@@ -37,8 +37,26 @@
         <section class="flex flex-wrap items-center px-0 border-b dark:border-[var(--wc-dark-secondary)]">
             <input type="search" id="users-search-field" wire:model.live.debounce='search' autocomplete="off"
                 placeholder="{{__('wirechat::chat.group.members.inputs.search.placeholder')}}"
-                class="wc-input w-full border-0 w-auto dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-dark-parimary)] rounded-lg focus:ring-0 hover:ring-0">
+                class="wc-input w-full border-0 p-1 w-auto dark:bg-[var(--wc-dark-primary)] outline-hidden focus:outline-hidden bg-[var(--wc-dark-parimary)] rounded-lg focus:ring-0 hover:ring-0">
         </section>
+
+        @if ($authIsAdminInGroup || $authIsOwner)
+            <section class="grid grid-cols-2 gap-2 pt-3">
+                <x-wirechat::actions.open-modal component="wirechat.chat.group.members.past"
+                    conversation="{{ $conversation?->id }}"  :panel="$this->panel">
+                    <x-wirechat::button variant="filled"  type="button" class="w-full" >
+                        {{ __('wirechat::chat.group.members.actions.past_members.label') }}
+                    </x-wirechat::button>
+                </x-wirechat::actions.open-modal>
+
+                <x-wirechat::actions.open-modal component="wirechat.chat.group.members.banned"
+                    conversation="{{ $conversation?->id }}"  :panel="$this->panel">
+                    <x-wirechat::button variant="filled" type="button" class="w-full" >
+                        {{ __('wirechat::chat.group.members.actions.banned_members.label') }}
+                    </x-wirechat::button>
+                </x-wirechat::actions.open-modal>
+            </section>
+        @endif
 
     </header>
     <div class="relative w-full p-2 ">
@@ -121,6 +139,13 @@
                                                 wire:confirm="{{__('wirechat::chat.group.members.actions.remove_from_group.confirmation_message',['member'=>$participant->participantable?->wirechat_name])}}"
                                                 class="text-red-500 ">
                                                 {{__('wirechat::chat.group.members.actions.remove_from_group.label')}}
+                                            </x-wirechat::dropdown-button>
+
+                                            <x-wirechat::dropdown-button
+                                                wire:click="banMember('{{ $participant->id }}')"
+                                                wire:confirm="{{__('wirechat::chat.group.members.actions.ban_member.confirmation_message',['member'=>$participant->participantable?->wirechat_name])}}"
+                                                class="text-red-500 ">
+                                                {{__('wirechat::chat.group.members.actions.ban_member.label')}}
                                             </x-wirechat::dropdown-button>
                                             @endif
 

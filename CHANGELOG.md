@@ -1,14 +1,14 @@
-# Wirechat Changelog 
+# Wirechat Changelog
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
 
-## [Unreleased]  
+## [Unreleased]
 
 ### Changed
 - No unreleased changes documented yet.
@@ -234,14 +234,14 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 ## [v0.2.10](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.10) - 2025-05-22
 
 ### Fixed
-- Fixed close button not working correctly when chat component is widget  
+- Fixed close button not working correctly when chat component is widget
 
 -----
 
 ## [v0.2.9](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.9) - 2025-05-15
 
 ### Fixed
-- Added misssing closing tag in chat-list component 
+- Added misssing closing tag in chat-list component
 
 ------
 
@@ -262,7 +262,7 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 
 ### Fixed
 - Changelog tag links missing prefix 'v'
-- Style: in new-group button to use correct/updated css variable 
+- Style: in new-group button to use correct/updated css variable
 - Failing tests
 
 
@@ -282,13 +282,13 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 
 ## [v0.2.5](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.5) - 2025-04-15
 
-### Added  
+### Added
 - `wirechat.attachments.disk_visibility` config option to determine if temporary URLs should be generated for private storage disks
 
-### Updated  
-- Attachment upload now uses single file uploads to support S3 and similar disks that do not handle `temporary_uploaded_files` with multiple files  
+### Updated
+- Attachment upload now uses single file uploads to support S3 and similar disks that do not handle `temporary_uploaded_files` with multiple files
 
-### Fixed  
+### Fixed
 - PHPStan errors and improved code style with docblocks
 
 ---
@@ -303,53 +303,53 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 
 ---
 
-## [v0.2.4](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.4) - 2025-03-30  
+## [v0.2.4](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.4) - 2025-03-30
 
-### Added  
-- support for Tailwind v4 
+### Added
+- support for Tailwind v4
 ---
 
-## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.3) - 2025-03-29  
+## [v0.2.3](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.3) - 2025-03-29
 
-### Added  
-- Language file translation keys for labels  
-- Built-in validation translation keys  
-- Separate group info page for groups  
-- Empty search results message for the new chat component  
-- More tests  
+### Added
+- Language file translation keys for labels
+- Built-in validation translation keys
+- Separate group info page for groups
+- Empty search results message for the new chat component
+- More tests
 
-### Fixed  
-- Delete photo button incorrectly acting as a submit button while creating a group  
+### Fixed
+- Delete photo button incorrectly acting as a submit button while creating a group
 
-### Updated  
+### Updated
 - includes folder to partials  in chats and chat directories
 
 ---
 
 
 ## [v0.2.2](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.2) - 2025-03-15
-### Updated  
+### Updated
 - Storeage url to use storage:disk()->url() instead of static url from database
 
 ---
 
 ## [v0.2.1](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.1) - 2025-03-15
-### Fixed  
-- Storage disk to support dynamic storage 
-### Added 
+### Fixed
+- Storage disk to support dynamic storage
+### Added
 - Tests for multiple storage support
 
 ---
 
 ## [v0.2.0](https://github.com/namumakwembo/wirechat/releases/tag/v0.2.0) - 2025-03-06
-### Added  
+### Added
 - Support for Laravel 12
 
 ---
 
 
 ## [v0.1.11](https://github.com/namumakwembo/wirechat/releases/tag/v0.1.11) - 2025-03-04
-### Added  
+### Added
 - Introduced native notifications feature for new messages
 - New `notifications` key to wirechat configuration
  ```php
@@ -390,7 +390,7 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 ### Changed
 - `NotifyParticipant` channel now uses an encoded type and ID to support mixed models in conversations.
 
-  **Breaking Change:**  
+  **Breaking Change:**
   If you previously listened to the `participant` channel, update to the new format:
 
   ```diff
@@ -409,49 +409,49 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
   We have restructured the package folders to group related components and assets more logically. This improves view publishing and feature additions. If you have previously published or customized views, please re-publish them using the new command and update any file path references accordingly.
 
 
-### Fixed  
-- Updated tests to fully support conversations with mixed models.  
-- Improved participant handling for different models.  
+### Fixed
+- Updated tests to fully support conversations with mixed models.
+- Improved participant handling for different models.
 
-### Updated  
-- Optimized code and queries for faster conversation loading.  
-- Updated brodcasting to use the guards provided in wirechat config the 
+### Updated
+- Optimized code and queries for faster conversation loading.
+- Updated brodcasting to use the guards provided in wirechat config the
 
 ---
 
-## [v0.0.7](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.7) - 2024-12-20  
-### Added  
-- Introduced `Actor` and `Actionable` traits for improved polymorphic relationship handling.  
+## [v0.0.7](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.7) - 2024-12-20
+### Added
+- Introduced `Actor` and `Actionable` traits for improved polymorphic relationship handling.
   - Added tests for `Actor` and `Actionable` traits.
 
-### Fixed  
+### Fixed
 - Resolved a bug that caused incorrect retrieval of the authenticated participant due to a missing `conversation_id` filter during retrieval.
 
-### Updated  
+### Updated
 - Refactored migrations to use `unsignedBigInteger`. All polymorphic relationships now use unsignedBigInteger by default to maintain consistency across databases. This resolves a type mismatch issue found during testing on PostgreSQL.
 
 **Note:** Running `php artisan view:clear` may be required to ensure the changes take effect.
 
 ---
 
-## [v0.0.6](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.6) - 2024-12-16  
-### Fixed  
-- Fixed error caused by missing import in chat blade due to typo.  
+## [v0.0.6](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.6) - 2024-12-16
+### Fixed
+- Fixed error caused by missing import in chat blade due to typo.
   **Note:** Running `php artisan view:clear` may be required to ensure the changes take effect.
 
 ---
 
-## [v0.0.5](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.5) - 2024-12-11  
-### Fixed  
-- Fixed unread messages dot not appearing correctly.  
+## [v0.0.5](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.5) - 2024-12-11
+### Fixed
+- Fixed unread messages dot not appearing correctly.
   **Note:** Running `php artisan view:clear` may be required to ensure the changes take effect.
 
 ---
 
-## [v0.0.4](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.4) - 2024-12-8  
-### Added  
-- Issue template  
-- MIT license  
+## [v0.0.4](https://github.com/namumakwembo/wirechat/releases/tag/v0.0.4) - 2024-12-8
+### Added
+- Issue template
+- MIT license
 - CODEOWNERS file to assign reviewers automatically
 
 ---
@@ -471,13 +471,13 @@ Transition from config-based to **Panel-based** settings for a cleaner, extensib
 
 ---
 
-## [0.0.1](https://github.com/namumakwembo/wirechat/releases/tag/0.0.1) - 2024-11-30  
-### Added  
-- Introduced `Wirechat` package with the following features:  
-  - Basic chat functionality for private conversations.  
-  - Group Chats functionality.  
+## [0.0.1](https://github.com/namumakwembo/wirechat/releases/tag/0.0.1) - 2024-11-30
+### Added
+- Introduced `Wirechat` package with the following features:
+  - Basic chat functionality for private conversations.
+  - Group Chats functionality.
   - Smart Deletes for:
-    * Conversations  
-    * Messages  
-  - Messages: sending, receiving, viewing.  
-  - Published initial migrations for conversations and messages.  
+    * Conversations
+    * Messages
+  - Messages: sending, receiving, viewing.
+  - Published initial migrations for conversations and messages.

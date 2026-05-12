@@ -135,14 +135,45 @@
                     </span>
 
                 </li>
+ 
 
             </ul>
         </section>
 
 
 
+          <section >
+
+            <h5 class="w-full text-start py-4 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] px-4">
+
+                {{__('wirechat::chat.group.permissions.labels.admins_can')}}:
+            </h5>
 
 
+       <ul class="space-y-2">
+                <li class="w-full flex items-center p-5">
+                    <span class="w-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 0h10.5A2.25 2.25 0 0 1 19.5 12.75v6A2.25 2.25 0 0 1 17.25 21h-10.5A2.25 2.25 0 0 1 4.5 18.75v-6A2.25 2.25 0 0 1 6.75 10.5Z" />
+                        </svg>
+                    </span>
+
+                    <span class="w-full text-start">
+                        <h5 class="font-medium">@lang('wirechat::chat.group.permissions.actions.admin_approval.label')</h5>
+                        <p>@lang('wirechat::chat.group.permissions.actions.admin_approval.helper_text')</p>
+                    </span>
+
+                    <span class="w-12">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input wire:model.live.debounce="admins_must_approve_new_members" type="checkbox" class="sr-only peer">
+                            <div class="relative w-11 h-6 peer-focus:outline-hidden rounded-full peer bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] shadow-2xs peer-checked:border-[var(--wc-brand-primary)] peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)] after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:after:bg-gray-100 after:shadow peer-checked:after:bg-[var(--wc-brand-primary)] peer-checked:dark:after:bg-[var(--wc-brand-primary)] peer-checked:after:border-[var(--wc-brand-primary)] peer-checked:dark:after:border-[var(--wc-brand-primary)] dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out"></div>
+                        </label>
+                    </span>
+                </li>
+            </ul>
+
+
+         </section>
     </div>
 
 </div>

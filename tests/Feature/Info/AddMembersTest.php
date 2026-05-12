@@ -1,14 +1,19 @@
 <?php
 
 use Livewire\Livewire;
-use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
+use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers;
 use Wirechat\Wirechat\Models\Conversation;
 use Workbench\App\Models\User;
+
+beforeEach(function () {
+    testPanelProvider()->groupInvitations(true);
+});
 
 test('user must be authenticated', function () {
 
     $conversation = Conversation::factory()->create();
-    Livewire::test(AddMembers::class, ['conversation' => $conversation])
+    Livewire::test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(401);
 });
 
@@ -17,7 +22,7 @@ test('aborts if user doest not belog to conversation', function () {
     $auth = User::factory()->create(['id' => '345678']);
 
     $conversation = Conversation::factory()->create();
-    Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation])
+    Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(403);
 });
 
@@ -27,7 +32,7 @@ test('aborts if conversation is private', function () {
     $receiver = User::factory()->create();
 
     $conversation = $auth->createConversationWith($receiver);
-    Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation])
+    Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(403, 'Cannot add members to private conversation');
 });
 
@@ -36,8 +41,40 @@ test('authenticaed user can access component ', function () {
 
     $conversation = $auth->createGroup('My Group');
 
-    Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation])
+    Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(200);
+});
+
+test('participant with add-members permission can access component', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $conversation = $owner->createGroup('My Group');
+    $conversation->group->allow_members_to_add_others = true;
+    $conversation->group->save();
+
+    $participant = $conversation->addParticipant($member);
+    $participant->role = ParticipantRole::PARTICIPANT;
+    $participant->save();
+
+    Livewire::actingAs($member)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200);
+});
+
+test('participant without add-members authority cannot access component', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $conversation = $owner->createGroup('My Group');
+    $conversation->group->allow_members_to_add_others = false;
+    $conversation->group->save();
+
+    $participant = $conversation->addParticipant($member);
+    $participant->role = ParticipantRole::PARTICIPANT;
+    $participant->save();
+
+    Livewire::actingAs($member)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(403);
 });
 
 describe('presence test', function () {
@@ -49,7 +86,7 @@ describe('presence test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         // * since converstaion already have one user which is the auth then default is 1
         $request
@@ -62,11 +99,40 @@ describe('presence test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
             ->assertSee('Save')
             ->assertMethodWired('save');
+    });
+
+    test('admins see the copy invite link shortcut', function () {
+        $owner = User::factory()->create();
+        $admin = User::factory()->create();
+
+        $conversation = $owner->createGroup('My Group');
+        $participant = $conversation->addParticipant($admin);
+        $participant->role = ParticipantRole::ADMIN;
+        $participant->save();
+
+        Livewire::actingAs($admin)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'));
+    });
+
+    test('participants with add-members permission see the copy invite link shortcut', function () {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+
+        $conversation = $owner->createGroup('My Group');
+        $conversation->group->allow_members_to_add_others = true;
+        $conversation->group->save();
+
+        $participant = $conversation->addParticipant($member);
+        $participant->role = ParticipantRole::PARTICIPANT;
+        $participant->save();
+
+        Livewire::actingAs($member)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'));
     });
 
 });
@@ -80,7 +146,7 @@ describe('actions test', function () {
         // add participant
         $conversation->addParticipant(User::factory()->create(['name' => 'Micheal']));
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
         $request
             ->set('search', 'Mic')
             ->assertSee('Micheal');
@@ -93,12 +159,25 @@ describe('actions test', function () {
         // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
         $conversation->addParticipant($user);
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal');
+    });
+
+    test('toggleMember() ignores tampered classes outside the current panel search results', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $user = User::factory()->create(['name' => 'Micheal']);
+
+        Livewire::actingAs($auth)
+            ->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Micheal')
+            ->call('toggleMember', $user->id, Conversation::class)
+            ->assertSet('selectedMembers', collect());
     });
 
     test('it updated number when new members are added or removed', function () {
@@ -111,10 +190,11 @@ describe('actions test', function () {
         // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertSee('2 / 1000')
                 // attempt to remove member
@@ -129,14 +209,16 @@ describe('actions test', function () {
         // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // first add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertSee('Micheal')
                 // then remove memener
             ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->set('search', '')
             ->assertDontSee('Micheal');
     });
 
@@ -148,10 +230,11 @@ describe('actions test', function () {
         $user = User::factory()->create(['name' => 'Micheal']);
         $conversation->addParticipant($user);
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // first add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal')
             ->assertStatus(403, $user->wirechat_name.' is already a member');
@@ -170,8 +253,9 @@ describe('actions test', function () {
 
         $participant->exitConversation();
 
-        $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
-        $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
+        $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
+        $request->set('search', 'Micheal')
+            ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
             ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they left the group");
 
     });
@@ -190,10 +274,27 @@ describe('actions test', function () {
         // remove by auth
         $participant->removeByAdmin($auth);
 
-        $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation]);
-        $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
+        $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
+        $request->set('search', 'Micheal')
+            ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
             ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they were removed from the group by an Admin.");
 
+    });
+
+    test('it shows warning toast and does not select banned past member', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $blockedUser = User::factory()->create(['name' => 'Blocked User']);
+        $participant = $conversation->addParticipant($blockedUser);
+        $participant->banByAdmin($auth);
+
+        Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Blocked User')
+            ->call('toggleMember', $blockedUser->id, $blockedUser->getMorphClass())
+            ->assertStatus(200)
+            ->assertDispatched('wirechat-toast', type: 'warning')
+            ->assertSet('selectedMembers', collect());
     });
 
     test('it does not abort if ADMIN tries to add a member removed by admin', function () {
@@ -213,8 +314,9 @@ describe('actions test', function () {
 
         expect($conversation->participants()->count())->toBe(1);
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
-        $request->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
+        $request->set('search', 'Micheal')
+            ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
             ->call('save')
             ->assertStatus(200);
 
@@ -230,7 +332,7 @@ describe('actions test', function () {
         // add participant
         $conversation->addParticipant(User::factory()->create(['name' => 'John']));
 
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // first add member
@@ -245,10 +347,11 @@ describe('actions test', function () {
 
         // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
@@ -263,10 +366,11 @@ describe('actions test', function () {
 
         // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 
@@ -280,10 +384,11 @@ describe('actions test', function () {
 
         // add participant
         $user = User::factory()->create(['name' => 'Micheal']);
-        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation]);
+        $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
 
         $request
                 // attempt to add member
+            ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->call('save');
 

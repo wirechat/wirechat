@@ -1,20 +1,21 @@
 <?php
 
-namespace Wirechat\Wirechat\Livewire\Chat\Group;
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
-use App\Models\User;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Validate;
-// use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Wirechat\Wirechat\Livewire\Concerns\CreatesGroupInvites;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
 class AddMembers extends ModalComponent
 {
+    use CreatesGroupInvites;
     use HasPanel;
+    use ResolvesPanelSearchResults;
     use WithFileUploads;
 
     #[Locked]
@@ -22,7 +23,6 @@ class AddMembers extends ModalComponent
 
     public $group;
 
-    // #[Locked]
     protected ?Participant $authParticipant = null;
 
     public $users;
@@ -38,15 +38,15 @@ class AddMembers extends ModalComponent
 
     public $exitingMembersCount;
 
+    public ?string $primaryInviteUrl = null;
+
     public static function closeOnClickAway(): bool
     {
-
         return false;
     }
 
     public static function closeModalOnEscape(): bool
     {
-
         return false;
     }
 
@@ -66,23 +66,12 @@ class AddMembers extends ModalComponent
      */
     public function updatedSearch()
     {
-
-        // Make sure it's not empty
         if (blank($this->search)) {
-
             $this->users = null;
         } else {
-
-            /**
-             * Update the users list based on the search term.
-             *
-             * Maps the panel search results to an array with:
-             * - id, type, wirechat_name, wirechat_avatar_url
-             * - belongsToConversation flag for the current conversation
-             */
             $this->users = collect($this->panel()->searchUsers($this->search)->collection)
                 ->map(function ($resource) {
-                    $model = $resource->resource; // underlying model
+                    $model = $resource->resource;
 
                     return [
                         'id' => $model->id,
@@ -90,71 +79,63 @@ class AddMembers extends ModalComponent
                         'wirechat_name' => $model->wirechat_name,
                         'wirechat_avatar_url' => $model->wirechat_avatar_url,
                         'belongsToConversation' => $model->belongsToConversation($this->conversation),
+                        'isBanned' => (bool) $this->conversation->participant($model, withoutGlobalScopes: true)?->isBannedByAdmin(),
                     ];
                 });
-
         }
     }
 
     public function toggleMember($id, string $class)
     {
+        $this->authorizeAddMembersAccess();
 
-        $model = app($class)->find($id);
+        $model = $this->resolvePanelSearchResult($id, $class);
 
         if ($model) {
-
-            // abort if member already belong to conversation
             abort_if($model->belongsToConversation($this->conversation), 403, $model->wirechat_name.' Is already a member');
 
-            if ($this->selectedMembers->contains(fn ($member) => $member->id == $model->id && get_class($member) == get_class($model))) {
-                // Remove member if they are already selected
+            if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
                 $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                    return $member->id == $id && get_class($member) == $class;
+                    return $member->getKey() == $id && $member->getMorphClass() == $class;
                 });
             } else {
-
-                // validate members count
                 if ($this->newTotalCount >= $this->panel()->getMaxGroupMembers()) {
                     return $this->dispatch('show-member-limit-error');
                 }
 
                 $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
 
-                // abort if member already exited group
+                if ($participant?->isBannedByAdmin()) {
+                    $this->dispatch(
+                        'wirechat-toast',
+                        type: 'warning',
+                        message: 'Cannot add '.$model->wirechat_name.' because they were banned from the group by an Admin.'
+                    );
+
+                    return;
+                }
                 abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->wirechat_name.' because they left the group');
 
-                // check if is removed - if true then
-                // abort if non admin member tries to add a participant previously removed by admin
                 if ($participant?->isRemovedByAdmin()) {
-                    $authParticipant = $this->conversation->participant(auth()->user());
-
-                    abort_unless($authParticipant?->isAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were removed from the group by an Admin.');
-
+                    abort_unless($this->authParticipant?->isAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were removed from the group by an Admin.');
                 }
 
-                // Add member if they are not selected
                 $this->selectedMembers->push($model);
             }
 
-            // update total count
-            // dd($this->conversation);
             $this->newTotalCount = count($this->selectedMembers) + $this->exitingMembersCount;
         }
     }
 
     public function save()
     {
+        $this->authorizeAddMembersAccess();
 
-        $authParticipant = $this->conversation->participant(auth()->user());
-
-        foreach ($this->selectedMembers as $key => $member) {
-
-            // make sure user does not belong to conversation already
-            // we set gloabl scopes to true to as to also check members hidden by scopes- to avoid duplicate constraint error
+        foreach ($this->selectedMembers as $member) {
             $alreadyExists = $member->belongsToConversation($this->conversation);
 
             if (! $alreadyExists) {
-                $this->conversation->addParticipant($member, undoAdminRemovalAction: $authParticipant?->isAdmin());
+                $this->conversation->addParticipant($member, undoAdminRemovalAction: $this->authParticipant?->isAdmin(), reviewedBy: auth()->user());
             }
         }
 
@@ -165,26 +146,66 @@ class AddMembers extends ModalComponent
 
     public function mount()
     {
+        $this->initializePanel($this->panel);
+
         abort_unless(auth()->check(), 401);
         abort_unless(auth()->user()->belongsToConversation($this->conversation), 403);
-
         abort_if($this->conversation->isPrivate(), 403, 'Cannot add members to private conversation');
 
-        // Load participants and get the count
-        $this->conversation->loadCount('participants');
+        $this->conversation = $this->conversation->load('group')->loadCount('participants');
+        $this->group = $this->conversation->group;
+        $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        // Dump the participants count
+        $this->authorizeAddMembersAccess();
 
         $this->exitingMembersCount = $this->conversation->participants_count;
         $this->newTotalCount = $this->exitingMembersCount;
-
         $this->selectedMembers = collect();
+        $this->primaryInviteUrl = $this->resolvePrimaryInviteUrl();
     }
 
     public function render()
     {
+        return view('wirechat::livewire.chat.group.members.add', [
+            'maxGroupMembers' => $this->panel()->getMaxGroupMembers(),
+        ]);
+    }
 
-        // Pass data to the view
-        return view('wirechat::livewire.chat.group.add-members', ['maxGroupMembers' => $this->panel()->getMaxGroupMembers()]);
+    protected function authorizeAddMembersAccess(): void
+    {
+        $this->authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless(
+            $this->authParticipant?->isAdmin() || $this->group?->allowsMembersToAddOthers(),
+            403,
+            'You do not have permission to add members to this group'
+        );
+    }
+
+    protected function resolvePrimaryInviteUrl(): ?string
+    {
+        if (! $this->panel() || ! $this->panel()->hasGroupInvitations()) {
+            return null;
+        }
+
+        $invite = $this->group->inviteLinks()
+            ->active()
+            ->where('panel_id', $this->panel()->getId())
+            ->primary()
+            ->latest('id')
+            ->first();
+
+        if (! $invite) {
+            $auth = auth()->user();
+
+            $invite = $this->createInviteWithUniqueToken($this->group->inviteLinks(), [
+                'panel_id' => $this->panel()->getId(),
+                'created_by_id' => $auth?->getKey(),
+                'created_by_type' => $auth?->getMorphClass(),
+                'is_primary' => true,
+            ]);
+        }
+
+        return $invite->url($this->panel());
     }
 }

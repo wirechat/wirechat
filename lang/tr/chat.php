@@ -125,6 +125,17 @@ return [
      *------------------------*/
     'group' => [
 
+        'invite_message' => [
+            'labels' => [
+                'type' => 'Grup sohbeti daveti',
+            ],
+            'actions' => [
+                'view_group' => [
+                    'label' => 'Grubu görüntüle',
+                ],
+            ],
+        ],
+
         // Group info component
         'info' => [
             'heading' => [
@@ -158,6 +169,9 @@ return [
                 ],
                 'group_permissions' => [
                     'label' => 'Grup İzinleri',
+                ],
+                'invite_via_link' => [
+                    'label' => 'Bağlantı ile Davet Et',
                 ],
                 'exit_group' => [
                     'label' => 'Gruptan Çık',
@@ -204,6 +218,23 @@ return [
                     'label' => 'Kaldır',
                     'confirmation_message' => ':member\'i bu gruptan kaldırmak istediğinizden emin misiniz?',
                 ],
+                'block_member' => [
+                    'label' => 'Üyeyi Engelle',
+                    'confirmation_message' => ':member kullanıcısını bu grupta engellemek istediğinizden emin misiniz?',
+                ],
+                'ban_member' => [
+                    'label' => 'Üyeyi Yasakla',
+                    'confirmation_message' => ':member kullanıcısını bu grupta yasaklamak istediğinizden emin misiniz?',
+                ],
+                'past_members' => [
+                    'label' => 'Geçmiş Üyeler',
+                ],
+                'blocked_members' => [
+                    'label' => 'Engellenen Üyeler',
+                ],
+                'banned_members' => [
+                    'label' => 'Yasaklı Üyeler',
+                ],
                 'load_more' => [
                     'label' => 'Daha fazla yükle',
                 ],
@@ -230,6 +261,9 @@ return [
                 'save' => [
                     'label' => 'Kaydet',
                 ],
+                'invite_via_link' => [
+                    'label' => 'Bağlantıyla gruba davet et',
+                ],
             ],
             'messages' => [
                 'invalid_conversation_type_error' => 'Yalnızca grup sohbetlerine izin verilir',
@@ -249,7 +283,8 @@ return [
                 ],
             ],
             'labels' => [
-                'members_can' => 'Üyeler yapabilecek',
+                'members_can' => 'Üyeler şunları yapabilir',
+                'admins_can' => 'Yöneticiler şunları yapabilir',
             ],
             'actions' => [
                 'edit_group_information' => [
@@ -262,8 +297,334 @@ return [
                 'add_other_members' => [
                     'label' => 'Diğer Üyeleri Ekle',
                 ],
+                'admin_approval' => [
+                    'label' => 'Yeni Üyeleri Onayla',
+                    'helper_text' => 'Davet bağlantısı üzerinden katılan kişilerin yöneticiler tarafından onaylanmasını iste',
+                ],
             ],
             'messages' => [
+            ],
+        ],
+        'invite_link' => [
+            'heading' => [
+                'label' => 'Davet Bağlantıları',
+            ],
+            'labels' => [
+                'description' => 'Hesabı olan herkes bu bağlantılardan birini açabilir ve erişim ayarlarınıza göre grubunuza katılabilir.',
+                'primary_link' => 'Birincil Bağlantı',
+                'admin_approval_enabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı var.',
+                'admin_approval_disabled' => 'Bu gruba katılmak için üyelerin yönetici onayına ihtiyacı yok.',
+                'primary_link_usage_empty' => 'Henüz kimse katılmadı',
+                'primary_link_usage_limited' => ':usages / :limit kullanım',
+                'primary_link_usage_total' => 'Şu ana kadar :usages katılım',
+                'group_access' => 'Grup Erişimi',
+                'group_access_requires_approval' => 'Bu bağlantıları açan kişilerin katılmadan önce yönetici onayı alması gerekir.',
+                'group_access_open' => 'Bu bağlantıları açan kişiler hemen gruba katılabilir.',
+                'join_requests' => 'Katılma İstekleri',
+                'join_requests_helper' => 'Bu gruba katılmak isteyen kişileri inceleyin.',
+                'additional_links' => 'Ek Bağlantılar',
+                'additional_links_helper' => 'Kendi son kullanma süresi ve kullanım sınırı olan ek davet bağlantıları oluşturun.',
+                'additional_link_usage_limited' => ':usages / :limit kullanım',
+                'additional_link_usage_total' => ':usages kullanım',
+                'additional_link_expires' => ':time sona erer',
+                'additional_link_never_expires' => 'Süresi dolmaz',
+                'additional_links_empty' => 'Henüz ek bağlantı yok. Sınırlı bir kampanya, geçici bir davet veya özel bir tanışma akışı için yeni bir tane oluşturun.',
+            ],
+            'actions' => [
+                'edit_permissions' => [
+                    'label' => 'Grup izinleri',
+                ],
+                'send_via_chat' => [
+                    'label' => 'Bağlantıyı Sohbetle Gönder',
+                ],
+                'copy_link' => [
+                    'label' => 'Bağlantıyı Kopyala',
+                ],
+                'reset_link' => [
+                    'label' => 'Bağlantıyı Sıfırla',
+                ],
+                'create_new_link' => [
+                    'label' => 'Yeni Bağlantı Oluştur',
+                ],
+                'load_more' => [
+                    'label' => 'Daha Fazla Yükle',
+                ],
+            ],
+            'messages' => [
+                'copied_success' => 'Davet bağlantısı kopyalandı.',
+                'copy_prompt' => 'Bu bağlantıyı kopyala',
+                'reset_success' => 'Grup davet bağlantısı sıfırlandı.',
+            ],
+            'create' => [
+                'heading' => [
+                    'label' => 'Yeni davet bağlantısı',
+                ],
+                'inputs' => [
+                    'name' => [
+                        'placeholder' => 'Bağlantı adı (isteğe bağlı)',
+                        'helper_text' => 'Bu adı yalnızca yöneticiler görebilir.',
+                    ],
+                ],
+                'sections' => [
+                    'expiry' => [
+                        'label' => 'Bağlantı süresi',
+                    ],
+                    'usage' => [
+                        'label' => 'Katılım sınırı',
+                    ],
+                ],
+                'options' => [
+                    'expiry' => [
+                        '1_hour' => '1 saat',
+                        '1_day' => '1 gün',
+                        '1_week' => '1 hafta',
+                        'never' => 'Süresiz',
+                    ],
+                    'usage' => [
+                        'unlimited' => 'Sınırsız',
+                    ],
+                ],
+                'labels' => [
+                    'approval_notice' => 'Onay süreci yine grubun erişim ayarlarına bağlıdır. Herkese açık gruplarda kişiler hemen katılabilir; özel veya onay gerektiren gruplarda ise katılma isteği oluşturulur.',
+                ],
+                'actions' => [
+                    'create' => [
+                        'label' => 'Bağlantı oluştur',
+                    ],
+                ],
+                'messages' => [
+                    'created_success' => 'Davet bağlantısı oluşturuldu.',
+                ],
+            ],
+            'show' => [
+                'heading' => [
+                    'label' => 'Davet bağlantısı',
+                ],
+                'labels' => [
+                    'link' => 'Bağlantı',
+                    'created_by' => 'Bağlantıyı oluşturan',
+                    'unknown' => 'Bilinmiyor',
+                    'uses' => 'Kullanım',
+                    'limit' => 'Sınır',
+                    'unlimited' => 'Sınırsız',
+                    'expires' => 'Sona erme',
+                    'never' => 'Asla',
+                ],
+                'actions' => [
+                    'copy_link' => [
+                        'label' => 'Bağlantıyı kopyala',
+                    ],
+                    'share_link' => [
+                        'label' => 'Bağlantıyı paylaş',
+                    ],
+                    'revoke' => [
+                        'label' => 'Bağlantıyı iptal et',
+                    ],
+                ],
+                'messages' => [
+                    'copied_success' => 'Davet bağlantısı kopyalandı.',
+                    'copy_prompt' => 'Bu bağlantıyı kopyala',
+                    'revoke_confirmation' => 'Bu davet bağlantısını iptal etmek istediğinizden emin misiniz?',
+                    'revoked_success' => 'Davet bağlantısı iptal edildi.',
+                ],
+            ],
+            'send_via_chat' => [
+                'heading' => [
+                    'label' => 'Davet Bağlantısı Gönder',
+                ],
+                'inputs' => [
+                    'search' => [
+                        'placeholder' => 'Kullanıcı ara',
+                    ],
+                ],
+                'actions' => [
+                    'send' => [
+                        'label' => 'Gönder',
+                    ],
+                ],
+                'messages' => [
+                    'invite_message' => ':group grubuna bu bağlantıyla katıl: :url',
+                    'unavailable_left' => ':member bu gruptan ayrıldı ve yeniden katılmak için davet bağlantısını kendisi açmalıdır.',
+                    'unavailable_removed' => ':member bu gruptan çıkarıldı ve grup davet bağlantısı alamaz.',
+                    'unavailable_blocked' => ':member bu grupta engellendiği için grup davet bağlantısı alamaz.',
+                    'sent_success' => 'Davet bağlantısı :count sohbete gönderildi.',
+                ],
+            ],
+            'page' => [
+                'labels' => [
+                    'invited_to_group' => 'Bir gruba katılman için davet edildin',
+                    'group_fallback' => 'Grup',
+                    'invite_title' => 'Grup Sohbeti Daveti',
+                    'members_count' => 'Üyeler :count',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'İptal',
+                    ],
+                    'continue' => [
+                        'label' => 'Devam Et',
+                    ],
+                    'join_group' => [
+                        'label' => 'Gruba Katıl',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Katılma İsteği Gönder',
+                    ],
+                ],
+                'messages' => [
+                    'invited_to_join_at' => ':app üzerinde bu gruba katılman için davet edildin.',
+                    'join_directly' => 'Bu davet bağlantısıyla gruba hemen katılabilirsin.',
+                    'request_required' => 'Yeni üyelerin bu gruba katılmadan önce yönetici onayı alması gerekir.',
+                    'request_pending' => 'Katılma isteğin yönetici onayı bekliyor.',
+                    'request_submitted' => 'Katılma isteğin grup yöneticilerine gönderildi.',
+                    'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsın.',
+                ],
+            ],
+        ],
+        'join' => [
+            'requests' => [
+                'heading' => [
+                    'label' => 'Katılma İstekleri',
+                ],
+                'labels' => [
+                    'description' => 'Bir davet bağlantısıyla bu gruba katılmak isteyen kişileri inceleyin ve yönetin.',
+                    'review' => 'İncele',
+                    'summary' => '{1} katılma isteği|[2,*] katılma isteği',
+                    'unknown_user' => 'Bilinmeyen kullanıcı',
+                    'requested_at' => 'İstendi: :time',
+                    'via_invite_link' => 'davet bağlantısıyla',
+                    'empty_state' => 'Şu anda bekleyen katılma isteği yok.',
+                    'count' => ':count Katılma İsteği',
+                ],
+                'actions' => [
+                    'approve' => [
+                        'label' => 'Gruba Ekle',
+                    ],
+                    'approve_all' => [
+                        'label' => 'Tümünü Kabul Et',
+                        'confirmation_message' => 'Bekleyen tüm katılma isteklerini kabul etmek istediğinize emin misiniz?',
+                    ],
+                    'dismiss' => [
+                        'label' => 'Reddet',
+                    ],
+                    'dismiss_banner' => [
+                        'label' => 'Katılma istekleri bildirimini kapat',
+                    ],
+                    'dismiss_all' => [
+                        'label' => 'Tümünü Reddet',
+                        'confirmation_message' => 'Bekleyen tüm katılma isteklerini reddetmek istediğinize emin misiniz?',
+                    ],
+                    'load_more' => [
+                        'label' => 'Daha Fazlasını Yükle',
+                    ],
+                ],
+                'messages' => [
+                    'approved_success' => 'Katılma isteği onaylandı.',
+                    'approved_all_success' => '{1} :count katılma isteği onaylandı.|[2,*] :count katılma isteği onaylandı.',
+                    'dismissed_success' => 'Katılma isteği reddedildi.',
+                    'dismissed_all_success' => '{1} :count katılma isteği reddedildi.|[2,*] :count katılma isteği reddedildi.',
+                ],
+            ],
+            'lobby' => [
+                'heading' => [
+                    'label' => 'Gruba Katıl',
+                ],
+                'labels' => [
+                    'default_group_name' => 'Grup',
+                    'members_count' => ':count üye',
+                    'more_members' => ':count üye daha',
+                    'already_member' => 'Bu grubun zaten bir üyesisiniz.',
+                    'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
+                    'pending_review' => 'Katılma isteğiniz zaten yönetici incelemesinde.',
+                    'requires_approval' => 'Bu gruba katılmak için önce yönetici onayı gerekir.',
+                    'open_access' => 'Bu gruba hemen katılabilirsiniz.',
+                ],
+                'actions' => [
+                    'cancel' => [
+                        'label' => 'Vazgeç',
+                    ],
+                    'open_group' => [
+                        'label' => 'Grubu Aç',
+                    ],
+                    'request_pending' => [
+                        'label' => 'İstek Bekliyor',
+                    ],
+                    'request_to_join' => [
+                        'label' => 'Katılma İsteği Gönder',
+                    ],
+                    'join_group' => [
+                        'label' => 'Gruba Katıl',
+                    ],
+                ],
+                'messages' => [
+                    'invite_inactive' => 'Bu davet bağlantısı artık aktif değil.',
+                    'join_blocked' => 'Şu anda bu davet bağlantısıyla gruba katılamazsınız.',
+                    'pending_request' => 'Katılma isteğiniz zaten beklemede.',
+                    'request_sent' => 'Katılma isteğiniz yöneticilere gönderildi.',
+                ],
+            ],
+        ],
+        'past_members' => [
+            'heading' => [
+                'label' => 'Geçmiş Üyeler',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Geçmiş üyeleri ara',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Geçmiş üye bulunamadı',
+                'reason_left' => 'Gruptan ayrıldı',
+                'reason_removed' => 'Bir yönetici tarafından çıkarıldı',
+                'reason_blocked' => 'Bir yönetici tarafından engellendi',
+                'at' => ':time',
+            ],
+        ],
+        'blocked_members' => [
+            'heading' => [
+                'label' => 'Engellenen Üyeler',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Engellenen üyeleri ara',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Engellenen üye bulunamadı',
+                'helper' => 'Engellenen üyeler, engel kaldırılana kadar yeniden katılamaz.',
+            ],
+            'actions' => [
+                'lift_block' => [
+                    'label' => 'Engeli Kaldır',
+                    'confirmation_message' => ':member için engeli kaldırmak istediğinizden emin misiniz?',
+                ],
+            ],
+            'messages' => [
+                'unblocked_success' => ':member artık grup davet bağlantısıyla yeniden katılabilir.',
+            ],
+        ],
+        'banned_members' => [
+            'heading' => [
+                'label' => 'Yasaklı Üyeler',
+            ],
+            'inputs' => [
+                'search' => [
+                    'placeholder' => 'Yasaklı üyeleri ara',
+                ],
+            ],
+            'labels' => [
+                'no_results' => 'Yasaklı üye bulunamadı',
+                'helper' => 'Yasaklı üyeler, yasak kaldırılana kadar yeniden katılamaz.',
+            ],
+            'actions' => [
+                'lift_ban' => [
+                    'label' => 'Yasağı Kaldır',
+                    'confirmation_message' => ':member için yasağı kaldırmak istediğinizden emin misiniz?',
+                ],
+            ],
+            'messages' => [
+                'unbanned_success' => ':member artık grup davet bağlantısıyla yeniden katılabilir.',
             ],
         ],
 

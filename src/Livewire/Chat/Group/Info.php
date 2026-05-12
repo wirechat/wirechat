@@ -39,9 +39,13 @@ class Info extends ModalComponent
 
     protected $listeners = [
         'participantsCountUpdated',
+        'refresh' => '$refresh',
+        'refreshGroupInfo' => '$refresh',
     ];
 
     public $totalParticipants;
+
+    public int $pendingJoinRequestsCount = 0;
 
     public function participantsCountUpdated(int $newCount)
     {
@@ -90,6 +94,15 @@ class Info extends ModalComponent
         );
 
         $this->conversation->group?->updateOrCreate(['conversation_id' => $this->conversation->id], ['description' => $value]);
+    }
+
+    public function saveDescription(?string $value = null): void
+    {
+        if ($value !== null) {
+            $this->description = $value;
+        }
+
+        $this->updatedDescription($this->description);
     }
 
     /* Update Group name when for submittted */
@@ -240,6 +253,7 @@ class Info extends ModalComponent
 
     public function mount()
     {
+        $this->initializePanel($this->panel);
 
         abort_if(empty($this->conversation), 404);
 
@@ -251,7 +265,7 @@ class Info extends ModalComponent
 
         $this->totalParticipants = $this->conversation->participants_count;
         $this->group = $this->conversation->group;
-
+        $this->pendingJoinRequestsCount = (int) ($this->group?->pendingJoinRequests()->count() ?? 0);
         $this->setDefaultValues();
     }
 
@@ -259,6 +273,9 @@ class Info extends ModalComponent
     {
 
         $participant = $this->conversation->participant(auth()->user());
+        $this->pendingJoinRequestsCount = $this->conversation->isGroup() && $participant?->isAdmin() && $this->panel()->hasGroupInvitations()
+            ? (int) ($this->group?->pendingJoinRequests()->count() ?? 0)
+            : 0;
 
         //  dd($this->isWidget(),$participant);
 

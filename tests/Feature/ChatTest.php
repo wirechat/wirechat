@@ -25,6 +25,7 @@ use Wirechat\Wirechat\Livewire\Chat\Chat as ChatBox;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\MessageRequest;
 use Workbench\App\Models\Admin;
@@ -445,6 +446,109 @@ describe('Presense', function () {
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
             ->assertSee('Older message');
+    });
+
+    test('it renders a group invite preview card from a wirechat invite link in the message body', function () {
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah', 'A place to share ideas');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Follow this link to join my group: '.$invite->url(testPanelProvider())
+        )->conversation;
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])
+            ->assertSee('Yodah')
+            ->assertSee(__('wirechat::chat.group.invite_message.labels.type'))
+            ->assertDontSee('A place to share ideas')
+            ->assertSee('Follow this link to join my group:')
+            ->assertSee(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->assertSee($invite->url(testPanelProvider()));
+    });
+
+    test('it renders an inline invite link without target=_blank so the controller redirect can run', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $inviteUrl = $invite->url(testPanelProvider());
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Join here: '.$inviteUrl.' and also https://example.com'
+        )->conversation;
+
+        $rendered = Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        preg_match_all('~<a[^>]*dusk="message-link"[^>]*>~', $rendered, $matches);
+        $linkTags = $matches[0];
+
+        // Two inline links: the invite URL, and the unrelated external URL.
+        expect($linkTags)->toHaveCount(2);
+
+        $inviteAnchor = collect($linkTags)
+            ->first(fn (string $tag) => str_contains($tag, $inviteUrl));
+        $externalAnchor = collect($linkTags)
+            ->first(fn (string $tag) => str_contains($tag, 'https://example.com'));
+
+        expect($inviteAnchor)->toContain('data-invite-link="true"')
+            ->and($inviteAnchor)->toContain('wire:click.prevent="handleOpenChat(')
+            ->and($inviteAnchor)->not->toContain('target="_blank"');
+
+        // The wire:click param must be encrypted — the raw token/URL must NOT
+        // appear inside the wire:click attribute itself, only inside the href.
+        preg_match("~wire:click\.prevent=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAnchor, $clickMatch);
+
+        expect($clickMatch[1] ?? '')->not->toBe('')
+            ->and($clickMatch[1])->not->toBe($inviteUrl)
+            ->and($clickMatch[1])->not->toBe($invite->token);
+
+        // And the encrypted payload must round-trip back to the canonical URL.
+        expect(decrypt($clickMatch[1]))->toBe($inviteUrl);
+
+        expect($externalAnchor)->toContain('target="_blank"')
+            ->and($externalAnchor)->not->toContain('data-invite-link="true"')
+            ->and($externalAnchor)->not->toContain('handleOpenChat');
+    });
+
+    test('it does not render a group invite preview card for foreign or edited text without a valid wirechat invite link', function () {
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $conversation = $sender->sendMessageTo($receiver, 'Edited invite text https://example.com/chats/invites/not-a-wirechat-link')->conversation;
+
+        Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])
+            ->assertSee('Edited invite text')
+            ->assertDontSee(__('wirechat::chat.group.invite_message.labels.type'))
+            ->assertDontSee(__('wirechat::chat.group.invite_message.actions.view_group.label'));
     });
 
     test('it can render grouped messages when the app uses immutable dates', function () {

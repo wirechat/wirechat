@@ -1,0 +1,83 @@
+<?php
+
+namespace Wirechat\Wirechat\Livewire\Chat\Group\Links;
+
+use Livewire\Attributes\Locked;
+use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Invite;
+use Wirechat\Wirechat\Models\Participant;
+
+class Show extends ModalComponent
+{
+    use HasPanel;
+
+    #[Locked]
+    public Conversation $conversation;
+
+    #[Locked]
+    public Invite $invite;
+
+    public $group;
+
+    protected ?Participant $authParticipant = null;
+
+    public static function modalAttributes(): array
+    {
+        return [
+            'closeOnEscape' => true,
+            'closeOnEscapeIsForceful' => false,
+            'destroyOnClose' => true,
+        ];
+    }
+
+    public function mount(): void
+    {
+        $this->initializePanel($this->panel);
+
+        abort_unless($this->panel()->hasGroupInvitations(), 404);
+
+        abort_unless(auth()->check(), 401);
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'You do not have permission to access this resource');
+        abort_if($this->conversation->isPrivate(), 403, 'This feature is only available for groups');
+
+        $this->conversation = $this->conversation->load('group');
+        $this->group = $this->conversation->group;
+        $this->authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to access invite links');
+
+        abort_unless(
+            $this->invite->inviteable_type === $this->group->getMorphClass()
+            && (string) $this->invite->inviteable_id === (string) $this->group->getKey()
+            && $this->invite->panel_id === $this->panel()->getId(),
+            404,
+            'Invite link not found for this group'
+        );
+
+        $this->invite = $this->invite->loadMissing('createdBy');
+    }
+
+    public function revokeLink(): void
+    {
+        $authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to revoke invite links');
+        abort_if($this->invite->is_primary, 403, 'Primary invite links cannot be revoked here.');
+
+        $this->invite->revoke();
+
+        $this->dispatch('refreshGroupInvites');
+        $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.group.invite_link.show.messages.revoked_success'));
+        $this->closeWirechatModal();
+    }
+
+    public function render()
+    {
+        return view('wirechat::livewire.chat.group.links.show', [
+            'inviteUrl' => $this->invite->url($this->panel()),
+            'canRevokeLink' => (bool) $this->conversation->participant(auth()->user())?->isAdmin() && ! $this->invite->is_primary,
+        ]);
+    }
+}

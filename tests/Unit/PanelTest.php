@@ -5,6 +5,13 @@ use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Wirechat\Wirechat\Support\Enums\UnReadType;
 use Workbench\App\Models\User;
 
+beforeEach(function () {
+    testPanelProvider()->registerRoutes(true);
+    testPanelProvider()->groupInvitations(true);
+    testPanelProvider()->invitePageLayout('wirechat::layouts.app');
+    testPanelProvider()->inviteJoinRedirect(null);
+});
+
 test(' panel hasRoutes is true by default()', function () {
     $auth = User::factory()->create();
 
@@ -21,6 +28,53 @@ test(' panel hasRoutes is false when registerRoutes is FALSE', function () {
 
 });
 
+test('panel hasGroupInvitations is true by default()', function () {
+    expect(testPanelProvider()->hasGroupInvitations())->toBeTrue();
+});
+
+test('panel hasGroupInvitations is false when disabled', function () {
+    testPanelProvider()->groupInvitations(false);
+
+    expect(testPanelProvider()->hasGroupInvitations())->toBeFalse();
+});
+
+test('panel invitePageLayout defaults to wirechat app layout', function () {
+    expect(testPanelProvider()->getInvitePageLayout())->toBe('wirechat::layouts.app');
+});
+
+test('panel invitePageLayout can be customized', function () {
+    testPanelProvider()->invitePageLayout('layouts.guest');
+
+    expect(testPanelProvider()->getInvitePageLayout())->toBe('layouts.guest');
+});
+
+test('panel inviteJoinRedirect is null by default', function () {
+    expect(testPanelProvider()->getInviteJoinRedirectUrl())->toBeNull();
+});
+
+test('panel inviteJoinRedirect can be customized', function () {
+    testPanelProvider()->inviteJoinRedirect('/widget');
+
+    expect(testPanelProvider()->getInviteJoinRedirectUrl())->toBe('/widget');
+});
+
+test('primary utility theme is mapped to the provider palette tokens', function () {
+    $providerContents = file_get_contents(__DIR__.'/../../src/WirechatServiceProvider.php');
+    $cssContents = file_get_contents(__DIR__.'/../../resources/css/app.css');
+
+    expect($providerContents)
+        ->toContain('--wc-primary-50: {$primary50};')
+        ->toContain('--wc-primary-500: {$primary500};')
+        ->toContain('--wc-primary-950: {$primary950};')
+        ->toContain('--wc-brand-primary: var(--wc-primary-500);');
+
+    expect($cssContents)
+        ->toContain('@theme inline {')
+        ->toContain('--color-primary-50: var(--wc-primary-50);')
+        ->toContain('--color-primary-500: var(--wc-primary-500);')
+        ->toContain('--color-primary-950: var(--wc-primary-950);');
+
+});
 test('panel unread messages type defaults to dot', function () {
     User::factory()->create();
 

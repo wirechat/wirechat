@@ -39,6 +39,20 @@ trait HasRoutes
     public const CHAT_ROUTE_NAME = 'chat';
 
     /**
+     * Route name for the invite preview route.
+     *
+     * @const string
+     */
+    public const INVITE_SHOW_ROUTE_NAME = 'invite.show';
+
+    /**
+     * Route name for the invite join route.
+     *
+     * @const string
+     */
+    public const INVITE_JOIN_ROUTE_NAME = 'invite.join';
+
+    /**
      * Check if panel has registered routes
      */
     public function hasRoutes(): bool
@@ -143,6 +157,22 @@ trait HasRoutes
     }
 
     /**
+     * Gets the fully qualified route name for the invite preview route.
+     */
+    public function getInviteRouteName(): string
+    {
+        return $this->generateRouteName(self::INVITE_SHOW_ROUTE_NAME);
+    }
+
+    /**
+     * Gets the fully qualified route name for the invite join route.
+     */
+    public function getInviteJoinRouteName(): string
+    {
+        return $this->generateRouteName(self::INVITE_JOIN_ROUTE_NAME);
+    }
+
+    /**
      * Generates a URL for a named route within the panel.
      *
      * @param  string  $name  The base route name (e.g., 'chats', 'chat').
@@ -177,5 +207,25 @@ trait HasRoutes
     public function chatRoute(mixed $conversation, bool $absolute = true): string
     {
         return $this->route(self::CHAT_ROUTE_NAME, ['conversation' => $conversation], $absolute);
+    }
+
+    /**
+     * Generates a URL for the invite preview route.
+     *
+     * @param  mixed  $token  The invite token or model route key.
+     */
+    public function inviteRoute(mixed $token, bool $absolute = true): string
+    {
+        return $this->route(self::INVITE_SHOW_ROUTE_NAME, ['token' => $token], $absolute);
+    }
+
+    /**
+     * Generates a URL for the invite join route.
+     *
+     * @param  mixed  $token  The invite token or model route key.
+     */
+    public function inviteJoinRoute(mixed $token, bool $absolute = true): string
+    {
+        return $this->route(self::INVITE_JOIN_ROUTE_NAME, ['token' => $token], $absolute);
     }
 }

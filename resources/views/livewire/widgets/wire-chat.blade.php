@@ -18,7 +18,7 @@
                     closeOnEscapeIsForceful: false,
                     dispatchCloseEvent: false,
                     destroyOnClose: false,
-                    closeModalOnClickAway:false,
+                    closeOnClickAway:false,
                     closeChatWidgetOnEscape(trigger) {
 
                         ///Only proceed if the trigger is for ChatDrawer
@@ -127,7 +127,7 @@
                         this.closeOnEscapeIsForceful = attributes.closeOnEscapeIsForceful ?? false;
                         this.dispatchCloseEvent = attributes.dispatchCloseEvent ?? false;
                         this.destroyOnClose = attributes.destroyOnClose ?? false;
-                        this.closeModalOnClickAway = attributes.closeModalOnClickAway ?? false;
+                        this.closeOnClickAway = attributes.closeOnClickAway ?? false;
 
                         this.$nextTick(() => {
                             let focusable = this.$refs[id]?.querySelector('[autofocus]');

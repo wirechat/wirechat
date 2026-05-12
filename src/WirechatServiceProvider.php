@@ -2,7 +2,10 @@
 
 namespace Wirechat\Wirechat;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Console\Commands\InstallWirechat;
@@ -14,9 +17,17 @@ use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
 use Wirechat\Wirechat\Facades\WirechatColor;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
-use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
-use Wirechat\Wirechat\Livewire\Chat\Group\Members;
+use Wirechat\Wirechat\Livewire\Chat\Group\Join\Lobby;
+use Wirechat\Wirechat\Livewire\Chat\Group\Join\Requests;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\Show;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\Banned;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\Members;
+use Wirechat\Wirechat\Livewire\Chat\Group\Members\PastMembers;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
 use Wirechat\Wirechat\Livewire\Chat\Info;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
@@ -60,6 +71,7 @@ class WirechatServiceProvider extends ServiceProvider
         //        app(\Wirechat\Wirechat\PanelRegistry::class)->autoDiscover();
 
         $this->loadLivewireComponents();
+        $this->configureRateLimiting();
 
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
@@ -171,12 +183,51 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.info', Info::class);
         Livewire::component('wirechat.chat.group.info', GroupInfo::class);
         Livewire::component('wirechat.chat.drawer', Drawer::class);
+        Livewire::component('wirechat.chat.group.members.add', AddMembers::class);
+        Livewire::component('wirechat.chat.group.members.list', Members::class);
+        Livewire::component('wirechat.chat.group.members.past', PastMembers::class);
+        Livewire::component('wirechat.chat.group.members.banned', Banned::class);
+        Livewire::component('wirechat.chat.group.permissions', Permissions::class);
+        Livewire::component('wirechat.chat.group.links.links', Links::class);
+        Livewire::component('wirechat.chat.group.links.list', \Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks::class);
+        Livewire::component('wirechat.chat.group.links.create', Create::class);
+        Livewire::component('wirechat.chat.group.links.show', Show::class);
+        Livewire::component('wirechat.chat.group.join.lobby', Lobby::class);
+        Livewire::component('wirechat.chat.group.join.requests', Requests::class);
+        Livewire::component('wirechat.chat.group.links.send', Send::class);
+
+        // Backwards-compatible aliases for existing integrations.
         Livewire::component('wirechat.chat.group.add-members', AddMembers::class);
         Livewire::component('wirechat.chat.group.members', Members::class);
-        Livewire::component('wirechat.chat.group.permissions', Permissions::class);
+        Livewire::component('wirechat.chat.group.past-members', PastMembers::class);
+        Livewire::component('wirechat.chat.group.banned-members', Banned::class);
+        Livewire::component('wirechat.chat.group.link.list', Links::class);
+        Livewire::component('wirechat.chat.group.link.create', Create::class);
+        Livewire::component('wirechat.chat.group.link.show', Show::class);
+        Livewire::component('wirechat.chat.group.link.send', Send::class);
+        Livewire::component('wirechat.chat.group.invite-link', Links::class);
+        Livewire::component('wirechat.chat.group.create-invite-link', Create::class);
+        Livewire::component('wirechat.chat.group.invite-link-details', Show::class);
+        Livewire::component('wirechat.chat.group.send-invite-link', Send::class);
 
         // stand alone widget component
         Livewire::component('wirechat', Wirechat::class);
+    }
+
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('wirechat-invite', function (Request $request) {
+            $token = (string) $request->route('token');
+            $method = strtolower($request->method());
+            $maxAttempts = $request->isMethod('POST') ? 10 : 30;
+
+            return Limit::perMinute($maxAttempts)->by(implode(':', [
+                'wirechat-invite',
+                $method,
+                $request->ip() ?? 'unknown',
+                $token,
+            ]));
+        });
     }
 
     protected function registerMiddlewares(): void
@@ -326,6 +377,7 @@ class WirechatServiceProvider extends ServiceProvider
 
             $colors = [
                 'primary' => Color::Blue,
+                'light' => Color::Zinc,
                 'gray' => Color::Zinc,
                 'dark' => Color::Zinc,
             ];
@@ -344,21 +396,54 @@ class WirechatServiceProvider extends ServiceProvider
 
             $primaryPalette = $colors['primary'] ?? Color::Blue;
             $grayPalette = $colors['gray'] ?? Color::Zinc;
+            $lightPalette = $colors['light'] ?? $grayPalette;
             $darkPalette = $colors['dark'] ?? Color::Zinc;
 
-            $primaryColor = $primaryPalette[500] ?? Color::Blue[500];
-            $lightSecondary = $grayPalette[100] ?? Color::Zinc[100];
-            $lightAccent = $grayPalette[50] ?? Color::Zinc[50];
-            $lightBorder = $grayPalette[200] ?? Color::Zinc[200];
+            $primary50 = $primaryPalette[50] ?? Color::Blue[50];
+            $primary100 = $primaryPalette[100] ?? Color::Blue[100];
+            $primary200 = $primaryPalette[200] ?? Color::Blue[200];
+            $primary300 = $primaryPalette[300] ?? Color::Blue[300];
+            $primary400 = $primaryPalette[400] ?? Color::Blue[400];
+            $primary500 = $primaryPalette[500] ?? Color::Blue[500];
+            $primary600 = $primaryPalette[600] ?? Color::Blue[600];
+            $primary700 = $primaryPalette[700] ?? Color::Blue[700];
+            $primary800 = $primaryPalette[800] ?? Color::Blue[800];
+            $primary900 = $primaryPalette[900] ?? Color::Blue[900];
+            $primary950 = $primaryPalette[950] ?? Color::Blue[950];
+
+            $lightSecondary = $lightPalette[100] ?? Color::Zinc[100];
+            $lightAccent = $lightPalette[50] ?? Color::Zinc[50];
+            $lightBorder = $lightPalette[200] ?? Color::Zinc[200];
             $darkPrimary = $darkPalette[900] ?? Color::Zinc[900];
             $darkSecondary = $darkPalette[800] ?? Color::Zinc[800];
             $darkAccent = $darkPalette[700] ?? Color::Zinc[700];
             $darkBorder = $darkPalette[700] ?? Color::Zinc[700];
 
             return "<?php echo <<<EOT
-                <style>
-                    :root {
-                        --wc-brand-primary: {$primaryColor};
+                    <style>
+                        :root {
+                            --wc-primary-50: {$primary50};
+                            --wc-primary-100: {$primary100};
+                            --wc-primary-200: {$primary200};
+                            --wc-primary-300: {$primary300};
+                            --wc-primary-400: {$primary400};
+                            --wc-primary-500: {$primary500};
+                            --wc-primary-600: {$primary600};
+                            --wc-primary-700: {$primary700};
+                            --wc-primary-800: {$primary800};
+                            --wc-primary-900: {$primary900};
+                            --wc-primary-950: {$primary950};
+                            --wc-brand-primary: var(--wc-primary-500);
+                            --primary-50: {$primary50};
+                            --primary-100:{$primary100};
+                            --primary-200: {$primary200};
+                            --primary-300: {$primary300};
+                            --primary-400: {$primary400};
+                            --primary-500: {$primary500};
+                            --primary-600: {$primary600};
+                            --primary-700: {$primary700};
+                            --primary-800: {$primary800};
+                            --primary-900: {$primary900};
 
                         --wc-light-primary: #fff;  /* white */
                         --wc-light-secondary: {$lightSecondary};/* --color-zinc-100 */

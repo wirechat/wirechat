@@ -10,6 +10,23 @@
      x-on:chat-closed.window="selectedConversationId = null"
      x-init="
         const container = document.getElementById('wirechat-chats-scrollable-container');
+        const pendingInviteToken = @js($pendingInviteToken);
+        const pendingInvitePanel = @js($pendingInvitePanel);
+
+        if (pendingInviteToken && @js($this->panel()->hasGroupInvitations())) {
+            const invitePanel = pendingInvitePanel || @js($this->panel);
+
+            setTimeout(() => {
+                Livewire.dispatch('openWirechatModal', {
+                    component: 'wirechat.chat.group.join.lobby',
+                    arguments: {
+                        token: pendingInviteToken,
+                        panel: invitePanel,
+                        widget: @js($this->widget)
+                    }
+                });
+            }, 250);
+        }
 
         function scrollToConversation(attempts = 10, delay = 200) {
             requestAnimationFrame(() => {
@@ -34,7 +51,7 @@
             const finalScroll = Math.max(0, Math.min(scrollOffset, maxScroll));
 
             // Animate scroll
-        
+
                 container.scrollTo({ top: finalScroll, behavior: 'smooth' });
             });
         }
