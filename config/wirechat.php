@@ -38,6 +38,7 @@ return [
         'message' => \Wirechat\Wirechat\Models\Message::class,
         'message_request' => \Wirechat\Wirechat\Models\MessageRequest::class,
         'participant' => \Wirechat\Wirechat\Models\Participant::class,
+        'setting' => \Wirechat\Wirechat\Models\Setting::class,
     ],
 
     /*

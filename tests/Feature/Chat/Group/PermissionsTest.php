@@ -108,6 +108,19 @@ describe('Presence check', function () {
             ->assertSee(__('wirechat::chat.group.permissions.actions.add_other_members.label'))
             ->assertPropertyWired('allow_members_to_add_others');
     });
+
+    test('"Invite others via link" label is set and property wired', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createGroup('Test');
+        $conversation->addParticipant($receiver);
+
+        Livewire::actingAs($auth)->test(Permissions::class, ['conversation' => $conversation])
+            ->assertSee(__('wirechat::chat.group.permissions.actions.invite_others_via_link.label'))
+            ->assertPropertyWired('allow_members_to_invite_others_via_link');
+    });
 });
 
 describe('Actions', function () {
@@ -157,6 +170,28 @@ describe('Actions', function () {
         $group = $conversation->group;
         $group->refresh();
         expect($group->allow_members_to_add_others)->toBe(false);
+
+    });
+
+    test('it can toggle "allow_members_to_invite_others_via_link" permission', function () {
+
+        $auth = User::factory()->create(['id' => '345678']);
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createGroup('Test');
+        $conversation->addParticipant($receiver);
+
+        $request = Livewire::actingAs($auth)->test(Permissions::class, ['conversation' => $conversation]);
+
+        $request->set('allow_members_to_invite_others_via_link', true);
+        $group = $conversation->group;
+        $group->refresh();
+        expect($group->allow_members_to_invite_others_via_link)->toBe(true);
+
+        $request->set('allow_members_to_invite_others_via_link', false);
+        $group = $conversation->group;
+        $group->refresh();
+        expect($group->allow_members_to_invite_others_via_link)->toBe(false);
 
     });
 

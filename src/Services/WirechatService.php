@@ -2,6 +2,7 @@
 
 namespace Wirechat\Wirechat\Services;
 
+use Illuminate\Database\Eloquent\Model;
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
@@ -10,9 +11,11 @@ use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Models\Setting;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
 use Wirechat\Wirechat\Services\Concerns\InteractsWithLinks;
+use Wirechat\Wirechat\Settings\UserSettings;
 
 class WirechatService
 {
@@ -80,6 +83,16 @@ class WirechatService
     {
 
         return new StorageService;
+    }
+
+    public function settings(Model $owner): UserSettings
+    {
+        return app(WirechatSettingsManager::class)->for($owner);
+    }
+
+    public function settingsManager(): WirechatSettingsManager
+    {
+        return app(WirechatSettingsManager::class);
     }
 
     public function currentPanel(): ?Panel
@@ -376,6 +389,21 @@ class WirechatService
     }
 
     /**
+     * Get the Setting model class from the configuration.
+     *
+     * @return class-string<Setting> The Setting model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function settingModelClass(): string
+    {
+        $class = (string) config('wirechat.models.setting', Setting::class);
+        $this->validateModelClass($class, Setting::class, 'wirechat.models.setting');
+
+        return $class;
+    }
+
+    /**
      * Validate that a model class exists and extends the expected base class.
      *
      * @param  string  $class  The class to validate.
@@ -470,6 +498,16 @@ class WirechatService
     }
 
     /**
+     * Get the Setting model table name.
+     *
+     * @return string The Setting model table name.
+     */
+    public function settingModelTable(): string
+    {
+        return $this->getCachedTableName('setting', fn () => $this->settingModel());
+    }
+
+    /**
      * Create a new Action model instance.
      *
      * @param  array  $attributes  The attributes to set on the model.
@@ -544,5 +582,16 @@ class WirechatService
     public function participantModel(array $attributes = []): Participant
     {
         return new ($this->participantModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Setting model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Setting The Setting model instance.
+     */
+    public function settingModel(array $attributes = []): Setting
+    {
+        return new ($this->settingModelClass())($attributes);
     }
 }

@@ -298,6 +298,10 @@ return [
                 'add_other_members' => [
                     'label' => "Ajouter d'autres membres",
                 ],
+                'invite_others_via_link' => [
+                    'label' => 'Inviter via un lien',
+                    'helper_text' => "Autoriser les membres à copier et envoyer le lien d'invitation principal du groupe",
+                ],
                 'admin_approval' => [
                     'label' => 'Approuver les nouveaux membres',
                     'helper_text' => "Exiger l'approbation d'un administrateur pour les personnes qui rejoignent via un lien d'invitation",

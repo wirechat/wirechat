@@ -119,12 +119,29 @@ describe('presence test', function () {
             ->assertSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'));
     });
 
-    test('participants with add-members permission see the copy invite link shortcut', function () {
+    test('participants with add-members permission do not see the copy invite link shortcut without invite-link permission', function () {
         $owner = User::factory()->create();
         $member = User::factory()->create();
 
         $conversation = $owner->createGroup('My Group');
         $conversation->group->allow_members_to_add_others = true;
+        $conversation->group->save();
+
+        $participant = $conversation->addParticipant($member);
+        $participant->role = ParticipantRole::PARTICIPANT;
+        $participant->save();
+
+        Livewire::actingAs($member)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertDontSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'));
+    });
+
+    test('participants with add-members and invite-link permissions see the copy invite link shortcut', function () {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+
+        $conversation = $owner->createGroup('My Group');
+        $conversation->group->allow_members_to_add_others = true;
+        $conversation->group->allow_members_to_invite_others_via_link = true;
         $conversation->group->save();
 
         $participant = $conversation->addParticipant($member);

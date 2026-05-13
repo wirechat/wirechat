@@ -44,6 +44,7 @@ use Wirechat\Wirechat\Middleware\EnsureWirechatPanelAccess;
 use Wirechat\Wirechat\Middleware\SetCurrentPanel;
 use Wirechat\Wirechat\Services\ColorService;
 use Wirechat\Wirechat\Services\WirechatService;
+use Wirechat\Wirechat\Services\WirechatSettingsManager;
 use Wirechat\Wirechat\Support\Color;
 
 class WirechatServiceProvider extends ServiceProvider
@@ -152,6 +153,7 @@ class WirechatServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ColorService::class, fn () => new ColorService);
+        $this->app->singleton(WirechatSettingsManager::class, fn () => new WirechatSettingsManager);
 
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container

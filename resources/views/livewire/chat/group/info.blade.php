@@ -7,6 +7,7 @@
         $isGroup = $conversation?->isGroup();
         $group = $conversation?->group;
         $canManageInvites = $authIsAdminInGroup && $this->panel()->hasGroupInvitations();
+        $canUseInviteLinks = ($authIsAdminInGroup || $group?->allowsMembersToInviteOthersViaLink()) && $this->panel()->hasGroupInvitations();
     @endphp
 
     <section class="cursor-pointer flex gap-4 z-10  items-center p-5 sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  ">
@@ -229,7 +230,7 @@
             </x-wirechat::actions.open-modal>
         @endif
 
-        @if ($canManageInvites)
+        @if ($canUseInviteLinks)
             <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.links.links"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex gap-3 items-center">
@@ -238,7 +239,9 @@
                     <span>{{ __('wirechat::chat.group.info.actions.invite_via_link.label') }}</span>
                 </button>
             </x-wirechat::actions.open-chat-drawer>
+        @endif
 
+        @if ($canManageInvites)
             <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.join.requests"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex items-center justify-between gap-3">

@@ -71,9 +71,7 @@ class Send extends ModalComponent
 
     public function toggleMember($id, string $class): void
     {
-        $authParticipant = $this->conversation->participant(auth()->user());
-
-        abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to send group invite links');
+        $this->authorizeSendAccess();
 
         $model = $this->resolvePanelSearchResult($id, $class);
 
@@ -96,9 +94,7 @@ class Send extends ModalComponent
 
     public function save(): void
     {
-        $authParticipant = $this->conversation->participant(auth()->user());
-
-        abort_unless($authParticipant?->isAdmin(), 403, 'You do not have permission to send group invite links');
+        $this->authorizeSendAccess();
 
         if ($this->selectedMembers->isEmpty()) {
             return;
@@ -151,7 +147,7 @@ class Send extends ModalComponent
         $this->group = $this->conversation->group;
         $this->authParticipant = $this->conversation->participant(auth()->user());
 
-        abort_unless($this->authParticipant?->isAdmin(), 403, 'You do not have permission to send group invite links');
+        $this->authorizeSendAccess();
 
         abort_unless(
             $this->invite->inviteable_type === $this->group->getMorphClass() && (string) $this->invite->inviteable_id === (string) $this->group->getKey(),
@@ -194,5 +190,18 @@ class Send extends ModalComponent
         }
 
         return true;
+    }
+
+    protected function authorizeSendAccess(): void
+    {
+        $this->authParticipant = $this->conversation->participant(auth()->user());
+
+        abort_unless(
+            $this->authParticipant?->isAdmin() || $this->group?->allowsMembersToInviteOthersViaLink(),
+            403,
+            'You do not have permission to send group invite links'
+        );
+
+        abort_unless($this->authParticipant?->isAdmin() || $this->invite->is_primary, 403, 'You do not have permission to send this invite link');
     }
 }

@@ -34,6 +34,8 @@ class Permissions extends ModalComponent
 
     public bool $allow_members_to_add_others = false;
 
+    public bool $allow_members_to_invite_others_via_link = false;
+
     public bool $allow_members_to_edit_group_info = false;
 
     public bool $admins_must_approve_new_members = false;
@@ -82,6 +84,7 @@ class Permissions extends ModalComponent
 
         $this->allow_members_to_send_messages = $this->group->allow_members_to_send_messages;
         $this->allow_members_to_add_others = $this->group->allow_members_to_add_others;
+        $this->allow_members_to_invite_others_via_link = $this->group->allow_members_to_invite_others_via_link;
         $this->allow_members_to_edit_group_info = $this->group->allow_members_to_edit_group_info;
         $this->admins_must_approve_new_members = (bool) $this->group->admins_must_approve_new_members;
 

@@ -318,6 +318,10 @@ return [
                 'add_other_members' => [
                     'label' => 'Add Other Members',
                 ],
+                'invite_others_via_link' => [
+                    'label' => 'Invite Others Via Link',
+                    'helper_text' => 'Allow members to copy and send the primary group invite link',
+                ],
                 'admin_approval' => [
                     'label' => 'Approve New Members',
                     'helper_text' => 'Require admins to approve people who join from an invite link',

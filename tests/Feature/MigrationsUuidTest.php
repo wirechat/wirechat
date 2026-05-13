@@ -8,11 +8,13 @@ use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Models\Setting;
 
 beforeEach(function () {
     // Drop all tables to ensure clean state
     Schema::dropIfExists((new Action)->getTable());
     Schema::dropIfExists((new Attachment)->getTable());
+    Schema::dropIfExists((new Setting)->getTable());
     Schema::dropIfExists((new Group)->getTable());
     Schema::dropIfExists((new Participant)->getTable());
     Schema::dropIfExists((new Message)->getTable());
@@ -144,5 +146,27 @@ describe('UUID configuration in migrations', function () {
         $actorType = Schema::getColumnType((new Action)->getTable(), 'actor_id');
         expect(isUuidColumnType($actionableType))->toBefalse();
         expect(isUuidColumnType($actorType))->toBefalse();
+    });
+
+    test('settings migration creates metadata columns invite permission and settings table', function () {
+        Config::set('wirechat.uses_uuid_for_conversations', false);
+        Config::set('wirechat.uuids', false);
+
+        $convMigration = include __DIR__.'/../../database/migrations/2024_11_01_000001_create_wirechat_conversations_table.php';
+        $convMigration->up();
+
+        $groupMigration = include __DIR__.'/../../database/migrations/2024_11_01_000007_create_wirechat_groups_table.php';
+        $groupMigration->up();
+
+        $migration = include __DIR__.'/../../database/migrations/2026_05_13_000001_create_wirechat_settings_table.php';
+        $migration->up();
+
+        expect(Schema::hasColumn((new Conversation)->getTable(), 'meta'))->toBeTrue()
+            ->and(Schema::hasColumn((new Group)->getTable(), 'meta'))->toBeTrue()
+            ->and(Schema::hasColumn((new Group)->getTable(), 'allow_members_to_invite_others_via_link'))->toBeTrue()
+            ->and(Schema::hasTable((new Setting)->getTable()))->toBeTrue()
+            ->and(Schema::hasColumn((new Setting)->getTable(), 'owner_id'))->toBeTrue()
+            ->and(Schema::hasColumn((new Setting)->getTable(), 'owner_type'))->toBeTrue()
+            ->and(Schema::hasColumn((new Setting)->getTable(), 'data'))->toBeTrue();
     });
 });

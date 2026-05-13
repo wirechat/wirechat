@@ -188,6 +188,10 @@ class AddMembers extends ModalComponent
             return null;
         }
 
+        if (! $this->authParticipant?->isAdmin() && ! $this->group?->allowsMembersToInviteOthersViaLink()) {
+            return null;
+        }
+
         $invite = $this->group->inviteLinks()
             ->active()
             ->where('panel_id', $this->panel()->getId())
