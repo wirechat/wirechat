@@ -50,11 +50,12 @@ class NotifyParticipant implements ShouldBroadcastNow
         $this->resolvePanel($panel);
 
         // Eager-load the participant and its participantable (the sender),
-        // and the participant's conversation with group, plus any attachment.
+        // the message conversation, and the participant's conversation with group.
         // We use loadMissing so we don't override already-loaded relationships.
         $this->message->loadMissing([
+            'conversation.group.cover',
             'participant.participantable',
-            'participant.conversation.group',
+            'participant.conversation.group.cover',
             'attachment',
         ]);
 
@@ -111,10 +112,12 @@ class NotifyParticipant implements ShouldBroadcastNow
     }
 
     /**
-     * @return array{enabled: bool, show_preview: bool}
+     * @return array{enabled: bool, show_preview: bool, conversation_name: string|null, conversation_avatar_url: string|null}
      */
     protected function notificationPreferences($conversation): array
     {
+        $conversation?->loadMissing('group.cover');
+
         $recipient = $this->participant instanceof Participant
             ? $this->participant->participantable
             : $this->participant;
@@ -127,6 +130,12 @@ class NotifyParticipant implements ShouldBroadcastNow
         return [
             'enabled' => $settings->notifications_enabled && $conversationNotificationsEnabled,
             'show_preview' => $settings->notification_previews_enabled,
+            'conversation_name' => $conversation?->isGroup()
+                ? ($conversation->group?->name ?: __('wirechat::chat.group.invite_link.page.labels.group_fallback'))
+                : null,
+            'conversation_avatar_url' => $conversation?->isGroup()
+                ? $conversation->group?->cover_url
+                : null,
         ];
     }
 }

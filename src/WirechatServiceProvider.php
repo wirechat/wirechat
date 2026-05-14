@@ -267,6 +267,7 @@ class WirechatServiceProvider extends ServiceProvider
                 $privatePreviewDisabledTitle = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_title'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
                 $privatePreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
                 $groupPreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.group_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+                $groupNotificationFallbackTitle = json_encode(__('wirechat::chat.group.invite_link.page.labels.group_fallback'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 
                 $script = <<<HTML
                              <script>
@@ -321,15 +322,16 @@ class WirechatServiceProvider extends ServiceProvider
                                         const privatePreviewDisabledTitle = {$privatePreviewDisabledTitle};
                                         const privatePreviewDisabledBody = {$privatePreviewDisabledBody};
                                         const groupPreviewDisabledBody = {$groupPreviewDisabledBody};
+                                        const groupNotificationFallbackTitle = {$groupNotificationFallbackTitle};
 
                                         let title = senderName;
                                         let body  = showPreview ? (e.message.body || '') : privatePreviewDisabledBody.replace(':sender', senderName);
                                         let icon  = e.message.sendable?.wirechat_avatar_url;
 
                                         if (e.message.conversation.type === 'group') {
-                                            title = e.message.conversation?.group?.name;
+                                            title = e.notification?.conversation_name || e.message.conversation?.group?.name || groupNotificationFallbackTitle;
                                             body  = showPreview ? senderName + ': ' + (e.message.body || '') : groupPreviewDisabledBody.replace(':sender', senderName);
-                                            icon  = e.message.conversation?.group?.cover_url;
+                                            icon  = e.notification?.conversation_avatar_url || e.message.conversation?.group?.cover_url;
                                         } else if (!showPreview) {
                                             title = privatePreviewDisabledTitle;
                                         }

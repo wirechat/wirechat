@@ -73,6 +73,8 @@ describe(' Data verifiction ', function () {
             expect($broadcastMessage['notification'])->toBe([
                 'enabled' => false,
                 'show_preview' => false,
+                'conversation_name' => null,
+                'conversation_avatar_url' => null,
             ]);
 
             return true;
@@ -104,7 +106,11 @@ describe(' Data verifiction ', function () {
             expect($broadcastMessage['notification'])->toBe([
                 'enabled' => false,
                 'show_preview' => true,
+                'conversation_name' => 'New group',
+                'conversation_avatar_url' => null,
             ]);
+
+            expect($broadcastMessage['message']['conversation']['group']['name'])->toBe('New group');
 
             return true;
         });
