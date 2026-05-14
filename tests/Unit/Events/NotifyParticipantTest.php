@@ -50,6 +50,66 @@ describe(' Data verifiction ', function () {
         });
     });
 
+    test('notification preferences are present for private messages', function () {
+        Event::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $receiver->wirechatSettings()->create([
+            'data' => [
+                'direct_message_notifications_enabled' => false,
+                'notification_previews_enabled' => false,
+            ],
+        ]);
+
+        $message = $auth->sendMessageTo($receiver, 'hello');
+        $participant = $message->conversation->participant($receiver);
+
+        NotifyParticipant::dispatch($participant, $message);
+
+        Event::assertDispatched(NotifyParticipant::class, function ($event) {
+            $broadcastMessage = (array) $event->broadcastWith();
+
+            expect($broadcastMessage['notification'])->toBe([
+                'enabled' => false,
+                'show_preview' => false,
+            ]);
+
+            return true;
+        });
+    });
+
+    test('notification preferences are present for group messages', function () {
+        Event::fake();
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $receiver->wirechatSettings()->create([
+            'data' => [
+                'group_message_notifications_enabled' => false,
+            ],
+        ]);
+
+        $conversation = $auth->createGroup(name: 'New group', description: 'description');
+        $conversation->addParticipant($receiver);
+
+        $message = $auth->sendMessageTo($conversation, 'hello');
+        $participant = $message->conversation->participant($receiver);
+
+        NotifyParticipant::dispatch($participant, $message);
+
+        Event::assertDispatched(NotifyParticipant::class, function ($event) {
+            $broadcastMessage = (array) $event->broadcastWith();
+
+            expect($broadcastMessage['notification'])->toBe([
+                'enabled' => false,
+                'show_preview' => true,
+            ]);
+
+            return true;
+        });
+    });
+
     it('broadcasts on correct  private channnel when Particiapant model is param ', function () {
         Event::fake();
         $auth = User::factory()->create();

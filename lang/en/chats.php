@@ -63,7 +63,7 @@ return [
         'options' => [
             'notifications' => [
                 'label' => 'Notifications',
-                'description' => 'Messages, groups, sounds',
+                'description' => 'Messages, groups, previews',
             ],
         ],
         'notifications' => [
@@ -81,10 +81,11 @@ return [
                     'label' => 'Show previews',
                     'description' => 'Preview message text inside notifications.',
                 ],
-                'sounds' => [
-                    'label' => 'Sounds',
-                    'description' => 'Play a sound for incoming messages.',
-                ],
+            ],
+            'preview_disabled' => [
+                'private_title' => 'New message',
+                'private_body' => ':sender sent you a message',
+                'group_body' => ':sender sent a message',
             ],
         ],
     ],

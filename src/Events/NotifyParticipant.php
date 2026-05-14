@@ -9,6 +9,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Http\Resources\MessageResource;
 use Wirechat\Wirechat\Models\Message;
@@ -37,6 +38,8 @@ class NotifyParticipant implements ShouldBroadcastNow
     public function __construct(public Participant|Model $participant, public Message $message, ?string $panel = null)
     {
         if ($participant instanceof Participant) {
+            $participant->loadMissing('participantable');
+
             $this->participantType = $participant->participantable_type;
             $this->participantId = $participant->participantable_id;
         } else {
@@ -103,6 +106,27 @@ class NotifyParticipant implements ShouldBroadcastNow
             'message' => new MessageResource($this->message),
             'redirect_url' => $this->getPanel()->chatRoute($conversationId),
             'is_request' => $isMessageRequest,
+            'notification' => $this->notificationPreferences($conversation),
+        ];
+    }
+
+    /**
+     * @return array{enabled: bool, show_preview: bool}
+     */
+    protected function notificationPreferences($conversation): array
+    {
+        $recipient = $this->participant instanceof Participant
+            ? $this->participant->participantable
+            : $this->participant;
+
+        $settings = Wirechat::settings($recipient);
+        $conversationNotificationsEnabled = $conversation?->isGroup()
+            ? $settings->group_message_notifications_enabled
+            : $settings->direct_message_notifications_enabled;
+
+        return [
+            'enabled' => $settings->notifications_enabled && $conversationNotificationsEnabled,
+            'show_preview' => $settings->notification_previews_enabled,
         ];
     }
 }

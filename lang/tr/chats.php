@@ -63,7 +63,7 @@ return [
         'options' => [
             'notifications' => [
                 'label' => 'Bildirimler',
-                'description' => 'Mesajlar, gruplar, sesler',
+                'description' => 'Mesajlar, gruplar, önizlemeler',
             ],
         ],
         'notifications' => [
@@ -81,10 +81,11 @@ return [
                     'label' => 'Önizlemeleri göster',
                     'description' => 'Bildirimlerde mesaj metnini önizle.',
                 ],
-                'sounds' => [
-                    'label' => 'Sesler',
-                    'description' => 'Gelen mesajlar için ses çal.',
-                ],
+            ],
+            'preview_disabled' => [
+                'private_title' => 'Yeni mesaj',
+                'private_body' => ':sender sana bir mesaj gönderdi',
+                'group_body' => ':sender bir mesaj gönderdi',
             ],
         ],
     ],

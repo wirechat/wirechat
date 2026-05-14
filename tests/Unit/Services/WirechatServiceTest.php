@@ -223,6 +223,9 @@ describe('WirechatService Model Resolution', function () {
             expect($settings)->toBeInstanceOf(UserSettings::class)
                 ->and($settings->toArray())->toBe([
                     'notifications_enabled' => true,
+                    'direct_message_notifications_enabled' => true,
+                    'group_message_notifications_enabled' => true,
+                    'notification_previews_enabled' => true,
                     'sound_enabled' => true,
                     'read_receipts_enabled' => true,
                 ])
@@ -233,14 +236,14 @@ describe('WirechatService Model Resolution', function () {
             $user = User::factory()->create();
             $manager = app(WirechatSettingsManager::class);
 
-            $manager->saveFor($user, new UserSettings(sound_enabled: false));
+            $manager->saveFor($user, new UserSettings(group_message_notifications_enabled: false));
 
             $row = Setting::query()->first();
 
             expect($row)->not->toBeNull()
                 ->and($row->owner_id)->toBe($user->getKey())
                 ->and($row->owner_type)->toBe($user->getMorphClass())
-                ->and($row->data)->toBe(['sound_enabled' => false]);
+                ->and($row->data)->toBe(['group_message_notifications_enabled' => false]);
 
             $manager->saveFor($user, new UserSettings);
 
@@ -251,14 +254,14 @@ describe('WirechatService Model Resolution', function () {
             $user = User::factory()->create();
             $manager = app(WirechatSettingsManager::class);
 
-            $manager->saveFor($user, new UserSettings(sound_enabled: false));
-            $settings = $manager->updateFor($user, ['read_receipts_enabled' => false]);
+            $manager->saveFor($user, new UserSettings(direct_message_notifications_enabled: false));
+            $settings = $manager->updateFor($user, ['notification_previews_enabled' => false]);
 
-            expect($settings->sound_enabled)->toBeFalse()
-                ->and($settings->read_receipts_enabled)->toBeFalse()
+            expect($settings->direct_message_notifications_enabled)->toBeFalse()
+                ->and($settings->notification_previews_enabled)->toBeFalse()
                 ->and(Setting::query()->first()?->data)->toBe([
-                    'sound_enabled' => false,
-                    'read_receipts_enabled' => false,
+                    'direct_message_notifications_enabled' => false,
+                    'notification_previews_enabled' => false,
                 ]);
         });
 

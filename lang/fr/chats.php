@@ -61,7 +61,7 @@ return [
         'options' => [
             'notifications' => [
                 'label' => 'Notifications',
-                'description' => 'Messages, groupes, sons',
+                'description' => 'Messages, groupes, aperçus',
             ],
         ],
         'notifications' => [
@@ -79,10 +79,11 @@ return [
                     'label' => 'Afficher les aperçus',
                     'description' => 'Afficher le texte du message dans les notifications.',
                 ],
-                'sounds' => [
-                    'label' => 'Sons',
-                    'description' => 'Jouer un son pour les messages entrants.',
-                ],
+            ],
+            'preview_disabled' => [
+                'private_title' => 'Nouveau message',
+                'private_body' => ':sender vous a envoyé un message',
+                'group_body' => ':sender a envoyé un message',
             ],
         ],
     ],

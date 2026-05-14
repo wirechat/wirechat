@@ -63,7 +63,7 @@ return [
         'options' => [
             'notifications' => [
                 'label' => 'Benachrichtigungen',
-                'description' => 'Nachrichten, Gruppen, Töne',
+                'description' => 'Nachrichten, Gruppen, Vorschauen',
             ],
         ],
         'notifications' => [
@@ -81,10 +81,11 @@ return [
                     'label' => 'Vorschauen anzeigen',
                     'description' => 'Nachrichtentext in Benachrichtigungen anzeigen.',
                 ],
-                'sounds' => [
-                    'label' => 'Töne',
-                    'description' => 'Ton bei eingehenden Nachrichten abspielen.',
-                ],
+            ],
+            'preview_disabled' => [
+                'private_title' => 'Neue Nachricht',
+                'private_body' => ':sender hat dir eine Nachricht gesendet',
+                'group_body' => ':sender hat eine Nachricht gesendet',
             ],
         ],
     ],

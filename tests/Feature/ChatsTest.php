@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Index as SettingsDrawer;
@@ -162,7 +163,34 @@ test('settings notification drawer renders notification UI', function () {
     Livewire::actingAs($auth)->test(NotificationsSettingsDrawer::class)
         ->assertSee(__('wirechat::chats.settings.notifications.heading'))
         ->assertSee(__('wirechat::chats.settings.notifications.options.messages.label'))
-        ->assertSeeHtml('dusk="settings-notifications-messages-toggle"');
+        ->assertSeeHtml('dusk="settings-notifications-messages-toggle"')
+        ->assertSeeHtml('dusk="settings-notifications-groups-toggle"')
+        ->assertSeeHtml('dusk="settings-notifications-previews-toggle"')
+        ->assertDontSee('Sounds')
+        ->assertDontSeeHtml('dusk="settings-notifications-sounds-toggle"');
+});
+
+test('settings notification drawer persists notification preferences', function () {
+    testPanelProvider()->settings();
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(NotificationsSettingsDrawer::class)
+        ->assertSet('messages', true)
+        ->assertSet('groups', true)
+        ->assertSet('previews', true)
+        ->call('toggleNotificationSetting', 'messages')
+        ->call('toggleNotificationSetting', 'groups')
+        ->call('toggleNotificationSetting', 'previews')
+        ->assertSet('messages', false)
+        ->assertSet('groups', false)
+        ->assertSet('previews', false);
+
+    $settings = Wirechat::settings($auth);
+
+    expect($settings->direct_message_notifications_enabled)->toBeFalse()
+        ->and($settings->group_message_notifications_enabled)->toBeFalse()
+        ->and($settings->notification_previews_enabled)->toBeFalse();
 });
 
 test('tabs blade components render labels badges and content shells', function () {

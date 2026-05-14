@@ -264,6 +264,9 @@ class WirechatServiceProvider extends ServiceProvider
                 $panelId = $currentPanel->getId();
                 $userId = auth()->id();
                 $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
+                $privatePreviewDisabledTitle = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_title'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+                $privatePreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+                $groupPreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.group_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 
                 $script = <<<HTML
                              <script>
@@ -299,7 +302,7 @@ class WirechatServiceProvider extends ServiceProvider
                                                 }
                                             }
 
-                                            if (!e.is_request && e.redirect_url !== window.location.href) {
+                                            if (!e.is_request && e.redirect_url !== window.location.href && e.notification?.enabled !== false) {
                                                 if (Notification.permission === 'granted') {
                                                     showNotification(e);
                                                 } else if (Notification.permission !== 'denied') {
@@ -310,17 +313,25 @@ class WirechatServiceProvider extends ServiceProvider
                                                     });
                                                 }
                                             }
-                                        });
+                                    });
 
                                     function showNotification(e) {
-                                        let title = e.message.sendable?.wirechat_name || 'User';
-                                        let body  = e.message.body;
+                                        const senderName = e.message.sendable?.wirechat_name || 'User';
+                                        const showPreview = e.notification?.show_preview !== false;
+                                        const privatePreviewDisabledTitle = {$privatePreviewDisabledTitle};
+                                        const privatePreviewDisabledBody = {$privatePreviewDisabledBody};
+                                        const groupPreviewDisabledBody = {$groupPreviewDisabledBody};
+
+                                        let title = senderName;
+                                        let body  = showPreview ? (e.message.body || '') : privatePreviewDisabledBody.replace(':sender', senderName);
                                         let icon  = e.message.sendable?.wirechat_avatar_url;
 
                                         if (e.message.conversation.type === 'group') {
                                             title = e.message.conversation?.group?.name;
-                                            body  = e.message.sendable?.wirechat_name + ': ' + e.message.body;
+                                            body  = showPreview ? senderName + ': ' + (e.message.body || '') : groupPreviewDisabledBody.replace(':sender', senderName);
                                             icon  = e.message.conversation?.group?.cover_url;
+                                        } else if (!showPreview) {
+                                            title = privatePreviewDisabledTitle;
                                         }
 
                                         const options = {
