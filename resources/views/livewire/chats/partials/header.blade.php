@@ -1,8 +1,11 @@
 @use("Wirechat\Wirechat\Facades\Wirechat")
 
 @php
+    $hasSettings = $this->panel()->hasSettings();
     $hasMessageRequests = $this->panel()->hasMessageRequests();
     $pendingMessageRequestsCount = $hasMessageRequests ? $this->pendingMessageRequestsCount() : 0;
+    $canCreateGroups = $this->panel()->hasCreateGroupAction() && auth()->user()?->canCreateGroups();
+    $hasHeaderMenuActions = $hasSettings || $hasMessageRequests || $canCreateGroups;
 @endphp
 
 <header class="px-3 z-10 sticky flex flex-col gap-1.5 top-0 w-full py-2 " dusk="header">
@@ -50,7 +53,8 @@
             </x-wirechat::actions.new-chat>
             @endif
 
-               {{-- Header Actions --}}
+            {{-- Header Actions --}}
+            @if ($hasHeaderMenuActions)
             <div class="ml-auto my-auto flex items-center">
                 <x-wirechat::dropdown align="right" width="48">
                     <x-slot name="trigger" class="size-8 mt-1 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-full p-2 px-2.5 transition-colors shrink-0">
@@ -59,6 +63,14 @@
                          </button>
                     </x-slot>
                     <x-slot name="content">
+                        {{-- Settings --}}
+                        @if ($hasSettings)
+                            <x-wirechat::actions.open-chats-drawer component="wirechat.chats.settings" widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
+                                <x-wirechat::dropdown-item icon="wirechat::icons.cog-6-tooth" id="open-settings-drawer-button" dusk="open-settings-drawer-button">
+                                    <span>{{ __('wirechat::chats.settings.actions.open.label') }}</span>
+                                </x-wirechat::dropdown-item>
+                            </x-wirechat::actions.open-chats-drawer>
+                        @endif
 
                         {{-- Message Requests --}}
                        @if ($hasMessageRequests)
@@ -75,9 +87,9 @@
                         @endif
 
                         {{-- New Group Action --}}
-                        @if ($this->panel()->hasCreateGroupAction() && auth()->user()->canCreateGroups())
+                        @if ($canCreateGroups)
                             <x-wirechat::actions.new-group widget="{{$this->isWidget()}}" panel="{{$this->panel}}">
-                                    <x-wirechat::dropdown-item  dusk="open_new_group_modal_button_in_header" icon="wirechat::icons.untitledui-users-plus"  id="open-requests-drawer-button">
+                                    <x-wirechat::dropdown-item  dusk="open_new_group_modal_button_in_header" icon="wirechat::icons.untitledui-users-plus"  id="open-new-group-modal-button">
                                             <span>{{ __('wirechat::chats.actions.new_group.label') }}</span>
                                     </x-wirechat::dropdown-item>
                             </x-wirechat::actions.new-group>
@@ -86,6 +98,7 @@
                 </x-wirechat::dropdown>
 
             </div>
+            @endif
 
 
         </div>

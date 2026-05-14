@@ -14,6 +14,7 @@ class TestPanelProvider extends PanelProvider
         return $panel
             ->id('test')
             ->path('test')
+            ->settings()
             ->messageRequests()
             ->chatsSearch(true)
             ->searchUsersUsing(function ($needle) {

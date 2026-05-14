@@ -111,6 +111,16 @@ test('panel message requests are disabled by default and can be enabled', functi
     expect($panel->hasMessageRequests())->toBeTrue();
 });
 
+test('panel settings are disabled by default and can be enabled', function () {
+    $panel = new Panel;
+
+    expect($panel->hasSettings())->toBeFalse();
+
+    $panel->settings();
+
+    expect($panel->hasSettings())->toBeTrue();
+});
+
 describe('Chats Route', function () {
 
     test('return 404 if user canAccessWirechatPanel() returns false on chats route', function () {

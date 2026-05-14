@@ -33,6 +33,8 @@ use Wirechat\Wirechat\Livewire\Chat\Info;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Requests as ChatsRequests;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Index as ChatsSettings;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as ChatsSettingsNotifications;
 use Wirechat\Wirechat\Livewire\Modals\Modal;
 use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
 use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
@@ -173,6 +175,8 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chats', Chats::class);
         Livewire::component('wirechat.chats.drawer', ChatsDrawer::class);
         Livewire::component('wirechat.chats.requests', ChatsRequests::class);
+        Livewire::component('wirechat.chats.settings', ChatsSettings::class);
+        Livewire::component('wirechat.chats.settings.notifications', ChatsSettingsNotifications::class);
 
         // modal
         Livewire::component('wirechat.modal', Modal::class);

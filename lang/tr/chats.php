@@ -44,6 +44,51 @@ return [
         ],
     ],
 
+    'settings' => [
+        'heading' => 'Ayarlar',
+        'actions' => [
+            'open' => [
+                'label' => 'Ayarlar',
+            ],
+            'close' => [
+                'label' => 'Ayarları kapat',
+            ],
+            'back' => [
+                'label' => 'Geri',
+            ],
+        ],
+        'labels' => [
+            'profile' => 'Profil',
+        ],
+        'options' => [
+            'notifications' => [
+                'label' => 'Bildirimler',
+                'description' => 'Mesajlar, gruplar, sesler',
+            ],
+        ],
+        'notifications' => [
+            'heading' => 'Bildirimler',
+            'options' => [
+                'messages' => [
+                    'label' => 'Mesajlar',
+                    'description' => 'Yeni direkt mesajlar geldiğinde bildir.',
+                ],
+                'groups' => [
+                    'label' => 'Gruplar',
+                    'description' => 'Gruplarda yeni etkinlik olduğunda bildir.',
+                ],
+                'previews' => [
+                    'label' => 'Önizlemeleri göster',
+                    'description' => 'Bildirimlerde mesaj metnini önizle.',
+                ],
+                'sounds' => [
+                    'label' => 'Sesler',
+                    'description' => 'Gelen mesajlar için ses çal.',
+                ],
+            ],
+        ],
+    ],
+
     'actions' => [
         'new_group' => [
             'label' => 'Yeni Grup',

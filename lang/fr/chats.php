@@ -41,6 +41,52 @@ return [
             'outgoing_empty_state' => 'Vous n’avez envoyé aucune demande de message active pour le moment.',
         ],
     ],
+
+    'settings' => [
+        'heading' => 'Paramètres',
+        'actions' => [
+            'open' => [
+                'label' => 'Paramètres',
+            ],
+            'close' => [
+                'label' => 'Fermer les paramètres',
+            ],
+            'back' => [
+                'label' => 'Retour',
+            ],
+        ],
+        'labels' => [
+            'profile' => 'Profil',
+        ],
+        'options' => [
+            'notifications' => [
+                'label' => 'Notifications',
+                'description' => 'Messages, groupes, sons',
+            ],
+        ],
+        'notifications' => [
+            'heading' => 'Notifications',
+            'options' => [
+                'messages' => [
+                    'label' => 'Messages',
+                    'description' => 'Recevoir une notification pour les nouveaux messages directs.',
+                ],
+                'groups' => [
+                    'label' => 'Groupes',
+                    'description' => 'Recevoir une notification pour les nouvelles activités de groupe.',
+                ],
+                'previews' => [
+                    'label' => 'Afficher les aperçus',
+                    'description' => 'Afficher le texte du message dans les notifications.',
+                ],
+                'sounds' => [
+                    'label' => 'Sons',
+                    'description' => 'Jouer un son pour les messages entrants.',
+                ],
+            ],
+        ],
+    ],
+
     'actions' => [
         'new_group' => [
             'label' => 'Nouveau Groupe',

@@ -76,7 +76,7 @@
 
     @php
         /* Show header if any of these conditions are true  */
-        $showHeader = $createChatAction || $chatsSearch || $redirectToHomeAction || !empty($heading);
+        $showHeader = $createChatAction || $chatsSearch || $redirectToHomeAction || !empty($heading) || $this->panel()->hasSettings();
     @endphp
 
     {{-- include header --}}

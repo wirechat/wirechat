@@ -44,6 +44,51 @@ return [
         ],
     ],
 
+    'settings' => [
+        'heading' => 'Settings',
+        'actions' => [
+            'open' => [
+                'label' => 'Settings',
+            ],
+            'close' => [
+                'label' => 'Close settings',
+            ],
+            'back' => [
+                'label' => 'Back',
+            ],
+        ],
+        'labels' => [
+            'profile' => 'Profile',
+        ],
+        'options' => [
+            'notifications' => [
+                'label' => 'Notifications',
+                'description' => 'Messages, groups, sounds',
+            ],
+        ],
+        'notifications' => [
+            'heading' => 'Notifications',
+            'options' => [
+                'messages' => [
+                    'label' => 'Messages',
+                    'description' => 'Notify when new direct messages arrive.',
+                ],
+                'groups' => [
+                    'label' => 'Groups',
+                    'description' => 'Notify when groups have new activity.',
+                ],
+                'previews' => [
+                    'label' => 'Show previews',
+                    'description' => 'Preview message text inside notifications.',
+                ],
+                'sounds' => [
+                    'label' => 'Sounds',
+                    'description' => 'Play a sound for incoming messages.',
+                ],
+            ],
+        ],
+    ],
+
     'actions' => [
         'new_group' => [
             'label' => 'New Group',
