@@ -5,6 +5,8 @@ use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Invite;
+use Wirechat\Wirechat\Models\JoinRequest;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
@@ -21,6 +23,8 @@ describe('WirechatService Model Resolution', function () {
             'wirechat.models.attachment' => Attachment::class,
             'wirechat.models.conversation' => Conversation::class,
             'wirechat.models.group' => Group::class,
+            'wirechat.models.invite' => Invite::class,
+            'wirechat.models.join_request' => JoinRequest::class,
             'wirechat.models.message' => Message::class,
             'wirechat.models.message_request' => MessageRequest::class,
             'wirechat.models.participant' => Participant::class,
@@ -43,6 +47,14 @@ describe('WirechatService Model Resolution', function () {
 
         it('returns correct group model class', function () {
             expect(Wirechat::groupModelClass())->toBe(Group::class);
+        });
+
+        it('returns correct invite model class', function () {
+            expect(Wirechat::inviteModelClass())->toBe(Invite::class);
+        });
+
+        it('returns correct join request model class', function () {
+            expect(Wirechat::joinRequestModelClass())->toBe(JoinRequest::class);
         });
 
         it('returns correct message model class', function () {
@@ -103,6 +115,28 @@ describe('WirechatService Model Resolution', function () {
                 ->and($model->name)->toBe('Test Group');
         });
 
+        it('creates invite model instance', function () {
+            $model = Wirechat::inviteModel([
+                'panel_id' => 'default',
+                'token' => 'test-token',
+            ]);
+
+            expect($model)->toBeInstanceOf(Invite::class)
+                ->and($model->panel_id)->toBe('default')
+                ->and($model->token)->toBe('test-token');
+        });
+
+        it('creates join request model instance', function () {
+            $model = Wirechat::joinRequestModel([
+                'requester_id' => 1,
+                'requester_type' => 'User',
+            ]);
+
+            expect($model)->toBeInstanceOf(JoinRequest::class)
+                ->and($model->requester_id)->toBe(1)
+                ->and($model->requester_type)->toBe('User');
+        });
+
         it('creates message model instance', function () {
             $model = Wirechat::messageModel(['body' => 'Hello World']);
 
@@ -156,6 +190,8 @@ describe('WirechatService Model Resolution', function () {
                 'wirechat.models.attachment' => Attachment::class,
                 'wirechat.models.conversation' => Conversation::class,
                 'wirechat.models.group' => Group::class,
+                'wirechat.models.invite' => Invite::class,
+                'wirechat.models.join_request' => JoinRequest::class,
                 'wirechat.models.message' => Message::class,
                 'wirechat.models.message_request' => MessageRequest::class,
                 'wirechat.models.participant' => Participant::class,
@@ -181,6 +217,8 @@ describe('WirechatService Model Resolution', function () {
                 'attachment' => Attachment::class,
                 'conversation' => Conversation::class,
                 'group' => Group::class,
+                'invite' => Invite::class,
+                'join_request' => JoinRequest::class,
                 'message' => Message::class,
                 'message_request' => MessageRequest::class,
                 'participant' => Participant::class,
@@ -207,6 +245,8 @@ describe('WirechatService Model Resolution', function () {
                 ->and(Wirechat::attachmentModelTable())->toBe((new Attachment)->getTable())
                 ->and(Wirechat::conversationModelTable())->toBe((new Conversation)->getTable())
                 ->and(Wirechat::groupModelTable())->toBe((new Group)->getTable())
+                ->and(Wirechat::inviteModelTable())->toBe((new Invite)->getTable())
+                ->and(Wirechat::joinRequestModelTable())->toBe((new JoinRequest)->getTable())
                 ->and(Wirechat::messageModelTable())->toBe((new Message)->getTable())
                 ->and(Wirechat::messageRequestModelTable())->toBe((new MessageRequest)->getTable())
                 ->and(Wirechat::participantModelTable())->toBe((new Participant)->getTable())

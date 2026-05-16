@@ -390,7 +390,7 @@ class Message extends Model
             return static::$groupInvitePreviewCache[$cacheKey];
         }
 
-        $invite = Invite::query()
+        $invite = Wirechat::inviteModelClass()::query()
             ->with('inviteable')
             ->where('panel_id', $resolvedPanel->getId())
             ->where('token', $token)

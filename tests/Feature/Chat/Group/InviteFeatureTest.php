@@ -4,6 +4,7 @@ use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\JoinRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
 use Wirechat\Wirechat\Livewire\Chat\Group\Join\Lobby;
@@ -659,6 +660,50 @@ it('handleOpenChat redirects existing members to the chat in non-widget mode', f
         ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
         ->call('handleOpenChat', encrypt($invite->token))
         ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
+});
+
+it('handleOpenChat resolves invites through the configured invite model', function () {
+    $customInvite = new class extends Invite
+    {
+        public static bool $queried = false;
+
+        public function newQuery()
+        {
+            self::$queried = true;
+
+            return parent::newQuery();
+        }
+    };
+    $customInviteClass = get_class($customInvite);
+
+    config(['wirechat.models.invite' => $customInviteClass]);
+    Wirechat::resetTableNameCache('invite');
+
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $groupConversation->addParticipant($member);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => 'CustomInviteToken01',
+        'is_primary' => true,
+    ]);
+
+    $customInviteClass::$queried = false;
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
+
+    expect($customInviteClass::$queried)->toBeTrue();
 });
 
 it('handleOpenChat dispatches open-chat in widget mode for existing members', function () {

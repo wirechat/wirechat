@@ -1172,7 +1172,7 @@ class Chat extends Component
         abort_if($token === null, 404);
 
         /** @var Invite|null $invite */
-        $invite = Invite::query()
+        $invite = Wirechat::inviteModelClass()::query()
             ->where('panel_id', $panel->getId())
             ->where('token', $token)
             ->with('inviteable.conversation')

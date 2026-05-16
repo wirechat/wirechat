@@ -152,9 +152,9 @@ class Chats extends Component
         $user = $this->auth;
         $ids = $this->conversationIds;
         $positions = array_flip($ids);
-        $table = (new Conversation)->getTable();
+        $table = Wirechat::conversationModelTable();
 
-        $conversationQuery = Conversation::query()
+        $conversationQuery = Wirechat::conversationModelClass()::query()
             ->whereIn($table.'.id', $ids);
 
         if ($this->panel()->hasUnreadIndicator()) {
@@ -202,26 +202,28 @@ class Chats extends Component
         $auth = $this->auth;
         abort_if($auth == null, 401);
 
-        $table = (new Conversation)->getTable();
+        $table = Wirechat::conversationModelTable();
         $perPage = 10;
 
-        // In free version, we use the user's relation as before
-        $baseQuery = $auth->conversations()
-            ->with([]) // ids only
-            ->where(function ($query) {
-                $query->where('type', ConversationType::GROUP)
-                    ->orWhere('type', ConversationType::SELF)
-                    ->orWhere(function ($privateQuery) {
-                        $privateQuery->where('type', ConversationType::PRIVATE)
-                            ->has('participants', '=', 2);
-                    });
-            })
-            ->when(trim($this->search ?? '') !== '', fn ($q) => $this->applySearchConditions($q))
-            ->when(trim($this->search ?? '') === '', function ($q) {
-                /** @phpstan-ignore-next-line */
-                return $q->withoutDeleted()->withoutBlanks();
-            })
-            // deterministic ordering for cursor paging (3-tuple: updated_at, created_at, id)
+        $baseQuery = Wirechat::conversationModel()->newQuery();
+        $baseQuery->whereHasParticipant($auth->getKey(), $auth->getMorphClass());
+        $baseQuery->where(function ($query) {
+            $query->where('type', ConversationType::GROUP)
+                ->orWhere('type', ConversationType::SELF)
+                ->orWhere(function ($privateQuery) {
+                    $privateQuery->where('type', ConversationType::PRIVATE)
+                        ->has('participants', '=', 2);
+                });
+        });
+
+        if (trim($this->search ?? '') !== '') {
+            $baseQuery = $this->applySearchConditions($baseQuery);
+        } else {
+            $baseQuery->withoutDeleted()->withoutBlanks();
+        }
+
+        // deterministic ordering for cursor paging (3-tuple: updated_at, created_at, id)
+        $baseQuery
             ->orderByDesc($table.'.updated_at')
             ->orderByDesc($table.'.created_at')
             ->orderByDesc($table.'.id');
@@ -243,6 +245,7 @@ class Chats extends Component
         }
 
         // Select id + updated_at + created_at so we can advance the cursor without another query
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Conversation> $rows */
         $rows = $baseQuery
             ->select([$table.'.id', $table.'.updated_at', $table.'.created_at'])
             ->take($perPage + 1)
@@ -261,6 +264,7 @@ class Chats extends Component
         ]));
 
         // Update cursor
+        /** @var Conversation|null $last */
         $last = $rows->last();
         if ($last) {
             $this->cursorUpdatedAt = (string) $last->updated_at;

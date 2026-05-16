@@ -148,7 +148,7 @@ class Group extends Model
      */
     public function inviteLinks(): MorphMany
     {
-        return $this->morphMany(Invite::class, 'inviteable');
+        return $this->morphMany(Wirechat::inviteModelClass(), 'inviteable');
     }
 
     /**
@@ -156,7 +156,7 @@ class Group extends Model
      */
     public function joinRequests(): MorphMany
     {
-        return $this->morphMany(JoinRequest::class, 'joinable');
+        return $this->morphMany(Wirechat::joinRequestModelClass(), 'joinable');
     }
 
     /**
