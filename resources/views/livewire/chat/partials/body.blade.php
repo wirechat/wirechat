@@ -433,7 +433,7 @@
 
                                 {{-- Message body --}}
                                 <div class="flex flex-col gap-2 max-w-[95%]  relative">
-                                    {{-- Show sender name is message does not belong to auth and conversation is group --}}
+                                    {{-- Show sender name for group messages. --}}
 
 
                                     {{-- -------------------- --}}
@@ -441,12 +441,12 @@
                                     {{-- -------------------- --}}
                                     @if ($attachment)
                                         @if (!$belongsToAuth && $isGroup)
-                                            <div style="color:  var(--wc-brand-primary);" @class([
-                                                'shrink-0 font-medium text-sm sm:text-base',
-                                                // Hide avatar if the next message is from the same user
-                                                'hidden' => $message?->sendable?->is($previousMessage?->sendable),
+                                            <div dusk="message-sender-name" @class([
+                                                'shrink-0 text-xs font-semibold leading-none text-[var(--wc-brand-primary)] dark:text-[var(--primary-300)]',
+                                                // Hide sender name if the previous message is from the same user
+                                                'hidden' => $previousMessage && $message?->user?->is($previousMessage?->user),
                                             ])>
-                                                {{ $message->sendable?->wirechat_name }}
+                                                {{ $message->user?->wirechat_name ?? __('wirechat::chat.labels.user') }}
                                             </div>
                                         @endif
 

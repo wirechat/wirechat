@@ -46,6 +46,32 @@ test('authenticaed user can access chatbox ', function () {
         ->assertStatus(200);
 });
 
+test('it shows peer sender names above group messages but not auth sender names', function () {
+    $auth = User::factory()->create(['name' => 'Owner Sender']);
+    $member = User::factory()->create(['name' => 'Group Member']);
+
+    $conversation = $auth->createGroup('My Group');
+    $conversation->addParticipant($member);
+
+    Message::create([
+        'conversation_id' => $conversation->id,
+        'participant_id' => $conversation->participant($auth)?->id,
+        'body' => 'hello from owner',
+    ]);
+
+    Message::create([
+        'conversation_id' => $conversation->id,
+        'participant_id' => $conversation->participant($member)?->id,
+        'body' => 'hello from member',
+    ]);
+
+    $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+    expect($html)
+        ->not->toMatch('/dusk="message-sender-name"[^>]*>\s*Owner Sender\s*</')
+        ->toMatch('/dusk="message-sender-name"[^>]*class="(?![^"]*\bhidden\b)[^"]*"[^>]*>\s*Group Member\s*</');
+});
+
 test('it applies ui classes and styles to the chat shell only', function () {
     $auth = User::factory()->create(['name' => 'Test']);
     $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
@@ -1110,7 +1136,7 @@ describe('Box presence test: ', function () {
             ->assertSee('Luis');
     });
 
-    test('it doesnt show auth name if conversation is group unless auth has replied to another you or vice versa ', function () {
+    test('it doesnt show auth sender name if conversation is group', function () {
 
         $auth = User::factory()->create(['name' => 'Namu']);
         $conversation = $auth->createGroup('My Group');
@@ -1127,7 +1153,7 @@ describe('Box presence test: ', function () {
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSee('Message from owner')
-            ->assertdontSeeText('Namu');
+            ->assertDontSeeText('Namu');
     });
 
     test('it shows dusk="disappearing_messages_icon" if disappearingTurnedOn for conversation', function () {
