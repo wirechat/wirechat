@@ -39,13 +39,15 @@
                 <div class="flex items-center gap-3">
                     <div class="min-w-0 flex-1 rounded-xl bg-[var(--wc-light-secondary)] px-4 py-3 text-sm break-all dark:bg-[var(--wc-dark-secondary)]">{{ $primaryInviteUrl }}</div>
 
-                    <button type="button"
-                        onclick="{{ $openPrimaryInviteDetailsAction }}"
-                        class="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-gray-500 transition hover:text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="h-5 w-5">
-                            <path d="M12 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 7Zm0 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 14Zm0 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 21Z" />
-                        </svg>
-                    </button>
+                    @if ($canManageInvites)
+                        <button type="button"
+                            onclick="{{ $openPrimaryInviteDetailsAction }}"
+                            class="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-gray-500 transition hover:text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="h-5 w-5">
+                                <path d="M12 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 7Zm0 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 14Zm0 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 21Z" />
+                            </svg>
+                        </button>
+                    @endif
                 </div>
 
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -135,10 +137,12 @@
         {{------------------}}
         {{-- Group links --}}
         {{------------------}}
-        <livewire:wirechat.chat.group.links.list
-            :conversation="$conversation"
-            :panel="$this->panel"
-            :key="'group-additional-links-'.$conversation->getKey().'-'.$this->panel"
-        />
+        @if ($canManageInvites)
+            <livewire:wirechat.chat.group.links.list
+                :conversation="$conversation"
+                :panel="$this->panel"
+                :key="'group-additional-links-'.$conversation->getKey().'-'.$this->panel"
+            />
+        @endif
     </section>
 </div>

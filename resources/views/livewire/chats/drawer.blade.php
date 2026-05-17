@@ -168,7 +168,7 @@
         aria-modal="true"
         tabindex="0"
     >
-        <div class="relative text-center">
+        <div class="relative text-center overflow-x-hidden">
             <div
                 x-show="show && showActiveComponent"
                 x-transition:enter="ease-out duration-300"

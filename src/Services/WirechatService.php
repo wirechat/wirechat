@@ -2,17 +2,22 @@
 
 namespace Wirechat\Wirechat\Services;
 
+use Illuminate\Database\Eloquent\Model;
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Invite;
+use Wirechat\Wirechat\Models\JoinRequest;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Models\Setting;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
 use Wirechat\Wirechat\Services\Concerns\InteractsWithLinks;
+use Wirechat\Wirechat\Settings\UserSettings;
 
 class WirechatService
 {
@@ -80,6 +85,16 @@ class WirechatService
     {
 
         return new StorageService;
+    }
+
+    public function settings(Model $owner): UserSettings
+    {
+        return app(WirechatSettingsManager::class)->for($owner);
+    }
+
+    public function settingsManager(): WirechatSettingsManager
+    {
+        return app(WirechatSettingsManager::class);
     }
 
     public function currentPanel(): ?Panel
@@ -331,6 +346,36 @@ class WirechatService
     }
 
     /**
+     * Get the Invite model class from the configuration.
+     *
+     * @return class-string<Invite> The Invite model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function inviteModelClass(): string
+    {
+        $class = (string) config('wirechat.models.invite', Invite::class);
+        $this->validateModelClass($class, Invite::class, 'wirechat.models.invite');
+
+        return $class;
+    }
+
+    /**
+     * Get the JoinRequest model class from the configuration.
+     *
+     * @return class-string<JoinRequest> The JoinRequest model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function joinRequestModelClass(): string
+    {
+        $class = (string) config('wirechat.models.join_request', JoinRequest::class);
+        $this->validateModelClass($class, JoinRequest::class, 'wirechat.models.join_request');
+
+        return $class;
+    }
+
+    /**
      * Get the Message model class from the configuration.
      *
      * @return class-string<Message> The Message model class.
@@ -371,6 +416,21 @@ class WirechatService
     {
         $class = (string) config('wirechat.models.participant', Participant::class);
         $this->validateModelClass($class, Participant::class, 'wirechat.models.participant');
+
+        return $class;
+    }
+
+    /**
+     * Get the Setting model class from the configuration.
+     *
+     * @return class-string<Setting> The Setting model class.
+     *
+     * @throws \InvalidArgumentException When the configured class is invalid.
+     */
+    public function settingModelClass(): string
+    {
+        $class = (string) config('wirechat.models.setting', Setting::class);
+        $this->validateModelClass($class, Setting::class, 'wirechat.models.setting');
 
         return $class;
     }
@@ -440,6 +500,26 @@ class WirechatService
     }
 
     /**
+     * Get the Invite model table name.
+     *
+     * @return string The Invite model table name.
+     */
+    public function inviteModelTable(): string
+    {
+        return $this->getCachedTableName('invite', fn () => $this->inviteModel());
+    }
+
+    /**
+     * Get the JoinRequest model table name.
+     *
+     * @return string The JoinRequest model table name.
+     */
+    public function joinRequestModelTable(): string
+    {
+        return $this->getCachedTableName('join_request', fn () => $this->joinRequestModel());
+    }
+
+    /**
      * Get the Message model table name.
      *
      * @return string The Message model table name.
@@ -467,6 +547,16 @@ class WirechatService
     public function participantModelTable(): string
     {
         return $this->getCachedTableName('participant', fn () => $this->participantModel());
+    }
+
+    /**
+     * Get the Setting model table name.
+     *
+     * @return string The Setting model table name.
+     */
+    public function settingModelTable(): string
+    {
+        return $this->getCachedTableName('setting', fn () => $this->settingModel());
     }
 
     /**
@@ -514,6 +604,28 @@ class WirechatService
     }
 
     /**
+     * Create a new Invite model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Invite The Invite model instance.
+     */
+    public function inviteModel(array $attributes = []): Invite
+    {
+        return new ($this->inviteModelClass())($attributes);
+    }
+
+    /**
+     * Create a new JoinRequest model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return JoinRequest The JoinRequest model instance.
+     */
+    public function joinRequestModel(array $attributes = []): JoinRequest
+    {
+        return new ($this->joinRequestModelClass())($attributes);
+    }
+
+    /**
      * Create a new Message model instance.
      *
      * @param  array  $attributes  The attributes to set on the model.
@@ -544,5 +656,16 @@ class WirechatService
     public function participantModel(array $attributes = []): Participant
     {
         return new ($this->participantModelClass())($attributes);
+    }
+
+    /**
+     * Create a new Setting model instance.
+     *
+     * @param  array  $attributes  The attributes to set on the model.
+     * @return Setting The Setting model instance.
+     */
+    public function settingModel(array $attributes = []): Setting
+    {
+        return new ($this->settingModelClass())($attributes);
     }
 }

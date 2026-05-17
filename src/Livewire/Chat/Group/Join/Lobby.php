@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Livewire\Chat\Group\Join;
 
 use Livewire\Attributes\Locked;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
@@ -55,7 +56,7 @@ class Lobby extends ModalComponent
 
     protected function resolveContext(): void
     {
-        $invite = Invite::query()
+        $invite = Wirechat::inviteModelClass()::query()
             ->where('panel_id', $this->panel()->getId())
             ->where('token', $this->token)
             ->with(['inviteable.cover', 'createdBy'])

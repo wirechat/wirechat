@@ -5,8 +5,11 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Index as SettingsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as NotificationsSettingsDrawer;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
@@ -35,6 +38,26 @@ test('it shows the requests drawer button in the chats header', function () {
 
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertSeeHtml('id="open-requests-drawer-button"');
+});
+
+test('it shows the settings drawer button in the chats header when panel settings are enabled', function () {
+    testPanelProvider()->settings();
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('id="open-settings-drawer-button"')
+        ->assertSee(__('wirechat::chats.settings.actions.open.label'));
+});
+
+test('it hides the settings drawer button when panel settings are disabled', function () {
+    testPanelProvider()->settings(false);
+
+    $auth = User::factory()->create();
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertDontSeeHtml('id="open-settings-drawer-button"')
+        ->assertDontSee(__('wirechat::chats.settings.actions.open.label'));
 });
 
 test('it hides the requests drawer button when message requests are disabled on the panel', function () {
@@ -103,6 +126,71 @@ test('requests drawer is unavailable when message requests are disabled on the p
 
     Livewire::actingAs($auth)->test(RequestsDrawer::class)
         ->assertNotFound();
+});
+
+test('settings drawer shows settings options', function () {
+    testPanelProvider()->settings();
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(SettingsDrawer::class)
+        ->assertSee(__('wirechat::chats.settings.heading'))
+        ->assertSee(__('wirechat::chats.settings.options.notifications.label'))
+        ->assertSeeHtml('dusk="settings-option-notifications"')
+        ->assertDontSee('Name and profile photo')
+        ->assertDontSee('Security')
+        ->assertDontSee('Theme')
+        ->assertDontSee('Keyboard shortcuts')
+        ->assertDontSeeHtml('dusk="settings-option-security"')
+        ->assertDontSeeHtml('dusk="settings-option-theme"')
+        ->assertDontSeeHtml('dusk="settings-option-keyboard"');
+});
+
+test('settings drawer is unavailable when panel settings are disabled', function () {
+    testPanelProvider()->settings(false);
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(SettingsDrawer::class)
+        ->assertNotFound();
+});
+
+test('settings notification drawer renders notification UI', function () {
+    testPanelProvider()->settings();
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(NotificationsSettingsDrawer::class)
+        ->assertSee(__('wirechat::chats.settings.notifications.heading'))
+        ->assertSee(__('wirechat::chats.settings.notifications.options.messages.label'))
+        ->assertSeeHtml('dusk="settings-notifications-messages-toggle"')
+        ->assertSeeHtml('dusk="settings-notifications-groups-toggle"')
+        ->assertSeeHtml('dusk="settings-notifications-previews-toggle"')
+        ->assertDontSee('Sounds')
+        ->assertDontSeeHtml('dusk="settings-notifications-sounds-toggle"');
+});
+
+test('settings notification drawer persists notification preferences', function () {
+    testPanelProvider()->settings();
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+
+    Livewire::actingAs($auth)->test(NotificationsSettingsDrawer::class)
+        ->assertSet('messages', true)
+        ->assertSet('groups', true)
+        ->assertSet('previews', true)
+        ->call('toggleNotificationSetting', 'messages')
+        ->call('toggleNotificationSetting', 'groups')
+        ->call('toggleNotificationSetting', 'previews')
+        ->assertSet('messages', false)
+        ->assertSet('groups', false)
+        ->assertSet('previews', false);
+
+    $settings = Wirechat::settings($auth);
+
+    expect($settings->direct_message_notifications_enabled)->toBeFalse()
+        ->and($settings->group_message_notifications_enabled)->toBeFalse()
+        ->and($settings->notification_previews_enabled)->toBeFalse();
 });
 
 test('tabs blade components render labels badges and content shells', function () {
@@ -331,6 +419,7 @@ describe('Presence check', function () {
     });
 
     it('shows DOESNT show header when createChatAction && chatsSearch && redirectToHomeAction are set false && heading is emtpy at component level', function () {
+        testPanelProvider()->settings(false);
 
         $auth = User::factory()->create();
 
@@ -348,6 +437,7 @@ describe('Presence check', function () {
         $auth = User::factory()->create();
 
         testPanelProvider()
+            ->settings(false)
             ->chatsSearch(false)
             ->createChatAction(false)
             ->redirectToHomeAction(false)

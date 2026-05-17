@@ -9,6 +9,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Http\Resources\MessageResource;
 use Wirechat\Wirechat\Models\Message;
@@ -37,6 +38,8 @@ class NotifyParticipant implements ShouldBroadcastNow
     public function __construct(public Participant|Model $participant, public Message $message, ?string $panel = null)
     {
         if ($participant instanceof Participant) {
+            $participant->loadMissing('participantable');
+
             $this->participantType = $participant->participantable_type;
             $this->participantId = $participant->participantable_id;
         } else {
@@ -47,11 +50,12 @@ class NotifyParticipant implements ShouldBroadcastNow
         $this->resolvePanel($panel);
 
         // Eager-load the participant and its participantable (the sender),
-        // and the participant's conversation with group, plus any attachment.
+        // the message conversation, and the participant's conversation with group.
         // We use loadMissing so we don't override already-loaded relationships.
         $this->message->loadMissing([
+            'conversation.group.cover',
             'participant.participantable',
-            'participant.conversation.group',
+            'participant.conversation.group.cover',
             'attachment',
         ]);
 
@@ -103,6 +107,35 @@ class NotifyParticipant implements ShouldBroadcastNow
             'message' => new MessageResource($this->message),
             'redirect_url' => $this->getPanel()->chatRoute($conversationId),
             'is_request' => $isMessageRequest,
+            'notification' => $this->notificationPreferences($conversation),
+        ];
+    }
+
+    /**
+     * @return array{enabled: bool, show_preview: bool, conversation_name: string|null, conversation_avatar_url: string|null}
+     */
+    protected function notificationPreferences($conversation): array
+    {
+        $conversation?->loadMissing('group.cover');
+
+        $recipient = $this->participant instanceof Participant
+            ? $this->participant->participantable
+            : $this->participant;
+
+        $settings = Wirechat::settings($recipient);
+        $conversationNotificationsEnabled = $conversation?->isGroup()
+            ? $settings->group_message_notifications_enabled
+            : $settings->direct_message_notifications_enabled;
+
+        return [
+            'enabled' => $settings->notifications_enabled && $conversationNotificationsEnabled,
+            'show_preview' => $settings->notification_previews_enabled,
+            'conversation_name' => $conversation?->isGroup()
+                ? ($conversation->group?->name ?: __('wirechat::chat.group.invite_link.page.labels.group_fallback'))
+                : null,
+            'conversation_avatar_url' => $conversation?->isGroup()
+                ? $conversation->group?->cover_url
+                : null,
         ];
     }
 }

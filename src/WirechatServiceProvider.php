@@ -33,6 +33,8 @@ use Wirechat\Wirechat\Livewire\Chat\Info;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Requests as ChatsRequests;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Index as ChatsSettings;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as ChatsSettingsNotifications;
 use Wirechat\Wirechat\Livewire\Modals\Modal;
 use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
 use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
@@ -44,6 +46,7 @@ use Wirechat\Wirechat\Middleware\EnsureWirechatPanelAccess;
 use Wirechat\Wirechat\Middleware\SetCurrentPanel;
 use Wirechat\Wirechat\Services\ColorService;
 use Wirechat\Wirechat\Services\WirechatService;
+use Wirechat\Wirechat\Services\WirechatSettingsManager;
 use Wirechat\Wirechat\Support\Color;
 
 class WirechatServiceProvider extends ServiceProvider
@@ -152,6 +155,7 @@ class WirechatServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ColorService::class, fn () => new ColorService);
+        $this->app->singleton(WirechatSettingsManager::class, fn () => new WirechatSettingsManager);
 
         // Register PanelRegistry with auto-discovery
         // Bind PanelRegistry to the container
@@ -171,6 +175,8 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chats', Chats::class);
         Livewire::component('wirechat.chats.drawer', ChatsDrawer::class);
         Livewire::component('wirechat.chats.requests', ChatsRequests::class);
+        Livewire::component('wirechat.chats.settings', ChatsSettings::class);
+        Livewire::component('wirechat.chats.settings.notifications', ChatsSettingsNotifications::class);
 
         // modal
         Livewire::component('wirechat.modal', Modal::class);
@@ -258,6 +264,10 @@ class WirechatServiceProvider extends ServiceProvider
                 $panelId = $currentPanel->getId();
                 $userId = auth()->id();
                 $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
+                $privatePreviewDisabledTitle = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_title'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+                $privatePreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+                $groupPreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.group_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+                $groupNotificationFallbackTitle = json_encode(__('wirechat::chat.group.invite_link.page.labels.group_fallback'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 
                 $script = <<<HTML
                              <script>
@@ -293,7 +303,7 @@ class WirechatServiceProvider extends ServiceProvider
                                                 }
                                             }
 
-                                            if (!e.is_request && e.redirect_url !== window.location.href) {
+                                            if (!e.is_request && e.redirect_url !== window.location.href && e.notification?.enabled !== false) {
                                                 if (Notification.permission === 'granted') {
                                                     showNotification(e);
                                                 } else if (Notification.permission !== 'denied') {
@@ -304,17 +314,26 @@ class WirechatServiceProvider extends ServiceProvider
                                                     });
                                                 }
                                             }
-                                        });
+                                    });
 
                                     function showNotification(e) {
-                                        let title = e.message.sendable?.wirechat_name || 'User';
-                                        let body  = e.message.body;
+                                        const senderName = e.message.sendable?.wirechat_name || 'User';
+                                        const showPreview = e.notification?.show_preview !== false;
+                                        const privatePreviewDisabledTitle = {$privatePreviewDisabledTitle};
+                                        const privatePreviewDisabledBody = {$privatePreviewDisabledBody};
+                                        const groupPreviewDisabledBody = {$groupPreviewDisabledBody};
+                                        const groupNotificationFallbackTitle = {$groupNotificationFallbackTitle};
+
+                                        let title = senderName;
+                                        let body  = showPreview ? (e.message.body || '') : privatePreviewDisabledBody.replace(':sender', senderName);
                                         let icon  = e.message.sendable?.wirechat_avatar_url;
 
                                         if (e.message.conversation.type === 'group') {
-                                            title = e.message.conversation?.group?.name;
-                                            body  = e.message.sendable?.wirechat_name + ': ' + e.message.body;
-                                            icon  = e.message.conversation?.group?.cover_url;
+                                            title = e.notification?.conversation_name || e.message.conversation?.group?.name || groupNotificationFallbackTitle;
+                                            body  = showPreview ? senderName + ': ' + (e.message.body || '') : groupPreviewDisabledBody.replace(':sender', senderName);
+                                            icon  = e.notification?.conversation_avatar_url || e.message.conversation?.group?.cover_url;
+                                        } else if (!showPreview) {
+                                            title = privatePreviewDisabledTitle;
                                         }
 
                                         const options = {

@@ -297,6 +297,10 @@ return [
                 'add_other_members' => [
                     'label' => 'Diğer Üyeleri Ekle',
                 ],
+                'invite_others_via_link' => [
+                    'label' => 'Bağlantıyla Davet Et',
+                    'helper_text' => 'Üyelerin birincil grup davet bağlantısını kopyalamasına ve göndermesine izin ver',
+                ],
                 'admin_approval' => [
                     'label' => 'Yeni Üyeleri Onayla',
                     'helper_text' => 'Davet bağlantısı üzerinden katılan kişilerin yöneticiler tarafından onaylanmasını iste',

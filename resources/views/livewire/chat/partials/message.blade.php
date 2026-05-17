@@ -3,9 +3,9 @@
 
 @php
 
-   $isSameAsNext = ($message?->sendable_id === $nextMessage?->sendable_id) && ($message?->sendable_type === $nextMessage?->sendable_type);
+   $isSameAsNext = (bool) ($nextMessage && $message?->sendable?->is($nextMessage?->sendable));
    $isNotSameAsNext = !$isSameAsNext;
-   $isSameAsPrevious = ($message?->sendable_id === $previousMessage?->sendable_id) && ($message?->sendable_type === $previousMessage?->sendable_type);
+   $isSameAsPrevious = (bool) ($previousMessage && $message?->sendable?->is($previousMessage?->sendable));
    $isNotSameAsPrevious = !$isSameAsPrevious;
    $groupInvitePreview = $message?->groupInvitePreview($this->panel());
    $inviteUrl = $groupInvitePreview['url'] ?? null;
@@ -66,12 +66,14 @@
 >
 @if (!$belongsToAuth && $isGroup)
 <div
+    dusk="message-sender-name"
     @class([
-        'shrink-0 font-medium text-purple-500',
-        // Hide avatar if the next message is from the same user
+        'shrink-0 text-xs font-normal leading-none',
+        'text-[var(--wc-brand-primary)] dark:text-[var(--primary-400)]',
+        // Hide sender name if the previous message is from the same user
         'hidden' => $isSameAsPrevious
     ])>
-    {{ $message?->sendable?->wirechat_name }}
+    {{ $message?->user?->wirechat_name ?? __('wirechat::chat.labels.user') }}
 </div>
 @endif
 

@@ -135,6 +135,38 @@
                     </span>
 
                 </li>
+
+                {{-- Invite other members via link --}}
+                <li class="w-full flex items-center p-5">
+                    <span class="w-12">
+                        <x-wirechat::icons.link class="size-5" />
+                    </span>
+
+                    <span class="w-full text-start">
+                        <h5 class="font-medium">@lang('wirechat::chat.group.permissions.actions.invite_others_via_link.label')</h5>
+                        <p>@lang('wirechat::chat.group.permissions.actions.invite_others_via_link.helper_text')</p>
+                    </span>
+
+                    <span class="w-12">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input wire:model.live.debounce="allow_members_to_invite_others_via_link" type="checkbox" class="sr-only peer">
+                            <div class="relative w-11 h-6  peer-focus:outline-hidden rounded-full peer
+                            bg-[var(--wc-light-secondary)]  dark:bg-[var(--wc-dark-secondary)]
+                            shadow-2xs
+                            peer-checked:border-[var(--wc-brand-primary)]
+                            peer-checked:after:translate-x-full peer-checked:rtl:after:-translate-x-full
+                            peer-checked:dark:border-[var(--wc-dark-primary)] peer-checked:border-[var(--wc-light-primary)]
+                            after:content-[''] after:absolute after:top-[2px]
+                            after:start-[2px]  after:bg-white dark:after:bg-gray-100 after:shadow
+                            peer-checked:after:bg-[var(--wc-brand-primary)] peer-checked:dark:after:bg-[var(--wc-brand-primary)]
+                            peer-checked:after:border-[var(--wc-brand-primary)] peer-checked:dark:after:border-[var(--wc-brand-primary)]
+                            dark:after:border-[var(--wc-dark-primary)] after:border-[var(--wc-light-primary)] after:border
+                            after:rounded-full after:h-5 after:w-5 after:transition-all ease-in-out">
+                            </div>
+                        </label>
+                    </span>
+
+                </li>
  
 
             </ul>

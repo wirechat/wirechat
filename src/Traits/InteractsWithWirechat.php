@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Traits;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -48,6 +49,14 @@ trait InteractsWithWirechat
             'participantable_id', // The foreign key on the participants table for the User model
             'conversation_id'     // The foreign key for the Conversation model
         )->withPivot('conversation_id'); // Optionally load conversation_id from the pivot table
+    }
+
+    /**
+     * @return MorphOne<\Wirechat\Wirechat\Models\Setting, static>
+     */
+    public function wirechatSettings(): MorphOne
+    {
+        return $this->morphOne(Wirechat::settingModelClass(), 'owner');
     }
 
     /**

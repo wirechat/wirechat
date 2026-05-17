@@ -5,9 +5,15 @@ use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Invite;
+use Wirechat\Wirechat\Models\JoinRequest;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Models\Setting;
+use Wirechat\Wirechat\Services\WirechatSettingsManager;
+use Wirechat\Wirechat\Settings\UserSettings;
+use Workbench\App\Models\User;
 
 describe('WirechatService Model Resolution', function () {
     beforeEach(function () {
@@ -17,9 +23,12 @@ describe('WirechatService Model Resolution', function () {
             'wirechat.models.attachment' => Attachment::class,
             'wirechat.models.conversation' => Conversation::class,
             'wirechat.models.group' => Group::class,
+            'wirechat.models.invite' => Invite::class,
+            'wirechat.models.join_request' => JoinRequest::class,
             'wirechat.models.message' => Message::class,
             'wirechat.models.message_request' => MessageRequest::class,
             'wirechat.models.participant' => Participant::class,
+            'wirechat.models.setting' => Setting::class,
         ]);
     });
 
@@ -40,6 +49,14 @@ describe('WirechatService Model Resolution', function () {
             expect(Wirechat::groupModelClass())->toBe(Group::class);
         });
 
+        it('returns correct invite model class', function () {
+            expect(Wirechat::inviteModelClass())->toBe(Invite::class);
+        });
+
+        it('returns correct join request model class', function () {
+            expect(Wirechat::joinRequestModelClass())->toBe(JoinRequest::class);
+        });
+
         it('returns correct message model class', function () {
             expect(Wirechat::messageModelClass())->toBe(Message::class);
         });
@@ -50,6 +67,10 @@ describe('WirechatService Model Resolution', function () {
 
         it('returns correct participant model class', function () {
             expect(Wirechat::participantModelClass())->toBe(Participant::class);
+        });
+
+        it('returns correct setting model class', function () {
+            expect(Wirechat::settingModelClass())->toBe(Setting::class);
         });
     });
 
@@ -94,6 +115,28 @@ describe('WirechatService Model Resolution', function () {
                 ->and($model->name)->toBe('Test Group');
         });
 
+        it('creates invite model instance', function () {
+            $model = Wirechat::inviteModel([
+                'panel_id' => 'default',
+                'token' => 'test-token',
+            ]);
+
+            expect($model)->toBeInstanceOf(Invite::class)
+                ->and($model->panel_id)->toBe('default')
+                ->and($model->token)->toBe('test-token');
+        });
+
+        it('creates join request model instance', function () {
+            $model = Wirechat::joinRequestModel([
+                'requester_id' => 1,
+                'requester_type' => 'User',
+            ]);
+
+            expect($model)->toBeInstanceOf(JoinRequest::class)
+                ->and($model->requester_id)->toBe(1)
+                ->and($model->requester_type)->toBe('User');
+        });
+
         it('creates message model instance', function () {
             $model = Wirechat::messageModel(['body' => 'Hello World']);
 
@@ -124,6 +167,19 @@ describe('WirechatService Model Resolution', function () {
                 ->and($model->participantable_id)->toBe(1)
                 ->and($model->participantable_type)->toBe('User');
         });
+
+        it('creates setting model instance', function () {
+            $model = Wirechat::settingModel([
+                'owner_id' => 1,
+                'owner_type' => 'User',
+                'data' => ['sound_enabled' => false],
+            ]);
+
+            expect($model)->toBeInstanceOf(Setting::class)
+                ->and($model->owner_id)->toBe(1)
+                ->and($model->owner_type)->toBe('User')
+                ->and($model->data)->toBe(['sound_enabled' => false]);
+        });
     });
 
     describe('Model Class Validation', function () {
@@ -134,9 +190,12 @@ describe('WirechatService Model Resolution', function () {
                 'wirechat.models.attachment' => Attachment::class,
                 'wirechat.models.conversation' => Conversation::class,
                 'wirechat.models.group' => Group::class,
+                'wirechat.models.invite' => Invite::class,
+                'wirechat.models.join_request' => JoinRequest::class,
                 'wirechat.models.message' => Message::class,
                 'wirechat.models.message_request' => MessageRequest::class,
                 'wirechat.models.participant' => Participant::class,
+                'wirechat.models.setting' => Setting::class,
             ]);
         });
 
@@ -158,9 +217,12 @@ describe('WirechatService Model Resolution', function () {
                 'attachment' => Attachment::class,
                 'conversation' => Conversation::class,
                 'group' => Group::class,
+                'invite' => Invite::class,
+                'join_request' => JoinRequest::class,
                 'message' => Message::class,
                 'message_request' => MessageRequest::class,
                 'participant' => Participant::class,
+                'setting' => Setting::class,
             ];
 
             foreach ($modelTypes as $type => $expectedClass) {
@@ -183,9 +245,73 @@ describe('WirechatService Model Resolution', function () {
                 ->and(Wirechat::attachmentModelTable())->toBe((new Attachment)->getTable())
                 ->and(Wirechat::conversationModelTable())->toBe((new Conversation)->getTable())
                 ->and(Wirechat::groupModelTable())->toBe((new Group)->getTable())
+                ->and(Wirechat::inviteModelTable())->toBe((new Invite)->getTable())
+                ->and(Wirechat::joinRequestModelTable())->toBe((new JoinRequest)->getTable())
                 ->and(Wirechat::messageModelTable())->toBe((new Message)->getTable())
                 ->and(Wirechat::messageRequestModelTable())->toBe((new MessageRequest)->getTable())
-                ->and(Wirechat::participantModelTable())->toBe((new Participant)->getTable());
+                ->and(Wirechat::participantModelTable())->toBe((new Participant)->getTable())
+                ->and(Wirechat::settingModelTable())->toBe((new Setting)->getTable());
+        });
+    });
+
+    describe('User Settings', function () {
+        it('returns default settings without creating a row', function () {
+            $user = User::factory()->create();
+
+            $settings = Wirechat::settings($user);
+
+            expect($settings)->toBeInstanceOf(UserSettings::class)
+                ->and($settings->toArray())->toBe([
+                    'notifications_enabled' => true,
+                    'direct_message_notifications_enabled' => true,
+                    'group_message_notifications_enabled' => true,
+                    'notification_previews_enabled' => true,
+                    'sound_enabled' => true,
+                    'read_receipts_enabled' => true,
+                ])
+                ->and(Setting::query()->count())->toBe(0);
+        });
+
+        it('persists only settings that differ from defaults and deletes default rows', function () {
+            $user = User::factory()->create();
+            $manager = app(WirechatSettingsManager::class);
+
+            $manager->saveFor($user, new UserSettings(group_message_notifications_enabled: false));
+
+            $row = Setting::query()->first();
+
+            expect($row)->not->toBeNull()
+                ->and($row->owner_id)->toBe($user->getKey())
+                ->and($row->owner_type)->toBe($user->getMorphClass())
+                ->and($row->data)->toBe(['group_message_notifications_enabled' => false]);
+
+            $manager->saveFor($user, new UserSettings);
+
+            expect(Setting::query()->count())->toBe(0);
+        });
+
+        it('updates settings by merging with the current values', function () {
+            $user = User::factory()->create();
+            $manager = app(WirechatSettingsManager::class);
+
+            $manager->saveFor($user, new UserSettings(direct_message_notifications_enabled: false));
+            $settings = $manager->updateFor($user, ['notification_previews_enabled' => false]);
+
+            expect($settings->direct_message_notifications_enabled)->toBeFalse()
+                ->and($settings->notification_previews_enabled)->toBeFalse()
+                ->and(Setting::query()->first()?->data)->toBe([
+                    'direct_message_notifications_enabled' => false,
+                    'notification_previews_enabled' => false,
+                ]);
+        });
+
+        it('exposes the settings relationship on wirechat users', function () {
+            $user = User::factory()->create();
+
+            $user->wirechatSettings()->create(['data' => ['notifications_enabled' => false]]);
+
+            expect($user->wirechatSettings)->toBeInstanceOf(Setting::class)
+                ->and($user->wirechatSettings->data)->toBe(['notifications_enabled' => false]);
         });
     });
 

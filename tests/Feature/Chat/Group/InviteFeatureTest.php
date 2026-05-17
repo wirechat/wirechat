@@ -4,6 +4,7 @@ use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\JoinRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
 use Wirechat\Wirechat\Livewire\Chat\Group\Join\Lobby;
@@ -119,6 +120,61 @@ it('forbids non-admin participants from accessing invite link management even wh
 
     Livewire::actingAs($participantUser)
         ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(403);
+});
+
+it('allows members with invite link permission to use only the primary invite link', function () {
+    $owner = User::factory()->create();
+    $participantUser = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $participant = $conversation->addParticipant($participantUser);
+    $participant->role = ParticipantRole::PARTICIPANT;
+    $participant->save();
+
+    $conversation->group->allow_members_to_invite_others_via_link = true;
+    $conversation->group->save();
+
+    Livewire::actingAs($participantUser)
+        ->test(GroupInfo::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.info.actions.invite_via_link.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.join_requests'));
+
+    Livewire::actingAs($participantUser)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.primary_link'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.additional_links'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.actions.create_new_link.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.actions.reset_link.label'));
+
+    $primaryInvite = $conversation->group->inviteLinks()->primary()->first();
+
+    expect($primaryInvite)->not->toBeNull()
+        ->and($primaryInvite?->is_primary)->toBeTrue();
+
+    Livewire::actingAs($participantUser)
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $primaryInvite, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200);
+
+    Livewire::actingAs($participantUser)
+        ->test(Create::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(403);
+
+    Livewire::actingAs($participantUser)
+        ->test(Show::class, ['conversation' => $conversation, 'invite' => $primaryInvite, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(403);
+
+    $additionalInvite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => false,
+    ]);
+
+    Livewire::actingAs($participantUser)
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $additionalInvite, 'panel' => testPanelProvider()->getId()])
         ->assertStatus(403);
 });
 
@@ -604,6 +660,50 @@ it('handleOpenChat redirects existing members to the chat in non-widget mode', f
         ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
         ->call('handleOpenChat', encrypt($invite->token))
         ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
+});
+
+it('handleOpenChat resolves invites through the configured invite model', function () {
+    $customInvite = new class extends Invite
+    {
+        public static bool $queried = false;
+
+        public function newQuery()
+        {
+            self::$queried = true;
+
+            return parent::newQuery();
+        }
+    };
+    $customInviteClass = get_class($customInvite);
+
+    config(['wirechat.models.invite' => $customInviteClass]);
+    Wirechat::resetTableNameCache('invite');
+
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $groupConversation->addParticipant($member);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => 'CustomInviteToken01',
+        'is_primary' => true,
+    ]);
+
+    $customInviteClass::$queried = false;
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt($invite->token))
+        ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
+
+    expect($customInviteClass::$queried)->toBeTrue();
 });
 
 it('handleOpenChat dispatches open-chat in widget mode for existing members', function () {

@@ -22,7 +22,9 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property bool $allow_members_to_send_messages
  * @property bool $allow_members_to_add_others
  * @property bool $allow_members_to_edit_group_info
+ * @property bool $allow_members_to_invite_others_via_link
  * @property int $admins_must_approve_new_members when turned on, admins must approve anyone who wants to join group
+ * @property array<string, mixed>|null $meta
  * @property string|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -59,6 +61,8 @@ class Group extends Model
         'conversation_id',
         'name',
         'description',
+        'allow_members_to_invite_others_via_link',
+        'meta',
     ];
 
     protected $casts = [
@@ -66,7 +70,9 @@ class Group extends Model
         'allow_members_to_send_messages' => 'boolean',
         'allow_members_to_add_others' => 'boolean',
         'allow_members_to_edit_group_info' => 'boolean',
+        'allow_members_to_invite_others_via_link' => 'boolean',
         'admins_must_approve_new_members' => 'boolean',
+        'meta' => 'array',
     ];
 
     public function __construct(array $attributes = [])
@@ -142,7 +148,7 @@ class Group extends Model
      */
     public function inviteLinks(): MorphMany
     {
-        return $this->morphMany(Invite::class, 'inviteable');
+        return $this->morphMany(Wirechat::inviteModelClass(), 'inviteable');
     }
 
     /**
@@ -150,7 +156,7 @@ class Group extends Model
      */
     public function joinRequests(): MorphMany
     {
-        return $this->morphMany(JoinRequest::class, 'joinable');
+        return $this->morphMany(Wirechat::joinRequestModelClass(), 'joinable');
     }
 
     /**
@@ -172,6 +178,11 @@ class Group extends Model
     public function allowsMembersToAddOthers(): bool
     {
         return $this->allow_members_to_add_others == true;
+    }
+
+    public function allowsMembersToInviteOthersViaLink(): bool
+    {
+        return $this->allow_members_to_invite_others_via_link == true;
     }
 
     public function allowsMembersToEditGroupInfo(): bool

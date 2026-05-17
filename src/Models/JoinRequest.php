@@ -71,7 +71,7 @@ class JoinRequest extends Model
 
     public function invite(): BelongsTo
     {
-        return $this->belongsTo(Invite::class);
+        return $this->belongsTo(Wirechat::inviteModelClass());
     }
 
     public function reviewedBy(): MorphTo

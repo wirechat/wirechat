@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Livewire\Concerns;
 
 use Illuminate\Database\QueryException;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Invite;
 
 trait CreatesGroupInvites
@@ -11,8 +12,10 @@ trait CreatesGroupInvites
     {
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {
             try {
+                $inviteClass = Wirechat::inviteModelClass();
+
                 return $inviteLinks->create(array_merge($attributes, [
-                    'token' => Invite::generateToken(),
+                    'token' => $inviteClass::generateToken(),
                 ]));
             } catch (QueryException $exception) {
                 if ($attempt >= $attempts || ! $this->isDuplicateInviteTokenException($exception)) {

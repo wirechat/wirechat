@@ -35,9 +35,12 @@ return [
         'attachment' => \Wirechat\Wirechat\Models\Attachment::class,
         'conversation' => \Wirechat\Wirechat\Models\Conversation::class,
         'group' => \Wirechat\Wirechat\Models\Group::class,
+        'invite' => \Wirechat\Wirechat\Models\Invite::class,
+        'join_request' => \Wirechat\Wirechat\Models\JoinRequest::class,
         'message' => \Wirechat\Wirechat\Models\Message::class,
         'message_request' => \Wirechat\Wirechat\Models\MessageRequest::class,
         'participant' => \Wirechat\Wirechat\Models\Participant::class,
+        'setting' => \Wirechat\Wirechat\Models\Setting::class,
     ],
 
     /*

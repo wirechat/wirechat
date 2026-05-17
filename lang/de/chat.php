@@ -318,6 +318,10 @@ return [
                 'add_other_members' => [
                     'label' => 'Weitere Mitglieder hinzufügen',
                 ],
+                'invite_others_via_link' => [
+                    'label' => 'Andere per Link einladen',
+                    'helper_text' => 'Mitglieder dürfen den primären Gruppeneinladungslink kopieren und senden',
+                ],
                 'admin_approval' => [
                     'label' => 'Neue Mitglieder bestätigen',
                     'helper_text' => 'Administratoren müssen Personen bestätigen, die über einen Einladungslink beitreten',

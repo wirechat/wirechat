@@ -44,6 +44,52 @@ return [
         ],
     ],
 
+    'settings' => [
+        'heading' => 'Einstellungen',
+        'actions' => [
+            'open' => [
+                'label' => 'Einstellungen',
+            ],
+            'close' => [
+                'label' => 'Einstellungen schließen',
+            ],
+            'back' => [
+                'label' => 'Zurück',
+            ],
+        ],
+        'labels' => [
+            'profile' => 'Profil',
+        ],
+        'options' => [
+            'notifications' => [
+                'label' => 'Benachrichtigungen',
+                'description' => 'Nachrichten, Gruppen, Vorschauen',
+            ],
+        ],
+        'notifications' => [
+            'heading' => 'Benachrichtigungen',
+            'options' => [
+                'messages' => [
+                    'label' => 'Nachrichten',
+                    'description' => 'Benachrichtigen, wenn neue Direktnachrichten eingehen.',
+                ],
+                'groups' => [
+                    'label' => 'Gruppen',
+                    'description' => 'Benachrichtigen, wenn Gruppen neue Aktivitäten haben.',
+                ],
+                'previews' => [
+                    'label' => 'Vorschauen anzeigen',
+                    'description' => 'Nachrichtentext in Benachrichtigungen anzeigen.',
+                ],
+            ],
+            'preview_disabled' => [
+                'private_title' => 'Neue Nachricht',
+                'private_body' => ':sender hat dir eine Nachricht gesendet',
+                'group_body' => ':sender hat eine Nachricht gesendet',
+            ],
+        ],
+    ],
+
     'actions' => [
         'new_group' => [
             'label' => 'Neue Gruppe',

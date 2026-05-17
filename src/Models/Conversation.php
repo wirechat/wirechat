@@ -25,6 +25,7 @@ use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
  * @property ConversationType $type Private is 1-1 , group or channel
  * @property \Illuminate\Support\Carbon|null $disappearing_started_at
  * @property int|null $disappearing_duration
+ * @property array<string, mixed>|null $meta
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Wirechat\Wirechat\Models\Participant|null $auth_participant
@@ -64,12 +65,14 @@ class Conversation extends Model
     protected $fillable = [
         'disappearing_started_at',
         'disappearing_duration',
+        'meta',
     ];
 
     protected $casts = [
         'type' => ConversationType::class,
         'updated_at' => 'datetime',
         'disappearing_started_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     public function __construct(array $attributes = [])
