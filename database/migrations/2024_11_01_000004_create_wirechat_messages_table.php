@@ -30,7 +30,6 @@ return new class extends Migration
 
             $table->text('body')->nullable();
             $table->string('type')->default('text');
-            $table->json('meta')->nullable();
 
             $table->timestamp('kept_at')->nullable()->comment('filled when a message is kept from disappearing');
 

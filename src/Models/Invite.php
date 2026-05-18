@@ -25,6 +25,7 @@ use Wirechat\Wirechat\Panel;
  * @property \Illuminate\Support\Carbon|null $expires_at
  * @property \Illuminate\Support\Carbon|null $last_used_at
  * @property \Illuminate\Support\Carbon|null $revoked_at
+ * @property array<string, mixed>|null $meta
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $createdBy
@@ -57,6 +58,7 @@ class Invite extends Model
         'expires_at',
         'last_used_at',
         'revoked_at',
+        'meta',
     ];
 
     protected $casts = [
@@ -64,6 +66,7 @@ class Invite extends Model
         'expires_at' => 'datetime',
         'last_used_at' => 'datetime',
         'revoked_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     public function __construct(array $attributes = [])

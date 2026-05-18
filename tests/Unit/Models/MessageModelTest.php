@@ -2,7 +2,9 @@
 
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Message;
@@ -32,6 +34,63 @@ it('casts meta as an array', function () {
             'compressed' => false,
         ],
     ]);
+});
+
+it('stores plaintext message bodies when encryption is disabled', function () {
+    config()->set('wirechat.encryption.enabled', false);
+
+    $message = Message::factory()->create([
+        'body' => 'Plain message',
+    ]);
+
+    $rawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+
+    expect($rawBody)->toBe('Plain message')
+        ->and($message->fresh()->body)->toBe('Plain message');
+});
+
+it('encrypts message bodies at rest when encryption is enabled', function () {
+    config()->set('wirechat.encryption.enabled', true);
+
+    $message = Message::factory()->create([
+        'body' => 'Sensitive message',
+    ]);
+
+    $rawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+
+    expect(str_starts_with($rawBody, 'wcenc:v1:'))->toBeTrue()
+        ->and($rawBody)->not->toBe('Sensitive message')
+        ->and($message->fresh()->body)->toBe('Sensitive message');
+});
+
+it('detects link messages before storing encrypted bodies', function () {
+    config()->set('wirechat.encryption.enabled', true);
+
+    $message = Message::factory()->create([
+        'body' => 'hello https://example.com',
+        'type' => MessageType::TEXT,
+    ]);
+
+    $rawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+
+    expect($message->fresh()->type)->toBe(MessageType::LINK)
+        ->and(str_starts_with($rawBody, 'wcenc:v1:'))->toBeTrue()
+        ->and($message->fresh()->body)->toBe('hello https://example.com');
+});
+
+it('reads mixed plaintext and encrypted message bodies', function () {
+    config()->set('wirechat.encryption.enabled', false);
+    $plainMessage = Message::factory()->create([
+        'body' => 'Plain message',
+    ]);
+
+    config()->set('wirechat.encryption.enabled', true);
+    $encryptedMessage = Message::factory()->create([
+        'body' => 'Encrypted message',
+    ]);
+
+    expect($plainMessage->fresh()->body)->toBe('Plain message')
+        ->and($encryptedMessage->fresh()->body)->toBe('Encrypted message');
 });
 
 it('returns user when sendable is called ', function () {

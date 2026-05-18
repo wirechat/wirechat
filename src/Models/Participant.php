@@ -28,6 +28,7 @@ use Wirechat\Wirechat\Traits\Actor;
  * @property \Illuminate\Support\Carbon|null $conversation_cleared_at
  * @property \Illuminate\Support\Carbon|null $conversation_deleted_at
  * @property \Illuminate\Support\Carbon|null $conversation_read_at
+ * @property array<string, mixed>|null $meta
  * @property string|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -74,6 +75,7 @@ class Participant extends Model
         'conversation_cleared_at',
         'conversation_read_at',
         'last_active_at',
+        'meta',
     ];
 
     protected $casts = [
@@ -83,6 +85,7 @@ class Participant extends Model
         'conversation_cleared_at' => 'datetime',
         'conversation_read_at' => 'datetime',
         'last_active_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     public function __construct(array $attributes = [])

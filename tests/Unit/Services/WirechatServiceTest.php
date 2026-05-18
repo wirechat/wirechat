@@ -15,6 +15,16 @@ use Wirechat\Wirechat\Services\WirechatSettingsManager;
 use Wirechat\Wirechat\Settings\UserSettings;
 use Workbench\App\Models\User;
 
+it('reports whether message encryption is enabled', function () {
+    config()->set('wirechat.encryption.enabled', false);
+
+    expect(Wirechat::hasEncryption())->toBeFalse();
+
+    config()->set('wirechat.encryption.enabled', true);
+
+    expect(Wirechat::hasEncryption())->toBeTrue();
+});
+
 describe('WirechatService Model Resolution', function () {
     beforeEach(function () {
         // Reset config to default values before each test

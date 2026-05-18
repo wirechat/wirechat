@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Facades\WirechatEncryption;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
 use Wirechat\Wirechat\Panel;
@@ -153,21 +154,21 @@ class Message extends Model
         static::addGlobalScope(WithoutRemovedMessages::class);
 
         static::saving(function (Message $message) {
-            if ($message->type === MessageType::ATTACHMENT) {
-                return;
+            $body = $message->body;
+
+            if ($message->type !== MessageType::ATTACHMENT) {
+                $trimmedBody = trim((string) $body);
+
+                if ($trimmedBody === '') {
+                    $message->type = MessageType::TEXT;
+                } else {
+                    $message->type = Wirechat::containsLink($trimmedBody)
+                        ? MessageType::LINK
+                        : MessageType::TEXT;
+                }
             }
 
-            $body = trim((string) $message->body);
-
-            if ($body === '') {
-                $message->type = MessageType::TEXT;
-
-                return;
-            }
-
-            $message->type = Wirechat::containsLink($body)
-                ? MessageType::LINK
-                : MessageType::TEXT;
+            $message->encryptBodyForStorage($body);
         });
 
         // listen to deleted
@@ -186,6 +187,26 @@ class Message extends Model
                 $message->actions()->delete();
             });
         });
+    }
+
+    public function getBodyAttribute(?string $value): ?string
+    {
+        return WirechatEncryption::decryptString($value);
+    }
+
+    protected function encryptBodyForStorage(?string $body): void
+    {
+        if ($body === null || $body === '') {
+            return;
+        }
+
+        $rawBody = $this->getAttributes()['body'] ?? null;
+
+        if (is_string($rawBody) && WirechatEncryption::isEncrypted($rawBody)) {
+            return;
+        }
+
+        $this->attributes['body'] = WirechatEncryption::encryptString($body);
     }
 
     public function attachment(): MorphOne

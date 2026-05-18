@@ -21,6 +21,7 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property string $original_name
  * @property string $url
  * @property string $mime_type
+ * @property array<string, mixed>|null $meta
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Model|\Eloquent $attachable
@@ -75,7 +76,11 @@ class Attachment extends Model
         'mkv',
     ];
 
-    protected $fillable = ['attachable_id', 'attachable_type', 'file_path', 'file_name', 'mime_type', 'url', 'original_name'];
+    protected $fillable = ['attachable_id', 'attachable_type', 'file_path', 'file_name', 'mime_type', 'url', 'original_name', 'meta'];
+
+    protected $casts = [
+        'meta' => 'array',
+    ];
 
     public function __construct(array $attributes = [])
     {
