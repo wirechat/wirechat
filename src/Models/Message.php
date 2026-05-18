@@ -25,6 +25,7 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property int|null $reply_id
  * @property string|null $body
  * @property MessageType $type
+ * @property array|null $meta
  * @property \Illuminate\Support\Carbon|null $kept_at filled when a message is kept from disappearing
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -49,6 +50,7 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereIsNotOwnedBy(\Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable $user)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereKeptAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereMeta($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereReplyId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereUpdatedAt($value)
@@ -76,11 +78,13 @@ class Message extends Model
         'reply_id',
         'conversation_id',
         'type',
+        'meta',
         'kept_at',
     ];
 
     protected $casts = [
         'type' => MessageType::class,
+        'meta' => 'array',
         'kept_at' => 'datetime',
     ];
 

@@ -16,6 +16,24 @@ it('returns conversation', function () {
     expect($message)->not->toBe(null);
 });
 
+it('casts meta as an array', function () {
+    $message = Message::factory()->create([
+        'meta' => [
+            'encryption' => [
+                'version' => 1,
+                'compressed' => false,
+            ],
+        ],
+    ]);
+
+    expect($message->fresh()->meta)->toBe([
+        'encryption' => [
+            'version' => 1,
+            'compressed' => false,
+        ],
+    ]);
+});
+
 it('returns user when sendable is called ', function () {
     $auth = User::factory()->create();
     $message = Message::factory()->sender($auth)->create();
