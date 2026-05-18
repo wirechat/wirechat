@@ -44,9 +44,11 @@ it('stores plaintext message bodies when encryption is disabled', function () {
     ]);
 
     $rawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+    $freshMessage = $message->fresh();
 
     expect($rawBody)->toBe('Plain message')
-        ->and($message->fresh()->body)->toBe('Plain message');
+        ->and($freshMessage->body)->toBe('Plain message')
+        ->and($freshMessage->meta ?? [])->not->toHaveKey('encryption');
 });
 
 it('encrypts message bodies at rest when encryption is enabled', function () {
@@ -57,10 +59,15 @@ it('encrypts message bodies at rest when encryption is enabled', function () {
     ]);
 
     $rawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+    $freshMessage = $message->fresh();
 
     expect(str_starts_with($rawBody, 'wcenc:v1:'))->toBeTrue()
         ->and($rawBody)->not->toBe('Sensitive message')
-        ->and($message->fresh()->body)->toBe('Sensitive message');
+        ->and($freshMessage->body)->toBe('Sensitive message')
+        ->and($freshMessage->meta['encryption'])->toBe([
+            'v' => 1,
+            'compression' => 'none',
+        ]);
 });
 
 it('detects link messages before storing encrypted bodies', function () {
@@ -75,7 +82,50 @@ it('detects link messages before storing encrypted bodies', function () {
 
     expect($message->fresh()->type)->toBe(MessageType::LINK)
         ->and(str_starts_with($rawBody, 'wcenc:v1:'))->toBeTrue()
+        ->and($message->fresh()->meta)->toHaveKey('encryption')
         ->and($message->fresh()->body)->toBe('hello https://example.com');
+});
+
+it('preserves existing message meta when storing encrypted bodies', function () {
+    config()->set('wirechat.encryption.enabled', true);
+
+    $message = Message::factory()->create([
+        'body' => 'Sensitive message',
+        'meta' => [
+            'custom' => [
+                'source' => 'test',
+            ],
+        ],
+    ]);
+
+    expect($message->fresh()->meta)->toBe([
+        'custom' => [
+            'source' => 'test',
+        ],
+        'encryption' => [
+            'v' => 1,
+            'compression' => 'none',
+        ],
+    ]);
+});
+
+it('removes stale encryption meta when storing plaintext bodies', function () {
+    config()->set('wirechat.encryption.enabled', false);
+
+    $message = Message::factory()->create([
+        'body' => 'Plain message',
+        'meta' => [
+            'custom' => 'value',
+            'encryption' => [
+                'v' => 1,
+                'compression' => 'gzip',
+            ],
+        ],
+    ]);
+
+    expect($message->fresh()->meta)->toBe([
+        'custom' => 'value',
+    ]);
 });
 
 it('reads mixed plaintext and encrypted message bodies', function () {

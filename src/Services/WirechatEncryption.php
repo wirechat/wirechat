@@ -4,7 +4,6 @@ namespace Wirechat\Wirechat\Services;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
-use JsonException;
 
 class WirechatEncryption
 {
@@ -24,6 +23,22 @@ class WirechatEncryption
             return $value;
         }
 
+        return $this->prefix().Crypt::encryptString($value);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $meta
+     * @return array{body: string|null, meta: array<string, mixed>|null}
+     */
+    public function encryptStringForStorage(?string $value, ?array $meta = null): array
+    {
+        if (! $this->shouldEncrypt($value)) {
+            return [
+                'body' => $value,
+                'meta' => $this->isEncrypted($value) ? $meta : $this->withoutEncryptionMeta($meta),
+            ];
+        }
+
         $compression = self::COMPRESSION_NONE;
         $plainValue = $value;
 
@@ -36,27 +51,37 @@ class WirechatEncryption
             }
         }
 
-        return $this->prefix().base64_encode(json_encode([
-            'v' => self::VERSION,
-            'compression' => $compression,
-            'payload' => Crypt::encryptString($plainValue),
-        ], JSON_THROW_ON_ERROR));
+        return [
+            'body' => $this->prefix().Crypt::encryptString($plainValue),
+            'meta' => $this->withEncryptionMeta($meta, $compression),
+        ];
     }
 
-    public function decryptString(?string $value): ?string
+    /**
+     * @param  array<string, mixed>|null  $meta
+     */
+    public function decryptString(?string $value, ?array $meta = null): ?string
+    {
+        return $this->decryptStringFromStorage($value, $meta);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $meta
+     */
+    public function decryptStringFromStorage(?string $value, ?array $meta = null): ?string
     {
         if ($value === null || $value === '' || ! $this->isEncrypted($value)) {
             return $value;
         }
 
-        $envelope = $this->decodeEnvelope($value);
-        $payload = $envelope['payload'] ?? null;
-        $compression = $envelope['compression'] ?? self::COMPRESSION_NONE;
+        return $this->decryptPayload(
+            substr($value, strlen($this->prefix())),
+            $this->compressionFromMeta($meta),
+        );
+    }
 
-        if (($envelope['v'] ?? null) !== self::VERSION || ! is_string($payload)) {
-            throw new DecryptException('Invalid Wirechat encrypted payload.');
-        }
-
+    protected function decryptPayload(string $payload, string $compression): string
+    {
         $plainValue = Crypt::decryptString($payload);
 
         if ($compression === self::COMPRESSION_GZIP) {
@@ -100,26 +125,69 @@ class WirechatEncryption
             && strlen($value) >= $this->compressionMinBytes();
     }
 
-    protected function decodeEnvelope(string $value): array
+    /**
+     * @param  array<string, mixed>|null  $meta
+     */
+    protected function compressionFromMeta(?array $meta): string
     {
-        $encoded = substr($value, strlen($this->prefix()));
-        $json = base64_decode($encoded, true);
+        $encryptionMeta = $this->encryptionMeta($meta);
 
-        if (! is_string($json)) {
+        if ($encryptionMeta === null) {
+            return self::COMPRESSION_NONE;
+        }
+
+        if (($encryptionMeta['v'] ?? null) !== self::VERSION) {
             throw new DecryptException('Invalid Wirechat encrypted payload.');
         }
 
-        try {
-            $envelope = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new DecryptException('Invalid Wirechat encrypted payload.', previous: $exception);
-        }
+        $compression = $encryptionMeta['compression'] ?? self::COMPRESSION_NONE;
 
-        if (! is_array($envelope)) {
+        if (! is_string($compression)) {
             throw new DecryptException('Invalid Wirechat encrypted payload.');
         }
 
-        return $envelope;
+        return $compression;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $meta
+     * @return array<string, mixed>|null
+     */
+    protected function encryptionMeta(?array $meta): ?array
+    {
+        $encryptionMeta = $meta['encryption'] ?? null;
+
+        return is_array($encryptionMeta) ? $encryptionMeta : null;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $meta
+     * @return array<string, mixed>
+     */
+    protected function withEncryptionMeta(?array $meta, string $compression): array
+    {
+        $meta ??= [];
+        $meta['encryption'] = [
+            'v' => self::VERSION,
+            'compression' => $compression,
+        ];
+
+        return $meta;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $meta
+     * @return array<string, mixed>|null
+     */
+    protected function withoutEncryptionMeta(?array $meta): ?array
+    {
+        if ($meta === null) {
+            return null;
+        }
+
+        unset($meta['encryption']);
+
+        return $meta === [] ? null : $meta;
     }
 
     protected function prefix(): string

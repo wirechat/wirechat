@@ -191,22 +191,21 @@ class Message extends Model
 
     public function getBodyAttribute(?string $value): ?string
     {
-        return WirechatEncryption::decryptString($value);
+        return WirechatEncryption::decryptStringFromStorage($value, $this->meta);
     }
 
     protected function encryptBodyForStorage(?string $body): void
     {
-        if ($body === null || $body === '') {
-            return;
-        }
-
         $rawBody = $this->getAttributes()['body'] ?? null;
 
         if (is_string($rawBody) && WirechatEncryption::isEncrypted($rawBody)) {
             return;
         }
 
-        $this->attributes['body'] = WirechatEncryption::encryptString($body);
+        $encrypted = WirechatEncryption::encryptStringForStorage($body, $this->meta);
+
+        $this->attributes['body'] = $encrypted['body'];
+        $this->meta = $encrypted['meta'];
     }
 
     public function attachment(): MorphOne

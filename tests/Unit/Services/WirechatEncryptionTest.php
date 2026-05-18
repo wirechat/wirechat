@@ -15,12 +15,18 @@ beforeEach(function () {
     ]);
 });
 
-function wirechatEncryptionEnvelope(string $value): array
+function wirechatEncryptionPayload(string $value): string
 {
     $prefix = 'wcenc:v1:';
-    $json = base64_decode(substr($value, strlen($prefix)), true);
 
-    return json_decode($json, true);
+    return substr($value, strlen($prefix));
+}
+
+function wirechatEncryptedPayloadJson(string $value): array
+{
+    $json = base64_decode(wirechatEncryptionPayload($value), true);
+
+    return json_decode((string) $json, true);
 }
 
 function wirechatUncompressibleMessage(): string
@@ -63,46 +69,47 @@ it('does not double encrypt encrypted values', function () {
 });
 
 it('does not compress short messages', function () {
-    $encrypted = WirechatEncryption::encryptString('short message');
-    $envelope = wirechatEncryptionEnvelope($encrypted);
+    $stored = WirechatEncryption::encryptStringForStorage('short message');
+    $encryptedPayload = wirechatEncryptedPayloadJson($stored['body']);
 
-    expect($envelope)
+    expect($encryptedPayload)
         ->not->toHaveKey('driver')
         ->not->toHaveKey('key')
-        ->and($envelope['v'])->toBe(1)
-        ->and($envelope['compression'])->toBe('none')
-        ->and(WirechatEncryption::decryptString($encrypted))->toBe('short message');
+        ->not->toHaveKey('payload')
+        ->not->toHaveKey('compression')
+        ->and($stored['meta']['encryption'])->toBe([
+            'v' => 1,
+            'compression' => 'none',
+        ])
+        ->and(WirechatEncryption::decryptStringFromStorage($stored['body'], $stored['meta']))->toBe('short message');
 });
 
 it('compresses long messages when smaller', function () {
     $message = str_repeat('Long support ticket message. ', 80);
-    $encrypted = WirechatEncryption::encryptString($message);
-    $envelope = wirechatEncryptionEnvelope($encrypted);
+    $stored = WirechatEncryption::encryptStringForStorage($message);
 
-    expect($envelope['compression'])->toBe('gzip')
-        ->and(WirechatEncryption::decryptString($encrypted))->toBe($message);
+    expect($stored['meta']['encryption']['compression'])->toBe('gzip')
+        ->and(WirechatEncryption::decryptStringFromStorage($stored['body'], $stored['meta']))->toBe($message);
 });
 
 it('skips compression when compressed output is larger and smaller output is required', function () {
     $message = wirechatUncompressibleMessage();
-    $encrypted = WirechatEncryption::encryptString($message);
-    $envelope = wirechatEncryptionEnvelope($encrypted);
+    $stored = WirechatEncryption::encryptStringForStorage($message);
 
     expect(strlen((string) gzencode($message, 6)))->toBeGreaterThan(strlen($message))
-        ->and($envelope['compression'])->toBe('none')
-        ->and(WirechatEncryption::decryptString($encrypted))->toBe($message);
+        ->and($stored['meta']['encryption']['compression'])->toBe('none')
+        ->and(WirechatEncryption::decryptStringFromStorage($stored['body'], $stored['meta']))->toBe($message);
 });
 
 it('allows compression when smaller output is not required', function () {
     config()->set('wirechat.encryption.compression.require_smaller_output', false);
 
     $message = wirechatUncompressibleMessage();
-    $encrypted = WirechatEncryption::encryptString($message);
-    $envelope = wirechatEncryptionEnvelope($encrypted);
+    $stored = WirechatEncryption::encryptStringForStorage($message);
 
     expect(strlen((string) gzencode($message, 6)))->toBeGreaterThan(strlen($message))
-        ->and($envelope['compression'])->toBe('gzip')
-        ->and(WirechatEncryption::decryptString($encrypted))->toBe($message);
+        ->and($stored['meta']['encryption']['compression'])->toBe('gzip')
+        ->and(WirechatEncryption::decryptStringFromStorage($stored['body'], $stored['meta']))->toBe($message);
 });
 
 it('detects encrypted values by prefix', function () {
