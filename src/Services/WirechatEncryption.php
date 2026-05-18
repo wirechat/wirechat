@@ -8,28 +8,36 @@ use JsonException;
 
 class WirechatEncryption
 {
+    private const PREFIX = 'wcenc:v1:';
+
+    private const VERSION = 1;
+
+    private const COMPRESSION_NONE = 'none';
+
+    private const COMPRESSION_GZIP = 'gzip';
+
+    private const DEFAULT_REQUIRE_SMALLER_OUTPUT = true;
+
     public function encryptString(?string $value): ?string
     {
         if (! $this->shouldEncrypt($value)) {
             return $value;
         }
 
-        $compression = 'none';
+        $compression = self::COMPRESSION_NONE;
         $plainValue = $value;
 
         if ($this->shouldCompress($value)) {
             $compressed = gzencode($value, $this->compressionLevel());
 
-            if (is_string($compressed) && (! $this->onlyCompressIfSmaller() || strlen($compressed) < strlen($value))) {
+            if (is_string($compressed) && (! $this->requiresSmallerCompressionOutput() || strlen($compressed) < strlen($value))) {
                 $plainValue = $compressed;
-                $compression = 'gzip';
+                $compression = self::COMPRESSION_GZIP;
             }
         }
 
         return $this->prefix().base64_encode(json_encode([
-            'v' => 1,
-            'driver' => $this->driver(),
-            'key' => $this->key(),
+            'v' => self::VERSION,
             'compression' => $compression,
             'payload' => Crypt::encryptString($plainValue),
         ], JSON_THROW_ON_ERROR));
@@ -43,15 +51,15 @@ class WirechatEncryption
 
         $envelope = $this->decodeEnvelope($value);
         $payload = $envelope['payload'] ?? null;
-        $compression = $envelope['compression'] ?? 'none';
+        $compression = $envelope['compression'] ?? self::COMPRESSION_NONE;
 
-        if (($envelope['v'] ?? null) !== 1 || ! is_string($payload)) {
+        if (($envelope['v'] ?? null) !== self::VERSION || ! is_string($payload)) {
             throw new DecryptException('Invalid Wirechat encrypted payload.');
         }
 
         $plainValue = Crypt::decryptString($payload);
 
-        if ($compression === 'gzip') {
+        if ($compression === self::COMPRESSION_GZIP) {
             $decompressed = gzdecode($plainValue);
 
             if (! is_string($decompressed)) {
@@ -61,7 +69,7 @@ class WirechatEncryption
             return $decompressed;
         }
 
-        if ($compression !== 'none') {
+        if ($compression !== self::COMPRESSION_NONE) {
             throw new DecryptException('Unsupported Wirechat compression mode.');
         }
 
@@ -116,17 +124,7 @@ class WirechatEncryption
 
     protected function prefix(): string
     {
-        return (string) config('wirechat.encryption.prefix', 'wcenc:v1:');
-    }
-
-    protected function driver(): string
-    {
-        return (string) config('wirechat.encryption.driver', 'laravel');
-    }
-
-    protected function key(): string
-    {
-        return (string) config('wirechat.encryption.key', 'app');
+        return self::PREFIX;
     }
 
     protected function compressionEnabled(): bool
@@ -144,8 +142,8 @@ class WirechatEncryption
         return max(0, min(9, (int) config('wirechat.encryption.compression.level', 6)));
     }
 
-    protected function onlyCompressIfSmaller(): bool
+    protected function requiresSmallerCompressionOutput(): bool
     {
-        return (bool) config('wirechat.encryption.compression.only_if_smaller', true);
+        return (bool) config('wirechat.encryption.compression.require_smaller_output', self::DEFAULT_REQUIRE_SMALLER_OUTPUT);
     }
 }
