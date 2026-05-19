@@ -59,6 +59,9 @@ class Chats extends Component
     #[Locked]
     public ?string $heading = '';
 
+    #[Locked]
+    public ?bool $hasReadReceipts = null;
+
     public function mount(): void
     {
         abort_unless(auth()->check(), 401);
