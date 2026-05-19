@@ -180,17 +180,6 @@ class Participant extends Model
     }
 
     /**
-     * Check if the participant has read the conversation.
-     */
-    public function hasReadConversation(): bool
-    {
-        $this->loadMissing('conversation');
-
-        return $this->conversation_read_at !== null
-            && $this->conversation_read_at >= $this->conversation->updated_at;
-    }
-
-    /**
      * Check if participant is admin
      **/
     public function isAdmin(): bool
