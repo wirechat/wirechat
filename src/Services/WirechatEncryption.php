@@ -103,7 +103,13 @@ class WirechatEncryption
 
     public function isEncrypted(?string $value): bool
     {
-        return is_string($value) && str_starts_with($value, $this->prefix());
+        if (! is_string($value) || ! str_starts_with($value, $this->prefix())) {
+            return false;
+        }
+
+        return $this->hasLaravelEncryptedPayloadShape(
+            substr($value, strlen($this->prefix())),
+        );
     }
 
     public function shouldEncrypt(?string $value): bool
@@ -188,6 +194,32 @@ class WirechatEncryption
         unset($meta['encryption']);
 
         return $meta === [] ? null : $meta;
+    }
+
+    protected function hasLaravelEncryptedPayloadShape(string $payload): bool
+    {
+        $decoded = $this->decodeLaravelEncryptedPayload($payload);
+
+        return is_array($decoded)
+            && is_string($decoded['iv'] ?? null)
+            && is_string($decoded['value'] ?? null)
+            && is_string($decoded['mac'] ?? null);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    protected function decodeLaravelEncryptedPayload(string $payload): ?array
+    {
+        $json = base64_decode($payload, true);
+
+        if (! is_string($json)) {
+            return null;
+        }
+
+        $decoded = json_decode($json, true);
+
+        return is_array($decoded) ? $decoded : null;
     }
 
     protected function prefix(): string

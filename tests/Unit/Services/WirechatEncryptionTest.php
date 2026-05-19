@@ -25,8 +25,9 @@ function wirechatEncryptionPayload(string $value): string
 function wirechatEncryptedPayloadJson(string $value): array
 {
     $json = base64_decode(wirechatEncryptionPayload($value), true);
+    $decoded = json_decode((string) $json, true);
 
-    return json_decode((string) $json, true);
+    return is_array($decoded) ? $decoded : [];
 }
 
 function wirechatUncompressibleMessage(): string
@@ -73,10 +74,7 @@ it('does not compress short messages', function () {
     $encryptedPayload = wirechatEncryptedPayloadJson($stored['body']);
 
     expect($encryptedPayload)
-        ->not->toHaveKey('driver')
-        ->not->toHaveKey('key')
-        ->not->toHaveKey('payload')
-        ->not->toHaveKey('compression')
+        ->toHaveKeys(['iv', 'value', 'mac'])
         ->and($stored['meta']['encryption'])->toBe([
             'v' => 1,
             'compression' => 'none',
@@ -112,11 +110,19 @@ it('allows compression when smaller output is not required', function () {
         ->and(WirechatEncryption::decryptStringFromStorage($stored['body'], $stored['meta']))->toBe($message);
 });
 
-it('detects encrypted values by prefix', function () {
-    expect(WirechatEncryption::isEncrypted('wcenc:v1:not-real'))->toBeTrue()
+it('detects encrypted values by marker and payload shape', function () {
+    $encrypted = WirechatEncryption::encryptString('hello world');
+
+    expect(WirechatEncryption::isEncrypted($encrypted))->toBeTrue()
+        ->and(WirechatEncryption::isEncrypted('wcenc:v1:not-real'))->toBeFalse()
+        ->and(WirechatEncryption::decryptString('wcenc:v1:not-real'))->toBe('wcenc:v1:not-real')
+        ->and(WirechatEncryption::shouldEncrypt('wcenc:v1:not-real'))->toBeTrue()
         ->and(WirechatEncryption::isEncrypted('not encrypted'))->toBeFalse();
 });
 
 it('throws when decrypting malformed encrypted payloads', function () {
-    WirechatEncryption::decryptString('wcenc:v1:not-base64');
+    $payload = wirechatEncryptedPayloadJson(WirechatEncryption::encryptString('hello world'));
+    $payload['value'] = strrev((string) $payload['value']);
+
+    WirechatEncryption::decryptString('wcenc:v1:'.base64_encode((string) json_encode($payload)));
 })->throws(DecryptException::class);

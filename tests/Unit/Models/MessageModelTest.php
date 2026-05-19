@@ -143,6 +143,60 @@ it('reads mixed plaintext and encrypted message bodies', function () {
         ->and($encryptedMessage->fresh()->body)->toBe('Encrypted message');
 });
 
+it('encrypts plaintext bodies that start with the Wirechat marker', function () {
+    config()->set('wirechat.encryption.enabled', true);
+
+    $message = Message::factory()->create([
+        'body' => 'wcenc:v1:hello',
+    ]);
+
+    $rawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+
+    expect($rawBody)->not->toBe('wcenc:v1:hello')
+        ->and(str_starts_with($rawBody, 'wcenc:v1:'))->toBeTrue()
+        ->and($message->fresh()->body)->toBe('wcenc:v1:hello');
+});
+
+it('updates encrypted message bodies when the body changes', function () {
+    config()->set('wirechat.encryption.enabled', true);
+
+    $message = Message::factory()->create([
+        'body' => 'Original message',
+    ]);
+
+    $originalRawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+    $message = $message->fresh();
+    $message->body = 'Updated message';
+    $message->save();
+
+    $updatedRawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+
+    expect($updatedRawBody)->not->toBe($originalRawBody)
+        ->and(str_starts_with($updatedRawBody, 'wcenc:v1:'))->toBeTrue()
+        ->and($message->fresh()->body)->toBe('Updated message');
+});
+
+it('stores plaintext updates when encryption is disabled after an encrypted body exists', function () {
+    config()->set('wirechat.encryption.enabled', true);
+
+    $message = Message::factory()->create([
+        'body' => 'Encrypted message',
+    ]);
+
+    config()->set('wirechat.encryption.enabled', false);
+
+    $message = $message->fresh();
+    $message->body = 'Plain update';
+    $message->save();
+
+    $rawBody = DB::table((new Message)->getTable())->where('id', $message->id)->value('body');
+    $freshMessage = $message->fresh();
+
+    expect($rawBody)->toBe('Plain update')
+        ->and($freshMessage->body)->toBe('Plain update')
+        ->and($freshMessage->meta ?? [])->not->toHaveKey('encryption');
+});
+
 it('returns user when sendable is called ', function () {
     $auth = User::factory()->create();
     $message = Message::factory()->sender($auth)->create();

@@ -198,7 +198,7 @@ class Message extends Model
     {
         $rawBody = $this->getAttributes()['body'] ?? null;
 
-        if (is_string($rawBody) && WirechatEncryption::isEncrypted($rawBody)) {
+        if (is_string($rawBody) && WirechatEncryption::isEncrypted($rawBody) && ! $this->isDirty('body')) {
             return;
         }
 
