@@ -123,6 +123,7 @@ class Chats extends Component
         $user = $this->auth;
         $ids = $this->conversationIds;
         $positions = array_flip($ids);
+        $table = (new Conversation)->getTable();
 
         $conversationQuery = Conversation::query()
             ->whereIn($table.'.id', $ids);
@@ -172,6 +173,7 @@ class Chats extends Component
         $auth = $this->auth;
         abort_if($auth == null, 401);
 
+        $table = (new Conversation)->getTable();
         $perPage = 10;
 
         // In free version, we use the user's relation as before
