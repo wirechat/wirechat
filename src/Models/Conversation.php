@@ -411,8 +411,7 @@ class Conversation extends Model
 
         // else return participant who is not the reference
         /** @var Participant|null $peer */
-        $peer = $participants->reject(
-            fn ($participant) => $participant->participantable_id == $reference->getKey() &&
+        $peer = $participants->reject(fn ($participant) => $participant->participantable_id == $reference->getKey() &&
             $participant->participantable_type == $reference->getMorphClass()
         )->first();
 
@@ -437,8 +436,7 @@ class Conversation extends Model
 
         // Check if 'participants' relationship is already loaded
         if ($this->relationLoaded('participants')) {
-            return collect($this->participants)->reject(
-                fn ($participant) => $participant->participantable_id == $reference->getKey() &&
+            return collect($this->participants)->reject(fn ($participant) => $participant->participantable_id == $reference->getKey() &&
                 $participant->participantable_type == $reference->getMorphClass()
             );
         }
@@ -558,7 +556,7 @@ class Conversation extends Model
 
         if (! $participant) {
             // If the participant is not found, return an empty collection
-            return new \Illuminate\Database\Eloquent\Collection();
+            return new \Illuminate\Database\Eloquent\Collection;
 
         }
 
