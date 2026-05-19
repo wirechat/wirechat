@@ -97,6 +97,11 @@ class WirechatService
         return app(WirechatSettingsManager::class);
     }
 
+    public function hasEncryption(): bool
+    {
+        return app(WirechatEncryption::class)->isEnabled();
+    }
+
     public function currentPanel(): ?Panel
     {
         return $this->registry->getCurrent();

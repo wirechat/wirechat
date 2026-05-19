@@ -6,12 +6,18 @@ use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Invite;
+use Wirechat\Wirechat\Models\JoinRequest;
 use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
 use Wirechat\Wirechat\Models\Setting;
 
 beforeEach(function () {
     // Drop all tables to ensure clean state
+    Schema::dropIfExists((new MessageRequest)->getTable());
+    Schema::dropIfExists((new JoinRequest)->getTable());
+    Schema::dropIfExists((new Invite)->getTable());
     Schema::dropIfExists((new Action)->getTable());
     Schema::dropIfExists((new Attachment)->getTable());
     Schema::dropIfExists((new Setting)->getTable());
@@ -155,15 +161,57 @@ describe('UUID configuration in migrations', function () {
         $convMigration = include __DIR__.'/../../database/migrations/2024_11_01_000001_create_wirechat_conversations_table.php';
         $convMigration->up();
 
+        $attachmentMigration = include __DIR__.'/../../database/migrations/2024_11_01_000002_create_wirechat_attachments_table.php';
+        $attachmentMigration->up();
+
+        $participantMigration = include __DIR__.'/../../database/migrations/2024_11_01_000003_create_wirechat_participants_table.php';
+        $participantMigration->up();
+
+        $messageMigration = include __DIR__.'/../../database/migrations/2024_11_01_000004_create_wirechat_messages_table.php';
+        $messageMigration->up();
+
+        $actionMigration = include __DIR__.'/../../database/migrations/2024_11_01_000006_create_wirechat_actions_table.php';
+        $actionMigration->up();
+
         $groupMigration = include __DIR__.'/../../database/migrations/2024_11_01_000007_create_wirechat_groups_table.php';
         $groupMigration->up();
+
+        $inviteMigration = include __DIR__.'/../../database/migrations/2024_11_01_000008_create_wirechat_invites_table.php';
+        $inviteMigration->up();
+
+        $joinRequestMigration = include __DIR__.'/../../database/migrations/2024_11_01_000009_create_wirechat_join_requests_table.php';
+        $joinRequestMigration->up();
+
+        $messageRequestMigration = include __DIR__.'/../../database/migrations/2026_04_07_000001_create_wirechat_message_requests_table.php';
+        $messageRequestMigration->up();
 
         $migration = include __DIR__.'/../../database/migrations/2026_05_13_000001_create_wirechat_settings_table.php';
         $migration->up();
 
-        expect(Schema::hasColumn((new Conversation)->getTable(), 'meta'))->toBeTrue()
-            ->and(Schema::hasColumn((new Group)->getTable(), 'meta'))->toBeTrue()
-            ->and(Schema::hasColumn((new Group)->getTable(), 'allow_members_to_invite_others_via_link'))->toBeTrue()
+        $tablesWithMeta = [
+            (new Conversation)->getTable(),
+            (new Group)->getTable(),
+            (new Message)->getTable(),
+            (new Participant)->getTable(),
+            (new Attachment)->getTable(),
+            (new Invite)->getTable(),
+        ];
+
+        foreach ($tablesWithMeta as $table) {
+            expect(Schema::hasColumn($table, 'meta'))->toBeTrue();
+        }
+
+        foreach ([
+            (new Action)->getTable(),
+            (new JoinRequest)->getTable(),
+            (new MessageRequest)->getTable(),
+            (new Setting)->getTable(),
+        ] as $table) {
+            expect(Schema::hasColumn($table, 'data'))->toBeTrue()
+                ->and(Schema::hasColumn($table, 'meta'))->toBeFalse();
+        }
+
+        expect(Schema::hasColumn((new Group)->getTable(), 'allow_members_to_invite_others_via_link'))->toBeTrue()
             ->and(Schema::hasTable((new Setting)->getTable()))->toBeTrue()
             ->and(Schema::hasColumn((new Setting)->getTable(), 'owner_id'))->toBeTrue()
             ->and(Schema::hasColumn((new Setting)->getTable(), 'owner_type'))->toBeTrue()

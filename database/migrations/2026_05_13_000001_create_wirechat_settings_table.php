@@ -21,6 +21,22 @@ return new class extends Migration
             $table->boolean('allow_members_to_invite_others_via_link')->default(false);
         });
 
+        Schema::table(Wirechat::messageModelTable(), function (Blueprint $table) {
+            $table->json('meta')->nullable();
+        });
+
+        Schema::table(Wirechat::participantModelTable(), function (Blueprint $table) {
+            $table->json('meta')->nullable();
+        });
+
+        Schema::table(Wirechat::attachmentModelTable(), function (Blueprint $table) {
+            $table->json('meta')->nullable();
+        });
+
+        Schema::table(Wirechat::inviteModelTable(), function (Blueprint $table) {
+            $table->json('meta')->nullable();
+        });
+
         Schema::create(Wirechat::settingModelTable(), function (Blueprint $table) {
             $table->id();
             $table->morphs('owner');
@@ -37,6 +53,19 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists(Wirechat::settingModelTable());
+
+        foreach ([
+            Wirechat::messageModelTable(),
+            Wirechat::participantModelTable(),
+            Wirechat::attachmentModelTable(),
+            Wirechat::inviteModelTable(),
+        ] as $tableName) {
+            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'meta')) {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->dropColumn('meta');
+                });
+            }
+        }
 
         $groupsTable = Wirechat::groupModelTable();
         if (Schema::hasTable($groupsTable)) {

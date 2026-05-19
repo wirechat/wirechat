@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Facades\WirechatEncryption;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
 use Wirechat\Wirechat\Panel;
@@ -25,6 +26,7 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property int|null $reply_id
  * @property string|null $body
  * @property MessageType $type
+ * @property array|null $meta
  * @property \Illuminate\Support\Carbon|null $kept_at filled when a message is kept from disappearing
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -49,6 +51,7 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereIsNotOwnedBy(\Illuminate\Database\Eloquent\Model|\Illuminate\Contracts\Auth\Authenticatable $user)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereKeptAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Message whereMeta($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereReplyId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Message whereUpdatedAt($value)
@@ -76,11 +79,13 @@ class Message extends Model
         'reply_id',
         'conversation_id',
         'type',
+        'meta',
         'kept_at',
     ];
 
     protected $casts = [
         'type' => MessageType::class,
+        'meta' => 'array',
         'kept_at' => 'datetime',
     ];
 
@@ -149,21 +154,21 @@ class Message extends Model
         static::addGlobalScope(WithoutRemovedMessages::class);
 
         static::saving(function (Message $message) {
-            if ($message->type === MessageType::ATTACHMENT) {
-                return;
+            $body = $message->body;
+
+            if ($message->type !== MessageType::ATTACHMENT) {
+                $trimmedBody = trim((string) $body);
+
+                if ($trimmedBody === '') {
+                    $message->type = MessageType::TEXT;
+                } else {
+                    $message->type = Wirechat::containsLink($trimmedBody)
+                        ? MessageType::LINK
+                        : MessageType::TEXT;
+                }
             }
 
-            $body = trim((string) $message->body);
-
-            if ($body === '') {
-                $message->type = MessageType::TEXT;
-
-                return;
-            }
-
-            $message->type = Wirechat::containsLink($body)
-                ? MessageType::LINK
-                : MessageType::TEXT;
+            $message->encryptBodyForStorage($body);
         });
 
         // listen to deleted
@@ -182,6 +187,25 @@ class Message extends Model
                 $message->actions()->delete();
             });
         });
+    }
+
+    public function getBodyAttribute(?string $value): ?string
+    {
+        return WirechatEncryption::decryptStringFromStorage($value, $this->meta);
+    }
+
+    protected function encryptBodyForStorage(?string $body): void
+    {
+        $rawBody = $this->getAttributes()['body'] ?? null;
+
+        if (is_string($rawBody) && WirechatEncryption::isEncrypted($rawBody) && ! $this->isDirty('body')) {
+            return;
+        }
+
+        $encrypted = WirechatEncryption::encryptStringForStorage($body, $this->meta);
+
+        $this->attributes['body'] = $encrypted['body'];
+        $this->meta = $encrypted['meta'];
     }
 
     public function attachment(): MorphOne

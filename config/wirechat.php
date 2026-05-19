@@ -62,6 +62,25 @@ return [
 
     /*
      |--------------------------------------------------------------------------
+     | Encryption
+     |--------------------------------------------------------------------------
+     |
+     | Encrypt message bodies at rest. This uses Laravel's encryption service
+     | and stores a versioned Wirechat envelope in the message body column.
+     |
+    */
+    'encryption' => [
+        'enabled' => env('WIRECHAT_ENCRYPTION_ENABLED', false),
+        'compression' => [
+            'enabled' => true,
+            'min_bytes' => 512,
+            'level' => 6,
+            'require_smaller_output' => true,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
      | Message URL Parsing
      |--------------------------------------------------------------------------
      |
