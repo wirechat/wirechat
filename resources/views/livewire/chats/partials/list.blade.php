@@ -83,7 +83,7 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
                         @endif
 
                         {{-- Seen status of last message --}}
-                        @if ($canViewLastSeenMessage)
+                        @if ($hasReadReceipts)
                             @if ($conversation->isLastMessageSeen($this->auth))
                                 <div class="flex items-center">
                                     <p class="text-xs text-blue-500">Seen</p>
@@ -107,6 +107,13 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
                                         <g id="SVGRepo_iconCarrier"> <path d="M1827.701 303.065 698.835 1431.801 92.299 825.266 0 917.564 698.835 1616.4 1919.869 395.234z" fill-rule="evenodd"/> </g>
                                     </svg>
                                 </div> 
+                            @endif
+
+                            {{-- Count unread messages of specific conversation --}}
+                            @if ($lastMessage != null && !$lastMessage?->ownedBy($this->auth) && !$isReadByAuth)
+                                <div x-show="showUnreadStatus" dusk="unreadMessagesDot" class=" col-span-2 flex flex-col">
+                                    <p class="text-xs text-white bg-[var(--wc-brand-primary)] w-5 h-5 rounded-full flex items-center justify-center">{{auth()->user()->getUnreadCount($conversation)}}</p>
+                                </div>
                             @endif
                         @endif
 

@@ -19,7 +19,7 @@ use Wirechat\Wirechat\Panel\Concerns\HasGroups;
 use Wirechat\Wirechat\Panel\Concerns\HasHeading;
 use Wirechat\Wirechat\Panel\Concerns\HasHeart;
 use Wirechat\Wirechat\Panel\Concerns\HasId;
-use Wirechat\Wirechat\Panel\Concerns\HasLastSeenMessage;
+use Wirechat\Wirechat\Panel\Concerns\HasReadReceipts;
 use Wirechat\Wirechat\Panel\Concerns\HasLayout;
 use Wirechat\Wirechat\Panel\Concerns\HasMessageLinks;
 use Wirechat\Wirechat\Panel\Concerns\HasMiddleware;
@@ -57,7 +57,7 @@ class Panel
     use HasUnreadIndicator;
     use HasUsersSearch;
     use HasWebPushNotifications;
-    use HasLastSeenMessage;
+    use HasReadReceipts;
 
     protected bool|Closure $isDefault = false;
 

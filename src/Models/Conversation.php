@@ -897,6 +897,10 @@ class Conversation extends Model
      */
     public function isLastMessageSeen($reference): bool
     {
-        return $this->peerParticipant(reference: $reference)->conversation_read_at >= $this->lastMessage?->created_at && $this->lastMessage->ownedBy($reference);
+        $peer = $this->peerParticipant(reference: $reference);
+
+        return $peer !== null
+            && $peer->hasReadConversation()
+            && $this->lastMessage?->ownedBy($reference);
     }
 }

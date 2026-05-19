@@ -4,18 +4,18 @@ namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
 
-trait HasLastSeenMessage
+trait HasReadReceipts
 {
     protected bool|Closure $isEnabled = false;
 
-    public function canViewLastSeenMessage(bool|Closure $condition = true): static
+    public function readReceipts(bool|Closure $condition = true): static
     {
         $this->isEnabled = $condition;
 
         return $this;
     }
 
-    public function hasViewLastMessage(): bool
+    public function hasReadReceipts(): bool
     {
         return (bool) $this->evaluate($this->isEnabled);
     }

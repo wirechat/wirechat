@@ -303,8 +303,8 @@ class Chats extends Component
                 : $this->panel()?->hasRedirectToHomeAction();
         }
 
-        if ($this->canViewLastSeenMessage === null) {
-            $this->canViewLastSeenMessage = $this->panel()?->hasViewLastMessage();
+        if ($this->hasReadReceipts === null) {
+            $this->hasReadReceipts = $this->panel()?->hasReadReceipts();
         }
     }
 
