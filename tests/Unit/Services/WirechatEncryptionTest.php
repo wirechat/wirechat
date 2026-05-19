@@ -41,6 +41,35 @@ function wirechatUncompressibleMessage(): string
     return substr($message, 0, 600);
 }
 
+function wirechatFakeLaravelEncryptedPayload(): string
+{
+    $cipher = strtolower((string) config('app.cipher', 'AES-256-CBC'));
+    $ivLength = openssl_cipher_iv_length($cipher);
+    $usesAead = in_array($cipher, ['aes-128-gcm', 'aes-256-gcm'], true);
+
+    $payload = [
+        'iv' => base64_encode(random_bytes(is_int($ivLength) ? $ivLength : 16)),
+        'value' => base64_encode('not real ciphertext'),
+        'mac' => $usesAead ? '' : str_repeat('a', 64),
+        'tag' => $usesAead ? base64_encode(random_bytes(16)) : '',
+    ];
+
+    return 'wcenc:v1:'.base64_encode((string) json_encode($payload, JSON_UNESCAPED_SLASHES));
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function wirechatEncryptionMeta(string $compression = 'none'): array
+{
+    return [
+        'encryption' => [
+            'v' => 1,
+            'compression' => $compression,
+        ],
+    ];
+}
+
 it('encrypts and decrypts plaintext strings', function () {
     $encrypted = WirechatEncryption::encryptString('hello world');
 
@@ -110,19 +139,26 @@ it('allows compression when smaller output is not required', function () {
         ->and(WirechatEncryption::decryptStringFromStorage($stored['body'], $stored['meta']))->toBe($message);
 });
 
+it('normalizes invalid gzip payloads into decrypt exceptions', function () {
+    $stored = WirechatEncryption::encryptStringForStorage('not compressed');
+
+    WirechatEncryption::decryptStringFromStorage($stored['body'], wirechatEncryptionMeta('gzip'));
+})->throws(DecryptException::class, 'Invalid Wirechat compressed payload using gzip compression.');
+
 it('detects encrypted values by marker and payload shape', function () {
     $encrypted = WirechatEncryption::encryptString('hello world');
+    $fakePayload = wirechatFakeLaravelEncryptedPayload();
 
     expect(WirechatEncryption::isEncrypted($encrypted))->toBeTrue()
         ->and(WirechatEncryption::isEncrypted('wcenc:v1:not-real'))->toBeFalse()
         ->and(WirechatEncryption::decryptString('wcenc:v1:not-real'))->toBe('wcenc:v1:not-real')
         ->and(WirechatEncryption::shouldEncrypt('wcenc:v1:not-real'))->toBeTrue()
+        ->and(WirechatEncryption::isEncrypted($fakePayload))->toBeFalse()
+        ->and(WirechatEncryption::decryptString($fakePayload))->toBe($fakePayload)
+        ->and(WirechatEncryption::shouldEncrypt($fakePayload))->toBeTrue()
         ->and(WirechatEncryption::isEncrypted('not encrypted'))->toBeFalse();
 });
 
 it('throws when decrypting malformed encrypted payloads', function () {
-    $payload = wirechatEncryptedPayloadJson(WirechatEncryption::encryptString('hello world'));
-    $payload['value'] = strrev((string) $payload['value']);
-
-    WirechatEncryption::decryptString('wcenc:v1:'.base64_encode((string) json_encode($payload)));
+    WirechatEncryption::decryptStringFromStorage('wcenc:v1:not-base64', wirechatEncryptionMeta());
 })->throws(DecryptException::class);

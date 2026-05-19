@@ -4,12 +4,13 @@ namespace Wirechat\Wirechat\Services;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
+use Throwable;
 
 class WirechatEncryption
 {
-    private const PREFIX = 'wcenc:v1:';
-
     private const VERSION = 1;
+
+    private const PREFIX = 'wcenc:v'.self::VERSION.':';
 
     private const COMPRESSION_NONE = 'none';
 
@@ -43,7 +44,7 @@ class WirechatEncryption
         $plainValue = $value;
 
         if ($this->shouldCompress($value)) {
-            $compressed = gzencode($value, $this->compressionLevel());
+            $compressed = $this->compress($value);
 
             if (is_string($compressed) && (! $this->requiresSmallerCompressionOutput() || strlen($compressed) < strlen($value))) {
                 $plainValue = $compressed;
@@ -70,32 +71,41 @@ class WirechatEncryption
      */
     public function decryptStringFromStorage(?string $value, ?array $meta = null): ?string
     {
-        if ($value === null || $value === '' || ! $this->isEncrypted($value)) {
+        if ($value === null || $value === '' || ! str_starts_with($value, $this->prefix())) {
+            return $value;
+        }
+
+        $payload = substr($value, strlen($this->prefix()));
+        $hasEncryptionMeta = $this->encryptionMeta($meta) !== null;
+
+        if (! $this->hasLaravelEncryptedPayloadShape($payload)) {
+            if ($hasEncryptionMeta) {
+                throw new DecryptException('Invalid Wirechat encrypted payload.');
+            }
+
+            return $value;
+        }
+
+        if (! $hasEncryptionMeta && ! $this->isEncrypted($value)) {
             return $value;
         }
 
         return $this->decryptPayload(
-            substr($value, strlen($this->prefix())),
+            $payload,
             $this->compressionFromMeta($meta),
         );
     }
 
     protected function decryptPayload(string $payload, string $compression): string
     {
+        if (! in_array($compression, [self::COMPRESSION_NONE, self::COMPRESSION_GZIP], true)) {
+            throw new DecryptException('Unsupported Wirechat compression mode.');
+        }
+
         $plainValue = Crypt::decryptString($payload);
 
         if ($compression === self::COMPRESSION_GZIP) {
-            $decompressed = gzdecode($plainValue);
-
-            if (! is_string($decompressed)) {
-                throw new DecryptException('Invalid Wirechat compressed payload.');
-            }
-
-            return $decompressed;
-        }
-
-        if ($compression !== self::COMPRESSION_NONE) {
-            throw new DecryptException('Unsupported Wirechat compression mode.');
+            return $this->decompress($plainValue);
         }
 
         return $plainValue;
@@ -107,9 +117,10 @@ class WirechatEncryption
             return false;
         }
 
-        return $this->hasLaravelEncryptedPayloadShape(
-            substr($value, strlen($this->prefix())),
-        );
+        $payload = substr($value, strlen($this->prefix()));
+
+        return $this->hasLaravelEncryptedPayloadShape($payload)
+            && $this->canDecryptPayload($payload);
     }
 
     public function shouldEncrypt(?string $value): bool
@@ -128,6 +139,7 @@ class WirechatEncryption
     public function shouldCompress(string $value): bool
     {
         return $this->compressionEnabled()
+            && $this->supportsCompression()
             && strlen($value) >= $this->compressionMinBytes();
     }
 
@@ -200,10 +212,35 @@ class WirechatEncryption
     {
         $decoded = $this->decodeLaravelEncryptedPayload($payload);
 
-        return is_array($decoded)
-            && is_string($decoded['iv'] ?? null)
-            && is_string($decoded['value'] ?? null)
-            && is_string($decoded['mac'] ?? null);
+        if (! is_array($decoded)
+            || ! is_string($decoded['iv'] ?? null)
+            || ! is_string($decoded['value'] ?? null)
+            || ! is_string($decoded['mac'] ?? null)
+            || ! array_key_exists('tag', $decoded)
+            || ! is_string($decoded['tag'])
+        ) {
+            return false;
+        }
+
+        $iv = base64_decode($decoded['iv'], true);
+        $value = base64_decode($decoded['value'], true);
+        $ivLength = $this->cipherIvLength();
+
+        if (! is_string($iv) || $value === false || $ivLength === null || strlen($iv) !== $ivLength) {
+            return false;
+        }
+
+        if ($this->cipherUsesAead()) {
+            $tag = base64_decode($decoded['tag'], true);
+
+            return $decoded['mac'] === ''
+                && is_string($tag)
+                && strlen($tag) === 16;
+        }
+
+        return $decoded['tag'] === ''
+            && strlen($decoded['mac']) === 64
+            && ctype_xdigit($decoded['mac']);
     }
 
     /**
@@ -220,6 +257,77 @@ class WirechatEncryption
         $decoded = json_decode($json, true);
 
         return is_array($decoded) ? $decoded : null;
+    }
+
+    protected function canDecryptPayload(string $payload): bool
+    {
+        try {
+            Crypt::decryptString($payload);
+        } catch (Throwable) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function compress(string $value): ?string
+    {
+        if (! $this->supportsCompression()) {
+            return null;
+        }
+
+        try {
+            $compressed = gzencode($value, $this->compressionLevel());
+        } catch (Throwable) {
+            return null;
+        }
+
+        return is_string($compressed) ? $compressed : null;
+    }
+
+    protected function decompress(string $value): string
+    {
+        if (! function_exists('gzdecode')) {
+            throw new DecryptException('Wirechat encrypted payload requires gzip decompression, but the PHP zlib extension is not available.');
+        }
+
+        try {
+            $decompressed = gzdecode($value);
+        } catch (Throwable $exception) {
+            throw new DecryptException('Invalid Wirechat compressed payload using gzip compression.', 0, $exception);
+        }
+
+        if (! is_string($decompressed)) {
+            throw new DecryptException('Invalid Wirechat compressed payload using gzip compression.');
+        }
+
+        return $decompressed;
+    }
+
+    protected function supportsCompression(): bool
+    {
+        return function_exists('gzencode') && function_exists('gzdecode');
+    }
+
+    protected function cipher(): string
+    {
+        return strtolower((string) config('app.cipher', 'AES-256-CBC'));
+    }
+
+    protected function cipherUsesAead(): bool
+    {
+        return in_array($this->cipher(), ['aes-128-gcm', 'aes-256-gcm'], true);
+    }
+
+    protected function cipherIvLength(): ?int
+    {
+        try {
+            $length = openssl_cipher_iv_length($this->cipher());
+        } catch (Throwable) {
+            return null;
+        }
+
+        return is_int($length) ? $length : null;
     }
 
     protected function prefix(): string
