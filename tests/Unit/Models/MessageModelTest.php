@@ -21,17 +21,17 @@ it('returns conversation', function () {
 it('casts meta as an array', function () {
     $message = Message::factory()->create([
         'meta' => [
-            'encryption' => [
-                'version' => 1,
-                'compressed' => false,
+            'context' => [
+                'source' => 'test',
+                'flagged' => false,
             ],
         ],
     ]);
 
     expect($message->fresh()->meta)->toBe([
-        'encryption' => [
-            'version' => 1,
-            'compressed' => false,
+        'context' => [
+            'source' => 'test',
+            'flagged' => false,
         ],
     ]);
 });
