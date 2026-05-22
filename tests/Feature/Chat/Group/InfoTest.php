@@ -235,6 +235,7 @@ describe('presence test', function () {
     });
 
     test('it shows "Delete Group" and method wired if is group and auth is Owner', function () {
+        testPanelProvider()->deleteChatAction();
 
         $auth = User::factory()->create();
 
@@ -244,6 +245,18 @@ describe('presence test', function () {
             ->assertSee('Delete Group')
             ->assertMethodWired('deleteGroup')
             ->assertSee('Before you can delete the group, you need to remove all group members');
+    });
+
+    test('it does not show "Delete Group" when delete chat action is disabled', function () {
+
+        $auth = User::factory()->create();
+
+        $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertDontSee('Delete Group')
+            ->assertMethodNotWired('deleteGroup')
+            ->assertSee('Group Permissions');
     });
 
     test('it shows "Group Permissions" and method wired if is group and auth is Owner', function () {
