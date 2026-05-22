@@ -77,6 +77,7 @@ describe('presence test', function () {
     });
 
     test('it shows "Delete Chat" if is not group', function () {
+        testPanelProvider()->deleteChatAction();
 
         $auth = User::factory()->create();
         $receiver = User::factory()->create();
@@ -86,6 +87,18 @@ describe('presence test', function () {
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->assertSee('Delete Chat')
             ->assertMethodWired('deleteChat');
+    });
+
+    test('it does not show "Delete Chat" when delete chat action is disabled', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+
+        Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
+            ->assertDontSee('Delete Chat')
+            ->assertMethodNotWired('deleteChat');
     });
 
 });

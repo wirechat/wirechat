@@ -988,6 +988,8 @@ describe('Box presence test: ', function () {
     });
 
     test('It shows Clear Chat button and method  is wired if conversation is Private', function () {
+        testPanelProvider()->clearChatAction();
+
         $auth = User::factory()->create();
 
         $participant = User::factory()->create(['name' => 'John']);
@@ -1001,6 +1003,8 @@ describe('Box presence test: ', function () {
     });
 
     test('It shows Clear Chat button and method  is wired if conversation is Self', function () {
+        testPanelProvider()->clearChatAction();
+
         $auth = User::factory()->create();
 
         // create conversation with user1
@@ -1089,6 +1093,8 @@ describe('Box presence test: ', function () {
     });
 
     test('it shows "Delete Chat" button label if Conversation  is Private', function () {
+        testPanelProvider()->deleteChatAction();
+
         $auth = User::factory()->create();
 
         $participant = User::factory()->create(['name' => 'John']);
@@ -1277,6 +1283,15 @@ describe('Heart', function () {
 
 describe('Chat Actions', function () {
 
+    test('delete-chat-action and clear-chat-action are hidden by default for private chats', function () {
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createConversationWith(User::factory()->create());
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertDontSeeHtml('dusk="delete-chat-action"')
+            ->assertDontSeeHtml('dusk="clear-chat-action"');
+    });
+
     // Delete Chat
     test('it doesnt show delete-chat-action if not enabled in chat', function () {
 
@@ -1322,6 +1337,28 @@ describe('Chat Actions', function () {
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSeeHtml('dusk="clear-chat-action"');
+    });
+
+    test('private clear and delete actions are not shown for group chats', function () {
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertDontSeeHtml('dusk="delete-chat-action"')
+            ->assertDontSeeHtml('dusk="clear-chat-action"');
+    });
+
+    test('private clear and delete actions abort for group conversations', function () {
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteConversation')
+            ->assertStatus(403);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('clearConversation')
+            ->assertStatus(403);
     });
 
     // Delete Chat

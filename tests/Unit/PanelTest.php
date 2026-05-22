@@ -121,6 +121,20 @@ test('panel settings are disabled by default and can be enabled', function () {
     expect($panel->hasSettings())->toBeTrue();
 });
 
+test('panel private chat actions are disabled by default and can be enabled', function () {
+    $panel = new Panel;
+
+    expect($panel->hasClearChatAction())->toBeFalse()
+        ->and($panel->hasDeleteChatAction())->toBeFalse();
+
+    $panel
+        ->clearChatAction()
+        ->deleteChatAction();
+
+    expect($panel->hasClearChatAction())->toBeTrue()
+        ->and($panel->hasDeleteChatAction())->toBeTrue();
+});
+
 describe('Chats Route', function () {
 
     test('return 404 if user canAccessWirechatPanel() returns false on chats route', function () {

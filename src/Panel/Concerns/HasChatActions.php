@@ -16,13 +16,13 @@ trait HasChatActions
 
     protected array|Closure $createChatActionIconAttributes = [];
 
-    protected bool|Closure $clearChatAction = true;
+    protected bool|Closure $clearChatAction = false;
 
     protected string|Htmlable|Closure|null $clearChatActionIcon = 'wirechat::icons.trash';
 
     protected array|Closure $clearChatActionIconAttributes = [];
 
-    protected bool|Closure $deleteChatAction = true;
+    protected bool|Closure $deleteChatAction = false;
 
     protected string|Htmlable|Closure|null $deleteChatActionIcon = 'wirechat::icons.trash';
 
