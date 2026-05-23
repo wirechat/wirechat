@@ -311,6 +311,7 @@ class Chat extends Component
     public function deleteConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasDeleteChatAction(), 403);
         abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
         abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
 
@@ -331,6 +332,7 @@ class Chat extends Component
     public function clearConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasClearChatAction(), 403);
         abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
         abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
 
