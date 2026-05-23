@@ -134,3 +134,19 @@ jobs:
       - run: composer install --no-interaction
 
       - run: vendor/bin/phpstan analyse
+
+  composer-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: mbstring, dom, curl
+
+      - run: composer install --no-interaction
+
+      - run: composer audit --format=plain
