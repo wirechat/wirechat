@@ -226,6 +226,8 @@ class Chat extends Component
      *  */
     public function setReply(string $id): void
     {
+        abort_unless($this->panel()->hasMessageReplyAction(), 403);
+
         // descrypt
 
         $messageId = null;
@@ -575,6 +577,8 @@ class Chat extends Component
      **/
     public function deleteForMe(string $id): void
     {
+        abort_unless($this->panel()->hasDeleteMessageActions(), 403);
+
         // descrypt
         $messageId = null;
         try {
@@ -611,6 +615,8 @@ class Chat extends Component
      **/
     public function deleteForEveryone(string $id): void
     {
+        abort_unless($this->panel()->hasDeleteMessageActions(), 403);
+
         // descrypt
         $messageId = null;
         try {
