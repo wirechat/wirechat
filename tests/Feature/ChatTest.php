@@ -1305,6 +1305,17 @@ describe('Chat Actions', function () {
             ->assertDontSeeHtml('dusk="delete-chat-action"');
     });
 
+    test('delete conversation aborts when delete chat action is disabled', function () {
+        testPanelProvider()->deleteChatAction(false);
+
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createConversationWith(User::factory()->create());
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteConversation')
+            ->assertStatus(403);
+    });
+
     test('it  shows delete-chat-action if  enabled in chat', function () {
         testPanelProvider()->deleteChatAction(fn () => true);
 
@@ -1328,6 +1339,17 @@ describe('Chat Actions', function () {
             ->assertDontSeeHtml('dusk="clear-chat-action"');
     });
 
+    test('clear conversation aborts when clear chat action is disabled', function () {
+        testPanelProvider()->clearChatAction(false);
+
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createConversationWith(User::factory()->create());
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('clearConversation')
+            ->assertStatus(403);
+    });
+
     test('it  shows clear-chat-action if  enabled in chat', function () {
         testPanelProvider()->clearChatAction(true);
 
@@ -1349,6 +1371,10 @@ describe('Chat Actions', function () {
     });
 
     test('private clear and delete actions abort for group conversations', function () {
+        testPanelProvider()
+            ->deleteChatAction()
+            ->clearChatAction();
+
         $auth = User::factory()->create(['name' => 'Namu']);
         $conversation = $auth->createGroup('My Group');
 
@@ -2945,6 +2971,9 @@ describe('Sending reply', function () {
 });
 
 describe('Deleting Conversation', function () {
+    beforeEach(function () {
+        testPanelProvider()->deleteChatAction();
+    });
 
     test('it redirects to chats route after deleting conversation', function () {
         $auth = User::factory()->create();
@@ -3202,6 +3231,8 @@ describe('Deleting Conversation', function () {
     describe('IsWidget:--', function () {
 
         test('it does not redirects to chats route after deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3226,6 +3257,8 @@ describe('Deleting Conversation', function () {
         });
 
         test('it dispatches "close-chat" evnt after deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3249,6 +3282,7 @@ describe('Deleting Conversation', function () {
         });
 
         test('it dispatches "chat-deleted" event after Deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
@@ -3273,6 +3307,7 @@ describe('Deleting Conversation', function () {
         });
 
         test('Deleted chat should no longer appea in Chats componnet when "chat-deleted" event is dispacted after Deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
@@ -3341,6 +3376,9 @@ describe('Deleting Conversation', function () {
 });
 
 describe('Clearing Conversation', function () {
+    beforeEach(function () {
+        testPanelProvider()->clearChatAction();
+    });
 
     test('user should still have access after deleting conversation', function () {
 
@@ -3462,6 +3500,8 @@ describe('Clearing Conversation', function () {
     describe('IsWidget:', function () {
 
         test('it does not redirects to chats route after deleting conversation', function () {
+            testPanelProvider()->clearChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3486,6 +3526,8 @@ describe('Clearing Conversation', function () {
         });
 
         test('it dispatches "close-chat" event after clearing conversation', function () {
+            testPanelProvider()->clearChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3509,6 +3551,7 @@ describe('Clearing Conversation', function () {
         });
 
         test('it dispatches "refresh" event after Clearing conversation', function () {
+            testPanelProvider()->clearChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
@@ -3533,6 +3576,7 @@ describe('Clearing Conversation', function () {
         });
 
         test('message is cleared/updated in Chats componnet when refresh "refresh" event is dispacted after Clearing conversation', function () {
+            testPanelProvider()->clearChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
