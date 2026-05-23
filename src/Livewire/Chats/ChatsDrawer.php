@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
+use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 
 class ChatsDrawer extends Component
 {
@@ -59,10 +60,14 @@ class ChatsDrawer extends Component
     {
         if (class_exists(ComponentRegistry::class)
             && app()->bound(ComponentRegistry::class)) {
-            return app(ComponentRegistry::class)->getClass($component);
+            $componentClass = app(ComponentRegistry::class)->getClass($component);
+        } else {
+            $componentClass = app('livewire.finder')->resolveClassComponentClassName($component);
         }
 
-        return app('livewire.finder')->resolveClassComponentClassName($component);
+        abort_unless(is_subclass_of($componentClass, ModalComponent::class), 403);
+
+        return $componentClass;
     }
 
     protected function getComponentName(string $class): string
