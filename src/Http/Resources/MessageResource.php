@@ -4,9 +4,10 @@ namespace Wirechat\Wirechat\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Wirechat\Wirechat\Models\Message;
 
 /**
- * @mixin \Wirechat\Wirechat\Models\Message
+ * @mixin Message
  */
 class MessageResource extends JsonResource
 {

@@ -10,7 +10,7 @@ use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\User;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<\App\Models\User>
  */
 class UserFactory extends Factory
 {

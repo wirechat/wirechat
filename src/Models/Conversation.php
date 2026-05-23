@@ -17,6 +17,7 @@ use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Concerns\HasDynamicIds;
+use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
 use Wirechat\Wirechat\Traits\Actionable;
 use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
 
@@ -28,16 +29,16 @@ use Wirechat\Wirechat\Workbench\Database\Factories\ConversationFactory;
  * @property array<string, mixed>|null $meta
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Wirechat\Wirechat\Models\Participant|null $auth_participant
- * @property \Wirechat\Wirechat\Models\Participant|null $peer_participant
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
+ * @property Participant|null $auth_participant
+ * @property Participant|null $peer_participant
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Action> $actions
  * @property-read int|null $actions_count
  * @property-read Group|null $group
  * @property-read Message|null $lastMessage
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $messageRequests
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, MessageRequest> $messageRequests
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Message> $messages
  * @property-read int|null $messages_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Participant> $participants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Participant> $participants
  * @property-read int|null $participants_count
  *
  * @method static Builder|Conversation newModelQuery()
@@ -151,7 +152,7 @@ class Conversation extends Model
      * If participants are already loaded, it fetches from the collection.
      * Otherwise, it queries dynamically via the `participants()` relationship.
      *
-     * @param  Model|\Illuminate\Contracts\Auth\Authenticatable  $user  The user instance.
+     * @param  Model|Authenticatable  $user  The user instance.
      * @param  bool  $withoutGlobalScopes  Whether to ignore global scopes in the query.
      * @return Participant|null The corresponding participant or null if not found.
      */
@@ -318,12 +319,12 @@ class Conversation extends Model
     /**
      * Define a relationship to fetch messages for this conversation.
      */
-    public function messages(): hasMany
+    public function messages(): HasMany
     {
         return $this->hasMany(Wirechat::messageModelClass());
     }
 
-    public function lastMessage(): hasOne
+    public function lastMessage(): HasOne
     {
         return $this->hasOne(Wirechat::messageModelClass(), 'conversation_id')->latestOfMany();
     }
@@ -331,7 +332,7 @@ class Conversation extends Model
     /**
      * Pending and historical message requests attached to this conversation.
      *
-     * @return HasMany<\Wirechat\Wirechat\Models\MessageRequest, $this>
+     * @return HasMany<MessageRequest, $this>
      */
     public function messageRequests(): HasMany
     {
@@ -339,7 +340,7 @@ class Conversation extends Model
     }
 
     /**
-     * @return HasMany<\Wirechat\Wirechat\Models\MessageRequest, $this>
+     * @return HasMany<MessageRequest, $this>
      */
     public function pendingMessageRequests(): HasMany
     {
@@ -576,7 +577,7 @@ class Conversation extends Model
 
         $builder->whereHas('messages', function (Builder $q) use ($user, $messagesTable, $participantsTable) {
             // Remove the global scope that hides removed messages so we can apply our own logic here
-            $q->withoutGlobalScope(\Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages::class)
+            $q->withoutGlobalScope(WithoutRemovedMessages::class)
 
                 // We only want messages that are NOT deleted by the current user's participant in this conversation
                 ->whereDoesntHave('actions', function ($aq) use ($user, $messagesTable, $participantsTable) {
@@ -674,7 +675,7 @@ class Conversation extends Model
      * This method retrieves the other participant in a private conversation
      * or returns the given reference user for self conversations.
      *
-     * @param  Model|\Illuminate\Contracts\Auth\Authenticatable  $reference  The reference user/model to exclude.
+     * @param  Model|Authenticatable  $reference  The reference user/model to exclude.
      * @return Participant|null The other participant or null if not applicable.
      */
     public function peerParticipant(Model|Authenticatable $reference): ?Participant
@@ -839,7 +840,7 @@ class Conversation extends Model
     /**
      * Retrieve unread messages in this conversation for a specific user.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $user
+     * @param  Model  $user
      * @return \Illuminate\Database\Eloquent\Collection<int,Message>
      */
     public function unreadMessages(Model|Authenticatable $user): \Illuminate\Database\Eloquent\Collection
@@ -881,7 +882,7 @@ class Conversation extends Model
     /**
      * Build a correlated subquery for unread messages for a specific user.
      *
-     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     * @return Builder<Message>
      */
     protected static function unreadSubqueryFor(Model|Authenticatable $user): Builder
     {
@@ -911,7 +912,7 @@ class Conversation extends Model
      * This is useful for preloading unread counts on conversation lists without
      * triggering one unread query per conversation row during rendering.
      *
-     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     * @return Builder<Message>
      */
     public static function unreadCountSubqueryFor(Model|Authenticatable $user): Builder
     {
@@ -922,7 +923,7 @@ class Conversation extends Model
     /**
      * Build a correlated subquery that reports whether unread messages exist.
      *
-     * @return Builder<\Wirechat\Wirechat\Models\Message>
+     * @return Builder<Message>
      */
     public static function unreadExistsSubqueryFor(Model|Authenticatable $user): Builder
     {

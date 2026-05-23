@@ -2,6 +2,9 @@
 
 namespace Wirechat\Wirechat\Livewire\Chats;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -17,8 +20,8 @@ use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 
 /**
- * @property-read \Illuminate\Contracts\Auth\Authenticatable|null $auth
- * @property-read \Illuminate\Support\Collection<int, \Wirechat\Wirechat\Models\Conversation> $conversations
+ * @property-read Authenticatable|null $auth
+ * @property-read Collection<int, Conversation> $conversations
  * @property int|string|null $selectedConversationId
  * @property array<int, int|string> $conversationIds
  */
@@ -353,7 +356,7 @@ class Chats extends Component
         }
     }
 
-    protected function applySearchConditions($query): \Illuminate\Database\Eloquent\Builder
+    protected function applySearchConditions($query): Builder
     {
         $searchableFields = $this->panel()->getSearchableAttributes();
         $groupSearchableFields = ['name', 'description'];

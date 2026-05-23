@@ -9,7 +9,7 @@ use Wirechat\Wirechat\Models\Participant;
 use Workbench\App\Models\User;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Participant>
+ * @extends Factory<\App\Models\Participant>
  */
 class ParticipantFactory extends Factory
 {

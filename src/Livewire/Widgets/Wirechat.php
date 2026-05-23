@@ -151,7 +151,7 @@ class Wirechat extends Component
 
     /**
      * @param  object  $component
-     * @return \Illuminate\Support\Collection<string|null>
+     * @return Collection<string|null>
      */
     public function getPublicPropertyTypes($component): Collection
     {

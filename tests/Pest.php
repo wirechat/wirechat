@@ -1,5 +1,7 @@
 <?php
 
+use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Tests\TestCase;
 
 /*
@@ -44,7 +46,7 @@ function something()
     // ..
 }
 
-function testPanelProvider(): \Wirechat\Wirechat\Panel
+function testPanelProvider(): Panel
 {
-    return \Wirechat\Wirechat\Facades\Wirechat::getPanel('test');
+    return Wirechat::getPanel('test');
 }

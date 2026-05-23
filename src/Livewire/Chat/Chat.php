@@ -3,12 +3,14 @@
 namespace Wirechat\Wirechat\Livewire\Chat;
 
 use Composer\InstalledVersions;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -42,7 +44,7 @@ use Wirechat\Wirechat\Models\Participant;
  *
  * Handles group, private and self conversations .
  *
- * @property \Illuminate\Contracts\Auth\Authenticatable|null $auth
+ * @property Authenticatable|null $auth
  */
 class Chat extends Component
 {
@@ -131,7 +133,7 @@ class Chat extends Component
         }
 
         if ($this->panel() == null) {
-            \Illuminate\Support\Facades\Log::warning('Wirechat:No panels registered in Chat Component');
+            Log::warning('Wirechat:No panels registered in Chat Component');
         } else {
             $panelId = $this->panel()->getId();
             $channelName = "{$panelId}.conversation.{$conversationId}";
@@ -452,7 +454,7 @@ class Chat extends Component
 
                 ]);
 
-            } catch (\Illuminate\Validation\ValidationException $th) {
+            } catch (ValidationException $th) {
 
                 $errors = $th->errors();
                 foreach ($errors as $field => $messages) {
@@ -1095,7 +1097,7 @@ class Chat extends Component
     /**
      * Returns the authenticated user.
      *
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return Authenticatable|null
      */
     #[Computed]
     public function auth()

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\PanelRegistry;
@@ -20,7 +21,7 @@ use Wirechat\Wirechat\PanelRegistry;
 $panels = app(PanelRegistry::class)->all();
 
 if (empty($panels)) {
-    \Illuminate\Support\Facades\Log::warning('No panels registered in wirechatPanelRegistry for channels');
+    Log::warning('No panels registered in wirechatPanelRegistry for channels');
 
     return;
 }

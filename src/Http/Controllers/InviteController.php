@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Invite;
 
@@ -36,7 +37,7 @@ class InviteController extends Controller
 
         abort_unless($group instanceof Group, 404);
 
-        /** @var \Wirechat\Wirechat\Models\Conversation $conversation */
+        /** @var Conversation $conversation */
         $conversation = $group->conversation()->with(['participants.participantable'])->firstOrFail();
         $auth = $request->user();
 

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\JoinRequestStatus;
@@ -11,6 +12,7 @@ use Wirechat\Wirechat\Livewire\Chat\Group\Join\Lobby;
 use Wirechat\Wirechat\Livewire\Chat\Group\Join\Requests;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Show;
 use Wirechat\Wirechat\Livewire\Chat\Group\Permissions;
@@ -354,7 +356,7 @@ it('loads additional invite links incrementally from the dedicated list componen
     }
 
     Livewire::actingAs($owner)
-        ->test(\Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->test(ListLinks::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
         ->assertSee(__('wirechat::chat.group.invite_link.labels.additional_links'))
         ->assertSee(__('wirechat::chat.group.invite_link.actions.load_more.label'))
         ->assertSee('Campaign 12')
@@ -909,7 +911,7 @@ it('handleOpenChat throttles excessive calls', function () {
     $hostConversation = $owner->createGroup('Host');
     $hostConversation->addParticipant($member);
 
-    \Illuminate\Support\Facades\RateLimiter::clear('wirechat-open-chat:'.$member->getKey());
+    RateLimiter::clear('wirechat-open-chat:'.$member->getKey());
 
     $groupConversation = $owner->createGroup('Target');
     $invite = $groupConversation->group->inviteLinks()->create([
@@ -920,7 +922,7 @@ it('handleOpenChat throttles excessive calls', function () {
         'is_primary' => true,
     ]);
 
-    \Illuminate\Support\Facades\RateLimiter::increment('wirechat-open-chat:'.$member->getKey(), 60, 60);
+    RateLimiter::increment('wirechat-open-chat:'.$member->getKey(), 60, 60);
 
     Livewire::actingAs($member)
         ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])

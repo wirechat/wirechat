@@ -9,7 +9,7 @@ use Wirechat\Wirechat\Models\MessageRequest;
 use Workbench\App\Models\User;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Wirechat\Wirechat\Models\MessageRequest>
+ * @extends Factory<MessageRequest>
  */
 class MessageRequestFactory extends Factory
 {

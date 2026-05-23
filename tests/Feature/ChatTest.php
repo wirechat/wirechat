@@ -2,12 +2,15 @@
 
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\ConversationType;
@@ -28,6 +31,7 @@ use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\MessageRequest;
+use Wirechat\Wirechat\Support\Enums\EmojiPickerPosition;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
@@ -1414,7 +1418,7 @@ describe('Emoji', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        testPanelProvider()->emojiPicker(position: \Wirechat\Wirechat\Support\Enums\EmojiPickerPosition::Floating);
+        testPanelProvider()->emojiPicker(position: EmojiPickerPosition::Floating);
 
         // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
@@ -1430,7 +1434,7 @@ describe('Emoji', function () {
 
         $auth = User::factory()->create(['name' => 'Test']);
 
-        testPanelProvider()->emojiPicker(position: \Wirechat\Wirechat\Support\Enums\EmojiPickerPosition::Docked);
+        testPanelProvider()->emojiPicker(position: EmojiPickerPosition::Docked);
 
         // create conversation with user1
         $conversation = $auth->createConversationWith($auth, 'hello');
@@ -2233,7 +2237,7 @@ describe('Sending messages ', function () {
         Carbon::setTestNow(Carbon::now()); // Freeze the current time
 
         for ($i = 0; $i < 60; $i++) {
-            \Illuminate\Support\Facades\RateLimiter::increment('send-message:'.$auth->id);
+            RateLimiter::increment('send-message:'.$auth->id);
         }
 
         // Move the time forward slightly for the 61st message
@@ -2314,7 +2318,7 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        event::assertDispatched(MessageCreated::class);
+        Event::assertDispatched(MessageCreated::class);
     });
 
     test('it Broadcaste event job "MessageCreted" when sendLike is called and conversation is PRIVATE', function () {
@@ -2332,7 +2336,7 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        event::assertDispatched(MessageCreated::class);
+        Event::assertDispatched(MessageCreated::class);
     });
 
     test('it does not Broadcaste event job "MessageCreted" when sendLike is called and conversation is SELF', function () {
@@ -2350,7 +2354,7 @@ describe('Sending messages ', function () {
 
         $message = Message::first();
 
-        event::assertNotDispatched(MessageCreated::class);
+        Event::assertNotDispatched(MessageCreated::class);
     });
 
     test('it pushed job "NotifyParticipants" when sendLike is called and is GROUP', function () {
@@ -2482,7 +2486,7 @@ describe('Sending messages ', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
         for ($i = 0; $i < 60; $i++) {
-            \Illuminate\Support\Facades\RateLimiter::increment('send-message:'.$auth->id);
+            RateLimiter::increment('send-message:'.$auth->id);
         }
 
         // Test that the rate limit is hit
@@ -2724,7 +2728,7 @@ describe('Sending messages ', function () {
 
     test('it saves file to databse when created & clears files properties when done', function () {
 
-        config::set('wirechat.storage.disk', 'public');
+        Config::set('wirechat.storage.disk', 'public');
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()
@@ -2771,7 +2775,7 @@ describe('Sending messages ', function () {
             ->create();
 
         // assert no message yet
-        $chatListComponet = Livewire::actingAs($auth)->test(ChatList::class)->assertDontSee('new message');
+        $chatListComponet = Livewire::actingAs($auth)->test(Chatlist::class)->assertDontSee('new message');
 
         // send message
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -2801,7 +2805,7 @@ describe('Sending reply', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call('setReply', $message->id)
             ->assertStatus(500);
-    })->throws(\Illuminate\Contracts\Encryption\DecryptException::class);
+    })->throws(DecryptException::class);
 
     test('it doesnt throw DecryptException invalid error if id is encrypted', function () {
         $auth = User::factory()->create();
@@ -2837,7 +2841,7 @@ describe('Sending reply', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call('setReply', encrypt($randomMessage->id))
             ->assertStatus(404);
-    })->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+    })->throws(ModelNotFoundException::class);
 
     test('it can set reply message when setReply is called', function () {
         $auth = User::factory()->create();
@@ -3781,7 +3785,7 @@ describe('deleteMessage ForEveryone', function () {
 
         // assert count no 3
         $request->asssertStatus(500);
-    })->throws(\Illuminate\Contracts\Encryption\DecryptException::class);
+    })->throws(DecryptException::class);
 
     test('it does Not throws DecryptException if id is Encrypted', function () {
 
@@ -3890,7 +3894,7 @@ describe('deleteMessage ForEveryone', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = $auth->createConversationWith($receiver, 'This is message');
 
-        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSee('This is message');
+        $CHATLIST = Livewire::actingAs($auth)->test(Chatlist::class)->assertSee('This is message');
 
         // run
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
@@ -3987,7 +3991,7 @@ describe('deletForMe', function () {
             ->call('deleteForMe', $otherUserMessage->id)
             ->assertStatus(500);
 
-    })->throws(\Illuminate\Contracts\Encryption\DecryptException::class);
+    })->throws(DecryptException::class);
 
     test('it doesnt throws DecryptException if message id is Encrypted  ', function () {
 
@@ -4095,7 +4099,7 @@ describe('deletForMe', function () {
 
         $conversation = $auth->createConversationWith($receiver, 'This is message');
 
-        $CHATLIST = Livewire::actingAs($auth)->test(ChatList::class)->assertSee('This is message');
+        $CHATLIST = Livewire::actingAs($auth)->test(Chatlist::class)->assertSee('This is message');
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 

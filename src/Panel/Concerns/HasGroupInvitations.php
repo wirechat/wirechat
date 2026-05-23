@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
+use Illuminate\Http\Request;
 
 /**
  * @method mixed evaluate(mixed $value, array $data = [], array $namedInjections = [])
@@ -49,12 +50,12 @@ trait HasGroupInvitations
         return $this;
     }
 
-    public function getInviteJoinRedirectUrl(?\Illuminate\Http\Request $request = null): ?string
+    public function getInviteJoinRedirectUrl(?Request $request = null): ?string
     {
         return $this->evaluate(
             $this->inviteJoinRedirect,
             ['request' => $request],
-            $request ? [\Illuminate\Http\Request::class => $request] : []
+            $request ? [Request::class => $request] : []
         );
     }
 }

@@ -3,14 +3,17 @@
 namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Carbon;
 use Wirechat\Wirechat\Enums\GroupType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Workbench\Database\Factories\GroupFactory;
 
 /**
  * @property int $id
@@ -26,13 +29,13 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property int $admins_must_approve_new_members when turned on, admins must approve anyone who wants to join group
  * @property array<string, mixed>|null $meta
  * @property string|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Wirechat\Wirechat\Models\Conversation $conversation
- * @property-read \Wirechat\Wirechat\Models\Attachment|null $cover
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Conversation $conversation
+ * @property-read Attachment|null $cover
  * @property-read string|null $cover_url
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Invite> $inviteLinks
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\JoinRequest> $joinRequests
+ * @property-read Collection<int, Invite> $inviteLinks
+ * @property-read Collection<int, JoinRequest> $joinRequests
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Group newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Group newQuery()
@@ -100,7 +103,7 @@ class Group extends Model
      */
     protected static function newFactory()
     {
-        return \Wirechat\Wirechat\Workbench\Database\Factories\GroupFactory::new();
+        return GroupFactory::new();
     }
 
     public function conversation(): BelongsTo
@@ -136,7 +139,7 @@ class Group extends Model
     }
 
     /**
-     * @return MorphOne<\Wirechat\Wirechat\Models\Attachment, $this>
+     * @return MorphOne<Attachment, $this>
      */
     public function cover(): MorphOne
     {
@@ -144,7 +147,7 @@ class Group extends Model
     }
 
     /**
-     * @return MorphMany<\Wirechat\Wirechat\Models\Invite, $this>
+     * @return MorphMany<Invite, $this>
      */
     public function inviteLinks(): MorphMany
     {
@@ -152,7 +155,7 @@ class Group extends Model
     }
 
     /**
-     * @return MorphMany<\Wirechat\Wirechat\Models\JoinRequest, $this>
+     * @return MorphMany<JoinRequest, $this>
      */
     public function joinRequests(): MorphMany
     {
@@ -160,7 +163,7 @@ class Group extends Model
     }
 
     /**
-     * @return MorphMany<\Wirechat\Wirechat\Models\JoinRequest, $this>
+     * @return MorphMany<JoinRequest, $this>
      */
     public function pendingJoinRequests(): MorphMany
     {
