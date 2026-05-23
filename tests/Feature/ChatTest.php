@@ -1582,6 +1582,94 @@ describe('Message actions: Viewing Private Chat', function () {
             ->assertSee('Nice things') // assert can see message
             ->assertDontSeeHtml('dusk="delete_message_for_me"');
     });
+
+    test('it hides reply actions when messageReplyAction is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertDontSeeHtml('dusk="reply_to_message_icon"')
+            ->assertDontSeeHtml('dusk="reply_to_message_button"')
+            ->assertSeeHtml('dusk="delete_message_for_me"');
+    });
+
+    test('it does not render message actions when reply and delete message actions are off', function () {
+        testPanelProvider()
+            ->deleteMessageActions(false)
+            ->messageReplyAction(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertDontSeeHtml('dusk="message_actions"')
+            ->assertDontSeeHtml('dusk="message_actions_dropdown"');
+    });
+
+    test('it renders only reply actions when delete message actions are off', function () {
+        testPanelProvider()->deleteMessageActions(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertSeeHtml('dusk="message_actions"')
+            ->assertSeeHtml('dusk="message_actions_dropdown"')
+            ->assertSeeHtml('dusk="reply_to_message_icon"')
+            ->assertSeeHtml('dusk="reply_to_message_button"')
+            ->assertDontSeeHtml('dusk="delete_message_for_me"')
+            ->assertDontSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+    test('it renders only delete actions when message reply action is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertSeeHtml('dusk="message_actions"')
+            ->assertSeeHtml('dusk="message_actions_dropdown"')
+            ->assertSeeHtml('dusk="delete_message_for_me"')
+            ->assertSeeHtml('dusk="delete_message_for_everyone"')
+            ->assertDontSeeHtml('dusk="reply_to_message_icon"')
+            ->assertDontSeeHtml('dusk="reply_to_message_button"');
+    });
+
+    test('delete message methods abort when delete message actions are off', function () {
+        testPanelProvider()->deleteMessageActions(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+        $message = $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForEveryone', encrypt($message->id))
+            ->assertStatus(403);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForMe', encrypt($message->id))
+            ->assertStatus(403);
+    });
 });
 
 describe('Message actions:Viewing Group Chat', function () {
@@ -2766,6 +2854,40 @@ describe('Sending reply', function () {
             ->call('setReply', encrypt($message->id))
             ->assertSet('replyMessage.id', $message->id);
 
+    });
+
+    test('setReply aborts when message reply action is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($receiver, message: 'How are you');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('setReply', encrypt($message->id))
+            ->assertStatus(403);
+    });
+
+    test('existing reply previews still render when message reply action is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = $auth->createConversationWith($receiver, 'Original message');
+
+        $parent = Message::query()->where('conversation_id', $conversation->id)->firstOrFail();
+        $reply = $receiver->sendMessageTo($conversation, message: 'Reply message');
+        $reply->forceFill(['reply_id' => $parent->id])->save();
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Reply message')
+            ->assertSee('Original message')
+            ->assertDontSeeHtml('dusk="reply_to_message_button"');
     });
 
     test('it shows "replying to yourself" when auth is replying to own message ', function () {
