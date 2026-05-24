@@ -8,7 +8,7 @@ use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
-use Wirechat\Wirechat\Models\group;
+use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
@@ -1418,13 +1418,13 @@ describe('deleting permanently()', function () {
         $group = $conversation->group;
 
         // get conversation reads
-        expect(group::find($group->id))->not->toBe(null);
+        expect(Group::find($group->id))->not->toBe(null);
 
         // Delete message
         $conversation->delete();
 
         // assert count
-        expect(group::find($group->id))->toBe(null);
+        expect(Group::find($group->id))->toBe(null);
     });
 
     it('deletes all messages when converstion is deleted', function () {

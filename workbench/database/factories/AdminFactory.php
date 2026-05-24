@@ -2,7 +2,6 @@
 
 namespace Wirechat\Wirechat\Workbench\Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -11,7 +10,7 @@ use Wirechat\Wirechat\Models\Message;
 use Workbench\App\Models\Admin;
 
 /**
- * @extends Factory<User>
+ * @extends Factory<Admin>
  */
 class AdminFactory extends Factory
 {

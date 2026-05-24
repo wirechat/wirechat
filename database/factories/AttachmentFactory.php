@@ -2,14 +2,16 @@
 
 namespace Database\Factories;
 
-use App\Models\Attachment;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Wirechat\Wirechat\Models\Attachment;
 
 /**
  * @extends Factory<Attachment>
  */
 class AttachmentFactory extends Factory
 {
+    protected $model = Attachment::class;
+
     /**
      * Define the model's default state.
      *

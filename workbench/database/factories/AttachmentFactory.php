@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Wirechat\Wirechat\Models\Attachment;
 
 /**
- * @extends Factory<\App\Models\Attachment>
+ * @extends Factory<Attachment>
  */
 class AttachmentFactory extends Factory
 {

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Wirechat\Wirechat\Models\Read;
 
 /**
- * @extends Factory<\App\Models\Read>
+ * @extends Factory<Read>
  */
 class ReadFactory extends Factory
 {

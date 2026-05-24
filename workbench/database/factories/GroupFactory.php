@@ -2,12 +2,11 @@
 
 namespace Wirechat\Wirechat\Workbench\Database\Factories;
 
-use App\Models\RoomSetting;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Wirechat\Wirechat\Models\Group;
 
 /**
- * @extends Factory<RoomSetting>
+ * @extends Factory<Group>
  */
 class GroupFactory extends Factory
 {

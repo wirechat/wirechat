@@ -2,7 +2,6 @@
 
 namespace Wirechat\Wirechat\Workbench\Database\Factories;
 
-use App\Models\Attachment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
@@ -10,7 +9,7 @@ use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
 /**
- * @extends Factory<Attachment>
+ * @extends Factory<Conversation>
  */
 class ConversationFactory extends Factory
 {

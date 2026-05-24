@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Wirechat\Wirechat\Http\Controllers\InviteController;
 use Wirechat\Wirechat\PanelRegistry;
