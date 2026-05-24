@@ -52,7 +52,7 @@ test('it creates panel', function () {
     // Ensure the file does not exist before publishing
     if (file_exists($expectedPath)) {
         // unlink($expectedPath); // Remove it if it already exists
-        \Illuminate\Support\Facades\File::delete($expectedPath);
+        Illuminate\Support\Facades\File::delete($expectedPath);
     }
 
     $this->artisan('wirechat:install');

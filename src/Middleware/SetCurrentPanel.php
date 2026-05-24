@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Wirechat\Wirechat\PanelRegistry;
 
 class SetCurrentPanel
 {
@@ -12,7 +13,7 @@ class SetCurrentPanel
      */
     public function handle(Request $request, Closure $next, string $panelId)
     {
-        app(\Wirechat\Wirechat\PanelRegistry::class)->setCurrent($panelId);
+        app(PanelRegistry::class)->setCurrent($panelId);
 
         return $next($request);
     }

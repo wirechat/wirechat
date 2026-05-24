@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Livewire\Component;
+use Livewire\Mechanisms\ComponentRegistry;
 
 class ChatsDrawer extends Component
 {
@@ -56,9 +57,9 @@ class ChatsDrawer extends Component
 
     protected function resolveComponentClass(string $component): string
     {
-        if (class_exists(\Livewire\Mechanisms\ComponentRegistry::class)
-            && app()->bound(\Livewire\Mechanisms\ComponentRegistry::class)) {
-            return app(\Livewire\Mechanisms\ComponentRegistry::class)->getClass($component);
+        if (class_exists(ComponentRegistry::class)
+            && app()->bound(ComponentRegistry::class)) {
+            return app(ComponentRegistry::class)->getClass($component);
         }
 
         return app('livewire.finder')->resolveClassComponentClassName($component);
@@ -66,9 +67,9 @@ class ChatsDrawer extends Component
 
     protected function getComponentName(string $class): string
     {
-        if (class_exists(\Livewire\Mechanisms\ComponentRegistry::class)
-            && app()->bound(\Livewire\Mechanisms\ComponentRegistry::class)) {
-            return app(\Livewire\Mechanisms\ComponentRegistry::class)->getName($class);
+        if (class_exists(ComponentRegistry::class)
+            && app()->bound(ComponentRegistry::class)) {
+            return app(ComponentRegistry::class)->getName($class);
         }
 
         return app('livewire.finder')->normalizeName($class);

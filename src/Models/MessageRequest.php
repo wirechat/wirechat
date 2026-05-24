@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Workbench\Database\Factories\MessageRequestFactory;
 
 /**
  * @property int $id
@@ -21,14 +23,14 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property MessageRequestStatus $status
  * @property int|null $reviewed_by_id
  * @property string|null $reviewed_by_type
- * @property \Illuminate\Support\Carbon|null $reviewed_at
+ * @property Carbon|null $reviewed_at
  * @property array<string, mixed>|null $data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Wirechat\Wirechat\Models\Conversation|null $conversation
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $recipient
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $reviewedBy
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $sender
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Conversation|null $conversation
+ * @property-read Model|\Eloquent|null $recipient
+ * @property-read Model|\Eloquent|null $reviewedBy
+ * @property-read Model|\Eloquent|null $sender
  *
  * @mixin \Eloquent
  */
@@ -64,7 +66,7 @@ class MessageRequest extends Model
 
     protected static function newFactory()
     {
-        return \Wirechat\Wirechat\Workbench\Database\Factories\MessageRequestFactory::new();
+        return MessageRequestFactory::new();
     }
 
     public function conversation(): BelongsTo

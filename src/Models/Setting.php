@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Wirechat\Wirechat\Facades\Wirechat;
 
 /**
@@ -11,8 +12,8 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property int $owner_id
  * @property string $owner_type
  * @property array<string, mixed>|null $data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Model|\Eloquent $owner
  *
  * @mixin \Eloquent

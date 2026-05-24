@@ -8,7 +8,7 @@ Route::name('wirechat.')
     ->group(function () {
         $panels = app(PanelRegistry::class)->all();
         if (empty($panels)) {
-            \Log::warning('No panels registered in wirechatPanelRegistry');
+            Log::warning('No panels registered in wirechatPanelRegistry');
 
             return;
         }

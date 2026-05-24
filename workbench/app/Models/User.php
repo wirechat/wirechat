@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Wirechat\Wirechat\Contracts\WirechatUser;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Traits\InteractsWithWirechat;
+use Wirechat\Wirechat\Workbench\Database\Factories\UserFactory;
 
 class User extends Authenticatable implements WirechatUser
 {
@@ -55,7 +56,7 @@ class User extends Authenticatable implements WirechatUser
      */
     protected static function newFactory()
     {
-        return \Wirechat\Wirechat\Workbench\Database\Factories\UserFactory::new();
+        return UserFactory::new();
     }
 
     public function getCoverUrlAttribute(): ?string

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
@@ -238,7 +239,7 @@ describe('WirechatService Model Resolution', function () {
             foreach ($modelTypes as $type => $expectedClass) {
                 config(["wirechat.models.{$type}" => 'NonExistentClass']);
 
-                $method = \Illuminate\Support\Str::camel("{$type}_model_class");
+                $method = Str::camel("{$type}_model_class");
 
                 expect(fn () => Wirechat::{$method}())
                     ->toThrow(InvalidArgumentException::class, "Model class 'NonExistentClass' configured in 'wirechat.models.{$type}' does not exist.");
@@ -477,7 +478,7 @@ describe('WirechatService Model Resolution', function () {
             $actionTable = Wirechat::actionModelTable();
 
             // Verify they're cached by checking internal state via reflection
-            $reflection = new \ReflectionClass(Wirechat::getFacadeRoot());
+            $reflection = new ReflectionClass(Wirechat::getFacadeRoot());
             $tableNamesProperty = $reflection->getProperty('tableNames');
             $tableNamesProperty->setAccessible(true);
             $cachedNames = $tableNamesProperty->getValue(Wirechat::getFacadeRoot());

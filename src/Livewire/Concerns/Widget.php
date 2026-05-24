@@ -4,11 +4,12 @@ namespace Wirechat\Wirechat\Livewire\Concerns;
 
 use Livewire\Attributes\Locked;
 use Wirechat\Wirechat\Livewire\Chat\Chats;
+use Wirechat\Wirechat\Models\Conversation;
 
 /**
  * Trait Actionable
  *
- * @property \Wirechat\Wirechat\Models\Conversation|null $conversation
+ * @property Conversation|null $conversation
  */
 trait Widget
 {
