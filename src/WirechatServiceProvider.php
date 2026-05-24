@@ -4,10 +4,12 @@ namespace Wirechat\Wirechat;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use Wirechat\Wirechat\Console\Commands\ActivateWirechatPro;
 use Wirechat\Wirechat\Console\Commands\InstallWirechat;
 use Wirechat\Wirechat\Console\Commands\MakePanelCommand;
 use Wirechat\Wirechat\Console\Commands\MigrateConfigToPanelCommand;
@@ -15,6 +17,7 @@ use Wirechat\Wirechat\Console\Commands\SetupNotifications;
 use Wirechat\Wirechat\Console\Commands\UpgradeMorphColumns;
 use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
 use Wirechat\Wirechat\Facades\WirechatColor;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\Info as GroupInfo;
@@ -22,6 +25,7 @@ use Wirechat\Wirechat\Livewire\Chat\Group\Join\Lobby;
 use Wirechat\Wirechat\Livewire\Chat\Group\Join\Requests;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Create;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Links;
+use Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Send;
 use Wirechat\Wirechat\Livewire\Chat\Group\Links\Show;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers;
@@ -62,6 +66,7 @@ class WirechatServiceProvider extends ServiceProvider
         // Register the command if we are using the application via the CLI
         if ($this->app->runningInConsole()) {
             $this->commands([
+                ActivateWirechatPro::class,
                 InstallWirechat::class,
                 SetupNotifications::class,
                 MakePanelCommand::class,
@@ -197,7 +202,7 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chat.group.members.banned', Banned::class);
         Livewire::component('wirechat.chat.group.permissions', Permissions::class);
         Livewire::component('wirechat.chat.group.links.links', Links::class);
-        Livewire::component('wirechat.chat.group.links.list', \Wirechat\Wirechat\Livewire\Chat\Group\Links\ListLinks::class);
+        Livewire::component('wirechat.chat.group.links.list', ListLinks::class);
         Livewire::component('wirechat.chat.group.links.create', Create::class);
         Livewire::component('wirechat.chat.group.links.show', Show::class);
         Livewire::component('wirechat.chat.group.join.lobby', Lobby::class);
@@ -240,7 +245,7 @@ class WirechatServiceProvider extends ServiceProvider
 
     protected function registerMiddlewares(): void
     {
-        $router = $this->app->make(\Illuminate\Routing\Router::class);
+        $router = $this->app->make(Router::class);
 
         $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
         $router->aliasMiddleware('wirechat.setPanel', SetCurrentPanel::class);
@@ -254,10 +259,10 @@ class WirechatServiceProvider extends ServiceProvider
             // Check if panel param s set
             if (isset($panel)) {
 
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
+                $currentPanel = Facades\Wirechat::getPanel($panel);
             } else {
 
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $script = '';
@@ -265,7 +270,7 @@ class WirechatServiceProvider extends ServiceProvider
             if ($currentPanel->hasWebPushNotifications() && auth()->check()) {
                 $panelId = $currentPanel->getId();
                 $userId = auth()->id();
-                $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
+                $encodedType = MorphClassResolver::encode(auth()->user()?->getMorphClass());
                 $privatePreviewDisabledTitle = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_title'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
                 $privatePreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.private_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
                 $groupPreviewDisabledBody = json_encode(__('wirechat::chats.settings.notifications.preview_disabled.group_body'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
@@ -390,10 +395,10 @@ class WirechatServiceProvider extends ServiceProvider
             // Check if panel param s set
             if (isset($panel)) {
 
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
+                $currentPanel = Facades\Wirechat::getPanel($panel);
             } else {
 
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $colors = [

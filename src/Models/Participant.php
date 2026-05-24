@@ -4,11 +4,13 @@ namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
@@ -16,6 +18,7 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedActionScope;
 use Wirechat\Wirechat\Traits\Actionable;
 use Wirechat\Wirechat\Traits\Actor;
+use Wirechat\Wirechat\Workbench\Database\Factories\ParticipantFactory;
 
 /**
  * @property int $id
@@ -23,18 +26,18 @@ use Wirechat\Wirechat\Traits\Actor;
  * @property ParticipantRole $role
  * @property int $participantable_id
  * @property string $participantable_type
- * @property \Illuminate\Support\Carbon|null $exited_at
- * @property \Illuminate\Support\Carbon|null $last_active_at
- * @property \Illuminate\Support\Carbon|null $conversation_cleared_at
- * @property \Illuminate\Support\Carbon|null $conversation_deleted_at
- * @property \Illuminate\Support\Carbon|null $conversation_read_at
+ * @property Carbon|null $exited_at
+ * @property Carbon|null $last_active_at
+ * @property Carbon|null $conversation_cleared_at
+ * @property Carbon|null $conversation_deleted_at
+ * @property Carbon|null $conversation_read_at
  * @property array<string, mixed>|null $meta
  * @property string|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Action> $actions
  * @property-read int|null $actions_count
- * @property-read \Wirechat\Wirechat\Models\Conversation $conversation
+ * @property-read Conversation $conversation
  * @property-read Model|\Eloquent $participantable
  *
  * @method static Builder|Participant newModelQuery()
@@ -123,17 +126,17 @@ class Participant extends Model
      * the resolver cannot guess the correct namespace for your Factory class.
      * so we exlicilty tell it the correct namespace
      *
-     * @return \Wirechat\Wirechat\Workbench\Database\Factories\ParticipantFactory
+     * @return ParticipantFactory
      */
     protected static function newFactory()
     {
-        return \Wirechat\Wirechat\Workbench\Database\Factories\ParticipantFactory::new();
+        return ParticipantFactory::new();
     }
 
     /**
      * Polymorphic relation to the participantable model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model,covariant $this>
+     * @return MorphTo<Model,covariant $this>
      */
     public function participantable(): MorphTo
     {
@@ -165,7 +168,7 @@ class Participant extends Model
     /**
      * Remove the "withoutExited" global scope to include exited participants.
      *
-     * @param  Builder<\Wirechat\Wirechat\Models\Participant>  $query
+     * @param  Builder<Participant>  $query
      */
     public function scopeWithExited(Builder $query): void
     {
@@ -485,8 +488,8 @@ class Participant extends Model
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
-     * @return \Illuminate\Database\Eloquent\Builder<static>
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeWithoutParticipantable($query, Model|Authenticatable $user): Builder
     {

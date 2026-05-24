@@ -5,6 +5,7 @@ namespace Wirechat\Wirechat\Traits;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,7 @@ use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Models\Setting;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
 
@@ -38,7 +40,7 @@ trait InteractsWithWirechat
     /**
      * Establishes a relationship between the user and conversations.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<Conversation, static>
+     * @return MorphToMany<Conversation, static>
      */
     public function conversations()
     {
@@ -52,7 +54,7 @@ trait InteractsWithWirechat
     }
 
     /**
-     * @return MorphOne<\Wirechat\Wirechat\Models\Setting, static>
+     * @return MorphOne<Setting, static>
      */
     public function wirechatSettings(): MorphOne
     {

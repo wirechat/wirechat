@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
@@ -90,7 +91,7 @@ test('it hides the new group button when group creation is disabled on the panel
 test('it hides the new group button when user cannot create groups', function () {
     testPanelProvider()->createGroupAction();
 
-    $auth = \Mockery::mock(User::class)->makePartial();
+    $auth = Mockery::mock(User::class)->makePartial();
     $auth->shouldReceive('canCreateGroups')->andReturn(false);
 
     Livewire::actingAs($auth)->test(Chatlist::class)
@@ -967,7 +968,7 @@ describe('List', function () {
 
         $component = Livewire::actingAs($auth)->test(Chatlist::class);
 
-        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        /** @var Collection<int, Conversation> $conversations */
         $conversations = collect($component->instance()->conversations);
         $loadedConversation = $conversations->firstWhere('id', $conversation->id);
 
@@ -989,7 +990,7 @@ describe('List', function () {
 
         $component = Livewire::actingAs($auth)->test(Chatlist::class);
 
-        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        /** @var Collection<int, Conversation> $conversations */
         $conversations = collect($component->instance()->conversations);
         $loadedConversation = $conversations->firstWhere('id', $conversation->id);
 

@@ -1,5 +1,16 @@
 <?php
 
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Invite;
+use Wirechat\Wirechat\Models\JoinRequest;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\MessageRequest;
+use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Models\Setting;
+
 return [
 
     /*
@@ -31,16 +42,16 @@ return [
     'table_prefix' => 'wirechat_',
 
     'models' => [
-        'action' => \Wirechat\Wirechat\Models\Action::class,
-        'attachment' => \Wirechat\Wirechat\Models\Attachment::class,
-        'conversation' => \Wirechat\Wirechat\Models\Conversation::class,
-        'group' => \Wirechat\Wirechat\Models\Group::class,
-        'invite' => \Wirechat\Wirechat\Models\Invite::class,
-        'join_request' => \Wirechat\Wirechat\Models\JoinRequest::class,
-        'message' => \Wirechat\Wirechat\Models\Message::class,
-        'message_request' => \Wirechat\Wirechat\Models\MessageRequest::class,
-        'participant' => \Wirechat\Wirechat\Models\Participant::class,
-        'setting' => \Wirechat\Wirechat\Models\Setting::class,
+        'action' => Action::class,
+        'attachment' => Attachment::class,
+        'conversation' => Conversation::class,
+        'group' => Group::class,
+        'invite' => Invite::class,
+        'join_request' => JoinRequest::class,
+        'message' => Message::class,
+        'message_request' => MessageRequest::class,
+        'participant' => Participant::class,
+        'setting' => Setting::class,
     ],
 
     /*

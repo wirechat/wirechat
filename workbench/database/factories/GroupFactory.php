@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Wirechat\Wirechat\Models\Group;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\RoomSetting>
+ * @extends Factory<Group>
  */
 class GroupFactory extends Factory
 {

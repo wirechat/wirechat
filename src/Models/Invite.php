@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Panel;
@@ -22,14 +23,14 @@ use Wirechat\Wirechat\Panel;
  * @property int|null $limit
  * @property int $usages
  * @property bool $is_primary
- * @property \Illuminate\Support\Carbon|null $expires_at
- * @property \Illuminate\Support\Carbon|null $last_used_at
- * @property \Illuminate\Support\Carbon|null $revoked_at
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $last_used_at
+ * @property Carbon|null $revoked_at
  * @property array<string, mixed>|null $meta
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $createdBy
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $inviteable
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Model|\Eloquent|null $createdBy
+ * @property-read Model|\Eloquent $inviteable
  *
  * @method static Builder|Invite active()
  * @method static Builder|Invite additional()

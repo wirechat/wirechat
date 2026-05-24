@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Workbench\Database\Factories\ActionFactory;
 
 /**
  * @property int $id
@@ -17,8 +19,8 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property string $actor_type
  * @property Actions $type
  * @property string|null $data Some additional information about the action
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Model|\Eloquent $actionable
  * @property-read Model|\Eloquent $actor
  *
@@ -71,7 +73,7 @@ class Action extends Model
      */
     protected static function newFactory()
     {
-        return \Wirechat\Wirechat\Workbench\Database\Factories\ActionFactory::new();
+        return ActionFactory::new();
     }
 
     // Polymorphic relationship to the entity being acted upon (message, conversation, etc.)

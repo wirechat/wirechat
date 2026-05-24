@@ -2,6 +2,7 @@
 
 namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
 use Wirechat\Wirechat\Enums\Actions;
@@ -125,10 +126,10 @@ class PastMembers extends ModalComponent
             ->latest('updated_at')
             ->paginate($this->perPage, ['*'], 'page', $this->page);
 
-        /** @var \Illuminate\Support\Collection<int, Participant> $participantItems */
+        /** @var Collection<int, Participant> $participantItems */
         $participantItems = collect($participants->items());
 
-        /** @var \Illuminate\Support\Collection<int, Participant> $filtered */
+        /** @var Collection<int, Participant> $filtered */
         $filtered = $participantItems
             ->filter(fn (Participant $participant): bool => $participant->pastMembershipReason() !== null)
             ->values();

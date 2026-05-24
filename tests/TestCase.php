@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\View;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Wirechat\Wirechat\WirechatServiceProvider;
+use Workbench\App\Models\User;
 use Workbench\App\Providers\Wirechat\TestPanelProvider;
 
 use function Orchestra\Testbench\workbench_path;
@@ -63,7 +64,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             //                'sslmode'  => 'prefer',
             //            ]);
 
-            $config->set('wirechat.user_model', \Workbench\App\Models\User::class);
+            $config->set('wirechat.user_model', User::class);
             $wirechatConfig = require __DIR__.'/../config/wirechat.php';
             $config->set('wirechat.message_url_parsing', $wirechatConfig['message_url_parsing'] ?? []);
 

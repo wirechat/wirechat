@@ -42,7 +42,7 @@ class MessageFactory extends Factory
             // Resolve conversation id (handle factory / missing values)
             $conversationId = $attributes['conversation_id'] ?? null;
 
-            if ($conversationId instanceof \Illuminate\Database\Eloquent\Factories\Factory) {
+            if ($conversationId instanceof Factory) {
                 $conversationId = $conversationId->create()->getKey();
             }
 

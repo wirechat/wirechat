@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Wirechat\Wirechat\Enums\JoinRequestStatus;
 use Wirechat\Wirechat\Facades\Wirechat;
 
@@ -21,11 +22,11 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property JoinRequestStatus $status
  * @property int|null $reviewed_by_id
  * @property string|null $reviewed_by_type
- * @property \Illuminate\Support\Carbon|null $reviewed_at
+ * @property Carbon|null $reviewed_at
  * @property array<string, mixed>|null $data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Wirechat\Wirechat\Models\Invite|null $invite
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Invite|null $invite
  *
  * @mixin \Eloquent
  */

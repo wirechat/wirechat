@@ -2,7 +2,10 @@
 
 namespace Wirechat\Wirechat\Panel\Concerns;
 
+use App\Models\User;
 use Closure;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Collection;
 use Wirechat\Wirechat\Http\Resources\WirechatUserResource;
 
 trait HasUsersSearch
@@ -19,7 +22,7 @@ trait HasUsersSearch
     /**
      * Search for chatable users and return a standardized JSON resource collection.
      *
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return AnonymousResourceCollection
      */
     public function searchUsers(?string $needle)
     {
@@ -31,7 +34,7 @@ trait HasUsersSearch
     /**
      * Execute the search logic and return a collection of models.
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     protected function runSearchCallback(?string $needle)
     {
@@ -46,7 +49,7 @@ trait HasUsersSearch
 
         // Default search: limit 20 results and return a collection
         // @phpstan-ignore-next-line
-        return \App\Models\User::query()
+        return User::query()
             ->where(function ($q) use ($needle) {
                 foreach ($this->getSearchableAttributes() as $field) {
                     $q->orWhere($field, 'like', "%{$needle}%");

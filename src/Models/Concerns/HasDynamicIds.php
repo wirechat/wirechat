@@ -2,7 +2,10 @@
 
 namespace Wirechat\Wirechat\Models\Concerns;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Wirechat\Wirechat\Facades\Wirechat;
 
@@ -27,7 +30,7 @@ trait HasDynamicIds
     {
         if (Wirechat::usesUuidForConversations()) {
             /** @phpstan-ignore-next-line */
-            if (method_exists(\Illuminate\Support\Str::class, 'uuid7')) {
+            if (method_exists(Str::class, 'uuid7')) {
                 return (string) Str::uuid7();
             }
 
@@ -65,12 +68,12 @@ trait HasDynamicIds
     /**
      * Retrieve the model for a bound value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation  $query
+     * @param  Model|Relation  $query
      * @param  mixed  $value
      * @param  string|null  $field
-     * @return \Illuminate\Contracts\Database\Eloquent\Builder
+     * @return Builder
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
@@ -112,7 +115,7 @@ trait HasDynamicIds
      * @param  string|null  $field
      * @return never
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     protected function handleInvalidUniqueId($value, $field)
     {

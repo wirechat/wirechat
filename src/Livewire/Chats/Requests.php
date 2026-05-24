@@ -2,6 +2,8 @@
 
 namespace Wirechat\Wirechat\Livewire\Chats;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Wirechat\Wirechat\Facades\Wirechat;
@@ -12,10 +14,10 @@ use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\MessageRequest;
 
 /**
- * @property-read \Illuminate\Contracts\Auth\Authenticatable|null $auth
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $incomingRequests
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $outgoingRequests
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\MessageRequest> $currentRequests
+ * @property-read Authenticatable|null $auth
+ * @property-read Collection<int, MessageRequest> $incomingRequests
+ * @property-read Collection<int, MessageRequest> $outgoingRequests
+ * @property-read Collection<int, MessageRequest> $currentRequests
  * @property-read bool $hasRequests
  * @property-read string $currentEmptyState
  */

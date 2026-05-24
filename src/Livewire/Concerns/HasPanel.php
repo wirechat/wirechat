@@ -6,6 +6,7 @@ use Livewire\Attributes\Computed;
 use Wirechat\Wirechat\Exceptions\NoPanelProvidedException;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelRegistry;
 
 trait HasPanel
 {
@@ -39,7 +40,7 @@ trait HasPanel
             throw NoPanelProvidedException::make();
         }
 
-        app(\Wirechat\Wirechat\PanelRegistry::class)->setCurrent($this->panel);
+        app(PanelRegistry::class)->setCurrent($this->panel);
     }
 
     #[Computed(cache: false)]
