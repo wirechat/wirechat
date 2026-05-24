@@ -63,7 +63,6 @@ it('ensure DefaultPanelProvider.stub exists', function () {
 
     $expectedContent =
 '<?php
-
 namespace {{ namespace }};
 
 use Wirechat\Wirechat\Panel;
