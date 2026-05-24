@@ -76,6 +76,8 @@ class {{ className }} extends PanelProvider
         return $panel
              ->id(\'{{ panelId }}\')
              ->path(\'{{ panelId }}\')
+             ->chatsSearch()
+             ->createChatAction()
              ->middleware([\'web\',\'auth\'])
              ->default();
     }
