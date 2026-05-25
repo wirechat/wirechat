@@ -3,6 +3,7 @@
 namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 /**
  * Trait HasAuth
@@ -43,7 +44,7 @@ trait HasAuth
     /**
      * Get the current authenticated user from one of the defined guards.
      */
-    public function auth(): ?\Illuminate\Contracts\Auth\Authenticatable
+    public function auth(): ?Authenticatable
     {
         foreach ($this->getGuards() as $guard) {
             if ($user = auth($guard)->user()) {

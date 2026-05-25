@@ -319,7 +319,7 @@ describe('WirechatService Model Resolution', function () {
             $actionTable = Wirechat::actionModelTable();
 
             // Verify they're cached by checking internal state via reflection
-            $reflection = new \ReflectionClass(Wirechat::getFacadeRoot());
+            $reflection = new ReflectionClass(Wirechat::getFacadeRoot());
             $tableNamesProperty = $reflection->getProperty('tableNames');
             $tableNamesProperty->setAccessible(true);
             $cachedNames = $tableNamesProperty->getValue(Wirechat::getFacadeRoot());

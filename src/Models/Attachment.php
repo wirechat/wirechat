@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\MimeTypes;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Workbench\Database\Factories\AttachmentFactory;
 
 /**
  * @property int $id
@@ -21,8 +23,8 @@ use Wirechat\Wirechat\Facades\Wirechat;
  * @property string $original_name
  * @property string $url
  * @property string $mime_type
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Model|\Eloquent $attachable
  * @property-read string $clean_mime_type
  *
@@ -91,7 +93,7 @@ class Attachment extends Model
      */
     protected static function newFactory()
     {
-        return \Wirechat\Wirechat\Workbench\Database\Factories\AttachmentFactory::new();
+        return AttachmentFactory::new();
     }
 
     protected static function booted(): void

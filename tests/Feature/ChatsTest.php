@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
@@ -655,7 +656,7 @@ describe('List', function () {
 
         $component = Livewire::actingAs($auth)->test(Chatlist::class);
 
-        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        /** @var Collection<int, Conversation> $conversations */
         $conversations = collect($component->instance()->conversations);
         $loadedConversation = $conversations->firstWhere('id', $conversation->id);
 
@@ -677,7 +678,7 @@ describe('List', function () {
 
         $component = Livewire::actingAs($auth)->test(Chatlist::class);
 
-        /** @var \Illuminate\Support\Collection<int, Conversation> $conversations */
+        /** @var Collection<int, Conversation> $conversations */
         $conversations = collect($component->instance()->conversations);
         $loadedConversation = $conversations->firstWhere('id', $conversation->id);
 

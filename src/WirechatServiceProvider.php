@@ -2,6 +2,7 @@
 
 namespace Wirechat\Wirechat;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -12,6 +13,7 @@ use Wirechat\Wirechat\Console\Commands\SetupNotifications;
 use Wirechat\Wirechat\Console\Commands\UpgradeMorphColumns;
 use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
 use Wirechat\Wirechat\Facades\WirechatColor;
+use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chat\Drawer;
 use Wirechat\Wirechat\Livewire\Chat\Group\AddMembers;
@@ -179,7 +181,7 @@ class WirechatServiceProvider extends ServiceProvider
 
     protected function registerMiddlewares(): void
     {
-        $router = $this->app->make(\Illuminate\Routing\Router::class);
+        $router = $this->app->make(Router::class);
 
         $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
         $router->aliasMiddleware('wirechat.setPanel', SetCurrentPanel::class);
@@ -192,19 +194,19 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
+                $currentPanel = Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $hasWebPushNotifications = $currentPanel->hasWebPushNotifications();
-            $panelId = \Wirechat\Wirechat\Facades\Wirechat::currentPanel()?->getId();
+            $panelId = Facades\Wirechat::currentPanel()?->getId();
 
             $script = '';
 
             if ($hasWebPushNotifications && auth()->check()) {
                 $userId = auth()->id();
-                $encodedType = \Wirechat\Wirechat\Helpers\MorphClassResolver::encode(auth()->user()?->getMorphClass());
+                $encodedType = MorphClassResolver::encode(auth()->user()?->getMorphClass());
 
                 $script = <<<HTML
                              <script>
@@ -318,9 +320,9 @@ class WirechatServiceProvider extends ServiceProvider
 
             // Check if panel param s set
             if (isset($panel)) {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::getPanel($panel);
+                $currentPanel = Facades\Wirechat::getPanel($panel);
             } else {
-                $currentPanel = \Wirechat\Wirechat\Facades\Wirechat::currentPanel(); // This gets panel according to route or default
+                $currentPanel = Facades\Wirechat::currentPanel(); // This gets panel according to route or default
             }
 
             $colors = [

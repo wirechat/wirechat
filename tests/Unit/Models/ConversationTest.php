@@ -3,8 +3,10 @@
 use App\Livewire\Test;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ConversationType;
+use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\group;
 use Wirechat\Wirechat\Models\Message;
@@ -1416,13 +1418,13 @@ describe('deleting permanently()', function () {
         $group = $conversation->group;
 
         // get conversation reads
-        expect(Group::find($group->id))->not->toBe(null);
+        expect(group::find($group->id))->not->toBe(null);
 
         // Delete message
         $conversation->delete();
 
         // assert count
-        expect(Group::find($group->id))->toBe(null);
+        expect(group::find($group->id))->toBe(null);
     });
 
     it('deletes all messages when converstion is deleted', function () {
@@ -1848,8 +1850,8 @@ describe('UUID()', function () {
 
     beforeEach(function () {
 
-        \Illuminate\Support\Facades\Config::set('wirechat.uses_uuid_for_conversations', true);
-        \Illuminate\Support\Facades\Config::set('wirechat.uuids', true);
+        Config::set('wirechat.uses_uuid_for_conversations', true);
+        Config::set('wirechat.uuids', true);
 
     });
 
@@ -1877,14 +1879,14 @@ describe('UUID()', function () {
         Storage::disk('test_disk')->put($attachmentPath, 'test content');
 
         // Associate the attachment with the message
-        $createdAttachment = \Wirechat\Wirechat\Models\Action::factory()->for($conversation, 'actionable')->create([
+        $createdAttachment = Action::factory()->for($conversation, 'actionable')->create([
             'data' => 'text/plain',
             'actor_id' => $auth->id,
             'type' => Actions::ARCHIVE,
             'actor_type' => $auth->getMorphClass(),
         ]);
 
-        $this->assertDatabaseHas((new \Wirechat\Wirechat\Models\Action)->getTable(), ['id' => $createdAttachment->id]);
+        $this->assertDatabaseHas((new Action)->getTable(), ['id' => $createdAttachment->id]);
 
         //   dd($createdAttachment);
     });

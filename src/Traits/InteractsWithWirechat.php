@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Traits;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,7 @@ trait InteractsWithWirechat
     /**
      * Establishes a relationship between the user and conversations.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany<Conversation, static>
+     * @return MorphToMany<Conversation, static>
      */
     public function conversations()
     {

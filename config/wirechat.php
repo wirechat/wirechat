@@ -1,5 +1,12 @@
 <?php
 
+use Wirechat\Wirechat\Models\Action;
+use Wirechat\Wirechat\Models\Attachment;
+use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\Group;
+use Wirechat\Wirechat\Models\Message;
+use Wirechat\Wirechat\Models\Participant;
+
 return [
 
     /*
@@ -31,12 +38,12 @@ return [
     'table_prefix' => 'wirechat_',
 
     'models' => [
-        'action' => \Wirechat\Wirechat\Models\Action::class,
-        'attachment' => \Wirechat\Wirechat\Models\Attachment::class,
-        'conversation' => \Wirechat\Wirechat\Models\Conversation::class,
-        'group' => \Wirechat\Wirechat\Models\Group::class,
-        'message' => \Wirechat\Wirechat\Models\Message::class,
-        'participant' => \Wirechat\Wirechat\Models\Participant::class,
+        'action' => Action::class,
+        'attachment' => Attachment::class,
+        'conversation' => Conversation::class,
+        'group' => Group::class,
+        'message' => Message::class,
+        'participant' => Participant::class,
     ],
 
     /*
