@@ -63,7 +63,6 @@ it('ensure DefaultPanelProvider.stub exists', function () {
 
     $expectedContent =
 '<?php
-
 namespace {{ namespace }};
 
 use Wirechat\Wirechat\Panel;
@@ -76,6 +75,9 @@ class {{ className }} extends PanelProvider
         return $panel
              ->id(\'{{ panelId }}\')
              ->path(\'{{ panelId }}\')
+             ->redirectToHomeAction()
+             ->chatsSearch()
+             ->createChatAction()
              ->middleware([\'web\',\'auth\'])
              ->default();
     }
