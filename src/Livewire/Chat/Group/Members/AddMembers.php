@@ -7,6 +7,7 @@ use Livewire\WithFileUploads;
 use Wirechat\Wirechat\Livewire\Concerns\CreatesGroupInvites;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\ProtectsGroupAddPrivacy;
 use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
@@ -15,6 +16,7 @@ class AddMembers extends ModalComponent
 {
     use CreatesGroupInvites;
     use HasPanel;
+    use ProtectsGroupAddPrivacy;
     use ResolvesPanelSearchResults;
     use WithFileUploads;
 
@@ -69,19 +71,20 @@ class AddMembers extends ModalComponent
         if (blank($this->search)) {
             $this->users = null;
         } else {
-            $this->users = collect($this->panel()->searchUsers($this->search)->collection)
-                ->map(function ($resource) {
-                    $model = $resource->resource;
+            $users = collect();
 
-                    return [
-                        'id' => $model->id,
-                        'type' => $model->getMorphClass(),
-                        'wirechat_name' => $model->wirechat_name,
-                        'wirechat_avatar_url' => $model->wirechat_avatar_url,
-                        'belongsToConversation' => $model->belongsToConversation($this->conversation),
-                        'isBanned' => (bool) $this->conversation->participant($model, withoutGlobalScopes: true)?->isBannedByAdmin(),
-                    ];
-                });
+            foreach ($this->groupAddableSearchResultModels() as $model) {
+                $users->push([
+                    'id' => $model->getKey(),
+                    'type' => $model->getMorphClass(),
+                    'wirechat_name' => $model->wirechat_name,
+                    'wirechat_avatar_url' => $model->wirechat_avatar_url,
+                    'belongsToConversation' => $model->belongsToConversation($this->conversation),
+                    'isBanned' => (bool) $this->conversation->participant($model, withoutGlobalScopes: true)?->isBannedByAdmin(),
+                ]);
+            }
+
+            $this->users = $users;
         }
     }
 
@@ -89,7 +92,7 @@ class AddMembers extends ModalComponent
     {
         $this->authorizeAddMembersAccess();
 
-        $model = $this->resolvePanelSearchResult($id, $class);
+        $model = $this->resolveGroupAddableSearchResult($id, $class);
 
         if ($model) {
             abort_if($model->belongsToConversation($this->conversation), 403, $model->wirechat_name.' Is already a member');
@@ -132,6 +135,8 @@ class AddMembers extends ModalComponent
         $this->authorizeAddMembersAccess();
 
         foreach ($this->selectedMembers as $member) {
+            $this->authorizeCanBeAddedToGroups($member);
+
             $alreadyExists = $member->belongsToConversation($this->conversation);
 
             if (! $alreadyExists) {

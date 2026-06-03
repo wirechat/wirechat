@@ -4,6 +4,7 @@ use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\AddMembers;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Services\WirechatSettingsManager;
 use Workbench\App\Models\User;
 
 beforeEach(function () {
@@ -169,6 +170,18 @@ describe('actions test', function () {
             ->assertSee('Micheal');
     });
 
+    test('users who disallow group adds are hidden from add members search', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $user = User::factory()->create(['name' => 'Micheal']);
+
+        app(WirechatSettingsManager::class)->updateFor($user, ['groups_can_add_me' => false]);
+
+        Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Mic')
+            ->assertDontSee('Micheal');
+    });
+
     test('toggleMember() method works correclty', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -183,6 +196,20 @@ describe('actions test', function () {
             ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
             ->assertDontSee('Micheal');
+    });
+
+    test('toggleMember() rejects users who disallow group adds', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $user = User::factory()->create(['name' => 'Micheal']);
+
+        app(WirechatSettingsManager::class)->updateFor($user, ['groups_can_add_me' => false]);
+
+        Livewire::actingAs($auth)
+            ->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Micheal')
+            ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->assertStatus(403, __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $user->wirechat_name]));
     });
 
     test('toggleMember() ignores tampered classes outside the current panel search results', function () {
@@ -375,6 +402,26 @@ describe('actions test', function () {
         $exists = $conversation->participants()->where('participantable_id', $user->id)->exists();
         expect($exists)->toBe(true);
 
+    });
+
+    test('save() rejects stale selected members who later disallow group adds', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $user = User::factory()->create(['name' => 'Micheal']);
+
+        $request = Livewire::actingAs($auth)
+            ->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Micheal')
+            ->call('toggleMember', $user->id, $user->getMorphClass());
+
+        app(WirechatSettingsManager::class)->updateFor($user, ['groups_can_add_me' => false]);
+
+        $request
+            ->call('save')
+            ->assertStatus(403, __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $user->wirechat_name]));
+
+        $exists = $conversation->participants()->where('participantable_id', $user->id)->exists();
+        expect($exists)->toBeFalse();
     });
 
     test('it dispatches participantsCountUpdated event after saving ', function () {

@@ -39,7 +39,7 @@ class ActivateWirechatPro extends Command
             $licenseKey = trim((string) ($this->option('license') ?: password(
                 label: 'Enter your Wirechat Pro license key',
                 required: true,
-                hint: 'Purchase a license key: https://buymeacoffee.com/namuio/e/366303'
+                hint: 'Purchase a license key: https://corepine.dev/marketplace/wirechat'
             )));
 
             $fingerprint = $this->option('fingerprint') === null

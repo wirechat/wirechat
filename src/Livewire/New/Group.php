@@ -4,8 +4,10 @@ namespace Wirechat\Wirechat\Livewire\New;
 
 use Livewire\Attributes\Validate;
 use Livewire\WithFileUploads;
+use Wirechat\Wirechat\Http\Resources\WirechatUserResource;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\ProtectsGroupAddPrivacy;
 use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
@@ -13,6 +15,7 @@ use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 class Group extends ModalComponent
 {
     use HasPanel;
+    use ProtectsGroupAddPrivacy;
     use ResolvesPanelSearchResults;
     use Widget;
     use WithFileUploads;
@@ -81,7 +84,7 @@ class Group extends ModalComponent
             $this->users = [];
         } else {
 
-            $this->users = $this->panel()->searchUsers($this->search)->resolve();
+            $this->users = WirechatUserResource::collection($this->groupAddableSearchResultModels())->resolve();
 
         }
     }
@@ -90,7 +93,7 @@ class Group extends ModalComponent
     public function addMember($id, string $class)
     {
         try {
-            $model = $this->resolvePanelSearchResult($id, $class);
+            $model = $this->resolveGroupAddableSearchResult($id, $class);
 
             if ($model) {
                 if (! $this->selectedMembers->contains($model)) {
@@ -115,7 +118,7 @@ class Group extends ModalComponent
     public function toggleMember($id, string $class)
     {
 
-        $model = $this->resolvePanelSearchResult($id, $class);
+        $model = $this->resolveGroupAddableSearchResult($id, $class);
 
         if ($model) {
             if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
@@ -153,13 +156,16 @@ class Group extends ModalComponent
 
         $this->validate();
 
+        foreach ($this->selectedMembers as $participant) {
+            $this->authorizeCanBeAddedToGroups($participant);
+        }
+
         // create group
         /* @var $conversation */
         $conversation = auth()->user()->createGroup($this->name, $this->description, $this->photo);
 
         // Add participants
         foreach ($this->selectedMembers as $key => $participant) {
-
             // make sure user does not belong to conversation already
             // mostly this is the auth user
             $alreadyExists = $conversation->participants()->where('participantable_id', $participant->id)->where('participantable_type', $participant->getMorphClass())->exists();

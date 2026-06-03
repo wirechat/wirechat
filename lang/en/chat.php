@@ -289,6 +289,7 @@ return [
                 'invalid_conversation_type_error' => 'Only group conversations allowed',
                 'members_limit_error' => 'Members cannot exceed :count',
                 'member_already_exists' => ' Already added to group',
+                'group_add_privacy_denied' => ':member does not allow others to add them to groups.',
             ],
         ],
         // permissions component

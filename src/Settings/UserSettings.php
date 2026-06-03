@@ -11,6 +11,7 @@ final class UserSettings
         public bool $notification_previews_enabled = true,
         public bool $sound_enabled = true,
         public bool $read_receipts_enabled = true,
+        public bool $groups_can_add_me = true,
     ) {}
 
     /**
@@ -25,6 +26,7 @@ final class UserSettings
             notification_previews_enabled: (bool) ($data['notification_previews_enabled'] ?? true),
             sound_enabled: (bool) ($data['sound_enabled'] ?? true),
             read_receipts_enabled: (bool) ($data['read_receipts_enabled'] ?? true),
+            groups_can_add_me: (bool) ($data['groups_can_add_me'] ?? true),
         );
     }
 
@@ -40,6 +42,7 @@ final class UserSettings
             'notification_previews_enabled' => $this->notification_previews_enabled,
             'sound_enabled' => $this->sound_enabled,
             'read_receipts_enabled' => $this->read_receipts_enabled,
+            'groups_can_add_me' => $this->groups_can_add_me,
         ];
     }
 }
