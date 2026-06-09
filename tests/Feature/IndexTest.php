@@ -51,7 +51,7 @@ test('it shows label "Send private photos and messages" ', function () {
     $auth = User::factory()->create();
     $response = $this->withoutExceptionHandling()->actingAs($auth)->get(testPanelProvider()->chatsRoute());
 
-    $response->assertSee('Select a conversation to start messaging');
+    $response->assertSee('Choose a conversation to start messaging.');
 
 });
 

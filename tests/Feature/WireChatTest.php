@@ -36,7 +36,7 @@ test('it shows label "Send private photos and messages" ', function () {
     $auth = User::factory()->create();
     $conversation = Conversation::factory()->create();
     $response = Livewire::actingAs($auth)->test(Wirechat::class);
-    $response->assertSee('Select a conversation to start messaging');
+    $response->assertSee('Choose a conversation to start messaging.');
 
 });
 
