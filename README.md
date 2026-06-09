@@ -39,6 +39,17 @@ cp .env.example .env
 
 The package uses the workbench application for local development and Orchestra Testbench for automated tests.
 
+Before opening a pull request, run the checks that match your change:
+
+```bash
+composer test
+php vendor/bin/pest
+php vendor/bin/pint --test
+php vendor/bin/phpstan analyse
+```
+
+Documentation-only changes do not usually require the full test suite, but code changes should include a focused test run and any relevant formatting or static analysis checks.
+
 ## Support Me ❤️
 I've invested a lot of time and resources in building and maintaining Wirechat, and your support truly makes a difference. If you find Wirechat helpful, please consider showing your appreciation by:
 
