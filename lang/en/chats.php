@@ -7,7 +7,7 @@ return [
      *------------------------*/
     'labels' => [
         'heading' => 'Chats',
-        'no_conversations_yet' => 'No conversations yet',
+        'no_conversations_yet' => 'No conversations yet. Start a new chat when you are ready.',
         'you' => 'You',
         'attachment' => 'Attachment',
         'now' => 'Now',
