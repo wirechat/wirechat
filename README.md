@@ -26,6 +26,19 @@ Explore the full documentation to get started and unlock Wirechat's potential:
 ## Contributing 🔧
 Thank you for considering contributing to WireChat! You can find out more on how to get started on the [**Contribution Docs**](https://wirechat.namuio.com/docs/contribution).
 
+### Local development
+
+Wirechat is a Laravel package, so contributors should work from a fork and keep each change on a focused branch:
+
+```bash
+git clone https://github.com/YOUR-USERNAME/wirechat.git
+cd wirechat
+composer install
+cp .env.example .env
+```
+
+The package uses the workbench application for local development and Orchestra Testbench for automated tests.
+
 ## Support Me ❤️
 I've invested a lot of time and resources in building and maintaining Wirechat, and your support truly makes a difference. If you find Wirechat helpful, please consider showing your appreciation by:
 
