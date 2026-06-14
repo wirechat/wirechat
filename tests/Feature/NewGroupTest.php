@@ -11,6 +11,7 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Services\WirechatSettingsManager;
 use Workbench\App\Models\User as ModelsUser;
 
 beforeEach(function () {
@@ -195,6 +196,17 @@ describe('Add members page', function () {
 
     });
 
+    test('users who disallow group adds are hidden from new group member search', function () {
+        $auth = ModelsUser::factory()->create();
+        $user = ModelsUser::factory()->create(['name' => 'Micheal']);
+
+        app(WirechatSettingsManager::class)->updateFor($user, ['groups_can_add_me' => false]);
+
+        Livewire::actingAs($auth)->test(NewGroup::class)
+            ->set('search', 'Mic')
+            ->assertDontSee('Micheal');
+    });
+
     test('calling addMember()  can add selected members', function () {
         $auth = ModelsUser::factory()->create();
         // create another user
@@ -206,6 +218,18 @@ describe('Add members page', function () {
             ->call('addMember', $user->id, $user->getMorphClass())
             ->assertSee('Micheal');
 
+    });
+
+    test('calling addMember() rejects users who disallow group adds', function () {
+        $auth = ModelsUser::factory()->create();
+        $user = ModelsUser::factory()->create(['name' => 'Micheal']);
+
+        app(WirechatSettingsManager::class)->updateFor($user, ['groups_can_add_me' => false]);
+
+        Livewire::actingAs($auth)->test(NewGroup::class)
+            ->set('search', 'Micheal')
+            ->call('addMember', $user->id, $user->getMorphClass())
+            ->assertStatus(403, __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $user->wirechat_name]));
     });
 
     test('calling addMember() ignores tampered classes outside the current panel search results', function () {
@@ -295,6 +319,24 @@ describe('Creteing group', function () {
 
         expect($conversation->type)->toBe(ConversationType::GROUP);
         expect($conversation)->not->toBe(null);
+    });
+
+    it('does not create a group if a selected member later disallows group adds', function () {
+        $auth = ModelsUser::factory()->create();
+        $member = ModelsUser::factory()->create(['name' => 'Micheal']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class)
+            ->set('name', 'Test Group')
+            ->set('search', 'Micheal')
+            ->call('addMember', $member->id, $member->getMorphClass());
+
+        app(WirechatSettingsManager::class)->updateFor($member, ['groups_can_add_me' => false]);
+
+        $request
+            ->call('create')
+            ->assertStatus(403, __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $member->wirechat_name]));
+
+        expect(Conversation::withoutGlobalScopes()->count())->toBe(0);
     });
 
     it('Creates group model', function () {

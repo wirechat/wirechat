@@ -279,6 +279,7 @@ describe('WirechatService Model Resolution', function () {
                     'notification_previews_enabled' => true,
                     'sound_enabled' => true,
                     'read_receipts_enabled' => true,
+                    'groups_can_add_me' => true,
                 ])
                 ->and(Setting::query()->count())->toBe(0);
         });
@@ -299,6 +300,21 @@ describe('WirechatService Model Resolution', function () {
             $manager->saveFor($user, new UserSettings);
 
             expect(Setting::query()->count())->toBe(0);
+        });
+
+        it('persists the group add privacy setting and deletes the row when restored', function () {
+            $user = User::factory()->create();
+            $manager = app(WirechatSettingsManager::class);
+
+            $settings = $manager->updateFor($user, ['groups_can_add_me' => false]);
+
+            expect($settings->groups_can_add_me)->toBeFalse()
+                ->and(Setting::query()->first()?->data)->toBe(['groups_can_add_me' => false]);
+
+            $settings = $manager->updateFor($user, ['groups_can_add_me' => true]);
+
+            expect($settings->groups_can_add_me)->toBeTrue()
+                ->and(Setting::query()->count())->toBe(0);
         });
 
         it('updates settings by merging with the current values', function () {

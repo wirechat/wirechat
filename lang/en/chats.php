@@ -60,14 +60,25 @@ return [
         'labels' => [
             'profile' => 'Profile',
         ],
+        'general' => [
+            'heading' => 'General',
+            'profile' => [
+                'description' => 'Your Wirechat profile in this panel.',
+            ],
+        ],
         'options' => [
             'notifications' => [
                 'label' => 'Notifications',
                 'description' => 'Messages, groups, previews',
             ],
+            'security_privacy' => [
+                'label' => 'Security & Privacy',
+                'description' => 'Groups',
+            ],
         ],
         'notifications' => [
             'heading' => 'Notifications',
+            'description' => 'Choose how Wirechat should notify you about new activity.',
             'options' => [
                 'messages' => [
                     'label' => 'Messages',
@@ -86,6 +97,25 @@ return [
                 'private_title' => 'New message',
                 'private_body' => ':sender sent you a message',
                 'group_body' => ':sender sent a message',
+            ],
+        ],
+        'security_privacy' => [
+            'heading' => 'Security & Privacy',
+            'description' => 'Manage privacy controls for how other users can interact with you.',
+            'options' => [
+                'groups' => [
+                    'label' => 'Groups',
+                    'description' => 'Control who can add you to groups.',
+                ],
+            ],
+            'groups' => [
+                'heading' => 'Groups',
+                'options' => [
+                    'add_me' => [
+                        'label' => 'Allow others to add me to groups',
+                        'description' => 'When this is off, you will not appear in default group add searches and cannot be added through Wirechat group add actions.',
+                    ],
+                ],
             ],
         ],
     ],
