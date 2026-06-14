@@ -3,7 +3,9 @@
 namespace Wirechat\Wirechat\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use JsonException;
 use RuntimeException;
 use Symfony\Component\Process\Process;
@@ -14,14 +16,24 @@ use function Laravel\Prompts\text;
 
 class ActivateWirechatPro extends Command
 {
-    private const REPOSITORY_URL = 'https://wirechat.composer.sh';
+    private const ACTIVATION_URL = 'https://corepine.dev/api/licenses/activate';
 
-    private const REPOSITORY_HOST = 'wirechat.composer.sh';
+    private const FREE_PACKAGE = 'wirechat/wirechat';
+
+    private const OLD_REPOSITORY_HOST = 'wirechat.composer.sh';
+
+    private const OLD_REPOSITORY_URL = 'https://wirechat.composer.sh';
+
+    private const PRO_PACKAGE = 'wirechat/wirechat-pro';
+
+    private const REPOSITORY_HOST = 'composer.corepine.dev';
+
+    private const REPOSITORY_URL = 'https://composer.corepine.dev';
 
     protected $signature = 'wirechat:activate
         {--email= : The email address assigned to the license, or "unlock" for an unassigned license}
         {--license= : The Wirechat Pro license key}
-        {--fingerprint= : Optional license fingerprint}
+        {--fingerprint= : Activation domain or project ID for licenses that require one}
         {--composer=composer : Composer executable}
         {--skip-install : Configure Composer without installing Wirechat Pro}';
 
@@ -45,6 +57,9 @@ class ActivateWirechatPro extends Command
             $fingerprint = $this->option('fingerprint') === null
                 ? ''
                 : trim((string) $this->option('fingerprint'));
+
+            $this->activateLicense($email, $licenseKey, $fingerprint);
+            $this->info('[✓] License activated with Corepine.');
 
             $this->writeAuthJson($email, $this->licensePassword($licenseKey, $fingerprint));
             $this->ensureComposerRepository();
@@ -70,6 +85,38 @@ class ActivateWirechatPro extends Command
         return $fingerprint === '' ? $licenseKey : "{$licenseKey}:{$fingerprint}";
     }
 
+    private function activateLicense(string $email, string $licenseKey, string $fingerprint): void
+    {
+        $payload = [
+            'email' => $email,
+            'license_key' => $licenseKey,
+            'package_name' => self::PRO_PACKAGE,
+            'fingerprint' => $fingerprint === '' ? null : $fingerprint,
+            'app_name' => config('app.name'),
+            'app_url' => config('app.url'),
+            'environment' => app()->environment(),
+            'metadata' => [
+                'source_package' => self::FREE_PACKAGE,
+                'source_command' => 'wirechat:activate',
+            ],
+        ];
+
+        try {
+            $response = Http::acceptJson()
+                ->asJson()
+                ->timeout(15)
+                ->post(self::ACTIVATION_URL, $payload);
+        } catch (ConnectionException $exception) {
+            throw new RuntimeException("Unable to reach Corepine activation service: {$exception->getMessage()}");
+        }
+
+        if ($response->failed()) {
+            $message = $response->json('message') ?: 'Unable to activate Wirechat Pro license.';
+
+            throw new RuntimeException($message);
+        }
+    }
+
     private function writeAuthJson(string $username, string $password): void
     {
         $path = base_path('auth.json');
@@ -78,6 +125,8 @@ class ActivateWirechatPro extends Command
         if (! isset($auth['http-basic']) || ! is_array($auth['http-basic'])) {
             $auth['http-basic'] = [];
         }
+
+        unset($auth['http-basic'][self::OLD_REPOSITORY_HOST]);
 
         $auth['http-basic'][self::REPOSITORY_HOST] = [
             'username' => $username,
@@ -97,12 +146,20 @@ class ActivateWirechatPro extends Command
 
         $composer = $this->readJsonFile($path);
         $repositories = $composer['repositories'] ?? [];
+        $originalRepositories = $repositories;
 
         if (! is_array($repositories)) {
             throw new RuntimeException('The composer.json repositories value must be an array or object.');
         }
 
+        $repositories = $this->removeLegacyRepositories($repositories);
+
         if ($this->hasWirechatProRepository($repositories)) {
+            if ($repositories !== $originalRepositories) {
+                $composer['repositories'] = $repositories;
+                $this->writeJsonFile($path, $composer);
+            }
+
             return;
         }
 
@@ -122,6 +179,29 @@ class ActivateWirechatPro extends Command
         $this->writeJsonFile($path, $composer);
     }
 
+    private function removeLegacyRepositories(array $repositories): array
+    {
+        if (array_is_list($repositories)) {
+            return array_values(array_filter(
+                $repositories,
+                fn (mixed $repository): bool => ! $this->isLegacyRepository($repository)
+            ));
+        }
+
+        foreach ($repositories as $key => $repository) {
+            if ($this->isLegacyRepository($repository)) {
+                unset($repositories[$key]);
+            }
+        }
+
+        return $repositories;
+    }
+
+    private function isLegacyRepository(mixed $repository): bool
+    {
+        return is_array($repository) && ($repository['url'] ?? null) === self::OLD_REPOSITORY_URL;
+    }
+
     private function hasWirechatProRepository(array $repositories): bool
     {
         foreach ($repositories as $repository) {
@@ -137,10 +217,10 @@ class ActivateWirechatPro extends Command
     {
         $composer = (string) $this->option('composer');
         $rootComposer = $this->readJsonFile(base_path('composer.json'));
-        $hasFreePackage = isset($rootComposer['require']['wirechat/wirechat']);
+        $hasFreePackage = isset($rootComposer['require'][self::FREE_PACKAGE]);
         $commands = array_values(array_filter([
-            $hasFreePackage ? "{$composer} remove wirechat/wirechat --no-update" : null,
-            "{$composer} require wirechat/wirechat-pro -W",
+            $hasFreePackage ? "{$composer} remove ".self::FREE_PACKAGE.' --no-update' : null,
+            "{$composer} require ".self::PRO_PACKAGE.' -W',
         ]));
 
         if (! confirm(
@@ -161,7 +241,7 @@ class ActivateWirechatPro extends Command
 
         if ($hasFreePackage) {
             $this->line('Removing the free package from composer.json...');
-            $removeExitCode = $this->runComposer([$composer, 'remove', 'wirechat/wirechat', '--no-update']);
+            $removeExitCode = $this->runComposer([$composer, 'remove', self::FREE_PACKAGE, '--no-update']);
 
             if ($removeExitCode !== self::SUCCESS) {
                 return $removeExitCode;
@@ -169,7 +249,7 @@ class ActivateWirechatPro extends Command
         }
 
         $this->line('Installing Wirechat Pro...');
-        $requireExitCode = $this->runComposer([$composer, 'require', 'wirechat/wirechat-pro', '-W']);
+        $requireExitCode = $this->runComposer([$composer, 'require', self::PRO_PACKAGE, '-W']);
 
         if ($requireExitCode !== self::SUCCESS) {
             return $requireExitCode;
