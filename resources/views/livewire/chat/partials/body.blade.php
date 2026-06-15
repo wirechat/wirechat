@@ -268,6 +268,16 @@
                     $parent = $message->parent ?? null;
                     $attachment = $message->attachment ?? null;
                     $isEmoji = $message->isEmoji();
+                    $canUseConversationMessageActions = ($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authIsAdmin;
+                    $canReplyToMessage = $canUseConversationMessageActions && $this->panel()->hasMessageReplyAction();
+                    $canDeleteMessageForEveryone = $canUseConversationMessageActions
+                        && $this->panel()->hasDeleteMessageActions()
+                        && ($message->ownedBy($this->auth) || ($authIsAdmin && $isGroup));
+                    $canDeleteMessageForMe = $canUseConversationMessageActions
+                        && $this->panel()->hasDeleteMessageActions()
+                        && ! $isGroup;
+                    $hasDropdownMessageActions = $canDeleteMessageForEveryone || $canDeleteMessageForMe || $canReplyToMessage;
+                    $hasMessageActions = $canReplyToMessage || $hasDropdownMessageActions;
 
 
                     // keep track of previous message
@@ -366,10 +376,11 @@
                             ])>
 
                                 {{-- Message Actions --}}
-                                @if (($isGroup && $conversation->group?->allowsMembersToSendMessages()) || $authIsAdmin)
+                                @if ($hasMessageActions)
                                 <div dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
-                                    <button wire:click="setReply('{{ encrypt($message->id) }}')"
+                                    @if ($canReplyToMessage)
+                                    <button dusk="reply_to_message_icon" wire:click="setReply('{{ encrypt($message->id) }}')"
                                         class=" invisible  group-hover:visible hover:scale-110 transition-transform">
 
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -379,12 +390,14 @@
                                                 d="M5.921 11.9 1.353 8.62a.72.72 0 0 1 0-1.238L5.921 4.1A.716.716 0 0 1 7 4.719V6c1.5 0 6 0 7 8-2.5-4.5-7-4-7-4v1.281c0 .56-.606.898-1.079.62z" />
                                         </svg>
                                     </button>
+                                    @endif
+                                    @if ($hasDropdownMessageActions)
                                     {{-- Dropdown actions button --}}
                                     <x-wirechat::dropdown class="w-40" align="{{ $belongsToAuth ? 'right' : 'left' }}"
                                         width="48">
                                         <x-slot name="trigger">
                                             {{-- Dots --}}
-                                            <button class="invisible  group-hover:visible hover:scale-110 transition-transform">
+                                            <button dusk="message_actions_dropdown" class="invisible  group-hover:visible hover:scale-110 transition-transform">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor"
                                                     class="bi bi-three-dots h-3 w-3 text-gray-700 dark:text-white"
@@ -396,7 +409,7 @@
                                         </x-slot>
                                         <x-slot name="content">
 
-                                            @if (($message->ownedBy($this->auth)|| ($authIsAdmin && $isGroup)) && $this->panel()->hasDeleteMessageActions())
+                                            @if ($canDeleteMessageForEveryone)
                                                 <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ encrypt($message->id) }}')"
                                                     wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
@@ -407,7 +420,7 @@
 
 
                                             {{-- Dont show delete for me if is group --}}
-                                            @if (!$isGroup && $this->panel()->hasDeleteMessageActions())
+                                            @if ($canDeleteMessageForMe)
                                             <button dusk="delete_message_for_me" wire:click="deleteForMe('{{ encrypt($message->id) }}')"
                                                 wire:confirm="{{ __('wirechat::chat.actions.delete_for_me.confirmation_message') }}" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
@@ -417,15 +430,18 @@
                                             @endif
 
 
+                                            @if ($canReplyToMessage)
                                             <button dusk="reply_to_message_button" wire:click="setReply('{{ encrypt($message->id) }}')"class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     @lang('wirechat::chat.actions.reply.label')
                                                 </x-wirechat::dropdown-link>
                                             </button>
+                                            @endif
 
 
                                         </x-slot>
                                     </x-wirechat::dropdown>
+                                    @endif
 
                                 </div>
                                 @endif

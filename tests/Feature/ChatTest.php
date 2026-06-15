@@ -988,6 +988,8 @@ describe('Box presence test: ', function () {
     });
 
     test('It shows Clear Chat button and method  is wired if conversation is Private', function () {
+        testPanelProvider()->clearChatAction();
+
         $auth = User::factory()->create();
 
         $participant = User::factory()->create(['name' => 'John']);
@@ -1001,6 +1003,8 @@ describe('Box presence test: ', function () {
     });
 
     test('It shows Clear Chat button and method  is wired if conversation is Self', function () {
+        testPanelProvider()->clearChatAction();
+
         $auth = User::factory()->create();
 
         // create conversation with user1
@@ -1089,6 +1093,8 @@ describe('Box presence test: ', function () {
     });
 
     test('it shows "Delete Chat" button label if Conversation  is Private', function () {
+        testPanelProvider()->deleteChatAction();
+
         $auth = User::factory()->create();
 
         $participant = User::factory()->create(['name' => 'John']);
@@ -1277,6 +1283,15 @@ describe('Heart', function () {
 
 describe('Chat Actions', function () {
 
+    test('delete-chat-action and clear-chat-action are hidden by default for private chats', function () {
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createConversationWith(User::factory()->create());
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertDontSeeHtml('dusk="delete-chat-action"')
+            ->assertDontSeeHtml('dusk="clear-chat-action"');
+    });
+
     // Delete Chat
     test('it doesnt show delete-chat-action if not enabled in chat', function () {
 
@@ -1288,6 +1303,17 @@ describe('Chat Actions', function () {
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertDontSeeHtml('dusk="delete-chat-action"');
+    });
+
+    test('delete conversation aborts when delete chat action is disabled', function () {
+        testPanelProvider()->deleteChatAction(false);
+
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createConversationWith(User::factory()->create());
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteConversation')
+            ->assertStatus(403);
     });
 
     test('it  shows delete-chat-action if  enabled in chat', function () {
@@ -1313,6 +1339,17 @@ describe('Chat Actions', function () {
             ->assertDontSeeHtml('dusk="clear-chat-action"');
     });
 
+    test('clear conversation aborts when clear chat action is disabled', function () {
+        testPanelProvider()->clearChatAction(false);
+
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createConversationWith(User::factory()->create());
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('clearConversation')
+            ->assertStatus(403);
+    });
+
     test('it  shows clear-chat-action if  enabled in chat', function () {
         testPanelProvider()->clearChatAction(true);
 
@@ -1322,6 +1359,32 @@ describe('Chat Actions', function () {
         // dd($conversation);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSeeHtml('dusk="clear-chat-action"');
+    });
+
+    test('private clear and delete actions are not shown for group chats', function () {
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertDontSeeHtml('dusk="delete-chat-action"')
+            ->assertDontSeeHtml('dusk="clear-chat-action"');
+    });
+
+    test('private clear and delete actions abort for group conversations', function () {
+        testPanelProvider()
+            ->deleteChatAction()
+            ->clearChatAction();
+
+        $auth = User::factory()->create(['name' => 'Namu']);
+        $conversation = $auth->createGroup('My Group');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteConversation')
+            ->assertStatus(403);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('clearConversation')
+            ->assertStatus(403);
     });
 
     // Delete Chat
@@ -1548,6 +1611,94 @@ describe('Message actions: Viewing Private Chat', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSee('Nice things') // assert can see message
             ->assertDontSeeHtml('dusk="delete_message_for_me"');
+    });
+
+    test('it hides reply actions when messageReplyAction is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertDontSeeHtml('dusk="reply_to_message_icon"')
+            ->assertDontSeeHtml('dusk="reply_to_message_button"')
+            ->assertSeeHtml('dusk="delete_message_for_me"');
+    });
+
+    test('it does not render message actions when reply and delete message actions are off', function () {
+        testPanelProvider()
+            ->deleteMessageActions(false)
+            ->messageReplyAction(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertDontSeeHtml('dusk="message_actions"')
+            ->assertDontSeeHtml('dusk="message_actions_dropdown"');
+    });
+
+    test('it renders only reply actions when delete message actions are off', function () {
+        testPanelProvider()->deleteMessageActions(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertSeeHtml('dusk="message_actions"')
+            ->assertSeeHtml('dusk="message_actions_dropdown"')
+            ->assertSeeHtml('dusk="reply_to_message_icon"')
+            ->assertSeeHtml('dusk="reply_to_message_button"')
+            ->assertDontSeeHtml('dusk="delete_message_for_me"')
+            ->assertDontSeeHtml('dusk="delete_message_for_everyone"');
+    });
+
+    test('it renders only delete actions when message reply action is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+
+        $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Nice things')
+            ->assertSeeHtml('dusk="message_actions"')
+            ->assertSeeHtml('dusk="message_actions_dropdown"')
+            ->assertSeeHtml('dusk="delete_message_for_me"')
+            ->assertSeeHtml('dusk="delete_message_for_everyone"')
+            ->assertDontSeeHtml('dusk="reply_to_message_icon"')
+            ->assertDontSeeHtml('dusk="reply_to_message_button"');
+    });
+
+    test('delete message methods abort when delete message actions are off', function () {
+        testPanelProvider()->deleteMessageActions(false);
+
+        $auth = User::factory()->create(['name' => 'test']);
+        $receiver = User::factory()->create(['name' => 'User']);
+        $conversation = $auth->createConversationWith($receiver);
+        $message = $auth->sendMessageTo($conversation, 'Nice things');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForEveryone', encrypt($message->id))
+            ->assertStatus(403);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('deleteForMe', encrypt($message->id))
+            ->assertStatus(403);
     });
 });
 
@@ -2735,6 +2886,40 @@ describe('Sending reply', function () {
 
     });
 
+    test('setReply aborts when message reply action is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create();
+
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($receiver, message: 'How are you');
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('setReply', encrypt($message->id))
+            ->assertStatus(403);
+    });
+
+    test('existing reply previews still render when message reply action is off', function () {
+        testPanelProvider()->messageReplyAction(false);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = $auth->createConversationWith($receiver, 'Original message');
+
+        $parent = Message::query()->where('conversation_id', $conversation->id)->firstOrFail();
+        $reply = $receiver->sendMessageTo($conversation, message: 'Reply message');
+        $reply->forceFill(['reply_id' => $parent->id])->save();
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->assertSee('Reply message')
+            ->assertSee('Original message')
+            ->assertDontSeeHtml('dusk="reply_to_message_button"');
+    });
+
     test('it shows "replying to yourself" when auth is replying to own message ', function () {
         $auth = User::factory()->create();
 
@@ -2786,6 +2971,9 @@ describe('Sending reply', function () {
 });
 
 describe('Deleting Conversation', function () {
+    beforeEach(function () {
+        testPanelProvider()->deleteChatAction();
+    });
 
     test('it redirects to chats route after deleting conversation', function () {
         $auth = User::factory()->create();
@@ -3043,6 +3231,8 @@ describe('Deleting Conversation', function () {
     describe('IsWidget:--', function () {
 
         test('it does not redirects to chats route after deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3067,6 +3257,8 @@ describe('Deleting Conversation', function () {
         });
 
         test('it dispatches "close-chat" evnt after deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3090,6 +3282,7 @@ describe('Deleting Conversation', function () {
         });
 
         test('it dispatches "chat-deleted" event after Deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
@@ -3114,6 +3307,7 @@ describe('Deleting Conversation', function () {
         });
 
         test('Deleted chat should no longer appea in Chats componnet when "chat-deleted" event is dispacted after Deleting conversation', function () {
+            testPanelProvider()->deleteChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
@@ -3182,6 +3376,9 @@ describe('Deleting Conversation', function () {
 });
 
 describe('Clearing Conversation', function () {
+    beforeEach(function () {
+        testPanelProvider()->clearChatAction();
+    });
 
     test('user should still have access after deleting conversation', function () {
 
@@ -3303,6 +3500,8 @@ describe('Clearing Conversation', function () {
     describe('IsWidget:', function () {
 
         test('it does not redirects to chats route after deleting conversation', function () {
+            testPanelProvider()->clearChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3327,6 +3526,8 @@ describe('Clearing Conversation', function () {
         });
 
         test('it dispatches "close-chat" event after clearing conversation', function () {
+            testPanelProvider()->clearChatAction();
+
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
 
@@ -3350,6 +3551,7 @@ describe('Clearing Conversation', function () {
         });
 
         test('it dispatches "refresh" event after Clearing conversation', function () {
+            testPanelProvider()->clearChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);
@@ -3374,6 +3576,7 @@ describe('Clearing Conversation', function () {
         });
 
         test('message is cleared/updated in Chats componnet when refresh "refresh" event is dispacted after Clearing conversation', function () {
+            testPanelProvider()->clearChatAction();
 
             $auth = User::factory()->create();
             $receiver = User::factory()->create(['name' => 'John']);

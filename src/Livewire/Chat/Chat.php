@@ -226,6 +226,8 @@ class Chat extends Component
      *  */
     public function setReply(string $id): void
     {
+        abort_unless($this->panel()->hasMessageReplyAction(), 403);
+
         // descrypt
 
         $messageId = null;
@@ -309,7 +311,9 @@ class Chat extends Component
     public function deleteConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasDeleteChatAction(), 403);
         abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
+        abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
 
         // delete conversation
         $this->conversation->deleteFor($this->auth);
@@ -328,7 +332,9 @@ class Chat extends Component
     public function clearConversation()
     {
         abort_unless(auth()->check(), 401);
+        abort_unless($this->panel()->hasClearChatAction(), 403);
         abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
+        abort_unless($this->conversation->isSelf() || $this->conversation->isPrivate(), 403, 'This operation is not available for Groups.');
 
         // delete conversation
         $this->conversation->clearFor($this->auth);
@@ -573,6 +579,8 @@ class Chat extends Component
      **/
     public function deleteForMe(string $id): void
     {
+        abort_unless($this->panel()->hasDeleteMessageActions(), 403);
+
         // descrypt
         $messageId = null;
         try {
@@ -609,6 +617,8 @@ class Chat extends Component
      **/
     public function deleteForEveryone(string $id): void
     {
+        abort_unless($this->panel()->hasDeleteMessageActions(), 403);
+
         // descrypt
         $messageId = null;
         try {
