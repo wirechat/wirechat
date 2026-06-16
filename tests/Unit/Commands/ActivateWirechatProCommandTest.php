@@ -96,6 +96,85 @@ it('configures composer credentials and repository without installing pro when s
     });
 });
 
+it('accepts an activation domain appended to the license key', function () {
+    fakeSuccessfulCorepineActivation($this->activationUrl);
+
+    $this->artisan('wirechat:activate', [
+        '--email' => 'admin@example.com',
+        '--license' => 'license-key:example.com',
+        '--skip-install' => true,
+    ])
+        ->expectsOutput('[✓] License activated with Corepine.')
+        ->expectsOutput('[✓] Composer credentials configured.')
+        ->expectsOutput('Skipped package installation.')
+        ->assertExitCode(0);
+
+    $auth = json_decode(File::get($this->authPath), true, 512, JSON_THROW_ON_ERROR);
+
+    expect($auth['http-basic']['composer.corepine.dev'])->toBe([
+        'username' => 'admin@example.com',
+        'password' => 'license-key:example.com',
+    ]);
+
+    Http::assertSent(function (Request $request): bool {
+        $payload = $request->data();
+
+        return $request->url() === $this->activationUrl
+            && $payload['license_key'] === 'license-key'
+            && $payload['fingerprint'] === 'example.com';
+    });
+});
+
+it('prompts for an activation domain when Corepine requires one', function () {
+    Http::fake([
+        $this->activationUrl => Http::sequence()
+            ->push([
+                'message' => 'An activation domain is required for this license.',
+            ], 422)
+            ->push([
+                'status' => 'active',
+                'package' => 'wirechat/wirechat-pro',
+                'license_key' => 'license-key',
+                'composer_host' => 'composer.corepine.dev',
+                'activation' => [
+                    'fingerprint' => 'example.com',
+                ],
+            ], 200),
+    ]);
+
+    $this->artisan('wirechat:activate', [
+        '--email' => 'admin@example.com',
+        '--skip-install' => true,
+    ])
+        ->expectsQuestion('Enter your Wirechat Pro license key', 'license-key')
+        ->expectsQuestion('Enter the activation domain or project ID for this license', 'example.com')
+        ->expectsOutput('[✓] License activated with Corepine.')
+        ->expectsOutput('[✓] Composer credentials configured.')
+        ->expectsOutput('Skipped package installation.')
+        ->assertExitCode(0);
+
+    $auth = json_decode(File::get($this->authPath), true, 512, JSON_THROW_ON_ERROR);
+
+    expect($auth['http-basic']['composer.corepine.dev'])->toBe([
+        'username' => 'admin@example.com',
+        'password' => 'license-key:example.com',
+    ]);
+
+    Http::assertSentCount(2);
+    Http::assertSent(function (Request $request): bool {
+        $payload = $request->data();
+
+        return $payload['license_key'] === 'license-key'
+            && $payload['fingerprint'] === null;
+    });
+    Http::assertSent(function (Request $request): bool {
+        $payload = $request->data();
+
+        return $payload['license_key'] === 'license-key'
+            && $payload['fingerprint'] === 'example.com';
+    });
+});
+
 it('prints manual composer commands when package replacement is declined', function () {
     fakeSuccessfulCorepineActivation($this->activationUrl);
 
