@@ -1015,7 +1015,8 @@ it('renders join from invite modal using translations', function () {
         ->assertSee(__('wirechat::chat.group.join.lobby.labels.members_count', ['count' => $conversation->participants_count]))
         ->assertSee(__('wirechat::chat.group.join.lobby.labels.open_access'))
         ->assertSee(__('wirechat::chat.group.join.lobby.actions.cancel.label'))
-        ->assertSee(__('wirechat::chat.group.join.lobby.actions.join_group.label'));
+        ->assertSee(__('wirechat::chat.group.join.lobby.actions.join_group.label'))
+        ->assertSeeHtml('autofocus tabindex="-1" class="text-lg font-semibold focus:outline-hidden"');
 });
 
 it('shows an overflow badge when the invite modal has more than six members to preview', function () {

@@ -5,7 +5,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-        <h3 class="text-lg font-semibold">{{ __('wirechat::chat.group.join.lobby.heading.label') }}</h3>
+        <h3 autofocus tabindex="-1" class="text-lg font-semibold focus:outline-hidden">{{ __('wirechat::chat.group.join.lobby.heading.label') }}</h3>
         <span class="w-10"></span>
     </div>
 
