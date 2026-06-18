@@ -183,12 +183,12 @@
          tabindex="0"
     
         >
-        <div class="relative h-full text-left">
-            <div x-show="show" x-transition:enter="ease-out duration-300"
+        <div class="pointer-events-auto relative h-full overflow-x-hidden bg-[var(--wc-light-primary)] text-left dark:bg-[var(--wc-dark-primary)] dark:text-white">
+            <div x-show="show && showActiveComponent" x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 -translate-x-full"
-                class="pointer-events-auto h-full w-full overscroll-contain bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)] dark:text-white" id="chatmodal-container">
+                class="h-full w-full overscroll-contain transition-all" id="chatmodal-container">
                 @forelse($drawerComponents as $id => $component)
                     <div class="overscroll-contain " x-show.immediate="activeDrawerComponent == '{{ $id }}'" x-ref="{{ $id }}"
                         wire:key="{{ $id }}">
