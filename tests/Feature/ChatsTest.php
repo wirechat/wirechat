@@ -8,6 +8,7 @@ use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
+use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Index as SettingsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as NotificationsDrawer;
@@ -158,6 +159,12 @@ test('settings drawer shows nested settings sections', function () {
         ->assertDontSee('Keyboard shortcuts')
         ->assertDontSeeHtml('dusk="settings-option-theme"')
         ->assertDontSeeHtml('dusk="settings-option-keyboard"');
+});
+
+test('chats drawer shell does not center child drawer text', function () {
+    Livewire::test(ChatsDrawer::class)
+        ->assertSeeHtml('class="relative overflow-x-hidden text-left"')
+        ->assertDontSeeHtml('class="relative text-center overflow-x-hidden"');
 });
 
 test('settings drawer is unavailable when panel settings are disabled', function () {
