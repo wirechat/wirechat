@@ -93,20 +93,8 @@
                             this.componentHistory.push(this.activeDrawerComponent);
                         }
 
-                        let focusableTimeout = 50;
-
-                        if (this.activeDrawerComponent === false) {
-                            this.activeDrawerComponent = id;
-                            this.showActiveComponent = true;
-                        } else {
-                            this.showActiveComponent = false;
-                            focusableTimeout = 400;
-
-                            setTimeout(() => {
-                                this.activeDrawerComponent = id;
-                                this.showActiveComponent = true;
-                            }, 300);
-                        }
+                        this.activeDrawerComponent = id;
+                        this.showActiveComponent = true;
 
                         const attributes = this.$wire.get('drawerComponents')[id]?.modalAttributes || {};
                         this.closeOnEscape = attributes.closeOnEscape ?? false;
@@ -121,7 +109,7 @@
                             if (focusable) {
                                 setTimeout(() => {
                                     focusable.focus();
-                                }, focusableTimeout);
+                                }, 50);
                             }
                         });
                     },
@@ -174,7 +162,7 @@
                 x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-full"
+                x-transition:leave-end="opacity-0 translate-x-full"
                 class="h-full w-full transition-all"
                 id="chatsdrawer-container"
             >
