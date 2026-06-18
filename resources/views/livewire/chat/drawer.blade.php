@@ -7,6 +7,11 @@
                     show: false,
                     showActiveComponent: true,
                     activeDrawerComponent: false,
+                    previousDrawerComponent: false,
+                    transitioningDrawerComponent: false,
+                    drawerComponentTransitionDirection: 'forward',
+                    drawerComponentTransitionPhase: 'idle',
+                    drawerComponentTransitionTimeout: null,
                     componentHistory: [],
                     listeners: [],
                     //current component attributes
@@ -103,12 +108,45 @@
                             return;
                         }
 
+                        const previousDrawerComponent = this.activeDrawerComponent;
+
                         if (this.activeDrawerComponent !== false && skip === false) {
                             this.componentHistory.push(this.activeDrawerComponent);
                         }
 
                         this.activeDrawerComponent = id;
                         this.showActiveComponent = true;
+
+                        if (previousDrawerComponent === false) {
+                            this.previousDrawerComponent = false;
+                            this.transitioningDrawerComponent = false;
+                            this.drawerComponentTransitionPhase = 'idle';
+                        } else {
+                            if (this.drawerComponentTransitionTimeout) {
+                                clearTimeout(this.drawerComponentTransitionTimeout);
+                            }
+
+                            this.previousDrawerComponent = previousDrawerComponent;
+                            this.transitioningDrawerComponent = true;
+                            this.drawerComponentTransitionDirection = skip ? 'back' : 'forward';
+                            this.drawerComponentTransitionPhase = 'start';
+
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    if (this.activeDrawerComponent === id) {
+                                        this.drawerComponentTransitionPhase = 'end';
+                                    }
+                                });
+                            });
+
+                            this.drawerComponentTransitionTimeout = setTimeout(() => {
+                                if (this.activeDrawerComponent === id) {
+                                    this.previousDrawerComponent = false;
+                                    this.transitioningDrawerComponent = false;
+                                    this.drawerComponentTransitionPhase = 'idle';
+                                }
+                            }, 300);
+                        }
 
                         
                         // Fetch modal attributes and set Alpine properties 
@@ -135,11 +173,50 @@
                     setShowPropertyTo(show) {
                         this.show = show;
                         if (!show) {
+                            this.previousDrawerComponent = false;
+                            this.transitioningDrawerComponent = false;
+                            this.drawerComponentTransitionPhase = 'idle';
+
                             setTimeout(() => {
                                 this.activeDrawerComponent = false;
                                 this.$wire.resetState();
                             }, 300);
                         }
+                    },
+                    shouldShowDrawerComponent(id) {
+                        return this.activeDrawerComponent === id || this.previousDrawerComponent === id;
+                    },
+                    drawerComponentTransitionClasses(id) {
+                        const isActive = this.activeDrawerComponent === id;
+                        const isPrevious = this.previousDrawerComponent === id;
+                        const direction = this.drawerComponentTransitionDirection;
+                        const phase = this.drawerComponentTransitionPhase;
+
+                        if (!this.transitioningDrawerComponent) {
+                            return isActive ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0';
+                        }
+
+                        if (phase === 'start') {
+                            if (isActive) {
+                                return direction === 'forward'
+                                    ? 'translate-x-full opacity-100'
+                                    : '-translate-x-full opacity-100';
+                            }
+
+                            return isPrevious ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0';
+                        }
+
+                        if (isActive) {
+                            return 'translate-x-0 opacity-100';
+                        }
+
+                        if (isPrevious) {
+                            return direction === 'forward'
+                                ? '-translate-x-full opacity-100'
+                                : 'translate-x-full opacity-100';
+                        }
+
+                        return 'translate-x-full opacity-0';
                     },
                     init() {
 
@@ -175,9 +252,9 @@
                 x-transition:enter-start="opacity-0 translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 translate-x-full"
-                class="h-full w-full overscroll-contain transition-all" id="chatmodal-container">
+                class="relative h-full w-full overflow-x-hidden overscroll-contain transition-all" id="chatmodal-container">
                 @forelse($drawerComponents as $id => $component)
-                    <div class="overscroll-contain " x-show.immediate="activeDrawerComponent == '{{ $id }}'" x-ref="{{ $id }}"
+                    <div class="absolute inset-0 h-full w-full overscroll-contain transition-all duration-300 ease-out" x-show="shouldShowDrawerComponent(@js($id))" x-bind:class="drawerComponentTransitionClasses(@js($id))" x-ref="{{ $id }}"
                         wire:key="{{ $id }}">
                         @livewire($component['name'], $component['arguments'], key($id))
                     </div>
