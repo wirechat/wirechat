@@ -8,21 +8,21 @@
     $hasHeaderMenuActions = $hasSettings || $hasMessageRequests || $canCreateGroups;
 @endphp
 
-<header class="px-3 z-10 sticky flex flex-col gap-1.5 top-0 w-full py-2 " dusk="header">
+<header class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-3 py-2 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]" dusk="header">
 
 
     {{-- heading/name and Icon --}}
-    <section class=" justify-between flex mb-1 items-center">
+    <section class="mb-1 flex items-center justify-between gap-3">
 
         @if (isset($heading))
-            <div class="flex items-center gap-2 truncate  " wire:ignore>
-                <h2 class="text-[1.4rem]  font-bold dark:text-white"  dusk="heading">{{$heading}}</h2>
+            <div class="min-w-0 flex-1 text-left" wire:ignore>
+                <h2 class="truncate text-[1.4rem] font-bold text-zinc-900 dark:text-white"  dusk="heading">{{$heading}}</h2>
             </div>
         @endif
 
 
 
-        <div class="flex gap-x-1 items-center   ">
+        <div class="flex shrink-0 items-center gap-x-1">
 
 
 

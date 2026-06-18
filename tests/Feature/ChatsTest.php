@@ -10,6 +10,8 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
 use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Index as SettingsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as NotificationsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Settings\SecurityPrivacy as SecurityPrivacyDrawer;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
@@ -128,26 +130,32 @@ test('requests drawer is unavailable when message requests are disabled on the p
         ->assertNotFound();
 });
 
-test('settings drawer shows grouped settings sections', function () {
+test('settings drawer shows nested settings sections', function () {
     testPanelProvider()->settings();
 
     $auth = User::factory()->create(['name' => 'Auth']);
 
     Livewire::actingAs($auth)->test(SettingsDrawer::class)
         ->assertSee(__('wirechat::chats.settings.heading'))
+        ->assertSeeHtml('class="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95"')
         ->assertSee(__('wirechat::chats.settings.general.heading'))
-        ->assertSee(__('wirechat::chats.settings.notifications.heading'))
-        ->assertSee(__('wirechat::chats.settings.security_privacy.heading'))
-        ->assertSee(__('wirechat::chats.settings.security_privacy.groups.heading'))
-        ->assertSeeHtml('dusk="settings-notifications-messages-toggle"')
-        ->assertSeeHtml('dusk="settings-notifications-groups-toggle"')
-        ->assertSeeHtml('dusk="settings-notifications-previews-toggle"')
-        ->assertSeeHtml('dusk="settings-security-privacy-groups-add-me-toggle"')
+        ->assertSee('Your profile in '.config('app.name').'.')
+        ->assertSee(__('wirechat::chats.settings.options.notifications.label'))
+        ->assertSee(__('wirechat::chats.settings.options.notifications.description'))
+        ->assertSee(__('wirechat::chats.settings.options.security_privacy.label'))
+        ->assertSee(__('wirechat::chats.settings.options.security_privacy.description'))
+        ->assertSeeHtml('dusk="settings-option-notifications"')
+        ->assertSeeHtml('dusk="settings-option-security-privacy"')
+        ->assertSeeHtml("component: 'wirechat.chats.settings.notifications'")
+        ->assertSeeHtml("component: 'wirechat.chats.settings.security-privacy'")
+        ->assertDontSeeHtml('dusk="settings-notifications-messages-toggle"')
+        ->assertDontSeeHtml('dusk="settings-notifications-groups-toggle"')
+        ->assertDontSeeHtml('dusk="settings-notifications-previews-toggle"')
+        ->assertDontSeeHtml('dusk="settings-security-privacy-groups-add-me-toggle"')
+        ->assertDontSeeHtml('dusk="settings-security-privacy-groups-heading"')
         ->assertDontSee('Name and profile photo')
         ->assertDontSee('Theme')
         ->assertDontSee('Keyboard shortcuts')
-        ->assertDontSeeHtml('dusk="settings-option-notifications"')
-        ->assertDontSeeHtml('dusk="settings-option-security-privacy"')
         ->assertDontSeeHtml('dusk="settings-option-theme"')
         ->assertDontSeeHtml('dusk="settings-option-keyboard"');
 });
@@ -166,7 +174,7 @@ test('settings drawer persists notification preferences', function () {
 
     $auth = User::factory()->create(['name' => 'Auth']);
 
-    Livewire::actingAs($auth)->test(SettingsDrawer::class)
+    Livewire::actingAs($auth)->test(NotificationsDrawer::class)
         ->assertSet('messages', true)
         ->assertSet('groups', true)
         ->assertSet('previews', true)
@@ -196,9 +204,11 @@ test('settings drawer persists group add preference', function () {
 
     $auth = User::factory()->create(['name' => 'Auth']);
 
-    Livewire::actingAs($auth)->test(SettingsDrawer::class)
+    Livewire::actingAs($auth)->test(SecurityPrivacyDrawer::class)
         ->assertSet('groupsCanAddMe', true)
+        ->assertSeeHtml('class="space-y-3 text-left"')
         ->assertSee(__('wirechat::chats.settings.security_privacy.groups.heading'))
+        ->assertSee('When this is off, people cannot find you in group add searches or add you to groups in '.config('app.name').'.')
         ->assertSeeHtml('dusk="settings-security-privacy-groups-add-me-toggle"')
         ->call('toggleGroupsCanAddMe')
         ->assertSet('groupsCanAddMe', false);
@@ -375,6 +385,9 @@ describe('Presence check', function () {
     it('has "chats heading set in chatlist" as defualt', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-3 py-2 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]"')
+            ->assertSeeHtml('class="min-w-0 flex-1 text-left"')
+            ->assertSeeHtml('class="truncate text-[1.4rem] font-bold text-zinc-900 dark:text-white"')
             ->assertSeeHtml('dusk="heading"')
             ->assertSet('heading', __('wirechat::chats.labels.heading'))
             ->assertSee(__('wirechat::chats.labels.heading'));

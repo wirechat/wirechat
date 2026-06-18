@@ -43,6 +43,9 @@ class InstallWirechat extends Command
         // Create deafult panel
         $this->createDefaultPanel();
 
+        $this->comment('Configuring frontend stylesheet...');
+        $this->configureStylesheet();
+
         $this->info('[✓] Wirechat Package installed successfully.');
     }
 
@@ -87,5 +90,52 @@ class InstallWirechat extends Command
             '--provider' => "Wirechat\Wirechat\WirechatServiceProvider",
             '--tag' => 'wirechat-migrations',
         ]);
+    }
+
+    private function configureStylesheet(): void
+    {
+        $cssPath = resource_path('css/app.css');
+        $freeImport = "@import '../../vendor/wirechat/wirechat/resources/css/app.css';";
+        $knownImports = [
+            'vendor/wirechat/wirechat/resources/css/app.css',
+            'vendor/wirechat/wirechat-pro/resources/css/app.css',
+        ];
+
+        if (! File::exists($cssPath)) {
+            $this->warn('resources/css/app.css was not found. Add this import to your Tailwind CSS file:');
+            $this->line($freeImport);
+
+            return;
+        }
+
+        $contents = File::get($cssPath);
+
+        foreach ($knownImports as $knownImport) {
+            if (str_contains($contents, $knownImport)) {
+                $this->info('[✓] Wirechat stylesheet already configured.');
+
+                return;
+            }
+        }
+
+        File::put($cssPath, $this->addStylesheetImport($contents, $freeImport));
+
+        $this->info('[✓] Added Wirechat stylesheet import to resources/css/app.css');
+    }
+
+    private function addStylesheetImport(string $contents, string $import): string
+    {
+        $contents = rtrim($contents);
+        $lines = preg_split('/\R/', $contents) ?: [];
+
+        foreach ($lines as $index => $line) {
+            if (preg_match("/^\\s*@import\\s+['\"]tailwindcss['\"]\\s*;/", $line) === 1) {
+                array_splice($lines, $index + 1, 0, $import);
+
+                return implode(PHP_EOL, $lines).PHP_EOL;
+            }
+        }
+
+        return $import.PHP_EOL.PHP_EOL.$contents.PHP_EOL;
     }
 }

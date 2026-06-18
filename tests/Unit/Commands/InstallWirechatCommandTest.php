@@ -3,6 +3,7 @@
 beforeEach(function () {
 
     $this->filePath = app_path('Providers/Wirechat/ChatsPanelProvider.php');
+    $this->cssPath = resource_path('css/app.css');
     $this->isLaravel11OrHigherWithBootstrapFile = version_compare(App::version(), '11.0', '>=') &&
         /** @phpstan-ignore-next-line */
         file_exists(App::getBootstrapProvidersPath());
@@ -14,6 +15,9 @@ beforeEach(function () {
 
     $this->originalProvidersContent = File::exists($this->providersFile)
         ? File::get($this->providersFile)
+        : null;
+    $this->originalCssContent = File::exists($this->cssPath)
+        ? File::get($this->cssPath)
         : null;
 
     // Delete config
@@ -29,8 +33,18 @@ afterEach(function () {
     }
 
     // Restore the original providers file contents
-    if ($this->originalProvidersContent !== null && File::exists($this->providersFile)) {
+    if ($this->originalProvidersContent !== null) {
+        File::ensureDirectoryExists(dirname($this->providersFile));
         File::put($this->providersFile, $this->originalProvidersContent);
+    } elseif (File::exists($this->providersFile)) {
+        File::delete($this->providersFile);
+    }
+
+    if ($this->originalCssContent !== null) {
+        File::ensureDirectoryExists(dirname($this->cssPath));
+        File::put($this->cssPath, $this->originalCssContent);
+    } elseif (File::exists($this->cssPath)) {
+        File::delete($this->cssPath);
     }
 });
 
@@ -92,4 +106,33 @@ test('it creates storage symlink', function () {
 
     // Optionally assert that the symlink points to storage/app/public
     expect(readlink($linkPath))->toBe(storage_path('app/public'));
+});
+
+test('it adds the free package stylesheet import to app css', function () {
+    File::ensureDirectoryExists(dirname($this->cssPath));
+    File::put($this->cssPath, "@import 'tailwindcss';\n\n@source '../views/**/*.blade.php';\n");
+
+    $this->artisan('wirechat:install');
+
+    expect(File::get($this->cssPath))->toContain(implode(PHP_EOL, [
+        "@import 'tailwindcss';",
+        "@import '../../vendor/wirechat/wirechat/resources/css/app.css';",
+        '',
+        "@source '../views/**/*.blade.php';",
+    ]));
+});
+
+test('it does not add the free package stylesheet import when pro stylesheet is configured', function () {
+    File::ensureDirectoryExists(dirname($this->cssPath));
+    File::put($this->cssPath, implode(PHP_EOL, [
+        "@import 'tailwindcss';",
+        "@import '../../vendor/wirechat/wirechat-pro/resources/css/app.css';",
+        '',
+    ]));
+
+    $this->artisan('wirechat:install');
+
+    expect(File::get($this->cssPath))
+        ->toContain('vendor/wirechat/wirechat-pro/resources/css/app.css')
+        ->not->toContain('vendor/wirechat/wirechat/resources/css/app.css');
 });

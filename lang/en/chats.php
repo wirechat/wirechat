@@ -63,7 +63,7 @@ return [
         'general' => [
             'heading' => 'General',
             'profile' => [
-                'description' => 'Your Wirechat profile in this panel.',
+                'description' => 'Your profile in :app.',
             ],
         ],
         'options' => [
@@ -78,7 +78,7 @@ return [
         ],
         'notifications' => [
             'heading' => 'Notifications',
-            'description' => 'Choose how Wirechat should notify you about new activity.',
+            'description' => 'Choose how :app should notify you about new activity.',
             'options' => [
                 'messages' => [
                     'label' => 'Messages',
@@ -113,7 +113,7 @@ return [
                 'options' => [
                     'add_me' => [
                         'label' => 'Allow others to add me to groups',
-                        'description' => 'When this is off, you will not appear in default group add searches and cannot be added through Wirechat group add actions.',
+                        'description' => 'When this is off, people cannot find you in group add searches or add you to groups in :app.',
                     ],
                 ],
             ],

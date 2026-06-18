@@ -6,8 +6,10 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Console\Commands\ActivateWirechatPro;
 use Wirechat\Wirechat\Console\Commands\InstallWirechat;
@@ -39,6 +41,7 @@ use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Requests as ChatsRequests;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Index as ChatsSettings;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as ChatsSettingsNotifications;
+use Wirechat\Wirechat\Livewire\Chats\Settings\SecurityPrivacy as ChatsSettingsSecurityPrivacy;
 use Wirechat\Wirechat\Livewire\Modals\Modal;
 use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
 use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
@@ -84,6 +87,7 @@ class WirechatServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
+        $this->loadBladeComponents();
 
         // publish views
         if ($this->app->runningInConsole()) {
@@ -184,6 +188,7 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chats.requests', ChatsRequests::class);
         Livewire::component('wirechat.chats.settings', ChatsSettings::class);
         Livewire::component('wirechat.chats.settings.notifications', ChatsSettingsNotifications::class);
+        Livewire::component('wirechat.chats.settings.security-privacy', ChatsSettingsSecurityPrivacy::class);
 
         // modal
         Livewire::component('wirechat.modal', Modal::class);
@@ -250,6 +255,23 @@ class WirechatServiceProvider extends ServiceProvider
         $router->aliasMiddleware('belongsToConversation', BelongsToConversation::class);
         $router->aliasMiddleware('wirechat.setPanel', SetCurrentPanel::class);
         $router->aliasMiddleware('wirechat.panelAccess', EnsureWirechatPanelAccess::class);
+    }
+
+    protected function loadBladeComponents(): void
+    {
+        $componentPath = __DIR__.'/../resources/views/components';
+
+        Blade::anonymousComponentPath($componentPath, 'wirechat');
+
+        foreach (File::allFiles($componentPath) as $file) {
+            $component = Str::of($file->getRelativePathname())
+                ->replace(DIRECTORY_SEPARATOR, '.')
+                ->replace('\\', '.')
+                ->beforeLast('.blade.php')
+                ->toString();
+
+            Blade::component("wirechat::components.{$component}", "wirechat::{$component}");
+        }
     }
 
     protected function loadAssets(): void
