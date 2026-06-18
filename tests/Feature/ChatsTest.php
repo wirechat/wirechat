@@ -163,7 +163,7 @@ test('settings drawer shows nested settings sections', function () {
 
 test('chats drawer shell does not center child drawer text', function () {
     Livewire::test(ChatsDrawer::class)
-        ->assertSeeHtml('class="relative overflow-x-hidden text-left"')
+        ->assertSeeHtml('class="relative h-full overflow-x-hidden text-left"')
         ->assertDontSeeHtml('class="relative text-center overflow-x-hidden"');
 });
 

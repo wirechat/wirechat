@@ -179,16 +179,16 @@
     x-data="ChatDrawer()" x-on:close.stop="setShowPropertyTo(false)"
          x-on:keydown.escape.stop="closeChatDrawerOnEscape({ modalType: 'ChatDrawer', event: $event }); "
          x-show="show"
-         class="pointer-events-none fixed inset-0 z-50 h-full overflow-y-auto overscroll-contain" style="display: none;"
+         class="pointer-events-none absolute inset-0 z-50 h-full overflow-y-auto overscroll-contain" style="display: none;"
          tabindex="0"
     
         >
-        <div class="justify-center text-center relative">
+        <div class="relative h-full text-left">
             <div x-show="show && showActiveComponent" x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 -translate-x-full"
-                class="pointer-events-auto w-auto overscroll-contain bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)] dark:text-white" id="chatmodal-container">
+                class="pointer-events-auto h-full w-full overscroll-contain bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)] dark:text-white" id="chatmodal-container">
                 @forelse($drawerComponents as $id => $component)
                     <div class="overscroll-contain " x-show.immediate="activeDrawerComponent == '{{ $id }}'" x-ref="{{ $id }}"
                         wire:key="{{ $id }}">

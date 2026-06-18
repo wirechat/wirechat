@@ -9,7 +9,7 @@ test('chats drawer stays scoped to the chats shell without locking page scroll',
     expect($html)
         ->toContain('id="chats-drawer"')
         ->toContain('class="pointer-events-none absolute inset-0 z-50 h-full overflow-y-auto"')
-        ->toContain('class="pointer-events-auto w-auto bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)]"')
+        ->toContain('class="pointer-events-auto h-full w-full bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)]"')
         ->not->toContain('x-on:click.self="closeChatListDrawerOnClickAway()"')
         ->not->toContain('x-trap.noscroll.inert="show && showActiveComponent"')
         ->toContain('this.closeOnClickAway = attributes.closeOnClickAway ?? false')

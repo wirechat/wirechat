@@ -166,7 +166,7 @@
         style="display: none;"
         tabindex="0"
     >
-        <div class="relative overflow-x-hidden text-left">
+        <div class="relative h-full overflow-x-hidden text-left">
             <div
                 x-show="show && showActiveComponent"
                 x-transition:enter="ease-out duration-300"
@@ -175,7 +175,7 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 translate-x-full"
-                class="pointer-events-auto w-auto bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)]"
+                class="pointer-events-auto h-full w-full bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)]"
                 id="chatsdrawer-container"
             >
                 @foreach($drawerComponents as $id => $component)
