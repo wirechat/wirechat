@@ -160,12 +160,10 @@
         id="chats-drawer"
         x-data="ChatListDrawer()"
         x-on:close.stop="setShowPropertyTo(false)"
-        x-on:click.self="closeChatListDrawerOnClickAway()"
         x-on:keydown.escape.stop="closeChatListDrawerOnEscape({ modalType: 'ChatListDrawer', event: $event })"
         x-show="show"
-        class="absolute inset-0 z-50 h-full overflow-y-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]"
+        class="pointer-events-none absolute inset-0 z-50 h-full overflow-y-auto"
         style="display: none;"
-        aria-modal="true"
         tabindex="0"
     >
         <div class="relative overflow-x-hidden text-left">
@@ -177,10 +175,8 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 translate-x-full"
-                class="w-auto transition-all"
+                class="pointer-events-auto w-auto bg-[var(--wc-light-primary)] transition-all dark:bg-[var(--wc-dark-primary)]"
                 id="chatsdrawer-container"
-                x-trap.noscroll.inert="show && showActiveComponent"
-                aria-modal="true"
             >
                 @foreach($drawerComponents as $id => $component)
                     <div
