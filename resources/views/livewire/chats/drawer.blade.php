@@ -168,7 +168,7 @@
     >
         <div class="relative h-full overflow-x-hidden text-left">
             <div
-                x-show="show && showActiveComponent"
+                x-show="show"
                 x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="opacity-0 translate-x-full"
                 x-transition:enter-end="opacity-100 translate-x-0"
