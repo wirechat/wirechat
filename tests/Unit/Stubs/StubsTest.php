@@ -47,6 +47,9 @@ class {{ className }} extends PanelProvider
         return $panel
              ->id(\'{{ panelId }}\')
              ->path(\'{{ panelId }}\')
+             ->chatsSearch()
+             ->redirectToHomeAction()
+             ->createChatAction()
              ->middleware([\'web\',\'auth\']);
     }
 }
@@ -75,8 +78,8 @@ class {{ className }} extends PanelProvider
         return $panel
              ->id(\'{{ panelId }}\')
              ->path(\'{{ panelId }}\')
-             ->redirectToHomeAction()
              ->chatsSearch()
+             ->redirectToHomeAction()
              ->createChatAction()
              ->middleware([\'web\',\'auth\'])
              ->default();
