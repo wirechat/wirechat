@@ -77,6 +77,31 @@ it('overwrites existing file when user confirms', function () {
     expect(File::get($this->filePath))->toContain("class {$this->className}");
 });
 
+it('registers providers in config app files that import provider classes', function () {
+    $appConfig = <<<'PHP'
+<?php
+
+use App\Providers\AppServiceProvider;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Support\ServiceProvider;
+
+return [
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        AppServiceProvider::class,
+        RouteServiceProvider::class,
+    ])->toArray(),
+];
+PHP;
+
+    $method = new ReflectionMethod(MakePanelCommand::class, 'addProviderToAppConfig');
+    $method->setAccessible(true);
+
+    $registeredConfig = $method->invoke(new MakePanelCommand, $appConfig, $this->providerClass);
+
+    expect($registeredConfig)
+        ->toContain("RouteServiceProvider::class,\n        {$this->providerClass}::class,");
+});
+
 it('shows validation error for invalid ID', function () {
     $this->artisan('make:wirechat-panel')
         ->expectsQuestion('What is the panel ID?', '1234bad')

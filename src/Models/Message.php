@@ -3,12 +3,14 @@
 namespace Wirechat\Wirechat\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\MessageType;
@@ -16,6 +18,7 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
 use Wirechat\Wirechat\Models\Scopes\WithoutRemovedMessages;
 use Wirechat\Wirechat\Traits\Actionable;
+use Wirechat\Wirechat\Workbench\Database\Factories\MessageFactory;
 
 /**
  * @property int $id
@@ -24,14 +27,14 @@ use Wirechat\Wirechat\Traits\Actionable;
  * @property int|null $reply_id
  * @property string|null $body
  * @property MessageType $type
- * @property \Illuminate\Support\Carbon|null $kept_at filled when a message is kept from disappearing
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Wirechat\Wirechat\Models\Action> $actions
+ * @property Carbon|null $kept_at filled when a message is kept from disappearing
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Action> $actions
  * @property-read int|null $actions_count
- * @property-read \Wirechat\Wirechat\Models\Attachment|null $attachment
- * @property-read \Wirechat\Wirechat\Models\Conversation|null $conversation
+ * @property-read Attachment|null $attachment
+ * @property-read Conversation|null $conversation
  * @property-read Message|null $parent
  * @property-read Message|null $reply
  * @property-read Model|\Eloquent $sendable
@@ -95,7 +98,7 @@ class Message extends Model
 
     /**
      * @deprecated Use $message->user instead via the participant relationship.
-     * @see \Wirechat\Wirechat\Models\Message::getUserAttribute()
+     * @see Message::getUserAttribute()
      * Previously, messages had a polymorphic `sendable` relationship (sendable_type/sendable_id),
      * but now messages are linked to a participant, which provides the actual user.
      * So both $message->sendable and $message->user return the participantable.
@@ -135,7 +138,7 @@ class Message extends Model
      */
     protected static function newFactory()
     {
-        return \Wirechat\Wirechat\Workbench\Database\Factories\MessageFactory::new();
+        return MessageFactory::new();
     }
 
     protected static function booted()
@@ -241,7 +244,7 @@ class Message extends Model
     }
 
     // Relationship for the parent message
-    public function parent(): belongsTo
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(Wirechat::messageModelClass(), 'reply_id')->withoutGlobalScope(WithoutRemovedMessages::class)->withTrashed();
     }

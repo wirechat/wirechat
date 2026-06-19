@@ -130,24 +130,38 @@ class MakePanelCommand extends Command
             $appConfigPath = config_path('app.php');
             $appConfig = file_get_contents($appConfigPath);
 
-            // Check for WirechatServiceProvider with or without full namespace
-            $anchor = Str::contains($appConfig, 'Wirechat\Wirechat\WirechatServiceProvider::class') ||
-                        Str::contains($appConfig, 'WirechatServiceProvider::class')
-                            ? 'WirechatServiceProvider::class,'
-                            : 'App\Providers\RouteServiceProvider::class,';
-
             if (! Str::contains($appConfig, $providerClass.'::class')) {
                 file_put_contents(
                     $appConfigPath,
-                    str_replace(
-                        $anchor,
-                        $anchor.PHP_EOL.'        '.$providerClass.'::class,',
-                        $appConfig
-                    )
+                    $this->addProviderToAppConfig($appConfig, $providerClass)
                 );
             }
         }
 
         $this->info("Wirechat panel [{$providerClass}] created successfully.");
+    }
+
+    protected function addProviderToAppConfig(string $appConfig, string $providerClass): string
+    {
+        $anchors = [
+            'Wirechat\\Wirechat\\WirechatServiceProvider::class,',
+            'WirechatServiceProvider::class,',
+            'App\\Providers\\RouteServiceProvider::class,',
+            'RouteServiceProvider::class,',
+            'App\\Providers\\AppServiceProvider::class,',
+            'AppServiceProvider::class,',
+        ];
+
+        foreach ($anchors as $anchor) {
+            if (Str::contains($appConfig, $anchor)) {
+                return str_replace(
+                    $anchor,
+                    $anchor.PHP_EOL.'        '.$providerClass.'::class,',
+                    $appConfig
+                );
+            }
+        }
+
+        throw new \RuntimeException('Unable to locate the providers array in config/app.php.');
     }
 }
