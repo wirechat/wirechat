@@ -4,6 +4,7 @@ namespace Wirechat\Wirechat\Livewire\Chats;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Computed;
@@ -203,7 +204,7 @@ class Chats extends Component
     protected function loadConversationIds(): void
     {
         $auth = $this->auth;
-        abort_if($auth == null, 401);
+        abort_if(! $auth instanceof Model, 401);
 
         $table = Wirechat::conversationModelTable();
         $perPage = 10;
@@ -224,6 +225,8 @@ class Chats extends Component
         } else {
             $baseQuery->withoutDeleted()->withoutBlanks();
         }
+
+        $baseQuery = $this->panel()->applyConversationsQueryModifier($baseQuery, $auth);
 
         // deterministic ordering for cursor paging (3-tuple: updated_at, created_at, id)
         $baseQuery

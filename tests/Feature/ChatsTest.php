@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
@@ -105,6 +106,34 @@ test('pending request conversations stay out of the normal chats list', function
 
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertDontSee('Pending User');
+});
+
+it('allows panels to modify the conversations query', function () {
+    $auth = User::factory()->create();
+    $visibleUser = User::factory()->create(['name' => 'Visible Query User']);
+    $hiddenUser = User::factory()->create(['name' => 'Hidden Query User']);
+
+    $visibleConversation = $auth->createConversationWith($visibleUser, 'Visible query message');
+    $auth->createConversationWith($hiddenUser, 'Hidden query message');
+
+    testPanelProvider()->modifyConversationsQuery(function (Builder $query, User $auth) use ($visibleConversation) {
+        return $query->whereKey($visibleConversation->getKey());
+    });
+
+    $this->actingAs($auth);
+
+    try {
+        $component = new Chatlist;
+        $component->initializePanel(testPanelProvider()->getId());
+
+        $method = new ReflectionMethod($component, 'loadConversationIds');
+        $method->setAccessible(true);
+        $method->invoke($component);
+
+        expect($component->conversationIds)->toBe([(int) $visibleConversation->getKey()]);
+    } finally {
+        testPanelProvider()->modifyConversationsQuery(null);
+    }
 });
 
 test('requests drawer shows its heading, description, tabs, and empty state', function () {
