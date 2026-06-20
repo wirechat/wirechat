@@ -392,7 +392,7 @@ describe('Presence check', function () {
     it('has "chats heading set in chatlist" as defualt', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSeeHtml('class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-3 py-2 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]"')
+            ->assertSeeHtml('class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-4 py-3 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]"')
             ->assertSeeHtml('class="min-w-0 flex-1 text-left"')
             ->assertSeeHtml('class="truncate text-[1.4rem] font-bold text-zinc-900 dark:text-white"')
             ->assertSeeHtml('dusk="heading"')

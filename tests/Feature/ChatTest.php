@@ -97,6 +97,21 @@ test('it applies ui classes and styles to the chat shell only', function () {
         ->and($styleMatches[0])->toHaveCount(1);
 });
 
+test('it renders the chat header with a single divider and aligned padding', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+
+    $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+    preg_match_all('/border-b border-zinc-200\/80 dark:border-zinc-700\/60/', $html, $dividerMatches);
+
+    expect($html)
+        ->toContain('class="w-full sticky inset-x-0 top-0 z-10 flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)]"')
+        ->toContain('px-4 py-3')
+        ->not->toContain('dark:border-[var(--wc-dark-secondary)] border-b')
+        ->and($dividerMatches[0])->toHaveCount(1);
+});
+
 test('it renders stable message anchors for scroll restoration', function () {
     $auth = User::factory()->create(['name' => 'Test']);
     $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');

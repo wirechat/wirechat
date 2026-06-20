@@ -8,7 +8,7 @@
     $hasHeaderMenuActions = $hasSettings || $hasMessageRequests || $canCreateGroups;
 @endphp
 
-<header class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-3 py-2 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]" dusk="header">
+<header class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-4 py-3 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]" dusk="header">
 
 
     {{-- heading/name and Icon --}}
