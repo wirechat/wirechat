@@ -242,7 +242,11 @@
             {{-- In widget mode, the drawer lives at the shell level so it survives chat component refreshes. --}}
             <livewire:wirechat.chat.drawer wire:key="widget-chat-drawer" />
 
-            <div  x-show="!show && !chatIsOpen " class="m-auto  justify-center flex gap-3 flex-col  items-center ">
+            <div
+                x-show="!show && !chatIsOpen"
+                dusk="widget-empty-state"
+                class="absolute inset-0 flex items-center justify-center px-4 text-center"
+            >
 
                 <h4 class="font-medium p-2 px-3 rounded-full font-semibold bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white dark:font-normal">@lang('wirechat::widgets.wirechat.messages.welcome')</h4>
 
