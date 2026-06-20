@@ -98,6 +98,15 @@ test('it applies ui classes and styles to the widget shell only', function () {
         ->and($styleMatches[0])->toHaveCount(1);
 });
 
+test('it centers the widget empty state across the chat panel', function () {
+    $html = file_get_contents(dirname(__DIR__, 2).'/resources/views/livewire/widgets/wire-chat.blade.php');
+
+    expect($html)
+        ->toContain('dusk="widget-empty-state"')
+        ->toContain('absolute inset-0 flex items-center justify-center px-4 text-center')
+        ->toContain("@lang('wirechat::widgets.wirechat.messages.welcome')");
+});
+
 test('wirechat styles uses the dark palette and supports extending zinc shades', function () {
     $customDark = [
         900 => 'oklch(0.18 0.01 285.9)',
