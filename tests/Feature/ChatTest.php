@@ -2667,6 +2667,7 @@ describe('Sending messages ', function () {
             'original_name' => 'report.pdf',
             'mime_type' => 'application/pdf',
             'url' => 'https://example.test/report.pdf',
+            'meta' => ['size' => 1048576],
         ]);
 
         $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
@@ -2677,9 +2678,12 @@ describe('Sending messages ', function () {
             ->toContain('dusk="message-attachment-shell"')
             ->toContain('dusk="message-attachment-time"')
             ->toContain('dusk="message-file-attachment"')
+            ->toContain('dusk="message-file-extension"')
+            ->toContain('dusk="message-file-meta"')
+            ->toContain('PDF')
+            ->toContain('1 MB')
             ->toContain('p-1')
             ->toContain('wc-tint-primary-bg')
-            ->toContain('bg-white/60')
             ->toContain('max-h-[24rem]')
             ->toContain('sm:max-w-[26rem]')
             ->toContain('object-contain')
@@ -2863,6 +2867,13 @@ describe('Sending messages ', function () {
         $messageExists = Attachment::all();
 
         expect(count($messageExists))->toBe(1);
+
+        $attachment = Attachment::first();
+
+        expect($attachment->meta)->toHaveKey('size')
+            ->and($attachment->size)->toBeGreaterThan(0)
+            ->and($attachment->extension)->toBe('pdf')
+            ->and($attachment->formatted_size)->not->toBeNull();
     });
 
     test('it saves file to storage when created & clears files properties when done', function () {

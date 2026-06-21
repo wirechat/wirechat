@@ -504,6 +504,9 @@ class Chat extends Component
                         Wirechat::storage()->disk()
                     ),
                     'url' => Storage::disk(Wirechat::storage()->disk())->url($path), // Use disk and path
+                    'meta' => [
+                        'size' => $attachment->getSize(),
+                    ],
                 ]);
 
                 // dd($attachment);
