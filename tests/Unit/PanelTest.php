@@ -76,7 +76,7 @@ test('primary utility theme is mapped to the provider palette tokens', function 
         ->toContain('--wc-tint-primary-50: color-mix(in srgb, var(--wc-primary-50) 35%, transparent);')
         ->toContain('--wc-tint-primary-500: color-mix(in srgb, var(--wc-primary-500) 35%, transparent);')
         ->toContain('--wc-tint-primary-950: color-mix(in srgb, var(--wc-primary-950) 35%, transparent);')
-        ->toContain('.wc-tint-primary-bg  { background-color: var(--wc-tint-primary-400); }');
+        ->toContain('.wc-tint-primary-bg  { background-color: var(--wc-tint-primary-300); }');
 
 });
 test('panel unread messages type defaults to dot', function () {

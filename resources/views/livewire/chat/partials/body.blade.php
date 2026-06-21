@@ -260,7 +260,7 @@
             <div
                 wire:key="group-{{ md5($date) }}"
                 dusk="message-date-separator"
-                class="sticky top-2 z-50 mx-auto mb-2 flex py-1.5  text-[12.5px]  px-1 min-w-24 items-center justify-center rounded-lg border border-zinc-200/70 bg-white/85 text-center  font-medium leading-none text-zinc-600 shadow-xs backdrop-blur dark:border-zinc-700/70 dark:bg-zinc-800/85 dark:text-zinc-300"
+                class="sticky top-2 z-50 mx-auto mb-2 flex h-6 w-24 items-center justify-center rounded-full border border-zinc-200/70 bg-white/85 px-2.5 text-center text-[11px] font-medium leading-none text-zinc-600 shadow-xs backdrop-blur dark:border-zinc-700/70 dark:bg-zinc-800/85 dark:text-zinc-300"
             >
                 {{ $date }}
             </div>
