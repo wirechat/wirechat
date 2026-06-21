@@ -22,7 +22,7 @@
     @class([
         'inline-flex max-w-full flex-col overflow-hidden',
         'rounded-lg p-1',
-        'bg-[color-mix(in_srgb,var(--primary-300)_40%,transparent)]' => $belongsToAuth,
+        'bg-[color-mix(in_srgb,var(--primary-400)_35%,transparent)] dark:bg-[color-mix(in_srgb,var(--primary-300)_40%,transparent)]' => $belongsToAuth,
         'bg-zinc-200/70 dark:bg-zinc-700/70' => ! $belongsToAuth,
 
     ])
@@ -34,7 +34,7 @@
             dusk="message-attachment-time"
             @class([
                 'block px-1.5 my-2 text-right text-[11px] leading-none',
-                'text-zinc-900 dark:text-white/90' => $belongsToAuth,
+                'text-zinc-800 dark:text-white/90' => $belongsToAuth,
                 'text-zinc-600 dark:text-zinc-300' => ! $belongsToAuth,
             ])
         >
