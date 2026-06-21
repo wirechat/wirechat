@@ -19,20 +19,14 @@
             'href' => null,
             'is_link' => false,
         ]];
-   $messageTextClasses = 'whitespace-pre-wrap tracking-normal wrap-anywhere text-sm md:text-base dark:text-white lg:tracking-normal';
+   $messageTextClasses = 'whitespace-pre-wrap tracking-normal wrap-anywhere font-normal text-sm md:text-base dark:text-white lg:tracking-normal';
 @endphp
 
 <div
 
-
-{{-- We use style here to make it easy for dynamic and safe injection --}}
-{{-- @style([
-'background-color:var(--wc-brand-primary)' => $belongsToAuth==true
-]) --}}
-
 @class([
-    'flex flex-wrap max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-    'text-white bg-[var(--primary-500)] opacity-90' => $belongsToAuth, // Background color for messages sent by the authenticated user
+    'flex flex-wrap max-w-fit text-[15px] font-[490] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
+    'wc-tint-primary-bg text-zinc-900  opacity-90 dark:opacity-90 dark:text-white' => $belongsToAuth,
     'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
@@ -95,7 +89,11 @@
 
 {{-- Display the created time based on different conditions --}}
 <span
-@class(['text-[11px] ml-auto ',  'text-gray-700 dark:text-gray-300' => !$belongsToAuth,'text-gray-100' => $belongsToAuth])>
+@class([
+    'ml-auto text-[11px]',
+    'text-gray-700 dark:text-gray-300' => !$belongsToAuth,
+    'text-zinc-700 dark:text-white/90' => $belongsToAuth,
+])>
     @php
         // If the message was created today, show only the time (e.g., 1:00 AM)
         echo $message?->created_at?->format('H:i');
@@ -108,7 +106,7 @@
         data-invite-link="true"
         @class([
             'mt-2 -mx-2.5  block border-t px-4 py-2 text-center text-sm font-semibold transition hover:opacity-95',
-            'border-white/20 text-white/90' => $belongsToAuth,
+            'border-zinc-900/10 text-zinc-800 dark:border-white/20 dark:text-white/90' => $belongsToAuth,
             'border-[var(--wc-light-border)] text-[var(--primary-500)] dark:border-[var(--wc-dark-border)] dark:text-[var(--primary-300)]' => ! $belongsToAuth,
         ])>
         {{ __('wirechat::chat.group.invite_message.actions.view_group.label') }}

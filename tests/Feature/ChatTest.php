@@ -2016,7 +2016,8 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('body', 'New message')
             ->call('sendMessage')
-            ->assertSee('New message');
+            ->assertSee('New message')
+            ->assertSeeHtml('wc-tint-primary-bg');
     });
 
     test('it saves new message to database when it is sent', function () {
@@ -2677,8 +2678,7 @@ describe('Sending messages ', function () {
             ->toContain('dusk="message-attachment-time"')
             ->toContain('dusk="message-file-attachment"')
             ->toContain('p-1')
-            ->toContain('bg-[color-mix(in_srgb,var(--primary-500)_35%,white)]')
-            ->toContain('dark:bg-[color-mix(in_srgb,var(--primary-300)_40%,transparent)]')
+            ->toContain('wc-tint-primary-bg')
             ->toContain('bg-white/60')
             ->toContain('max-h-[24rem]')
             ->toContain('sm:max-w-[26rem]')

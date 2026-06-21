@@ -22,7 +22,7 @@
     @class([
         'inline-flex max-w-full flex-col overflow-hidden',
         'rounded-lg p-1',
-        'bg-[color-mix(in_srgb,var(--primary-400)_35%,transparent)] dark:bg-[color-mix(in_srgb,var(--primary-300)_40%,transparent)]' => $belongsToAuth,
+        'wc-tint-primary-bg' => $belongsToAuth,
         'bg-zinc-200/70 dark:bg-zinc-700/70' => ! $belongsToAuth,
 
     ])

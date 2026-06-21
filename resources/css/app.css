@@ -279,6 +279,8 @@
     .wc-bg-secondary     { @apply bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]; }
     .wc-bg-accent        { @apply bg-[var(--wc-light-accent)]    dark:bg-[var(--wc-dark-accent)]; }
     .wc-bg-brand         { @apply bg-[var(--wc-brand-primary)]; }
+    .wc-tint-primary-bg  { background-color: color-mix(in srgb, var(--primary-400) 35%, transparent); }
+    .dark .wc-tint-primary-bg { background-color: color-mix(in srgb, var(--primary-300) 40%, transparent); }
 
     /* Hover states */
     .wc-bg-primary-hover:hover   { @apply bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-primary)]; }
