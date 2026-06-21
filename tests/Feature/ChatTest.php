@@ -487,6 +487,11 @@ describe('Presense', function () {
             ->assertSee($yesterdayExpected)    // Assert "Yesterday 3:00 PM"
             ->assertSee($thisWeekExpected)     // Assert "Mon 9:00 AM" (or whatever day it is)
             ->assertSee($olderExpected)        // Assert "08/31/24"
+            ->assertSeeHtml('dusk="message-date-separator"')
+            ->assertSeeHtml('text-[11px]')
+            ->assertSeeHtml('rounded-full')
+            ->assertSeeHtml('h-6 w-24')
+            ->assertDontSeeHtml('sticky top-0 uppercase')
             ->assertSee('Message from today')
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
