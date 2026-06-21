@@ -468,7 +468,7 @@
 
                                         {{-- Attachemnt is Video/ --}}
                                         @if ($attachment->isVideo())
-                                            <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
+                                            <x-wirechat::video height="max-h-[24rem] max-w-full sm:max-w-[26rem]" :cover="false" source="{{ $attachment?->url }}" />
 
                                         @elseif($attachment->isImage())
                                             @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])

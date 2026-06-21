@@ -2617,6 +2617,55 @@ describe('Sending messages ', function () {
             ->assertSeeHtml('<img ');
     });
 
+    test('it renders media attachments with bounded image and video sizing', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $imageMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $imageMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/photo.png',
+            'file_name' => 'photo.png',
+            'original_name' => 'photo.png',
+            'mime_type' => 'image/png',
+            'url' => 'https://example.test/photo.png',
+        ]);
+
+        $videoMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $videoMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/clip.mp4',
+            'file_name' => 'clip.mp4',
+            'original_name' => 'clip.mp4',
+            'mime_type' => 'video/mp4',
+            'url' => 'https://example.test/clip.mp4',
+        ]);
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('<img ')
+            ->toContain('<video ')
+            ->toContain('max-h-[24rem]')
+            ->toContain('sm:max-w-[26rem]')
+            ->toContain('object-contain')
+            ->toContain('rounded-2xl')
+            ->not->toContain('h-[200px]')
+            ->not->toContain('min-h-[210px]')
+            ->not->toContain('max-h-[400px]')
+            ->not->toContain('rounded-3xl');
+    });
+
     test('it saves image to storage when created & clears files properties when done', function () {
         Storage::fake('public');
 

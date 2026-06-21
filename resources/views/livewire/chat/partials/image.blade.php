@@ -11,9 +11,9 @@
 
 
 
-<img @class([ 
+<img @class([
 
-        'max-w-max  h-[200px] min-h-[210px] bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]   object-scale-down  grow-0 shrink  overflow-hidden  rounded-3xl',
+        'block h-auto max-h-[24rem] max-w-full sm:max-w-[26rem] bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] object-contain grow-0 shrink overflow-hidden rounded-2xl',
 
         'rounded-br-md rounded-tr-2xl' => ($isSameAsNext && $isNotSameAsPrevious && $belongsToAuth),
 
