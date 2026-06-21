@@ -25,8 +25,8 @@
 <div
 
 @class([
-    'flex flex-wrap shadow-xs max-w-fit text-[15px] font-[490] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-    'wc-tint-primary-bg text-zinc-900  opacity-90 dark:opacity-90 dark:text-white' => $belongsToAuth,
+    'flex flex-wrap shadow-xs max-w-fit text-[15px] font-[420] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
+    'wc-tint-primary-bg text-zinc-900 opacity-90 dark:opacity-90 text-black dark:text-white' => $belongsToAuth,
     'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
