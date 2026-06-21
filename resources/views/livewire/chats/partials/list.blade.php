@@ -98,8 +98,7 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
                         <div x-show="selectedConversationId != conversationID" dusk="unreadMessagesCount" class="col-span-2 flex flex-col text-center my-auto items-end">
                             <span class="sr-only">unread messages count</span>
                             <span
-                                @style(['background-color:var(--wc-brand-primary)'])
-                                class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold leading-none text-white"
+                                class="inline-flex bg-(--wc-primary-600)/90 min-w-6 items-center opacity-90 justify-center rounded-full px-2 py-1 text-xs font-semibold leading-none text-white"
                             >
                                 {{ $unreadIndicatorCount }}
                             </span>
@@ -109,7 +108,7 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
                             {{-- Dots icon --}}
                             <span dusk="unreadDotItem" class="sr-only">unread dot</span>
                             <svg @style(['color:var(--wc-brand-primary)']) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
+                                fill="currentColor" class="bi bi-dot w-10 h-10 " viewBox="0 0 16 16">
                                 <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
                             </svg>
 
