@@ -30,6 +30,7 @@ use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithAttachmentDownloads;
 use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Attachment;
@@ -49,6 +50,7 @@ use Wirechat\Wirechat\Models\Participant;
 class Chat extends Component
 {
     use HasPanel;
+    use InteractsWithAttachmentDownloads;
     use InteractsWithUI;
     use Widget;
     use WithFileUploads {

@@ -29,13 +29,14 @@
         </p>
     </div>
 
-    <a
-        download="{{ $attachment->original_name }}"
-        href="{{ $attachment?->url }}"
+    <button
+        type="button"
+        wire:loading.attr="disabled"
+        wire:click="download('{{ encrypt($attachment->id) }}')"
        class="grid shrink-0 place-items-center border p-2 border-zinc-800/20 dark:border-zinc-400/90 rounded-full transition-colors dark:text-gray-400 text-gray-500/90 hover:text-[var(--wc-brand-primary)] disabled:cursor-progress dark:border-zinc-300/40   dark:hover:text-[var(--wc-brand-primary)]/90"
     >
      
     <svg class="size-6 stroke-[0.8]  " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M227.7,134.47A4,4,0,0,0,224,132H180V48a12,12,0,0,0-12-12H88A12,12,0,0,0,76,48v84H32a4,4,0,0,0-2.83,6.83l96,96a4,4,0,0,0,5.66,0l96-96A4,4,0,0,0,227.7,134.47ZM128,226.34,41.66,140H80a4,4,0,0,0,4-4V48a4,4,0,0,1,4-4h80a4,4,0,0,1,4,4v88a4,4,0,0,0,4,4h38.34Z"></path></svg>
 
-    </a>
+    </button>
 </div>

@@ -2592,6 +2592,44 @@ describe('Sending messages ', function () {
         }
     });
 
+    test('attachment downloads require access to the attachment conversation', function () {
+        Storage::fake('public');
+        Config::set('wirechat.storage.disk', 'public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+        $intruder = User::factory()->create();
+        $intruderPeer = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+        $message = Message::query()->create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $conversation->participant($auth)?->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $path = Wirechat::storage()->attachmentsDirectory().'/secret.txt';
+        Storage::disk('public')->put($path, 'secret content');
+
+        $attachment = $message->attachment()->create([
+            'file_path' => $path,
+            'file_name' => 'secret.txt',
+            'original_name' => 'secret.txt',
+            'mime_type' => 'text/plain',
+            'url' => Storage::disk('public')->url($path),
+        ]);
+
+        $intruderConversation = $intruder->createConversationWith($intruderPeer);
+
+        Livewire::actingAs($intruder)->test(ChatBox::class, ['conversation' => $intruderConversation->id])
+            ->call('download', encrypt($attachment->id))
+            ->assertStatus(403);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('download', encrypt($attachment->id))
+            ->assertFileDownloaded('secret.txt');
+    });
+
     test('it renders stored generic image attachments as images using the original extension', function () {
         Storage::fake('public');
 
@@ -2682,6 +2720,7 @@ describe('Sending messages ', function () {
             ->toContain('dusk="message-file-meta"')
             ->toContain('PDF')
             ->toContain('1 MB')
+            ->toContain('wire:click="download')
             ->toContain('p-1')
             ->toContain('wc-tint-primary-bg')
             ->toContain('max-h-[24rem]')
@@ -2691,7 +2730,9 @@ describe('Sending messages ', function () {
             ->not->toContain('h-[200px]')
             ->not->toContain('min-h-[210px]')
             ->not->toContain('max-h-[400px]')
-            ->not->toContain('rounded-3xl');
+            ->not->toContain('rounded-3xl')
+            ->not->toContain('href="https://example.test/report.pdf"')
+            ->not->toContain('download="report.pdf"');
 
         expect(substr_count($html, 'dusk="message-attachment-shell"'))->toBe(3);
         expect(substr_count($html, 'dusk="message-attachment-time"'))->toBe(3);
