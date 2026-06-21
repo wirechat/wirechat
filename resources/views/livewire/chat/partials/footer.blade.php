@@ -547,7 +547,7 @@
                             <button
                                 x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
                                 wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
-                                id="sendMessageButton" class="bg-[var(--primary-500)] rounded-full p-2 cursor-pointer hover:text-[var(--primary-500)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
+                                id="sendMessageButton" class="bg-(--primary-600)/90 rounded-full p-2 cursor-pointer hover:text-[var(--primary-500)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
 
                                 <svg class="size-4.5 text-white  dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
                                     width="36" height="36" viewBox="0 0 24 24" fill="none"

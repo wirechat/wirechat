@@ -99,7 +99,7 @@
             "
           id="wirechat-chats-scrollable-container"
           wire:navigate:scroll
-        class=" overflow-y-auto py-2  wc-scrollbar-theme  grow  h-full relative " style="contain:content">
+        class=" overflow-y-auto py-2  scrollbar-thumb-zinc-400/70 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent grow  h-full relative " style="contain:content">
 
         {{-- loading indicator --}}
 

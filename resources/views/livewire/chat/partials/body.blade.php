@@ -237,7 +237,7 @@
 
     x-cloak
     x-bind:class="{'opacity-0 pointer-events-none': initializing}"
-     class='flex flex-col h-full transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8 grow overscroll-contain overflow-x-hidden w-full my-auto'
+     class='flex flex-col h-full scrollbar-thumb-zinc-400/70 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8 grow overscroll-contain overflow-x-hidden w-full my-auto'
     style="contain: layout paint"
 >
 
@@ -257,7 +257,11 @@
         @foreach ($loadedMessages as $date => $messageGroup)
 
             {{-- Date  --}}
-            <div wire:key="group-{{ md5($date) }}"  class="sticky top-0 uppercase p-2 shadow-xs px-2.5 z-50 rounded-xl border dark:border-[var(--wc-dark-primary)] border-[var(--wc-light-primary)] text-sm flex text-center justify-center  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white  w-28 mx-auto ">
+            <div
+                wire:key="group-{{ md5($date) }}"
+                dusk="message-date-separator"
+                class="sticky top-2 z-50 mx-auto mb-2 flex h-6 w-24 items-center justify-center rounded-full border border-zinc-200/70 bg-white/85 px-2.5 text-center text-[11px] font-medium leading-none text-zinc-600 shadow-xs backdrop-blur dark:border-zinc-700/70 dark:bg-zinc-800/85 dark:text-zinc-300"
+            >
                 {{ $date }}
             </div>
 
@@ -466,16 +470,23 @@
                                             </div>
                                         @endif
 
-                                        {{-- Attachemnt is Video/ --}}
-                                        @if ($attachment->isVideo())
-                                            <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
+                                        <x-wirechat::attachment-bubble
+                                            :previous-message="$previousMessage"
+                                            :message="$message"
+                                            :next-message="$nextMessage"
+                                            :belongs-to-auth="$belongsToAuth"
+                                        >
+                                            {{-- Attachment is video --}}
+                                            @if ($attachment->isVideo())
+                                                <x-wirechat::video height="max-h-[24rem] max-w-full sm:max-w-[26rem]" :cover="false" source="{{ $attachment?->url }}" />
 
-                                        @elseif($attachment->isImage())
-                                            @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
-                                        @else
-                                         {{-- Attachemnt is Application/ --}}
-                                          @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
-                                        @endif
+                                            @elseif($attachment->isImage())
+                                                @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
+                                            @else
+                                                {{-- Attachment is file --}}
+                                                @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
+                                            @endif
+                                        </x-wirechat::attachment-bubble>
 
                                     @endif
 

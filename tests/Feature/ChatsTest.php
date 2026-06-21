@@ -36,6 +36,19 @@ test('authenticaed user can access chatlist ', function () {
         ->assertStatus(200);
 });
 
+test('it renders selected conversation background classes in the chats list', function () {
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create(['name' => 'John']);
+
+    $auth->createConversationWith($receiver, message: 'Hello John');
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('bg-[var(--wc-light-secondary)]')
+        ->assertSeeHtml('dark:bg-[var(--wc-dark-secondary)]')
+        ->assertDontSeeHtml('border-r-4')
+        ->assertDontSeeHtml('border-[var(--wc-tint-primary-500)]');
+});
+
 test('it shows the requests drawer button in the chats header', function () {
     $auth = User::factory()->create();
 
@@ -392,7 +405,7 @@ describe('Presence check', function () {
     it('has "chats heading set in chatlist" as defualt', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSeeHtml('class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-3 py-2 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]"')
+            ->assertSeeHtml('class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-4 py-3 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]"')
             ->assertSeeHtml('class="min-w-0 flex-1 text-left"')
             ->assertSeeHtml('class="truncate text-[1.4rem] font-bold text-zinc-900 dark:text-white"')
             ->assertSeeHtml('dusk="heading"')

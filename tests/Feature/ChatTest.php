@@ -97,6 +97,21 @@ test('it applies ui classes and styles to the chat shell only', function () {
         ->and($styleMatches[0])->toHaveCount(1);
 });
 
+test('it renders the chat header with a single divider and aligned padding', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+
+    $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+    preg_match_all('/border-b border-zinc-200\/80 dark:border-zinc-700\/60/', $html, $dividerMatches);
+
+    expect($html)
+        ->toContain('class="w-full sticky inset-x-0 top-0 z-10 flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)]"')
+        ->toContain('px-4 py-3')
+        ->not->toContain('dark:border-[var(--wc-dark-secondary)] border-b')
+        ->and($dividerMatches[0])->toHaveCount(1);
+});
+
 test('it renders stable message anchors for scroll restoration', function () {
     $auth = User::factory()->create(['name' => 'Test']);
     $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
@@ -472,6 +487,11 @@ describe('Presense', function () {
             ->assertSee($yesterdayExpected)    // Assert "Yesterday 3:00 PM"
             ->assertSee($thisWeekExpected)     // Assert "Mon 9:00 AM" (or whatever day it is)
             ->assertSee($olderExpected)        // Assert "08/31/24"
+            ->assertSeeHtml('dusk="message-date-separator"')
+            ->assertSeeHtml('text-[11px]')
+            ->assertSeeHtml('rounded-full')
+            ->assertSeeHtml('h-6 w-24')
+            ->assertDontSeeHtml('sticky top-0 uppercase')
             ->assertSee('Message from today')
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
@@ -2001,7 +2021,8 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('body', 'New message')
             ->call('sendMessage')
-            ->assertSee('New message');
+            ->assertSee('New message')
+            ->assertSeeHtml('wc-tint-primary-bg');
     });
 
     test('it saves new message to database when it is sent', function () {
@@ -2576,6 +2597,44 @@ describe('Sending messages ', function () {
         }
     });
 
+    test('attachment downloads require access to the attachment conversation', function () {
+        Storage::fake('public');
+        Config::set('wirechat.storage.disk', 'public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+        $intruder = User::factory()->create();
+        $intruderPeer = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+        $message = Message::query()->create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $conversation->participant($auth)?->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $path = Wirechat::storage()->attachmentsDirectory().'/secret.txt';
+        Storage::disk('public')->put($path, 'secret content');
+
+        $attachment = $message->attachment()->create([
+            'file_path' => $path,
+            'file_name' => 'secret.txt',
+            'original_name' => 'secret.txt',
+            'mime_type' => 'text/plain',
+            'url' => Storage::disk('public')->url($path),
+        ]);
+
+        $intruderConversation = $intruder->createConversationWith($intruderPeer);
+
+        Livewire::actingAs($intruder)->test(ChatBox::class, ['conversation' => $intruderConversation->id])
+            ->call('download', encrypt($attachment->id))
+            ->assertStatus(403);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('download', encrypt($attachment->id))
+            ->assertFileDownloaded('secret.txt');
+    });
+
     test('it renders stored generic image attachments as images using the original extension', function () {
         Storage::fake('public');
 
@@ -2599,7 +2658,90 @@ describe('Sending messages ', function () {
         ]);
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSeeHtml('<img ');
+            ->assertSeeHtml('<img');
+    });
+
+    test('it renders media attachments with bounded image and video sizing', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $imageMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:30:00'),
+        ]);
+
+        $imageMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/photo.png',
+            'file_name' => 'photo.png',
+            'original_name' => 'photo.png',
+            'mime_type' => 'image/png',
+            'url' => 'https://example.test/photo.png',
+        ]);
+
+        $videoMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:31:00'),
+        ]);
+
+        $videoMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/clip.mp4',
+            'file_name' => 'clip.mp4',
+            'original_name' => 'clip.mp4',
+            'mime_type' => 'video/mp4',
+            'url' => 'https://example.test/clip.mp4',
+        ]);
+
+        $fileMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:32:00'),
+        ]);
+
+        $fileMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/report.pdf',
+            'file_name' => 'report.pdf',
+            'original_name' => 'report.pdf',
+            'mime_type' => 'application/pdf',
+            'url' => 'https://example.test/report.pdf',
+            'meta' => ['size' => 1048576],
+        ]);
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('<img')
+            ->toContain('<video ')
+            ->toContain('dusk="message-attachment-shell"')
+            ->toContain('dusk="message-attachment-time"')
+            ->toContain('dusk="message-file-attachment"')
+            ->toContain('dusk="message-file-extension"')
+            ->toContain('dusk="message-file-meta"')
+            ->toContain('PDF')
+            ->toContain('1 MB')
+            ->toContain('wire:click="download')
+            ->toContain('p-1')
+            ->toContain('wc-tint-primary-bg')
+            ->toContain('max-h-[24rem]')
+            ->toContain('sm:max-w-[26rem]')
+            ->toContain('object-contain')
+            ->toContain('rounded-xl')
+            ->not->toContain('h-[200px]')
+            ->not->toContain('min-h-[210px]')
+            ->not->toContain('max-h-[400px]')
+            ->not->toContain('rounded-3xl')
+            ->not->toContain('href="https://example.test/report.pdf"')
+            ->not->toContain('download="report.pdf"');
+
+        expect(substr_count($html, 'dusk="message-attachment-shell"'))->toBe(3);
+        expect(substr_count($html, 'dusk="message-attachment-time"'))->toBe(3);
+        expect(preg_match_all('/dusk="message-attachment-time"[^>]*>\s*\d{2}:\d{2}\s*<\/span>/s', $html))->toBe(3);
     });
 
     test('it saves image to storage when created & clears files properties when done', function () {
@@ -2691,7 +2833,7 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('media', $file)
             ->call('sendMessage')
-            ->assertSeeHtml('<img ')
+            ->assertSeeHtml('<img')
             // now assert that media is back to empty
             ->assertSet('media', []);
 
@@ -2771,6 +2913,13 @@ describe('Sending messages ', function () {
         $messageExists = Attachment::all();
 
         expect(count($messageExists))->toBe(1);
+
+        $attachment = Attachment::first();
+
+        expect($attachment->meta)->toHaveKey('size')
+            ->and($attachment->size)->toBeGreaterThan(0)
+            ->and($attachment->extension)->toBe('pdf')
+            ->and($attachment->formatted_size)->not->toBeNull();
     });
 
     test('it saves file to storage when created & clears files properties when done', function () {

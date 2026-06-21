@@ -11,13 +11,13 @@
 
 
   <div x-data="{playing:false,muted:false}"
-      class="relative "
+      class="relative inline-block max-w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/20"
       @click.outside="$refs.player.pause()"
       x-intersect:leave="$refs.player.pause()">
 
 
         <video x-ref="player" src="{{$source}}" @play="playing=true" @pause="playing=false"
-              class="  w-auto dark:bg-gray-600    border rounded-xl  border-gray-50 dark:border-gray-700 rounded-xl {{$cover==true?'object-cover':''}} {{$height}}">
+              class="block h-auto max-w-full rounded-xl {{$cover==true?'object-cover':'object-contain'}} {{$height}}">
             your browser does not support html5 video 
         </video>
 

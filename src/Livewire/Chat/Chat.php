@@ -30,6 +30,7 @@ use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithAttachmentDownloads;
 use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Attachment;
@@ -49,6 +50,7 @@ use Wirechat\Wirechat\Models\Participant;
 class Chat extends Component
 {
     use HasPanel;
+    use InteractsWithAttachmentDownloads;
     use InteractsWithUI;
     use Widget;
     use WithFileUploads {
@@ -504,6 +506,9 @@ class Chat extends Component
                         Wirechat::storage()->disk()
                     ),
                     'url' => Storage::disk(Wirechat::storage()->disk())->url($path), // Use disk and path
+                    'meta' => [
+                        'size' => $attachment->getSize(),
+                    ],
                 ]);
 
                 // dd($attachment);

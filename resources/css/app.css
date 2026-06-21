@@ -16,6 +16,22 @@
     --color-primary-950: var(--wc-primary-950);
 }
 
+@layer base {
+    :root {
+        --wc-tint-primary-50: color-mix(in srgb, var(--wc-primary-50) 35%, transparent);
+        --wc-tint-primary-100: color-mix(in srgb, var(--wc-primary-100) 35%, transparent);
+        --wc-tint-primary-200: color-mix(in srgb, var(--wc-primary-200) 35%, transparent);
+        --wc-tint-primary-300: color-mix(in srgb, var(--wc-primary-300) 35%, transparent);
+        --wc-tint-primary-400: color-mix(in srgb, var(--wc-primary-400) 35%, transparent);
+        --wc-tint-primary-500: color-mix(in srgb, var(--wc-primary-500) 35%, transparent);
+        --wc-tint-primary-600: color-mix(in srgb, var(--wc-primary-600) 35%, transparent);
+        --wc-tint-primary-700: color-mix(in srgb, var(--wc-primary-700) 35%, transparent);
+        --wc-tint-primary-800: color-mix(in srgb, var(--wc-primary-800) 35%, transparent);
+        --wc-tint-primary-900: color-mix(in srgb, var(--wc-primary-900) 35%, transparent);
+        --wc-tint-primary-950: color-mix(in srgb, var(--wc-primary-950) 35%, transparent);
+    }
+}
+
 @layer components {
     /* Base styles for inputs, textareas, selects */
     .wc-input,
@@ -279,6 +295,8 @@
     .wc-bg-secondary     { @apply bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]; }
     .wc-bg-accent        { @apply bg-[var(--wc-light-accent)]    dark:bg-[var(--wc-dark-accent)]; }
     .wc-bg-brand         { @apply bg-[var(--wc-brand-primary)]; }
+    .wc-tint-primary-bg  { background-color: var(--wc-tint-primary-300); }
+    .dark .wc-tint-primary-bg { background-color: color-mix(in srgb, var(--wc-primary-300) 40%, transparent); }
 
     /* Hover states */
     .wc-bg-primary-hover:hover   { @apply bg-[var(--wc-light-primary)]   dark:bg-[var(--wc-dark-primary)]; }
