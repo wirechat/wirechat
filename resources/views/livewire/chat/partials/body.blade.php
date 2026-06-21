@@ -237,7 +237,7 @@
 
     x-cloak
     x-bind:class="{'opacity-0 pointer-events-none': initializing}"
-     class='flex flex-col h-full transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8 grow overscroll-contain overflow-x-hidden w-full my-auto'
+     class='flex flex-col h-full scrollbar-thumb-zinc-400/70 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8 grow overscroll-contain overflow-x-hidden w-full my-auto'
     style="contain: layout paint"
 >
 
