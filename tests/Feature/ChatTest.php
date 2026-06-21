@@ -2614,7 +2614,7 @@ describe('Sending messages ', function () {
         ]);
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSeeHtml('<img ');
+            ->assertSeeHtml('<img');
     });
 
     test('it renders media attachments with bounded image and video sizing', function () {
@@ -2627,6 +2627,7 @@ describe('Sending messages ', function () {
             'conversation_id' => $conversation->id,
             'participant_id' => $participant->id,
             'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:30:00'),
         ]);
 
         $imageMessage->attachment()->create([
@@ -2641,6 +2642,7 @@ describe('Sending messages ', function () {
             'conversation_id' => $conversation->id,
             'participant_id' => $participant->id,
             'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:31:00'),
         ]);
 
         $videoMessage->attachment()->create([
@@ -2651,19 +2653,44 @@ describe('Sending messages ', function () {
             'url' => 'https://example.test/clip.mp4',
         ]);
 
+        $fileMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:32:00'),
+        ]);
+
+        $fileMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/report.pdf',
+            'file_name' => 'report.pdf',
+            'original_name' => 'report.pdf',
+            'mime_type' => 'application/pdf',
+            'url' => 'https://example.test/report.pdf',
+        ]);
+
         $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
 
         expect($html)
-            ->toContain('<img ')
+            ->toContain('<img')
             ->toContain('<video ')
+            ->toContain('dusk="message-attachment-shell"')
+            ->toContain('dusk="message-attachment-time"')
+            ->toContain('dusk="message-file-attachment"')
+            ->toContain('p-1')
+            ->toContain('bg-[color-mix(in_srgb,var(--primary-300)_40%,transparent)]')
+            ->toContain('bg-white/60')
             ->toContain('max-h-[24rem]')
             ->toContain('sm:max-w-[26rem]')
             ->toContain('object-contain')
-            ->toContain('rounded-2xl')
+            ->toContain('rounded-xl')
             ->not->toContain('h-[200px]')
             ->not->toContain('min-h-[210px]')
             ->not->toContain('max-h-[400px]')
             ->not->toContain('rounded-3xl');
+
+        expect(substr_count($html, 'dusk="message-attachment-shell"'))->toBe(3);
+        expect(substr_count($html, 'dusk="message-attachment-time"'))->toBe(3);
+        expect(preg_match_all('/dusk="message-attachment-time"[^>]*>\s*\d{2}:\d{2}\s*<\/span>/s', $html))->toBe(3);
     });
 
     test('it saves image to storage when created & clears files properties when done', function () {
@@ -2755,7 +2782,7 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('media', $file)
             ->call('sendMessage')
-            ->assertSeeHtml('<img ')
+            ->assertSeeHtml('<img')
             // now assert that media is back to empty
             ->assertSet('media', []);
 

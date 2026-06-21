@@ -466,16 +466,23 @@
                                             </div>
                                         @endif
 
-                                        {{-- Attachemnt is Video/ --}}
-                                        @if ($attachment->isVideo())
-                                            <x-wirechat::video height="max-h-[24rem] max-w-full sm:max-w-[26rem]" :cover="false" source="{{ $attachment?->url }}" />
+                                        <x-wirechat::attachment-bubble
+                                            :previous-message="$previousMessage"
+                                            :message="$message"
+                                            :next-message="$nextMessage"
+                                            :belongs-to-auth="$belongsToAuth"
+                                        >
+                                            {{-- Attachment is video --}}
+                                            @if ($attachment->isVideo())
+                                                <x-wirechat::video height="max-h-[24rem] max-w-full sm:max-w-[26rem]" :cover="false" source="{{ $attachment?->url }}" />
 
-                                        @elseif($attachment->isImage())
-                                            @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
-                                        @else
-                                         {{-- Attachemnt is Application/ --}}
-                                          @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
-                                        @endif
+                                            @elseif($attachment->isImage())
+                                                @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
+                                            @else
+                                                {{-- Attachment is file --}}
+                                                @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
+                                            @endif
+                                        </x-wirechat::attachment-bubble>
 
                                     @endif
 
