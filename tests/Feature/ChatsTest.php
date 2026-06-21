@@ -36,6 +36,19 @@ test('authenticaed user can access chatlist ', function () {
         ->assertStatus(200);
 });
 
+test('it renders selected conversation background classes in the chats list', function () {
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create(['name' => 'John']);
+
+    $auth->createConversationWith($receiver, message: 'Hello John');
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('bg-[var(--wc-light-secondary)]')
+        ->assertSeeHtml('dark:bg-[var(--wc-dark-secondary)]')
+        ->assertDontSeeHtml('border-r-4')
+        ->assertDontSeeHtml('border-[var(--wc-tint-primary-500)]');
+});
+
 test('it shows the requests drawer button in the chats header', function () {
     $auth = User::factory()->create();
 

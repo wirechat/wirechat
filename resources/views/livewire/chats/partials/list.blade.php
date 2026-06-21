@@ -57,10 +57,9 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
         @keydown.enter="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @else
         wire:navigate href="{{ $this->panel()->chatRoute($conversation->id)}}" @endif
-            @style(['border-color:var(--wc-brand-primary)' => $selectedConversationId == $conversation?->id])
             class="py-3 flex gap-4  dark:hover:bg-[var(--wc-dark-secondary)]  hover:bg-[var(--wc-light-secondary)]  rounded-xs transition-colors duration-150  relative w-full cursor-pointer px-2"
             :class="$wire.selectedConversationId == conversationID &&
-                'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)] border-r-4  border-opacity-20 border-[var(--wc-brand-primary)]'">
+                'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)]'">
 
             <div class="shrink-0">
                 <x-wirechat::avatar key="chat-list-conversation-{{$key}}" wire:key="chatslist-key-{{$key}}" disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
