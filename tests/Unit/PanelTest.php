@@ -3,6 +3,7 @@
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Wirechat\Wirechat\Support\Enums\UnReadType;
+use Workbench\App\Models\Admin;
 use Workbench\App\Models\User;
 
 beforeEach(function () {
@@ -123,6 +124,20 @@ test('panel settings are disabled by default and can be enabled', function () {
     $panel->settings();
 
     expect($panel->hasSettings())->toBeTrue();
+});
+
+test('panel default user search uses the configured user model', function () {
+    User::factory()->create(['name' => 'Taylor User']);
+    $admin = Admin::factory()->create(['name' => 'Taylor Admin']);
+
+    config(['wirechat.models.user' => Admin::class]);
+
+    $results = (new Panel)->searchUsers('Taylor')->toArray(request());
+
+    expect($results)
+        ->toHaveCount(1)
+        ->and($results[0]['id'])->toBe($admin->id)
+        ->and($results[0]['wirechat_name'])->toBe('Taylor Admin');
 });
 
 test('panel private chat actions are disabled by default and can be enabled', function () {

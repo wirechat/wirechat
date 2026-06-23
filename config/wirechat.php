@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
@@ -42,6 +43,7 @@ return [
     'table_prefix' => 'wirechat_',
 
     'models' => [
+        'user' => User::class,
         'action' => Action::class,
         'attachment' => Attachment::class,
         'conversation' => Conversation::class,
