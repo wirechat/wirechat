@@ -892,4 +892,19 @@ class Conversation extends Model
 
         return $participant->isAdmin();
     }
+
+    /**
+     * Check if last conversation read by the receiver
+     */
+    public function isLastMessageSeen($reference): bool
+    {
+        $peer = $this->peerParticipant(reference: $reference);
+
+        $hasReadConversation = $peer->conversation_read_at !== null
+            && $peer->conversation_read_at >= $peer->conversation->updated_at;
+
+        return $peer !== null
+            && $hasReadConversation
+            && $this->lastMessage?->ownedBy($reference);
+    }
 }

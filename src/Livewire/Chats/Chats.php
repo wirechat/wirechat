@@ -22,7 +22,9 @@ use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
  */
 class Chats extends Component
 {
-    use HasPanel, InteractsWithUI, Widget;
+    use HasPanel;
+    use InteractsWithUI;
+    use Widget;
 
     public $search;
 
@@ -56,6 +58,9 @@ class Chats extends Component
 
     #[Locked]
     public ?string $heading = '';
+
+    #[Locked]
+    public ?bool $hasReadReceipts = null;
 
     public function mount(): void
     {
@@ -299,6 +304,10 @@ class Chats extends Component
             $this->redirectToHomeAction = $this->widget
                 ? false
                 : $this->panel()?->hasRedirectToHomeAction();
+        }
+
+        if ($this->hasReadReceipts === null) {
+            $this->hasReadReceipts = $this->panel()?->hasReadReceipts();
         }
     }
 
