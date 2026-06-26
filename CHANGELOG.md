@@ -15,6 +15,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.5.10](https://github.com/wirechat/wirechat/releases/tag/v0.5.10) - 2026-06-19
+
+### Changed
+- Updated generated panel provider stubs to include the default chat search, home redirect, and create chat actions.
+
+### Fixed
+- The first generated panel provider is now marked as the default panel when no panels are registered yet.
+- Improved generated panel provider test coverage and reset handling for Wirechat's resolved service instance.
+
+---
+
+## [v0.5.9](https://github.com/wirechat/wirechat/releases/tag/v0.5.9) - 2026-06-19
+
+### Fixed
+- Fixed panel provider registration in `config/app.php` for applications that import provider classes.
+- Corrected relation return type casing and model PHPDoc imports for cleaner static analysis.
+
+---
+
+## [v0.5.8](https://github.com/wirechat/wirechat/releases/tag/v0.5.8) - 2026-05-17
+
+### Added
+- Added PHP 8.5 compatibility to the package constraints and CI matrix.
+- Added `Participant::isParticipantable()` to centralize participant identity checks across authenticated models.
+
+### Changed
+- Livewire component refresh dispatches now target registered component aliases instead of class references.
+- Message wrapping, footer button transitions, and send action styling were refined.
+
+### Fixed
+- Hardened participantable checks for null users and custom participantable/sendable resolution.
+- Added `.com` to the default bare-domain parsing TLD list.
+- Stabilized time-sensitive helper tests by aligning mutable and immutable Carbon clocks.
+
+---
+
+## [v0.5.7](https://github.com/wirechat/wirechat/releases/tag/v0.5.7) - 2026-04-10
+
+### Fixed
+- Stopped persisting computed auth model state on chat components so participant identity stays tied to the current request user.
+
+---
+
+## [v0.5.6](https://github.com/wirechat/wirechat/releases/tag/v0.5.6) - 2026-04-10
+
+### Fixed
+- Fixed grouped chat date formatting when immutable timestamps are used.
+
+---
+
 ## [v0.5.5](https://github.com/wirechat/wirechat/releases/tag/v0.5.5) - 2026-04-09
 
 ### Added
