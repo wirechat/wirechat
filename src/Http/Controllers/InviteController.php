@@ -44,6 +44,7 @@ class InviteController extends Controller
         $isMember = false;
         $hasPendingJoinRequest = false;
         $joinBlocked = false;
+        $requiresApproval = false;
 
         if ($auth !== null) {
             $isMember = $auth->belongsToConversation($conversation);
@@ -54,7 +55,8 @@ class InviteController extends Controller
                 return redirect()->to(Wirechat::currentPanel()->chatRoute($conversation->id));
             }
 
-            $hasPendingJoinRequest = $group->hasPendingJoinRequest($auth);
+            $requiresApproval = $group->requiresInviteApproval();
+            $hasPendingJoinRequest = $requiresApproval && $group->hasPendingJoinRequest($auth);
             $joinBlocked = $group->inviteJoinBlockedFor($auth);
         }
 
@@ -67,6 +69,7 @@ class InviteController extends Controller
             'isMember' => $isMember,
             'hasPendingJoinRequest' => $hasPendingJoinRequest,
             'joinBlocked' => $joinBlocked,
+            'requiresApproval' => $requiresApproval,
         ]);
     }
 

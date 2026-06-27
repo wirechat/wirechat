@@ -1121,6 +1121,7 @@ describe('Exiting Chat', function () {
         $dismissedRequester = User::factory()->create();
 
         $conversation = $auth->createGroup(name: 'My Group', description: 'This is a good group');
+        $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
 
         foreach (range(1, 12) as $index) {
             $conversation->group->requestToJoin(User::factory()->create(['name' => "Requester {$index}"]));
