@@ -51,6 +51,17 @@ it('can filter users if search input is set', function () {
 
 });
 
+it('hides users denied by canSendMessageTo from search results', function () {
+    $auth = ModelsUser::factory()->create();
+    $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+    ModelsUser::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $otherUser->getKey()];
+
+    Livewire::actingAs($auth)->test(NewChat::class)
+        ->set('search', 'Joh')
+        ->assertDontSee('John');
+});
+
 test('search_users_field_is_set_correctly', function () {
 
     $auth = ModelsUser::factory()->create(['email_verified_at' => now()]);
@@ -150,6 +161,24 @@ describe('Creating conversation', function () {
                 && $event->requestStatus === MessageRequestStatus::PENDING;
         });
 
+    });
+
+    test('it respects canSendMessageTo when creating a conversation from the modal', function () {
+        testPanelProvider()->messageRequests();
+
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        ModelsUser::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $otherUser->getKey()];
+
+        Livewire::actingAs($auth)->test(NewChat::class)
+            ->set('search', 'Joh')
+            ->assertDontSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class)
+            ->assertStatus(403);
+
+        expect($auth->hasConversationWith($otherUser))->toBeFalse()
+            ->and(MessageRequest::query()->count())->toBe(0);
     });
 
     test('it creates a direct conversation when message requests are disabled on the panel', function () {

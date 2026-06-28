@@ -69,6 +69,7 @@
                     @foreach ($participants as $key => $participant)
                         @php
                             $loopParticipantIsAuth = $participant->isParticipantable(auth()->user());
+                            $canMessageParticipant = $this->canMessageParticipant($participant);
                         @endphp
                         <li x-data="{ memberMenuId: {{ $participant->id }} }" x-ref="button"
                             @click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"
@@ -100,16 +101,18 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>   --}}
 
-                                    <x-wirechat::dropdown-button wire:click="sendMessage('{{ $participant->id }}')"
-                                        class="truncate ">
-                                        @if ($loopParticipantIsAuth)
+                                    @if ($canMessageParticipant)
+                                        <x-wirechat::dropdown-button wire:click="sendMessage('{{ $participant->id }}')"
+                                            class="truncate ">
+                                            @if ($loopParticipantIsAuth)
 
-                                        {{__('wirechat::chat.group.members.actions.send_message_to_yourself.label')}}
-                                        @else
+                                            {{__('wirechat::chat.group.members.actions.send_message_to_yourself.label')}}
+                                            @else
 
-                                        {{__('wirechat::chat.group.members.actions.send_message_to_member.label',['member'=>$participant->participantable?->wirechat_name ])}}
-                                        @endif
-                                    </x-wirechat::dropdown-button>
+                                            {{__('wirechat::chat.group.members.actions.send_message_to_member.label',['member'=>$participant->participantable?->wirechat_name ])}}
+                                            @endif
+                                        </x-wirechat::dropdown-button>
+                                    @endif
 
                                     @if ($authIsAdminInGroup || $authIsOwner)
                                         {{-- Only show admin actions to owner of group and if is not the current loop --}}

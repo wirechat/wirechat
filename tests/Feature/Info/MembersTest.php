@@ -114,6 +114,21 @@ describe('presence test', function () {
             ->assertSeeHtml('x-show="openMemberMenu === memberMenuId"');
     });
 
+    test('member action menu hides direct message action when messaging is denied', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $conversation->addParticipant($user);
+
+        User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $user->getKey()];
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+            ->set('search', 'Micheal')
+            ->assertSee('Micheal')
+            ->assertDontSee(__('wirechat::chat.group.members.actions.send_message_to_member.label', ['member' => $user->wirechat_name]));
+    });
+
     test('it show label "You" if member in loop is auth user', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -556,6 +571,22 @@ describe('actions test', function () {
 
             // assert after
             expect($auth->hasConversationWith($user))->toBe(true);
+        });
+
+        test('it respects canSendMessageTo when sending a direct message to a member', function () {
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $user->getKey()];
+
+            Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+                ->call('sendMessage', $participant->id)
+                ->assertStatus(403);
+
+            expect($auth->hasConversationWith($user))->toBe(false);
         });
     });
 
