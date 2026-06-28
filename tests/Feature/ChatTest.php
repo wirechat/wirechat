@@ -528,6 +528,41 @@ describe('Presense', function () {
             ->assertSee($invite->url(testPanelProvider()));
     });
 
+    test('it keeps group invite previews below visible group sender names', function () {
+        $owner = User::factory()->create(['name' => 'Owner']);
+        $member = User::factory()->create(['name' => 'Group Member']);
+
+        $conversation = $owner->createGroup('Host Group');
+        $conversation->addParticipant($member);
+
+        $targetConversation = $member->createGroup('Target Group');
+        $invite = $targetConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $member->getKey(),
+            'created_by_type' => $member->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $conversation->participant($member)?->id,
+            'body' => 'Join here: '.$invite->url(testPanelProvider()),
+        ]);
+
+        $html = Livewire::actingAs($owner)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        expect($html)
+            ->toMatch('/dusk="message-sender-name"[^>]*class="(?![^"]*\bhidden\b)[^"]*"[^>]*>\s*Group Member\s*</')
+            ->toContain('dusk="group-invite-preview"')
+            ->toContain('Target Group')
+            ->toContain('w-72 max-w-full')
+            ->not->toMatch('/dusk="group-invite-preview"[^>]*class="[^"]*(?:^|\s)-mt-1\.5(?:\s|")/');
+    });
+
     test('it renders an inline invite link without target=_blank so the controller redirect can run', function () {
         testPanelProvider()->parseMessageUrls(true);
 

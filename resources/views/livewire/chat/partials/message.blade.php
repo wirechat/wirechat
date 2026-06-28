@@ -19,6 +19,7 @@
             'href' => null,
             'is_link' => false,
         ]];
+   $hasVisibleSenderName = ! $belongsToAuth && $isGroup && $isNotSameAsPrevious;
    $messageTextClasses = 'whitespace-pre-wrap tracking-normal wrap-anywhere font-normal text-sm md:text-base dark:text-white lg:tracking-normal';
 @endphp
 
@@ -75,6 +76,7 @@
     @include('wirechat::livewire.chat.partials.group-invite', [
         'preview' => $groupInvitePreview,
         'belongsToAuth' => $belongsToAuth,
+        'hasVisibleSenderName' => $hasVisibleSenderName,
     ])
 @endif
 
