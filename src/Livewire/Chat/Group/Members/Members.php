@@ -76,11 +76,11 @@ class Members extends ModalComponent
      */
     public function sendMessage(Participant $participant)
     {
-
         abort_unless(auth()->check(), 401);
 
         // Load missing relationship in case of strict models types
         $participant->loadMissing('participantable');
+        abort_unless($this->canMessageParticipant($participant), 403, 'You are not allowed to send messages to this user.');
 
         $conversation = auth()->user()->createConversationWith($participant->participantable);
 
@@ -101,6 +101,15 @@ class Members extends ModalComponent
         // $this->dispatch('open-chat',conversation: $conversation->id);
         // $this->dispatch('closeModal');
 
+    }
+
+    public function canMessageParticipant(Participant $participant): bool
+    {
+        abort_unless(auth()->check(), 401);
+
+        $participant->loadMissing('participantable');
+
+        return auth()->user()->canSendMessageTo($participant->participantable);
     }
 
     /**

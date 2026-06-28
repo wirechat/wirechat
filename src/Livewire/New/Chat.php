@@ -2,14 +2,18 @@
 
 namespace Wirechat\Wirechat\Livewire\New;
 
+use Illuminate\Database\Eloquent\Model;
+use Wirechat\Wirechat\Http\Resources\WirechatUserResource;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
+use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 
 class Chat extends ModalComponent
 {
     use HasPanel;
+    use ResolvesPanelSearchResults;
     use Widget;
 
     public $users = [];
@@ -30,30 +34,20 @@ class Chat extends ModalComponent
     /**
      * Search For users to create conversations with
      */
-    public function updatedsearch()
+    public function updatedSearch()
     {
-
-        // Make sure it's not empty
         if (blank($this->search)) {
-
             $this->users = [];
         } else {
-
-            /**
-             * todo: migrate search chantable to channel
-             */
-            $this->users = $this->panel()->searchUsers($this->search)->resolve();
+            $this->users = WirechatUserResource::collection($this->messageableSearchResultModels())->resolve();
         }
     }
 
     public function createConversation($id, string $class)
     {
+        $model = $this->resolveMessageableSearchResult($id, $class);
 
-        // resolve model from params -get model class
-        $model = app($class);
-        $model = $model::find($id);
-
-        if ($model) {
+        if ($model instanceof Model) {
             $createdConversation = $this->panel()->hasMessageRequests()
                 ? auth()->user()->sendMessageRequestTo($model)
                 : auth()->user()->createConversationWith($model);
@@ -73,6 +67,26 @@ class Chat extends ModalComponent
 
             }
         }
+    }
+
+    protected function messageableSearchResultModels()
+    {
+        return collect($this->panel()->searchUsers($this->search)->collection)
+            ->map(fn ($resource) => $resource->resource ?? null)
+            ->filter(fn ($model) => $model instanceof Model)
+            ->filter(fn (Model $model): bool => auth()->user()->canSendMessageTo($model))
+            ->values();
+    }
+
+    protected function resolveMessageableSearchResult($id, string $class): ?Model
+    {
+        $model = $this->resolvePanelSearchResult($id, $class);
+
+        if ($model instanceof Model) {
+            abort_unless(auth()->user()->canSendMessageTo($model), 403, 'You are not allowed to send messages to this user.');
+        }
+
+        return $model;
     }
 
     public function mount()
