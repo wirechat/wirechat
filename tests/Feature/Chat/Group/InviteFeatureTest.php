@@ -395,6 +395,31 @@ it('can send an invite link via chat', function () {
         ->and($privateConversation->messages()->latest('id')->first()->body)->toContain($invite->url(testPanelProvider()));
 });
 
+it('removes selected invite recipients after the search query changes', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $receiver = User::factory()->create(['name' => 'Receiver One']);
+    User::factory()->create(['name' => 'Receiver Two']);
+
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', 'Receiver One')
+        ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
+        ->assertSee('Receiver One')
+        ->set('search', 'Receiver Two')
+        ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
+        ->assertSet('selectedMembers', collect())
+        ->assertDontSee('Receiver One');
+});
+
 it('ignores tampered send invite selections outside the current panel search results', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $receiver = User::factory()->create(['name' => 'Receiver']);

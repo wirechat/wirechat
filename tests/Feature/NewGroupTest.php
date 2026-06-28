@@ -260,6 +260,21 @@ describe('Add members page', function () {
             ->assertDontSee('Micheal');
     });
 
+    test('calling toggleMember() removes selected members after the search query changes', function () {
+        $auth = ModelsUser::factory()->create();
+        $user = ModelsUser::factory()->create(['name' => 'Micheal']);
+        ModelsUser::factory()->create(['name' => 'Jessica']);
+
+        Livewire::actingAs($auth)->test(NewGroup::class)
+            ->set('search', 'Micheal')
+            ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->assertSee('Micheal')
+            ->set('search', 'Jessica')
+            ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->assertSet('selectedMembers', collect())
+            ->assertDontSee('Micheal');
+    });
+
     test('show error if member limit is exceeded', function () {
 
         testPanelProvider()->maxGroupMembers(2);
