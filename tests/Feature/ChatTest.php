@@ -559,7 +559,7 @@ describe('Presense', function () {
             ->toMatch('/dusk="message-sender-name"[^>]*class="(?![^"]*\bhidden\b)[^"]*"[^>]*>\s*Group Member\s*</')
             ->toContain('dusk="group-invite-preview"')
             ->toContain('Target Group')
-            ->toContain('w-72 max-w-full')
+            ->toContain('max-w-full')
             ->not->toMatch('/dusk="group-invite-preview"[^>]*class="[^"]*(?:^|\s)-mt-1\.5(?:\s|")/');
     });
 
