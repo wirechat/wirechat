@@ -92,40 +92,42 @@ class AddMembers extends ModalComponent
     {
         $this->authorizeAddMembersAccess();
 
+        if ($this->selectedMembers->contains(fn ($member) => (string) $member->getKey() === (string) $id && $member->getMorphClass() === $class)) {
+            $this->selectedMembers = $this->selectedMembers
+                ->reject(fn ($member) => (string) $member->getKey() === (string) $id && $member->getMorphClass() === $class)
+                ->values();
+            $this->newTotalCount = count($this->selectedMembers) + $this->exitingMembersCount;
+
+            return;
+        }
+
         $model = $this->resolveGroupAddableSearchResult($id, $class);
 
         if ($model) {
             abort_if($model->belongsToConversation($this->conversation), 403, $model->wirechat_name.' Is already a member');
 
-            if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
-                $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                    return $member->getKey() == $id && $member->getMorphClass() == $class;
-                });
-            } else {
-                if ($this->newTotalCount >= $this->panel()->getMaxGroupMembers()) {
-                    return $this->dispatch('show-member-limit-error');
-                }
-
-                $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
-
-                if ($participant?->isBannedByAdmin()) {
-                    $this->dispatch(
-                        'wirechat-toast',
-                        type: 'warning',
-                        message: 'Cannot add '.$model->wirechat_name.' because they were banned from the group by an Admin.'
-                    );
-
-                    return;
-                }
-                abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->wirechat_name.' because they left the group');
-
-                if ($participant?->isRemovedByAdmin()) {
-                    abort_unless($this->authParticipant?->isAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were removed from the group by an Admin.');
-                }
-
-                $this->selectedMembers->push($model);
+            if ($this->newTotalCount >= $this->panel()->getMaxGroupMembers()) {
+                return $this->dispatch('show-member-limit-error');
             }
 
+            $participant = $this->conversation->participant($model, withoutGlobalScopes: true);
+
+            if ($participant?->isBannedByAdmin()) {
+                $this->dispatch(
+                    'wirechat-toast',
+                    type: 'warning',
+                    message: 'Cannot add '.$model->wirechat_name.' because they were banned from the group by an Admin.'
+                );
+
+                return;
+            }
+            abort_if($participant?->hasExited(), 403, 'Cannot add '.$model->wirechat_name.' because they left the group');
+
+            if ($participant?->isRemovedByAdmin()) {
+                abort_unless($this->authParticipant?->isAdmin(), 403, 'Cannot add '.$model->wirechat_name.' because they were removed from the group by an Admin.');
+            }
+
+            $this->selectedMembers->push($model);
             $this->newTotalCount = count($this->selectedMembers) + $this->exitingMembersCount;
         }
     }

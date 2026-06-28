@@ -266,6 +266,24 @@ describe('actions test', function () {
             ->assertDontSee('Micheal');
     });
 
+    test('toggleMember() removes selected members after the search query changes', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $user = User::factory()->create(['name' => 'Micheal']);
+        User::factory()->create(['name' => 'Jessica']);
+
+        Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->set('search', 'Micheal')
+            ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->assertSee('Micheal')
+            ->assertSet('newTotalCount', 2)
+            ->set('search', 'Jessica')
+            ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->assertSet('selectedMembers', collect())
+            ->assertSet('newTotalCount', 1)
+            ->assertDontSee('Micheal');
+    });
+
     test('existing member cannot be added to selectedMembers it aborts 403', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');

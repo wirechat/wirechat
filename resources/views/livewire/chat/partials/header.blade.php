@@ -2,7 +2,7 @@
 
 @php
     $group = $conversation->group;
-    $pendingJoinRequestsCount = $conversation->isGroup() && $authParticipant?->isAdmin() && $this->panel()->hasGroupInvitations() ? $conversation->group?->pendingJoinRequests()->count(): 0;
+    $pendingJoinRequestsCount = $conversation->isGroup() && $authParticipant?->isAdmin() && $this->panel()->hasGroupInvitations() && $group?->requiresInviteApproval() ? $group->pendingJoinRequests()->count(): 0;
     $hasMessageRequests = $this->panel()->hasMessageRequests();
     $hasActiveMessageRequest = $hasMessageRequests && $conversation->isPrivate() && $conversation->hasActiveMessageRequest();
 @endphp

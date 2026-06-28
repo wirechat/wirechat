@@ -205,7 +205,7 @@ class Group extends Model
 
     public function requiresInviteApproval(): bool
     {
-        return $this->isPrivateAccess() || (bool) $this->admins_must_approve_new_members;
+        return (bool) $this->admins_must_approve_new_members;
     }
 
     public function inviteJoinBlockedFor(Model|Authenticatable $user): bool

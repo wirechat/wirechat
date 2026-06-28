@@ -395,6 +395,31 @@ it('can send an invite link via chat', function () {
         ->and($privateConversation->messages()->latest('id')->first()->body)->toContain($invite->url(testPanelProvider()));
 });
 
+it('removes selected invite recipients after the search query changes', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $receiver = User::factory()->create(['name' => 'Receiver One']);
+    User::factory()->create(['name' => 'Receiver Two']);
+
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', 'Receiver One')
+        ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
+        ->assertSee('Receiver One')
+        ->set('search', 'Receiver Two')
+        ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
+        ->assertSet('selectedMembers', collect())
+        ->assertDontSee('Receiver One');
+});
+
 it('ignores tampered send invite selections outside the current panel search results', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $receiver = User::factory()->create(['name' => 'Receiver']);
@@ -553,6 +578,7 @@ it('shows invite management actions only to admins in group info', function () {
 
     $conversation = $owner->createGroup('Test');
     $conversation->group->allow_members_to_add_others = true;
+    $conversation->group->admins_must_approve_new_members = true;
     $conversation->group->save();
 
     $adminParticipant = $conversation->addParticipant($admin);
@@ -1265,6 +1291,8 @@ it('creates a join request from the in-app invite modal when approval is require
     $receiver = User::factory()->create();
 
     $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
+
     $invite = $conversation->group->inviteLinks()->create([
         'panel_id' => testPanelProvider()->getId(),
         'created_by_id' => $owner->getKey(),
@@ -1285,6 +1313,58 @@ it('creates a join request from the in-app invite modal when approval is require
     expect($receiver->belongsToConversation($conversation))->toBeFalse()
         ->and($conversation->group->hasPendingJoinRequest($receiver))->toBeTrue()
         ->and(in_array($invite->usages, [null, 0], true))->toBeTrue();
+});
+
+it('lets invite users join immediately when admin approval is turned off after a pending request exists', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->call('proceed')
+        ->assertNoRedirect();
+
+    expect($receiver->belongsToConversation($conversation))->toBeFalse()
+        ->and($conversation->group->hasPendingJoinRequest($receiver))->toBeTrue();
+
+    $conversation->group->forceFill(['admins_must_approve_new_members' => false])->save();
+
+    Livewire::actingAs($owner)
+        ->test(GroupInfo::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSet('pendingJoinRequestsCount', 0)
+        ->assertDontSee(__('wirechat::chat.group.join.requests.heading.label'));
+
+    Livewire::actingAs($owner)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.group_access_open'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.join_requests'));
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->assertSet('requiresApproval', false)
+        ->assertSet('hasPendingJoinRequest', false)
+        ->assertSee(__('wirechat::chat.group.join.lobby.labels.open_access'))
+        ->assertSee(__('wirechat::chat.group.join.lobby.actions.join_group.label'))
+        ->call('proceed')
+        ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+
+    $invite->refresh();
+
+    expect($receiver->belongsToConversation($conversation))->toBeTrue()
+        ->and($conversation->group->pendingJoinRequests()->count())->toBe(0)
+        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::ACCEPTED)->count())->toBe(1)
+        ->and($invite->usages)->toBe(1);
 });
 
 it('allows admin-removed users to request join from lobby when approval is required', function () {
@@ -1610,6 +1690,7 @@ it('shows the join request banner only to group admins', function () {
     $requester = User::factory()->create();
 
     $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
     $conversation->addParticipant($member);
     $conversation->group->requestToJoin($requester);
 
@@ -1627,6 +1708,7 @@ it('shows the join request banner only to group admins', function () {
 it('pluralizes the join request banner summary for admins', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
 
     $conversation->group->requestToJoin(User::factory()->create());
     $conversation->group->requestToJoin(User::factory()->create());

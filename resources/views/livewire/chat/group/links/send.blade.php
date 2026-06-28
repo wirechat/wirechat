@@ -30,9 +30,9 @@
         <section class="overflow-x-hidden my-2">
             <ul style="-ms-overflow-style: none; scrollbar-width: none;" class="flex w-full overflow-x-auto gap-3">
                 @foreach ($selectedMembers as $member)
-                    <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-[var(--wc-light-secondary)] rounded-sm dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300" wire:key="selected-invite-member-{{ $member->id }}">
+                    <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-[var(--wc-light-secondary)] rounded-sm dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300" wire:key="selected-invite-member-{{ md5($member->getMorphClass()) }}-{{ $member->getKey() }}">
                         {{ $member->wirechat_name }}
-                        <button type="button" wire:click="toggleMember('{{ $member->id }}', {{ json_encode(get_class($member)) }})"
+                        <button type="button" wire:click="toggleMember('{{ $member->getKey() }}', {{ json_encode($member->getMorphClass()) }})"
                             class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300">
                             <svg class="w-2 h-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
@@ -49,7 +49,7 @@
             @if ($users)
                 <ul class="overflow-auto flex flex-col">
                     @foreach ($users as $key => $user)
-                        <li wire:key="invite-users-{{ $key }}" class="flex cursor-pointer group gap-2 items-center p-2">
+                        <li wire:key="invite-users-{{ md5((string) $user['type']) }}-{{ $user['id'] }}" class="flex cursor-pointer group gap-2 items-center p-2">
                             <label wire:click="toggleMember('{{ $user['id'] }}', {{ json_encode($user['type']) }})" class="flex cursor-pointer gap-2 items-center w-full">
                                 <x-wirechat::avatar src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10" />
 
@@ -58,7 +58,7 @@
                                 </div>
 
                                 <div class="ml-auto">
-                                    @if ($selectedMembers->contains(fn($member) => $member->id == $user['id'] && get_class($member) == $user['type']))
+                                    @if ($selectedMembers->contains(fn($member) => (string) $member->getKey() === (string) $user['id'] && $member->getMorphClass() === $user['type']))
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-square w-6 h-6 text-green-500" viewBox="0 0 16 16">
                                             <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
                                             <path d="m10.97 4.97-3.992 4.99-1.75-1.75a.75.75 0 1 0-1.06 1.06l2.325 2.324a.75.75 0 0 0 1.08-.022l4.525-5.656a.75.75 0 1 0-1.128-.944" />

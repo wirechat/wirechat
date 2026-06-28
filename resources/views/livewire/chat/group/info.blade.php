@@ -7,6 +7,7 @@
         $isGroup = $conversation?->isGroup();
         $group = $conversation?->group;
         $canManageInvites = $authIsAdminInGroup && $this->panel()->hasGroupInvitations();
+        $canManageJoinRequests = $canManageInvites && $group?->requiresInviteApproval();
         $canUseInviteLinks = ($authIsAdminInGroup || $group?->allowsMembersToInviteOthersViaLink()) && $this->panel()->hasGroupInvitations();
     @endphp
 
@@ -241,7 +242,7 @@
             </x-wirechat::actions.open-chat-drawer>
         @endif
 
-        @if ($canManageInvites)
+        @if ($canManageJoinRequests)
             <x-wirechat::actions.open-chat-drawer component="wirechat.chat.group.join.requests"
                 conversation="{{ $conversation?->id }}" widget="{{ $this->isWidget() }}" :panel="$this->panel">
                 <button class="cursor-pointer w-full py-5 px-8 hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)] focus:outline-hidden transition flex items-center justify-between gap-3">

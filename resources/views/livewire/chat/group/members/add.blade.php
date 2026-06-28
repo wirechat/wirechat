@@ -80,10 +80,10 @@
 
                 @foreach ($selectedMembers as $key => $member)
                     <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-[var(--wc-light-secondary)] rounded-sm dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300"
-                        wire:key="selected-member-{{ $member->id }}">
+                        wire:key="selected-member-{{ md5($member->getMorphClass()) }}-{{ $member->getKey() }}">
                         {{ $member->wirechat_name }}
                         <button type="button"
-                            wire:click="toggleMember('{{ $member->id }}',{{ json_encode(get_class($member)) }})"
+                            wire:click="toggleMember('{{ $member->getKey() }}',{{ json_encode($member->getMorphClass()) }})"
                             class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300"
                             aria-label="Remove">
                             <svg class="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +119,7 @@
                         $isBanned = (bool) ($user['isBanned'] ?? false);
                     @endphp
                     <li
-                        wire:key="users-{{$key}}"
+                        wire:key="users-{{ md5((string) $user['type']) }}-{{ $user['id'] }}"
                         @class([
                             'flex group gap-2 items-center p-2',
                             'cursor-not-allowed opacity-60' => $isBanned,
@@ -151,11 +151,11 @@
                                 @elseif ($isBanned)
                                 {{ __('wirechat::chat.group.join.lobby.labels.join_blocked') }}
                                 @endif
-                             </span>
+                            </span>
                            </div>
 
                             <div class="ml-auto">
-                                @if ($selectedMembers->contains(fn($member) => $member->id == $user['id'] && get_class($member) == $user['type']) || $isAlreadyAParticipant)
+                                @if ($selectedMembers->contains(fn($member) => (string) $member->getKey() === (string) $user['id'] && $member->getMorphClass() === $user['type']) || $isAlreadyAParticipant)
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         fill="currentColor"
                                         class="bi bi-plus-square-fill w-6 h-6 text-green-500"

@@ -265,7 +265,9 @@ class Info extends ModalComponent
 
         $this->totalParticipants = $this->conversation->participants_count;
         $this->group = $this->conversation->group;
-        $this->pendingJoinRequestsCount = (int) ($this->group?->pendingJoinRequests()->count() ?? 0);
+        $this->pendingJoinRequestsCount = $this->group->requiresInviteApproval()
+            ? (int) $this->group->pendingJoinRequests()->count()
+            : 0;
         $this->setDefaultValues();
     }
 
@@ -273,8 +275,8 @@ class Info extends ModalComponent
     {
 
         $participant = $this->conversation->participant(auth()->user());
-        $this->pendingJoinRequestsCount = $this->conversation->isGroup() && $participant?->isAdmin() && $this->panel()->hasGroupInvitations()
-            ? (int) ($this->group?->pendingJoinRequests()->count() ?? 0)
+        $this->pendingJoinRequestsCount = $this->conversation->isGroup() && $participant?->isAdmin() && $this->panel()->hasGroupInvitations() && $this->group->requiresInviteApproval()
+            ? (int) $this->group->pendingJoinRequests()->count()
             : 0;
 
         //  dd($this->isWidget(),$participant);
