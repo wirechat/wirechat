@@ -19,8 +19,12 @@
         // cancels old retries
         jumpSeq: 0,
 
-        // prevent infinite spam on load events
-        mediaFixQueued: false,
+        // short-lived resize stabilization after prepending older messages
+        prependResizeObserver: null,
+        prependResizeTimer: null,
+        prependStabilizeUntil: 0,
+        prependRestoreQueued: false,
+        ignoreScrollUntil: 0,
 
         // manual scroll detection
         lastScrollTop: 0,
@@ -60,6 +64,76 @@
             const newOffset = rect.top - containerTop;
 
             container.scrollTop += (newOffset - this.anchorOffset);
+            this.lastScrollTop = container.scrollTop;
+            this.ignoreScrollUntil = Date.now() + 80;
+        },
+
+        queuePrependRestore() {
+            if (this.prependRestoreQueued) return;
+            this.prependRestoreQueued = true;
+
+            requestAnimationFrame(() => {
+                this.prependRestoreQueued = false;
+
+                if (Date.now() > this.prependStabilizeUntil) return;
+
+                this.restoreToAnchor();
+            });
+        },
+
+        stopPrependResizeObserver(clearAnchor = true) {
+            if (this.prependResizeObserver) {
+                this.prependResizeObserver.disconnect();
+                this.prependResizeObserver = null;
+            }
+
+            if (this.prependResizeTimer) {
+                clearTimeout(this.prependResizeTimer);
+                this.prependResizeTimer = null;
+            }
+
+            this.prependStabilizeUntil = 0;
+            this.prependRestoreQueued = false;
+
+            if (clearAnchor) {
+                this.anchorId = null;
+                this.anchorOffset = 0;
+            }
+        },
+
+        observePrependedMessageResizes(duration = 900) {
+            const container = this.el;
+            if (!container || !this.anchorId) return;
+
+            if (!('ResizeObserver' in window)) {
+                this.stopPrependResizeObserver();
+                return;
+            }
+
+            const anchor = container.querySelector(`[data-message-id='${this.anchorId}']`);
+            if (!anchor) return;
+
+            this.stopPrependResizeObserver(false);
+            this.prependStabilizeUntil = Date.now() + duration;
+
+            this.prependResizeObserver = new ResizeObserver(() => {
+                if (Date.now() > this.prependStabilizeUntil) {
+                    this.stopPrependResizeObserver();
+                    return;
+                }
+
+                this.queuePrependRestore();
+            });
+
+            const nodes = container.querySelectorAll('[data-message-id]');
+
+            for (const node of nodes) {
+                this.prependResizeObserver.observe(node);
+
+                if (node === anchor) break;
+            }
+
+            this.prependResizeTimer = setTimeout(() => this.stopPrependResizeObserver(), duration);
         },
 
         restoreAfterOlderLoaded() {
@@ -69,7 +143,11 @@
 
             requestAnimationFrame(() => {
                 this.restoreToAnchor();
-                requestAnimationFrame(() => this.restoreToAnchor());
+
+                requestAnimationFrame(() => {
+                    this.restoreToAnchor();
+                    this.observePrependedMessageResizes();
+                });
             });
         },
 
@@ -102,6 +180,7 @@
             } catch (error) {
                 this.pendingPrependRestore = false;
                 this.loadingOlder = false;
+                this.stopPrependResizeObserver();
             }
         },
 
@@ -156,32 +235,6 @@
             requestAnimationFrame(tick);
         },
 
-        onAnyMediaLoad() {
-            if (this.mediaFixQueued) return;
-            this.mediaFixQueued = true;
-
-            requestAnimationFrame(() => {
-                this.mediaFixQueued = false;
-
-                if (this.pendingPrependRestore || this.loadingOlder) {
-                    this.restoreToAnchor();
-                    requestAnimationFrame(() => this.restoreToAnchor());
-                    return;
-                }
-
-                if (this.initializing) {
-                    this.scrollToBottom();
-                    requestAnimationFrame(() => this.scrollToBottom());
-                    return;
-                }
-
-                if (this.jumpTargetId && Date.now() < this.jumpLockUntil) {
-                    this.scrollToMessageCenter(this.jumpTargetId);
-                    requestAnimationFrame(() => this.scrollToMessageCenter(this.jumpTargetId));
-                }
-            });
-        },
-
         scrollToBottom() {
             if (!this.el) return;
             this.el.scrollTop = this.el.scrollHeight;
@@ -195,9 +248,10 @@
             const currentTop = c.scrollTop;
             const delta = Math.abs(currentTop - this.lastScrollTop);
 
-            if (delta > 8) {
+            if (delta > 8 && Date.now() > this.ignoreScrollUntil && !this.pendingPrependRestore && !this.loadingOlder) {
                 this.jumpTargetId = null;
                 this.jumpLockUntil = 0;
+                this.stopPrependResizeObserver();
             }
 
             this.lastScrollTop = currentTop;
@@ -221,8 +275,6 @@
         }, 220);
         "
     @scroll="onScroll()"
-    x-on:load.capture="$data.onAnyMediaLoad()"
-    x-on:error.capture="$data.onAnyMediaLoad()"
 
         @scroll-bottom.window="
         requestAnimationFrame(() => {
@@ -452,7 +504,7 @@
 
 
                                 {{-- Message body --}}
-                                <div class="flex flex-col gap-2 max-w-[95%]  relative">
+                                <div class="flex flex-col gap-2 max-w-[95%] relative">
                                     {{-- Show sender name for group messages. --}}
 
 
@@ -478,7 +530,22 @@
                                         >
                                             {{-- Attachment is video --}}
                                             @if ($attachment->isVideo())
-                                                <x-wirechat::video height="max-h-[24rem] max-w-full sm:max-w-[26rem]" :cover="false" source="{{ $attachment?->url }}" />
+                                                @php
+                                                    $videoWidth = (int) data_get($attachment->meta, 'video.width', 0);
+                                                    $videoHeight = (int) data_get($attachment->meta, 'video.height', 0);
+                                                    $videoFrameOrientation = data_get($attachment->meta, 'video.orientation');
+
+                                                    if (! in_array($videoFrameOrientation, ['portrait', 'landscape'], true)) {
+                                                        $videoFrameOrientation = $videoHeight > $videoWidth ? 'portrait' : null;
+                                                    }
+                                                @endphp
+
+                                                <x-wirechat::video
+                                                    source="{{ $attachment?->url }}"
+                                                    :media-width="$videoWidth > 0 ? $videoWidth : null"
+                                                    :media-height="$videoHeight > 0 ? $videoHeight : null"
+                                                    :frame-orientation="$videoFrameOrientation"
+                                                />
 
                                             @elseif($attachment->isImage())
                                                 @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])

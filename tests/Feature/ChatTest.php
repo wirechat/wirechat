@@ -121,9 +121,13 @@ test('it renders stable message anchors for scroll restoration', function () {
 
     expect($html)
         ->toContain('x-ref="main-chat-body"')
+        ->toContain('ResizeObserver')
+        ->toContain('observePrependedMessageResizes')
         ->toContain('data-message-id="'.$message->id.'"')
         ->toContain('id="message-'.$message->id.'"')
-        ->toContain('wire:key="msg-'.$message->id.'"');
+        ->toContain('wire:key="msg-'.$message->id.'"')
+        ->not->toContain('x-on:load.capture="$data.onAnyMediaLoad()"')
+        ->not->toContain('x-on:error.capture="$data.onAnyMediaLoad()"');
 });
 
 test('it loads older messages from the top using the pro-style older window', function () {
@@ -2582,15 +2586,26 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
 
-        $file[] = UploadedFile::fake()->image('photo.png');
+        $file[] = UploadedFile::fake()->image('photo.png', 640, 480);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('media', $file)
             ->call('sendMessage')
+            ->assertDispatched('scroll-bottom')
             // now assert that media is back to empty
             ->assertSet('media', []);
 
-        $messageExists = Attachment::all();
-        expect(count($messageExists))->toBe(1);
+        $attachment = Attachment::first();
+
+        expect(Attachment::count())->toBe(1)
+            ->and($attachment->meta)
+            ->toMatchArray([
+                'image' => [
+                    'width' => 640,
+                    'height' => 480,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.3333,
+                ],
+            ]);
     });
 
     test('it appends media uploaded one by one and preserves image metadata when sent', function () {
@@ -2600,8 +2615,8 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
 
-        $firstImage = UploadedFile::fake()->image('first-photo.png');
-        $secondImage = UploadedFile::fake()->image('second-photo.jpg');
+        $firstImage = UploadedFile::fake()->image('first-photo.png', 1200, 800);
+        $secondImage = UploadedFile::fake()->image('second-photo.jpg', 600, 900);
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
@@ -2619,13 +2634,31 @@ describe('Sending messages ', function () {
 
         $attachments = Attachment::query()
             ->orderBy('id')
-            ->get(['original_name', 'mime_type', 'file_path']);
+            ->get(['original_name', 'mime_type', 'file_path', 'meta']);
 
         expect($attachments)->toHaveCount(2)
             ->and($attachments->pluck('original_name')->all())
             ->toBe(['first-photo.png', 'second-photo.jpg'])
             ->and($attachments->pluck('mime_type')->all())
-            ->toBe(['image/png', 'image/jpeg']);
+            ->toBe(['image/png', 'image/jpeg'])
+            ->and($attachments[0]->meta)
+            ->toMatchArray([
+                'image' => [
+                    'width' => 1200,
+                    'height' => 800,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.5,
+                ],
+            ])
+            ->and($attachments[1]->meta)
+            ->toMatchArray([
+                'image' => [
+                    'width' => 600,
+                    'height' => 900,
+                    'orientation' => 'portrait',
+                    'aspect_ratio' => 0.6667,
+                ],
+            ]);
 
         foreach ($attachments as $attachment) {
             Storage::disk('public')->assertExists($attachment->file_path);
@@ -2715,6 +2748,14 @@ describe('Sending messages ', function () {
             'original_name' => 'photo.png',
             'mime_type' => 'image/png',
             'url' => 'https://example.test/photo.png',
+            'meta' => [
+                'image' => [
+                    'width' => 1024,
+                    'height' => 768,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.3333,
+                ],
+            ],
         ]);
 
         $videoMessage = Message::create([
@@ -2730,13 +2771,44 @@ describe('Sending messages ', function () {
             'original_name' => 'clip.mp4',
             'mime_type' => 'video/mp4',
             'url' => 'https://example.test/clip.mp4',
+            'meta' => [
+                'video' => [
+                    'width' => 720,
+                    'height' => 1280,
+                    'orientation' => 'portrait',
+                    'aspect_ratio' => 0.5625,
+                ],
+            ],
+        ]);
+
+        $landscapeVideoMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:32:00'),
+        ]);
+
+        $landscapeVideoMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/landscape-clip.mp4',
+            'file_name' => 'landscape-clip.mp4',
+            'original_name' => 'landscape-clip.mp4',
+            'mime_type' => 'video/mp4',
+            'url' => 'https://example.test/landscape-clip.mp4',
+            'meta' => [
+                'video' => [
+                    'width' => 1920,
+                    'height' => 1080,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.7778,
+                ],
+            ],
         ]);
 
         $fileMessage = Message::create([
             'conversation_id' => $conversation->id,
             'participant_id' => $participant->id,
             'type' => MessageType::ATTACHMENT,
-            'created_at' => Carbon::parse('2026-06-21 14:32:00'),
+            'created_at' => Carbon::parse('2026-06-21 14:33:00'),
         ]);
 
         $fileMessage->attachment()->create([
@@ -2752,7 +2824,20 @@ describe('Sending messages ', function () {
 
         expect($html)
             ->toContain('<img')
-            ->toContain('<video ')
+            ->toContain('<video')
+            ->toContain('wire:ignore')
+            ->toContain('preload="metadata"')
+            ->toContain('playsinline')
+            ->toContain('[overflow-anchor:none]')
+            ->toContain('h-[24rem] w-[13.5rem]')
+            ->toContain('h-[14.625rem] w-[26rem]')
+            ->toContain('h-[14.625rem] sm:max-w-[26rem]')
+            ->toContain('width="1024"')
+            ->toContain('height="768"')
+            ->toContain('width="720"')
+            ->toContain('height="1280"')
+            ->toContain('width="1920"')
+            ->toContain('height="1080"')
             ->toContain('dusk="message-attachment-shell"')
             ->toContain('dusk="message-attachment-time"')
             ->toContain('dusk="message-file-attachment"')
@@ -2765,6 +2850,7 @@ describe('Sending messages ', function () {
             ->toContain('wc-tint-primary-bg')
             ->toContain('max-h-[24rem]')
             ->toContain('sm:max-w-[26rem]')
+            ->toContain('h-full w-auto max-w-full')
             ->toContain('object-contain')
             ->toContain('rounded-xl')
             ->not->toContain('h-[200px]')
@@ -2774,9 +2860,9 @@ describe('Sending messages ', function () {
             ->not->toContain('href="https://example.test/report.pdf"')
             ->not->toContain('download="report.pdf"');
 
-        expect(substr_count($html, 'dusk="message-attachment-shell"'))->toBe(3);
-        expect(substr_count($html, 'dusk="message-attachment-time"'))->toBe(3);
-        expect(preg_match_all('/dusk="message-attachment-time"[^>]*>\s*\d{2}:\d{2}\s*<\/span>/s', $html))->toBe(3);
+        expect(substr_count($html, 'dusk="message-attachment-shell"'))->toBe(4);
+        expect(substr_count($html, 'dusk="message-attachment-time"'))->toBe(4);
+        expect(preg_match_all('/dusk="message-attachment-time"[^>]*>\s*\d{2}:\d{2}\s*<\/span>/s', $html))->toBe(4);
     });
 
     test('it saves image to storage when created & clears files properties when done', function () {

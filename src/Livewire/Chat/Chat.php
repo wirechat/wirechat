@@ -39,6 +39,7 @@ use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Support\AttachmentMeta;
 
 /**
  * Chat Component
@@ -495,20 +496,20 @@ class Chat extends Component
                     // 'body' => $this->body, // Add body if required
                 ]);
 
+                $mimeType = Attachment::resolveMimeType(
+                    $attachment,
+                    $path,
+                    Wirechat::storage()->disk()
+                );
+
                 // Create and associate the attachment with the message
                 $attachment = $message->attachment()->create([
                     'file_path' => $path,
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
-                    'mime_type' => Attachment::resolveMimeType(
-                        $attachment,
-                        $path,
-                        Wirechat::storage()->disk()
-                    ),
+                    'mime_type' => $mimeType,
                     'url' => Storage::disk(Wirechat::storage()->disk())->url($path), // Use disk and path
-                    'meta' => [
-                        'size' => $attachment->getSize(),
-                    ],
+                    'meta' => AttachmentMeta::fromUploadedFile($attachment, $mimeType)->toArray(),
                 ]);
 
                 // dd($attachment);
@@ -714,6 +715,65 @@ class Chat extends Component
     private function flattenLoadedMessages()
     {
         return collect($this->loadedMessages)->flatten(1)->values();
+    }
+
+    private function prependLoadedMessages($messages): void
+    {
+        $olderGroups = $messages
+            ->groupBy(fn ($m) => $this->messageGroupKey($m))
+            ->map(fn ($group) => new EloquentCollection(collect($group)->values()->all()));
+
+        $currentGroups = collect($this->loadedMessages);
+        $merged = collect();
+
+        foreach ($olderGroups as $groupKey => $olderGroup) {
+            if ($currentGroups->has($groupKey)) {
+                $currentGroup = collect($currentGroups->get($groupKey));
+
+                $merged->put($groupKey, new EloquentCollection(
+                    $olderGroup->concat($currentGroup)->values()->all()
+                ));
+
+                continue;
+            }
+
+            $merged->put($groupKey, $olderGroup);
+        }
+
+        foreach ($currentGroups as $groupKey => $currentGroup) {
+            if ($merged->has($groupKey)) {
+                continue;
+            }
+
+            $merged->put($groupKey, $currentGroup);
+        }
+
+        $this->loadedMessages = $merged;
+    }
+
+    private function appendLoadedMessages($messages): void
+    {
+        $newerGroups = $messages
+            ->groupBy(fn ($m) => $this->messageGroupKey($m))
+            ->map(fn ($group) => new EloquentCollection(collect($group)->values()->all()));
+
+        $currentGroups = collect($this->loadedMessages);
+
+        foreach ($newerGroups as $groupKey => $newerGroup) {
+            if ($currentGroups->has($groupKey)) {
+                $currentGroup = collect($currentGroups->get($groupKey));
+
+                $currentGroups->put($groupKey, new EloquentCollection(
+                    $currentGroup->concat($newerGroup)->values()->all()
+                ));
+
+                continue;
+            }
+
+            $currentGroups->put($groupKey, $newerGroup);
+        }
+
+        $this->loadedMessages = $currentGroups;
     }
 
     private function syncCursorsFromFlat($messages): void
@@ -1000,10 +1060,10 @@ class Chat extends Component
             return;
         }
 
-        $all = $older->concat($this->flattenLoadedMessages());
+        $this->prependLoadedMessages($older);
 
-        $this->setLoadedMessagesFromFlat($all);
-        $this->syncCursorsFromFlat($all);
+        $flat = $this->flattenLoadedMessages();
+        $this->syncCursorsFromFlat($flat);
         $this->syncCanLoadFlags();
         $this->dispatch('older-loaded');
     }
@@ -1034,10 +1094,10 @@ class Chat extends Component
             return;
         }
 
-        $all = $this->flattenLoadedMessages()->concat($newer);
+        $this->appendLoadedMessages($newer);
 
-        $this->setLoadedMessagesFromFlat($all);
-        $this->syncCursorsFromFlat($all);
+        $flat = $this->flattenLoadedMessages();
+        $this->syncCursorsFromFlat($flat);
         $this->syncCanLoadFlags();
     }
 
