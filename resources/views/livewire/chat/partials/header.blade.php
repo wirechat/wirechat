@@ -17,7 +17,7 @@
             <button
                 type="button"
                 aria-label="{{ __('wirechat::chat.actions.close_chat.label') }}"
-                @click="$dispatch('close-chat',{conversation: {{json_encode($conversation->id)}} })"
+                @click="$dispatch('close-chat', { conversation: @js($conversation->id) })"
                 dusk="return_to_home_button_dispatch"
                 class="shrink-0 cursor-pointer dark:text-white"
                 id="chatReturn">
@@ -129,7 +129,7 @@
 
 
                         @if ($this->isWidget())
-                            <x-wirechat::dropdown-link @click="$dispatch('close-chat',{conversation: {{json_encode($conversation->id)}} })">
+                            <x-wirechat::dropdown-link @click="$dispatch('close-chat', { conversation: @js($conversation->id) })">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @else

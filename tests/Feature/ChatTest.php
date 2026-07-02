@@ -2117,6 +2117,24 @@ describe('Sending messages ', function () {
             ->toContain('href="https://example.com"');
     });
 
+    test('it escapes html-like message bodies while rendering', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $payload = '<img src=x onerror=alert(1)><script>alert(2)</script>';
+
+        $conversation = $auth->createConversationWith($receiver, $payload);
+
+        $html = Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain(e($payload))
+            ->not->toContain($payload)
+            ->not->toContain('<img src=x onerror=alert(1)>')
+            ->not->toContain('<script>alert(2)</script>');
+    });
+
     test('it preserves whitespace formatting when rendering linkified messages', function () {
         testPanelProvider()->parseMessageUrls(true);
 

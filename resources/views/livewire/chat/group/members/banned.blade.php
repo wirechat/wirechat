@@ -40,7 +40,7 @@
                                 </div>
 
                                 <button type="button"
-                                    wire:click="liftBan({{ $bannedMember->id }})"
+                                    wire:click="liftBan(@js($bannedMember->id))"
                                     wire:confirm="{{ __('wirechat::chat.group.banned_members.actions.lift_ban.confirmation_message', ['member' => $bannedMember->participantable?->wirechat_name]) }}"
                                     class="shrink-0 rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-[var(--wc-brand-primary)] hover:bg-[var(--wc-light-secondary)] dark:border-zinc-700 dark:hover:bg-[var(--wc-dark-secondary)]">
                                     {{ __('wirechat::chat.group.banned_members.actions.lift_ban.label') }}

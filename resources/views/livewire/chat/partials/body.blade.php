@@ -436,7 +436,7 @@
                                 <div dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
                                     @if ($canReplyToMessage)
-                                    <button dusk="reply_to_message_icon" wire:click="setReply('{{ encrypt($message->id) }}')"
+                                    <button dusk="reply_to_message_icon" wire:click="setReply(@js(encrypt($message->id)))"
                                         class=" invisible  group-hover:visible hover:scale-110 transition-transform">
 
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -466,7 +466,7 @@
                                         <x-slot name="content">
 
                                             @if ($canDeleteMessageForEveryone)
-                                                <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ encrypt($message->id) }}')"
+                                                <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone(@js(encrypt($message->id)))"
                                                     wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
                                                         @lang('wirechat::chat.actions.delete_for_everyone.label')
@@ -477,7 +477,7 @@
 
                                             {{-- Dont show delete for me if is group --}}
                                             @if ($canDeleteMessageForMe)
-                                            <button dusk="delete_message_for_me" wire:click="deleteForMe('{{ encrypt($message->id) }}')"
+                                            <button dusk="delete_message_for_me" wire:click="deleteForMe(@js(encrypt($message->id)))"
                                                 wire:confirm="{{ __('wirechat::chat.actions.delete_for_me.confirmation_message') }}" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     @lang('wirechat::chat.actions.delete_for_me.label')
@@ -487,7 +487,7 @@
 
 
                                             @if ($canReplyToMessage)
-                                            <button dusk="reply_to_message_button" wire:click="setReply('{{ encrypt($message->id) }}')"class="w-full text-start">
+                                            <button dusk="reply_to_message_button" wire:click="setReply(@js(encrypt($message->id)))"class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     @lang('wirechat::chat.actions.reply.label')
                                                 </x-wirechat::dropdown-link>

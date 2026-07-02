@@ -81,7 +81,7 @@
                             <button
                                  wire:loading.attr="disabled"
                                 type="button"
-                                wire:click="dismiss({{ $request->id }})"
+                                wire:click="dismiss(@js($request->id))"
                                 class="inline-flex
                                  size-10 items-center disabled:cursor-not-allowed disabled:opacity-80 transition-all justify-center rounded-full bg-red-50 text-red-600  hover:bg-red-100 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
                                 aria-label="{{ __('wirechat::chat.group.join.requests.actions.dismiss.label') }}"
@@ -92,7 +92,7 @@
                             <button
                                 type="button"
                                      wire:loading.attr="disabled"
-                                wire:click="approve({{ $request->id }})"
+                                wire:click="approve(@js($request->id))"
                                 class="inline-flex disabled:cursor-not-allowed disabled:opacity-80 transition-all size-10 items-center justify-center rounded-full bg-[var(--primary-50)] text-[var(--primary-700)] hover:bg-[var(--primary-100)] dark:bg-[color-mix(in_srgb,var(--primary-700)_20%,transparent)] dark:text-[var(--primary-300)] dark:hover:bg-[color-mix(in_srgb,var(--primary-700)_30%,transparent)]"
                                 aria-label="{{ __('wirechat::chat.group.join.requests.actions.approve.label') }}"
                                 title="{{ __('wirechat::chat.group.join.requests.actions.approve.label') }}">

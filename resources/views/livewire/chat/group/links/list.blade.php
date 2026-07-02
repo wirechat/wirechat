@@ -1,9 +1,3 @@
-@php
-    $conversationId = (string) \Illuminate\Support\Js::from($conversation->id);
-    $panelId = (string) \Illuminate\Support\Js::from($this->panel);
-    $openCreateInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.create', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
-@endphp
-
 <x-wirechat::section
     :title="__('wirechat::chat.group.invite_link.labels.additional_links')"
     :description="__('wirechat::chat.group.invite_link.labels.additional_links_helper')"
@@ -12,7 +6,8 @@
     <x-slot:actions>
         <x-wirechat::button
             size="sm"
-            onclick="{{ $openCreateInviteLinkAction }}">
+            x-data
+            x-on:click="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.create', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })">
             {{ __('wirechat::chat.group.invite_link.actions.create_new_link.label') }}
         </x-wirechat::button>
     </x-slot:actions>
@@ -20,7 +15,8 @@
     <div class="space-y-3">
         @forelse ($additionalInvites as $invite)
             <button type="button"
-                onclick="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.show', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })"
+                x-data
+                x-on:click="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.show', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })"
                 wire:key="additional-invite-{{ $invite->id }}"
                 class="flex w-full items-center gap-4 rounded-xl border dark:border-zinc-700 px-4 py-4 text-left transition hover:bg-[var(--wc-light-secondary)]/60 dark:hover:bg-[var(--wc-dark-secondary)]/60">
                 <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)]">

@@ -32,7 +32,7 @@
                 @foreach ($selectedMembers as $member)
                     <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-[var(--wc-light-secondary)] rounded-sm dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300" wire:key="selected-invite-member-{{ md5($member->getMorphClass()) }}-{{ $member->getKey() }}">
                         {{ $member->wirechat_name }}
-                        <button type="button" wire:click="toggleMember('{{ $member->getKey() }}', {{ json_encode($member->getMorphClass()) }})"
+                        <button type="button" wire:click="toggleMember(@js((string) $member->getKey()), @js($member->getMorphClass()))"
                             class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300">
                             <svg class="w-2 h-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
@@ -50,7 +50,7 @@
                 <ul class="overflow-auto flex flex-col">
                     @foreach ($users as $key => $user)
                         <li wire:key="invite-users-{{ md5((string) $user['type']) }}-{{ $user['id'] }}" class="flex cursor-pointer group gap-2 items-center p-2">
-                            <label wire:click="toggleMember('{{ $user['id'] }}', {{ json_encode($user['type']) }})" class="flex cursor-pointer gap-2 items-center w-full">
+                            <label wire:click="toggleMember(@js((string) $user['id']), @js($user['type']))" class="flex cursor-pointer gap-2 items-center w-full">
                                 <x-wirechat::avatar src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10" />
 
                                 <div class="min-w-0">

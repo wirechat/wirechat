@@ -5,13 +5,13 @@
     'panel' => null
 ])
 
-<div {{ $attributes }}  onclick="Livewire.dispatch('openChatDrawer', { 
-        component: '{{ $component }}', 
-        arguments: { 
+<div {{ $attributes }} x-data x-on:click="Livewire.dispatch('openChatDrawer', {
+        component: @js($component),
+        arguments: {
              conversation: @js($conversation),
             widget: @js($widget),
             panel: @js($panel)
-        } 
+        }
     })">
 
     {{ $slot }}

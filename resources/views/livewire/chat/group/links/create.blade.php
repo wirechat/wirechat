@@ -7,7 +7,6 @@
     ];
     $expirySliderKeys = array_keys($expirySliderOptions);
     $expirySliderIndex = array_search($expiryPreset, $expirySliderKeys, true);
-    $expirySliderKeysJs = (string) \Illuminate\Support\Js::from(array_values($expirySliderKeys));
 
     $usageSliderOptions = [
         '1' => '1',
@@ -18,7 +17,6 @@
     ];
     $usageSliderKeys = array_map('strval', array_keys($usageSliderOptions));
     $usageSliderIndex = array_search((string) $usagePreset, $usageSliderKeys, true);
-    $usageSliderKeysJs = (string) \Illuminate\Support\Js::from(array_values($usageSliderKeys));
 @endphp
 
 <div class=" max-w-xl rounded-xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-6 text-zinc-900 shadow-xl dark:text-white">
@@ -56,7 +54,7 @@
                         step="1"
                         value="{{ $expirySliderIndex === false ? count($expirySliderKeys) - 1 : $expirySliderIndex }}"
                         x-data="{}"
-                        x-on:input="$wire.set('expiryPreset', {{ $expirySliderKeysJs }}[$event.target.value] ?? 'never')"
+                        x-on:input="$wire.set('expiryPreset', @js(array_values($expirySliderKeys))[$event.target.value] ?? 'never')"
                         class="wc-range-zinc mx-auto w-full"
                     />
                 </div>
@@ -70,7 +68,7 @@
                 <div class="mt-2 flex justify-between w-full   text-center text-xs">
                     @foreach ($expirySliderOptions as $key => $label)
                         <button type="button"
-                            wire:click="$set('expiryPreset', '{{ $key }}')"
+                            wire:click="$set('expiryPreset', @js($key))"
                             @class([
                                 'flex items-center justify-center transition cursor-pointer',
                                 'font-medium text-[var(--wc-brand-primary)]' => $expiryPreset === $key,
@@ -104,7 +102,7 @@
                         step="1"
                         value="{{ $usageSliderIndex === false ? count($usageSliderKeys) - 1 : $usageSliderIndex }}"
                         x-data="{}"
-                        x-on:input="$wire.set('usagePreset', {{ $usageSliderKeysJs }}[$event.target.value] ?? 'unlimited')"
+                        x-on:input="$wire.set('usagePreset', @js(array_values($usageSliderKeys))[$event.target.value] ?? 'unlimited')"
                         class="wc-range-zinc mx-auto w-full"
                     />
                 </div>
@@ -119,7 +117,7 @@
                             };
                         @endphp
                         <button type="button"
-                            wire:click="$set('usagePreset', '{{ $key }}')"
+                            wire:click="$set('usagePreset', @js((string) $key))"
                             @class([
                                 'absolute top-0 flex flex-col gap-1 transition cursor-pointer',
                                 'left-0 items-start text-left' => $loop->first,

@@ -65,7 +65,7 @@
 
                         @foreach ($users as $key => $user)
                             <li wire:key="user-{{ $key }}"
-                                wire:click="createConversation('{{ $user['id'] }}',{{ json_encode($user['type']) }})"
+                                wire:click="createConversation(@js((string) $user['id']), @js($user['type']))"
                                 class="flex cursor-pointer group gap-2 items-center p-2">
 
                                 <x-wirechat::avatar :src="$user['wirechat_avatar_url']" class="w-10 h-10"/>

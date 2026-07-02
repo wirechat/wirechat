@@ -32,7 +32,7 @@
     <button
         type="button"
         wire:loading.attr="disabled"
-        wire:click="download('{{ encrypt($attachment->id) }}')"
+        wire:click="download(@js(encrypt($attachment->id)))"
        class="grid shrink-0 place-items-center border p-2 border-zinc-800/20 dark:border-zinc-500/70 rounded-full transition-colors dark:text-gray-400/90 text-gray-500/90 hover:text-[var(--wc-brand-primary)] disabled:cursor-progress dark:border-zinc-300/40   dark:hover:text-[var(--wc-brand-primary)]/90"
     >
      

@@ -403,6 +403,15 @@ describe('WirechatService Model Resolution', function () {
                 ->and(Wirechat::containsLink('http://127.0.0.1'))->toBeTrue()
                 ->and(Wirechat::containsLink('http://192.168.1.15/test'))->toBeTrue();
         });
+
+        it('does not linkify unsafe protocols or html-like payloads', function () {
+            $segments = Wirechat::linkifyMessage('click javascript:alert(1) data:text/html,<script>alert(1)</script>');
+
+            expect(Wirechat::containsLink('javascript:alert(1)'))->toBeFalse()
+                ->and(Wirechat::containsLink('data:text/html,<script>alert(1)</script>'))->toBeFalse()
+                ->and(Wirechat::containsLink('<script>alert(1)</script>'))->toBeFalse()
+                ->and(collect($segments)->where('is_link', true))->toBeEmpty();
+        });
     });
 
     describe('Custom Model Classes', function () {

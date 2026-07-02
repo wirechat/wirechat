@@ -78,7 +78,7 @@
 
                     <button
                         type="button"
-                        wire:click="openConversation({{ $request->id }})"
+                        wire:click="openConversation(@js($request->id))"
                         @class([
                             'flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-left transition',
                             'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-900',

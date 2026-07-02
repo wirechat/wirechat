@@ -1,11 +1,3 @@
-@php
-    $inviteUrlJs = (string) \Illuminate\Support\Js::from($inviteUrl);
-    $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.show.messages.copied_success'));
-    $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.show.messages.copy_prompt'));
-    $openSendInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: ".(string) \Illuminate\Support\Js::from($conversation->id).", invite: ".(string) \Illuminate\Support\Js::from($invite->id).", panel: ".(string) \Illuminate\Support\Js::from($this->panel)." } })";
-    $copyInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$inviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$inviteUrlJs}); }";
-@endphp
-
 <div class="w-[92vw] max-w-lg rounded-xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-6 text-gray-900 shadow-xl dark:text-white">
     <div class="flex items-center justify-between gap-4">
         <button type="button" wire:click="closeWirechatModal" class="rounded-full p-2 text-gray-500 transition hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)]">
@@ -58,15 +50,30 @@
             <x-wirechat::button type="button"
                  size='sm'
                   variant='default'
-                x-data="{}"
-                x-on:click="{{ $copyInviteAction }}">
+                x-data="{
+                    inviteUrl: @js($inviteUrl),
+                    copySuccessMessage: @js(__('wirechat::chat.group.invite_link.show.messages.copied_success')),
+                    copyPrompt: @js(__('wirechat::chat.group.invite_link.show.messages.copy_prompt')),
+                    copyInviteLink() {
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(this.inviteUrl);
+                            this.$dispatch('wirechat-toast', { type: 'success', message: this.copySuccessMessage });
+
+                            return;
+                        }
+
+                        window.prompt(this.copyPrompt, this.inviteUrl);
+                    },
+                }"
+                x-on:click="copyInviteLink()">
                 {{ __('wirechat::chat.group.invite_link.show.actions.copy_link.label') }}
             </x-wirechat::button>
             
             <x-wirechat::button 
              variant='outline'
             type="button"
-                onclick="{{ $openSendInviteLinkAction }}">
+                x-data
+                x-on:click="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })">
                 {{ __('wirechat::chat.group.invite_link.show.actions.share_link.label') }}
             </x-wirechat::button>
         </div>

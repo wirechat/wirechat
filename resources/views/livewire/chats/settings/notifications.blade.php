@@ -29,7 +29,7 @@
                     type="button"
                     class="relative h-6 w-11 shrink-0 rounded-full bg-zinc-300 transition dark:bg-zinc-700"
                     @style($this->{$row['property']} ? ['background-color: var(--wc-brand-primary)'] : [])
-                    wire:click="toggleNotificationSetting('{{ $row['property'] }}')"
+                    wire:click="toggleNotificationSetting(@js($row['property']))"
                     aria-pressed="{{ $this->{$row['property']} ? 'true' : 'false' }}"
                     dusk="settings-notifications-{{ $row['key'] }}-toggle"
                 >

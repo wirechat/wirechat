@@ -27,3 +27,34 @@ arch('Ensure Widget Trait is used in Components')
         'Wirechat\Wirechat\Livewire\Chat\Info',
         'Wirechat\Wirechat\Livewire\Chat\Group\Members\Members',
     ]);
+
+it('js encodes dynamic blade action arguments', function () {
+    $viewsPath = dirname(__DIR__, 2).'/resources/views';
+    $patterns = [
+        'raw Blade expression in wire:click arguments' => '/wire:click(?:\.\w+)*="[^"]*\{\{/',
+        'raw Blade expression in Alpine or DOM event arguments' => '/(?:@click|@change|x-on:[^=]+|onclick)="[^"]*\{\{/',
+        'manual json_encode in Blade action arguments' => '/(?:@click|@change|x-on:[^=]+|onclick|wire:click(?:\.\w+)*)="[^"]*json_encode\(/',
+        'PHP-built JavaScript action snippets' => '/\$[A-Za-z0-9_]+Action\s*=/',
+    ];
+    $violations = [];
+
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($viewsPath, FilesystemIterator::SKIP_DOTS)
+    );
+
+    foreach ($files as $file) {
+        if (! str_ends_with($file->getFilename(), '.blade.php')) {
+            continue;
+        }
+
+        $contents = file_get_contents($file->getPathname());
+
+        foreach ($patterns as $description => $pattern) {
+            if (preg_match($pattern, $contents) === 1) {
+                $violations[] = str_replace($viewsPath.'/', '', $file->getPathname()).': '.$description;
+            }
+        }
+    }
+
+    expect($violations)->toBeEmpty();
+});

@@ -8,21 +8,6 @@
         <h3 class="text-lg font-medium">{{ __('wirechat::chat.group.invite_link.heading.label') }}</h3>
     </section>
 
-    @php
-        $conversationId = (string) \Illuminate\Support\Js::from($conversation->id);
-        $primaryInviteId = (string) \Illuminate\Support\Js::from($primaryInvite->id);
-        $panelId = (string) \Illuminate\Support\Js::from($this->panel);
-        $primaryInviteUrlJs = (string) \Illuminate\Support\Js::from($primaryInviteUrl);
-        $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copied_success'));
-        $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copy_prompt'));
-
-        $openPrimaryInviteDetailsAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.show', arguments: { conversation: {$conversationId}, invite: {$primaryInviteId}, panel: {$panelId} } })";
-        $copyPrimaryInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$primaryInviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$primaryInviteUrlJs}); }";
-        $openSendInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: {$conversationId}, invite: {$primaryInviteId}, panel: {$panelId} } })";
-        $openPermissionsDrawerAction = "Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.permissions', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
-        $openJoinRequestsDrawerAction = "Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: {$conversationId}, panel: {$panelId} } })";
-    @endphp
-
     <section class="mx-auto flex max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
         <div class="space-y-3 text-center">
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]">
@@ -41,7 +26,8 @@
 
                     @if ($canManageInvites)
                         <button type="button"
-                            onclick="{{ $openPrimaryInviteDetailsAction }}"
+                            x-data
+                            x-on:click="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.show', arguments: { conversation: @js($conversation->id), invite: @js($primaryInvite->id), panel: @js($this->panel) } })"
                             class="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--wc-light-secondary)] text-gray-500 transition hover:text-[var(--wc-brand-primary)] dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="h-5 w-5">
                                 <path d="M12 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 7Zm0 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 14Zm0 7a1.75 1.75 0 1 0 0-3.5A1.75 1.75 0 0 0 12 21Z" />
@@ -52,8 +38,22 @@
 
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <x-wirechat::button
-                        x-data="{}"
-                        x-on:click="{{ $copyPrimaryInviteAction }}"
+                        x-data="{
+                            inviteUrl: @js($primaryInviteUrl),
+                            copySuccessMessage: @js(__('wirechat::chat.group.invite_link.messages.copied_success')),
+                            copyPrompt: @js(__('wirechat::chat.group.invite_link.messages.copy_prompt')),
+                            copyInviteLink() {
+                                if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(this.inviteUrl);
+                                    this.$dispatch('wirechat-toast', { type: 'success', message: this.copySuccessMessage });
+
+                                    return;
+                                }
+
+                                window.prompt(this.copyPrompt, this.inviteUrl);
+                            },
+                        }"
+                        x-on:click="copyInviteLink()"
                         class="items-center flex gap-2"
                     >
                         {{ __('wirechat::chat.group.invite_link.actions.copy_link.label') }}
@@ -66,7 +66,8 @@
 
                     <x-wirechat::button
                         variant="outline"
-                        onclick="{{ $openSendInviteLinkAction }}"
+                        x-data
+                        x-on:click="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: @js($conversation->id), invite: @js($primaryInvite->id), panel: @js($this->panel) } })"
                     >
                         {{ __('wirechat::chat.group.invite_link.actions.send_via_chat.label') }}
                     </x-wirechat::button>
@@ -102,7 +103,8 @@
             @if ($canManageJoinRequests)
                 <div class="rounded-xl bg-[var(--wc-light-secondary)] px-4 py-3 dark:bg-[var(--wc-dark-secondary)]">
                     <button type="button"
-                        onclick="{{ $openJoinRequestsDrawerAction }}"
+                        x-data
+                        x-on:click="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
                         class="flex w-full items-center justify-between gap-3 text-left">
                         <div>
                             <p class="font-medium">{{ __('wirechat::chat.group.invite_link.labels.join_requests') }}</p>
@@ -126,7 +128,10 @@
             </p>
 
             @if ($canEditGroupAccess)
-                <x-wirechat::button onclick="{{ $openPermissionsDrawerAction }}" variant="link">
+                <x-wirechat::button
+                    x-data
+                    x-on:click="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.permissions', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
+                    variant="link">
                                 {{ __('wirechat::chat.group.invite_link.actions.edit_permissions.label') }}
                 </x-wirechat::button>
             @endif

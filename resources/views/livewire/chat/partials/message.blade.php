@@ -85,7 +85,7 @@
     class="{{ $messageTextClasses }}"
     style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php $isInviteLink = $inviteUrl !== null && $segment['href'] === $inviteUrl; @endphp<a
                 dusk="message-link"
-                @if ($isInviteLink) data-invite-link="true" wire:click.prevent="handleOpenChat('{{ $encryptedInviteLink }}')" @else target="_blank" rel="noopener noreferrer" @endif
+                @if ($isInviteLink) data-invite-link="true" wire:click.prevent="handleOpenChat(@js($encryptedInviteLink))" @else target="_blank" rel="noopener noreferrer" @endif
                 class="underline tracking-normal wrap-anywhere text-sm md:text-base dark:text-white lg:tracking-normal"
                 href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
 
@@ -104,7 +104,7 @@
 
 @if ($groupInvitePreview)
     <a href="{{ $groupInvitePreview['url'] }}"
-        wire:click.prevent="handleOpenChat('{{ $encryptedInviteLink }}')"
+        wire:click.prevent="handleOpenChat(@js($encryptedInviteLink))"
         data-invite-link="true"
         @class([
             'mt-2 -mx-2.5  block border-t px-4 py-2 text-center text-sm font-semibold transition hover:opacity-95',

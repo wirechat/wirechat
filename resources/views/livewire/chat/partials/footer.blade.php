@@ -143,7 +143,7 @@
                                             {{-- Delete image --}}
                                             <button wire:loading.attr="disabled"
                                                 class="disabled:cursor-progress absolute -top-2 -right-2  z-10 dark:text-gray-50"
-                                                @click="removeUpload('{{ $mediaItem->getFilename() }}')">
+                                                @click="removeUpload(@js($mediaItem->getFilename()))">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
                                                     <path
@@ -163,7 +163,7 @@
                                         <div class="relative h-24 sm:h-36 ">
                                             <button wire:loading.attr="disabled"
                                                 class="disabled:cursor-progress absolute -top-2 -right-2  z-10 dark:text-gray-50"
-                                                @click="removeUpload('{{ $mediaItem->getFilename() }}')">
+                                                @click="removeUpload(@js($mediaItem->getFilename()))">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
                                                     <path
@@ -184,7 +184,7 @@
                                 <label wire:loading.class="cursor-progress"
                                     class="shrink-0 cursor-pointer relative w-16 h-14 rounded-lg  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-primary)]   hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  flex text-center justify-center ">
                                     <input wire:loading.attr="disabled"
-                                        @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
+                                        @change="handleFileSelect(event, @js(count($media)))" type="file" multiple
                                            accept="{{ collect($this->panel()->getMediaMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
                                            class="sr-only">
                                     <span class="m-auto ">
@@ -216,7 +216,7 @@
                                     {{-- Delete file button --}}
                                     <button wire:loading.attr="disabled"
                                         class="disabled:cursor-progress absolute -top-2 -right-2  z-10"
-                                        @click="removeUpload('{{ $file->getFilename() }}')">
+                                        @click="removeUpload(@js($file->getFilename()))">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                             fill="currentColor"
                                             class="bi bi-x-circle dark:text-white dark:hover:text-red-500 hover:text-red-500 transition-colors"
@@ -254,7 +254,7 @@
                             <label wire:loading.class="cursor-progress"
                                 class="cursor-pointer shrink-0 relative w-16 h-14 rounded-lg bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]   hover:border-[var(--wc-light-primary)] dark:hover:border-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  transition-colors   flex text-center justify-center  ">
                                 <input wire:loading.attr="disabled"
-                                    @change="handleFileSelect(event,{{ count($files) }})" type="file" multiple
+                                    @change="handleFileSelect(event, @js(count($files)))" type="file" multiple
                                        accept="{{ collect($this->panel()->getFileMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
 
                                        class="sr-only"
@@ -422,7 +422,7 @@
                                         class="cursor-pointer">
                                         <input wire:loading.attr="disabled" wire:target="sendMessage"
                                             dusk="file-upload-input"
-                                            @change="handleFileSelect(event, {{ count($files) }})" type="file"
+                                            @change="handleFileSelect(event, @js(count($files)))" type="file"
                                             multiple
 
                                                accept="{{ collect($this->panel()->getFileMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
@@ -457,7 +457,7 @@
                                         {{-- Trigger image upload --}}
                                         <input dusk="media-upload-input" wire:loading.attr="disabled"
                                             wire:target="sendMessage"
-                                            @change="handleFileSelect(event, {{ count($media) }})" type="file"
+                                            @change="handleFileSelect(event, @js(count($media)))" type="file"
                                             multiple
                                                accept="{{ collect($this->panel()->getMediaMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
 

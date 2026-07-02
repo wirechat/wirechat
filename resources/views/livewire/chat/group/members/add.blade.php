@@ -1,10 +1,3 @@
-@php
-    $primaryInviteUrlJs = (string) \Illuminate\Support\Js::from($primaryInviteUrl ?? null);
-    $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copied_success'));
-    $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copy_prompt'));
-    $copyPrimaryInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$primaryInviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$primaryInviteUrlJs}); }";
-@endphp
-
 <div class="h-[calc(100vh_-_10rem)] rounded-xl  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-zinc-200 dark:border-zinc-700 overflow-y-auto overflow-x-hidden  ">
 
 <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
@@ -61,8 +54,22 @@
         <section class="w-full flex  border-zinc-200 px-0 py-3 dark:border-zinc-700">
             <x-wirechat::button type="button"
                 variant="filled"
-                x-data
-                x-on:click="{{ $copyPrimaryInviteAction }}"
+                x-data="{
+                    inviteUrl: @js($primaryInviteUrl),
+                    copySuccessMessage: @js(__('wirechat::chat.group.invite_link.messages.copied_success')),
+                    copyPrompt: @js(__('wirechat::chat.group.invite_link.messages.copy_prompt')),
+                    copyInviteLink() {
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(this.inviteUrl);
+                            this.$dispatch('wirechat-toast', { type: 'success', message: this.copySuccessMessage });
+
+                            return;
+                        }
+
+                        window.prompt(this.copyPrompt, this.inviteUrl);
+                    },
+                }"
+                x-on:click="copyInviteLink()"
                 class="w-full gap-2">   
                <x-wirechat::icons.link class="size-5" />
 
@@ -83,7 +90,7 @@
                         wire:key="selected-member-{{ md5($member->getMorphClass()) }}-{{ $member->getKey() }}">
                         {{ $member->wirechat_name }}
                         <button type="button"
-                            wire:click="toggleMember('{{ $member->getKey() }}',{{ json_encode($member->getMorphClass()) }})"
+                            wire:click="toggleMember(@js((string) $member->getKey()), @js($member->getMorphClass()))"
                             class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300"
                             aria-label="Remove">
                             <svg class="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -129,7 +136,7 @@
                         <label
                         {{-- The wire:click attribute is only rendered if $isAlreadyAParticipant is false. --}}
                          @if (!$isAlreadyAParticipant)
-                         wire:click="toggleMember('{{ $user['id'] }}', {{ json_encode($user['type']) }})"
+                         wire:click="toggleMember(@js((string) $user['id']), @js($user['type']))"
                          @endif
 
                             @class([

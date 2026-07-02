@@ -170,7 +170,7 @@
                                     wire:key="selected-member-{{ md5($member->getMorphClass()) }}-{{ $member->getKey() }}">
                                     {{ $member->wirechat_name }}
                                     <button type="button"
-                                        wire:click="toggleMember('{{ $member->getKey() }}',{{ json_encode($member->getMorphClass()) }})"
+                                        wire:click="toggleMember(@js((string) $member->getKey()), @js($member->getMorphClass()))"
                                         class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)]  hover:text-gray-900  dark:hover:text-gray-300"
                                         aria-label="Remove">
                                         <svg class="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +204,7 @@
                                 <li wire:key="new-group-users-{{ md5((string) $user['type']) }}-{{ $user['id'] }}" class="flex cursor-pointer group gap-2 items-center p-2">
 
                                     <label
-                                        wire:click="toggleMember('{{ $user['id'] }}',{{ json_encode($user['type']) }})"
+                                        wire:click="toggleMember(@js((string) $user['id']), @js($user['type']))"
                                         class="flex cursor-pointer gap-2 items-center w-full">
                                         <x-wirechat::avatar  src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10" />
 
