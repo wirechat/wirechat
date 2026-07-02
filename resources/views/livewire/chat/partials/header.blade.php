@@ -270,25 +270,30 @@
             x-on:wirechat-join-requests-banner-updated.window="handleBannerUpdate($event.detail)"
             class="border-zinc-100 bg-zinc-50 px-2 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/60 lg:px-4">
             <div class="mx-auto flex w-full items-center justify-between gap-3 rounded-2xl px-1 text-sm">
-                <button type="button"
-                    onclick="Livewire.dispatch('openChatDrawer', { component: 'wirechat.chat.group.join.requests', arguments: { conversation: @js($conversation->id), panel: @js($this->panel) } })"
-                    class="min-w-0 flex-1 text-left">
-                    <div class="flex items-center gap-2">
-                        <x-wirechat::icons.user-clock class="ml-1 size-5 dark:text-zinc-300" />
+                <x-wirechat::actions.open-chat-drawer
+                    component="wirechat.chat.group.join.requests"
+                    :conversation="$conversation->id"
+                    :panel="$this->panel"
+                    class="min-w-0 flex-1"
+                >
+                    <button type="button" class="w-full text-left">
+                        <div class="flex items-center gap-2">
+                            <x-wirechat::icons.user-clock class="ml-1 size-5 dark:text-zinc-300" />
 
-                        <span class="font-bold text-[var(--primary-500)]">
-                            {{ __('wirechat::chat.group.join.requests.labels.review') }}
-                        </span>
+                            <span class="font-bold text-[var(--primary-500)]">
+                                {{ __('wirechat::chat.group.join.requests.labels.review') }}
+                            </span>
 
-                        <span class="font-medium text-[var(--primary-500)]" x-text="pendingCount">
-                            {{ $pendingJoinRequestsCount }}
-                        </span>
+                            <span class="font-medium text-[var(--primary-500)]" x-text="pendingCount">
+                                {{ $pendingJoinRequestsCount }}
+                            </span>
 
-                        <span class="truncate font-medium text-gray-700 dark:text-white/80" x-text="summary">
-                            {{ trans_choice('wirechat::chat.group.join.requests.labels.summary', $pendingJoinRequestsCount, ['count' => $pendingJoinRequestsCount]) }}
-                        </span>
-                    </div>
-                </button>
+                            <span class="truncate font-medium text-gray-700 dark:text-white/80" x-text="summary">
+                                {{ trans_choice('wirechat::chat.group.join.requests.labels.summary', $pendingJoinRequestsCount, ['count' => $pendingJoinRequestsCount]) }}
+                            </span>
+                        </div>
+                    </button>
+                </x-wirechat::actions.open-chat-drawer>
 
                 <button type="button" @click.stop="dismissBanner()"
                     class="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-200/70 hover:text-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-700/70 dark:hover:text-white"

@@ -117,7 +117,9 @@ describe('presence test', function () {
         $participant->save();
 
         Livewire::actingAs($admin)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-            ->assertSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'));
+            ->assertSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'))
+            ->assertSeeHtml('copyWithSelection')
+            ->assertSeeHtml('window.navigator.clipboard.writeText(value)');
     });
 
     test('participants with add-members permission do not see the copy invite link shortcut without invite-link permission', function () {
@@ -133,7 +135,8 @@ describe('presence test', function () {
         $participant->save();
 
         Livewire::actingAs($member)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-            ->assertDontSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'));
+            ->assertDontSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'))
+            ->assertDontSeeHtml('copyWithSelection');
     });
 
     test('participants with add-members and invite-link permissions see the copy invite link shortcut', function () {
@@ -150,7 +153,9 @@ describe('presence test', function () {
         $participant->save();
 
         Livewire::actingAs($member)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
-            ->assertSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'));
+            ->assertSee(__('wirechat::chat.group.add_members.actions.invite_via_link.label'))
+            ->assertSeeHtml('copyWithSelection')
+            ->assertSeeHtml('window.navigator.clipboard.writeText(value)');
     });
 
 });

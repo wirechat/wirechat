@@ -2,17 +2,25 @@
     'component',
     'conversation' => null,
     'widget' => false,
-    'panel'=>null,
+    'panel' => null,
+    'arguments' => [],
 ])
 
-<div x-data x-on:click="Livewire.dispatch('openWirechatModal', {
-        component: @js($component),
-        arguments: {
-            conversation: @js($conversation),
-            widget:@js($widget),
-            panel:@js($panel)
-        }
-    })">
+@php
+    $modalArguments = array_merge([
+        'conversation' => $conversation,
+        'widget' => $widget,
+        'panel' => $panel,
+    ], $arguments);
+@endphp
 
+<div
+    {{ $attributes }}
+    x-data
+    x-on:click="Livewire.dispatch('openWirechatModal', {
+        component: @js($component),
+        arguments: @js($modalArguments)
+    })"
+>
     {{ $slot }}
 </div>

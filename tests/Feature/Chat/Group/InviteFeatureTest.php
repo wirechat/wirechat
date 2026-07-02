@@ -266,6 +266,8 @@ it('renders translated content in the invite link details modal', function () {
         ->assertSee(__('wirechat::chat.group.invite_link.show.labels.expires'))
         ->assertSee(__('wirechat::chat.group.invite_link.show.labels.never'))
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
+        ->assertSeeHtml('copyWithSelection')
+        ->assertSeeHtml('window.navigator.clipboard.writeText(value)')
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.share_link.label'))
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.revoke.label'));
 });
@@ -641,6 +643,12 @@ it('shows group access editing only to owners inside invite links', function () 
 
     Livewire::actingAs($owner)
         ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSeeHtml('wirechat.chat.group.links.show')
+        ->assertSeeHtml('wirechat.chat.group.links.send')
+        ->assertSeeHtml('copyWithSelection')
+        ->assertSeeHtml('window.navigator.clipboard.writeText(value)')
+        ->assertSeeHtml("document.execCommand('copy')")
+        ->assertSeeHtml('openChatDrawer')
         ->assertSee('wirechat.chat.group.permissions');
 
     Livewire::actingAs($admin)

@@ -52,29 +52,18 @@
 
     @if ($primaryInviteUrl)
         <section class="w-full flex  border-zinc-200 px-0 py-3 dark:border-zinc-700">
-            <x-wirechat::button type="button"
-                variant="filled"
-                x-data="{
-                    inviteUrl: @js($primaryInviteUrl),
-                    copySuccessMessage: @js(__('wirechat::chat.group.invite_link.messages.copied_success')),
-                    copyPrompt: @js(__('wirechat::chat.group.invite_link.messages.copy_prompt')),
-                    copyInviteLink() {
-                        if (navigator.clipboard) {
-                            navigator.clipboard.writeText(this.inviteUrl);
-                            this.$dispatch('wirechat-toast', { type: 'success', message: this.copySuccessMessage });
+            <x-wirechat::actions.copy
+                :value="$primaryInviteUrl"
+                :success-message="__('wirechat::chat.group.invite_link.messages.copied_success')"
+                :prompt-message="__('wirechat::chat.group.invite_link.messages.copy_prompt')"
+                class="w-full"
+            >
+                <x-wirechat::button type="button" variant="filled" full-width class="gap-2">
+                    <x-wirechat::icons.link class="size-5" />
 
-                            return;
-                        }
-
-                        window.prompt(this.copyPrompt, this.inviteUrl);
-                    },
-                }"
-                x-on:click="copyInviteLink()"
-                class="w-full gap-2">   
-               <x-wirechat::icons.link class="size-5" />
-
-                <span>{{ __('wirechat::chat.group.add_members.actions.invite_via_link.label') }}</span>
-            </x-wirechat::button>
+                    <span>{{ __('wirechat::chat.group.add_members.actions.invite_via_link.label') }}</span>
+                </x-wirechat::button>
+            </x-wirechat::actions.copy>
         </section>
     @endif
 

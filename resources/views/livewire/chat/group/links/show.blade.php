@@ -47,35 +47,37 @@
         </div>
 
         <div class="grid grid-cols-1 max-h-fit gap-3 sm:grid-cols-2">
-            <x-wirechat::button type="button"
-                 size='sm'
-                  variant='default'
-                x-data="{
-                    inviteUrl: @js($inviteUrl),
-                    copySuccessMessage: @js(__('wirechat::chat.group.invite_link.show.messages.copied_success')),
-                    copyPrompt: @js(__('wirechat::chat.group.invite_link.show.messages.copy_prompt')),
-                    copyInviteLink() {
-                        if (navigator.clipboard) {
-                            navigator.clipboard.writeText(this.inviteUrl);
-                            this.$dispatch('wirechat-toast', { type: 'success', message: this.copySuccessMessage });
+            <x-wirechat::actions.copy
+                :value="$inviteUrl"
+                :success-message="__('wirechat::chat.group.invite_link.show.messages.copied_success')"
+                :prompt-message="__('wirechat::chat.group.invite_link.show.messages.copy_prompt')"
+                class="w-full"
+            >
+                <x-wirechat::button
+                    type="button"
+                    size="sm"
+                    variant="default"
+                    full-width
+                >
+                    {{ __('wirechat::chat.group.invite_link.show.actions.copy_link.label') }}
+                </x-wirechat::button>
+            </x-wirechat::actions.copy>
 
-                            return;
-                        }
-
-                        window.prompt(this.copyPrompt, this.inviteUrl);
-                    },
-                }"
-                x-on:click="copyInviteLink()">
-                {{ __('wirechat::chat.group.invite_link.show.actions.copy_link.label') }}
-            </x-wirechat::button>
-            
-            <x-wirechat::button 
-             variant='outline'
-            type="button"
-                x-data
-                x-on:click="Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: @js($conversation->id), invite: @js($invite->id), panel: @js($this->panel) } })">
-                {{ __('wirechat::chat.group.invite_link.show.actions.share_link.label') }}
-            </x-wirechat::button>
+            <x-wirechat::actions.open-modal
+                component="wirechat.chat.group.links.send"
+                :conversation="$conversation->id"
+                :panel="$this->panel"
+                :arguments="['invite' => $invite->id]"
+                class="w-full"
+            >
+                <x-wirechat::button
+                    type="button"
+                    variant="outline"
+                    full-width
+                >
+                    {{ __('wirechat::chat.group.invite_link.show.actions.share_link.label') }}
+                </x-wirechat::button>
+            </x-wirechat::actions.open-modal>
         </div>
 
         @if ($canRevokeLink)
