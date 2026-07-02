@@ -42,6 +42,10 @@
 
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate font-medium">{{ $pastMember->participantable?->wirechat_name }}</p>
+                                    @if (filled($pastMember->participantable?->wirechat_subtitle))
+                                        <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $pastMember->participantable?->wirechat_subtitle }}</p>
+                                    @endif
                                     <p class="text-sm text-gray-600 dark:text-gray-300">{{ $reasonLabel }}</p>
                                     @if ($atLabel)
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.past_members.labels.at', ['time' => $atLabel]) }}</p>

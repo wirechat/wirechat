@@ -7,6 +7,8 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
+    $this->sandbox = wirechat_create_filesystem_sandbox();
+
     $this->id = 'testPanel';
     $this->className = 'TestPanelPanelProvider';
     $this->namespace = 'App\\Providers\\Wirechat';

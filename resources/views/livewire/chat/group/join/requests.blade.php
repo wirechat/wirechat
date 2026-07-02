@@ -63,6 +63,11 @@
                             <div class="flex flex-wrap items-start justify-between gap-3">
                                 <div class="text-start">
                                     <p class="font-medium">{{ $requester?->wirechat_name ?: __('wirechat::chat.group.join.requests.labels.unknown_user') }}</p>
+                                    @if (filled($requester?->wirechat_subtitle))
+                                        <p class="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $requester?->wirechat_subtitle }}
+                                        </p>
+                                    @endif
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                         {{ $request->created_at?->diffForHumans() }}
                                     </p>

@@ -2,7 +2,6 @@
 
 namespace Wirechat\Wirechat\Panel\Concerns;
 
-use App\Models\User;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -67,7 +66,7 @@ trait HasUsersSearch
      */
     protected function defaultSearchUserModel(): string
     {
-        $class = (string) config('wirechat.models.user', config('wirechat.user_model', User::class));
+        $class = (string) config('wirechat.models.user', config('wirechat.user_model', 'App\\Models\\User'));
 
         if (! class_exists($class)) {
             throw new \InvalidArgumentException("Model class '{$class}' configured in 'wirechat.models.user' does not exist.");

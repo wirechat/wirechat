@@ -298,7 +298,10 @@ test('dropdown trigger slot classes are applied to the trigger wrapper', functio
 
 test('requests drawer defaults to the incoming tab when incoming requests exist', function () {
     $auth = User::factory()->create(['name' => 'Auth']);
-    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+    $incomingSender = User::factory()->create([
+        'name' => 'Incoming Sender',
+        'email' => 'incoming.sender@example.test',
+    ]);
     $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
 
     $incomingSender->sendMessageRequestTo($auth);
@@ -307,6 +310,7 @@ test('requests drawer defaults to the incoming tab when incoming requests exist'
     Livewire::actingAs($auth)->test(RequestsDrawer::class)
         ->assertSet('activeTab', 'incoming')
         ->assertSee('Incoming Sender')
+        ->assertSee($incomingSender->wirechat_subtitle)
         ->assertDontSee('Outgoing Recipient');
 });
 

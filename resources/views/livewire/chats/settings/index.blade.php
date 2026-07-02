@@ -33,6 +33,11 @@
                     <h3 class="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">
                         {{ data_get($auth, 'wirechat_name') ?? data_get($auth, 'name') ?? __('wirechat::chats.settings.labels.profile') }}
                     </h3>
+                    @if (filled(data_get($auth, 'wirechat_subtitle')))
+                        <p class="mt-1 truncate text-sm text-zinc-500 dark:text-zinc-400">
+                            {{ data_get($auth, 'wirechat_subtitle') }}
+                        </p>
+                    @endif
                     <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                         {{ __('wirechat::chats.settings.general.profile.description', ['app' => $appName]) }}
                     </p>

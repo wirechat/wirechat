@@ -494,7 +494,10 @@ it('hides exited and removed past members from send invite search results', func
     $owner = User::factory()->create(['name' => 'Owner']);
     $exitedUser = User::factory()->create(['name' => 'Invite Candidate Left']);
     $removedUser = User::factory()->create(['name' => 'Invite Candidate Removed']);
-    $availableUser = User::factory()->create(['name' => 'Invite Candidate Ready']);
+    $availableUser = User::factory()->create([
+        'name' => 'Invite Candidate Ready',
+        'email' => 'invite.candidate@example.test',
+    ]);
 
     $conversation = $owner->createGroup('Test');
     $conversation->addParticipant($exitedUser)->exitConversation();
@@ -512,8 +515,33 @@ it('hides exited and removed past members from send invite search results', func
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->set('search', 'Invite Candidate')
         ->assertSee($availableUser->wirechat_name)
+        ->assertSee($availableUser->wirechat_subtitle)
         ->assertDontSee($exitedUser->wirechat_name)
         ->assertDontSee($removedUser->wirechat_name);
+});
+
+it('shows requester subtitles in the join requests drawer', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create([
+        'name' => 'Subtitle Requester',
+        'email' => 'subtitle.requester@example.test',
+    ]);
+
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $conversation->group->requestToJoin($receiver, $invite);
+
+    Livewire::actingAs($owner)
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee($receiver->wirechat_name)
+        ->assertSee($receiver->wirechat_subtitle);
 });
 
 it('rejects direct send invite selection for an exited past member', function () {
@@ -542,10 +570,10 @@ it('uses the panel user search callback in the send invite modal', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $emailMatchedUser = User::factory()->create([
         'name' => 'Email Result',
-        'email' => 'custom-callback@example.com',
+        'email' => 'callback-match@example.com',
     ]);
     $nameMatchedUser = User::factory()->create([
-        'name' => 'custom-callback',
+        'name' => 'Callback Match',
         'email' => 'name-only@example.com',
     ]);
 
@@ -566,7 +594,7 @@ it('uses the panel user search callback in the send invite modal', function () {
 
     Livewire::actingAs($owner)
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
-        ->set('search', 'custom-callback')
+        ->set('search', 'callback-match')
         ->assertSee($emailMatchedUser->wirechat_name)
         ->assertDontSee($nameMatchedUser->wirechat_name);
 });

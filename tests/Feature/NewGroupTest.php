@@ -187,12 +187,16 @@ describe('Add members page', function () {
     test('Search can be filtered', function () {
         $auth = ModelsUser::factory()->create();
         // create another user
-        ModelsUser::factory()->create(['name' => 'Micheal']);
+        $user = ModelsUser::factory()->create([
+            'name' => 'Micheal',
+            'email' => 'micheal.new-group@example.test',
+        ]);
 
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request
             ->set('search', 'Mic')
-            ->assertSee('Micheal');
+            ->assertSee('Micheal')
+            ->assertSee($user->wirechat_subtitle);
 
     });
 

@@ -161,13 +161,16 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        // add participant
-        $conversation->addParticipant(User::factory()->create(['name' => 'Micheal']));
+        $user = User::factory()->create([
+            'name' => 'Micheal',
+            'email' => 'micheal.add-members@example.test',
+        ]);
 
         $request = Livewire::actingAs($auth)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
         $request
             ->set('search', 'Mic')
-            ->assertSee('Micheal');
+            ->assertSee('Micheal')
+            ->assertSee($user->wirechat_subtitle);
     });
 
     test('users who disallow group adds are hidden from add members search', function () {

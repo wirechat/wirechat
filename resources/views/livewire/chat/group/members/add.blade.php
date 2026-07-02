@@ -144,6 +144,11 @@
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
                                 {{ $user['wirechat_name'] }}</p>
 
+                            @if (filled($user['wirechat_subtitle'] ?? null))
+                                <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $user['wirechat_subtitle'] }}</p>
+                            @endif
+
                              <span
                              @class(['text-gray-600 dark:text-gray-400 text-sm'])>
                                 @if ($isAlreadyAParticipant)

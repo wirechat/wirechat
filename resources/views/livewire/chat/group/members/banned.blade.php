@@ -32,6 +32,10 @@
 
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate font-medium">{{ $bannedMember->participantable?->wirechat_name }}</p>
+                                    @if (filled($bannedMember->participantable?->wirechat_subtitle))
+                                        <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $bannedMember->participantable?->wirechat_subtitle }}</p>
+                                    @endif
                                     <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.banned_members.labels.helper') }}</p>
                                 </div>
 

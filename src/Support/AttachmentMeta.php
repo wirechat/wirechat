@@ -76,8 +76,8 @@ final class AttachmentMeta
                 return null;
             }
 
-            $width = (int) ($size[0] ?? 0);
-            $height = (int) ($size[1] ?? 0);
+            $width = (int) $size[0];
+            $height = (int) $size[1];
 
             return self::dimensions($width, $height);
         } catch (Throwable) {

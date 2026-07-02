@@ -31,6 +31,9 @@
                 <x-wirechat::avatar :src="$invite->createdBy?->wirechat_avatar_url" class="h-12 w-12" />
                 <div>
                     <p class="font-medium">{{ $invite->createdBy?->wirechat_name ?: __('wirechat::chat.group.invite_link.show.labels.unknown') }}</p>
+                    @if (filled($invite->createdBy?->wirechat_subtitle))
+                        <p class="truncate text-sm text-gray-500 dark:text-gray-400">{{ $invite->createdBy?->wirechat_subtitle }}</p>
+                    @endif
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $invite->created_at?->format('M j, Y g:i A') }}</p>
                 </div>
             </div>

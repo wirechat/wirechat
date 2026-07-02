@@ -1,6 +1,7 @@
 <?php
 
 beforeEach(function () {
+    $this->sandbox = wirechat_create_filesystem_sandbox();
 
     $this->filePath = app_path('Providers/Wirechat/ChatsPanelProvider.php');
     $this->cssPath = resource_path('css/app.css');

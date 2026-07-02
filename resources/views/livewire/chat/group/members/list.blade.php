@@ -83,13 +83,17 @@
                                 <x-wirechat::avatar src="{{ $participant->participantable->wirechat_avatar_url }}"
                                     class="w-10 h-10" />
 
-                                <div class="grid grid-cols-12 w-full ">
+                                <div class="grid grid-cols-12 w-full gap-x-2">
                                     <h6 @class(['transition-all truncate group-hover:underline col-span-10' ])>
                                         {{ $loopParticipantIsAuth ? 'You' : $participant->participantable->wirechat_name }}</h6>
                                         @if ($participant->isOwner()|| $participant->isAdmin())
                                         <span  style="background-color: var(--wirechat-primary-color);" class=" flex items-center col-span-2 dark:text-white text-xs font-medium ml-auto px-2.5 py-px rounded-sm ">
                                             {{$participant->isOwner()? __('wirechat::chat.group.members.labels.owner'): __('wirechat::chat.group.members.labels.admin')}}
                                         </span>
+                                        @endif
+                                        @if (filled($participant->participantable?->wirechat_subtitle))
+                                            <p class="col-span-10 truncate text-sm text-gray-500 dark:text-gray-400">
+                                                {{ $participant->participantable?->wirechat_subtitle }}</p>
                                         @endif
 
                                 </div>

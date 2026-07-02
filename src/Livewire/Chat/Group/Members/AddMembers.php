@@ -79,6 +79,7 @@ class AddMembers extends ModalComponent
                     'type' => $model->getMorphClass(),
                     'wirechat_name' => $model->wirechat_name,
                     'wirechat_avatar_url' => $model->wirechat_avatar_url,
+                    'wirechat_subtitle' => data_get($model, 'wirechat_subtitle'),
                     'belongsToConversation' => $model->belongsToConversation($this->conversation),
                     'isBanned' => (bool) $this->conversation->participant($model, withoutGlobalScopes: true)?->isBannedByAdmin(),
                 ]);

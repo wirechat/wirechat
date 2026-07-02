@@ -74,13 +74,19 @@ describe('presence test', function () {
         $conversation = $auth->createGroup('My Group');
 
         // add participants
-        $conversation->addParticipant(User::factory()->create(['name' => 'John']));
+        $john = User::factory()->create([
+            'name' => 'John',
+            'email' => 'john.member@example.test',
+        ]);
+
+        $conversation->addParticipant($john);
         $conversation->addParticipant(User::factory()->create(['name' => 'Lemon']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Cold']));
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request
             ->assertSee('John')
+            ->assertSee($john->wirechat_subtitle)
             ->assertSee('Lemon')
             ->assertSee('Cold');
     });
@@ -863,7 +869,10 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        $leftUser = User::factory()->create(['name' => 'Left User']);
+        $leftUser = User::factory()->create([
+            'name' => 'Left User',
+            'email' => 'left.member@example.test',
+        ]);
         $removedUser = User::factory()->create(['name' => 'Removed User']);
         $blockedUser = User::factory()->create(['name' => 'Blocked User']);
 
@@ -873,6 +882,7 @@ describe('actions test', function () {
 
         Livewire::actingAs($auth)->test(PastMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee($leftUser->wirechat_name)
+            ->assertSee($leftUser->wirechat_subtitle)
             ->assertSee($removedUser->wirechat_name)
             ->assertSee($blockedUser->wirechat_name)
             ->assertSee(__('wirechat::chat.group.past_members.labels.reason_left'))
@@ -884,12 +894,16 @@ describe('actions test', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        $blockedUser = User::factory()->create(['name' => 'Blocked User']);
+        $blockedUser = User::factory()->create([
+            'name' => 'Blocked User',
+            'email' => 'blocked.member@example.test',
+        ]);
         $participant = $conversation->addParticipant($blockedUser);
         $participant->blockByAdmin($auth);
 
         Livewire::actingAs($auth)->test(Banned::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee($blockedUser->wirechat_name)
+            ->assertSee($blockedUser->wirechat_subtitle)
             ->call('liftBan', $participant->id)
             ->assertDontSee($blockedUser->wirechat_name);
 

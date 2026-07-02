@@ -128,7 +128,10 @@ test('panel settings are disabled by default and can be enabled', function () {
 
 test('panel default user search uses the configured user model', function () {
     User::factory()->create(['name' => 'Taylor User']);
-    $admin = Admin::factory()->create(['name' => 'Taylor Admin']);
+    $admin = Admin::factory()->create([
+        'name' => 'Taylor Admin',
+        'email' => 'taylor.admin@example.test',
+    ]);
 
     config(['wirechat.models.user' => Admin::class]);
 
@@ -137,7 +140,8 @@ test('panel default user search uses the configured user model', function () {
     expect($results)
         ->toHaveCount(1)
         ->and($results[0]['id'])->toBe($admin->id)
-        ->and($results[0]['wirechat_name'])->toBe('Taylor Admin');
+        ->and($results[0]['wirechat_name'])->toBe('Taylor Admin')
+        ->and($results[0]['wirechat_subtitle'])->toBe('taylor.admin@example.test');
 });
 
 test('panel private chat actions are disabled by default and can be enabled', function () {

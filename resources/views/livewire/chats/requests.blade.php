@@ -103,6 +103,12 @@
                                 @endif
                             </div>
 
+                            @if (filled($peer?->wirechat_subtitle))
+                                <p class="mt-1 truncate text-sm text-zinc-500 dark:text-zinc-400">
+                                    {{ $peer?->wirechat_subtitle }}
+                                </p>
+                            @endif
+
                             <p class="mt-1 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
                                 {{ $preview }}
                             </p>

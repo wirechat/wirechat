@@ -81,6 +81,11 @@ class User extends Authenticatable implements WirechatUser
 
     }
 
+    public function getWirechatSubtitleAttribute(): ?string
+    {
+        return $this->email;
+    }
+
     public function canCreateGroups(): bool
     {
         return $this->hasVerifiedEmail() == true;

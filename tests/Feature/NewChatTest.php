@@ -43,11 +43,16 @@ it('can filter users if search input is set', function () {
     $auth = ModelsUser::factory()->create();
 
     // create user
-    ModelsUser::factory()->create(['name' => 'John']);
+    $user = ModelsUser::factory()->create([
+        'name' => 'John',
+        'email' => 'john.subtitle@example.test',
+    ]);
 
     $request = Livewire::actingAs($auth)->test(NewChat::class);
 
-    $request->set('search', 'Joh')->assertSee('John');
+    $request->set('search', 'Joh')
+        ->assertSee('John')
+        ->assertSee($user->wirechat_subtitle);
 
 });
 

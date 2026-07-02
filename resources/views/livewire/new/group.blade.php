@@ -208,8 +208,15 @@
                                         class="flex cursor-pointer gap-2 items-center w-full">
                                         <x-wirechat::avatar  src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10" />
 
-                                        <p class="group-hover:underline transition-all truncate">
-                                            {{ $user['wirechat_name'] }}</p>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="group-hover:underline transition-all truncate">
+                                                {{ $user['wirechat_name'] }}</p>
+
+                                            @if (filled($user['wirechat_subtitle'] ?? null))
+                                                <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ $user['wirechat_subtitle'] }}</p>
+                                            @endif
+                                        </div>
 
                                         <div class="ml-auto">
                                             @if ($selectedMembers->contains(fn($member) => (string) $member->getKey() === (string) $user['id'] && $member->getMorphClass() === $user['type']))

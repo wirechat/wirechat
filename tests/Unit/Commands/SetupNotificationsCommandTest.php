@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
+    $this->sandbox = wirechat_create_filesystem_sandbox();
+
     // Clean up existing files for isolation
     if (File::exists(public_path('js/wirechat/sw.js'))) {
         File::delete(public_path('js/wirechat/sw.js'));

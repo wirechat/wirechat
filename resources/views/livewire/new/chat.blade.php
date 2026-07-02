@@ -70,8 +70,15 @@
 
                                 <x-wirechat::avatar :src="$user['wirechat_avatar_url']" class="w-10 h-10"/>
 
-                                <p class="group-hover:underline transition-all">
-                                    {{ $user['wirechat_name'] }}</p>
+                                <div class="min-w-0">
+                                    <p class="group-hover:underline transition-all truncate">
+                                        {{ $user['wirechat_name'] }}</p>
+
+                                    @if (filled($user['wirechat_subtitle'] ?? null))
+                                        <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $user['wirechat_subtitle'] }}</p>
+                                    @endif
+                                </div>
 
                             </li>
                         @endforeach
