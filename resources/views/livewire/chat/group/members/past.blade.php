@@ -24,7 +24,7 @@
             @if ($pastMembers->isEmpty())
                 <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.past_members.labels.no_results') }}</p>
             @else
-                <ul class="flex flex-col gap-3">
+                <ul class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($pastMembers as $pastMember)
                         @php
                             $reason = $pastMember->pastMembershipReason();
@@ -36,7 +36,7 @@
                             $atLabel = $pastMember->pastMembershipAt()?->diffForHumans();
                         @endphp
 
-                        <li class="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-700" wire:key="past-member-{{ $pastMember->id }}">
+                        <li class="py-4" wire:key="past-member-{{ $pastMember->id }}">
                             <div class="flex items-start gap-3">
                                 <x-wirechat::avatar :src="$pastMember->participantable?->wirechat_avatar_url" class="w-10 h-10 shrink-0" />
 
