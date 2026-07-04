@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
+use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelRegistry;
 use Wirechat\Wirechat\Support\Color;
 use Workbench\App\Models\User;
 
@@ -125,6 +128,47 @@ test('wirechat styles uses the dark palette and supports extending zinc shades',
         ->toContain('--wc-dark-secondary: '.$customDark[800].';')
         ->toContain('--wc-dark-accent: '.$customDark[700].';')
         ->toContain('--wc-light-secondary: '.Color::Zinc[100].';');
+});
+
+test('wirechat styles use soft color tone by default', function () {
+    app(PanelRegistry::class)->register(
+        Panel::make()
+            ->id('tone-soft')
+            ->path('tone-soft')
+            ->colors([
+                'primary' => Color::Emerald,
+            ])
+    );
+
+    $styles = Blade::render('@wirechatStyles(tone-soft)');
+
+    expect($styles)
+        ->toContain('--wc-primary-500: '.Color::Emerald[500].';')
+        ->toContain('--wc-primary-tone-bg: color-mix(in srgb, var(--wc-primary-300) 35%, transparent);')
+        ->toContain('--wc-primary-tone-text: rgb(24 24 27);')
+        ->toContain('--wc-primary-tone-dark-bg: color-mix(in srgb, var(--wc-primary-300) 40%, transparent);')
+        ->toContain('--wc-primary-tone-dark-text: #fff;');
+});
+
+test('wirechat styles can use solid color tone for primary surfaces', function () {
+    app(PanelRegistry::class)->register(
+        Panel::make()
+            ->id('tone-solid')
+            ->path('tone-solid')
+            ->colors([
+                'primary' => Color::Rose,
+            ])
+            ->colorTone(ColorTone::Solid)
+    );
+
+    $styles = Blade::render('@wirechatStyles(tone-solid)');
+
+    expect($styles)
+        ->toContain('--wc-primary-500: '.Color::Rose[500].';')
+        ->toContain('--wc-primary-tone-bg: var(--wc-primary-500);')
+        ->toContain('--wc-primary-tone-text: #fff;')
+        ->toContain('--wc-primary-tone-dark-bg: var(--wc-primary-600);')
+        ->toContain('--wc-primary-tone-dark-text: #fff;');
 });
 
 test('it forwards chatsClass and chatClass to the widget children', function () {

@@ -1,5 +1,6 @@
 <?php
 
+use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Wirechat\Wirechat\Support\Enums\UnReadType;
@@ -59,6 +60,24 @@ test('panel inviteJoinRedirect can be customized', function () {
     expect(testPanelProvider()->getInviteJoinRedirectUrl())->toBe('/widget');
 });
 
+test('panel color tone defaults to soft and can be customized', function () {
+    expect(testPanelProvider()->getColorTone())->toBe(ColorTone::Soft)
+        ->and(testPanelProvider()->hasSoftColorTone())->toBeTrue()
+        ->and(testPanelProvider()->hasSolidColorTone())->toBeFalse();
+
+    testPanelProvider()->colorTone(ColorTone::Solid);
+
+    expect(testPanelProvider()->getColorTone())->toBe(ColorTone::Solid)
+        ->and(testPanelProvider()->hasSoftColorTone())->toBeFalse()
+        ->and(testPanelProvider()->hasSolidColorTone())->toBeTrue();
+});
+
+test('panel color tone accepts string values', function () {
+    testPanelProvider()->colorTone('solid');
+
+    expect(testPanelProvider()->getColorTone())->toBe(ColorTone::Solid);
+});
+
 test('primary utility theme is mapped to the provider palette tokens', function () {
     $providerContents = file_get_contents(__DIR__.'/../../src/WirechatServiceProvider.php');
     $cssContents = file_get_contents(__DIR__.'/../../resources/css/app.css');
@@ -77,6 +96,9 @@ test('primary utility theme is mapped to the provider palette tokens', function 
         ->toContain('--wc-tint-primary-50: color-mix(in srgb, var(--wc-primary-50) 35%, transparent);')
         ->toContain('--wc-tint-primary-500: color-mix(in srgb, var(--wc-primary-500) 35%, transparent);')
         ->toContain('--wc-tint-primary-950: color-mix(in srgb, var(--wc-primary-950) 35%, transparent);')
+        ->toContain('.wc-primary-tone-bg {')
+        ->toContain('background-color: var(--wc-primary-tone-bg, var(--wc-brand-primary));')
+        ->toContain('color: var(--wc-primary-tone-text, #fff);')
         ->toContain('.wc-tint-primary-bg  { background-color: var(--wc-tint-primary-300); }');
 
 });

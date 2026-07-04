@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\MessageType;
@@ -530,6 +531,36 @@ describe('Presense', function () {
             ->assertSee('Follow this link to join my group:')
             ->assertSee(__('wirechat::chat.group.invite_message.actions.view_group.label'))
             ->assertSee($invite->url(testPanelProvider()));
+    });
+
+    test('it renders outgoing group invite action as white for solid color tone', function () {
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah', 'A place to share ideas');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Follow this link to join my group: '.$invite->url(testPanelProvider())
+        )->conversation;
+
+        $html = Livewire::actingAs($sender)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        expect($html)
+            ->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->toMatch('/data-invite-link="true"[^>]*class="[^"]*border-white\/20 text-white\/90/');
     });
 
     test('it keeps group invite previews below visible group sender names', function () {
@@ -2061,7 +2092,26 @@ describe('Sending messages ', function () {
             ->set('body', 'New message')
             ->call('sendMessage')
             ->assertSee('New message')
-            ->assertSeeHtml('wc-tint-primary-bg');
+            ->assertSeeHtml('wc-primary-tone-bg')
+            ->assertSeeHtml('ml-auto text-[11px] text-zinc-700 dark:text-white/90')
+            ->assertDontSeeHtml('bg-[#f6f6f8fb]');
+    });
+
+    test('it renders outgoing message time as white for solid color tone', function () {
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('body', 'New message')
+            ->call('sendMessage')
+            ->assertSee('New message')
+            ->assertSeeHtml('ml-auto text-[11px] text-white/90')
+            ->assertDontSeeHtml('ml-auto text-[11px] text-zinc-700 dark:text-white/90');
     });
 
     test('it saves new message to database when it is sent', function () {
@@ -2114,7 +2164,32 @@ describe('Sending messages ', function () {
 
         expect($html)
             ->toContain('dusk="message-link"')
-            ->toContain('href="https://example.com"');
+            ->toContain('href="https://example.com"')
+            ->toMatch('/dusk="message-link"[^>]*class="[^"]*dark:text-white/');
+    });
+
+    test('it renders outgoing message links as white for solid color tone', function () {
+        testPanelProvider()->parseMessageUrls(true);
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"')
+            ->toMatch('/dusk="message-link"[^>]*class="[^"]*text-white\/90/')
+            ->not->toMatch('/dusk="message-link"[^>]*class="[^"]*dark:text-white/');
     });
 
     test('it escapes html-like message bodies while rendering', function () {
@@ -2865,7 +2940,7 @@ describe('Sending messages ', function () {
             ->toContain('1 MB')
             ->toContain('wire:click="download')
             ->toContain('p-1')
-            ->toContain('wc-tint-primary-bg')
+            ->toContain('wc-primary-tone-bg')
             ->toContain('max-h-[24rem]')
             ->toContain('sm:max-w-[26rem]')
             ->toContain('h-full w-auto max-w-full')

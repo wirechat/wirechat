@@ -22,7 +22,7 @@
     @class([
         'inline-flex max-w-full flex-col overflow-hidden',
         'rounded-lg p-1',
-        'wc-tint-primary-bg' => $belongsToAuth,
+        'wc-primary-tone-bg' => $belongsToAuth,
         'bg-zinc-200/70 dark:bg-zinc-700/70' => ! $belongsToAuth,
 
     ])

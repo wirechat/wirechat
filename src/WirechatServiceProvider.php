@@ -18,6 +18,7 @@ use Wirechat\Wirechat\Console\Commands\MigrateConfigToPanelCommand;
 use Wirechat\Wirechat\Console\Commands\SetupNotifications;
 use Wirechat\Wirechat\Console\Commands\UpgradeMorphColumns;
 use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
+use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Facades\WirechatColor;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
@@ -466,6 +467,18 @@ class WirechatServiceProvider extends ServiceProvider
             $darkSecondary = $darkPalette[800] ?? Color::Zinc[800];
             $darkAccent = $darkPalette[700] ?? Color::Zinc[700];
             $darkBorder = $darkPalette[700] ?? Color::Zinc[700];
+            $colorTone = $currentPanel?->getColorTone() ?? ColorTone::Soft;
+            $toneLightBackground = 'color-mix(in srgb, var(--wc-primary-300) 35%, transparent)';
+            $toneLightText = 'rgb(24 24 27)';
+            $toneDarkBackground = 'color-mix(in srgb, var(--wc-primary-300) 40%, transparent)';
+            $toneDarkText = '#fff';
+
+            if ($colorTone === ColorTone::Solid) {
+                $toneLightBackground = 'var(--wc-primary-500)';
+                $toneLightText = '#fff';
+                $toneDarkBackground = 'var(--wc-primary-600)';
+                $toneDarkText = '#fff';
+            }
 
             return "<?php echo <<<EOT
                     <style>
@@ -502,6 +515,11 @@ class WirechatServiceProvider extends ServiceProvider
                         --wc-dark-secondary: {$darkSecondary};/* --color-zinc-800 */
                         --wc-dark-accent: {$darkAccent};/* --color-zinc-700 */
                         --wc-dark-border: {$darkBorder};/* --color-zinc-700 */
+
+                        --wc-primary-tone-bg: {$toneLightBackground};
+                        --wc-primary-tone-text: {$toneLightText};
+                        --wc-primary-tone-dark-bg: {$toneDarkBackground};
+                        --wc-primary-tone-dark-text: {$toneDarkText};
                     }
                     [x-cloak] {
                         display: none !important;
