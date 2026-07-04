@@ -533,7 +533,7 @@ describe('Presense', function () {
             ->assertSee($invite->url(testPanelProvider()));
     });
 
-    test('it renders outgoing group invite action as white for solid color tone', function () {
+    test('it renders outgoing group invite surfaces as white for solid color tone', function () {
         testPanelProvider()->colorTone(ColorTone::Solid);
 
         $sender = User::factory()->create(['name' => 'Sender']);
@@ -560,6 +560,7 @@ describe('Presense', function () {
 
         expect($html)
             ->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->toMatch('/dusk="group-invite-preview"[^>]*class="[^"]*bg-white\/10 text-white/')
             ->toMatch('/data-invite-link="true"[^>]*class="[^"]*border-white\/20 text-white\/90/');
     });
 
@@ -2938,6 +2939,8 @@ describe('Sending messages ', function () {
             ->toContain('dusk="message-file-meta"')
             ->toContain('PDF')
             ->toContain('1 MB')
+            ->toContain('truncate text-sm font-medium text-zinc-900 dark:text-zinc-100')
+            ->toContain('mt-1 flex items-center gap-1.5 text-xs font-medium uppercase leading-none text-zinc-600 dark:text-zinc-300')
             ->toContain('wire:click="download')
             ->toContain('p-1')
             ->toContain('wc-primary-tone-bg')
@@ -2956,6 +2959,43 @@ describe('Sending messages ', function () {
         expect(substr_count($html, 'dusk="message-attachment-shell"'))->toBe(4);
         expect(substr_count($html, 'dusk="message-attachment-time"'))->toBe(4);
         expect(preg_match_all('/dusk="message-attachment-time"[^>]*>\s*\d{2}:\d{2}\s*<\/span>/s', $html))->toBe(4);
+    });
+
+    test('it renders outgoing file attachment details with solid color tone contrast', function () {
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:33:00'),
+        ]);
+
+        $message->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/Archive.zip',
+            'file_name' => 'Archive.zip',
+            'original_name' => 'Archive.zip',
+            'mime_type' => 'application/zip',
+            'url' => 'https://example.test/Archive.zip',
+            'meta' => ['size' => 9856614],
+        ]);
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('Archive.zip')
+            ->toContain('ZIP')
+            ->toContain('9.4 MB')
+            ->toMatch('/class="[^"]*truncate text-sm font-medium text-white"[^>]*>\s*Archive\.zip\s*<\/p>/s')
+            ->toMatch('/dusk="message-file-extension"[^>]*class="[^"]*text-zinc-700/')
+            ->toMatch('/dusk="message-file-meta"[^>]*class="[^"]*text-white\/80/')
+            ->toMatch('/dusk="message-attachment-time"[^>]*class="[^"]*text-white\/90/')
+            ->toMatch('/wire:click="download[^>]*class="[^"]*border-white\/30 text-white\/85 hover:text-white/');
     });
 
     test('it saves image to storage when created & clears files properties when done', function () {

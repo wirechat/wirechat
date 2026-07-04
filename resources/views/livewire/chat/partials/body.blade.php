@@ -527,6 +527,7 @@
                                             :message="$message"
                                             :next-message="$nextMessage"
                                             :belongs-to-auth="$belongsToAuth"
+                                            :has-solid-color-tone="$this->panel()->hasSolidColorTone()"
                                         >
                                             {{-- Attachment is video --}}
                                             @if ($attachment->isVideo())
@@ -551,7 +552,7 @@
                                                 @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
                                             @else
                                                 {{-- Attachment is file --}}
-                                                @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
+                                                @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment, 'belongsToAuth' => $belongsToAuth, 'hasSolidColorTone' => $this->panel()->hasSolidColorTone() ])
                                             @endif
                                         </x-wirechat::attachment-bubble>
 

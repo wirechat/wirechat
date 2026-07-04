@@ -78,6 +78,7 @@
         'preview' => $groupInvitePreview,
         'belongsToAuth' => $belongsToAuth,
         'hasVisibleSenderName' => $hasVisibleSenderName,
+        'hasSolidColorTone' => $hasSolidColorTone,
     ])
 @endif
 
