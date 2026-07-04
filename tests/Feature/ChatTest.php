@@ -561,7 +561,8 @@ describe('Presense', function () {
         expect($html)
             ->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
             ->toMatch('/dusk="group-invite-preview"[^>]*class="[^"]*bg-white\/10 text-white/')
-            ->toMatch('/data-invite-link="true"[^>]*class="[^"]*border-white\/20 text-white\/90/');
+            ->toMatch('/<button[^>]*dusk="group-invite-action"[^>]*data-invite-link="true"[^>]*class="[^"]*border-white\/20 text-white\/90/')
+            ->not->toContain('href="'.$invite->url(testPanelProvider()).'"');
     });
 
     test('it keeps group invite previews below visible group sender names', function () {
@@ -599,7 +600,7 @@ describe('Presense', function () {
             ->not->toMatch('/dusk="group-invite-preview"[^>]*class="[^"]*(?:^|\s)-mt-1\.5(?:\s|")/');
     });
 
-    test('it renders an inline invite link without target=_blank so the controller redirect can run', function () {
+    test('it renders an inline invite link as an in-chat action while external links stay anchors', function () {
         testPanelProvider()->parseMessageUrls(true);
 
         $sender = User::factory()->create(['name' => 'Sender']);
@@ -626,24 +627,32 @@ describe('Presense', function () {
             'panel' => testPanelProvider()->getId(),
         ])->html();
 
+        preg_match_all('~<button[^>]*dusk="message-invite-action"[^>]*>[\s\S]*?</button>~', $rendered, $buttonMatches);
+        $inviteActions = collect($buttonMatches[0])
+            ->filter(fn (string $tag) => str_contains($tag, $inviteUrl))
+            ->values();
+
         preg_match_all('~<a[^>]*dusk="message-link"[^>]*>~', $rendered, $matches);
         $linkTags = $matches[0];
 
-        // Two inline links: the invite URL, and the unrelated external URL.
-        expect($linkTags)->toHaveCount(2);
+        expect($inviteActions)->toHaveCount(1)
+            ->and($linkTags)->toHaveCount(1)
+            ->and($rendered)->not->toContain('href="'.$inviteUrl.'"');
 
-        $inviteAnchor = collect($linkTags)
-            ->first(fn (string $tag) => str_contains($tag, $inviteUrl));
+        $inviteAction = $inviteActions->first();
         $externalAnchor = collect($linkTags)
             ->first(fn (string $tag) => str_contains($tag, 'https://example.com'));
 
-        expect($inviteAnchor)->toContain('data-invite-link="true"')
-            ->and($inviteAnchor)->toContain('wire:click.prevent="handleOpenChat(')
-            ->and($inviteAnchor)->not->toContain('target="_blank"');
+        expect($inviteAction)->toContain('type="button"')
+            ->and($inviteAction)->toContain('data-invite-link="true"')
+            ->and($inviteAction)->toContain('wire:click="handleOpenChat(')
+            ->and($inviteAction)->not->toContain('href=')
+            ->and($inviteAction)->not->toContain('target="_blank"')
+            ->and($inviteAction)->not->toContain('rel=');
 
-        // The wire:click param must be encrypted — the raw token/URL must NOT
-        // appear inside the wire:click attribute itself, only inside the href.
-        preg_match("~wire:click\.prevent=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAnchor, $clickMatch);
+        // The wire:click param must be encrypted, while the visible text still
+        // shows the copied/shareable invite URL.
+        preg_match("~wire:click=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAction, $clickMatch);
 
         expect($clickMatch[1] ?? '')->not->toBe('')
             ->and($clickMatch[1])->not->toBe($inviteUrl)
@@ -653,6 +662,7 @@ describe('Presense', function () {
         expect(decrypt($clickMatch[1]))->toBe($inviteUrl);
 
         expect($externalAnchor)->toContain('target="_blank"')
+            ->and($externalAnchor)->toContain('rel="noopener noreferrer"')
             ->and($externalAnchor)->not->toContain('data-invite-link="true"')
             ->and($externalAnchor)->not->toContain('handleOpenChat');
     });

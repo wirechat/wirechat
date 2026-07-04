@@ -1,6 +1,5 @@
 @php
     $auth = auth()->user();
-    $appName = config('app.name', 'this app');
 @endphp
 
 <div class="flex min-h-full flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
@@ -38,9 +37,6 @@
                             {{ data_get($auth, 'wirechat_subtitle') }}
                         </p>
                     @endif
-                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                        {{ __('wirechat::chats.settings.general.profile.description', ['app' => $appName]) }}
-                    </p>
                 </div>
             </div>
         </section>

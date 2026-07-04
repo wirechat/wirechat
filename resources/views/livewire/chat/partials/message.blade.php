@@ -85,15 +85,25 @@
 <pre
     dusk="message-text"
     class="{{ $messageTextClasses }}"
-    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php $isInviteLink = $inviteUrl !== null && $segment['href'] === $inviteUrl; @endphp<a
+    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php $isInviteLink = $inviteUrl !== null && $segment['href'] === $inviteUrl; @endphp@if ($isInviteLink)<button
+                dusk="message-invite-action"
+                type="button"
+                data-invite-link="true"
+                wire:click="handleOpenChat(@js($encryptedInviteLink))"
+                @class([
+                    'inline cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-[inherit] underline tracking-normal wrap-anywhere text-sm md:text-base lg:tracking-normal',
+                    'text-white/90' => $belongsToAuth && $hasSolidColorTone,
+                    'dark:text-white' => ! ($belongsToAuth && $hasSolidColorTone),
+                ])>{{ $segment['text'] }}</button>@else<a
                 dusk="message-link"
-                @if ($isInviteLink) data-invite-link="true" wire:click.prevent="handleOpenChat(@js($encryptedInviteLink))" @else target="_blank" rel="noopener noreferrer" @endif
+                target="_blank"
+                rel="noopener noreferrer"
                 @class([
                     'underline tracking-normal wrap-anywhere text-sm md:text-base lg:tracking-normal',
                     'text-white/90' => $belongsToAuth && $hasSolidColorTone,
                     'dark:text-white' => ! ($belongsToAuth && $hasSolidColorTone),
                 ])
-                href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@else{{ $segment['text'] }}@endif@endforeach</pre>
+                href="{{ $segment['href'] }}">{{ $segment['text'] }}</a>@endif@else{{ $segment['text'] }}@endif@endforeach</pre>
 
 {{-- Display the created time based on different conditions --}}
 <span
@@ -110,8 +120,10 @@
 </span>
 
 @if ($groupInvitePreview)
-    <a href="{{ $groupInvitePreview['url'] }}"
-        wire:click.prevent="handleOpenChat(@js($encryptedInviteLink))"
+    <button
+        type="button"
+        dusk="group-invite-action"
+        wire:click="handleOpenChat(@js($encryptedInviteLink))"
         data-invite-link="true"
         @class([
             'mt-2 -mx-2.5  block border-t px-4 py-2 text-center text-sm font-semibold transition hover:opacity-95',
@@ -120,6 +132,6 @@
             'border-[var(--wc-light-border)] text-[var(--primary-500)] dark:border-[var(--wc-dark-border)] dark:text-[var(--primary-300)]' => ! $belongsToAuth,
         ])>
         {{ __('wirechat::chat.group.invite_message.actions.view_group.label') }}
-    </a>
+    </button>
 @endif
 </div>

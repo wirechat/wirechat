@@ -153,7 +153,7 @@ test('settings drawer shows nested settings sections', function () {
         ->assertSee(__('wirechat::chats.settings.heading'))
         ->assertSeeHtml('class="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95"')
         ->assertSee(__('wirechat::chats.settings.general.heading'))
-        ->assertSee('Your profile in '.config('app.name').'.')
+        ->assertDontSee('Your profile in '.config('app.name').'.')
         ->assertSee(__('wirechat::chats.settings.options.notifications.label'))
         ->assertSee(__('wirechat::chats.settings.options.notifications.description'))
         ->assertSee(__('wirechat::chats.settings.options.security_privacy.label'))
