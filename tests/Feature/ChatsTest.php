@@ -374,13 +374,13 @@ test('requests drawer opens the conversation in widget mode without redirecting'
     $auth = User::factory()->create(['name' => 'Auth']);
     $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
 
-    $incomingSender->sendMessageRequestTo($auth);
+    $conversation = $incomingSender->sendMessageRequestTo($auth);
     $request = MessageRequest::query()->pending()->firstOrFail();
 
     Livewire::actingAs($auth)->test(RequestsDrawer::class, ['widget' => true])
         ->call('openConversation', $request->id)
         ->assertDispatched('closeChatListDrawer')
-        ->assertDispatched('open-chat')
+        ->assertDispatched('open-chat', conversation: $conversation->id)
         ->assertNoRedirect();
 });
 

@@ -50,10 +50,10 @@
                 <ul class="overflow-auto flex flex-col">
                     @foreach ($users as $key => $user)
                         <li wire:key="invite-users-{{ md5((string) $user['type']) }}-{{ $user['id'] }}" class="flex cursor-pointer group gap-2 items-center p-2">
-                            <label wire:click="toggleMember(@js((string) $user['id']), @js($user['type']))" class="flex cursor-pointer gap-2 items-center w-full">
-                                <x-wirechat::avatar src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10" />
+                            <label wire:click="toggleMember(@js((string) $user['id']), @js($user['type']))" class="flex cursor-pointer gap-2 items-center w-full min-w-0">
+                                <x-wirechat::avatar src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10 shrink-0" />
 
-                                <div class="min-w-0">
+                                <div class="min-w-0 flex-1">
                                     <p class="transition-all truncate group-hover:underline">{{ $user['wirechat_name'] }}</p>
 
                                     @if (filled($user['wirechat_subtitle'] ?? null))
@@ -62,7 +62,7 @@
                                     @endif
                                 </div>
 
-                                <div class="ml-auto">
+                                <div class="ml-auto shrink-0">
                                     @if ($selectedMembers->contains(fn($member) => (string) $member->getKey() === (string) $user['id'] && $member->getMorphClass() === $user['type']))
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-square w-6 h-6 text-green-500" viewBox="0 0 16 16">
                                             <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />

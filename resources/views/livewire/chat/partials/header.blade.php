@@ -5,6 +5,7 @@
     $pendingJoinRequestsCount = $conversation->isGroup() && $authParticipant?->isAdmin() && $this->panel()->hasGroupInvitations() && $group?->requiresInviteApproval() ? $group->pendingJoinRequests()->count(): 0;
     $hasMessageRequests = $this->panel()->hasMessageRequests();
     $hasActiveMessageRequest = $hasMessageRequests && $conversation->isPrivate() && $conversation->hasActiveMessageRequest();
+    $conversationActionId = (string) $conversation->id;
 @endphp
 
 <header
@@ -129,7 +130,7 @@
 
 
                         @if ($this->isWidget())
-                            <x-wirechat::dropdown-link @click="$dispatch('close-chat', { conversation: @js($conversation->id) })">
+                            <x-wirechat::dropdown-link @click="$dispatch('close-chat', { conversation: '{{ $conversationActionId }}' })">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @else

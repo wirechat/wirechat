@@ -175,7 +175,8 @@ describe('actions test', function () {
         $request
             ->set('search', 'Mic')
             ->assertSee('Micheal')
-            ->assertSee($user->wirechat_subtitle);
+            ->assertSee($user->wirechat_subtitle)
+            ->assertSeeHtml('class="min-w-0 flex-1"');
     });
 
     test('users who disallow group adds are hidden from add members search', function () {

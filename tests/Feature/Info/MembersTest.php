@@ -120,6 +120,28 @@ describe('presence test', function () {
             ->assertSeeHtml('x-show="openMemberMenu === memberMenuId"');
     });
 
+    test('member rows constrain subtitles and keep action buttons outside labels', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $conversation->addParticipant(User::factory()->create(['name' => 'John']));
+
+        $html = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+            ->html();
+
+        expect($html)
+            ->toContain('class="flex cursor-pointer gap-2 items-center w-full min-w-0"')
+            ->toContain('class="grid min-w-0 flex-1 grid-cols-12 gap-x-2"')
+            ->toContain('class="col-span-10 min-w-0 truncate text-sm text-gray-500 dark:text-gray-400"')
+            ->toContain('@click.stop')
+            ->toContain('type="button"')
+            ->toContain('wire:click="removeFromGroup(\'')
+            ->toContain('wire:click="banMember(\'')
+            ->not->toContain('removeFromGroup(@js')
+            ->not->toContain('banMember(@js')
+            ->not->toContain('<label class="flex cursor-pointer gap-2 items-center w-full">');
+    });
+
     test('member action menu hides direct message action when messaging is denied', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
@@ -863,6 +885,41 @@ describe('actions test', function () {
         expect($participant->isBlockedByAdmin())->toBeTrue()
             ->and($participant->isRemovedByAdmin())->toBeTrue()
             ->and($user->belongsToConversation($conversation->fresh()))->toBeFalse();
+    });
+
+    test('calling banMember creates a banned past member from a scalar id', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name' => 'Banned User']);
+        $participant = $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->call('banMember', (string) $participant->id)
+            ->assertDontSee($user->wirechat_name);
+
+        $participant->refresh();
+
+        expect($participant->isBannedByAdmin())->toBeTrue()
+            ->and($participant->isRemovedByAdmin())->toBeTrue()
+            ->and($user->belongsToConversation($conversation->fresh()))->toBeFalse();
+    });
+
+    test('banMember only acts on participant records from the mounted conversation', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $otherConversation = $auth->createGroup('Other Group');
+
+        $user = User::factory()->create(['name' => 'Shared Member']);
+        $currentParticipant = $conversation->addParticipant($user);
+        $otherParticipant = $otherConversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->call('banMember', $otherParticipant->id)
+            ->assertStatus(403, 'This user does not belong to conversation');
+
+        expect($currentParticipant->refresh()->isBannedByAdmin())->toBeFalse()
+            ->and($otherParticipant->refresh()->isBannedByAdmin())->toBeFalse();
     });
 
     test('past members drawer shows left removed and blocked reasons', function () {

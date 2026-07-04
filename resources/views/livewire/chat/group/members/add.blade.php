@@ -129,13 +129,13 @@
                          @endif
 
                             @class([
-                                'flex gap-2 items-center w-full',
+                                'flex gap-2 items-center w-full min-w-0',
                                 'cursor-not-allowed' => $isBanned,
                                 'cursor-pointer' => ! $isBanned,
                             ])>
-                            <x-wirechat::avatar src="{{$user['wirechat_avatar_url']}}" class="w-10 h-10" />
+                            <x-wirechat::avatar src="{{$user['wirechat_avatar_url']}}" class="w-10 h-10 shrink-0" />
 
-                           <div @class(['opacity-70' => $isAlreadyAParticipant || $isBanned]) >
+                           <div @class(['min-w-0 flex-1', 'opacity-70' => $isAlreadyAParticipant || $isBanned]) >
                             <p
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
                                 {{ $user['wirechat_name'] }}</p>
@@ -155,7 +155,7 @@
                             </span>
                            </div>
 
-                            <div class="ml-auto">
+                            <div class="ml-auto shrink-0">
                                 @if ($selectedMembers->contains(fn($member) => (string) $member->getKey() === (string) $user['id'] && $member->getMorphClass() === $user['type']) || $isAlreadyAParticipant)
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         fill="currentColor"

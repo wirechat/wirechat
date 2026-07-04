@@ -58,6 +58,16 @@ test('it renders Chat when "openChatWidget" event is selected ', function () {
 
 });
 
+test('it renders Chat when widget event payload contains a conversation key', function () {
+    $auth = User::factory()->create();
+    $conversation = $auth->createConversationWith(User::factory()->create());
+
+    Livewire::actingAs($auth)->test(Wirechat::class)
+        ->call('openChatWidget', ['conversation' => $conversation->id])
+        ->assertSet('selectedConversationId', $conversation->id)
+        ->assertSeeLivewire(Chat::class);
+});
+
 test('it removes Chat when "closeChatWidget" event is selected ', function () {
     $auth = User::factory()->create();
 
@@ -108,6 +118,28 @@ test('it centers the widget empty state across the chat panel', function () {
         ->toContain('dusk="widget-empty-state"')
         ->toContain('absolute inset-0 flex items-center justify-center px-4 text-center')
         ->toContain("@lang('wirechat::widgets.wirechat.messages.welcome')");
+});
+
+test('blade component attributes do not contain uncompiled js directives', function () {
+    $views = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(dirname(__DIR__, 2).'/resources/views')
+    );
+
+    $matches = [];
+
+    foreach ($views as $view) {
+        if (! $view->isFile() || $view->getExtension() !== 'php') {
+            continue;
+        }
+
+        preg_match_all('/<x-[^>]*@js\([^>]*>/m', file_get_contents($view->getPathname()), $componentMatches);
+
+        foreach ($componentMatches[0] as $match) {
+            $matches[] = str_replace(dirname(__DIR__, 2).'/', '', $view->getPathname()).': '.$match;
+        }
+    }
+
+    expect($matches)->toBeEmpty();
 });
 
 test('wirechat styles uses the dark palette and supports extending zinc shades', function () {

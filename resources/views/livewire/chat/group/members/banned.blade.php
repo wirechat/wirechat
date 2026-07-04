@@ -28,7 +28,7 @@
                     @foreach ($bannedMembers as $bannedMember)
                         <li class="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-700" wire:key="banned-member-{{ $bannedMember->id }}">
                             <div class="flex items-start gap-3">
-                                <x-wirechat::avatar :src="$bannedMember->participantable?->wirechat_avatar_url" class="w-10 h-10" />
+                                <x-wirechat::avatar :src="$bannedMember->participantable?->wirechat_avatar_url" class="w-10 h-10 shrink-0" />
 
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate font-medium">{{ $bannedMember->participantable?->wirechat_name }}</p>
