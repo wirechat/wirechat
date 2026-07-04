@@ -442,6 +442,19 @@ class Message extends Model
         ];
     }
 
+    public function isGroupInviteLink(string $link, Panel|string|null $panel = null): bool
+    {
+        $resolvedPanel = $panel instanceof Panel
+            ? $panel
+            : Wirechat::getPanel($panel ?: Wirechat::currentPanel()?->getId());
+
+        if (! $resolvedPanel) {
+            return false;
+        }
+
+        return $this->matchesGroupInviteRoute($resolvedPanel, $link);
+    }
+
     protected function extractGroupInviteToken(Panel $panel): ?string
     {
         $body = trim((string) $this->body);
@@ -456,6 +469,17 @@ class Message extends Model
             return static::$groupInviteTokenCache[$cacheKey];
         }
 
+        return static::$groupInviteTokenCache[$cacheKey] = $this->extractGroupInviteTokenFromText($panel, $body);
+    }
+
+    protected function extractGroupInviteTokenFromText(Panel $panel, string $text): ?string
+    {
+        $text = trim($text);
+
+        if ($text === '') {
+            return null;
+        }
+
         $placeholder = 'WIRECHAT_INVITE_TOKEN';
 
         $patterns = array_unique(array_filter([
@@ -464,15 +488,39 @@ class Message extends Model
         ]));
 
         foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $body, $matches)) {
-                return static::$groupInviteTokenCache[$cacheKey] = $matches['token'] ?? null;
+            if (preg_match($pattern, $text, $matches)) {
+                return $matches['token'] ?? null;
             }
         }
 
-        return static::$groupInviteTokenCache[$cacheKey] = null;
+        return null;
     }
 
-    protected function inviteRoutePattern(string $route, string $placeholder): ?string
+    protected function matchesGroupInviteRoute(Panel $panel, string $text): bool
+    {
+        $text = trim($text);
+
+        if ($text === '') {
+            return false;
+        }
+
+        $placeholder = 'WIRECHAT_INVITE_TOKEN';
+
+        $patterns = array_unique(array_filter([
+            $this->inviteRoutePattern($panel->inviteRoute($placeholder), $placeholder, '[^\s/?#]+'),
+            $this->inviteRoutePattern($panel->inviteRoute($placeholder, false), $placeholder, '[^\s/?#]+'),
+        ]));
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function inviteRoutePattern(string $route, string $placeholder, string $tokenPattern = '[A-Za-z0-9]{10,255}'): ?string
     {
         $path = parse_url($route, PHP_URL_PATH);
 
@@ -482,8 +530,7 @@ class Message extends Model
 
         $escapedPath = preg_quote($path, '~');
         $escapedPlaceholder = preg_quote($placeholder, '~');
-        $tokenPattern = '(?P<token>[A-Za-z0-9]{10,255})';
-        $resolvedPathPattern = str_replace($escapedPlaceholder, $tokenPattern, $escapedPath);
+        $resolvedPathPattern = str_replace($escapedPlaceholder, "(?P<token>{$tokenPattern})", $escapedPath);
 
         return "~(?:https?://[^\\s]+)?{$resolvedPathPattern}(?:\\?[^\s]*)?(?=$|\\s)~";
     }

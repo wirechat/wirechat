@@ -615,7 +615,7 @@ describe('Presense', function () {
             'is_primary' => true,
         ]);
 
-        $inviteUrl = $invite->url(testPanelProvider());
+        $inviteUrl = preg_replace('~^https?://[^/]+~', 'http://localhost:8001', $invite->url(testPanelProvider()));
 
         $conversation = $sender->sendMessageTo(
             $receiver,
@@ -665,6 +665,61 @@ describe('Presense', function () {
             ->and($externalAnchor)->toContain('rel="noopener noreferrer"')
             ->and($externalAnchor)->not->toContain('data-invite-link="true"')
             ->and($externalAnchor)->not->toContain('handleOpenChat');
+    });
+
+    test('it renders missing invite route urls as in-chat actions instead of external links', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+        $missingInviteUrl = preg_replace(
+            '~^https?://[^/]+~',
+            'http://localhost:8001',
+            testPanelProvider()->inviteRoute(Invite::generateToken())
+        );
+        $malformedInviteUrl = preg_replace(
+            '~^https?://[^/]+~',
+            'http://localhost:8001',
+            testPanelProvider()->inviteRoute('not-a-wirechat-link')
+        );
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Old invite: '.$missingInviteUrl.' malformed '.$malformedInviteUrl.' and external https://example.com'
+        )->conversation;
+
+        $rendered = Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        preg_match_all('~<button[^>]*dusk="message-invite-action"[^>]*>[\s\S]*?</button>~', $rendered, $buttonMatches);
+        preg_match_all('~<a[^>]*dusk="message-link"[^>]*>~', $rendered, $anchorMatches);
+
+        $inviteActions = collect($buttonMatches[0]);
+        $inviteAction = $inviteActions
+            ->first(fn (string $tag) => str_contains($tag, $missingInviteUrl));
+        $malformedInviteAction = $inviteActions
+            ->first(fn (string $tag) => str_contains($tag, $malformedInviteUrl));
+        $externalAnchor = collect($anchorMatches[0])
+            ->first(fn (string $tag) => str_contains($tag, 'https://example.com'));
+
+        expect($rendered)
+            ->not->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->not->toContain('href="'.$missingInviteUrl.'"')
+            ->not->toContain('href="'.$malformedInviteUrl.'"')
+            ->and($inviteAction)->toContain('data-invite-link="true"')
+            ->and($inviteAction)->toContain('wire:click="handleOpenChat(')
+            ->and($inviteAction)->not->toContain('target="_blank"')
+            ->and($malformedInviteAction)->toContain('data-invite-link="true"')
+            ->and($malformedInviteAction)->toContain('wire:click="handleOpenChat(')
+            ->and($malformedInviteAction)->not->toContain('target="_blank"')
+            ->and($externalAnchor)->toContain('href="https://example.com"')
+            ->and($externalAnchor)->toContain('target="_blank"');
+
+        preg_match("~wire:click=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAction, $clickMatch);
+
+        expect(decrypt($clickMatch[1] ?? ''))->toBe($missingInviteUrl);
     });
 
     test('it does not render a group invite preview card for foreign or edited text without a valid wirechat invite link', function () {

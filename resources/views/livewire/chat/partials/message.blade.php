@@ -85,11 +85,14 @@
 <pre
     dusk="message-text"
     class="{{ $messageTextClasses }}"
-    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php $isInviteLink = $inviteUrl !== null && $segment['href'] === $inviteUrl; @endphp@if ($isInviteLink)<button
+    style="font-family: inherit;">@foreach ($segments as $segment)@if ($segment['is_link'])@php
+                    $isInviteLink = $message?->isGroupInviteLink((string) $segment['href'], $this->panel()) === true;
+                    $encryptedSegmentInviteLink = $isInviteLink ? encrypt($segment['href']) : null;
+                @endphp@if ($isInviteLink)<button
                 dusk="message-invite-action"
                 type="button"
                 data-invite-link="true"
-                wire:click="handleOpenChat(@js($encryptedInviteLink))"
+                wire:click="handleOpenChat(@js($encryptedSegmentInviteLink))"
                 @class([
                     'inline cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-[inherit] underline tracking-normal wrap-anywhere text-sm md:text-base lg:tracking-normal',
                     'text-white/90' => $belongsToAuth && $hasSolidColorTone,
