@@ -70,13 +70,15 @@
                 .catch(() => false);
         };
 
-        if (copyWithSelection()) {
-            notifyCopied();
+        copyWithClipboard().then((copied) => {
+            if (copied || copyWithSelection()) {
+                notifyCopied();
 
-            return;
-        }
+                return;
+            }
 
-        copyWithClipboard().then((copied) => copied ? notifyCopied() : promptCopy());
+            promptCopy();
+        });
     "
 >
     {{ $slot }}

@@ -321,6 +321,8 @@ it('renders translated content in the invite link details modal', function () {
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
         ->assertSeeHtml('copyWithSelection')
         ->assertSeeHtml('window.navigator.clipboard.writeText(value)')
+        ->assertSeeHtml('copyWithClipboard().then((copied) => {')
+        ->assertSeeHtml('if (copied || copyWithSelection())')
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.share_link.label'))
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.revoke.label'));
 });
