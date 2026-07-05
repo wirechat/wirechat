@@ -20,6 +20,7 @@ use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Events\MessageRequestUpdated;
 use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
@@ -49,6 +50,36 @@ test('authenticaed user can access chatbox ', function () {
 
     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertStatus(200);
+});
+
+test('broadcast redirect urls are null when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $sender->createConversationWith($receiver, 'Route off broadcast');
+    $message = $conversation->messages()->firstOrFail();
+
+    expect((new NotifyParticipant($receiver, $message, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBeNull()
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::ACCEPTED, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBeNull()
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::PENDING, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBeNull();
+});
+
+test('broadcast redirect urls fall back to the mount url when chat routes are disabled', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $sender->createConversationWith($receiver, 'Mount broadcast');
+    $message = $conversation->messages()->firstOrFail();
+
+    expect((new NotifyParticipant($receiver, $message, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBe('/app')
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::ACCEPTED, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBe('/app')
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::PENDING, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBe('/app');
 });
 
 test('it shows peer sender names above group messages but not auth sender names', function () {
@@ -531,6 +562,46 @@ describe('Presense', function () {
             ->assertSee('Follow this link to join my group:')
             ->assertSee(__('wirechat::chat.group.invite_message.actions.view_group.label'))
             ->assertSee($invite->url(testPanelProvider()));
+    });
+
+    test('it renders a group invite preview action without public invite url when routes are disabled', function () {
+        testPanelProvider()->registerRoutes(false);
+        testPanelProvider()->parseMessageUrls(true);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $inviteUrl = 'http://localhost:8001/test/invites/'.$invite->token;
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Join here: '.$inviteUrl
+        )->conversation;
+
+        $rendered = Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        preg_match_all('~<button[^>]*dusk="group-invite-action"[^>]*>[\s\S]*?</button>~', $rendered, $buttonMatches);
+
+        expect($rendered)
+            ->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->toContain('data-invite-link="true"')
+            ->not->toContain('href="'.$inviteUrl.'"')
+            ->and($buttonMatches[0])->toHaveCount(1)
+            ->and($buttonMatches[0][0])->toContain('wire:click="handleOpenChat(')
+            ->and($buttonMatches[0][0])->not->toContain('href=')
+            ->and($buttonMatches[0][0])->not->toContain('target="_blank"');
     });
 
     test('it renders outgoing group invite surfaces as white for solid color tone', function () {
@@ -1367,6 +1438,17 @@ describe('Box presence test: ', function () {
                 ->assertDontSeeHtml('dusk="return_to_home_button_link"');
             //                ->assertMethodWired('$dispatch(\'close-chat\')');
 
+        });
+
+        test('it renders close actions instead of route links when panel routes are disabled', function () {
+            testPanelProvider()->registerRoutes(false);
+
+            $auth = User::factory()->create(['name' => 'Namu']);
+            $conversation = $auth->createGroup('My Group');
+
+            Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSeeHtml('dusk="return_to_home_button_dispatch"')
+                ->assertDontSeeHtml('dusk="return_to_home_button_link"');
         });
 
         test('it doesnt render $dispatch("close-chat") BUT Renders redirect to chats index', function () {

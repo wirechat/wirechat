@@ -11,7 +11,6 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
-use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
@@ -84,13 +83,9 @@ class Members extends ModalComponent
 
         $conversation = auth()->user()->createConversationWith($participant->participantable);
 
-        $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatRoute($conversation->id),
-            events: [
-                WidgetsWirechat::class => ['open-chat',  ['conversation' => $conversation->id]],
-                'closeWirechatModal',
-            ]
-        );
+        $this->closeWirechatModal();
+
+        return $this->navigateToChat($conversation->id);
 
         // $this->closeModalWithEvents([
         //   //  WidgetsWirechat::class => ['close-chat'],

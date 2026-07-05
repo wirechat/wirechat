@@ -101,9 +101,13 @@ class Send extends ModalComponent
             return;
         }
 
+        $inviteUrl = $this->panel()->inviteRouteIfRegistered($this->invite->token);
+
+        abort_if($inviteUrl === null, 404);
+
         $messageBody = __('wirechat::chat.group.invite_link.send_via_chat.messages.invite_message', [
             'group' => $this->group->name ?: __('wirechat::chat.group.invite_link.page.labels.group_fallback'),
-            'url' => $this->invite->url($this->panel()),
+            'url' => $inviteUrl,
         ]);
 
         foreach ($this->selectedMembers as $member) {

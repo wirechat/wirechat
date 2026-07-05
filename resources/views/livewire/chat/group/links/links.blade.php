@@ -16,10 +16,11 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.labels.description') }}</p>
         </div>
 
-        <x-wirechat::section
-            :title="__('wirechat::chat.group.invite_link.labels.primary_link')"
-            class="dark:border-zinc-700 b p-5"
-        >
+        @if ($primaryInviteUrl)
+            <x-wirechat::section
+                :title="__('wirechat::chat.group.invite_link.labels.primary_link')"
+                class="dark:border-zinc-700 b p-5"
+            >
             <div class="rounded-xl border border-dashed dark:border-zinc-700 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-3">
                 <div class="flex items-center gap-3">
                     <div class="min-w-0 flex-1 rounded-xl bg-[var(--wc-light-secondary)] px-4 py-3 text-sm break-all dark:bg-[var(--wc-dark-secondary)]">{{ $primaryInviteUrl }}</div>
@@ -85,7 +86,8 @@
                     @endif
                 </div>
             </div>
-        </x-wirechat::section>
+            </x-wirechat::section>
+        @endif
         {{------------------}}
         {{-- Group Access --}}
         {{------------------}}
@@ -142,7 +144,7 @@
         {{------------------}}
         {{-- Group links --}}
         {{------------------}}
-        @if ($canManageInvites)
+        @if ($canManageInvites && $primaryInviteUrl)
             <livewire:wirechat.chat.group.links.list
                 :conversation="$conversation"
                 :panel="$this->panel"

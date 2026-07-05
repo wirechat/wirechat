@@ -333,7 +333,7 @@ class WirechatServiceProvider extends ServiceProvider
                                                 }
                                             }
 
-                                            if (!e.is_request && e.redirect_url !== window.location.href && e.notification?.enabled !== false) {
+                                            if (e.redirect_url && !e.is_request && e.redirect_url !== window.location.href && e.notification?.enabled !== false) {
                                                 if (Notification.permission === 'granted') {
                                                     showNotification(e);
                                                 } else if (Notification.permission !== 'denied') {

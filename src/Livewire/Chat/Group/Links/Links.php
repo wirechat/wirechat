@@ -103,7 +103,7 @@ class Links extends ModalComponent
 
         return view('wirechat::livewire.chat.group.links.links', [
             'primaryInvite' => $primaryInvite,
-            'primaryInviteUrl' => $primaryInvite->url($this->panel()),
+            'primaryInviteUrl' => $this->panel()->inviteRouteIfRegistered($primaryInvite->token),
             'canManageInvites' => $canManageInvites,
             'canResetLink' => $canManageInvites,
             'canManageJoinRequests' => $canManageInvites && $requiresApproval,

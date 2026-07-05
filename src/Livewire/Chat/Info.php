@@ -40,7 +40,7 @@ class Info extends ModalComponent
         // Dispatach event instead if isWidget
         // handle widget termination
         $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => ['chat-deleted',  [$this->conversation->id]],

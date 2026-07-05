@@ -20,8 +20,10 @@ use Wirechat\Wirechat\Models\Invite;
 use Workbench\App\Models\User;
 
 beforeEach(function () {
+    testPanelProvider()->registerRoutes(true);
     testPanelProvider()->groupInvitations(true);
     testPanelProvider()->inviteJoinRedirect(null);
+    testPanelProvider()->mountUrl(null);
 });
 
 it('shows and updates the admin approval toggle in group permissions', function () {
@@ -87,6 +89,57 @@ it('allows admins to access invite links', function () {
 
     expect($conversation->group->inviteLinks()->count())->toBe(1)
         ->and($invite?->is_primary)->toBeTrue();
+});
+
+it('hides public invite url controls when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $linksComponent = Livewire::actingAs($owner)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.primary_link'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.additional_links'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.actions.copy_link.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.actions.send_via_chat.label'));
+
+    $invite = $conversation->group->inviteLinks()->firstOrFail();
+
+    $linksComponent->assertDontSee($invite->url(testPanelProvider()));
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertDontSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.show.actions.share_link.label'))
+        ->assertDontSee($invite->url(testPanelProvider()));
+});
+
+it('keeps public invite url controls when chat routes are disabled and a mount url is configured', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $linksComponent = Livewire::actingAs($owner)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.primary_link'))
+        ->assertSee(__('wirechat::chat.group.invite_link.actions.copy_link.label'));
+
+    $invite = $conversation->group->inviteLinks()->firstOrFail();
+
+    $linksComponent->assertSee($invite->url(testPanelProvider()));
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
+        ->assertSee($invite->url(testPanelProvider()));
 });
 
 it('forbids non-admin participants from accessing invite link management even when they can add members', function () {
@@ -726,6 +779,33 @@ it('handleOpenChat redirects existing members to the chat in non-widget mode', f
         ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
 });
 
+it('handleOpenChat opens existing member invites internally when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $groupConversation->addParticipant($member);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt('http://localhost:8001/test/invites/'.$invite->token))
+        ->assertNoRedirect()
+        ->assertDispatched('open-chat', conversation: $groupConversation->id);
+});
+
 it('handleOpenChat resolves invites through the configured invite model', function () {
     $customInvite = new class extends Invite
     {
@@ -1217,6 +1297,27 @@ it('stages the invite token in session and redirects to chats index', function (
         ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
 });
 
+it('stages the invite token in session and redirects to the mount url when chat routes are disabled', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertRedirect('/app')
+        ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
+        ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
+});
+
 it('redirects invite joins to the panel inviteJoinRedirect when configured', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');
@@ -1234,6 +1335,49 @@ it('redirects invite joins to the panel inviteJoinRedirect when configured', fun
         ->assertRedirect('/wirechat-widget')
         ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
         ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
+});
+
+it('lets inviteJoinRedirect override the mount url for invite joins', function () {
+    testPanelProvider()
+        ->mountUrl('/app')
+        ->inviteJoinRedirect('/wirechat-widget');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertRedirect('/wirechat-widget')
+        ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
+        ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
+});
+
+it('redirects existing members from invite links to the mount url when chat routes are disabled', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->actingAs($owner)
+        ->get(testPanelProvider()->inviteRoute($invite->token))
+        ->assertRedirect('/app')
+        ->assertSessionHas('wirechat_pending_conversation_id', $conversation->id)
+        ->assertSessionHas('wirechat_pending_conversation_panel', testPanelProvider()->getId());
 });
 
 it('joins a public group from the in-app invite modal', function () {
@@ -1314,6 +1458,39 @@ it('opens the joined group in widget mode from the invite lobby', function () {
         ->call('proceed')
         ->assertNoRedirect()
         ->assertDispatched('open-chat')
+        ->assertDispatched('closeWirechatModal');
+
+    $invite->refresh();
+
+    expect($receiver->belongsToConversation($conversation))->toBeTrue()
+        ->and($invite->usages)->toBe(1);
+});
+
+it('opens the joined group internally from the invite lobby when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, [
+            'token' => $invite->token,
+            'panel' => testPanelProvider()->getId(),
+        ])
+        ->call('proceed')
+        ->assertNoRedirect()
+        ->assertDispatched('open-chat', conversation: $conversation->id)
         ->assertDispatched('closeWirechatModal');
 
     $invite->refresh();

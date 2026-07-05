@@ -15,26 +15,28 @@ Route::name('wirechat.')
         }
 
         foreach ($panels as $panel) {
+            if ($panel->shouldRegisterInviteRoutes()) {
+                Route::prefix($panel->getRoutePrefix())
+                    ->name("{$panel->getPath()}.")
+                    ->middleware([
+                        'web',
+                        "wirechat.setPanel:{$panel->getId()}",
+                    ])
+                    ->group(function () {
+                        Route::get('/invites/{token}', [InviteController::class, 'show'])
+                            ->middleware('throttle:wirechat-invite')
+                            ->where('token', '[A-Za-z0-9]{16,64}')
+                            ->name('invite.show');
+                        Route::post('/invites/{token}/join', [InviteController::class, 'join'])
+                            ->middleware('throttle:wirechat-invite')
+                            ->where('token', '[A-Za-z0-9]{16,64}')
+                            ->name('invite.join');
+                    });
+            }
+
             if (! $panel->hasRoutes()) {
                 continue;
             }
-
-            Route::prefix($panel->getRoutePrefix())
-                ->name("{$panel->getPath()}.")
-                ->middleware([
-                    'web',
-                    "wirechat.setPanel:{$panel->getId()}",
-                ])
-                ->group(function () {
-                    Route::get('/invites/{token}', [InviteController::class, 'show'])
-                        ->middleware('throttle:wirechat-invite')
-                        ->where('token', '[A-Za-z0-9]{16,64}')
-                        ->name('invite.show');
-                    Route::post('/invites/{token}/join', [InviteController::class, 'join'])
-                        ->middleware('throttle:wirechat-invite')
-                        ->where('token', '[A-Za-z0-9]{16,64}')
-                        ->name('invite.join');
-                });
 
             Route::prefix($panel->getRoutePrefix())
                 ->name("{$panel->getPath()}.")

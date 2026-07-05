@@ -6,6 +6,7 @@
     $hasMessageRequests = $this->panel()->hasMessageRequests();
     $hasActiveMessageRequest = $hasMessageRequests && $conversation->isPrivate() && $conversation->hasActiveMessageRequest();
     $conversationActionId = (string) $conversation->id;
+    $chatsRoute = $this->panel()->chatsRouteIfRegistered();
 @endphp
 
 <header
@@ -14,7 +15,7 @@
     <div class="border-b border-zinc-200/80 dark:border-zinc-700/60 flex w-full items-center px-4 py-3.5 gap-2 md:gap-5">
 
         {{-- Return --}}
-        @if ($this->isWidget())
+        @if ($this->isWidget() || $chatsRoute === null)
             <button
                 type="button"
                 aria-label="{{ __('wirechat::chat.actions.close_chat.label') }}"
@@ -26,7 +27,7 @@
             </button>
         @else
             <a wire:navigate
-                href="{{ $this->panel()->chatsRoute() }}"
+                href="{{ $chatsRoute }}"
                 aria-label="{{ __('wirechat::chat.actions.close_chat.label') }}"
                 dusk="return_to_home_button_link"
                 class="shrink-0 cursor-pointer dark:text-white lg:hidden"
@@ -129,12 +130,12 @@
                         @endif
 
 
-                        @if ($this->isWidget())
+                        @if ($this->isWidget() || $chatsRoute === null)
                             <x-wirechat::dropdown-link @click="$dispatch('close-chat', { conversation: '{{ $conversationActionId }}' })">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @else
-                            <x-wirechat::dropdown-link href="{{ $this->panel()->chatsRoute()  }}" class="shrink-0">
+                            <x-wirechat::dropdown-link href="{{ $chatsRoute }}" class="shrink-0">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @endif

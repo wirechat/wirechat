@@ -218,6 +218,6 @@ class AddMembers extends ModalComponent
             ]);
         }
 
-        return $invite->url($this->panel());
+        return $this->panel()->inviteRouteIfRegistered($invite->token);
     }
 }

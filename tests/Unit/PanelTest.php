@@ -12,6 +12,7 @@ beforeEach(function () {
     testPanelProvider()->groupInvitations(true);
     testPanelProvider()->invitePageLayout('wirechat::layouts.app');
     testPanelProvider()->inviteJoinRedirect(null);
+    testPanelProvider()->mountUrl(null);
 });
 
 test(' panel hasRoutes is true by default()', function () {
@@ -28,6 +29,76 @@ test(' panel hasRoutes is false when registerRoutes is FALSE', function () {
 
     expect(testPanelProvider()->hasRoutes())->toBeFalse();
 
+});
+
+test('panel route-safe helpers return null when routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    expect(testPanelProvider()->hasRegisteredRoute(Panel::CHATS_ROUTE_NAME))->toBeFalse()
+        ->and(testPanelProvider()->chatsRouteIfRegistered())->toBeNull()
+        ->and(testPanelProvider()->chatsUrl())->toBeNull()
+        ->and(testPanelProvider()->chatRouteIfRegistered(123))->toBeNull()
+        ->and(testPanelProvider()->chatUrl(123))->toBeNull()
+        ->and(testPanelProvider()->inviteRouteIfRegistered('InviteToken12345'))->toBeNull()
+        ->and(testPanelProvider()->inviteJoinRouteIfRegistered('InviteToken12345'))->toBeNull();
+});
+
+test('panel route-safe helpers return urls when routes are enabled', function () {
+    testPanelProvider()
+        ->registerRoutes(true)
+        ->mountUrl('/app');
+
+    expect(testPanelProvider()->hasRegisteredRoute(Panel::CHATS_ROUTE_NAME))->toBeTrue()
+        ->and(testPanelProvider()->chatsRouteIfRegistered())->toBe(testPanelProvider()->chatsRoute())
+        ->and(testPanelProvider()->chatsUrl())->toBe(testPanelProvider()->chatsRoute())
+        ->and(testPanelProvider()->chatRouteIfRegistered(123))->toBe(testPanelProvider()->chatRoute(123))
+        ->and(testPanelProvider()->chatUrl(123))->toBe(testPanelProvider()->chatRoute(123))
+        ->and(testPanelProvider()->inviteRouteIfRegistered('InviteToken12345'))->toBe(testPanelProvider()->inviteRoute('InviteToken12345'))
+        ->and(testPanelProvider()->inviteJoinRouteIfRegistered('InviteToken12345'))->toBe(testPanelProvider()->inviteJoinRoute('InviteToken12345'));
+});
+
+test('panel mount url keeps invite routes available when chat routes are disabled', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    expect(testPanelProvider()->hasRegisteredRoute(Panel::CHATS_ROUTE_NAME))->toBeFalse()
+        ->and(testPanelProvider()->hasRegisteredRoute(Panel::CHAT_ROUTE_NAME))->toBeFalse()
+        ->and(testPanelProvider()->hasRegisteredRoute(Panel::INVITE_SHOW_ROUTE_NAME))->toBeTrue()
+        ->and(testPanelProvider()->chatsRouteIfRegistered())->toBeNull()
+        ->and(testPanelProvider()->chatsUrl())->toBe('/app')
+        ->and(testPanelProvider()->chatRouteIfRegistered(123))->toBeNull()
+        ->and(testPanelProvider()->chatUrl(123))->toBe('/app')
+        ->and(testPanelProvider()->inviteRouteIfRegistered('InviteToken12345'))->toBe(testPanelProvider()->inviteRoute('InviteToken12345'))
+        ->and(testPanelProvider()->inviteJoinRouteIfRegistered('InviteToken12345'))->toBe(testPanelProvider()->inviteJoinRoute('InviteToken12345'));
+});
+
+test('panel mount url is null by default and can be customized', function () {
+    expect(testPanelProvider()->getMountUrl())->toBeNull()
+        ->and(testPanelProvider()->hasMountUrl())->toBeFalse();
+
+    testPanelProvider()->mountUrl('/app');
+
+    expect(testPanelProvider()->getMountUrl())->toBe('/app')
+        ->and(testPanelProvider()->hasMountUrl())->toBeTrue();
+});
+
+test('panel mount url closures are not evaluated when checking route registration', function () {
+    $evaluated = false;
+
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl(function () use (&$evaluated) {
+            $evaluated = true;
+
+            return '/app';
+        });
+
+    expect(testPanelProvider()->hasMountUrl())->toBeTrue()
+        ->and(testPanelProvider()->shouldRegisterInviteRoutes())->toBeTrue()
+        ->and($evaluated)->toBeFalse()
+        ->and(testPanelProvider()->getMountUrl())->toBe('/app')
+        ->and($evaluated)->toBeTrue();
 });
 
 test('panel hasGroupInvitations is true by default()', function () {

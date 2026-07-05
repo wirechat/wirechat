@@ -560,7 +560,7 @@ describe('actions test', function () {
                 ->call('sendMessage', $participant->id)
                 ->assertRedirect(testPanelProvider()->chatRoute(2))
                 ->assertNotDispatched('close-chat')
-                ->assertNotDispatched('closeWirechatModal')
+                ->assertDispatched('closeWirechatModal')
                 ->assertNotDispatched('open-chat');
         });
 
@@ -580,6 +580,24 @@ describe('actions test', function () {
                 ->assertDispatched('closeWirechatModal')
                 ->assertNotDispatched('close-chat');
 
+        });
+
+        test('it dispatches internal navigation when panel routes are disabled', function () {
+            testPanelProvider()->registerRoutes(false);
+
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+            $request
+                ->call('sendMessage', $participant->id)
+                ->assertNoRedirect()
+                ->assertDispatched('open-chat')
+                ->assertDispatched('closeWirechatModal')
+                ->assertNotDispatched('close-chat');
         });
 
         test('it create conversation between auth and user after calling sendMessage', function () {

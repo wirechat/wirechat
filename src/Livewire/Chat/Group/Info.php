@@ -204,7 +204,7 @@ class Info extends ModalComponent
 
         // handle widget termination
         $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 ['close-chat',  ['conversation' => $this->conversation->id]],
                 Chats::class => ['chat-deleted',  [$this->conversation->id]],
@@ -233,7 +233,7 @@ class Info extends ModalComponent
         $auth->exitConversation($this->conversation);
 
         $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => ['chat-exited',  [$this->conversation->id]],

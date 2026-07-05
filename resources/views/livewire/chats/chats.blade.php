@@ -12,9 +12,20 @@
         const container = document.getElementById('wirechat-chats-scrollable-container');
         const pendingInviteToken = @js($pendingInviteToken);
         const pendingInvitePanel = @js($pendingInvitePanel);
+        const pendingConversationId = @js($pendingConversationId);
+        const pendingConversationPanel = @js($pendingConversationPanel);
+        const currentPanel = @js($this->panel);
+
+        if (pendingConversationId && (!pendingConversationPanel || pendingConversationPanel === currentPanel)) {
+            setTimeout(() => {
+                selectedConversationId = pendingConversationId;
+                $wire.selectedConversationId = pendingConversationId;
+                $dispatch('open-chat', { conversation: pendingConversationId });
+            }, 250);
+        }
 
         if (pendingInviteToken && @js($this->panel()->hasGroupInvitations())) {
-            const invitePanel = pendingInvitePanel || @js($this->panel);
+            const invitePanel = pendingInvitePanel || currentPanel;
 
             setTimeout(() => {
                 Livewire.dispatch('openWirechatModal', {

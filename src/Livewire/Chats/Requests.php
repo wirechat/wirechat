@@ -187,13 +187,7 @@ class Requests extends ModalComponent
 
         $this->closeChatListDrawer();
 
-        if ($this->isWidget()) {
-            $this->openChat($conversation->id);
-
-            return null;
-        }
-
-        return $this->redirect($this->panel()->chatRoute($conversation->id));
+        return $this->navigateToChat($conversation->id);
     }
 
     protected function resolveDefaultTab(): string

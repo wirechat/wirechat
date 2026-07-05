@@ -378,6 +378,27 @@ describe('Creating conversation', function () {
 
     });
 
+    test('it opens the chat internally after creating conversation when panel routes are disabled', function () {
+        testPanelProvider()->registerRoutes(false);
+
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $request = Livewire::actingAs($auth)->test(NewChat::class);
+
+        $request
+            ->set('search', 'Joh')
+            ->assertSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        $conversation = $auth->conversations()->first();
+
+        $request
+            ->assertNoRedirect()
+            ->assertDispatched('open-chat', conversation: $conversation?->id)
+            ->assertDispatched('closeWirechatModal');
+    });
+
     test('it does not redirects but  dispataches Livewire events "open-chat" events after creating conversation if IS Widget', function () {
 
         $auth = ModelsUser::factory()->create();

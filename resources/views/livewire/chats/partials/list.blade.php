@@ -27,6 +27,8 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
         && $lastMessage != null
         && $hasUnreadMessages
         && $selectedConversationId != $conversation->id;
+    $chatRoute = $this->panel()->chatRouteIfRegistered($conversation->id);
+    $useInternalChatNavigation = $widget || $chatRoute === null;
 
 
     @endphp
@@ -50,14 +52,15 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
         wire:key="conversation-em-{{ $conversation->id }}-{{ $lastMessage?->id ?? 'none' }}-{{ $unreadIndicatorKey }}"
         x-on:chat-opened.window="handleChatOpened($event)"
         x-on:chat-closed.window="handleChatClosed($event)">
-        <a @if ($widget) tabindex="0"
+        <a @if ($useInternalChatNavigation) tabindex="0"
         role="button"
         dusk="openChatWidgetButton"
+        data-internal-chat-action="true"
         @click="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @keydown.enter="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @else
         wire:navigate
-         href="{{ $this->panel()->chatRoute($conversation->id)}}" @endif
+         href="{{ $chatRoute }}" @endif
             class="py-3 flex gap-4  dark:hover:bg-[var(--wc-dark-secondary)]  hover:bg-[var(--wc-light-secondary)]  rounded-lg transition-colors duration-150  relative w-full cursor-pointer px-2"
             :class="$wire.selectedConversationId == conversationID &&
                 'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)]'">

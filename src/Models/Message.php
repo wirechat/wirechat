@@ -434,7 +434,7 @@ class Message extends Model
 
         return static::$groupInvitePreviewCache[$cacheKey] = [
             'token' => $invite->token,
-            'url' => $invite->url($resolvedPanel),
+            'url' => $resolvedPanel->inviteRouteIfRegistered($invite->token),
             'name' => $group->name ?: __('wirechat::chat.group.join.lobby.labels.default_group_name'),
             'description' => $group->description,
             'cover_url' => $group->cover_url,
@@ -482,10 +482,7 @@ class Message extends Model
 
         $placeholder = 'WIRECHAT_INVITE_TOKEN';
 
-        $patterns = array_unique(array_filter([
-            $this->inviteRoutePattern($panel->inviteRoute($placeholder), $placeholder),
-            $this->inviteRoutePattern($panel->inviteRoute($placeholder, false), $placeholder),
-        ]));
+        $patterns = $this->groupInviteRoutePatterns($panel, $placeholder);
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
@@ -506,10 +503,7 @@ class Message extends Model
 
         $placeholder = 'WIRECHAT_INVITE_TOKEN';
 
-        $patterns = array_unique(array_filter([
-            $this->inviteRoutePattern($panel->inviteRoute($placeholder), $placeholder, '[^\s/?#]+'),
-            $this->inviteRoutePattern($panel->inviteRoute($placeholder, false), $placeholder, '[^\s/?#]+'),
-        ]));
+        $patterns = $this->groupInviteRoutePatterns($panel, $placeholder, '[^\s/?#]+');
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text)) {
@@ -518,6 +512,27 @@ class Message extends Model
         }
 
         return false;
+    }
+
+    protected function groupInviteRoutePatterns(Panel $panel, string $placeholder, string $tokenPattern = '[A-Za-z0-9]{10,255}'): array
+    {
+        $routes = array_filter([
+            $panel->inviteRouteIfRegistered($placeholder),
+            $panel->inviteRouteIfRegistered($placeholder, false),
+            $this->panelInvitePath($panel, $placeholder),
+        ]);
+
+        return array_unique(array_filter(array_map(
+            fn (string $route): ?string => $this->inviteRoutePattern($route, $placeholder, $tokenPattern),
+            $routes
+        )));
+    }
+
+    protected function panelInvitePath(Panel $panel, string $placeholder): string
+    {
+        $prefix = $panel->getRoutePrefix();
+
+        return '/'.trim($prefix === '' ? "invites/{$placeholder}" : "{$prefix}/invites/{$placeholder}", '/');
     }
 
     protected function inviteRoutePattern(string $route, string $placeholder, string $tokenPattern = '[A-Za-z0-9]{10,255}'): ?string

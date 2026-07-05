@@ -10,7 +10,6 @@ use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\ProtectsGroupAddPrivacy;
 use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
-use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 
 class Group extends ModalComponent
 {
@@ -178,13 +177,7 @@ class Group extends ModalComponent
         $this->forceClose();
         $this->closeWirechatModal();
 
-        // redirect to conversation
-        $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatRoute($conversation->id),
-            events: [
-                WidgetsWirechat::class => ['open-chat',  ['conversation' => $conversation->id]],
-            ]
-        );
+        return $this->navigateToChat($conversation->id);
 
     }
 

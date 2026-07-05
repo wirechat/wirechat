@@ -146,14 +146,9 @@ class Lobby extends ModalComponent
 
     protected function redirectAfterJoin()
     {
-        if ($this->isWidget()) {
-            $this->openChat($this->conversation->id);
-            $this->closeWirechatModal();
+        $this->closeWirechatModal();
 
-            return null;
-        }
-
-        return $this->redirect($this->panel()->chatRoute($this->conversation->id));
+        return $this->navigateToChat($this->conversation->id);
     }
 
     public function render()

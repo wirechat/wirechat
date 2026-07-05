@@ -322,7 +322,7 @@ class Chat extends Component
         $this->conversation->deleteFor($this->auth);
 
         $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => ['chat-deleted',  [$this->conversation->id]],
@@ -347,7 +347,7 @@ class Chat extends Component
         // Dispatach event instead if isWidget
 
         $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => 'refresh',
@@ -385,13 +385,13 @@ class Chat extends Component
         // delete conversation
         $auth->exitConversation($this->conversation);
 
-        // Dispatach event instead if isWidget
-        if ($this->isWidget()) {
-            $this->dispatch('close-chat');
-        } else {
-            // redirect to chats page
-            $this->redirect($this->panel()->chatsRoute());
-        }
+        return $this->handleComponentTermination(
+            redirectRoute: $this->panel()->chatsUrl(),
+            events: [
+                'close-chat',
+                Chats::class => 'refresh',
+            ]
+        );
     }
 
     protected function rateLimit()
@@ -1272,7 +1272,7 @@ class Chat extends Component
                 return null;
             }
 
-            return $this->redirect($panel->chatRoute($conversation->id));
+            return $this->navigateToChat($conversation->id);
         }
 
         // Non-member: surface the lobby directly. The public preview page is
@@ -1372,7 +1372,7 @@ class Chat extends Component
     {
         if (! $this->conversation) {
             $this->handleComponentTermination(
-                redirectRoute: $this->panel()->chatsRoute(),
+                redirectRoute: $this->panel()->chatsUrl(),
                 events: [
                     'close-chat',
                     Chats::class => 'refresh',
@@ -1387,7 +1387,7 @@ class Chat extends Component
 
         if (! $this->conversation || ! $this->auth->canAccessConversation($this->conversation)) {
             $this->handleComponentTermination(
-                redirectRoute: $this->panel()->chatsRoute(),
+                redirectRoute: $this->panel()->chatsUrl(),
                 events: [
                     'close-chat',
                     Chats::class => 'refresh',
@@ -1446,7 +1446,7 @@ class Chat extends Component
         $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.message_request.messages.dismissed'));
 
         return $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => 'refresh',
@@ -1468,7 +1468,7 @@ class Chat extends Component
 
         if (($event['status'] ?? null) === MessageRequestStatus::DISMISSED->value) {
             return $this->handleComponentTermination(
-                redirectRoute: $this->panel()->chatsRoute(),
+                redirectRoute: $this->panel()->chatsUrl(),
                 events: [
                     'close-chat',
                     Chats::class => 'refresh',

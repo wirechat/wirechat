@@ -529,6 +529,37 @@ describe('Creteing group', function () {
 
     });
 
+    it('it opens the group internally after creating group when panel routes are disabled', function () {
+        testPanelProvider()->registerRoutes(false)->maxGroupMembers(3);
+
+        $auth = ModelsUser::factory()->create();
+        $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
+        $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
+        $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file = UploadedFile::fake()->create('photo.png');
+
+        $request
+            ->set('name', 'Test Group')
+            ->set('description', 'Description Testing')
+            ->set('photo', $file)
+            ->set('search', 'Micheal')
+            ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
+            ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
+            ->call('addMember', $member3->id, $member3->getMorphClass())
+            ->call('create');
+
+        $conversation = Conversation::withoutGlobalScopes()->first();
+
+        $request
+            ->assertNoRedirect()
+            ->assertDispatched('open-chat', conversation: $conversation?->id)
+            ->assertDispatched('closeWirechatModal');
+    });
+
     it('it does not redirects but  dispataches Livewire events "open-chat" events after creating group if IS Widget', function () {
 
         testPanelProvider()->maxGroupMembers(3);

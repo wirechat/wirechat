@@ -8,8 +8,8 @@
    $isSameAsPrevious = (bool) ($previousMessage && $message?->sendable?->is($previousMessage?->sendable));
    $isNotSameAsPrevious = !$isSameAsPrevious;
    $groupInvitePreview = $message?->groupInvitePreview($this->panel());
-   $inviteUrl = $groupInvitePreview['url'] ?? null;
-   $encryptedInviteLink = $inviteUrl !== null ? encrypt($inviteUrl) : null;
+   $inviteToken = $groupInvitePreview['token'] ?? null;
+   $encryptedInviteLink = $inviteToken !== null ? encrypt($inviteToken) : null;
    $canParseMessageUrls = $this->panel()->canParseMessageUrls();
    $body = (string) ($message?->body ?? '');
    $segments = ($canParseMessageUrls && Wirechat::containsLink($body))

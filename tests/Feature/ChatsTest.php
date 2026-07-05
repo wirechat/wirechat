@@ -36,6 +36,24 @@ test('authenticaed user can access chatlist ', function () {
         ->assertStatus(200);
 });
 
+test('chat list consumes a pending conversation handoff from the session', function () {
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create();
+    $conversation = $auth->createConversationWith($receiver, message: 'Pending handoff');
+
+    session([
+        'wirechat_pending_conversation_id' => $conversation->id,
+        'wirechat_pending_conversation_panel' => testPanelProvider()->getId(),
+    ]);
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSet('pendingConversationId', $conversation->id)
+        ->assertSet('pendingConversationPanel', testPanelProvider()->getId());
+
+    expect(session()->has('wirechat_pending_conversation_id'))->toBeFalse()
+        ->and(session()->has('wirechat_pending_conversation_panel'))->toBeFalse();
+});
+
 test('it renders selected conversation background classes in the chats list', function () {
     $auth = User::factory()->create();
     $receiver = User::factory()->create(['name' => 'John']);
@@ -47,6 +65,20 @@ test('it renders selected conversation background classes in the chats list', fu
         ->assertSeeHtml('dark:bg-[var(--wc-dark-secondary)]')
         ->assertDontSeeHtml('border-r-4')
         ->assertDontSeeHtml('border-[var(--wc-tint-primary-500)]');
+});
+
+test('chat list uses internal chat actions when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create(['name' => 'Route Off']);
+
+    $conversation = $auth->createConversationWith($receiver, message: 'Hello route off');
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSee('Route Off')
+        ->assertSeeHtml('data-internal-chat-action="true"')
+        ->assertDontSeeHtml('wire:navigate href="'.testPanelProvider()->chatRoute($conversation->id).'"');
 });
 
 test('it shows the requests drawer button in the chats header', function () {
@@ -378,6 +410,22 @@ test('requests drawer opens the conversation in widget mode without redirecting'
     $request = MessageRequest::query()->pending()->firstOrFail();
 
     Livewire::actingAs($auth)->test(RequestsDrawer::class, ['widget' => true])
+        ->call('openConversation', $request->id)
+        ->assertDispatched('closeChatListDrawer')
+        ->assertDispatched('open-chat', conversation: $conversation->id)
+        ->assertNoRedirect();
+});
+
+test('requests drawer opens the conversation internally when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+
+    $conversation = $incomingSender->sendMessageRequestTo($auth);
+    $request = MessageRequest::query()->pending()->firstOrFail();
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
         ->call('openConversation', $request->id)
         ->assertDispatched('closeChatListDrawer')
         ->assertDispatched('open-chat', conversation: $conversation->id)
