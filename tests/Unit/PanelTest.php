@@ -1,6 +1,7 @@
 <?php
 
 use Wirechat\Wirechat\Enums\ColorTone;
+use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Support\Enums\UnreadIndicatorType;
 use Wirechat\Wirechat\Support\Enums\UnReadType;
@@ -147,6 +148,16 @@ test('panel color tone accepts string values', function () {
     testPanelProvider()->colorTone('solid');
 
     expect(testPanelProvider()->getColorTone())->toBe(ColorTone::Solid);
+});
+
+test('wirechat notifications enabled follows panel web push setting', function () {
+    testPanelProvider()->webPushNotifications(false);
+
+    expect(Wirechat::notificationsEnabled())->toBeFalse();
+
+    testPanelProvider()->webPushNotifications();
+
+    expect(Wirechat::notificationsEnabled())->toBeTrue();
 });
 
 test('primary utility theme is mapped to the provider palette tokens', function () {

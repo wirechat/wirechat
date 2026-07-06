@@ -259,7 +259,7 @@ class WirechatService
      */
     public static function notificationsEnabled(): bool
     {
-        return (bool) config('wirechat.notifications.enabled', false);
+        return (bool) app(PanelRegistry::class)->getCurrent()?->hasWebPushNotifications();
     }
 
     /**
