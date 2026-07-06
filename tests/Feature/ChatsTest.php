@@ -791,7 +791,10 @@ describe('List', function () {
         $auth = User::factory()->create();
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSee('No conversations yet');
+            ->assertSee(__('wirechat::chats.labels.no_conversations_yet'))
+            ->assertSeeHtml('dusk="chats-empty-state"')
+            ->assertSeeHtml('class="max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400"')
+            ->assertDontSeeHtml('font-bold text-gray-700');
     });
 
     it('loads conversations items when user has them', function () {
@@ -1693,6 +1696,20 @@ describe('Search', function () {
                 && in_array($conversationWithJohn->id, $ids, true)
                 && ! in_array($conversationWithMary->id, $ids, true);
         });
+    });
+
+    it('shows a compact empty state when search has no matches', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $auth->createConversationWith($receiver, 'hello');
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->set('search', 'xyznonexistent')
+            ->assertSee(__('wirechat::chats.labels.no_conversations_found'))
+            ->assertSeeHtml('dusk="chats-empty-state"')
+            ->assertSeeHtml('class="max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400"')
+            ->assertDontSee(__('wirechat::chats.labels.no_conversations_yet'));
     });
 
     test('deleted conversation should  appear when searched', function () {

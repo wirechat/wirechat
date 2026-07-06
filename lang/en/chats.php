@@ -8,6 +8,7 @@ return [
     'labels' => [
         'heading' => 'Chats',
         'no_conversations_yet' => 'No conversations yet. Start a new chat when you are ready.',
+        'no_conversations_found' => 'No conversations found.',
         'you' => 'You',
         'attachment' => 'Attachment',
         'now' => 'Now',

@@ -122,8 +122,14 @@
             {{-- include load more if true --}}
             @includeWhen($canLoadMore, 'wirechat::livewire.chats.partials.load-more-button')
         @else
-            <div class="w-full flex items-center h-full justify-center">
-                <h6 class=" font-bold text-gray-700 dark:text-white">{{ __('wirechat::chats.labels.no_conversations_yet')  }}</h6>
+            @php
+                $emptyStateLabel = trim((string) ($search ?? '')) !== ''
+                    ? __('wirechat::chats.labels.no_conversations_found')
+                    : __('wirechat::chats.labels.no_conversations_yet');
+            @endphp
+
+            <div class="flex h-full min-h-40 w-full items-center justify-center px-6 py-8 text-center" dusk="chats-empty-state">
+                <p class="max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400">{{ $emptyStateLabel }}</p>
             </div>
         @endif
     </main>
