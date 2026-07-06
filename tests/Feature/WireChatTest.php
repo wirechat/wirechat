@@ -142,6 +142,27 @@ test('blade component attributes do not contain uncompiled js directives', funct
     expect($matches)->toBeEmpty();
 });
 
+test('wirechat assets render the notification service worker and echo listener', function () {
+    $auth = User::factory()->create();
+
+    testPanelProvider()
+        ->webPushNotifications()
+        ->serviceWorkerPath('/sw.js');
+
+    $this->actingAs($auth);
+
+    $assets = Blade::render('@wirechatAssets(panel: "test")');
+
+    expect($assets)
+        ->toContain('navigator.serviceWorker.register("/sw.js")')
+        ->toContain('Wirechat Service Worker registered/updated')
+        ->toContain('Echo.private(`test.participant.')
+        ->toContain(".listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant'")
+        ->toContain('Notification.permission')
+        ->toContain('showNotification(e)')
+        ->not->toContain('@js(');
+});
+
 test('wirechat styles uses the dark palette and supports extending zinc shades', function () {
     $customDark = [
         900 => 'oklch(0.18 0.01 285.9)',
