@@ -22,7 +22,9 @@
     <div class="relative w-full p-2">
         <section class="my-4">
             @if ($bannedMembers->isEmpty())
-                <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.banned_members.labels.no_results') }}</p>
+                <div class="flex min-h-32 items-center justify-center text-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.banned_members.labels.no_results') }}</p>
+                </div>
             @else
                 <ul class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($bannedMembers as $bannedMember)
@@ -42,7 +44,7 @@
                                 <button type="button"
                                     wire:click="liftBan(@js($bannedMember->id))"
                                     wire:confirm="{{ __('wirechat::chat.group.banned_members.actions.lift_ban.confirmation_message', ['member' => $bannedMember->participantable?->wirechat_name]) }}"
-                                    class="shrink-0 rounded-md px-3 py-2 text-sm font-medium text-[var(--wc-brand-primary)] transition hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)]">
+                                    class="shrink-0 rounded-md px-3 py-2 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300">
                                     {{ __('wirechat::chat.group.banned_members.actions.lift_ban.label') }}
                                 </button>
                             </div>

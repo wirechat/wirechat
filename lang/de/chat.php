@@ -236,8 +236,8 @@ return [
                     'confirmation_message' => 'Möchten Sie :member wirklich aus dieser Gruppe entfernen?',
                 ],
                 'block_member' => [
-                    'label' => 'Mitglied blockieren',
-                    'confirmation_message' => 'Möchten Sie :member wirklich für diese Gruppe blockieren?',
+                    'label' => 'Mitglied sperren',
+                    'confirmation_message' => 'Möchten Sie :member wirklich für diese Gruppe sperren?',
                 ],
                 'ban_member' => [
                     'label' => 'Mitglied sperren',
@@ -247,7 +247,7 @@ return [
                     'label' => 'Ehemalige Mitglieder',
                 ],
                 'blocked_members' => [
-                    'label' => 'Blockierte Mitglieder',
+                    'label' => 'Gesperrte Mitglieder',
                 ],
                 'banned_members' => [
                     'label' => 'Gesperrte Mitglieder',
@@ -603,27 +603,27 @@ return [
                 'no_results' => 'Keine ehemaligen Mitglieder gefunden',
                 'reason_left' => 'Gruppe verlassen',
                 'reason_removed' => 'Von einem Administrator entfernt',
-                'reason_blocked' => 'Von einem Administrator blockiert',
+                'reason_blocked' => 'Von einem Administrator gebannt',
                 'at' => ':time',
             ],
         ],
         'blocked_members' => [
             'heading' => [
-                'label' => 'Blockierte Mitglieder',
+                'label' => 'Gesperrte Mitglieder',
             ],
             'inputs' => [
                 'search' => [
-                    'placeholder' => 'Blockierte Mitglieder suchen',
+                    'placeholder' => 'Gesperrte Mitglieder suchen',
                 ],
             ],
             'labels' => [
-                'no_results' => 'Keine blockierten Mitglieder gefunden',
-                'helper' => 'Blockierte Mitglieder können nicht erneut beitreten, bis die Blockierung aufgehoben wird.',
+                'no_results' => 'Keine gesperrten Mitglieder gefunden',
+                'helper' => 'Gesperrte Mitglieder können nicht erneut beitreten, bis die Sperre aufgehoben wird.',
             ],
             'actions' => [
                 'lift_block' => [
-                    'label' => 'Blockierung aufheben',
-                    'confirmation_message' => 'Möchten Sie die Blockierung für :member wirklich aufheben?',
+                    'label' => 'Sperre aufheben',
+                    'confirmation_message' => 'Möchten Sie die Sperre für :member wirklich aufheben?',
                 ],
             ],
             'messages' => [

@@ -517,7 +517,7 @@ describe('presence test', function () {
 
     });
 
-    test('admins can see past and blocked member drawers', function () {
+    test('admins can see past and banned member drawers', function () {
         $owner = User::factory()->create(['name' => 'Owner']);
         $admin = User::factory()->create(['name' => 'Admin']);
 
@@ -887,7 +887,7 @@ describe('actions test', function () {
 
     });
 
-    test('calling blockMember creates a blocked past member and removes them from active members', function () {
+    test('calling blockMember creates a banned past member and removes them from active members', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -940,7 +940,7 @@ describe('actions test', function () {
             ->and($otherParticipant->refresh()->isBannedByAdmin())->toBeFalse();
     });
 
-    test('past members drawer shows left removed and blocked reasons', function () {
+    test('past members drawer shows left removed and banned reasons', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -949,20 +949,21 @@ describe('actions test', function () {
             'email' => 'left.member@example.test',
         ]);
         $removedUser = User::factory()->create(['name' => 'Removed User']);
-        $blockedUser = User::factory()->create(['name' => 'Blocked User']);
+        $bannedUser = User::factory()->create(['name' => 'Banned User']);
 
         $conversation->addParticipant($leftUser)->exitConversation();
         $conversation->addParticipant($removedUser)->removeByAdmin($auth);
-        $conversation->addParticipant($blockedUser)->blockByAdmin($auth);
+        $conversation->addParticipant($bannedUser)->blockByAdmin($auth);
 
         Livewire::actingAs($auth)->test(PastMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee($leftUser->wirechat_name)
             ->assertSee($leftUser->wirechat_subtitle)
             ->assertSee($removedUser->wirechat_name)
-            ->assertSee($blockedUser->wirechat_name)
+            ->assertSee($bannedUser->wirechat_name)
             ->assertSee(__('wirechat::chat.group.past_members.labels.reason_left'))
             ->assertSee(__('wirechat::chat.group.past_members.labels.reason_removed'))
-            ->assertSee(__('wirechat::chat.group.past_members.labels.reason_blocked'));
+            ->assertSee(__('wirechat::chat.group.past_members.labels.reason_blocked'))
+            ->assertDontSee('Blocked by an admin');
     });
 
     test('banned members drawer can lift a ban without restoring active membership', function () {
@@ -979,6 +980,8 @@ describe('actions test', function () {
         Livewire::actingAs($auth)->test(Banned::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee($blockedUser->wirechat_name)
             ->assertSee($blockedUser->wirechat_subtitle)
+            ->assertSeeHtml('text-emerald-600')
+            ->assertDontSeeHtml('text-[var(--wc-brand-primary)]')
             ->call('liftBan', $participant->id)
             ->assertDontSee($blockedUser->wirechat_name);
 
@@ -987,6 +990,19 @@ describe('actions test', function () {
         expect($participant->isBlockedByAdmin())->toBeFalse()
             ->and($participant->hasExited())->toBeTrue()
             ->and($blockedUser->belongsToConversation($conversation->fresh()))->toBeFalse();
+    });
+
+    test('past and banned members drawers center their empty states', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        Livewire::actingAs($auth)->test(PastMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee(__('wirechat::chat.group.past_members.labels.no_results'))
+            ->assertSeeHtml('flex min-h-32 items-center justify-center text-center');
+
+        Livewire::actingAs($auth)->test(Banned::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee(__('wirechat::chat.group.banned_members.labels.no_results'))
+            ->assertSeeHtml('flex min-h-32 items-center justify-center text-center');
     });
 
     test('non-admins cannot access the past members drawer', function () {

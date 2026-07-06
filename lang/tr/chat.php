@@ -219,8 +219,8 @@ return [
                     'confirmation_message' => ':member\'i bu gruptan kaldırmak istediğinizden emin misiniz?',
                 ],
                 'block_member' => [
-                    'label' => 'Üyeyi Engelle',
-                    'confirmation_message' => ':member kullanıcısını bu grupta engellemek istediğinizden emin misiniz?',
+                    'label' => 'Üyeyi Yasakla',
+                    'confirmation_message' => ':member kullanıcısını bu grupta yasaklamak istediğinizden emin misiniz?',
                 ],
                 'ban_member' => [
                     'label' => 'Üyeyi Yasakla',
@@ -230,7 +230,7 @@ return [
                     'label' => 'Geçmiş Üyeler',
                 ],
                 'blocked_members' => [
-                    'label' => 'Engellenen Üyeler',
+                    'label' => 'Yasaklı Üyeler',
                 ],
                 'banned_members' => [
                     'label' => 'Yasaklı Üyeler',
@@ -581,27 +581,27 @@ return [
                 'no_results' => 'Geçmiş üye bulunamadı',
                 'reason_left' => 'Gruptan ayrıldı',
                 'reason_removed' => 'Bir yönetici tarafından çıkarıldı',
-                'reason_blocked' => 'Bir yönetici tarafından engellendi',
+                'reason_blocked' => 'Bir yönetici tarafından yasaklandı',
                 'at' => ':time',
             ],
         ],
         'blocked_members' => [
             'heading' => [
-                'label' => 'Engellenen Üyeler',
+                'label' => 'Yasaklı Üyeler',
             ],
             'inputs' => [
                 'search' => [
-                    'placeholder' => 'Engellenen üyeleri ara',
+                    'placeholder' => 'Yasaklı üyeleri ara',
                 ],
             ],
             'labels' => [
-                'no_results' => 'Engellenen üye bulunamadı',
-                'helper' => 'Engellenen üyeler, engel kaldırılana kadar yeniden katılamaz.',
+                'no_results' => 'Yasaklı üye bulunamadı',
+                'helper' => 'Yasaklı üyeler, yasak kaldırılana kadar yeniden katılamaz.',
             ],
             'actions' => [
                 'lift_block' => [
-                    'label' => 'Engeli Kaldır',
-                    'confirmation_message' => ':member için engeli kaldırmak istediğinizden emin misiniz?',
+                    'label' => 'Yasağı Kaldır',
+                    'confirmation_message' => ':member için yasağı kaldırmak istediğinizden emin misiniz?',
                 ],
             ],
             'messages' => [

@@ -236,8 +236,8 @@ return [
                     'confirmation_message' => 'Are you sure you want remove :member from this Group ?.',
                 ],
                 'block_member' => [
-                    'label' => 'Block Member',
-                    'confirmation_message' => 'Are you sure you want to block :member from this group ?.',
+                    'label' => 'Ban Member',
+                    'confirmation_message' => 'Are you sure you want to ban :member from this group ?.',
                 ],
                 'ban_member' => [
                     'label' => 'Ban Member',
@@ -247,7 +247,7 @@ return [
                     'label' => 'Past Members',
                 ],
                 'blocked_members' => [
-                    'label' => 'Blocked Members',
+                    'label' => 'Banned Members',
                 ],
                 'banned_members' => [
                     'label' => 'Banned Members',
@@ -604,27 +604,27 @@ return [
                 'no_results' => 'No past members found',
                 'reason_left' => 'Left the group',
                 'reason_removed' => 'Removed by an admin',
-                'reason_blocked' => 'Blocked by an admin',
+                'reason_blocked' => 'Banned by an admin',
                 'at' => ':time',
             ],
         ],
         'blocked_members' => [
             'heading' => [
-                'label' => 'Blocked Members',
+                'label' => 'Banned Members',
             ],
             'inputs' => [
                 'search' => [
-                    'placeholder' => 'Search blocked members',
+                    'placeholder' => 'Search banned members',
                 ],
             ],
             'labels' => [
-                'no_results' => 'No blocked members found',
-                'helper' => 'Blocked members cannot rejoin until the block is lifted.',
+                'no_results' => 'No banned members found',
+                'helper' => 'Banned members cannot rejoin until the ban is lifted.',
             ],
             'actions' => [
                 'lift_block' => [
-                    'label' => 'Lift Block',
-                    'confirmation_message' => 'Are you sure you want to lift the block for :member ?.',
+                    'label' => 'Lift Ban',
+                    'confirmation_message' => 'Are you sure you want to lift the ban for :member ?.',
                 ],
             ],
             'messages' => [

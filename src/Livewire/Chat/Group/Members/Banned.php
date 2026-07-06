@@ -66,7 +66,7 @@ class Banned extends ModalComponent
             ->whereKey($participantId)
             ->firstOrFail();
         /** @var Participant $participant */
-        abort_unless($participant->isBannedByAdmin(), 404, 'Member is not blocked.');
+        abort_unless($participant->isBannedByAdmin(), 404, 'Member is not banned.');
 
         $participant->liftBanByAdmin();
 

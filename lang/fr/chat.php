@@ -222,8 +222,8 @@ return [
                     'confirmation_message' => 'Êtes-vous sûr de vouloir retirer :member de ce groupe?',
                 ],
                 'block_member' => [
-                    'label' => 'Bloquer le membre',
-                    'confirmation_message' => 'Voulez-vous vraiment bloquer :member de ce groupe?',
+                    'label' => 'Bannir le membre',
+                    'confirmation_message' => 'Voulez-vous vraiment bannir :member de ce groupe?',
                 ],
                 'ban_member' => [
                     'label' => 'Bannir le membre',
@@ -233,7 +233,7 @@ return [
                     'label' => 'Anciens membres',
                 ],
                 'blocked_members' => [
-                    'label' => 'Membres bloqués',
+                    'label' => 'Membres bannis',
                 ],
                 'banned_members' => [
                     'label' => 'Membres bannis',
@@ -581,27 +581,27 @@ return [
                 'no_results' => 'Aucun ancien membre trouvé',
                 'reason_left' => 'A quitté le groupe',
                 'reason_removed' => 'Retiré par un administrateur',
-                'reason_blocked' => 'Bloqué par un administrateur',
+                'reason_blocked' => 'Banni par un administrateur',
                 'at' => ':time',
             ],
         ],
         'blocked_members' => [
             'heading' => [
-                'label' => 'Membres bloqués',
+                'label' => 'Membres bannis',
             ],
             'inputs' => [
                 'search' => [
-                    'placeholder' => 'Rechercher les membres bloqués',
+                    'placeholder' => 'Rechercher les membres bannis',
                 ],
             ],
             'labels' => [
-                'no_results' => 'Aucun membre bloqué trouvé',
-                'helper' => 'Les membres bloqués ne peuvent pas revenir tant que le blocage n\'est pas levé.',
+                'no_results' => 'Aucun membre banni trouvé',
+                'helper' => 'Les membres bannis ne peuvent pas revenir tant que le bannissement n\'est pas levé.',
             ],
             'actions' => [
                 'lift_block' => [
-                    'label' => 'Lever le blocage',
-                    'confirmation_message' => 'Voulez-vous vraiment lever le blocage pour :member?',
+                    'label' => 'Lever le bannissement',
+                    'confirmation_message' => 'Voulez-vous vraiment lever le bannissement pour :member?',
                 ],
             ],
             'messages' => [

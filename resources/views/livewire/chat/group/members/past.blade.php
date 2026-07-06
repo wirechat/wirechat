@@ -22,7 +22,9 @@
     <div class="relative w-full p-2">
         <section class="my-4">
             @if ($pastMembers->isEmpty())
-                <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.past_members.labels.no_results') }}</p>
+                <div class="flex min-h-32 items-center justify-center text-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('wirechat::chat.group.past_members.labels.no_results') }}</p>
+                </div>
             @else
                 <ul class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach ($pastMembers as $pastMember)
