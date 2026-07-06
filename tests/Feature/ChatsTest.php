@@ -163,6 +163,12 @@ test('requests drawer shows its heading, description, tabs, and empty state', fu
         ->assertSee(__('wirechat::chats.requests.labels.description'))
         ->assertSeeHtml('dusk="incoming-requests-tab"')
         ->assertSeeHtml('dusk="outgoing-requests-tab"')
+        ->assertSeeHtml('class="flex gap-5"')
+        ->assertSeeHtml('inline-flex min-h-10 items-center gap-2 border-b-2 text-sm font-medium transition')
+        ->assertSeeHtml('max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400')
+        ->assertDontSeeHtml('grid grid-cols-2 gap-2 rounded-lg')
+        ->assertDontSeeHtml('border-dashed')
+        ->assertDontSeeHtml('rounded-2xl')
         ->assertSee(__('wirechat::chats.requests.labels.empty_state'))
         ->assertSet('activeTab', 'incoming');
 });
