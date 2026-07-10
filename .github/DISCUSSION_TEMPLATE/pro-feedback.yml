@@ -1,0 +1,46 @@
+name: Pro feedback
+description: Ask a question, share feedback, or suggest an improvement for Wirechat Pro
+title: "[Pro] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this discussion for Wirechat Pro questions, feedback, and feature ideas.
+
+        For a reproducible bug, please use the bug report form instead and select **Wirechat Pro** as the package.
+
+        Do not include license keys, private application code, or other sensitive information.
+  - type: input
+    id: version
+    attributes:
+      label: Wirechat Pro version
+      description: Which Pro version are you using?
+      placeholder: v0.5.13-beta1
+    validations:
+      required: true
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      options:
+        - Question
+        - Feature idea
+        - User experience feedback
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What would you like to ask, improve, or discuss?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add a small code example, screenshot, or other context if it helps explain the request.
+    validations:
+      required: false

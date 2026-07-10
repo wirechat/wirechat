@@ -1,0 +1,43 @@
+name: Feature request
+description: Suggest an idea or improvement for Wirechat
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this discussion to suggest a new feature or improvement for Wirechat.
+
+        Please search existing discussions before creating a new request.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package would this request affect?
+      options:
+        - Wirechat Free
+        - Wirechat Pro
+        - Both packages
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem would this feature solve, or what workflow would it improve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe how you think the feature could work.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any alternative solutions or workarounds you have tried.
+    validations:
+      required: false
