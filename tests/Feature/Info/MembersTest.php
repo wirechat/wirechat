@@ -9,6 +9,7 @@ use Wirechat\Wirechat\Livewire\Chat\Group\Members\Members;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\PastMembers;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
 use Workbench\App\Models\User;
 
@@ -620,6 +621,8 @@ describe('actions test', function () {
         });
 
         test('it create conversation between auth and user after calling sendMessage', function () {
+            testPanelProvider()->messageRequests(false);
+
             $auth = User::factory()->create();
             $conversation = $auth->createGroup('My Group');
 
@@ -652,6 +655,39 @@ describe('actions test', function () {
                 ->assertStatus(403);
 
             expect($auth->hasConversationWith($user))->toBe(false);
+        });
+
+        test('it creates a message request when message requests are enabled', function () {
+            testPanelProvider()->messageRequests();
+
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+                ->call('sendMessage', $participant->id);
+
+            $privateConversation = $auth->conversations()->whereKeyNot($conversation->id)->first();
+
+            expect($privateConversation)->not->toBeNull()
+                ->and($privateConversation?->participant($user))->toBeNull()
+                ->and(MessageRequest::query()->pending()->where('conversation_id', $privateConversation?->id)->count())->toBe(1);
+        });
+
+        test('it creates a direct conversation when message requests are disabled', function () {
+            testPanelProvider()->messageRequests(false);
+
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+                ->call('sendMessage', $participant->id);
+
+            expect($auth->hasConversationWith($user))->toBeTrue()
+                ->and(MessageRequest::query()->count())->toBe(0);
         });
     });
 

@@ -81,7 +81,9 @@ class Members extends ModalComponent
 
         abort_unless($this->canMessageParticipant($participant), 403, 'You are not allowed to send messages to this user.');
 
-        $conversation = auth()->user()->createConversationWith($participant->participantable);
+        $conversation = $this->panel()->hasMessageRequests()
+            ? auth()->user()->sendMessageRequestTo($participant->participantable)
+            : auth()->user()->createConversationWith($participant->participantable);
 
         $this->closeWirechatModal();
 
