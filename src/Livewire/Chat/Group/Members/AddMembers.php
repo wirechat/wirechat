@@ -2,6 +2,8 @@
 
 namespace Wirechat\Wirechat\Livewire\Chat\Group\Members;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
 use Wirechat\Wirechat\Livewire\Concerns\CreatesGroupInvites;
@@ -137,15 +139,29 @@ class AddMembers extends ModalComponent
     {
         $this->authorizeAddMembersAccess();
 
+        if ($this->selectedMembers->isEmpty()) {
+            return;
+        }
+
+        if ($this->newTotalCount > $this->panel()->getMaxGroupMembers()) {
+            return $this->dispatch('show-member-limit-error');
+        }
+
         foreach ($this->selectedMembers as $member) {
-            $this->authorizeCanBeAddedToGroups($member);
-
-            $alreadyExists = $member->belongsToConversation($this->conversation);
-
-            if (! $alreadyExists) {
-                $this->conversation->addParticipant($member, undoAdminRemovalAction: $this->authParticipant?->isAdmin(), reviewedBy: auth()->user());
+            if (! $member instanceof Model || ! $this->canAddSelectedMember($member)) {
+                return;
             }
         }
+
+        DB::transaction(function () {
+            foreach ($this->selectedMembers as $member) {
+                $alreadyExists = $member->belongsToConversation($this->conversation);
+
+                if (! $alreadyExists) {
+                    $this->conversation->addParticipant($member, undoAdminRemovalAction: $this->authParticipant?->isAdmin(), reviewedBy: auth()->user());
+                }
+            }
+        });
 
         $this->closeWirechatModal();
 
@@ -188,6 +204,45 @@ class AddMembers extends ModalComponent
             403,
             'You do not have permission to add members to this group'
         );
+    }
+
+    protected function canAddSelectedMember(Model $member): bool
+    {
+        if (! $this->canBeAddedToGroups($member)) {
+            $this->dispatch('wirechat-toast', type: 'error', message: __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', [
+                'member' => data_get($member, 'wirechat_name', __('wirechat::chat.labels.user')),
+            ]));
+
+            return false;
+        }
+
+        if ($member->belongsToConversation($this->conversation)) {
+            $this->dispatch('wirechat-toast', type: 'error', message: $member->wirechat_name.' is already a member of this group.');
+
+            return false;
+        }
+
+        $participant = $this->conversation->participant($member, withoutGlobalScopes: true);
+
+        if ($participant?->isBannedByAdmin()) {
+            $this->dispatch('wirechat-toast', type: 'error', message: 'Cannot add '.$member->wirechat_name.' because they are banned from this group.');
+
+            return false;
+        }
+
+        if ($participant?->hasExited()) {
+            $this->dispatch('wirechat-toast', type: 'error', message: 'Cannot add '.$member->wirechat_name.' because they left this group.');
+
+            return false;
+        }
+
+        if ($participant?->isRemovedByAdmin() && ! $this->authParticipant?->isAdmin()) {
+            $this->dispatch('wirechat-toast', type: 'error', message: 'Cannot add '.$member->wirechat_name.' because they were removed from this group by an admin.');
+
+            return false;
+        }
+
+        return true;
     }
 
     protected function resolvePrimaryInviteUrl(): ?string

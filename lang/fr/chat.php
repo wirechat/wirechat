@@ -450,7 +450,7 @@ return [
                     'invite_message' => "Rejoignez :group via ce lien d'invitation : :url",
                     'unavailable_left' => ':member a quitté ce groupe et doit ouvrir lui-même le lien d\'invitation pour revenir.',
                     'unavailable_removed' => ':member a été retiré de ce groupe et ne peut pas recevoir de lien d\'invitation de groupe.',
-                    'unavailable_blocked' => ':member est bloqué pour ce groupe et ne peut pas recevoir de lien d\'invitation de groupe.',
+                    'unavailable_blocked' => ':member est banni de ce groupe et ne peut pas recevoir de lien d\'invitation de groupe.',
                     'sent_success' => "Lien d'invitation envoyé à :count discussions.",
                 ],
             ],

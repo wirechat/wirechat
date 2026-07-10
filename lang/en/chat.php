@@ -473,7 +473,7 @@ return [
                     'invite_message' => 'Join :group via this invite link: :url',
                     'unavailable_left' => ':member left this group and must open the invite link personally to rejoin.',
                     'unavailable_removed' => ':member was removed from this group and cannot receive a group invite link.',
-                    'unavailable_blocked' => ':member is blocked from this group and cannot receive a group invite link.',
+                    'unavailable_blocked' => ':member is banned from this group and cannot receive a group invite link.',
                     'sent_success' => 'Invite link sent to :count chats.',
                 ],
             ],

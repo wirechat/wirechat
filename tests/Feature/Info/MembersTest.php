@@ -652,7 +652,7 @@ describe('actions test', function () {
 
             Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
                 ->call('sendMessage', $participant->id)
-                ->assertStatus(403);
+                ->assertDispatched('wirechat-toast', type: 'error');
 
             expect($auth->hasConversationWith($user))->toBe(false);
         });
@@ -753,7 +753,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('makeAdmin', $participant->id)
-            ->assertStatus(403, 'Owner role cannot be changed');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         $participant = $participant->refresh();
 
@@ -772,7 +772,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('dismissAdmin', $participant->id)
-            ->assertStatus(403, 'Owner role cannot be changed');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         $participant = $participant->refresh();
 
@@ -813,7 +813,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id)
-            ->assertStatus(403, 'Owner cannot be removed from group');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         $participant = $participant->refresh();
 
@@ -836,7 +836,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id)
-            ->assertStatus(403, 'This user does not belong to conversation');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
     });
 
@@ -853,7 +853,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($randomUser)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id)
-            ->assertStatus(403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
     });
 
@@ -989,7 +989,7 @@ describe('actions test', function () {
 
         Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->call('banMember', $otherParticipant->id)
-            ->assertStatus(403, 'This user does not belong to conversation');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         expect($currentParticipant->refresh()->isBannedByAdmin())->toBeFalse()
             ->and($otherParticipant->refresh()->isBannedByAdmin())->toBeFalse();

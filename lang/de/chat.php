@@ -472,7 +472,7 @@ return [
                     'invite_message' => 'Tritt :group über diesen Einladungslink bei: :url',
                     'unavailable_left' => ':member hat die Gruppe verlassen und muss den Einladungslink selbst öffnen, um wieder beizutreten.',
                     'unavailable_removed' => ':member wurde aus dieser Gruppe entfernt und kann keinen Gruppeneinladungslink erhalten.',
-                    'unavailable_blocked' => ':member ist für diese Gruppe blockiert und kann keinen Gruppeneinladungslink erhalten.',
+                    'unavailable_blocked' => ':member ist aus dieser Gruppe verbannt und kann keinen Gruppeneinladungslink erhalten.',
                     'sent_success' => 'Einladungslink an :count Chats gesendet.',
                 ],
             ],

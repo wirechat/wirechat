@@ -953,7 +953,7 @@ describe('Deleting Group', function () {
 
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call('deleteGroup')
-            ->assertStatus(403, 'Cannot delete group: Please remove all members before attempting to delete the group.');
+            ->assertDispatched('wirechat-toast', type: 'error');
     });
 
     test('it aborts if group of Mixed Model members is not 0 excluding owner', function () {
@@ -969,7 +969,7 @@ describe('Deleting Group', function () {
 
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call('deleteGroup')
-            ->assertStatus(403, 'Cannot delete group: Please remove all members before attempting to delete the group.');
+            ->assertDispatched('wirechat-toast', type: 'error');
     });
 
     test('group can be deleted after removing all members or when if they all remove themselves', function () {
@@ -1022,7 +1022,7 @@ describe('Deleting Group', function () {
 
         Livewire::actingAs($nonOwner)->test(Info::class, ['conversation' => $conversation])
             ->call('deleteGroup')
-            ->assertStatus(403, 'Forbidden: You do not have permission to delete this group.');
+            ->assertDispatched('wirechat-toast', type: 'error');
     });
 
 });
@@ -1108,7 +1108,7 @@ describe('Exiting Chat', function () {
         $conversation->addParticipant($user);
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
             ->call('exitConversation')
-            ->assertStatus(403, 'Owner cannot exit conversation');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         expect($auth->belongsToConversation($conversation))->toBe(true);
     });

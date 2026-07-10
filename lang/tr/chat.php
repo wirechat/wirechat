@@ -450,7 +450,7 @@ return [
                     'invite_message' => ':group grubuna bu bağlantıyla katıl: :url',
                     'unavailable_left' => ':member bu gruptan ayrıldı ve yeniden katılmak için davet bağlantısını kendisi açmalıdır.',
                     'unavailable_removed' => ':member bu gruptan çıkarıldı ve grup davet bağlantısı alamaz.',
-                    'unavailable_blocked' => ':member bu grupta engellendiği için grup davet bağlantısı alamaz.',
+                    'unavailable_blocked' => ':member bu gruptan yasaklandığı için grup davet bağlantısı alamaz.',
                     'sent_success' => 'Davet bağlantısı :count sohbete gönderildi.',
                 ],
             ],

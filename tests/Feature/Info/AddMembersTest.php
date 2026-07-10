@@ -208,7 +208,8 @@ describe('actions test', function () {
                 // attempt to add member
             ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
-            ->assertDontSee('Micheal');
+            ->assertSet('selectedMembers', collect())
+            ->assertDispatched('wirechat-toast', type: 'error');
     });
 
     test('toggleMember() rejects users who disallow group adds', function () {
@@ -222,7 +223,7 @@ describe('actions test', function () {
             ->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
-            ->assertStatus(403, __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $user->wirechat_name]));
+            ->assertDispatched('wirechat-toast', type: 'error', message: __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $user->wirechat_name]));
     });
 
     test('toggleMember() ignores tampered classes outside the current panel search results', function () {
@@ -311,8 +312,8 @@ describe('actions test', function () {
                 // first add member
             ->set('search', 'Micheal')
             ->call('toggleMember', $user->id, $user->getMorphClass())
-            ->assertDontSee('Micheal')
-            ->assertStatus(403, $user->wirechat_name.' is already a member');
+            ->assertSet('selectedMembers', collect())
+            ->assertDispatched('wirechat-toast', type: 'error');
     });
 
     test('it aborts if admin tries to add a member who exited the group', function () {
@@ -331,7 +332,7 @@ describe('actions test', function () {
         $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
         $request->set('search', 'Micheal')
             ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
-            ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they left the group");
+            ->assertDispatched('wirechat-toast', type: 'error');
 
     });
 
@@ -352,7 +353,7 @@ describe('actions test', function () {
         $request = Livewire::actingAs($randomUser)->test(AddMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()]);
         $request->set('search', 'Micheal')
             ->call('toggleMember', $userTobeRemoved->id, $userTobeRemoved->getMorphClass())
-            ->assertStatus(403, "Cannot add {$participant->participantable->wirechat_name} because they were removed from the group by an Admin.");
+            ->assertDispatched('wirechat-toast', type: 'error');
 
     });
 
@@ -449,7 +450,7 @@ describe('actions test', function () {
 
         $request
             ->call('save')
-            ->assertStatus(403, __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $user->wirechat_name]));
+            ->assertDispatched('wirechat-toast', type: 'error', message: __('wirechat::chat.group.add_members.messages.group_add_privacy_denied', ['member' => $user->wirechat_name]));
 
         $exists = $conversation->participants()->where('participantable_id', $user->id)->exists();
         expect($exists)->toBeFalse();

@@ -224,6 +224,23 @@ test('wirechat styles can use solid color tone for primary surfaces', function (
         ->toContain('--wc-primary-tone-dark-text: #fff;');
 });
 
+test('toast renders a semantic icon and color for each supported type', function () {
+    $html = Blade::render('<x-wirechat::toast />');
+
+    expect($html)
+        ->toContain("type=='warning'")
+        ->toContain("type=='info'")
+        ->toContain("type=='error'")
+        ->toContain("type=='danger'")
+        ->toContain("type=='success'")
+        ->toContain('text-yellow-500')
+        ->toContain('text-blue-500')
+        ->toContain('text-red-500')
+        ->toContain('text-green-500')
+        ->toContain('text-blue-700 dark:text-blue-300')
+        ->toContain('text-red-700 dark:text-red-300');
+});
+
 test('it forwards chatsClass and chatClass to the widget children', function () {
     $auth = User::factory()->create();
     $conversation = $auth->createConversationWith(User::factory()->create());

@@ -544,7 +544,7 @@ it('prevents sending a group invite link via chat to banned past members', funct
         ])
         ->set('search', $bannedUser->name)
         ->call('toggleMember', $bannedUser->id, $bannedUser->getMorphClass())
-        ->assertStatus(403);
+        ->assertDispatched('wirechat-toast', type: 'error');
 });
 
 it('hides exited and removed past members from send invite search results', function () {
@@ -620,7 +620,7 @@ it('rejects direct send invite selection for an exited past member', function ()
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->set('search', $exitedUser->name)
         ->call('toggleMember', $exitedUser->getKey(), $exitedUser->getMorphClass())
-        ->assertStatus(403);
+        ->assertDispatched('wirechat-toast', type: 'error');
 });
 
 it('uses the panel user search callback in the send invite modal', function () {
