@@ -71,14 +71,23 @@
                             $loopParticipantIsAuth = $participant->isParticipantable(auth()->user());
                             $canMessageParticipant = $this->canMessageParticipant($participant);
                             $participantActionId = (string) $participant->id;
+                            $canManageMember = $authIsAdminInGroup || $authIsOwner;
+                            $canToggleMemberAdmin = $authIsOwner && ! $loopParticipantIsAuth;
+                            $canRemoveOrBanMember = $canManageMember && ! $participant->isOwner() && ! $loopParticipantIsAuth && ! $participant->isAdmin();
+                            $hasMemberActions = $canMessageParticipant || $canToggleMemberAdmin || $canRemoveOrBanMember;
                         @endphp
                         <li x-data="{ memberMenuId: {{ $participant->id }} }" x-ref="button"
-                            @click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"
+                            @if ($hasMemberActions)
+                                @click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"
+                            @endif
                             aria-modal="true"
                             tabindex="0"
                             x-on:keydown.escape.stop="openMemberMenu = null"
                             :class="openMemberMenu !== memberMenuId || 'bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)]'"
-                            class="flex cursor-pointer group gap-2 items-center overflow-x-hidden p-2 py-3">
+                            @class([
+                                'flex group gap-2 items-center overflow-x-hidden p-2 py-3',
+                                'cursor-pointer' => $hasMemberActions,
+                            ])>
 
                             <div class="flex cursor-pointer gap-2 items-center w-full min-w-0">
                                 <x-wirechat::avatar src="{{ $participant->participantable->wirechat_avatar_url }}"
@@ -99,12 +108,13 @@
 
                                 </div>
 
-                                <div x-cloak x-show="openMemberMenu === memberMenuId" @click.stop
-                                    x-anchor.bottom-end="$refs.button"
-                                    class="z-20 ml-auto shrink-0 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] border dark:border-zinc-700 py-4 shadow-lg rounded-md grid space-y-2 w-52">
-                                    {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-600 dark:text-gray-300  w-6 h-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                    </svg>   --}}
+                                @if ($hasMemberActions)
+                                    <div x-cloak x-show="openMemberMenu === memberMenuId" @click.stop
+                                        x-anchor.bottom-end="$refs.button"
+                                        class="z-20 ml-auto shrink-0 bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] border dark:border-zinc-700 py-4 shadow-lg rounded-md grid space-y-2 w-52">
+                                        {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-600 dark:text-gray-300  w-6 h-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>   --}}
 
                                     @if ($canMessageParticipant)
                                         <x-wirechat::dropdown-button wire:click="sendMessage('{{ $participantActionId }}')"
@@ -119,7 +129,7 @@
                                         </x-wirechat::dropdown-button>
                                     @endif
 
-                                    @if ($authIsAdminInGroup || $authIsOwner)
+                                    @if ($canManageMember)
                                         {{-- Only show admin actions to owner of group and if is not the current loop --}}
                                         {{--AND We only want to show admin actions if participant is not owner --}}
                                         @if ($authIsOwner && !$loopParticipantIsAuth)
@@ -141,7 +151,7 @@
                                         @endif
 
                                             {{--AND We only want to show remove actions if participant is not owner of conversation because we don't want to remove owner--}}
-                                            @if (!$participant->isOwner() && !$loopParticipantIsAuth && !$participant->isAdmin())
+                                            @if ($canRemoveOrBanMember)
                                             <x-wirechat::dropdown-button
                                                 wire:click="removeFromGroup('{{ $participantActionId }}')"
                                                 wire:confirm="{{__('wirechat::chat.group.members.actions.remove_from_group.confirmation_message',['member'=>$participant->participantable?->wirechat_name])}}"
@@ -157,12 +167,12 @@
                                             </x-wirechat::dropdown-button>
                                             @endif
 
-                                    @else
                                     @endif
 
 
 
-                                </div>
+                                    </div>
+                                @endif
                             </div>
 
                         </li>

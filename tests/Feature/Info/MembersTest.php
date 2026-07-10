@@ -157,6 +157,25 @@ describe('presence test', function () {
             ->assertDontSee(__('wirechat::chat.group.members.actions.send_message_to_member.label', ['member' => $user->wirechat_name]));
     });
 
+    test('member action menu is hidden when no actions are available', function () {
+        $owner = User::factory()->create();
+        $auth = User::factory()->create();
+        $conversation = $owner->createGroup('My Group');
+
+        $conversation->addParticipant($auth);
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $conversation->addParticipant($user);
+
+        User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $user->getKey()];
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+            ->set('search', 'Micheal')
+            ->assertSee('Micheal')
+            ->assertDontSeeHtml('x-show="openMemberMenu === memberMenuId"')
+            ->assertDontSeeHtml('@click.stop')
+            ->assertDontSee(__('wirechat::chat.group.members.actions.send_message_to_member.label', ['member' => $user->wirechat_name]));
+    });
+
     test('it show label "You" if member in loop is auth user', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
