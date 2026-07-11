@@ -4,6 +4,7 @@ namespace Workbench\App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Wirechat\Wirechat\Contracts\WirechatUser;
@@ -17,6 +18,9 @@ class User extends Authenticatable implements WirechatUser
 
     // use Chatable;
     use InteractsWithWirechat;
+
+    /** @var array<string, array<int, string>> */
+    public static array $wirechatMessageDenyList = [];
 
     /**
      * The attributes that are mass assignable.
@@ -77,6 +81,11 @@ class User extends Authenticatable implements WirechatUser
 
     }
 
+    public function getWirechatSubtitleAttribute(): ?string
+    {
+        return $this->email;
+    }
+
     public function canCreateGroups(): bool
     {
         return $this->hasVerifiedEmail() == true;
@@ -85,6 +94,13 @@ class User extends Authenticatable implements WirechatUser
     public function canCreateChats(): bool
     {
         return $this->hasVerifiedEmail() == true;
+    }
+
+    public function canSendMessageTo(Model $recipient): bool
+    {
+        $deniedRecipients = static::$wirechatMessageDenyList[(string) $this->getKey()] ?? [];
+
+        return ! in_array((string) $recipient->getKey(), $deniedRecipients, true);
     }
 
     public function canAccessWirechatPanel(Panel $panel): bool

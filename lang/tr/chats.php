@@ -8,6 +8,7 @@ return [
     'labels' => [
         'heading' => 'Sohbetler',
         'no_conversations_yet' => 'Henüz sohbet yok',
+        'no_conversations_found' => 'Sohbet bulunamadı.',
         'you' => 'Sen',
         'attachment' => 'Ek',
         'now' => 'Şimdi',

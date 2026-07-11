@@ -39,7 +39,7 @@ trait Widget
         // set redirect route
         if ($redirectRoute == null) {
 
-            $redirectRoute = route($this->panel()->chatsRoute());
+            $redirectRoute = $this->panel()?->chatsUrl();
         }
 
         // set events to dispatch on termination
@@ -48,7 +48,7 @@ trait Widget
                 ['close-chat', ['conversation' => $this->resolveConversationId()]],
             ];
         }
-        if ($this->isWidget()) {
+        if ($this->usesInternalWirechatNavigation() || $redirectRoute === null) {
 
             $this->dispatchWidgetEvents($events);
         } else {
@@ -57,20 +57,40 @@ trait Widget
         }
     }
 
+    public function navigateToChat(int|string $conversation)
+    {
+        $redirectRoute = $this->panel()?->chatRouteIfRegistered($conversation);
+
+        if ($this->usesInternalWirechatNavigation() || $redirectRoute === null) {
+            $this->openChat($conversation);
+
+            return null;
+        }
+
+        return $this->redirect($redirectRoute);
+    }
+
+    protected function usesInternalWirechatNavigation(): bool
+    {
+        return $this->isWidget() || (method_exists($this, 'isTray') && $this->isTray());
+    }
+
     /**
      * Dispatch events to the widget components. upon terminatoin
      */
     private function dispatchWidgetEvents(array $events): void
     {
         foreach ($events as $component => $event) {
+            $params = [];
+
             if (is_array($event)) {
                 [$event, $params] = $event;
             }
 
             if (is_numeric($component)) {
-                $this->dispatch($event, ...$params ?? []);
+                $this->dispatch($event, ...$params);
             } else {
-                $this->dispatch($event, ...$params ?? [])->to($component);
+                $this->dispatch($event, ...$params)->to($component);
             }
         }
     }

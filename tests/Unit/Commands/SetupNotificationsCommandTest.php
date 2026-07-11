@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
+    $this->sandbox = wirechat_create_filesystem_sandbox();
+
     // Clean up existing files for isolation
     if (File::exists(public_path('js/wirechat/sw.js'))) {
         File::delete(public_path('js/wirechat/sw.js'));
@@ -34,6 +36,8 @@ it('creates the Wirechat and main service worker files when they do not exist', 
 
     $this->artisan('wirechat:setup-notifications')
         ->expectsOutput('✅ Wirechat notifications setup complete!')
+        ->expectsOutput("Note: If you're already using a custom service worker in your application, manually add `importScripts('/js/wirechat/sw.js');` to that service worker file and call `->serviceWorkerPath(asset('sw.js'))` on your Wirechat panel.")
+        ->expectsOutput('Finally, enable web push notifications on your Wirechat panel with `->webPushNotifications()`.')
         ->assertExitCode(0);
 
     expect(File::exists(public_path('js/wirechat/sw.js')))->toBeTrue();

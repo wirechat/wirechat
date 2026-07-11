@@ -24,8 +24,12 @@
 
                 <div class=" grid  ">
 
-                    <a class="px-8 py-5 " @dusk="receiver_name" href="{{ $receiver?->wirechat_profile_url }}">
+                    <a class="px-8 py-5 text-center" @dusk="receiver_name" href="{{ $receiver?->wirechat_profile_url }}">
                         <h5 class="text-2xl">{{ $receiver?->wirechat_name }}</h5>
+
+                        @if (filled($receiver?->wirechat_subtitle))
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $receiver?->wirechat_subtitle }}</p>
+                        @endif
                     </a>
                 </div>
 

@@ -7,6 +7,7 @@ return [
     'labels' => [
         'heading' => 'Discussions',
         'no_conversations_yet' => 'Aucune discussion pour le moment',
+        'no_conversations_found' => 'Aucune discussion trouvée.',
         'you' => 'Vous',
         'attachment' => 'Pièce jointe',
         'now' => 'Maintenant',

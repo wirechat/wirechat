@@ -27,6 +27,8 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
         && $lastMessage != null
         && $hasUnreadMessages
         && $selectedConversationId != $conversation->id;
+    $chatRoute = $this->panel()->chatRouteIfRegistered($conversation->id);
+    $useInternalChatNavigation = $widget || $chatRoute === null;
 
 
     @endphp
@@ -50,17 +52,18 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
         wire:key="conversation-em-{{ $conversation->id }}-{{ $lastMessage?->id ?? 'none' }}-{{ $unreadIndicatorKey }}"
         x-on:chat-opened.window="handleChatOpened($event)"
         x-on:chat-closed.window="handleChatClosed($event)">
-        <a @if ($widget) tabindex="0"
+        <a @if ($useInternalChatNavigation) tabindex="0"
         role="button"
         dusk="openChatWidgetButton"
+        data-internal-chat-action="true"
         @click="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @keydown.enter="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @else
-        wire:navigate href="{{ $this->panel()->chatRoute($conversation->id)}}" @endif
-            @style(['border-color:var(--wc-brand-primary)' => $selectedConversationId == $conversation?->id])
-            class="py-3 flex gap-4  dark:hover:bg-[var(--wc-dark-secondary)]  hover:bg-[var(--wc-light-secondary)]  rounded-xs transition-colors duration-150  relative w-full cursor-pointer px-2"
+        wire:navigate
+         href="{{ $chatRoute }}" @endif
+            class="py-3 flex gap-4  dark:hover:bg-[var(--wc-dark-secondary)]  hover:bg-[var(--wc-light-secondary)]  rounded-lg transition-colors duration-150  relative w-full cursor-pointer px-2"
             :class="$wire.selectedConversationId == conversationID &&
-                'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)] border-r-4  border-opacity-20 border-[var(--wc-brand-primary)]'">
+                'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)]'">
 
             <div class="shrink-0">
                 <x-wirechat::avatar key="chat-list-conversation-{{$key}}" wire:key="chatslist-key-{{$key}}" disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
@@ -98,8 +101,7 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
                         <div x-show="selectedConversationId != conversationID" dusk="unreadMessagesCount" class="col-span-2 flex flex-col text-center my-auto items-end">
                             <span class="sr-only">unread messages count</span>
                             <span
-                                @style(['background-color:var(--wc-brand-primary)'])
-                                class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold leading-none text-white"
+                                class="inline-flex bg-(--wc-primary-600)/90 min-w-6 items-center opacity-90 justify-center rounded-full px-2 py-1 text-xs font-semibold leading-none text-white"
                             >
                                 {{ $unreadIndicatorCount }}
                             </span>
@@ -109,7 +111,7 @@ $unreadIndicatorType = $this->panel()->getUnreadIndicatorType();
                             {{-- Dots icon --}}
                             <span dusk="unreadDotItem" class="sr-only">unread dot</span>
                             <svg @style(['color:var(--wc-brand-primary)']) xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                fill="currentColor" class="bi bi-dot w-10 h-10 text-blue-500" viewBox="0 0 16 16">
+                                fill="currentColor" class="bi bi-dot w-10 h-10 " viewBox="0 0 16 16">
                                 <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
                             </svg>
 

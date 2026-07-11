@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
+use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Widgets\Wirechat;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Panel;
+use Wirechat\Wirechat\PanelRegistry;
 use Wirechat\Wirechat\Support\Color;
 use Workbench\App\Models\User;
 
@@ -55,6 +58,16 @@ test('it renders Chat when "openChatWidget" event is selected ', function () {
 
 });
 
+test('it renders Chat when widget event payload contains a conversation key', function () {
+    $auth = User::factory()->create();
+    $conversation = $auth->createConversationWith(User::factory()->create());
+
+    Livewire::actingAs($auth)->test(Wirechat::class)
+        ->call('openChatWidget', ['conversation' => $conversation->id])
+        ->assertSet('selectedConversationId', $conversation->id)
+        ->assertSeeLivewire(Chat::class);
+});
+
 test('it removes Chat when "closeChatWidget" event is selected ', function () {
     $auth = User::factory()->create();
 
@@ -98,6 +111,58 @@ test('it applies ui classes and styles to the widget shell only', function () {
         ->and($styleMatches[0])->toHaveCount(1);
 });
 
+test('it centers the widget empty state across the chat panel', function () {
+    $html = file_get_contents(dirname(__DIR__, 2).'/resources/views/livewire/widgets/wire-chat.blade.php');
+
+    expect($html)
+        ->toContain('dusk="widget-empty-state"')
+        ->toContain('absolute inset-0 flex items-center justify-center px-4 text-center')
+        ->toContain("@lang('wirechat::widgets.wirechat.messages.welcome')");
+});
+
+test('blade component attributes do not contain uncompiled js directives', function () {
+    $views = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(dirname(__DIR__, 2).'/resources/views')
+    );
+
+    $matches = [];
+
+    foreach ($views as $view) {
+        if (! $view->isFile() || $view->getExtension() !== 'php') {
+            continue;
+        }
+
+        preg_match_all('/<x-[^>]*@js\([^>]*>/m', file_get_contents($view->getPathname()), $componentMatches);
+
+        foreach ($componentMatches[0] as $match) {
+            $matches[] = str_replace(dirname(__DIR__, 2).'/', '', $view->getPathname()).': '.$match;
+        }
+    }
+
+    expect($matches)->toBeEmpty();
+});
+
+test('wirechat assets render the notification service worker and echo listener', function () {
+    $auth = User::factory()->create();
+
+    testPanelProvider()
+        ->webPushNotifications()
+        ->serviceWorkerPath('/sw.js');
+
+    $this->actingAs($auth);
+
+    $assets = Blade::render('@wirechatAssets(panel: "test")');
+
+    expect($assets)
+        ->toContain('navigator.serviceWorker.register("/sw.js")')
+        ->toContain('Wirechat Service Worker registered/updated')
+        ->toContain('Echo.private(`test.participant.')
+        ->toContain(".listen('.Wirechat\\\\Wirechat\\\\Events\\\\NotifyParticipant'")
+        ->toContain('Notification.permission')
+        ->toContain('showNotification(e)')
+        ->not->toContain('@js(');
+});
+
 test('wirechat styles uses the dark palette and supports extending zinc shades', function () {
     $customDark = [
         900 => 'oklch(0.18 0.01 285.9)',
@@ -116,6 +181,64 @@ test('wirechat styles uses the dark palette and supports extending zinc shades',
         ->toContain('--wc-dark-secondary: '.$customDark[800].';')
         ->toContain('--wc-dark-accent: '.$customDark[700].';')
         ->toContain('--wc-light-secondary: '.Color::Zinc[100].';');
+});
+
+test('wirechat styles use soft color tone by default', function () {
+    app(PanelRegistry::class)->register(
+        Panel::make()
+            ->id('tone-soft')
+            ->path('tone-soft')
+            ->colors([
+                'primary' => Color::Emerald,
+            ])
+    );
+
+    $styles = Blade::render('@wirechatStyles(tone-soft)');
+
+    expect($styles)
+        ->toContain('--wc-primary-500: '.Color::Emerald[500].';')
+        ->toContain('--wc-primary-tone-bg: color-mix(in srgb, var(--wc-primary-300) 35%, transparent);')
+        ->toContain('--wc-primary-tone-text: rgb(24 24 27);')
+        ->toContain('--wc-primary-tone-dark-bg: color-mix(in srgb, var(--wc-primary-300) 40%, transparent);')
+        ->toContain('--wc-primary-tone-dark-text: #fff;');
+});
+
+test('wirechat styles can use solid color tone for primary surfaces', function () {
+    app(PanelRegistry::class)->register(
+        Panel::make()
+            ->id('tone-solid')
+            ->path('tone-solid')
+            ->colors([
+                'primary' => Color::Rose,
+            ])
+            ->colorTone(ColorTone::Solid)
+    );
+
+    $styles = Blade::render('@wirechatStyles(tone-solid)');
+
+    expect($styles)
+        ->toContain('--wc-primary-500: '.Color::Rose[500].';')
+        ->toContain('--wc-primary-tone-bg: var(--wc-primary-500);')
+        ->toContain('--wc-primary-tone-text: #fff;')
+        ->toContain('--wc-primary-tone-dark-bg: var(--wc-primary-600);')
+        ->toContain('--wc-primary-tone-dark-text: #fff;');
+});
+
+test('toast renders a semantic icon and color for each supported type', function () {
+    $html = Blade::render('<x-wirechat::toast />');
+
+    expect($html)
+        ->toContain("type=='warning'")
+        ->toContain("type=='info'")
+        ->toContain("type=='error'")
+        ->toContain("type=='danger'")
+        ->toContain("type=='success'")
+        ->toContain('text-yellow-500')
+        ->toContain('text-blue-500')
+        ->toContain('text-red-500')
+        ->toContain('text-green-500')
+        ->toContain('text-blue-700 dark:text-blue-300')
+        ->toContain('text-red-700 dark:text-red-300');
 });
 
 test('it forwards chatsClass and chatClass to the widget children', function () {

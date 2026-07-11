@@ -60,10 +60,11 @@ class Send extends ModalComponent
                 $model = $resource->resource;
 
                 return [
-                    'id' => $model->id,
+                    'id' => $model->getKey(),
                     'type' => $model->getMorphClass(),
                     'wirechat_name' => $model->wirechat_name,
                     'wirechat_avatar_url' => $model->wirechat_avatar_url,
+                    'wirechat_subtitle' => data_get($model, 'wirechat_subtitle'),
                 ];
             })
             ->values();
@@ -73,6 +74,14 @@ class Send extends ModalComponent
     {
         $this->authorizeSendAccess();
 
+        if ($this->selectedMembers->contains(fn ($member) => (string) $member->getKey() === (string) $id && $member->getMorphClass() === $class)) {
+            $this->selectedMembers = $this->selectedMembers
+                ->reject(fn ($member) => (string) $member->getKey() === (string) $id && $member->getMorphClass() === $class)
+                ->values();
+
+            return;
+        }
+
         $model = $this->resolvePanelSearchResult($id, $class);
 
         if (! $model) {
@@ -80,14 +89,6 @@ class Send extends ModalComponent
         }
 
         abort_unless($this->canReceiveInviteLink($model, shouldAbort: true), 403);
-
-        if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
-            $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                return $member->getKey() == $id && $member->getMorphClass() == $class;
-            })->values();
-
-            return;
-        }
 
         $this->selectedMembers->push($model);
     }
@@ -100,9 +101,13 @@ class Send extends ModalComponent
             return;
         }
 
+        $inviteUrl = $this->panel()->inviteRouteIfRegistered($this->invite->token);
+
+        abort_if($inviteUrl === null, 404);
+
         $messageBody = __('wirechat::chat.group.invite_link.send_via_chat.messages.invite_message', [
             'group' => $this->group->name ?: __('wirechat::chat.group.invite_link.page.labels.group_fallback'),
-            'url' => $this->invite->url($this->panel()),
+            'url' => $inviteUrl,
         ]);
 
         foreach ($this->selectedMembers as $member) {

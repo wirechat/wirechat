@@ -80,10 +80,14 @@ class Wirechat extends Component
 
     public function openChatWidget($conversation, $arguments = [], $modalAttributes = []): void
     {
+        if (is_array($conversation) && array_key_exists('conversation', $conversation)) {
+            $conversation = $conversation['conversation'];
+        }
+
         $component = 'wirechat.chat';
 
         // Generate a unique ID using the conversationId and arguments
-        $id = md5($component.$conversation.serialize($arguments));
+        $id = md5($component.(string) $conversation.serialize($arguments));
 
         // Merge modal attributes with defaults
         $defaultModalAttributes = [

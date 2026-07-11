@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\File;
 use Wirechat\Wirechat\Console\Commands\MakePanelCommand;
+use Wirechat\Wirechat\Facades\Wirechat;
 
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
+    $this->sandbox = wirechat_create_filesystem_sandbox();
+
     $this->id = 'testPanel';
     $this->className = 'TestPanelPanelProvider';
     $this->namespace = 'App\\Providers\\Wirechat';
@@ -29,6 +32,9 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    app()->forgetInstance('wirechat');
+    Wirechat::clearResolvedInstance('wirechat');
+
     // Delete the generated panel provider file
     if (File::exists($this->filePath)) {
         File::delete($this->filePath);
@@ -50,6 +56,35 @@ it('creates a new wirechat panel provider using a fresh ID', function () {
     } else {
         $artisan->expectsOutput("We’ve attempted to register [{$this->displayPath}] in your [config/app.php] providers list. If you run into issues, the change might not have applied correctly — you can always insert it yourself in the 'providers' array.");
     }
+    $artisan->run();
+
+    expect(File::get($this->filePath))
+        ->toContain('->chatsSearch()')
+        ->toContain('->redirectToHomeAction()')
+        ->toContain('->createChatAction()')
+        ->not->toContain('->default();');
+});
+
+it('creates the first wirechat panel provider as the default panel', function () {
+    app()->instance('wirechat', new class
+    {
+        public function panels(): array
+        {
+            return [];
+        }
+    });
+    Wirechat::clearResolvedInstance('wirechat');
+
+    $this->artisan('make:wirechat-panel', ['id' => $this->id])
+        ->assertExitCode(0)
+        ->expectsOutput("Wirechat panel [$this->providerClass] created successfully.")
+        ->run();
+
+    expect(File::get($this->filePath))
+        ->toContain('->chatsSearch()')
+        ->toContain('->redirectToHomeAction()')
+        ->toContain('->createChatAction()')
+        ->toContain('->default();');
 });
 
 it('does not overwrite existing file if user cancels', function () {
@@ -75,6 +110,31 @@ it('overwrites existing file when user confirms', function () {
 
     expect(File::get($this->filePath))->not->toBe('OLD');
     expect(File::get($this->filePath))->toContain("class {$this->className}");
+});
+
+it('registers providers in config app files that import provider classes', function () {
+    $appConfig = <<<'PHP'
+<?php
+
+use App\Providers\AppServiceProvider;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Support\ServiceProvider;
+
+return [
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        AppServiceProvider::class,
+        RouteServiceProvider::class,
+    ])->toArray(),
+];
+PHP;
+
+    $method = new ReflectionMethod(MakePanelCommand::class, 'addProviderToAppConfig');
+    $method->setAccessible(true);
+
+    $registeredConfig = $method->invoke(new MakePanelCommand, $appConfig, $this->providerClass);
+
+    expect($registeredConfig)
+        ->toContain("RouteServiceProvider::class,\n        {$this->providerClass}::class,");
 });
 
 it('shows validation error for invalid ID', function () {

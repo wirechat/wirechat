@@ -187,12 +187,16 @@ describe('Add members page', function () {
     test('Search can be filtered', function () {
         $auth = ModelsUser::factory()->create();
         // create another user
-        ModelsUser::factory()->create(['name' => 'Micheal']);
+        $user = ModelsUser::factory()->create([
+            'name' => 'Micheal',
+            'email' => 'micheal.new-group@example.test',
+        ]);
 
         $request = Livewire::actingAs($auth)->test(NewGroup::class);
         $request
             ->set('search', 'Mic')
-            ->assertSee('Micheal');
+            ->assertSee('Micheal')
+            ->assertSee($user->wirechat_subtitle);
 
     });
 
@@ -257,6 +261,21 @@ describe('Add members page', function () {
                 // then remove memener
             ->call('removeMember', $user->id, $user->getMorphClass())
             ->set('search', '')
+            ->assertDontSee('Micheal');
+    });
+
+    test('calling toggleMember() removes selected members after the search query changes', function () {
+        $auth = ModelsUser::factory()->create();
+        $user = ModelsUser::factory()->create(['name' => 'Micheal']);
+        ModelsUser::factory()->create(['name' => 'Jessica']);
+
+        Livewire::actingAs($auth)->test(NewGroup::class)
+            ->set('search', 'Micheal')
+            ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->assertSee('Micheal')
+            ->set('search', 'Jessica')
+            ->call('toggleMember', $user->id, $user->getMorphClass())
+            ->assertSet('selectedMembers', collect())
             ->assertDontSee('Micheal');
     });
 
@@ -508,6 +527,37 @@ describe('Creteing group', function () {
         $request->assertRedirect(testPanelProvider()->chatRoute($conversation->id))
             ->assertNotDispatched('open-chat');
 
+    });
+
+    it('it opens the group internally after creating group when panel routes are disabled', function () {
+        testPanelProvider()->registerRoutes(false)->maxGroupMembers(3);
+
+        $auth = ModelsUser::factory()->create();
+        $member1 = ModelsUser::factory()->create(['name' => 'Micheal']);
+        $member2 = ModelsUser::factory()->create(['name' => 'Boost']);
+        $member3 = ModelsUser::factory()->create(['name' => 'Ultra']);
+
+        $request = Livewire::actingAs($auth)->test(NewGroup::class);
+        $file = UploadedFile::fake()->create('photo.png');
+
+        $request
+            ->set('name', 'Test Group')
+            ->set('description', 'Description Testing')
+            ->set('photo', $file)
+            ->set('search', 'Micheal')
+            ->call('addMember', $member1->id, $member1->getMorphClass())
+            ->set('search', 'Boost')
+            ->call('addMember', $member2->id, $member2->getMorphClass())
+            ->set('search', 'Ultra')
+            ->call('addMember', $member3->id, $member3->getMorphClass())
+            ->call('create');
+
+        $conversation = Conversation::withoutGlobalScopes()->first();
+
+        $request
+            ->assertNoRedirect()
+            ->assertDispatched('open-chat', conversation: $conversation?->id)
+            ->assertDispatched('closeWirechatModal');
     });
 
     it('it does not redirects but  dispataches Livewire events "open-chat" events after creating group if IS Widget', function () {

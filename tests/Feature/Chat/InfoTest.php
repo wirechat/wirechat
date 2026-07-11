@@ -49,12 +49,16 @@ describe('presence test', function () {
 
     test('it shows receiver name if conversaton is private', function () {
         $auth = User::factory()->create(['id' => '345678']);
-        $receiver = User::factory()->create(['name' => 'Musa']);
+        $receiver = User::factory()->create([
+            'name' => 'Musa',
+            'email' => 'musa.info@example.test',
+        ]);
 
         $conversation = $auth->createConversationWith($receiver, 'hello');
 
         Livewire::actingAs($auth)->test(Info::class, ['conversation' => $conversation])
-            ->assertSee('Musa');
+            ->assertSee('Musa')
+            ->assertSee($receiver->wirechat_subtitle);
     });
 
     test('it shows receiver name if conversaton is private and Mixed Model', function () {

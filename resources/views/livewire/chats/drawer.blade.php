@@ -6,6 +6,11 @@
                     show: false,
                     showActiveComponent: true,
                     activeDrawerComponent: false,
+                    previousDrawerComponent: false,
+                    transitioningDrawerComponent: false,
+                    drawerComponentTransitionDirection: 'forward',
+                    drawerComponentTransitionPhase: 'idle',
+                    drawerComponentTransitionTimeout: null,
                     componentHistory: [],
                     listeners: [],
                     closeOnEscape: false,
@@ -89,22 +94,43 @@
                             return;
                         }
 
+                        const previousDrawerComponent = this.activeDrawerComponent;
+
                         if (this.activeDrawerComponent !== false && skip === false) {
                             this.componentHistory.push(this.activeDrawerComponent);
                         }
 
-                        let focusableTimeout = 50;
+                        this.activeDrawerComponent = id;
+                        this.showActiveComponent = true;
 
-                        if (this.activeDrawerComponent === false) {
-                            this.activeDrawerComponent = id;
-                            this.showActiveComponent = true;
+                        if (previousDrawerComponent === false) {
+                            this.previousDrawerComponent = false;
+                            this.transitioningDrawerComponent = false;
+                            this.drawerComponentTransitionPhase = 'idle';
                         } else {
-                            this.showActiveComponent = false;
-                            focusableTimeout = 400;
+                            if (this.drawerComponentTransitionTimeout) {
+                                clearTimeout(this.drawerComponentTransitionTimeout);
+                            }
 
-                            setTimeout(() => {
-                                this.activeDrawerComponent = id;
-                                this.showActiveComponent = true;
+                            this.previousDrawerComponent = previousDrawerComponent;
+                            this.transitioningDrawerComponent = true;
+                            this.drawerComponentTransitionDirection = skip ? 'back' : 'forward';
+                            this.drawerComponentTransitionPhase = 'start';
+
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    if (this.activeDrawerComponent === id) {
+                                        this.drawerComponentTransitionPhase = 'end';
+                                    }
+                                });
+                            });
+
+                            this.drawerComponentTransitionTimeout = setTimeout(() => {
+                                if (this.activeDrawerComponent === id) {
+                                    this.previousDrawerComponent = false;
+                                    this.transitioningDrawerComponent = false;
+                                    this.drawerComponentTransitionPhase = 'idle';
+                                }
                             }, 300);
                         }
 
@@ -121,7 +147,7 @@
                             if (focusable) {
                                 setTimeout(() => {
                                     focusable.focus();
-                                }, focusableTimeout);
+                                }, 50);
                             }
                         });
                     },
@@ -130,11 +156,52 @@
                         this.show = show;
 
                         if (!show) {
+                            this.previousDrawerComponent = false;
+                            this.transitioningDrawerComponent = false;
+                            this.drawerComponentTransitionPhase = 'idle';
+
                             setTimeout(() => {
                                 this.activeDrawerComponent = false;
                                 this.$wire.resetState();
                             }, 300);
                         }
+                    },
+
+                    shouldShowDrawerComponent(id) {
+                        return this.activeDrawerComponent === id || this.previousDrawerComponent === id;
+                    },
+
+                    drawerComponentTransitionClasses(id) {
+                        const isActive = this.activeDrawerComponent === id;
+                        const isPrevious = this.previousDrawerComponent === id;
+                        const direction = this.drawerComponentTransitionDirection;
+                        const phase = this.drawerComponentTransitionPhase;
+
+                        if (!this.transitioningDrawerComponent) {
+                            return isActive ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0';
+                        }
+
+                        if (phase === 'start') {
+                            if (isActive) {
+                                return direction === 'forward'
+                                    ? 'translate-x-full opacity-100'
+                                    : '-translate-x-full opacity-100';
+                            }
+
+                            return isPrevious ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0';
+                        }
+
+                        if (isActive) {
+                            return 'translate-x-0 opacity-100';
+                        }
+
+                        if (isPrevious) {
+                            return direction === 'forward'
+                                ? '-translate-x-full opacity-100'
+                                : 'translate-x-full opacity-100';
+                        }
+
+                        return 'translate-x-full opacity-0';
                     },
 
                     init() {
@@ -160,15 +227,13 @@
         id="chats-drawer"
         x-data="ChatListDrawer()"
         x-on:close.stop="setShowPropertyTo(false)"
-        x-on:click.self="closeChatListDrawerOnClickAway()"
         x-on:keydown.escape.stop="closeChatListDrawerOnEscape({ modalType: 'ChatListDrawer', event: $event })"
         x-show="show"
-        class="absolute inset-0 z-50 h-full overflow-y-auto bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]"
+        class="pointer-events-none absolute inset-0 z-50 h-full overflow-y-auto"
         style="display: none;"
-        aria-modal="true"
         tabindex="0"
     >
-        <div class="relative text-center overflow-x-hidden">
+        <div class="pointer-events-auto relative h-full overflow-x-hidden bg-[var(--wc-light-primary)] text-left dark:bg-[var(--wc-dark-primary)]">
             <div
                 x-show="show && showActiveComponent"
                 x-transition:enter="ease-out duration-300"
@@ -177,14 +242,14 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-x-0"
                 x-transition:leave-end="opacity-0 translate-x-full"
-                class="w-auto transition-all"
+                class="relative h-full w-full overflow-x-hidden transition-all"
                 id="chatsdrawer-container"
-                x-trap.noscroll.inert="show && showActiveComponent"
-                aria-modal="true"
             >
                 @foreach($drawerComponents as $id => $component)
                     <div
-                        x-show.immediate="activeDrawerComponent == '{{ $id }}'"
+                        x-show="shouldShowDrawerComponent(@js($id))"
+                        x-bind:class="drawerComponentTransitionClasses(@js($id))"
+                        class="absolute inset-0 h-full w-full transition-all duration-300 ease-out"
                         x-ref="{{ $id }}"
                         wire:key="{{ $id }}"
                     >

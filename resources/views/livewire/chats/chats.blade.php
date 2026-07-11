@@ -1,6 +1,6 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
 @php
-    $chatsShellClass = trim('flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full'.$this->getUiClass());
+    $chatsShellClass = trim('relative flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full'.$this->getUiClass());
     $chatsShellStyles = $this->getUiStyles();
 @endphp
 <div
@@ -12,9 +12,20 @@
         const container = document.getElementById('wirechat-chats-scrollable-container');
         const pendingInviteToken = @js($pendingInviteToken);
         const pendingInvitePanel = @js($pendingInvitePanel);
+        const pendingConversationId = @js($pendingConversationId);
+        const pendingConversationPanel = @js($pendingConversationPanel);
+        const currentPanel = @js($this->panel);
+
+        if (pendingConversationId && (!pendingConversationPanel || pendingConversationPanel === currentPanel)) {
+            setTimeout(() => {
+                selectedConversationId = pendingConversationId;
+                $wire.selectedConversationId = pendingConversationId;
+                $dispatch('open-chat', { conversation: pendingConversationId });
+            }, 250);
+        }
 
         if (pendingInviteToken && @js($this->panel()->hasGroupInvitations())) {
-            const invitePanel = pendingInvitePanel || @js($this->panel);
+            const invitePanel = pendingInvitePanel || currentPanel;
 
             setTimeout(() => {
                 Livewire.dispatch('openWirechatModal', {
@@ -99,7 +110,7 @@
             "
           id="wirechat-chats-scrollable-container"
           wire:navigate:scroll
-        class=" overflow-y-auto py-2  wc-scrollbar-theme  grow  h-full relative " style="contain:content">
+        class=" overflow-y-auto py-2  scrollbar-thumb-zinc-400/70 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent grow  h-full relative " style="contain:content">
 
         {{-- loading indicator --}}
 
@@ -111,8 +122,14 @@
             {{-- include load more if true --}}
             @includeWhen($canLoadMore, 'wirechat::livewire.chats.partials.load-more-button')
         @else
-            <div class="w-full flex items-center h-full justify-center">
-                <h6 class=" font-bold text-gray-700 dark:text-white">{{ __('wirechat::chats.labels.no_conversations_yet')  }}</h6>
+            @php
+                $emptyStateLabel = trim((string) ($search ?? '')) !== ''
+                    ? __('wirechat::chats.labels.no_conversations_found')
+                    : __('wirechat::chats.labels.no_conversations_yet');
+            @endphp
+
+            <div class="flex h-full min-h-40 w-full items-center justify-center px-6 py-8 text-center" dusk="chats-empty-state">
+                <p class="max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400">{{ $emptyStateLabel }}</p>
             </div>
         @endif
     </main>

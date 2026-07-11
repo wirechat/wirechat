@@ -76,7 +76,7 @@ class Show extends ModalComponent
     public function render()
     {
         return view('wirechat::livewire.chat.group.links.show', [
-            'inviteUrl' => $this->invite->url($this->panel()),
+            'inviteUrl' => $this->panel()->inviteRouteIfRegistered($this->invite->token),
             'canRevokeLink' => (bool) $this->conversation->participant(auth()->user())?->isAdmin() && ! $this->invite->is_primary,
         ]);
     }

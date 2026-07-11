@@ -30,6 +30,7 @@ use Wirechat\Wirechat\PanelRegistry;
  * @property-read string|null $wirechat_avatar_url
  * @property-read string|null $wirechat_name
  * @property-read string|null $wirechat_profile_url
+ * @property-read string|null $wirechat_subtitle
  *
  * @method string displayName()
  */
@@ -486,6 +487,14 @@ trait InteractsWithWirechat
     {
         // fallback to old `display_name` for backward compatibility
         return $this->wirechat_name ?? ($this->display_name);
+    }
+
+    /**
+     * Get the short subtitle shown under the user's Wirechat name.
+     */
+    public function getWirechatSubtitleAttribute(): ?string
+    {
+        return $this->attributes['wirechat_subtitle'] ?? null;
     }
 
     /**

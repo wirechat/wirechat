@@ -55,10 +55,10 @@ class SetupNotifications extends Command
         }
 
         $this->info('✅ Wirechat notifications setup complete!');
-        $this->line("Note: If you're already using a custom service worker in your application, you need to manually add `importScripts('/js/wirechat/sw.js');` to your existing service worker file and update the notifications.main_sw_script value in config/wirechat.php to point to your service worker file.");
+        $this->line("Note: If you're already using a custom service worker in your application, manually add `importScripts('/js/wirechat/sw.js');` to that service worker file and call `->serviceWorkerPath(asset('sw.js'))` on your Wirechat panel.");
         $this->newLine();
 
-        $this->comment('Finally, ensure that `notifications.enabled` is set to true in your Wirechat config.');
+        $this->comment('Finally, enable web push notifications on your Wirechat panel with `->webPushNotifications()`.');
     }
 
     protected function getStub(string $stub)

@@ -4,6 +4,8 @@ use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\Tests\TestCase;
 
+require_once __DIR__.'/Support/FilesystemSnapshots.php';
+
 /*
 |--------------------------------------------------------------------------
 | Test Case

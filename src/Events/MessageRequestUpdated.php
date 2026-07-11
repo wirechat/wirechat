@@ -55,8 +55,8 @@ class MessageRequestUpdated implements ShouldBroadcastNow
             'conversation_id' => $this->conversationId,
             'status' => $this->requestStatus->value,
             'redirect_url' => $this->requestStatus === MessageRequestStatus::ACCEPTED
-                ? $this->getPanel()->chatRoute($this->conversationId)
-                : $this->getPanel()->chatsRoute(),
+                ? $this->getPanel()->chatUrl($this->conversationId)
+                : $this->getPanel()->chatsUrl(),
         ];
     }
 }

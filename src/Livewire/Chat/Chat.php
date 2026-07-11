@@ -30,6 +30,7 @@ use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Livewire\Chats\Chats;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
+use Wirechat\Wirechat\Livewire\Concerns\InteractsWithAttachmentDownloads;
 use Wirechat\Wirechat\Livewire\Concerns\InteractsWithUI;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
 use Wirechat\Wirechat\Models\Attachment;
@@ -38,6 +39,7 @@ use Wirechat\Wirechat\Models\Group;
 use Wirechat\Wirechat\Models\Invite;
 use Wirechat\Wirechat\Models\Message;
 use Wirechat\Wirechat\Models\Participant;
+use Wirechat\Wirechat\Support\AttachmentMeta;
 
 /**
  * Chat Component
@@ -49,6 +51,7 @@ use Wirechat\Wirechat\Models\Participant;
 class Chat extends Component
 {
     use HasPanel;
+    use InteractsWithAttachmentDownloads;
     use InteractsWithUI;
     use Widget;
     use WithFileUploads {
@@ -319,7 +322,7 @@ class Chat extends Component
         $this->conversation->deleteFor($this->auth);
 
         $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => ['chat-deleted',  [$this->conversation->id]],
@@ -344,7 +347,7 @@ class Chat extends Component
         // Dispatach event instead if isWidget
 
         $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => 'refresh',
@@ -382,13 +385,13 @@ class Chat extends Component
         // delete conversation
         $auth->exitConversation($this->conversation);
 
-        // Dispatach event instead if isWidget
-        if ($this->isWidget()) {
-            $this->dispatch('close-chat');
-        } else {
-            // redirect to chats page
-            $this->redirect($this->panel()->chatsRoute());
-        }
+        return $this->handleComponentTermination(
+            redirectRoute: $this->panel()->chatsUrl(),
+            events: [
+                'close-chat',
+                Chats::class => 'refresh',
+            ]
+        );
     }
 
     protected function rateLimit()
@@ -412,7 +415,7 @@ class Chat extends Component
         abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         if ($this->conversation->isPrivate() && $this->receiver instanceof Model) {
-            abort_unless($this->auth->canSendMessageTo($this->receiver), 403, 'You are not allowed to send messages to this user.');
+            abort_unless($this->canSendMessage(), 403, 'You are not allowed to send messages to this user.');
         }
 
         // rate limit
@@ -493,17 +496,20 @@ class Chat extends Component
                     // 'body' => $this->body, // Add body if required
                 ]);
 
+                $mimeType = Attachment::resolveMimeType(
+                    $attachment,
+                    $path,
+                    Wirechat::storage()->disk()
+                );
+
                 // Create and associate the attachment with the message
                 $attachment = $message->attachment()->create([
                     'file_path' => $path,
                     'file_name' => basename($path),
                     'original_name' => $attachment->getClientOriginalName(),
-                    'mime_type' => Attachment::resolveMimeType(
-                        $attachment,
-                        $path,
-                        Wirechat::storage()->disk()
-                    ),
+                    'mime_type' => $mimeType,
                     'url' => Storage::disk(Wirechat::storage()->disk())->url($path), // Use disk and path
+                    'meta' => AttachmentMeta::fromUploadedFile($attachment, $mimeType)->toArray(),
                 ]);
 
                 // dd($attachment);
@@ -709,6 +715,65 @@ class Chat extends Component
     private function flattenLoadedMessages()
     {
         return collect($this->loadedMessages)->flatten(1)->values();
+    }
+
+    private function prependLoadedMessages($messages): void
+    {
+        $olderGroups = $messages
+            ->groupBy(fn ($m) => $this->messageGroupKey($m))
+            ->map(fn ($group) => new EloquentCollection(collect($group)->values()->all()));
+
+        $currentGroups = collect($this->loadedMessages);
+        $merged = collect();
+
+        foreach ($olderGroups as $groupKey => $olderGroup) {
+            if ($currentGroups->has($groupKey)) {
+                $currentGroup = collect($currentGroups->get($groupKey));
+
+                $merged->put($groupKey, new EloquentCollection(
+                    $olderGroup->concat($currentGroup)->values()->all()
+                ));
+
+                continue;
+            }
+
+            $merged->put($groupKey, $olderGroup);
+        }
+
+        foreach ($currentGroups as $groupKey => $currentGroup) {
+            if ($merged->has($groupKey)) {
+                continue;
+            }
+
+            $merged->put($groupKey, $currentGroup);
+        }
+
+        $this->loadedMessages = $merged;
+    }
+
+    private function appendLoadedMessages($messages): void
+    {
+        $newerGroups = $messages
+            ->groupBy(fn ($m) => $this->messageGroupKey($m))
+            ->map(fn ($group) => new EloquentCollection(collect($group)->values()->all()));
+
+        $currentGroups = collect($this->loadedMessages);
+
+        foreach ($newerGroups as $groupKey => $newerGroup) {
+            if ($currentGroups->has($groupKey)) {
+                $currentGroup = collect($currentGroups->get($groupKey));
+
+                $currentGroups->put($groupKey, new EloquentCollection(
+                    $currentGroup->concat($newerGroup)->values()->all()
+                ));
+
+                continue;
+            }
+
+            $currentGroups->put($groupKey, $newerGroup);
+        }
+
+        $this->loadedMessages = $currentGroups;
     }
 
     private function syncCursorsFromFlat($messages): void
@@ -995,10 +1060,10 @@ class Chat extends Component
             return;
         }
 
-        $all = $older->concat($this->flattenLoadedMessages());
+        $this->prependLoadedMessages($older);
 
-        $this->setLoadedMessagesFromFlat($all);
-        $this->syncCursorsFromFlat($all);
+        $flat = $this->flattenLoadedMessages();
+        $this->syncCursorsFromFlat($flat);
         $this->syncCanLoadFlags();
         $this->dispatch('older-loaded');
     }
@@ -1029,10 +1094,10 @@ class Chat extends Component
             return;
         }
 
-        $all = $this->flattenLoadedMessages()->concat($newer);
+        $this->appendLoadedMessages($newer);
 
-        $this->setLoadedMessagesFromFlat($all);
-        $this->syncCursorsFromFlat($all);
+        $flat = $this->flattenLoadedMessages();
+        $this->syncCursorsFromFlat($flat);
         $this->syncCanLoadFlags();
     }
 
@@ -1142,10 +1207,6 @@ class Chat extends Component
 
         $this->conversation->markAsRead();
 
-        if ($this->isWidget()) {
-            $this->dispatch('refresh')->to('wirechat.chats');
-        }
-
         if ($this->authParticipant) {
 
             $this->authParticipant->update(['last_active_at' => now()]);
@@ -1207,7 +1268,7 @@ class Chat extends Component
                 return null;
             }
 
-            return $this->redirect($panel->chatRoute($conversation->id));
+            return $this->navigateToChat($conversation->id);
         }
 
         // Non-member: surface the lobby directly. The public preview page is
@@ -1303,11 +1364,20 @@ class Chat extends Component
             && $this->conversation->hasPendingMessageRequestFrom($this->auth);
     }
 
+    public function canSendMessage(): bool
+    {
+        if (! $this->conversation?->isPrivate() || ! $this->receiver instanceof Model) {
+            return true;
+        }
+
+        return (bool) $this->auth?->canSendMessageTo($this->receiver);
+    }
+
     protected function refreshConversationContext(bool $reloadMessages = false): void
     {
         if (! $this->conversation) {
             $this->handleComponentTermination(
-                redirectRoute: $this->panel()->chatsRoute(),
+                redirectRoute: $this->panel()->chatsUrl(),
                 events: [
                     'close-chat',
                     Chats::class => 'refresh',
@@ -1322,7 +1392,7 @@ class Chat extends Component
 
         if (! $this->conversation || ! $this->auth->canAccessConversation($this->conversation)) {
             $this->handleComponentTermination(
-                redirectRoute: $this->panel()->chatsRoute(),
+                redirectRoute: $this->panel()->chatsUrl(),
                 events: [
                     'close-chat',
                     Chats::class => 'refresh',
@@ -1381,7 +1451,7 @@ class Chat extends Component
         $this->dispatch('wirechat-toast', type: 'success', message: __('wirechat::chat.message_request.messages.dismissed'));
 
         return $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatsRoute(),
+            redirectRoute: $this->panel()->chatsUrl(),
             events: [
                 'close-chat',
                 Chats::class => 'refresh',
@@ -1403,7 +1473,7 @@ class Chat extends Component
 
         if (($event['status'] ?? null) === MessageRequestStatus::DISMISSED->value) {
             return $this->handleComponentTermination(
-                redirectRoute: $this->panel()->chatsRoute(),
+                redirectRoute: $this->panel()->chatsUrl(),
                 events: [
                     'close-chat',
                     Chats::class => 'refresh',

@@ -84,9 +84,9 @@ class Lobby extends ModalComponent
         $auth = auth()->user();
 
         $this->isMember = $auth->belongsToConversation($this->conversation);
-        $this->hasPendingJoinRequest = ! $this->isMember && $this->group->hasPendingJoinRequest($auth);
         $this->joinBlocked = ! $this->isMember && $this->group->inviteJoinBlockedFor($auth);
         $this->requiresApproval = ! $this->isMember && $this->group->requiresInviteApproval();
+        $this->hasPendingJoinRequest = $this->requiresApproval && $this->group->hasPendingJoinRequest($auth);
     }
 
     public function proceed()
@@ -101,6 +101,9 @@ class Lobby extends ModalComponent
             return null;
         }
 
+        $this->group = $this->group->fresh();
+        $this->syncState();
+
         if ($this->isMember) {
             return $this->redirectAfterJoin();
         }
@@ -111,7 +114,7 @@ class Lobby extends ModalComponent
             return null;
         }
 
-        if ($this->hasPendingJoinRequest) {
+        if ($this->requiresApproval && $this->hasPendingJoinRequest) {
             $this->dispatch('wirechat-toast', type: 'info', message: __('wirechat::chat.group.join.lobby.messages.pending_request'));
 
             return null;
@@ -126,22 +129,26 @@ class Lobby extends ModalComponent
             return null;
         }
 
+        $hadPendingJoinRequest = $this->group->hasPendingJoinRequest($auth);
+
+        if ($hadPendingJoinRequest) {
+            $this->group->requestToJoin($auth, $this->invite);
+        }
+
         $this->conversation->join($auth);
-        $this->invite?->markUsed();
+
+        if (! $hadPendingJoinRequest) {
+            $this->invite?->markUsed();
+        }
 
         return $this->redirectAfterJoin();
     }
 
     protected function redirectAfterJoin()
     {
-        if ($this->isWidget()) {
-            $this->openChat($this->conversation->id);
-            $this->closeWirechatModal();
+        $this->closeWirechatModal();
 
-            return null;
-        }
-
-        return $this->redirect($this->panel()->chatRoute($this->conversation->id));
+        return $this->navigateToChat($this->conversation->id);
     }
 
     public function render()

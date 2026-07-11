@@ -9,6 +9,7 @@ use Wirechat\Wirechat\Livewire\Chat\Group\Members\Members;
 use Wirechat\Wirechat\Livewire\Chat\Group\Members\PastMembers;
 use Wirechat\Wirechat\Models\Action;
 use Wirechat\Wirechat\Models\Conversation;
+use Wirechat\Wirechat\Models\MessageRequest;
 use Wirechat\Wirechat\Models\Participant;
 use Workbench\App\Models\User;
 
@@ -74,13 +75,19 @@ describe('presence test', function () {
         $conversation = $auth->createGroup('My Group');
 
         // add participants
-        $conversation->addParticipant(User::factory()->create(['name' => 'John']));
+        $john = User::factory()->create([
+            'name' => 'John',
+            'email' => 'john.member@example.test',
+        ]);
+
+        $conversation->addParticipant($john);
         $conversation->addParticipant(User::factory()->create(['name' => 'Lemon']));
         $conversation->addParticipant(User::factory()->create(['name' => 'Cold']));
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request
             ->assertSee('John')
+            ->assertSee($john->wirechat_subtitle)
             ->assertSee('Lemon')
             ->assertSee('Cold');
     });
@@ -112,6 +119,62 @@ describe('presence test', function () {
             ->assertSeeHtml('@click.outside="openMemberMenu = null"')
             ->assertSeeHtml('@click="openMemberMenu = openMemberMenu === memberMenuId ? null : memberMenuId"')
             ->assertSeeHtml('x-show="openMemberMenu === memberMenuId"');
+    });
+
+    test('member rows constrain subtitles and keep action buttons outside labels', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $conversation->addParticipant(User::factory()->create(['name' => 'John']));
+
+        $html = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+            ->html();
+
+        expect($html)
+            ->toContain('class="flex cursor-pointer gap-2 items-center w-full min-w-0"')
+            ->toContain('class="grid min-w-0 flex-1 grid-cols-12 gap-x-2"')
+            ->toContain('class="col-span-10 min-w-0 truncate text-sm text-gray-500 dark:text-gray-400"')
+            ->toContain('@click.stop')
+            ->toContain('type="button"')
+            ->toContain('wire:click="removeFromGroup(\'')
+            ->toContain('wire:click="banMember(\'')
+            ->not->toContain('removeFromGroup(@js')
+            ->not->toContain('banMember(@js')
+            ->not->toContain('<label class="flex cursor-pointer gap-2 items-center w-full">');
+    });
+
+    test('member action menu hides direct message action when messaging is denied', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $conversation->addParticipant($user);
+
+        User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $user->getKey()];
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+            ->set('search', 'Micheal')
+            ->assertSee('Micheal')
+            ->assertDontSee(__('wirechat::chat.group.members.actions.send_message_to_member.label', ['member' => $user->wirechat_name]));
+    });
+
+    test('member action menu is hidden when no actions are available', function () {
+        $owner = User::factory()->create();
+        $auth = User::factory()->create();
+        $conversation = $owner->createGroup('My Group');
+
+        $conversation->addParticipant($auth);
+        $user = User::factory()->create(['name' => 'Micheal']);
+        $conversation->addParticipant($user);
+
+        User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $user->getKey()];
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+            ->set('search', 'Micheal')
+            ->assertSee('Micheal')
+            ->assertDontSeeHtml('x-show="openMemberMenu === memberMenuId"')
+            ->assertDontSeeHtml('@click.stop')
+            ->assertDontSee(__('wirechat::chat.group.members.actions.send_message_to_member.label', ['member' => $user->wirechat_name]));
     });
 
     test('it show label "You" if member in loop is auth user', function () {
@@ -474,7 +537,7 @@ describe('presence test', function () {
 
     });
 
-    test('admins can see past and blocked member drawers', function () {
+    test('admins can see past and banned member drawers', function () {
         $owner = User::factory()->create(['name' => 'Owner']);
         $admin = User::factory()->create(['name' => 'Admin']);
 
@@ -517,7 +580,7 @@ describe('actions test', function () {
                 ->call('sendMessage', $participant->id)
                 ->assertRedirect(testPanelProvider()->chatRoute(2))
                 ->assertNotDispatched('close-chat')
-                ->assertNotDispatched('closeWirechatModal')
+                ->assertDispatched('closeWirechatModal')
                 ->assertNotDispatched('open-chat');
         });
 
@@ -539,7 +602,27 @@ describe('actions test', function () {
 
         });
 
+        test('it dispatches internal navigation when panel routes are disabled', function () {
+            testPanelProvider()->registerRoutes(false);
+
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
+            $request
+                ->call('sendMessage', $participant->id)
+                ->assertNoRedirect()
+                ->assertDispatched('open-chat')
+                ->assertDispatched('closeWirechatModal')
+                ->assertNotDispatched('close-chat');
+        });
+
         test('it create conversation between auth and user after calling sendMessage', function () {
+            testPanelProvider()->messageRequests(false);
+
             $auth = User::factory()->create();
             $conversation = $auth->createGroup('My Group');
 
@@ -556,6 +639,55 @@ describe('actions test', function () {
 
             // assert after
             expect($auth->hasConversationWith($user))->toBe(true);
+        });
+
+        test('it respects canSendMessageTo when sending a direct message to a member', function () {
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $user->getKey()];
+
+            Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+                ->call('sendMessage', $participant->id)
+                ->assertDispatched('wirechat-toast', type: 'error');
+
+            expect($auth->hasConversationWith($user))->toBe(false);
+        });
+
+        test('it creates a message request when message requests are enabled', function () {
+            testPanelProvider()->messageRequests();
+
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+                ->call('sendMessage', $participant->id);
+
+            $privateConversation = $auth->conversations()->whereKeyNot($conversation->id)->first();
+
+            expect($privateConversation)->not->toBeNull()
+                ->and($privateConversation?->participant($user))->toBeNull()
+                ->and(MessageRequest::query()->pending()->where('conversation_id', $privateConversation?->id)->count())->toBe(1);
+        });
+
+        test('it creates a direct conversation when message requests are disabled', function () {
+            testPanelProvider()->messageRequests(false);
+
+            $auth = User::factory()->create();
+            $conversation = $auth->createGroup('My Group');
+            $user = User::factory()->create(['name' => 'Micheal']);
+            $participant = $conversation->addParticipant($user);
+
+            Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation])
+                ->call('sendMessage', $participant->id);
+
+            expect($auth->hasConversationWith($user))->toBeTrue()
+                ->and(MessageRequest::query()->count())->toBe(0);
         });
     });
 
@@ -621,7 +753,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('makeAdmin', $participant->id)
-            ->assertStatus(403, 'Owner role cannot be changed');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         $participant = $participant->refresh();
 
@@ -640,7 +772,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('dismissAdmin', $participant->id)
-            ->assertStatus(403, 'Owner role cannot be changed');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         $participant = $participant->refresh();
 
@@ -681,7 +813,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id)
-            ->assertStatus(403, 'Owner cannot be removed from group');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
         $participant = $participant->refresh();
 
@@ -704,7 +836,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id)
-            ->assertStatus(403, 'This user does not belong to conversation');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
     });
 
@@ -721,7 +853,7 @@ describe('actions test', function () {
 
         $request = Livewire::actingAs($randomUser)->test(Members::class, ['conversation' => $conversation]);
         $request->call('removeFromGroup', $participant->id)
-            ->assertStatus(403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+            ->assertDispatched('wirechat-toast', type: 'error');
 
     });
 
@@ -810,7 +942,7 @@ describe('actions test', function () {
 
     });
 
-    test('calling blockMember creates a blocked past member and removes them from active members', function () {
+    test('calling blockMember creates a banned past member and removes them from active members', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
@@ -828,37 +960,83 @@ describe('actions test', function () {
             ->and($user->belongsToConversation($conversation->fresh()))->toBeFalse();
     });
 
-    test('past members drawer shows left removed and blocked reasons', function () {
+    test('calling banMember creates a banned past member from a scalar id', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        $leftUser = User::factory()->create(['name' => 'Left User']);
+        $user = User::factory()->create(['name' => 'Banned User']);
+        $participant = $conversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->call('banMember', (string) $participant->id)
+            ->assertDontSee($user->wirechat_name);
+
+        $participant->refresh();
+
+        expect($participant->isBannedByAdmin())->toBeTrue()
+            ->and($participant->isRemovedByAdmin())->toBeTrue()
+            ->and($user->belongsToConversation($conversation->fresh()))->toBeFalse();
+    });
+
+    test('banMember only acts on participant records from the mounted conversation', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+        $otherConversation = $auth->createGroup('Other Group');
+
+        $user = User::factory()->create(['name' => 'Shared Member']);
+        $currentParticipant = $conversation->addParticipant($user);
+        $otherParticipant = $otherConversation->addParticipant($user);
+
+        Livewire::actingAs($auth)->test(Members::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->call('banMember', $otherParticipant->id)
+            ->assertDispatched('wirechat-toast', type: 'error');
+
+        expect($currentParticipant->refresh()->isBannedByAdmin())->toBeFalse()
+            ->and($otherParticipant->refresh()->isBannedByAdmin())->toBeFalse();
+    });
+
+    test('past members drawer shows left removed and banned reasons', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        $leftUser = User::factory()->create([
+            'name' => 'Left User',
+            'email' => 'left.member@example.test',
+        ]);
         $removedUser = User::factory()->create(['name' => 'Removed User']);
-        $blockedUser = User::factory()->create(['name' => 'Blocked User']);
+        $bannedUser = User::factory()->create(['name' => 'Banned User']);
 
         $conversation->addParticipant($leftUser)->exitConversation();
         $conversation->addParticipant($removedUser)->removeByAdmin($auth);
-        $conversation->addParticipant($blockedUser)->blockByAdmin($auth);
+        $conversation->addParticipant($bannedUser)->blockByAdmin($auth);
 
         Livewire::actingAs($auth)->test(PastMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee($leftUser->wirechat_name)
+            ->assertSee($leftUser->wirechat_subtitle)
             ->assertSee($removedUser->wirechat_name)
-            ->assertSee($blockedUser->wirechat_name)
+            ->assertSee($bannedUser->wirechat_name)
             ->assertSee(__('wirechat::chat.group.past_members.labels.reason_left'))
             ->assertSee(__('wirechat::chat.group.past_members.labels.reason_removed'))
-            ->assertSee(__('wirechat::chat.group.past_members.labels.reason_blocked'));
+            ->assertSee(__('wirechat::chat.group.past_members.labels.reason_blocked'))
+            ->assertDontSee('Blocked by an admin');
     });
 
     test('banned members drawer can lift a ban without restoring active membership', function () {
         $auth = User::factory()->create();
         $conversation = $auth->createGroup('My Group');
 
-        $blockedUser = User::factory()->create(['name' => 'Blocked User']);
+        $blockedUser = User::factory()->create([
+            'name' => 'Blocked User',
+            'email' => 'blocked.member@example.test',
+        ]);
         $participant = $conversation->addParticipant($blockedUser);
         $participant->blockByAdmin($auth);
 
         Livewire::actingAs($auth)->test(Banned::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
             ->assertSee($blockedUser->wirechat_name)
+            ->assertSee($blockedUser->wirechat_subtitle)
+            ->assertSeeHtml('text-emerald-600')
+            ->assertDontSeeHtml('text-[var(--wc-brand-primary)]')
             ->call('liftBan', $participant->id)
             ->assertDontSee($blockedUser->wirechat_name);
 
@@ -867,6 +1045,19 @@ describe('actions test', function () {
         expect($participant->isBlockedByAdmin())->toBeFalse()
             ->and($participant->hasExited())->toBeTrue()
             ->and($blockedUser->belongsToConversation($conversation->fresh()))->toBeFalse();
+    });
+
+    test('past and banned members drawers center their empty states', function () {
+        $auth = User::factory()->create();
+        $conversation = $auth->createGroup('My Group');
+
+        Livewire::actingAs($auth)->test(PastMembers::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee(__('wirechat::chat.group.past_members.labels.no_results'))
+            ->assertSeeHtml('flex min-h-32 items-center justify-center text-center');
+
+        Livewire::actingAs($auth)->test(Banned::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+            ->assertSee(__('wirechat::chat.group.banned_members.labels.no_results'))
+            ->assertSeeHtml('flex min-h-32 items-center justify-center text-center');
     });
 
     test('non-admins cannot access the past members drawer', function () {

@@ -13,12 +13,14 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageDeleted;
+use Wirechat\Wirechat\Events\MessageRequestUpdated;
 use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Helpers\Helper;
@@ -48,6 +50,36 @@ test('authenticaed user can access chatbox ', function () {
 
     Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
         ->assertStatus(200);
+});
+
+test('broadcast redirect urls are null when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $sender->createConversationWith($receiver, 'Route off broadcast');
+    $message = $conversation->messages()->firstOrFail();
+
+    expect((new NotifyParticipant($receiver, $message, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBeNull()
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::ACCEPTED, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBeNull()
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::PENDING, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBeNull();
+});
+
+test('broadcast redirect urls fall back to the mount url when chat routes are disabled', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $sender = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $sender->createConversationWith($receiver, 'Mount broadcast');
+    $message = $conversation->messages()->firstOrFail();
+
+    expect((new NotifyParticipant($receiver, $message, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBe('/app')
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::ACCEPTED, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBe('/app')
+        ->and((new MessageRequestUpdated($receiver, $conversation->id, MessageRequestStatus::PENDING, testPanelProvider()->getId()))->broadcastWith()['redirect_url'])->toBe('/app');
 });
 
 test('it shows peer sender names above group messages but not auth sender names', function () {
@@ -97,6 +129,21 @@ test('it applies ui classes and styles to the chat shell only', function () {
         ->and($styleMatches[0])->toHaveCount(1);
 });
 
+test('it renders the chat header with a single divider and aligned padding', function () {
+    $auth = User::factory()->create(['name' => 'Test']);
+    $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
+
+    $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+    preg_match_all('/border-b border-zinc-200\/80 dark:border-zinc-700\/60/', $html, $dividerMatches);
+
+    expect($html)
+        ->toContain('class="w-full sticky inset-x-0 top-0 z-10 flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-secondary)]"')
+        ->toContain('px-4 py-3')
+        ->not->toContain('dark:border-[var(--wc-dark-secondary)] border-b')
+        ->and($dividerMatches[0])->toHaveCount(1);
+});
+
 test('it renders stable message anchors for scroll restoration', function () {
     $auth = User::factory()->create(['name' => 'Test']);
     $conversation = $auth->createConversationWith(User::factory()->create(), 'hello');
@@ -106,9 +153,13 @@ test('it renders stable message anchors for scroll restoration', function () {
 
     expect($html)
         ->toContain('x-ref="main-chat-body"')
+        ->toContain('ResizeObserver')
+        ->toContain('observePrependedMessageResizes')
         ->toContain('data-message-id="'.$message->id.'"')
         ->toContain('id="message-'.$message->id.'"')
-        ->toContain('wire:key="msg-'.$message->id.'"');
+        ->toContain('wire:key="msg-'.$message->id.'"')
+        ->not->toContain('x-on:load.capture="$data.onAnyMediaLoad()"')
+        ->not->toContain('x-on:error.capture="$data.onAnyMediaLoad()"');
 });
 
 test('it loads older messages from the top using the pro-style older window', function () {
@@ -228,6 +279,21 @@ test('it loads newer messages after jumping to an older window', function () {
     expect($loadedIds)->toBe($expectedIdsAfterLoadNewer)
         ->and($component->instance()->canLoadNewer)->toBeFalse()
         ->and($component->instance()->canLoadOlder)->toBeTrue();
+});
+
+test('it replaces the private composer when replies are unavailable', function () {
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create();
+    $conversation = $auth->createConversationWith($receiver);
+
+    User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $receiver->getKey()];
+
+    Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertSee(__('wirechat::chat.messages.replies_unavailable'))
+        ->assertDontSee(__('wirechat::chat.inputs.message.placeholder'))
+        ->assertDontSeeHtml('id="chat-footer"');
+
+    unset(User::$wirechatMessageDenyList[(string) $auth->getKey()]);
 });
 
 test('returns 404 if conversation is not found', function () {
@@ -472,6 +538,11 @@ describe('Presense', function () {
             ->assertSee($yesterdayExpected)    // Assert "Yesterday 3:00 PM"
             ->assertSee($thisWeekExpected)     // Assert "Mon 9:00 AM" (or whatever day it is)
             ->assertSee($olderExpected)        // Assert "08/31/24"
+            ->assertSeeHtml('dusk="message-date-separator"')
+            ->assertSeeHtml('text-[11px]')
+            ->assertSeeHtml('rounded-full')
+            ->assertSeeHtml('h-6 w-24')
+            ->assertDontSeeHtml('sticky top-0 uppercase')
             ->assertSee('Message from today')
             ->assertSee('Message from yesterday')
             ->assertSee('Message from this week')
@@ -508,7 +579,8 @@ describe('Presense', function () {
             ->assertSee($invite->url(testPanelProvider()));
     });
 
-    test('it renders an inline invite link without target=_blank so the controller redirect can run', function () {
+    test('it renders a group invite preview action without public invite url when routes are disabled', function () {
+        testPanelProvider()->registerRoutes(false);
         testPanelProvider()->parseMessageUrls(true);
 
         $sender = User::factory()->create(['name' => 'Sender']);
@@ -523,7 +595,113 @@ describe('Presense', function () {
             'is_primary' => true,
         ]);
 
-        $inviteUrl = $invite->url(testPanelProvider());
+        $inviteUrl = 'http://localhost:8001/test/invites/'.$invite->token;
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Join here: '.$inviteUrl
+        )->conversation;
+
+        $rendered = Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        preg_match_all('~<button[^>]*dusk="group-invite-action"[^>]*>[\s\S]*?</button>~', $rendered, $buttonMatches);
+
+        expect($rendered)
+            ->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->toContain('data-invite-link="true"')
+            ->not->toContain('href="'.$inviteUrl.'"')
+            ->and($buttonMatches[0])->toHaveCount(1)
+            ->and($buttonMatches[0][0])->toContain('wire:click="handleOpenChat(')
+            ->and($buttonMatches[0][0])->not->toContain('href=')
+            ->and($buttonMatches[0][0])->not->toContain('target="_blank"');
+    });
+
+    test('it renders outgoing group invite surfaces as white for solid color tone', function () {
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah', 'A place to share ideas');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Follow this link to join my group: '.$invite->url(testPanelProvider())
+        )->conversation;
+
+        $html = Livewire::actingAs($sender)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        expect($html)
+            ->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->toMatch('/dusk="group-invite-preview"[^>]*class="[^"]*bg-white\/10 text-white/')
+            ->toMatch('/<button[^>]*dusk="group-invite-action"[^>]*data-invite-link="true"[^>]*class="[^"]*border-white\/20 text-white\/90/')
+            ->not->toContain('href="'.$invite->url(testPanelProvider()).'"');
+    });
+
+    test('it keeps group invite previews below visible group sender names', function () {
+        $owner = User::factory()->create(['name' => 'Owner']);
+        $member = User::factory()->create(['name' => 'Group Member']);
+
+        $conversation = $owner->createGroup('Host Group');
+        $conversation->addParticipant($member);
+
+        $targetConversation = $member->createGroup('Target Group');
+        $invite = $targetConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $member->getKey(),
+            'created_by_type' => $member->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $conversation->participant($member)?->id,
+            'body' => 'Join here: '.$invite->url(testPanelProvider()),
+        ]);
+
+        $html = Livewire::actingAs($owner)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        expect($html)
+            ->toMatch('/dusk="message-sender-name"[^>]*class="(?![^"]*\bhidden\b)[^"]*"[^>]*>\s*Group Member\s*</')
+            ->toContain('dusk="group-invite-preview"')
+            ->toContain('Target Group')
+            ->toContain('max-w-full')
+            ->not->toMatch('/dusk="group-invite-preview"[^>]*class="[^"]*(?:^|\s)-mt-1\.5(?:\s|")/');
+    });
+
+    test('it renders an inline invite link as an in-chat action while external links stay anchors', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+
+        $groupConversation = $sender->createGroup('Yodah');
+        $invite = $groupConversation->group->inviteLinks()->create([
+            'panel_id' => testPanelProvider()->getId(),
+            'created_by_id' => $sender->getKey(),
+            'created_by_type' => $sender->getMorphClass(),
+            'token' => Invite::generateToken(),
+            'is_primary' => true,
+        ]);
+
+        $inviteUrl = preg_replace('~^https?://[^/]+~', 'http://localhost:8001', $invite->url(testPanelProvider()));
 
         $conversation = $sender->sendMessageTo(
             $receiver,
@@ -535,24 +713,32 @@ describe('Presense', function () {
             'panel' => testPanelProvider()->getId(),
         ])->html();
 
+        preg_match_all('~<button[^>]*dusk="message-invite-action"[^>]*>[\s\S]*?</button>~', $rendered, $buttonMatches);
+        $inviteActions = collect($buttonMatches[0])
+            ->filter(fn (string $tag) => str_contains($tag, $inviteUrl))
+            ->values();
+
         preg_match_all('~<a[^>]*dusk="message-link"[^>]*>~', $rendered, $matches);
         $linkTags = $matches[0];
 
-        // Two inline links: the invite URL, and the unrelated external URL.
-        expect($linkTags)->toHaveCount(2);
+        expect($inviteActions)->toHaveCount(1)
+            ->and($linkTags)->toHaveCount(1)
+            ->and($rendered)->not->toContain('href="'.$inviteUrl.'"');
 
-        $inviteAnchor = collect($linkTags)
-            ->first(fn (string $tag) => str_contains($tag, $inviteUrl));
+        $inviteAction = $inviteActions->first();
         $externalAnchor = collect($linkTags)
             ->first(fn (string $tag) => str_contains($tag, 'https://example.com'));
 
-        expect($inviteAnchor)->toContain('data-invite-link="true"')
-            ->and($inviteAnchor)->toContain('wire:click.prevent="handleOpenChat(')
-            ->and($inviteAnchor)->not->toContain('target="_blank"');
+        expect($inviteAction)->toContain('type="button"')
+            ->and($inviteAction)->toContain('data-invite-link="true"')
+            ->and($inviteAction)->toContain('wire:click="handleOpenChat(')
+            ->and($inviteAction)->not->toContain('href=')
+            ->and($inviteAction)->not->toContain('target="_blank"')
+            ->and($inviteAction)->not->toContain('rel=');
 
-        // The wire:click param must be encrypted — the raw token/URL must NOT
-        // appear inside the wire:click attribute itself, only inside the href.
-        preg_match("~wire:click\.prevent=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAnchor, $clickMatch);
+        // The wire:click param must be encrypted, while the visible text still
+        // shows the copied/shareable invite URL.
+        preg_match("~wire:click=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAction, $clickMatch);
 
         expect($clickMatch[1] ?? '')->not->toBe('')
             ->and($clickMatch[1])->not->toBe($inviteUrl)
@@ -562,8 +748,64 @@ describe('Presense', function () {
         expect(decrypt($clickMatch[1]))->toBe($inviteUrl);
 
         expect($externalAnchor)->toContain('target="_blank"')
+            ->and($externalAnchor)->toContain('rel="noopener noreferrer"')
             ->and($externalAnchor)->not->toContain('data-invite-link="true"')
             ->and($externalAnchor)->not->toContain('handleOpenChat');
+    });
+
+    test('it renders missing invite route urls as in-chat actions instead of external links', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $sender = User::factory()->create(['name' => 'Sender']);
+        $receiver = User::factory()->create(['name' => 'Receiver']);
+        $missingInviteUrl = preg_replace(
+            '~^https?://[^/]+~',
+            'http://localhost:8001',
+            testPanelProvider()->inviteRoute(Invite::generateToken())
+        );
+        $malformedInviteUrl = preg_replace(
+            '~^https?://[^/]+~',
+            'http://localhost:8001',
+            testPanelProvider()->inviteRoute('not-a-wirechat-link')
+        );
+
+        $conversation = $sender->sendMessageTo(
+            $receiver,
+            'Old invite: '.$missingInviteUrl.' malformed '.$malformedInviteUrl.' and external https://example.com'
+        )->conversation;
+
+        $rendered = Livewire::actingAs($receiver)->test(ChatBox::class, [
+            'conversation' => $conversation->id,
+            'panel' => testPanelProvider()->getId(),
+        ])->html();
+
+        preg_match_all('~<button[^>]*dusk="message-invite-action"[^>]*>[\s\S]*?</button>~', $rendered, $buttonMatches);
+        preg_match_all('~<a[^>]*dusk="message-link"[^>]*>~', $rendered, $anchorMatches);
+
+        $inviteActions = collect($buttonMatches[0]);
+        $inviteAction = $inviteActions
+            ->first(fn (string $tag) => str_contains($tag, $missingInviteUrl));
+        $malformedInviteAction = $inviteActions
+            ->first(fn (string $tag) => str_contains($tag, $malformedInviteUrl));
+        $externalAnchor = collect($anchorMatches[0])
+            ->first(fn (string $tag) => str_contains($tag, 'https://example.com'));
+
+        expect($rendered)
+            ->not->toContain(__('wirechat::chat.group.invite_message.actions.view_group.label'))
+            ->not->toContain('href="'.$missingInviteUrl.'"')
+            ->not->toContain('href="'.$malformedInviteUrl.'"')
+            ->and($inviteAction)->toContain('data-invite-link="true"')
+            ->and($inviteAction)->toContain('wire:click="handleOpenChat(')
+            ->and($inviteAction)->not->toContain('target="_blank"')
+            ->and($malformedInviteAction)->toContain('data-invite-link="true"')
+            ->and($malformedInviteAction)->toContain('wire:click="handleOpenChat(')
+            ->and($malformedInviteAction)->not->toContain('target="_blank"')
+            ->and($externalAnchor)->toContain('href="https://example.com"')
+            ->and($externalAnchor)->toContain('target="_blank"');
+
+        preg_match("~wire:click=\"handleOpenChat\\('([^']+)'\\)\"~", $inviteAction, $clickMatch);
+
+        expect(decrypt($clickMatch[1] ?? ''))->toBe($missingInviteUrl);
     });
 
     test('it does not render a group invite preview card for foreign or edited text without a valid wirechat invite link', function () {
@@ -791,7 +1033,7 @@ describe('mount()', function () {
             ->assertNotDispatched('refresh');
     });
 
-    test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
+    test('When Widget it does not refresh the chat list after loading chat', function () {
         $auth = User::factory()->create();
         $user = User::factory()->create();
 
@@ -802,7 +1044,7 @@ describe('mount()', function () {
 
         $request
             ->assertStatus(200)
-            ->assertDispatched('refresh');
+            ->assertNotDispatched('refresh');
     });
 
     // test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
@@ -1211,6 +1453,17 @@ describe('Box presence test: ', function () {
                 ->assertDontSeeHtml('dusk="return_to_home_button_link"');
             //                ->assertMethodWired('$dispatch(\'close-chat\')');
 
+        });
+
+        test('it renders close actions instead of route links when panel routes are disabled', function () {
+            testPanelProvider()->registerRoutes(false);
+
+            $auth = User::factory()->create(['name' => 'Namu']);
+            $conversation = $auth->createGroup('My Group');
+
+            Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertSeeHtml('dusk="return_to_home_button_dispatch"')
+                ->assertDontSeeHtml('dusk="return_to_home_button_link"');
         });
 
         test('it doesnt render $dispatch("close-chat") BUT Renders redirect to chats index', function () {
@@ -2001,7 +2254,27 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('body', 'New message')
             ->call('sendMessage')
-            ->assertSee('New message');
+            ->assertSee('New message')
+            ->assertSeeHtml('wc-primary-tone-bg')
+            ->assertSeeHtml('ml-auto text-[11px] text-zinc-700 dark:text-white/90')
+            ->assertDontSeeHtml('bg-[#f6f6f8fb]');
+    });
+
+    test('it renders outgoing message time as white for solid color tone', function () {
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->set('body', 'New message')
+            ->call('sendMessage')
+            ->assertSee('New message')
+            ->assertSeeHtml('ml-auto text-[11px] text-white/90')
+            ->assertDontSeeHtml('ml-auto text-[11px] text-zinc-700 dark:text-white/90');
     });
 
     test('it saves new message to database when it is sent', function () {
@@ -2054,7 +2327,50 @@ describe('Sending messages ', function () {
 
         expect($html)
             ->toContain('dusk="message-link"')
-            ->toContain('href="https://example.com"');
+            ->toContain('href="https://example.com"')
+            ->toMatch('/dusk="message-link"[^>]*class="[^"]*dark:text-white/');
+    });
+
+    test('it renders outgoing message links as white for solid color tone', function () {
+        testPanelProvider()->parseMessageUrls(true);
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()
+            ->withParticipants([$auth, $receiver])
+            ->create();
+
+        $message = $auth->sendMessageTo($conversation, 'hello https://example.com world');
+        $message->type = MessageType::TEXT;
+        $message->body = 'hello https://example.com world';
+        $message->save();
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('dusk="message-link"')
+            ->toContain('href="https://example.com"')
+            ->toMatch('/dusk="message-link"[^>]*class="[^"]*text-white\/90/')
+            ->not->toMatch('/dusk="message-link"[^>]*class="[^"]*dark:text-white/');
+    });
+
+    test('it escapes html-like message bodies while rendering', function () {
+        testPanelProvider()->parseMessageUrls(true);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $payload = '<img src=x onerror=alert(1)><script>alert(2)</script>';
+
+        $conversation = $auth->createConversationWith($receiver, $payload);
+
+        $html = Livewire::actingAs($receiver)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain(e($payload))
+            ->not->toContain($payload)
+            ->not->toContain('<img src=x onerror=alert(1)>')
+            ->not->toContain('<script>alert(2)</script>');
     });
 
     test('it preserves whitespace formatting when rendering linkified messages', function () {
@@ -2526,15 +2842,26 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
 
-        $file[] = UploadedFile::fake()->image('photo.png');
+        $file[] = UploadedFile::fake()->image('photo.png', 640, 480);
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('media', $file)
             ->call('sendMessage')
+            ->assertDispatched('scroll-bottom')
             // now assert that media is back to empty
             ->assertSet('media', []);
 
-        $messageExists = Attachment::all();
-        expect(count($messageExists))->toBe(1);
+        $attachment = Attachment::first();
+
+        expect(Attachment::count())->toBe(1)
+            ->and($attachment->meta)
+            ->toMatchArray([
+                'image' => [
+                    'width' => 640,
+                    'height' => 480,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.3333,
+                ],
+            ]);
     });
 
     test('it appends media uploaded one by one and preserves image metadata when sent', function () {
@@ -2544,8 +2871,8 @@ describe('Sending messages ', function () {
         $receiver = User::factory()->create(['name' => 'John']);
         $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
 
-        $firstImage = UploadedFile::fake()->image('first-photo.png');
-        $secondImage = UploadedFile::fake()->image('second-photo.jpg');
+        $firstImage = UploadedFile::fake()->image('first-photo.png', 1200, 800);
+        $secondImage = UploadedFile::fake()->image('second-photo.jpg', 600, 900);
 
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
 
@@ -2563,17 +2890,73 @@ describe('Sending messages ', function () {
 
         $attachments = Attachment::query()
             ->orderBy('id')
-            ->get(['original_name', 'mime_type', 'file_path']);
+            ->get(['original_name', 'mime_type', 'file_path', 'meta']);
 
         expect($attachments)->toHaveCount(2)
             ->and($attachments->pluck('original_name')->all())
             ->toBe(['first-photo.png', 'second-photo.jpg'])
             ->and($attachments->pluck('mime_type')->all())
-            ->toBe(['image/png', 'image/jpeg']);
+            ->toBe(['image/png', 'image/jpeg'])
+            ->and($attachments[0]->meta)
+            ->toMatchArray([
+                'image' => [
+                    'width' => 1200,
+                    'height' => 800,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.5,
+                ],
+            ])
+            ->and($attachments[1]->meta)
+            ->toMatchArray([
+                'image' => [
+                    'width' => 600,
+                    'height' => 900,
+                    'orientation' => 'portrait',
+                    'aspect_ratio' => 0.6667,
+                ],
+            ]);
 
         foreach ($attachments as $attachment) {
             Storage::disk('public')->assertExists($attachment->file_path);
         }
+    });
+
+    test('attachment downloads require access to the attachment conversation', function () {
+        Storage::fake('public');
+        Config::set('wirechat.storage.disk', 'public');
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+        $intruder = User::factory()->create();
+        $intruderPeer = User::factory()->create();
+
+        $conversation = $auth->createConversationWith($receiver);
+        $message = Message::query()->create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $conversation->participant($auth)?->id,
+            'type' => MessageType::ATTACHMENT,
+        ]);
+
+        $path = Wirechat::storage()->attachmentsDirectory().'/secret.txt';
+        Storage::disk('public')->put($path, 'secret content');
+
+        $attachment = $message->attachment()->create([
+            'file_path' => $path,
+            'file_name' => 'secret.txt',
+            'original_name' => 'secret.txt',
+            'mime_type' => 'text/plain',
+            'url' => Storage::disk('public')->url($path),
+        ]);
+
+        $intruderConversation = $intruder->createConversationWith($intruderPeer);
+
+        Livewire::actingAs($intruder)->test(ChatBox::class, ['conversation' => $intruderConversation->id])
+            ->call('download', encrypt($attachment->id))
+            ->assertStatus(403);
+
+        Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+            ->call('download', encrypt($attachment->id))
+            ->assertFileDownloaded('secret.txt');
     });
 
     test('it renders stored generic image attachments as images using the original extension', function () {
@@ -2599,7 +2982,182 @@ describe('Sending messages ', function () {
         ]);
 
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
-            ->assertSeeHtml('<img ');
+            ->assertSeeHtml('<img');
+    });
+
+    test('it renders media attachments with bounded image and video sizing', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $imageMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:30:00'),
+        ]);
+
+        $imageMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/photo.png',
+            'file_name' => 'photo.png',
+            'original_name' => 'photo.png',
+            'mime_type' => 'image/png',
+            'url' => 'https://example.test/photo.png',
+            'meta' => [
+                'image' => [
+                    'width' => 1024,
+                    'height' => 768,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.3333,
+                ],
+            ],
+        ]);
+
+        $videoMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:31:00'),
+        ]);
+
+        $videoMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/clip.mp4',
+            'file_name' => 'clip.mp4',
+            'original_name' => 'clip.mp4',
+            'mime_type' => 'video/mp4',
+            'url' => 'https://example.test/clip.mp4',
+            'meta' => [
+                'video' => [
+                    'width' => 720,
+                    'height' => 1280,
+                    'orientation' => 'portrait',
+                    'aspect_ratio' => 0.5625,
+                ],
+            ],
+        ]);
+
+        $landscapeVideoMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:32:00'),
+        ]);
+
+        $landscapeVideoMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/landscape-clip.mp4',
+            'file_name' => 'landscape-clip.mp4',
+            'original_name' => 'landscape-clip.mp4',
+            'mime_type' => 'video/mp4',
+            'url' => 'https://example.test/landscape-clip.mp4',
+            'meta' => [
+                'video' => [
+                    'width' => 1920,
+                    'height' => 1080,
+                    'orientation' => 'landscape',
+                    'aspect_ratio' => 1.7778,
+                ],
+            ],
+        ]);
+
+        $fileMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:33:00'),
+        ]);
+
+        $fileMessage->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/report.pdf',
+            'file_name' => 'report.pdf',
+            'original_name' => 'report.pdf',
+            'mime_type' => 'application/pdf',
+            'url' => 'https://example.test/report.pdf',
+            'meta' => ['size' => 1048576],
+        ]);
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('<img')
+            ->toContain('<video')
+            ->toContain('wire:ignore')
+            ->toContain('preload="metadata"')
+            ->toContain('playsinline')
+            ->toContain('[overflow-anchor:none]')
+            ->toContain('h-[24rem] w-[13.5rem]')
+            ->toContain('h-[14.625rem] w-[26rem]')
+            ->toContain('h-[14.625rem] sm:max-w-[26rem]')
+            ->toContain('width="1024"')
+            ->toContain('height="768"')
+            ->toContain('width="720"')
+            ->toContain('height="1280"')
+            ->toContain('width="1920"')
+            ->toContain('height="1080"')
+            ->toContain('dusk="message-attachment-shell"')
+            ->toContain('dusk="message-attachment-time"')
+            ->toContain('dusk="message-file-attachment"')
+            ->toContain('dusk="message-file-extension"')
+            ->toContain('dusk="message-file-meta"')
+            ->toContain('PDF')
+            ->toContain('1 MB')
+            ->toContain('truncate text-sm font-medium text-zinc-900 dark:text-zinc-100')
+            ->toContain('mt-1 flex items-center gap-1.5 text-xs font-medium uppercase leading-none text-zinc-600 dark:text-zinc-300')
+            ->toContain('wire:click="download')
+            ->toContain('p-1')
+            ->toContain('wc-primary-tone-bg')
+            ->toContain('max-h-[24rem]')
+            ->toContain('sm:max-w-[26rem]')
+            ->toContain('h-full w-auto max-w-full')
+            ->toContain('object-contain')
+            ->toContain('rounded-xl')
+            ->not->toContain('h-[200px]')
+            ->not->toContain('min-h-[210px]')
+            ->not->toContain('max-h-[400px]')
+            ->not->toContain('rounded-3xl')
+            ->not->toContain('href="https://example.test/report.pdf"')
+            ->not->toContain('download="report.pdf"');
+
+        expect(substr_count($html, 'dusk="message-attachment-shell"'))->toBe(4);
+        expect(substr_count($html, 'dusk="message-attachment-time"'))->toBe(4);
+        expect(preg_match_all('/dusk="message-attachment-time"[^>]*>\s*\d{2}:\d{2}\s*<\/span>/s', $html))->toBe(4);
+    });
+
+    test('it renders outgoing file attachment details with solid color tone contrast', function () {
+        testPanelProvider()->colorTone(ColorTone::Solid);
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'created_at' => Carbon::parse('2026-06-21 14:33:00'),
+        ]);
+
+        $message->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/Archive.zip',
+            'file_name' => 'Archive.zip',
+            'original_name' => 'Archive.zip',
+            'mime_type' => 'application/zip',
+            'url' => 'https://example.test/Archive.zip',
+            'meta' => ['size' => 9856614],
+        ]);
+
+        $html = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])->html();
+
+        expect($html)
+            ->toContain('Archive.zip')
+            ->toContain('ZIP')
+            ->toContain('9.4 MB')
+            ->toMatch('/class="[^"]*truncate text-sm font-medium text-white"[^>]*>\s*Archive\.zip\s*<\/p>/s')
+            ->toMatch('/dusk="message-file-extension"[^>]*class="[^"]*text-zinc-700/')
+            ->toMatch('/dusk="message-file-meta"[^>]*class="[^"]*text-white\/80/')
+            ->toMatch('/dusk="message-attachment-time"[^>]*class="[^"]*text-white\/90/')
+            ->toMatch('/wire:click="download[^>]*class="[^"]*border-white\/30 text-white\/85 hover:text-white/');
     });
 
     test('it saves image to storage when created & clears files properties when done', function () {
@@ -2691,7 +3249,7 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->set('media', $file)
             ->call('sendMessage')
-            ->assertSeeHtml('<img ')
+            ->assertSeeHtml('<img')
             // now assert that media is back to empty
             ->assertSet('media', []);
 
@@ -2771,6 +3329,13 @@ describe('Sending messages ', function () {
         $messageExists = Attachment::all();
 
         expect(count($messageExists))->toBe(1);
+
+        $attachment = Attachment::first();
+
+        expect($attachment->meta)->toHaveKey('size')
+            ->and($attachment->size)->toBeGreaterThan(0)
+            ->and($attachment->extension)->toBe('pdf')
+            ->and($attachment->formatted_size)->not->toBeNull();
     });
 
     test('it saves file to storage when created & clears files properties when done', function () {

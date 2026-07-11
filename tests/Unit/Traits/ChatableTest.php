@@ -81,6 +81,17 @@ describe('createConversationWith() ', function () {
 
     })->throws(Exception::class, 'You do not have permission to create chats.');
 
+    it('aborts if canSendMessageTo denies the recipient', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $receiver->getKey()];
+
+        $auth->createConversationWith($receiver);
+
+    })->throws(Exception::class, 'You are not allowed to send messages to this user.');
+
     it('creates 2 participants for conversation when created', function () {
 
         $auth = User::factory()->create();
@@ -306,6 +317,17 @@ describe('sendMessageTo() ', function () {
         $auth->sendMessageTo($randomUserConversation, 'hello');
 
     })->throws(Exception::class, 'You do not have access to this conversation.');
+
+    it('aborts if canSendMessageTo denies a direct recipient model', function () {
+
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $receiver->getKey()];
+
+        $auth->sendMessageTo($receiver, 'hello');
+
+    })->throws(Exception::class, 'You are not allowed to send messages to this user.');
 
     it('can send message conversation', function () {
 

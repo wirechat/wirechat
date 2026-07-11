@@ -20,8 +20,10 @@ use Wirechat\Wirechat\Models\Invite;
 use Workbench\App\Models\User;
 
 beforeEach(function () {
+    testPanelProvider()->registerRoutes(true);
     testPanelProvider()->groupInvitations(true);
     testPanelProvider()->inviteJoinRedirect(null);
+    testPanelProvider()->mountUrl(null);
 });
 
 it('shows and updates the admin approval toggle in group permissions', function () {
@@ -87,6 +89,57 @@ it('allows admins to access invite links', function () {
 
     expect($conversation->group->inviteLinks()->count())->toBe(1)
         ->and($invite?->is_primary)->toBeTrue();
+});
+
+it('hides public invite url controls when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $linksComponent = Livewire::actingAs($owner)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.primary_link'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.additional_links'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.actions.copy_link.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.actions.send_via_chat.label'));
+
+    $invite = $conversation->group->inviteLinks()->firstOrFail();
+
+    $linksComponent->assertDontSee($invite->url(testPanelProvider()));
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertDontSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.show.actions.share_link.label'))
+        ->assertDontSee($invite->url(testPanelProvider()));
+});
+
+it('keeps public invite url controls when chat routes are disabled and a mount url is configured', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+
+    $linksComponent = Livewire::actingAs($owner)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.primary_link'))
+        ->assertSee(__('wirechat::chat.group.invite_link.actions.copy_link.label'));
+
+    $invite = $conversation->group->inviteLinks()->firstOrFail();
+
+    $linksComponent->assertSee($invite->url(testPanelProvider()));
+
+    Livewire::actingAs($owner)
+        ->test(Show::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->assertStatus(200)
+        ->assertSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
+        ->assertSee($invite->url(testPanelProvider()));
 });
 
 it('forbids non-admin participants from accessing invite link management even when they can add members', function () {
@@ -266,6 +319,10 @@ it('renders translated content in the invite link details modal', function () {
         ->assertSee(__('wirechat::chat.group.invite_link.show.labels.expires'))
         ->assertSee(__('wirechat::chat.group.invite_link.show.labels.never'))
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.copy_link.label'))
+        ->assertSeeHtml('copyWithSelection')
+        ->assertSeeHtml('window.navigator.clipboard.writeText(value)')
+        ->assertSeeHtml('copyWithClipboard().then((copied) => {')
+        ->assertSeeHtml('if (copied || copyWithSelection())')
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.share_link.label'))
         ->assertSee(__('wirechat::chat.group.invite_link.show.actions.revoke.label'));
 });
@@ -395,6 +452,31 @@ it('can send an invite link via chat', function () {
         ->and($privateConversation->messages()->latest('id')->first()->body)->toContain($invite->url(testPanelProvider()));
 });
 
+it('removes selected invite recipients after the search query changes', function () {
+    $owner = User::factory()->create(['name' => 'Owner']);
+    $receiver = User::factory()->create(['name' => 'Receiver One']);
+    User::factory()->create(['name' => 'Receiver Two']);
+
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
+        ->set('search', 'Receiver One')
+        ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
+        ->assertSee('Receiver One')
+        ->set('search', 'Receiver Two')
+        ->call('toggleMember', $receiver->getKey(), $receiver->getMorphClass())
+        ->assertSet('selectedMembers', collect())
+        ->assertDontSee('Receiver One');
+});
+
 it('ignores tampered send invite selections outside the current panel search results', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $receiver = User::factory()->create(['name' => 'Receiver']);
@@ -462,14 +544,17 @@ it('prevents sending a group invite link via chat to banned past members', funct
         ])
         ->set('search', $bannedUser->name)
         ->call('toggleMember', $bannedUser->id, $bannedUser->getMorphClass())
-        ->assertStatus(403);
+        ->assertDispatched('wirechat-toast', type: 'error');
 });
 
 it('hides exited and removed past members from send invite search results', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $exitedUser = User::factory()->create(['name' => 'Invite Candidate Left']);
     $removedUser = User::factory()->create(['name' => 'Invite Candidate Removed']);
-    $availableUser = User::factory()->create(['name' => 'Invite Candidate Ready']);
+    $availableUser = User::factory()->create([
+        'name' => 'Invite Candidate Ready',
+        'email' => 'invite.candidate@example.test',
+    ]);
 
     $conversation = $owner->createGroup('Test');
     $conversation->addParticipant($exitedUser)->exitConversation();
@@ -487,8 +572,33 @@ it('hides exited and removed past members from send invite search results', func
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->set('search', 'Invite Candidate')
         ->assertSee($availableUser->wirechat_name)
+        ->assertSee($availableUser->wirechat_subtitle)
         ->assertDontSee($exitedUser->wirechat_name)
         ->assertDontSee($removedUser->wirechat_name);
+});
+
+it('shows requester subtitles in the join requests drawer', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create([
+        'name' => 'Subtitle Requester',
+        'email' => 'subtitle.requester@example.test',
+    ]);
+
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $conversation->group->requestToJoin($receiver, $invite);
+
+    Livewire::actingAs($owner)
+        ->test(Requests::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee($receiver->wirechat_name)
+        ->assertSee($receiver->wirechat_subtitle);
 });
 
 it('rejects direct send invite selection for an exited past member', function () {
@@ -510,17 +620,17 @@ it('rejects direct send invite selection for an exited past member', function ()
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
         ->set('search', $exitedUser->name)
         ->call('toggleMember', $exitedUser->getKey(), $exitedUser->getMorphClass())
-        ->assertStatus(403);
+        ->assertDispatched('wirechat-toast', type: 'error');
 });
 
 it('uses the panel user search callback in the send invite modal', function () {
     $owner = User::factory()->create(['name' => 'Owner']);
     $emailMatchedUser = User::factory()->create([
         'name' => 'Email Result',
-        'email' => 'custom-callback@example.com',
+        'email' => 'callback-match@example.com',
     ]);
     $nameMatchedUser = User::factory()->create([
-        'name' => 'custom-callback',
+        'name' => 'Callback Match',
         'email' => 'name-only@example.com',
     ]);
 
@@ -541,7 +651,7 @@ it('uses the panel user search callback in the send invite modal', function () {
 
     Livewire::actingAs($owner)
         ->test(Send::class, ['conversation' => $conversation, 'invite' => $invite, 'panel' => testPanelProvider()->getId()])
-        ->set('search', 'custom-callback')
+        ->set('search', 'callback-match')
         ->assertSee($emailMatchedUser->wirechat_name)
         ->assertDontSee($nameMatchedUser->wirechat_name);
 });
@@ -553,6 +663,7 @@ it('shows invite management actions only to admins in group info', function () {
 
     $conversation = $owner->createGroup('Test');
     $conversation->group->allow_members_to_add_others = true;
+    $conversation->group->admins_must_approve_new_members = true;
     $conversation->group->save();
 
     $adminParticipant = $conversation->addParticipant($admin);
@@ -587,6 +698,12 @@ it('shows group access editing only to owners inside invite links', function () 
 
     Livewire::actingAs($owner)
         ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSeeHtml('wirechat.chat.group.links.show')
+        ->assertSeeHtml('wirechat.chat.group.links.send')
+        ->assertSeeHtml('copyWithSelection')
+        ->assertSeeHtml('window.navigator.clipboard.writeText(value)')
+        ->assertSeeHtml("document.execCommand('copy')")
+        ->assertSeeHtml('openChatDrawer')
         ->assertSee('wirechat.chat.group.permissions');
 
     Livewire::actingAs($admin)
@@ -662,6 +779,33 @@ it('handleOpenChat redirects existing members to the chat in non-widget mode', f
         ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
         ->call('handleOpenChat', encrypt($invite->token))
         ->assertRedirect(testPanelProvider()->chatRoute($groupConversation->id));
+});
+
+it('handleOpenChat opens existing member invites internally when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+
+    $hostConversation = $owner->createGroup('Host');
+    $hostConversation->addParticipant($member);
+
+    $groupConversation = $owner->createGroup('Target');
+    $groupConversation->addParticipant($member);
+
+    $invite = $groupConversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($member)
+        ->test(Chat::class, ['conversation' => $hostConversation->id, 'panel' => testPanelProvider()->getId()])
+        ->call('handleOpenChat', encrypt('http://localhost:8001/test/invites/'.$invite->token))
+        ->assertNoRedirect()
+        ->assertDispatched('open-chat', conversation: $groupConversation->id);
 });
 
 it('handleOpenChat resolves invites through the configured invite model', function () {
@@ -1015,7 +1159,8 @@ it('renders join from invite modal using translations', function () {
         ->assertSee(__('wirechat::chat.group.join.lobby.labels.members_count', ['count' => $conversation->participants_count]))
         ->assertSee(__('wirechat::chat.group.join.lobby.labels.open_access'))
         ->assertSee(__('wirechat::chat.group.join.lobby.actions.cancel.label'))
-        ->assertSee(__('wirechat::chat.group.join.lobby.actions.join_group.label'));
+        ->assertSee(__('wirechat::chat.group.join.lobby.actions.join_group.label'))
+        ->assertSeeHtml('autofocus tabindex="-1" class="text-lg font-semibold focus:outline-hidden"');
 });
 
 it('shows an overflow badge when the invite modal has more than six members to preview', function () {
@@ -1154,6 +1299,27 @@ it('stages the invite token in session and redirects to chats index', function (
         ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
 });
 
+it('stages the invite token in session and redirects to the mount url when chat routes are disabled', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertRedirect('/app')
+        ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
+        ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
+});
+
 it('redirects invite joins to the panel inviteJoinRedirect when configured', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');
@@ -1171,6 +1337,49 @@ it('redirects invite joins to the panel inviteJoinRedirect when configured', fun
         ->assertRedirect('/wirechat-widget')
         ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
         ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
+});
+
+it('lets inviteJoinRedirect override the mount url for invite joins', function () {
+    testPanelProvider()
+        ->mountUrl('/app')
+        ->inviteJoinRedirect('/wirechat-widget');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->post(testPanelProvider()->inviteJoinRoute($invite->token))
+        ->assertRedirect('/wirechat-widget')
+        ->assertSessionHas('wirechat_pending_invite_token', $invite->token)
+        ->assertSessionHas('wirechat_pending_invite_panel', testPanelProvider()->getId());
+});
+
+it('redirects existing members from invite links to the mount url when chat routes are disabled', function () {
+    testPanelProvider()
+        ->registerRoutes(false)
+        ->mountUrl('/app');
+
+    $owner = User::factory()->create();
+    $conversation = $owner->createGroup('Test');
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    $this->actingAs($owner)
+        ->get(testPanelProvider()->inviteRoute($invite->token))
+        ->assertRedirect('/app')
+        ->assertSessionHas('wirechat_pending_conversation_id', $conversation->id)
+        ->assertSessionHas('wirechat_pending_conversation_panel', testPanelProvider()->getId());
 });
 
 it('joins a public group from the in-app invite modal', function () {
@@ -1259,11 +1468,46 @@ it('opens the joined group in widget mode from the invite lobby', function () {
         ->and($invite->usages)->toBe(1);
 });
 
+it('opens the joined group internally from the invite lobby when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['type' => GroupType::PUBLIC])->save();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, [
+            'token' => $invite->token,
+            'panel' => testPanelProvider()->getId(),
+        ])
+        ->call('proceed')
+        ->assertNoRedirect()
+        ->assertDispatched('open-chat', conversation: $conversation->id)
+        ->assertDispatched('closeWirechatModal');
+
+    $invite->refresh();
+
+    expect($receiver->belongsToConversation($conversation))->toBeTrue()
+        ->and($invite->usages)->toBe(1);
+});
+
 it('creates a join request from the in-app invite modal when approval is required', function () {
     $owner = User::factory()->create();
     $receiver = User::factory()->create();
 
     $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
+
     $invite = $conversation->group->inviteLinks()->create([
         'panel_id' => testPanelProvider()->getId(),
         'created_by_id' => $owner->getKey(),
@@ -1284,6 +1528,58 @@ it('creates a join request from the in-app invite modal when approval is require
     expect($receiver->belongsToConversation($conversation))->toBeFalse()
         ->and($conversation->group->hasPendingJoinRequest($receiver))->toBeTrue()
         ->and(in_array($invite->usages, [null, 0], true))->toBeTrue();
+});
+
+it('lets invite users join immediately when admin approval is turned off after a pending request exists', function () {
+    $owner = User::factory()->create();
+    $receiver = User::factory()->create();
+
+    $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
+
+    $invite = $conversation->group->inviteLinks()->create([
+        'panel_id' => testPanelProvider()->getId(),
+        'created_by_id' => $owner->getKey(),
+        'created_by_type' => $owner->getMorphClass(),
+        'token' => Invite::generateToken(),
+        'is_primary' => true,
+    ]);
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->call('proceed')
+        ->assertNoRedirect();
+
+    expect($receiver->belongsToConversation($conversation))->toBeFalse()
+        ->and($conversation->group->hasPendingJoinRequest($receiver))->toBeTrue();
+
+    $conversation->group->forceFill(['admins_must_approve_new_members' => false])->save();
+
+    Livewire::actingAs($owner)
+        ->test(GroupInfo::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSet('pendingJoinRequestsCount', 0)
+        ->assertDontSee(__('wirechat::chat.group.join.requests.heading.label'));
+
+    Livewire::actingAs($owner)
+        ->test(Links::class, ['conversation' => $conversation, 'panel' => testPanelProvider()->getId()])
+        ->assertSee(__('wirechat::chat.group.invite_link.labels.group_access_open'))
+        ->assertDontSee(__('wirechat::chat.group.invite_link.labels.join_requests'));
+
+    Livewire::actingAs($receiver)
+        ->test(Lobby::class, ['token' => $invite->token, 'panel' => testPanelProvider()->getId()])
+        ->assertSet('requiresApproval', false)
+        ->assertSet('hasPendingJoinRequest', false)
+        ->assertSee(__('wirechat::chat.group.join.lobby.labels.open_access'))
+        ->assertSee(__('wirechat::chat.group.join.lobby.actions.join_group.label'))
+        ->call('proceed')
+        ->assertRedirect(testPanelProvider()->chatRoute($conversation->id));
+
+    $invite->refresh();
+
+    expect($receiver->belongsToConversation($conversation))->toBeTrue()
+        ->and($conversation->group->pendingJoinRequests()->count())->toBe(0)
+        ->and($conversation->group->joinRequests()->where('status', JoinRequestStatus::ACCEPTED)->count())->toBe(1)
+        ->and($invite->usages)->toBe(1);
 });
 
 it('allows admin-removed users to request join from lobby when approval is required', function () {
@@ -1609,6 +1905,7 @@ it('shows the join request banner only to group admins', function () {
     $requester = User::factory()->create();
 
     $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
     $conversation->addParticipant($member);
     $conversation->group->requestToJoin($requester);
 
@@ -1626,6 +1923,7 @@ it('shows the join request banner only to group admins', function () {
 it('pluralizes the join request banner summary for admins', function () {
     $owner = User::factory()->create();
     $conversation = $owner->createGroup('Test');
+    $conversation->group->forceFill(['admins_must_approve_new_members' => true])->save();
 
     $conversation->group->requestToJoin(User::factory()->create());
     $conversation->group->requestToJoin(User::factory()->create());

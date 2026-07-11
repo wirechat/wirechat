@@ -7,6 +7,11 @@
                     show: false,
                     showActiveComponent: true,
                     activeDrawerComponent: false,
+                    previousDrawerComponent: false,
+                    transitioningDrawerComponent: false,
+                    drawerComponentTransitionDirection: 'forward',
+                    drawerComponentTransitionPhase: 'idle',
+                    drawerComponentTransitionTimeout: null,
                     componentHistory: [],
                     listeners: [],
                     //current component attributes
@@ -103,23 +108,43 @@
                             return;
                         }
 
+                        const previousDrawerComponent = this.activeDrawerComponent;
+
                         if (this.activeDrawerComponent !== false && skip === false) {
                             this.componentHistory.push(this.activeDrawerComponent);
                         }
 
-                        let focusableTimeout = 50;
+                        this.activeDrawerComponent = id;
+                        this.showActiveComponent = true;
 
-                        if (this.activeDrawerComponent === false) {
-                            this.activeDrawerComponent = id
-                            this.showActiveComponent = true;
+                        if (previousDrawerComponent === false) {
+                            this.previousDrawerComponent = false;
+                            this.transitioningDrawerComponent = false;
+                            this.drawerComponentTransitionPhase = 'idle';
                         } else {
+                            if (this.drawerComponentTransitionTimeout) {
+                                clearTimeout(this.drawerComponentTransitionTimeout);
+                            }
 
-                            this.showActiveComponent = false;
-                            focusableTimeout = 400;
+                            this.previousDrawerComponent = previousDrawerComponent;
+                            this.transitioningDrawerComponent = true;
+                            this.drawerComponentTransitionDirection = skip ? 'back' : 'forward';
+                            this.drawerComponentTransitionPhase = 'start';
 
-                            setTimeout(() => {
-                                this.activeDrawerComponent = id;
-                                this.showActiveComponent = true;
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    if (this.activeDrawerComponent === id) {
+                                        this.drawerComponentTransitionPhase = 'end';
+                                    }
+                                });
+                            });
+
+                            this.drawerComponentTransitionTimeout = setTimeout(() => {
+                                if (this.activeDrawerComponent === id) {
+                                    this.previousDrawerComponent = false;
+                                    this.transitioningDrawerComponent = false;
+                                    this.drawerComponentTransitionPhase = 'idle';
+                                }
                             }, 300);
                         }
 
@@ -138,7 +163,7 @@
                             if (focusable) {
                                 setTimeout(() => {
                                     focusable.focus();
-                                }, focusableTimeout);
+                                }, 50);
                             }
                         });
 
@@ -148,11 +173,50 @@
                     setShowPropertyTo(show) {
                         this.show = show;
                         if (!show) {
+                            this.previousDrawerComponent = false;
+                            this.transitioningDrawerComponent = false;
+                            this.drawerComponentTransitionPhase = 'idle';
+
                             setTimeout(() => {
                                 this.activeDrawerComponent = false;
                                 this.$wire.resetState();
                             }, 300);
                         }
+                    },
+                    shouldShowDrawerComponent(id) {
+                        return this.activeDrawerComponent === id || this.previousDrawerComponent === id;
+                    },
+                    drawerComponentTransitionClasses(id) {
+                        const isActive = this.activeDrawerComponent === id;
+                        const isPrevious = this.previousDrawerComponent === id;
+                        const direction = this.drawerComponentTransitionDirection;
+                        const phase = this.drawerComponentTransitionPhase;
+
+                        if (!this.transitioningDrawerComponent) {
+                            return isActive ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0';
+                        }
+
+                        if (phase === 'start') {
+                            if (isActive) {
+                                return direction === 'forward'
+                                    ? 'translate-x-full opacity-100'
+                                    : '-translate-x-full opacity-100';
+                            }
+
+                            return isPrevious ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0';
+                        }
+
+                        if (isActive) {
+                            return 'translate-x-0 opacity-100';
+                        }
+
+                        if (isPrevious) {
+                            return direction === 'forward'
+                                ? '-translate-x-full opacity-100'
+                                : 'translate-x-full opacity-100';
+                        }
+
+                        return 'translate-x-full opacity-0';
                     },
                     init() {
 
@@ -177,23 +241,20 @@
     data-modal-type="ChatDrawer"
     id="chat-drawer"
     x-data="ChatDrawer()" x-on:close.stop="setShowPropertyTo(false)"
-         x-on:click.self="closeChatDrawerOnClickAway()"
          x-on:keydown.escape.stop="closeChatDrawerOnEscape({ modalType: 'ChatDrawer', event: $event }); "
          x-show="show"
-         class="fixed bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]  dark:text-white opacity-100 inset-0 z-50 h-full overflow-y-auto overscroll-contain " style="display: none;"
-         aria-modal="true"
+         class="pointer-events-none absolute inset-0 z-50 h-full overflow-y-auto overscroll-contain" style="display: none;"
          tabindex="0"
     
         >
-        <div class="justify-center text-center relative">
+        <div class="pointer-events-auto relative h-full overflow-x-hidden bg-[var(--wc-light-primary)] text-left dark:bg-[var(--wc-dark-primary)] dark:text-white">
             <div x-show="show && showActiveComponent" x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 -translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
+                x-transition:enter-start="opacity-0 translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 -translate-x-full"
-                class="w-auto overscroll-contain  transition-all " id="chatmodal-container"
-                x-trap.noscroll.inert="show && showActiveComponent" aria-modal="true">
+                x-transition:leave-end="opacity-0 translate-x-full"
+                class="relative h-full w-full overflow-x-hidden overscroll-contain transition-all" id="chatmodal-container">
                 @forelse($drawerComponents as $id => $component)
-                    <div class="overscroll-contain " x-show.immediate="activeDrawerComponent == '{{ $id }}'" x-ref="{{ $id }}"
+                    <div class="absolute inset-0 h-full w-full overscroll-contain transition-all duration-300 ease-out" x-show="shouldShowDrawerComponent(@js($id))" x-bind:class="drawerComponentTransitionClasses(@js($id))" x-ref="{{ $id }}"
                         wire:key="{{ $id }}">
                         @livewire($component['name'], $component['arguments'], key($id))
                     </div>

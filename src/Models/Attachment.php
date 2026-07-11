@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\MimeTypes;
+use Throwable;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Workbench\Database\Factories\AttachmentFactory;
 
@@ -28,6 +29,9 @@ use Wirechat\Wirechat\Workbench\Database\Factories\AttachmentFactory;
  * @property Carbon|null $updated_at
  * @property-read Model|\Eloquent $attachable
  * @property-read string $clean_mime_type
+ * @property-read string $extension
+ * @property-read int|null $size
+ * @property-read string|null $formatted_size
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Attachment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Attachment newQuery()
@@ -163,6 +167,60 @@ class Attachment extends Model
         return explode('/', $this->mime_type)[1] ?? 'unknown';
     }
 
+    protected function extension(): Attribute
+    {
+        return Attribute::make(
+            get: function (): string {
+                $name = (string) ($this->original_name ?: $this->file_name);
+                $extension = pathinfo($name, PATHINFO_EXTENSION);
+
+                if ($extension !== '') {
+                    return Str::lower($extension);
+                }
+
+                return MimeTypes::getDefault()->getExtensions((string) $this->mime_type)[0] ?? 'file';
+            }
+        );
+    }
+
+    protected function size(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?int {
+                $size = $this->meta['size'] ?? null;
+
+                if (is_numeric($size)) {
+                    return (int) $size;
+                }
+
+                $path = (string) $this->file_path;
+
+                if ($path === '') {
+                    return null;
+                }
+
+                try {
+                    $disk = Storage::disk(Wirechat::storage()->disk());
+
+                    if (! $disk->exists($path)) {
+                        return null;
+                    }
+
+                    return $disk->size($path);
+                } catch (Throwable) {
+                    return null;
+                }
+            }
+        );
+    }
+
+    protected function formattedSize(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?string => $this->size === null ? null : static::formatBytes($this->size)
+        );
+    }
+
     public static function resolveMimeType(UploadedFile $file, ?string $storedPath = null, ?string $disk = null): string
     {
         $mimeType = $file->getMimeType();
@@ -217,5 +275,25 @@ class Attachment extends Model
             ->value();
 
         return $extension !== '' && in_array($extension, $extensions, true);
+    }
+
+    protected static function formatBytes(int $bytes): string
+    {
+        $size = max(0, $bytes);
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $unit = 0;
+
+        while ($size >= 1024 && $unit < count($units) - 1) {
+            $size /= 1024;
+            $unit++;
+        }
+
+        if ($unit === 0) {
+            return $size.' '.$units[$unit];
+        }
+
+        $precision = $size >= 10 || (float) (int) $size === (float) $size ? 0 : 1;
+
+        return number_format($size, $precision).' '.$units[$unit];
     }
 }

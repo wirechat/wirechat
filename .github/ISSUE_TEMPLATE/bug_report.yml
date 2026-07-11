@@ -10,10 +10,18 @@ body:
         ---
 
         Thank you for taking the time to file a bug report. To address this bug as fast as possible, we need some information.
-  - type: markdown
+  - type: dropdown
+    id: package
     attributes:
-      value: |
-        **Package:** Wirechat
+      label: Package
+      description: Which Wirechat package is affected?
+      options:
+        - Wirechat Free
+        - Wirechat Pro
+        - Both packages
+        - Not sure
+    validations:
+      required: true
   - type: input
     id: package-version
     attributes:

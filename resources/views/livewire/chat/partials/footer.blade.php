@@ -43,6 +43,11 @@
             class="dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)] w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 ">
             Only admins can send messages
         </div>
+    @elseif ($conversation->isPrivate() && ! $this->canSendMessage())
+        <div
+            class="dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)] w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4">
+            {{ __('wirechat::chat.messages.replies_unavailable') }}
+        </div>
     @else
         @if ($hasPendingOutgoingMessageRequest)
             <div class="border-t border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
@@ -143,7 +148,7 @@
                                             {{-- Delete image --}}
                                             <button wire:loading.attr="disabled"
                                                 class="disabled:cursor-progress absolute -top-2 -right-2  z-10 dark:text-gray-50"
-                                                @click="removeUpload('{{ $mediaItem->getFilename() }}')">
+                                                @click="removeUpload(@js($mediaItem->getFilename()))">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
                                                     <path
@@ -163,7 +168,7 @@
                                         <div class="relative h-24 sm:h-36 ">
                                             <button wire:loading.attr="disabled"
                                                 class="disabled:cursor-progress absolute -top-2 -right-2  z-10 dark:text-gray-50"
-                                                @click="removeUpload('{{ $mediaItem->getFilename() }}')">
+                                                @click="removeUpload(@js($mediaItem->getFilename()))">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
                                                     <path
@@ -172,8 +177,10 @@
                                                         d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
                                                 </svg>
                                             </button>
-                                            <x-wirechat::video height="h-24 sm:h-36 " :cover="false"
-                                                :showToggleSound="false" :source="$mediaItem->temporaryUrl()" />
+                                            <video src="{{ $mediaItem->temporaryUrl() }}" preload="metadata" playsinline
+                                                class="block h-full max-w-full rounded-lg object-contain">
+                                                your browser does not support html5 video
+                                            </video>
                                         </div>
                                     @endif
                                 @endforeach
@@ -182,7 +189,7 @@
                                 <label wire:loading.class="cursor-progress"
                                     class="shrink-0 cursor-pointer relative w-16 h-14 rounded-lg  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-primary)]   hover:bg-[var(--wc-light-primary)] dark:hover:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  flex text-center justify-center ">
                                     <input wire:loading.attr="disabled"
-                                        @change="handleFileSelect(event,{{ count($media) }})" type="file" multiple
+                                        @change="handleFileSelect(event, @js(count($media)))" type="file" multiple
                                            accept="{{ collect($this->panel()->getMediaMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
                                            class="sr-only">
                                     <span class="m-auto ">
@@ -214,7 +221,7 @@
                                     {{-- Delete file button --}}
                                     <button wire:loading.attr="disabled"
                                         class="disabled:cursor-progress absolute -top-2 -right-2  z-10"
-                                        @click="removeUpload('{{ $file->getFilename() }}')">
+                                        @click="removeUpload(@js($file->getFilename()))">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                             fill="currentColor"
                                             class="bi bi-x-circle dark:text-white dark:hover:text-red-500 hover:text-red-500 transition-colors"
@@ -252,7 +259,7 @@
                             <label wire:loading.class="cursor-progress"
                                 class="cursor-pointer shrink-0 relative w-16 h-14 rounded-lg bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)]   hover:border-[var(--wc-light-primary)] dark:hover:border-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)]  transition-colors   flex text-center justify-center  ">
                                 <input wire:loading.attr="disabled"
-                                    @change="handleFileSelect(event,{{ count($files) }})" type="file" multiple
+                                    @change="handleFileSelect(event, @js(count($files)))" type="file" multiple
                                        accept="{{ collect($this->panel()->getFileMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
 
                                        class="sr-only"
@@ -420,7 +427,7 @@
                                         class="cursor-pointer">
                                         <input wire:loading.attr="disabled" wire:target="sendMessage"
                                             dusk="file-upload-input"
-                                            @change="handleFileSelect(event, {{ count($files) }})" type="file"
+                                            @change="handleFileSelect(event, @js(count($files)))" type="file"
                                             multiple
 
                                                accept="{{ collect($this->panel()->getFileMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
@@ -455,7 +462,7 @@
                                         {{-- Trigger image upload --}}
                                         <input dusk="media-upload-input" wire:loading.attr="disabled"
                                             wire:target="sendMessage"
-                                            @change="handleFileSelect(event, {{ count($media) }})" type="file"
+                                            @change="handleFileSelect(event, @js(count($media)))" type="file"
                                             multiple
                                                accept="{{ collect($this->panel()->getMediaMimes())->map(fn($ext) => '.' . $ext)->implode(',') }}"
 
@@ -547,7 +554,7 @@
                             <button
                                 x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
                                 wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
-                                id="sendMessageButton" class="bg-[var(--primary-500)] rounded-full p-2 cursor-pointer hover:text-[var(--primary-500)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
+                                id="sendMessageButton" class="bg-(--primary-600)/90 rounded-full p-2 cursor-pointer hover:text-[var(--primary-500)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
 
                                 <svg class="size-4.5 text-white  dark:text-gray-200" xmlns="http://www.w3.org/2000/svg"
                                     width="36" height="36" viewBox="0 0 24 24" fill="none"

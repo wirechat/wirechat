@@ -40,10 +40,14 @@ class InviteController extends Controller
         /** @var Conversation $conversation */
         $conversation = $group->conversation()->with(['participants.participantable'])->firstOrFail();
         $auth = $request->user();
+        $panel = Wirechat::currentPanel();
+
+        abort_if($panel === null, 404);
 
         $isMember = false;
         $hasPendingJoinRequest = false;
         $joinBlocked = false;
+        $requiresApproval = false;
 
         if ($auth !== null) {
             $isMember = $auth->belongsToConversation($conversation);
@@ -51,10 +55,24 @@ class InviteController extends Controller
             // If the user is already a member, skip the invite preview entirely
             // and route them straight into the conversation.
             if ($isMember) {
-                return redirect()->to(Wirechat::currentPanel()->chatRoute($conversation->id));
+                $chatRoute = $panel->chatRouteIfRegistered($conversation->id);
+
+                if ($chatRoute !== null) {
+                    return redirect()->to($chatRoute);
+                }
+
+                $mountUrl = $panel->chatUrl($conversation->id);
+
+                abort_if($mountUrl === null, 404);
+
+                $request->session()->put('wirechat_pending_conversation_id', $conversation->id);
+                $request->session()->put('wirechat_pending_conversation_panel', $panel->getId());
+
+                return redirect()->to($mountUrl);
             }
 
-            $hasPendingJoinRequest = $group->hasPendingJoinRequest($auth);
+            $requiresApproval = $group->requiresInviteApproval();
+            $hasPendingJoinRequest = $requiresApproval && $group->hasPendingJoinRequest($auth);
             $joinBlocked = $group->inviteJoinBlockedFor($auth);
         }
 
@@ -67,6 +85,7 @@ class InviteController extends Controller
             'isMember' => $isMember,
             'hasPendingJoinRequest' => $hasPendingJoinRequest,
             'joinBlocked' => $joinBlocked,
+            'requiresApproval' => $requiresApproval,
         ]);
     }
 
@@ -75,13 +94,18 @@ class InviteController extends Controller
         $invite = $this->resolveInvite($token);
         $panel = Wirechat::currentPanel();
 
+        abort_if($panel === null, 404);
+
         abort_unless($invite->inviteable instanceof Group, 404);
 
         $request->session()->put('wirechat_pending_invite_token', $invite->token);
-        $request->session()->put('wirechat_pending_invite_panel', $panel?->getId());
+        $request->session()->put('wirechat_pending_invite_panel', $panel->getId());
 
-        $redirect = $panel?->getInviteJoinRedirectUrl($request);
+        $redirect = $panel->getInviteJoinRedirectUrl($request)
+            ?? $panel->chatsUrl();
 
-        return redirect()->to($redirect ?: $panel->chatsRoute());
+        abort_if($redirect === null, 404);
+
+        return redirect()->to($redirect);
     }
 }

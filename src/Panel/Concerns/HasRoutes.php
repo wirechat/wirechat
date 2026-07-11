@@ -3,6 +3,8 @@
 namespace Wirechat\Wirechat\Panel\Concerns;
 
 use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Laravel\SerializableClosure\Serializers\Native;
 
 /**
@@ -18,6 +20,8 @@ trait HasRoutes
     protected array $routes = [];
 
     protected bool|Closure $hasRoutes = true;
+
+    protected string|Closure|null $mountUrl = null;
 
     /**
      * The base path for the panel's routes.
@@ -65,6 +69,38 @@ trait HasRoutes
         $this->hasRoutes = $condition;
 
         return $this;
+    }
+
+    public function mountUrl(string|Closure|null $url): static
+    {
+        $this->mountUrl = $url;
+
+        return $this;
+    }
+
+    public function getMountUrl(?Request $request = null): ?string
+    {
+        return $this->evaluate(
+            $this->mountUrl,
+            ['request' => $request],
+            $request ? [Request::class => $request] : []
+        );
+    }
+
+    public function hasMountUrl(?Request $request = null): bool
+    {
+        if ($this->mountUrl instanceof Closure && $request === null) {
+            return true;
+        }
+
+        $url = $this->getMountUrl($request);
+
+        return is_string($url) && trim($url) !== '';
+    }
+
+    public function shouldRegisterInviteRoutes(): bool
+    {
+        return $this->hasRoutes() || $this->hasMountUrl();
     }
 
     /**
@@ -186,6 +222,32 @@ trait HasRoutes
         return route($this->generateRouteName($name), $parameters, $absolute);
     }
 
+    public function hasRegisteredRoute(string $name): bool
+    {
+        if (! $this->shouldRegisterRouteName($name)) {
+            return false;
+        }
+
+        return Route::has($this->generateRouteName($name));
+    }
+
+    protected function shouldRegisterRouteName(string $name): bool
+    {
+        return match ($name) {
+            self::INVITE_SHOW_ROUTE_NAME, self::INVITE_JOIN_ROUTE_NAME => $this->shouldRegisterInviteRoutes(),
+            default => $this->hasRoutes(),
+        };
+    }
+
+    public function routeIfRegistered(string $name, array $parameters = [], bool $absolute = true): ?string
+    {
+        if (! $this->hasRegisteredRoute($name)) {
+            return null;
+        }
+
+        return $this->route($name, $parameters, $absolute);
+    }
+
     /**
      * Generates a URL for the chats index route.
      *
@@ -195,6 +257,22 @@ trait HasRoutes
     public function chatsRoute(bool $absolute = true): string
     {
         return $this->route(self::CHATS_ROUTE_NAME, [], $absolute);
+    }
+
+    public function chatsRouteIfRegistered(bool $absolute = true): ?string
+    {
+        return $this->routeIfRegistered(self::CHATS_ROUTE_NAME, [], $absolute);
+    }
+
+    public function chatsUrl(bool $absolute = true): ?string
+    {
+        $route = $this->chatsRouteIfRegistered($absolute);
+
+        if ($route !== null) {
+            return $route;
+        }
+
+        return $this->hasRoutes() ? null : $this->getMountUrl(request());
     }
 
     /**
@@ -209,6 +287,22 @@ trait HasRoutes
         return $this->route(self::CHAT_ROUTE_NAME, ['conversation' => $conversation], $absolute);
     }
 
+    public function chatRouteIfRegistered(mixed $conversation, bool $absolute = true): ?string
+    {
+        return $this->routeIfRegistered(self::CHAT_ROUTE_NAME, ['conversation' => $conversation], $absolute);
+    }
+
+    public function chatUrl(mixed $conversation, bool $absolute = true): ?string
+    {
+        $route = $this->chatRouteIfRegistered($conversation, $absolute);
+
+        if ($route !== null) {
+            return $route;
+        }
+
+        return $this->hasRoutes() ? null : $this->getMountUrl(request());
+    }
+
     /**
      * Generates a URL for the invite preview route.
      *
@@ -219,6 +313,11 @@ trait HasRoutes
         return $this->route(self::INVITE_SHOW_ROUTE_NAME, ['token' => $token], $absolute);
     }
 
+    public function inviteRouteIfRegistered(mixed $token, bool $absolute = true): ?string
+    {
+        return $this->routeIfRegistered(self::INVITE_SHOW_ROUTE_NAME, ['token' => $token], $absolute);
+    }
+
     /**
      * Generates a URL for the invite join route.
      *
@@ -227,5 +326,10 @@ trait HasRoutes
     public function inviteJoinRoute(mixed $token, bool $absolute = true): string
     {
         return $this->route(self::INVITE_JOIN_ROUTE_NAME, ['token' => $token], $absolute);
+    }
+
+    public function inviteJoinRouteIfRegistered(mixed $token, bool $absolute = true): ?string
+    {
+        return $this->routeIfRegistered(self::INVITE_JOIN_ROUTE_NAME, ['token' => $token], $absolute);
     }
 }

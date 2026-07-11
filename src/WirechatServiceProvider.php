@@ -6,8 +6,10 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Wirechat\Wirechat\Console\Commands\ActivateWirechatPro;
 use Wirechat\Wirechat\Console\Commands\InstallWirechat;
@@ -16,6 +18,7 @@ use Wirechat\Wirechat\Console\Commands\MigrateConfigToPanelCommand;
 use Wirechat\Wirechat\Console\Commands\SetupNotifications;
 use Wirechat\Wirechat\Console\Commands\UpgradeMorphColumns;
 use Wirechat\Wirechat\Console\Commands\UpgradeNamespaceCommand;
+use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Facades\WirechatColor;
 use Wirechat\Wirechat\Helpers\MorphClassResolver;
 use Wirechat\Wirechat\Livewire\Chat\Chat;
@@ -39,6 +42,7 @@ use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Requests as ChatsRequests;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Index as ChatsSettings;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as ChatsSettingsNotifications;
+use Wirechat\Wirechat\Livewire\Chats\Settings\SecurityPrivacy as ChatsSettingsSecurityPrivacy;
 use Wirechat\Wirechat\Livewire\Modals\Modal;
 use Wirechat\Wirechat\Livewire\New\Chat as NewChat;
 use Wirechat\Wirechat\Livewire\New\Group as NewGroup;
@@ -84,6 +88,7 @@ class WirechatServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'wirechat');
+        $this->loadBladeComponents();
 
         // publish views
         if ($this->app->runningInConsole()) {
@@ -184,6 +189,7 @@ class WirechatServiceProvider extends ServiceProvider
         Livewire::component('wirechat.chats.requests', ChatsRequests::class);
         Livewire::component('wirechat.chats.settings', ChatsSettings::class);
         Livewire::component('wirechat.chats.settings.notifications', ChatsSettingsNotifications::class);
+        Livewire::component('wirechat.chats.settings.security-privacy', ChatsSettingsSecurityPrivacy::class);
 
         // modal
         Livewire::component('wirechat.modal', Modal::class);
@@ -252,6 +258,23 @@ class WirechatServiceProvider extends ServiceProvider
         $router->aliasMiddleware('wirechat.panelAccess', EnsureWirechatPanelAccess::class);
     }
 
+    protected function loadBladeComponents(): void
+    {
+        $componentPath = __DIR__.'/../resources/views/components';
+
+        Blade::anonymousComponentPath($componentPath, 'wirechat');
+
+        foreach (File::allFiles($componentPath) as $file) {
+            $component = Str::of($file->getRelativePathname())
+                ->replace(DIRECTORY_SEPARATOR, '.')
+                ->replace('\\', '.')
+                ->beforeLast('.blade.php')
+                ->toString();
+
+            Blade::component("wirechat::components.{$component}", "wirechat::{$component}");
+        }
+    }
+
     protected function loadAssets(): void
     {
         Blade::directive('wirechatAssets', function (Panel|string|null $panel = null) {
@@ -310,7 +333,7 @@ class WirechatServiceProvider extends ServiceProvider
                                                 }
                                             }
 
-                                            if (!e.is_request && e.redirect_url !== window.location.href && e.notification?.enabled !== false) {
+                                            if (e.redirect_url && !e.is_request && e.redirect_url !== window.location.href && e.notification?.enabled !== false) {
                                                 if (Notification.permission === 'granted') {
                                                     showNotification(e);
                                                 } else if (Notification.permission !== 'denied') {
@@ -444,6 +467,18 @@ class WirechatServiceProvider extends ServiceProvider
             $darkSecondary = $darkPalette[800] ?? Color::Zinc[800];
             $darkAccent = $darkPalette[700] ?? Color::Zinc[700];
             $darkBorder = $darkPalette[700] ?? Color::Zinc[700];
+            $colorTone = $currentPanel?->getColorTone() ?? ColorTone::Soft;
+            $toneLightBackground = 'color-mix(in srgb, var(--wc-primary-300) 35%, transparent)';
+            $toneLightText = 'rgb(24 24 27)';
+            $toneDarkBackground = 'color-mix(in srgb, var(--wc-primary-300) 40%, transparent)';
+            $toneDarkText = '#fff';
+
+            if ($colorTone === ColorTone::Solid) {
+                $toneLightBackground = 'var(--wc-primary-500)';
+                $toneLightText = '#fff';
+                $toneDarkBackground = 'var(--wc-primary-600)';
+                $toneDarkText = '#fff';
+            }
 
             return "<?php echo <<<EOT
                     <style>
@@ -480,6 +515,11 @@ class WirechatServiceProvider extends ServiceProvider
                         --wc-dark-secondary: {$darkSecondary};/* --color-zinc-800 */
                         --wc-dark-accent: {$darkAccent};/* --color-zinc-700 */
                         --wc-dark-border: {$darkBorder};/* --color-zinc-700 */
+
+                        --wc-primary-tone-bg: {$toneLightBackground};
+                        --wc-primary-tone-text: {$toneLightText};
+                        --wc-primary-tone-dark-bg: {$toneDarkBackground};
+                        --wc-primary-tone-dark-text: {$toneDarkText};
                     }
                     [x-cloak] {
                         display: none !important;

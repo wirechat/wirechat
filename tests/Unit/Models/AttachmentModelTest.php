@@ -13,6 +13,39 @@ it('resolves a specific mime type from the original extension when upload mime i
     expect(Attachment::resolveMimeType($file))->toBe('image/png');
 });
 
+it('exposes the original extension and formatted metadata size', function () {
+    $attachment = new Attachment([
+        'file_path' => 'attachments/archive.zip',
+        'file_name' => 'archive.zip',
+        'original_name' => 'wirechat-pro.zip',
+        'mime_type' => 'application/zip',
+        'meta' => ['size' => 1048576],
+    ]);
+
+    expect($attachment->extension)->toBe('zip')
+        ->and($attachment->size)->toBe(1048576)
+        ->and($attachment->formatted_size)->toBe('1 MB');
+});
+
+it('falls back to storage when attachment metadata has no size', function () {
+    Storage::fake('public');
+    FacadesConfig::set('wirechat.storage.disk', 'public');
+
+    $path = 'attachments/fallback.txt';
+    Storage::disk('public')->put($path, str_repeat('a', 1536));
+
+    $attachment = new Attachment([
+        'file_path' => $path,
+        'file_name' => 'fallback.txt',
+        'original_name' => 'fallback.txt',
+        'mime_type' => 'text/plain',
+    ]);
+
+    expect($attachment->extension)->toBe('txt')
+        ->and($attachment->size)->toBe(1536)
+        ->and($attachment->formatted_size)->toBe('1.5 KB');
+});
+
 it('tests attachment URL generation with custom test_disk', function () {
     // Dynamically configure the "test_disk" disk for testing
     $this->app['config']->set('filesystems.disks.test_disk', [

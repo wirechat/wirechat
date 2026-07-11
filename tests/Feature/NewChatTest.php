@@ -43,12 +43,28 @@ it('can filter users if search input is set', function () {
     $auth = ModelsUser::factory()->create();
 
     // create user
-    ModelsUser::factory()->create(['name' => 'John']);
+    $user = ModelsUser::factory()->create([
+        'name' => 'John',
+        'email' => 'john.subtitle@example.test',
+    ]);
 
     $request = Livewire::actingAs($auth)->test(NewChat::class);
 
-    $request->set('search', 'Joh')->assertSee('John');
+    $request->set('search', 'Joh')
+        ->assertSee('John')
+        ->assertSee($user->wirechat_subtitle);
 
+});
+
+it('hides users denied by canSendMessageTo from search results', function () {
+    $auth = ModelsUser::factory()->create();
+    $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+    ModelsUser::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $otherUser->getKey()];
+
+    Livewire::actingAs($auth)->test(NewChat::class)
+        ->set('search', 'Joh')
+        ->assertDontSee('John');
 });
 
 test('search_users_field_is_set_correctly', function () {
@@ -150,6 +166,24 @@ describe('Creating conversation', function () {
                 && $event->requestStatus === MessageRequestStatus::PENDING;
         });
 
+    });
+
+    test('it respects canSendMessageTo when creating a conversation from the modal', function () {
+        testPanelProvider()->messageRequests();
+
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        ModelsUser::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $otherUser->getKey()];
+
+        Livewire::actingAs($auth)->test(NewChat::class)
+            ->set('search', 'Joh')
+            ->assertDontSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class)
+            ->assertStatus(403);
+
+        expect($auth->hasConversationWith($otherUser))->toBeFalse()
+            ->and(MessageRequest::query()->count())->toBe(0);
     });
 
     test('it creates a direct conversation when message requests are disabled on the panel', function () {
@@ -342,6 +376,27 @@ describe('Creating conversation', function () {
             ->assertRedirect(testPanelProvider()->chatRoute($conversation->id))
             ->assertNotDispatched('open-chat');
 
+    });
+
+    test('it opens the chat internally after creating conversation when panel routes are disabled', function () {
+        testPanelProvider()->registerRoutes(false);
+
+        $auth = ModelsUser::factory()->create();
+        $otherUser = ModelsUser::factory()->create(['name' => 'John']);
+
+        $request = Livewire::actingAs($auth)->test(NewChat::class);
+
+        $request
+            ->set('search', 'Joh')
+            ->assertSee('John')
+            ->call('createConversation', $otherUser->id, ModelsUser::class);
+
+        $conversation = $auth->conversations()->first();
+
+        $request
+            ->assertNoRedirect()
+            ->assertDispatched('open-chat', conversation: $conversation?->id)
+            ->assertDispatched('closeWirechatModal');
     });
 
     test('it does not redirects but  dispataches Livewire events "open-chat" events after creating conversation if IS Widget', function () {

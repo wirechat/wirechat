@@ -64,6 +64,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             //                'sslmode'  => 'prefer',
             //            ]);
 
+            $config->set('wirechat.models.user', User::class);
             $config->set('wirechat.user_model', User::class);
             $wirechatConfig = require __DIR__.'/../config/wirechat.php';
             $config->set('wirechat.message_url_parsing', $wirechatConfig['message_url_parsing'] ?? []);
@@ -95,6 +96,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        User::$wirechatMessageDenyList = [];
 
         $this->withoutVite();
     }

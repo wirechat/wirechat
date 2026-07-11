@@ -105,7 +105,9 @@ class NotifyParticipant implements ShouldBroadcastNow
 
         return [
             'message' => new MessageResource($this->message),
-            'redirect_url' => $this->getPanel()->chatRoute($conversationId),
+            'redirect_url' => $conversationId !== null
+                ? $this->getPanel()->chatUrl($conversationId)
+                : null,
             'is_request' => $isMessageRequest,
             'notification' => $this->notificationPreferences($conversation),
         ];

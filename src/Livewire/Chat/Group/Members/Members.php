@@ -6,13 +6,11 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Locked;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
-use Wirechat\Wirechat\Enums\Actions;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Concerns\HasPanel;
 use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
-use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Participant;
 
@@ -74,23 +72,22 @@ class Members extends ModalComponent
     /**
      * Actions
      */
-    public function sendMessage(Participant $participant)
+    public function sendMessage(int|string $participantId)
     {
-
         abort_unless(auth()->check(), 401);
 
-        // Load missing relationship in case of strict models types
-        $participant->loadMissing('participantable');
+        $participant = $this->resolveParticipant($participantId);
+        $this->authorizeConversationParticipant($participant);
 
-        $conversation = auth()->user()->createConversationWith($participant->participantable);
+        abort_unless($this->canMessageParticipant($participant), 403, 'You are not allowed to send messages to this user.');
 
-        $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatRoute($conversation->id),
-            events: [
-                WidgetsWirechat::class => ['open-chat',  ['conversation' => $conversation->id]],
-                'closeWirechatModal',
-            ]
-        );
+        $conversation = $this->panel()->hasMessageRequests()
+            ? auth()->user()->sendMessageRequestTo($participant->participantable)
+            : auth()->user()->createConversationWith($participant->participantable);
+
+        $this->closeWirechatModal();
+
+        return $this->navigateToChat($conversation->id);
 
         // $this->closeModalWithEvents([
         //   //  WidgetsWirechat::class => ['close-chat'],
@@ -103,22 +100,25 @@ class Members extends ModalComponent
 
     }
 
-    /**
-     * Admin actions */
-    public function dismissAdmin(Participant $participant)
+    public function canMessageParticipant(Participant $participant): bool
     {
-        // Load missing relationship in case of strict models types
+        abort_unless(auth()->check(), 401);
+
         $participant->loadMissing('participantable');
 
-        $this->toggleAdmin($participant);
+        return auth()->user()->canSendMessageTo($participant->participantable);
     }
 
-    public function makeAdmin(Participant $participant)
+    /**
+     * Admin actions */
+    public function dismissAdmin(int|string $participantId)
     {
-        // Load missing relationship in case of strict models types
-        $participant->loadMissing('participantable');
+        $this->toggleAdmin($this->resolveParticipant($participantId));
+    }
 
-        $this->toggleAdmin($participant);
+    public function makeAdmin(int|string $participantId)
+    {
+        $this->toggleAdmin($this->resolveParticipant($participantId));
     }
 
     private function toggleAdmin(Participant $participant)
@@ -126,10 +126,10 @@ class Members extends ModalComponent
 
         abort_unless(auth()->check(), 401);
 
-        // Load missing relationship in case of strict models types
-        $participant->loadMissing('participantable');
-        // abort if user does not belong to conversation
-        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        $this->authorizeConversationParticipant($participant);
+
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
+        abort_unless(auth()->user()->isOwnerOf($this->conversation), 403, 'Only the group owner can manage admins.');
 
         // abort if user participants is owner
         abort_if($participant->isOwner(), 403, 'Owner role cannot be changed');
@@ -197,56 +197,30 @@ class Members extends ModalComponent
     }
 
     /* Deleting from group */
-    public function removeFromGroup(Participant $participant)
+    public function removeFromGroup(int|string $participantId)
     {
+        $participant = $this->resolveParticipant($participantId);
+
         $this->authorizeAdminAction($participant, 'remove');
 
         $participant->removeByAdmin(auth()->user());
 
-        // abort if auth is not admin
-        abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
-
-        // abort if user participants is owner
-        abort_if($participant->isOwner(), 403, 'Owner cannot be removed from group');
-
-        // determine the admin's participant in this conversation to use as the actor
-        $adminParticipant = $this->conversation->participant(auth()->user());
-
-        // ensure the admin participant exists
-        if (! $adminParticipant) {
-            abort(403, 'Admin participant not found in conversation');
-        }
-
-        // remove from group
-        // Create the 'remove' action record in the actions table
-        Wirechat::actionModelClass()::create([
-            'actionable_id' => $participant->getKey(),
-            'actionable_type' => $participant->getMorphClass(),
-            'actor_id' => $adminParticipant->getKey(),  // The admin participant who performed the action
-            'actor_type' => $adminParticipant->getMorphClass(),  // The participant model as actor
-            'type' => Actions::REMOVED_BY_ADMIN,  // Type of action
-        ]);
-
-        // remove from
-        // Remove member if they are already selected
-        $this->participants = $this->participants->reject(function ($member) use ($participant) {
-            return $member->getKey() == $participant->getKey() && get_class($member) == get_class($participant);
-        });
+        $this->removeParticipantFromLoadedList($participant);
 
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
         $this->dispatch('participantsCountUpdated', $this->totalMembersCount)->to('wirechat.chat.group.info');
     }
 
-    public function blockMember(Participant $participant)
+    public function blockMember(int|string $participantId)
     {
+        $participant = $this->resolveParticipant($participantId);
+
         $this->authorizeAdminAction($participant, 'block');
 
         $participant->banByAdmin(auth()->user());
 
-        $this->participants = $this->participants->reject(function ($member) use ($participant) {
-            return $member->id == $participant->id && get_class($member) == get_class($participant);
-        });
+        $this->removeParticipantFromLoadedList($participant);
 
         $this->totalMembersCount = $this->totalMembersCount - 1;
 
@@ -254,9 +228,9 @@ class Members extends ModalComponent
         $this->dispatch('refresh')->self();
     }
 
-    public function banMember(Participant $participant)
+    public function banMember(int|string $participantId)
     {
-        $this->blockMember($participant);
+        $this->blockMember($participantId);
     }
 
     /**
@@ -294,9 +268,9 @@ class Members extends ModalComponent
 
     protected function authorizeAdminAction(Participant $participant, string $action = 'manage'): void
     {
-        $participant->loadMissing('participantable');
+        $this->authorizeConversationParticipant($participant);
 
-        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+        abort_unless(auth()->user()->belongsToConversation($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
         abort_unless(auth()->user()->isAdminIn($this->conversation), 403, 'You do not have permission to perform this action in this group. Only admins can proceed.');
         abort_if($participant->isOwner(), 403, ucfirst($action).' action cannot target the group owner.');
         abort_if($participant->isAdmin(), 403, ucfirst($action).' action cannot target another admin.');
@@ -305,6 +279,32 @@ class Members extends ModalComponent
             403,
             'You cannot '.strtolower($action).' yourself from the group.'
         );
+    }
+
+    protected function resolveParticipant(int|string $participantId): Participant
+    {
+        /** @var Participant $participant */
+        $participant = Wirechat::participantModelClass()::query()
+            ->with('participantable')
+            ->findOrFail($participantId);
+
+        return $participant;
+    }
+
+    protected function authorizeConversationParticipant(Participant $participant): void
+    {
+        $participant->loadMissing('participantable');
+
+        abort_unless((string) $participant->conversation_id === (string) $this->conversation->getKey(), 403, 'This user does not belong to conversation');
+        abort_unless($participant->participantable->belongsToConversation($this->conversation), 403, 'This user does not belong to conversation');
+    }
+
+    protected function removeParticipantFromLoadedList(Participant $participant): void
+    {
+        $this->participants = $this->participants->reject(function ($member) use ($participant) {
+            return (string) $member->getKey() === (string) $participant->getKey()
+                && $member->getMorphClass() === $participant->getMorphClass();
+        });
     }
 
     public function render()

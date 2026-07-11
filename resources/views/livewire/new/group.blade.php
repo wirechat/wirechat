@@ -71,7 +71,7 @@
                         <label class="my-2" for="description">@lang('wirechat::new.group.inputs.description.label')</label>
 
                         <textarea id='description' type="text" wire:model='description' placeholder="{{__('wirechat::new.group.inputs.description.placeholder')}}" rows="4"
-                            class="wc-textarea w-full resize-none rounded-lg border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)]   bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
+                            class="wc-textarea w-full resize-none  p-2  rounded-lg border-[var(--wc-light-border)]  dark:border-[var(--wc-dark-border)]   bg-inherit dark:text-white outline-hidden w-full focus:outline-hidden  focus:ring-0 hover:ring-0">
                         </textarea>
 
 
@@ -167,10 +167,10 @@
 
                             @foreach ($selectedMembers as $key => $member)
                                 <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] rounded-sm  dark:text-gray-300"
-                                    wire:key="selected-member-{{ $member->id }}">
+                                    wire:key="selected-member-{{ md5($member->getMorphClass()) }}-{{ $member->getKey() }}">
                                     {{ $member->wirechat_name }}
                                     <button type="button"
-                                        wire:click="toggleMember('{{ $member->id }}',{{ json_encode(get_class($member)) }})"
+                                        wire:click="toggleMember(@js((string) $member->getKey()), @js($member->getMorphClass()))"
                                         class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)]  hover:text-gray-900  dark:hover:text-gray-300"
                                         aria-label="Remove">
                                         <svg class="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -201,18 +201,25 @@
                     @if (count($users)!=0)
                         <ul class="overflow-auto flex flex-col">
                             @foreach ($users as $key => $user)
-                                <li class="flex cursor-pointer group gap-2 items-center p-2">
+                                <li wire:key="new-group-users-{{ md5((string) $user['type']) }}-{{ $user['id'] }}" class="flex cursor-pointer group gap-2 items-center p-2">
 
                                     <label
-                                        wire:click="toggleMember('{{ $user['id'] }}',{{ json_encode($user['type']) }})"
+                                        wire:click="toggleMember(@js((string) $user['id']), @js($user['type']))"
                                         class="flex cursor-pointer gap-2 items-center w-full">
                                         <x-wirechat::avatar  src="{{ $user['wirechat_avatar_url'] }}" class="w-10 h-10" />
 
-                                        <p class="group-hover:underline transition-all truncate">
-                                            {{ $user['wirechat_name'] }}</p>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="group-hover:underline transition-all truncate">
+                                                {{ $user['wirechat_name'] }}</p>
+
+                                            @if (filled($user['wirechat_subtitle'] ?? null))
+                                                <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ $user['wirechat_subtitle'] }}</p>
+                                            @endif
+                                        </div>
 
                                         <div class="ml-auto">
-                                            @if ($selectedMembers->contains(fn($member) => $member->id == $user['id'] && $member->getMorphClass() == $user['type']))
+                                            @if ($selectedMembers->contains(fn($member) => (string) $member->getKey() === (string) $user['id'] && $member->getMorphClass() === $user['type']))
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor"
                                                     class="bi bi-plus-square-fill w-6 h-6 text-green-500"

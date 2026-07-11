@@ -1,10 +1,3 @@
-@php
-    $primaryInviteUrlJs = (string) \Illuminate\Support\Js::from($primaryInviteUrl ?? null);
-    $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copied_success'));
-    $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.messages.copy_prompt'));
-    $copyPrimaryInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$primaryInviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$primaryInviteUrlJs}); }";
-@endphp
-
 <div class="h-[calc(100vh_-_10rem)] rounded-xl  sm:h-[450px] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] dark:text-white border border-zinc-200 dark:border-zinc-700 overflow-y-auto overflow-x-hidden  ">
 
 <header class=" sticky top-0 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] z-10 p-2">
@@ -59,15 +52,18 @@
 
     @if ($primaryInviteUrl)
         <section class="w-full flex  border-zinc-200 px-0 py-3 dark:border-zinc-700">
-            <x-wirechat::button type="button"
-                variant="filled"
-                x-data
-                x-on:click="{{ $copyPrimaryInviteAction }}"
-                class="w-full gap-2">   
-               <x-wirechat::icons.link class="size-5" />
+            <x-wirechat::actions.copy
+                :value="$primaryInviteUrl"
+                :success-message="__('wirechat::chat.group.invite_link.messages.copied_success')"
+                :prompt-message="__('wirechat::chat.group.invite_link.messages.copy_prompt')"
+                class="w-full"
+            >
+                <x-wirechat::button type="button" variant="filled" full-width class="gap-2">
+                    <x-wirechat::icons.link class="size-5" />
 
-                <span>{{ __('wirechat::chat.group.add_members.actions.invite_via_link.label') }}</span>
-            </x-wirechat::button>
+                    <span>{{ __('wirechat::chat.group.add_members.actions.invite_via_link.label') }}</span>
+                </x-wirechat::button>
+            </x-wirechat::actions.copy>
         </section>
     @endif
 
@@ -80,10 +76,10 @@
 
                 @foreach ($selectedMembers as $key => $member)
                     <li class="flex items-center text-nowrap min-w-fit px-2 py-1 text-sm font-medium text-gray-800 bg-[var(--wc-light-secondary)] rounded-sm dark:bg-[var(--wc-dark-secondary)] dark:text-gray-300"
-                        wire:key="selected-member-{{ $member->id }}">
+                        wire:key="selected-member-{{ md5($member->getMorphClass()) }}-{{ $member->getKey() }}">
                         {{ $member->wirechat_name }}
                         <button type="button"
-                            wire:click="toggleMember('{{ $member->id }}',{{ json_encode(get_class($member)) }})"
+                            wire:click="toggleMember(@js((string) $member->getKey()), @js($member->getMorphClass()))"
                             class="flex items-center p-1 ms-2 text-sm text-gray-400 bg-transparent rounded-xs hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300"
                             aria-label="Remove">
                             <svg class="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +115,7 @@
                         $isBanned = (bool) ($user['isBanned'] ?? false);
                     @endphp
                     <li
-                        wire:key="users-{{$key}}"
+                        wire:key="users-{{ md5((string) $user['type']) }}-{{ $user['id'] }}"
                         @class([
                             'flex group gap-2 items-center p-2',
                             'cursor-not-allowed opacity-60' => $isBanned,
@@ -129,20 +125,25 @@
                         <label
                         {{-- The wire:click attribute is only rendered if $isAlreadyAParticipant is false. --}}
                          @if (!$isAlreadyAParticipant)
-                         wire:click="toggleMember('{{ $user['id'] }}', {{ json_encode($user['type']) }})"
+                         wire:click="toggleMember(@js((string) $user['id']), @js($user['type']))"
                          @endif
 
                             @class([
-                                'flex gap-2 items-center w-full',
+                                'flex gap-2 items-center w-full min-w-0',
                                 'cursor-not-allowed' => $isBanned,
                                 'cursor-pointer' => ! $isBanned,
                             ])>
-                            <x-wirechat::avatar src="{{$user['wirechat_avatar_url']}}" class="w-10 h-10" />
+                            <x-wirechat::avatar src="{{$user['wirechat_avatar_url']}}" class="w-10 h-10 shrink-0" />
 
-                           <div @class(['opacity-70' => $isAlreadyAParticipant || $isBanned]) >
+                           <div @class(['min-w-0 flex-1', 'opacity-70' => $isAlreadyAParticipant || $isBanned]) >
                             <p
                             @class(['transition-all truncate', 'group-hover:underline ' => !$isAlreadyAParticipant])>
                                 {{ $user['wirechat_name'] }}</p>
+
+                            @if (filled($user['wirechat_subtitle'] ?? null))
+                                <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $user['wirechat_subtitle'] }}</p>
+                            @endif
 
                              <span
                              @class(['text-gray-600 dark:text-gray-400 text-sm'])>
@@ -151,11 +152,11 @@
                                 @elseif ($isBanned)
                                 {{ __('wirechat::chat.group.join.lobby.labels.join_blocked') }}
                                 @endif
-                             </span>
+                            </span>
                            </div>
 
-                            <div class="ml-auto">
-                                @if ($selectedMembers->contains(fn($member) => $member->id == $user['id'] && get_class($member) == $user['type']) || $isAlreadyAParticipant)
+                            <div class="ml-auto shrink-0">
+                                @if ($selectedMembers->contains(fn($member) => (string) $member->getKey() === (string) $user['id'] && $member->getMorphClass() === $user['type']) || $isAlreadyAParticipant)
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         fill="currentColor"
                                         class="bi bi-plus-square-fill w-6 h-6 text-green-500"

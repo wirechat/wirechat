@@ -1,11 +1,3 @@
-@php
-    $inviteUrlJs = (string) \Illuminate\Support\Js::from($inviteUrl);
-    $copySuccessMessageJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.show.messages.copied_success'));
-    $copyPromptJs = (string) \Illuminate\Support\Js::from(__('wirechat::chat.group.invite_link.show.messages.copy_prompt'));
-    $openSendInviteLinkAction = "Livewire.dispatch('openWirechatModal', { component: 'wirechat.chat.group.links.send', arguments: { conversation: ".(string) \Illuminate\Support\Js::from($conversation->id).", invite: ".(string) \Illuminate\Support\Js::from($invite->id).", panel: ".(string) \Illuminate\Support\Js::from($this->panel)." } })";
-    $copyInviteAction = "if (navigator.clipboard) { navigator.clipboard.writeText({$inviteUrlJs}); \$dispatch('wirechat-toast', { type: 'success', message: {$copySuccessMessageJs} }); } else { window.prompt({$copyPromptJs}, {$inviteUrlJs}); }";
-@endphp
-
 <div class="w-[92vw] max-w-lg rounded-xl border border-[var(--wc-light-border)] dark:border-[var(--wc-dark-border)] bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] p-6 text-gray-900 shadow-xl dark:text-white">
     <div class="flex items-center justify-between gap-4">
         <button type="button" wire:click="closeWirechatModal" class="rounded-full p-2 text-gray-500 transition hover:bg-[var(--wc-light-secondary)] dark:hover:bg-[var(--wc-dark-secondary)]">
@@ -18,11 +10,13 @@
     </div>
 
     <div class="mt-6 space-y-5">
-        {{-- Invite Link --}}
-        <div class="rounded-xl border border-dashed border-[var(--wc-light-border)] p-4 dark:border-[var(--wc-dark-border)]">
-            <p class="text-sm   text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.show.labels.link') }}</p>
-            <p class="mt-3 break-all text-[var(--primary-500)] text-sm">{{ $inviteUrl }}</p>
-        </div>
+        @if ($inviteUrl)
+            {{-- Invite Link --}}
+            <div class="rounded-xl border border-dashed border-[var(--wc-light-border)] p-4 dark:border-[var(--wc-dark-border)]">
+                <p class="text-sm   text-gray-500 dark:text-gray-400">{{ __('wirechat::chat.group.invite_link.show.labels.link') }}</p>
+                <p class="mt-3 break-all text-[var(--primary-500)] text-sm">{{ $inviteUrl }}</p>
+            </div>
+        @endif
 
         {{-- Created By --}}
         <div class="rounded-xl border border-dashed border-[var(--wc-light-border)] p-4 dark:border-[var(--wc-dark-border)]">
@@ -31,6 +25,9 @@
                 <x-wirechat::avatar :src="$invite->createdBy?->wirechat_avatar_url" class="h-12 w-12" />
                 <div>
                     <p class="font-medium">{{ $invite->createdBy?->wirechat_name ?: __('wirechat::chat.group.invite_link.show.labels.unknown') }}</p>
+                    @if (filled($invite->createdBy?->wirechat_subtitle))
+                        <p class="truncate text-sm text-gray-500 dark:text-gray-400">{{ $invite->createdBy?->wirechat_subtitle }}</p>
+                    @endif
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $invite->created_at?->format('M j, Y g:i A') }}</p>
                 </div>
             </div>
@@ -51,22 +48,41 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 max-h-fit gap-3 sm:grid-cols-2">
-            <x-wirechat::button type="button"
-                 size='sm'
-                  variant='default'
-                x-data="{}"
-                x-on:click="{{ $copyInviteAction }}">
-                {{ __('wirechat::chat.group.invite_link.show.actions.copy_link.label') }}
-            </x-wirechat::button>
-            
-            <x-wirechat::button 
-             variant='outline'
-            type="button"
-                onclick="{{ $openSendInviteLinkAction }}">
-                {{ __('wirechat::chat.group.invite_link.show.actions.share_link.label') }}
-            </x-wirechat::button>
-        </div>
+        @if ($inviteUrl)
+            <div class="grid grid-cols-1 max-h-fit gap-3 sm:grid-cols-2">
+                <x-wirechat::actions.copy
+                    :value="$inviteUrl"
+                    :success-message="__('wirechat::chat.group.invite_link.show.messages.copied_success')"
+                    :prompt-message="__('wirechat::chat.group.invite_link.show.messages.copy_prompt')"
+                    class="w-full"
+                >
+                    <x-wirechat::button
+                        type="button"
+                        size="sm"
+                        variant="default"
+                        full-width
+                    >
+                        {{ __('wirechat::chat.group.invite_link.show.actions.copy_link.label') }}
+                    </x-wirechat::button>
+                </x-wirechat::actions.copy>
+
+                <x-wirechat::actions.open-modal
+                    component="wirechat.chat.group.links.send"
+                    :conversation="$conversation->id"
+                    :panel="$this->panel"
+                    :arguments="['invite' => $invite->id]"
+                    class="w-full"
+                >
+                    <x-wirechat::button
+                        type="button"
+                        variant="outline"
+                        full-width
+                    >
+                        {{ __('wirechat::chat.group.invite_link.show.actions.share_link.label') }}
+                    </x-wirechat::button>
+                </x-wirechat::actions.open-modal>
+            </div>
+        @endif
 
         @if ($canRevokeLink)
             <button type="button" wire:click="revokeLink" wire:confirm="{{ __('wirechat::chat.group.invite_link.show.messages.revoke_confirmation') }}"

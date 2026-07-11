@@ -99,16 +99,17 @@ class Links extends ModalComponent
         $authParticipant = $this->conversation->participant(auth()->user());
         $canManageInvites = (bool) $authParticipant?->isAdmin();
         $primaryInvite = $this->invite->fresh(['createdBy']);
+        $requiresApproval = $this->group->requiresInviteApproval();
 
         return view('wirechat::livewire.chat.group.links.links', [
             'primaryInvite' => $primaryInvite,
-            'primaryInviteUrl' => $primaryInvite->url($this->panel()),
+            'primaryInviteUrl' => $this->panel()->inviteRouteIfRegistered($primaryInvite->token),
             'canManageInvites' => $canManageInvites,
             'canResetLink' => $canManageInvites,
-            'canManageJoinRequests' => $canManageInvites,
+            'canManageJoinRequests' => $canManageInvites && $requiresApproval,
             'canEditGroupAccess' => (bool) $authParticipant?->isOwner(),
-            'pendingJoinRequestsCount' => $this->group->pendingJoinRequests()->count(),
-            'requiresAdminApproval' => (bool) $this->group->admins_must_approve_new_members,
+            'pendingJoinRequestsCount' => $requiresApproval ? $this->group->pendingJoinRequests()->count() : 0,
+            'requiresAdminApproval' => $requiresApproval,
         ]);
     }
 

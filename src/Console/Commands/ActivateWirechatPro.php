@@ -31,7 +31,7 @@ class ActivateWirechatPro extends Command
     private const REPOSITORY_URL = 'https://composer.corepine.dev';
 
     protected $signature = 'wirechat:activate
-        {--email= : The email address assigned to the license, or "unlock" for an unassigned license}
+        {--email= : The email address associated with the license}
         {--license= : The Wirechat Pro license key}
         {--fingerprint= : Activation domain or project ID for licenses that require one}
         {--composer=composer : Composer executable}
@@ -42,23 +42,39 @@ class ActivateWirechatPro extends Command
     public function handle(): int
     {
         try {
+            $licenseOptionProvided = $this->option('license') !== null;
+
             $email = trim((string) ($this->option('email') ?: text(
                 label: 'Enter the email address associated with your license',
                 required: true,
-                hint: 'Use "unlock" if the license is not assigned to a licensee yet.'
             )));
 
             $licenseKey = trim((string) ($this->option('license') ?: password(
                 label: 'Enter your Wirechat Pro license key',
                 required: true,
-                hint: 'Purchase a license key: https://corepine.dev/marketplace/wirechat'
+                hint: 'Purchase a license key: https://corepine.dev/products/wirechat'
             )));
 
-            $fingerprint = $this->option('fingerprint') === null
-                ? ''
-                : trim((string) $this->option('fingerprint'));
+            [$licenseKey, $fingerprint] = $this->licenseCredentials(
+                $licenseKey,
+                $this->option('fingerprint'),
+            );
 
-            $this->activateLicense($email, $licenseKey, $fingerprint);
+            try {
+                $this->activateLicense($email, $licenseKey, $fingerprint);
+            } catch (RuntimeException $exception) {
+                if (! $this->shouldPromptForFingerprint($exception, $fingerprint, $licenseOptionProvided)) {
+                    throw $exception;
+                }
+
+                $fingerprint = trim((string) text(
+                    label: 'Enter the activation domain or project ID for this license',
+                    required: true,
+                ));
+
+                $this->activateLicense($email, $licenseKey, $fingerprint);
+            }
+
             $this->info('[✓] License activated with Corepine.');
 
             $this->writeAuthJson($email, $this->licensePassword($licenseKey, $fingerprint));
@@ -83,6 +99,36 @@ class ActivateWirechatPro extends Command
     private function licensePassword(string $licenseKey, string $fingerprint): string
     {
         return $fingerprint === '' ? $licenseKey : "{$licenseKey}:{$fingerprint}";
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function licenseCredentials(string $licenseKey, mixed $fingerprintOption): array
+    {
+        $fingerprint = $fingerprintOption === null ? '' : trim((string) $fingerprintOption);
+
+        if ($fingerprint !== '' || ! str_contains($licenseKey, ':')) {
+            return [$licenseKey, $fingerprint];
+        }
+
+        [$key, $inlineFingerprint] = explode(':', $licenseKey, 2);
+
+        $key = trim($key);
+        $inlineFingerprint = trim($inlineFingerprint);
+
+        if ($key === '' || $inlineFingerprint === '') {
+            return [$licenseKey, $fingerprint];
+        }
+
+        return [$key, $inlineFingerprint];
+    }
+
+    private function shouldPromptForFingerprint(RuntimeException $exception, string $fingerprint, bool $licenseOptionProvided): bool
+    {
+        return ! $licenseOptionProvided
+            && $fingerprint === ''
+            && $exception->getMessage() === 'An activation domain is required for this license.';
     }
 
     private function activateLicense(string $email, string $licenseKey, string $fingerprint): void

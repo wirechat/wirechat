@@ -197,7 +197,7 @@ class Conversation extends Model
             abort_if(
                 $participant->isBannedByAdmin(),
                 403,
-                'Cannot add '.$user->wirechat_name.' because they were blocked from the group by an Admin.'
+                'Cannot add '.$user->wirechat_name.' because they were banned from the group by an Admin.'
             );
 
             // Abort if the participant exited themselves
@@ -281,7 +281,7 @@ class Conversation extends Model
         abort_if(
             $participant->isBannedByAdmin(),
             403,
-            'You cannot join this group because you were blocked by an admin.'
+            'You cannot join this group because you were banned by an admin.'
         );
 
         if ($participant->isRemovedByAdmin() && ! $participant->hasExited()) {

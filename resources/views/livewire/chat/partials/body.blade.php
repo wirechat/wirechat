@@ -19,8 +19,12 @@
         // cancels old retries
         jumpSeq: 0,
 
-        // prevent infinite spam on load events
-        mediaFixQueued: false,
+        // short-lived resize stabilization after prepending older messages
+        prependResizeObserver: null,
+        prependResizeTimer: null,
+        prependStabilizeUntil: 0,
+        prependRestoreQueued: false,
+        ignoreScrollUntil: 0,
 
         // manual scroll detection
         lastScrollTop: 0,
@@ -60,6 +64,76 @@
             const newOffset = rect.top - containerTop;
 
             container.scrollTop += (newOffset - this.anchorOffset);
+            this.lastScrollTop = container.scrollTop;
+            this.ignoreScrollUntil = Date.now() + 80;
+        },
+
+        queuePrependRestore() {
+            if (this.prependRestoreQueued) return;
+            this.prependRestoreQueued = true;
+
+            requestAnimationFrame(() => {
+                this.prependRestoreQueued = false;
+
+                if (Date.now() > this.prependStabilizeUntil) return;
+
+                this.restoreToAnchor();
+            });
+        },
+
+        stopPrependResizeObserver(clearAnchor = true) {
+            if (this.prependResizeObserver) {
+                this.prependResizeObserver.disconnect();
+                this.prependResizeObserver = null;
+            }
+
+            if (this.prependResizeTimer) {
+                clearTimeout(this.prependResizeTimer);
+                this.prependResizeTimer = null;
+            }
+
+            this.prependStabilizeUntil = 0;
+            this.prependRestoreQueued = false;
+
+            if (clearAnchor) {
+                this.anchorId = null;
+                this.anchorOffset = 0;
+            }
+        },
+
+        observePrependedMessageResizes(duration = 900) {
+            const container = this.el;
+            if (!container || !this.anchorId) return;
+
+            if (!('ResizeObserver' in window)) {
+                this.stopPrependResizeObserver();
+                return;
+            }
+
+            const anchor = container.querySelector(`[data-message-id='${this.anchorId}']`);
+            if (!anchor) return;
+
+            this.stopPrependResizeObserver(false);
+            this.prependStabilizeUntil = Date.now() + duration;
+
+            this.prependResizeObserver = new ResizeObserver(() => {
+                if (Date.now() > this.prependStabilizeUntil) {
+                    this.stopPrependResizeObserver();
+                    return;
+                }
+
+                this.queuePrependRestore();
+            });
+
+            const nodes = container.querySelectorAll('[data-message-id]');
+
+            for (const node of nodes) {
+                this.prependResizeObserver.observe(node);
+
+                if (node === anchor) break;
+            }
+
+            this.prependResizeTimer = setTimeout(() => this.stopPrependResizeObserver(), duration);
         },
 
         restoreAfterOlderLoaded() {
@@ -69,7 +143,11 @@
 
             requestAnimationFrame(() => {
                 this.restoreToAnchor();
-                requestAnimationFrame(() => this.restoreToAnchor());
+
+                requestAnimationFrame(() => {
+                    this.restoreToAnchor();
+                    this.observePrependedMessageResizes();
+                });
             });
         },
 
@@ -102,6 +180,7 @@
             } catch (error) {
                 this.pendingPrependRestore = false;
                 this.loadingOlder = false;
+                this.stopPrependResizeObserver();
             }
         },
 
@@ -156,32 +235,6 @@
             requestAnimationFrame(tick);
         },
 
-        onAnyMediaLoad() {
-            if (this.mediaFixQueued) return;
-            this.mediaFixQueued = true;
-
-            requestAnimationFrame(() => {
-                this.mediaFixQueued = false;
-
-                if (this.pendingPrependRestore || this.loadingOlder) {
-                    this.restoreToAnchor();
-                    requestAnimationFrame(() => this.restoreToAnchor());
-                    return;
-                }
-
-                if (this.initializing) {
-                    this.scrollToBottom();
-                    requestAnimationFrame(() => this.scrollToBottom());
-                    return;
-                }
-
-                if (this.jumpTargetId && Date.now() < this.jumpLockUntil) {
-                    this.scrollToMessageCenter(this.jumpTargetId);
-                    requestAnimationFrame(() => this.scrollToMessageCenter(this.jumpTargetId));
-                }
-            });
-        },
-
         scrollToBottom() {
             if (!this.el) return;
             this.el.scrollTop = this.el.scrollHeight;
@@ -195,9 +248,10 @@
             const currentTop = c.scrollTop;
             const delta = Math.abs(currentTop - this.lastScrollTop);
 
-            if (delta > 8) {
+            if (delta > 8 && Date.now() > this.ignoreScrollUntil && !this.pendingPrependRestore && !this.loadingOlder) {
                 this.jumpTargetId = null;
                 this.jumpLockUntil = 0;
+                this.stopPrependResizeObserver();
             }
 
             this.lastScrollTop = currentTop;
@@ -221,8 +275,6 @@
         }, 220);
         "
     @scroll="onScroll()"
-    x-on:load.capture="$data.onAnyMediaLoad()"
-    x-on:error.capture="$data.onAnyMediaLoad()"
 
         @scroll-bottom.window="
         requestAnimationFrame(() => {
@@ -237,7 +289,7 @@
 
     x-cloak
     x-bind:class="{'opacity-0 pointer-events-none': initializing}"
-     class='flex flex-col h-full transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8 grow overscroll-contain overflow-x-hidden w-full my-auto'
+     class='flex flex-col h-full scrollbar-thumb-zinc-400/70 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent transition-opacity duration-150 relative gap-2 gap-y-4 p-4 md:p-5 lg:p-8 grow overscroll-contain overflow-x-hidden w-full my-auto'
     style="contain: layout paint"
 >
 
@@ -257,7 +309,11 @@
         @foreach ($loadedMessages as $date => $messageGroup)
 
             {{-- Date  --}}
-            <div wire:key="group-{{ md5($date) }}"  class="sticky top-0 uppercase p-2 shadow-xs px-2.5 z-50 rounded-xl border dark:border-[var(--wc-dark-primary)] border-[var(--wc-light-primary)] text-sm flex text-center justify-center  bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white  w-28 mx-auto ">
+            <div
+                wire:key="group-{{ md5($date) }}"
+                dusk="message-date-separator"
+                class="sticky top-2 z-50 mx-auto mb-2 flex h-6 w-24 py-3 items-center justify-center rounded-full border border-zinc-200/70 bg-white/85 px-2.5 text-center text-[11px] font-medium leading-none text-zinc-600 shadow-xs backdrop-blur dark:border-zinc-700/70 dark:bg-zinc-800/85 dark:text-zinc-300"
+            >
                 {{ $date }}
             </div>
 
@@ -380,7 +436,7 @@
                                 <div dusk="message_actions" @class([ 'my-auto flex  w-auto  items-center gap-2', 'order-1' => !$belongsToAuth, ])>
                                     {{-- reply button --}}
                                     @if ($canReplyToMessage)
-                                    <button dusk="reply_to_message_icon" wire:click="setReply('{{ encrypt($message->id) }}')"
+                                    <button dusk="reply_to_message_icon" wire:click="setReply(@js(encrypt($message->id)))"
                                         class=" invisible  group-hover:visible hover:scale-110 transition-transform">
 
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -410,7 +466,7 @@
                                         <x-slot name="content">
 
                                             @if ($canDeleteMessageForEveryone)
-                                                <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone('{{ encrypt($message->id) }}')"
+                                                <button dusk="delete_message_for_everyone" wire:click="deleteForEveryone(@js(encrypt($message->id)))"
                                                     wire:confirm="{{ __('wirechat::chat.actions.delete_for_everyone.confirmation_message') }}" class="w-full text-start">
                                                     <x-wirechat::dropdown-link>
                                                         @lang('wirechat::chat.actions.delete_for_everyone.label')
@@ -421,7 +477,7 @@
 
                                             {{-- Dont show delete for me if is group --}}
                                             @if ($canDeleteMessageForMe)
-                                            <button dusk="delete_message_for_me" wire:click="deleteForMe('{{ encrypt($message->id) }}')"
+                                            <button dusk="delete_message_for_me" wire:click="deleteForMe(@js(encrypt($message->id)))"
                                                 wire:confirm="{{ __('wirechat::chat.actions.delete_for_me.confirmation_message') }}" class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     @lang('wirechat::chat.actions.delete_for_me.label')
@@ -431,7 +487,7 @@
 
 
                                             @if ($canReplyToMessage)
-                                            <button dusk="reply_to_message_button" wire:click="setReply('{{ encrypt($message->id) }}')"class="w-full text-start">
+                                            <button dusk="reply_to_message_button" wire:click="setReply(@js(encrypt($message->id)))"class="w-full text-start">
                                                 <x-wirechat::dropdown-link>
                                                     @lang('wirechat::chat.actions.reply.label')
                                                 </x-wirechat::dropdown-link>
@@ -448,7 +504,7 @@
 
 
                                 {{-- Message body --}}
-                                <div class="flex flex-col gap-2 max-w-[95%]  relative">
+                                <div class="flex flex-col gap-2 max-w-[95%] relative">
                                     {{-- Show sender name for group messages. --}}
 
 
@@ -466,16 +522,39 @@
                                             </div>
                                         @endif
 
-                                        {{-- Attachemnt is Video/ --}}
-                                        @if ($attachment->isVideo())
-                                            <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
+                                        <x-wirechat::attachment-bubble
+                                            :previous-message="$previousMessage"
+                                            :message="$message"
+                                            :next-message="$nextMessage"
+                                            :belongs-to-auth="$belongsToAuth"
+                                            :has-solid-color-tone="$this->panel()->hasSolidColorTone()"
+                                        >
+                                            {{-- Attachment is video --}}
+                                            @if ($attachment->isVideo())
+                                                @php
+                                                    $videoWidth = (int) data_get($attachment->meta, 'video.width', 0);
+                                                    $videoHeight = (int) data_get($attachment->meta, 'video.height', 0);
+                                                    $videoFrameOrientation = data_get($attachment->meta, 'video.orientation');
 
-                                        @elseif($attachment->isImage())
-                                            @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
-                                        @else
-                                         {{-- Attachemnt is Application/ --}}
-                                          @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
-                                        @endif
+                                                    if (! in_array($videoFrameOrientation, ['portrait', 'landscape'], true)) {
+                                                        $videoFrameOrientation = $videoHeight > $videoWidth ? 'portrait' : null;
+                                                    }
+                                                @endphp
+
+                                                <x-wirechat::video
+                                                    source="{{ $attachment?->url }}"
+                                                    :media-width="$videoWidth > 0 ? $videoWidth : null"
+                                                    :media-height="$videoHeight > 0 ? $videoHeight : null"
+                                                    :frame-orientation="$videoFrameOrientation"
+                                                />
+
+                                            @elseif($attachment->isImage())
+                                                @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
+                                            @else
+                                                {{-- Attachment is file --}}
+                                                @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment, 'belongsToAuth' => $belongsToAuth, 'hasSolidColorTone' => $this->panel()->hasSolidColorTone() ])
+                                            @endif
+                                        </x-wirechat::attachment-bubble>
 
                                     @endif
 

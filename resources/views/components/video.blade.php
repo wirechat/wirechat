@@ -1,25 +1,49 @@
 @props([
-    'source'=>null,
-    'controls'=>true,
-    'cover'=>true,
-    'height'=>"auto",
-    'showToggleSound'=>true,
-
-
-
+    'source' => null,
+    'controls' => true,
+    'showToggleSound' => true,
+    'mediaWidth' => null,
+    'mediaHeight' => null,
+    'frameOrientation' => null,
 ])
 
+@php
+    $initialOrientation = in_array($frameOrientation, ['portrait', 'landscape'], true) ? $frameOrientation : null;
+    $mediaWidth = is_numeric($mediaWidth) ? (int) $mediaWidth : null;
+    $mediaHeight = is_numeric($mediaHeight) ? (int) $mediaHeight : null;
 
-  <div x-data="{playing:false,muted:false}"
-      class="relative "
-      @click.outside="$refs.player.pause()"
-      x-intersect:leave="$refs.player.pause()">
+    if ($initialOrientation === null && $mediaWidth > 0 && $mediaHeight > 0) {
+        $initialOrientation = $mediaHeight > $mediaWidth ? 'portrait' : 'landscape';
+    }
 
+    $initialOrientation ??= 'landscape';
+@endphp
 
-        <video x-ref="player" src="{{$source}}" @play="playing=true" @pause="playing=false"
-              class="  w-auto dark:bg-gray-600    border rounded-xl  border-gray-50 dark:border-gray-700 rounded-xl {{$cover==true?'object-cover':''}} {{$height}}">
-            your browser does not support html5 video 
-        </video>
+<div
+    x-data="{ playing: false, muted: false }"
+    class="relative inline-block max-w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/20 max-h-[24rem] sm:max-w-[26rem] [overflow-anchor:none]"
+    wire:ignore
+    dusk="message-video-frame"
+    @click.outside="$refs.player.pause()"
+    x-intersect:leave="$refs.player.pause()"
+>
+
+    <div class="h-[24rem] w-[13.5rem]" @if ($initialOrientation !== 'portrait') style="display: none;" @endif aria-hidden="true"></div>
+    <div class="h-[14.625rem] w-[26rem]" @if ($initialOrientation === 'portrait') style="display: none;" @endif aria-hidden="true"></div>
+
+    <video
+        x-ref="player"
+        src="{{ $source }}"
+        @play="playing=true"
+        @pause="playing=false"
+        preload="metadata"
+        playsinline
+        @if ($mediaWidth) width="{{ $mediaWidth }}" @endif
+        @if ($mediaHeight) height="{{ $mediaHeight }}" @endif
+        class="absolute inset-0 block h-full w-full rounded-xl object-contain"
+    >
+        your browser does not support html5 video
+    </video>
 
         @if ($controls==true)
             

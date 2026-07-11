@@ -10,7 +10,6 @@ use Wirechat\Wirechat\Livewire\Concerns\ModalComponent;
 use Wirechat\Wirechat\Livewire\Concerns\ProtectsGroupAddPrivacy;
 use Wirechat\Wirechat\Livewire\Concerns\ResolvesPanelSearchResults;
 use Wirechat\Wirechat\Livewire\Concerns\Widget;
-use Wirechat\Wirechat\Livewire\Widgets\Wirechat as WidgetsWirechat;
 
 class Group extends ModalComponent
 {
@@ -96,7 +95,7 @@ class Group extends ModalComponent
             $model = $this->resolveGroupAddableSearchResult($id, $class);
 
             if ($model) {
-                if (! $this->selectedMembers->contains($model)) {
+                if (! $this->selectedMembers->contains(fn ($member) => (string) $member->getKey() === (string) $model->getKey() && $member->getMorphClass() === $model->getMorphClass())) {
                     $this->selectedMembers->push($model);
                 }
             }
@@ -110,33 +109,32 @@ class Group extends ModalComponent
     public function removeMember($id, string $class)
     {
         // Filter out the member with the specified ID and class
-        $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-            return $member->getKey() == $id && $member->getMorphClass() == $class;
-        });
+        $this->selectedMembers = $this->selectedMembers
+            ->reject(fn ($member) => (string) $member->getKey() === (string) $id && $member->getMorphClass() === $class)
+            ->values();
     }
 
     public function toggleMember($id, string $class)
     {
 
+        if ($this->selectedMembers->contains(fn ($member) => (string) $member->getKey() === (string) $id && $member->getMorphClass() === $class)) {
+            $this->selectedMembers = $this->selectedMembers
+                ->reject(fn ($member) => (string) $member->getKey() === (string) $id && $member->getMorphClass() === $class)
+                ->values();
+
+            return;
+        }
+
         $model = $this->resolveGroupAddableSearchResult($id, $class);
 
         if ($model) {
-            if ($this->selectedMembers->contains(fn ($member) => $member->getKey() == $model->getKey() && get_class($member) == get_class($model))) {
-                // Remove member if they are already selected
-                $this->selectedMembers = $this->selectedMembers->reject(function ($member) use ($id, $class) {
-                    return $member->getKey() == $id && $member->getMorphClass() == $class;
-                });
-            } else {
-
-                // validte members count
-                if (count($this->selectedMembers) >= $this->panel()->getMaxGroupMembers()) {
-                    return $this->dispatch('show-member-limit-error');
-                }
-
-                // Add member if they are not selected
-                $this->selectedMembers->push($model);
-
+            // validte members count
+            if (count($this->selectedMembers) >= $this->panel()->getMaxGroupMembers()) {
+                return $this->dispatch('show-member-limit-error');
             }
+
+            // Add member if they are not selected
+            $this->selectedMembers->push($model);
 
         }
     }
@@ -179,13 +177,7 @@ class Group extends ModalComponent
         $this->forceClose();
         $this->closeWirechatModal();
 
-        // redirect to conversation
-        $this->handleComponentTermination(
-            redirectRoute: $this->panel()->chatRoute($conversation->id),
-            events: [
-                WidgetsWirechat::class => ['open-chat',  ['conversation' => $conversation->id]],
-            ]
-        );
+        return $this->navigateToChat($conversation->id);
 
     }
 

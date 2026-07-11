@@ -9,8 +9,11 @@ use Livewire\Livewire;
 use Wirechat\Wirechat\Enums\MessageType;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Livewire\Chats\Chats as Chatlist;
+use Wirechat\Wirechat\Livewire\Chats\ChatsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Requests as RequestsDrawer;
 use Wirechat\Wirechat\Livewire\Chats\Settings\Index as SettingsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Settings\Notifications as NotificationsDrawer;
+use Wirechat\Wirechat\Livewire\Chats\Settings\SecurityPrivacy as SecurityPrivacyDrawer;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Message;
@@ -32,6 +35,51 @@ test('authenticaed user can access chatlist ', function () {
     $auth = User::factory()->create();
     Livewire::actingAs($auth)->test(Chatlist::class)
         ->assertStatus(200);
+});
+
+test('chat list consumes a pending conversation handoff from the session', function () {
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create();
+    $conversation = $auth->createConversationWith($receiver, message: 'Pending handoff');
+
+    session([
+        'wirechat_pending_conversation_id' => $conversation->id,
+        'wirechat_pending_conversation_panel' => testPanelProvider()->getId(),
+    ]);
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSet('pendingConversationId', $conversation->id)
+        ->assertSet('pendingConversationPanel', testPanelProvider()->getId());
+
+    expect(session()->has('wirechat_pending_conversation_id'))->toBeFalse()
+        ->and(session()->has('wirechat_pending_conversation_panel'))->toBeFalse();
+});
+
+test('it renders selected conversation background classes in the chats list', function () {
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create(['name' => 'John']);
+
+    $auth->createConversationWith($receiver, message: 'Hello John');
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSeeHtml('bg-[var(--wc-light-secondary)]')
+        ->assertSeeHtml('dark:bg-[var(--wc-dark-secondary)]')
+        ->assertDontSeeHtml('border-r-4')
+        ->assertDontSeeHtml('border-[var(--wc-tint-primary-500)]');
+});
+
+test('chat list uses internal chat actions when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create(['name' => 'Route Off']);
+
+    $conversation = $auth->createConversationWith($receiver, message: 'Hello route off');
+
+    Livewire::actingAs($auth)->test(Chatlist::class)
+        ->assertSee('Route Off')
+        ->assertSeeHtml('data-internal-chat-action="true"')
+        ->assertDontSeeHtml('wire:navigate href="'.testPanelProvider()->chatRoute($conversation->id).'"');
 });
 
 test('it shows the requests drawer button in the chats header', function () {
@@ -144,6 +192,12 @@ test('requests drawer shows its heading, description, tabs, and empty state', fu
         ->assertSee(__('wirechat::chats.requests.labels.description'))
         ->assertSeeHtml('dusk="incoming-requests-tab"')
         ->assertSeeHtml('dusk="outgoing-requests-tab"')
+        ->assertSeeHtml('class="flex gap-5"')
+        ->assertSeeHtml('inline-flex min-h-10 items-center gap-2 border-b-2 text-sm font-medium transition')
+        ->assertSeeHtml('max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400')
+        ->assertDontSeeHtml('grid grid-cols-2 gap-2 rounded-lg')
+        ->assertDontSeeHtml('border-dashed')
+        ->assertDontSeeHtml('rounded-2xl')
         ->assertSee(__('wirechat::chats.requests.labels.empty_state'))
         ->assertSet('activeTab', 'incoming');
 });
@@ -157,28 +211,40 @@ test('requests drawer is unavailable when message requests are disabled on the p
         ->assertNotFound();
 });
 
-test('settings drawer shows grouped settings sections', function () {
+test('settings drawer shows nested settings sections', function () {
     testPanelProvider()->settings();
 
     $auth = User::factory()->create(['name' => 'Auth']);
 
     Livewire::actingAs($auth)->test(SettingsDrawer::class)
         ->assertSee(__('wirechat::chats.settings.heading'))
+        ->assertSeeHtml('class="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95"')
         ->assertSee(__('wirechat::chats.settings.general.heading'))
-        ->assertSee(__('wirechat::chats.settings.notifications.heading'))
-        ->assertSee(__('wirechat::chats.settings.security_privacy.heading'))
-        ->assertSee(__('wirechat::chats.settings.security_privacy.groups.heading'))
-        ->assertSeeHtml('dusk="settings-notifications-messages-toggle"')
-        ->assertSeeHtml('dusk="settings-notifications-groups-toggle"')
-        ->assertSeeHtml('dusk="settings-notifications-previews-toggle"')
-        ->assertSeeHtml('dusk="settings-security-privacy-groups-add-me-toggle"')
+        ->assertDontSee('Your profile in '.config('app.name').'.')
+        ->assertSee(__('wirechat::chats.settings.options.notifications.label'))
+        ->assertSee(__('wirechat::chats.settings.options.notifications.description'))
+        ->assertSee(__('wirechat::chats.settings.options.security_privacy.label'))
+        ->assertSee(__('wirechat::chats.settings.options.security_privacy.description'))
+        ->assertSeeHtml('dusk="settings-option-notifications"')
+        ->assertSeeHtml('dusk="settings-option-security-privacy"')
+        ->assertSeeHtml("component: 'wirechat.chats.settings.notifications'")
+        ->assertSeeHtml("component: 'wirechat.chats.settings.security-privacy'")
+        ->assertDontSeeHtml('dusk="settings-notifications-messages-toggle"')
+        ->assertDontSeeHtml('dusk="settings-notifications-groups-toggle"')
+        ->assertDontSeeHtml('dusk="settings-notifications-previews-toggle"')
+        ->assertDontSeeHtml('dusk="settings-security-privacy-groups-add-me-toggle"')
+        ->assertDontSeeHtml('dusk="settings-security-privacy-groups-heading"')
         ->assertDontSee('Name and profile photo')
         ->assertDontSee('Theme')
         ->assertDontSee('Keyboard shortcuts')
-        ->assertDontSeeHtml('dusk="settings-option-notifications"')
-        ->assertDontSeeHtml('dusk="settings-option-security-privacy"')
         ->assertDontSeeHtml('dusk="settings-option-theme"')
         ->assertDontSeeHtml('dusk="settings-option-keyboard"');
+});
+
+test('chats drawer shell does not center child drawer text', function () {
+    Livewire::test(ChatsDrawer::class)
+        ->assertSeeHtml('class="pointer-events-auto relative h-full overflow-x-hidden bg-[var(--wc-light-primary)] text-left dark:bg-[var(--wc-dark-primary)]"')
+        ->assertDontSeeHtml('class="relative text-center overflow-x-hidden"');
 });
 
 test('settings drawer is unavailable when panel settings are disabled', function () {
@@ -195,7 +261,7 @@ test('settings drawer persists notification preferences', function () {
 
     $auth = User::factory()->create(['name' => 'Auth']);
 
-    Livewire::actingAs($auth)->test(SettingsDrawer::class)
+    Livewire::actingAs($auth)->test(NotificationsDrawer::class)
         ->assertSet('messages', true)
         ->assertSet('groups', true)
         ->assertSet('previews', true)
@@ -225,9 +291,11 @@ test('settings drawer persists group add preference', function () {
 
     $auth = User::factory()->create(['name' => 'Auth']);
 
-    Livewire::actingAs($auth)->test(SettingsDrawer::class)
+    Livewire::actingAs($auth)->test(SecurityPrivacyDrawer::class)
         ->assertSet('groupsCanAddMe', true)
+        ->assertSeeHtml('class="space-y-3 text-left"')
         ->assertSee(__('wirechat::chats.settings.security_privacy.groups.heading'))
+        ->assertSee('When this is off, people cannot find you in group add searches or add you to groups in '.config('app.name').'.')
         ->assertSeeHtml('dusk="settings-security-privacy-groups-add-me-toggle"')
         ->call('toggleGroupsCanAddMe')
         ->assertSet('groupsCanAddMe', false);
@@ -297,7 +365,10 @@ test('dropdown trigger slot classes are applied to the trigger wrapper', functio
 
 test('requests drawer defaults to the incoming tab when incoming requests exist', function () {
     $auth = User::factory()->create(['name' => 'Auth']);
-    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+    $incomingSender = User::factory()->create([
+        'name' => 'Incoming Sender',
+        'email' => 'incoming.sender@example.test',
+    ]);
     $outgoingRecipient = User::factory()->create(['name' => 'Outgoing Recipient']);
 
     $incomingSender->sendMessageRequestTo($auth);
@@ -306,6 +377,7 @@ test('requests drawer defaults to the incoming tab when incoming requests exist'
     Livewire::actingAs($auth)->test(RequestsDrawer::class)
         ->assertSet('activeTab', 'incoming')
         ->assertSee('Incoming Sender')
+        ->assertSee($incomingSender->wirechat_subtitle)
         ->assertDontSee('Outgoing Recipient');
 });
 
@@ -369,13 +441,29 @@ test('requests drawer opens the conversation in widget mode without redirecting'
     $auth = User::factory()->create(['name' => 'Auth']);
     $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
 
-    $incomingSender->sendMessageRequestTo($auth);
+    $conversation = $incomingSender->sendMessageRequestTo($auth);
     $request = MessageRequest::query()->pending()->firstOrFail();
 
     Livewire::actingAs($auth)->test(RequestsDrawer::class, ['widget' => true])
         ->call('openConversation', $request->id)
         ->assertDispatched('closeChatListDrawer')
-        ->assertDispatched('open-chat')
+        ->assertDispatched('open-chat', conversation: $conversation->id)
+        ->assertNoRedirect();
+});
+
+test('requests drawer opens the conversation internally when panel routes are disabled', function () {
+    testPanelProvider()->registerRoutes(false);
+
+    $auth = User::factory()->create(['name' => 'Auth']);
+    $incomingSender = User::factory()->create(['name' => 'Incoming Sender']);
+
+    $conversation = $incomingSender->sendMessageRequestTo($auth);
+    $request = MessageRequest::query()->pending()->firstOrFail();
+
+    Livewire::actingAs($auth)->test(RequestsDrawer::class)
+        ->call('openConversation', $request->id)
+        ->assertDispatched('closeChatListDrawer')
+        ->assertDispatched('open-chat', conversation: $conversation->id)
         ->assertNoRedirect();
 });
 
@@ -404,6 +492,9 @@ describe('Presence check', function () {
     it('has "chats heading set in chatlist" as defualt', function () {
         $auth = User::factory()->create();
         Livewire::actingAs($auth)->test(Chatlist::class)
+            ->assertSeeHtml('class="sticky top-0 z-10 flex w-full flex-col gap-1.5 border-b border-zinc-100 bg-[var(--wc-light-primary)] px-4 py-3 dark:border-zinc-800 dark:bg-[var(--wc-dark-primary)]"')
+            ->assertSeeHtml('class="min-w-0 flex-1 text-left"')
+            ->assertSeeHtml('class="truncate text-[1.4rem] font-bold text-zinc-900 dark:text-white"')
             ->assertSeeHtml('dusk="heading"')
             ->assertSet('heading', __('wirechat::chats.labels.heading'))
             ->assertSee(__('wirechat::chats.labels.heading'));
@@ -735,7 +826,10 @@ describe('List', function () {
         $auth = User::factory()->create();
 
         Livewire::actingAs($auth)->test(Chatlist::class)
-            ->assertSee('No conversations yet');
+            ->assertSee(__('wirechat::chats.labels.no_conversations_yet'))
+            ->assertSeeHtml('dusk="chats-empty-state"')
+            ->assertSeeHtml('class="max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400"')
+            ->assertDontSeeHtml('font-bold text-gray-700');
     });
 
     it('loads conversations items when user has them', function () {
@@ -1637,6 +1731,20 @@ describe('Search', function () {
                 && in_array($conversationWithJohn->id, $ids, true)
                 && ! in_array($conversationWithMary->id, $ids, true);
         });
+    });
+
+    it('shows a compact empty state when search has no matches', function () {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create(['name' => 'John']);
+
+        $auth->createConversationWith($receiver, 'hello');
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->set('search', 'xyznonexistent')
+            ->assertSee(__('wirechat::chats.labels.no_conversations_found'))
+            ->assertSeeHtml('dusk="chats-empty-state"')
+            ->assertSeeHtml('class="max-w-64 text-sm font-normal leading-5 text-zinc-500 dark:text-zinc-400"')
+            ->assertDontSee(__('wirechat::chats.labels.no_conversations_yet'));
     });
 
     test('deleted conversation should  appear when searched', function () {
