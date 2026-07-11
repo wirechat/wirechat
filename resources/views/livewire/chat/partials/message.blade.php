@@ -21,7 +21,7 @@
         ]];
    $hasVisibleSenderName = ! $belongsToAuth && $isGroup && $isNotSameAsPrevious;
    $hasSolidColorTone = $this->panel()->hasSolidColorTone();
-   $messageTextClasses = 'whitespace-pre-wrap tracking-normal wrap-anywhere font-normal text-sm md:text-base dark:text-white lg:tracking-normal';
+   $messageTextClasses = 'whitespace-pre-wrap tracking-normal wrap-anywhere font-normal text-base dark:text-white lg:tracking-normal';
 @endphp
 
 <div
@@ -94,7 +94,7 @@
                 data-invite-link="true"
                 wire:click="handleOpenChat(@js($encryptedSegmentInviteLink))"
                 @class([
-                    'inline cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-[inherit] underline tracking-normal wrap-anywhere text-sm md:text-base lg:tracking-normal',
+                    'inline cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-[inherit] underline tracking-normal wrap-anywhere text-base lg:tracking-normal',
                     'text-white/90' => $belongsToAuth && $hasSolidColorTone,
                     'dark:text-white' => ! ($belongsToAuth && $hasSolidColorTone),
                 ])>{{ $segment['text'] }}</button>@else<a
@@ -102,7 +102,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 @class([
-                    'underline tracking-normal wrap-anywhere text-sm md:text-base lg:tracking-normal',
+                    'underline tracking-normal wrap-anywhere text-base lg:tracking-normal',
                     'text-white/90' => $belongsToAuth && $hasSolidColorTone,
                     'dark:text-white' => ! ($belongsToAuth && $hasSolidColorTone),
                 ])
