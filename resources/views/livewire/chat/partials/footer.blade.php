@@ -43,6 +43,11 @@
             class="dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)] w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4 ">
             Only admins can send messages
         </div>
+    @elseif ($conversation->isPrivate() && ! $this->canSendMessage())
+        <div
+            class="dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)] w-full text-center text-gray-600 dark:text-gray-200 justify-center text-sm flex py-4">
+            {{ __('wirechat::chat.messages.replies_unavailable') }}
+        </div>
     @else
         @if ($hasPendingOutgoingMessageRequest)
             <div class="border-t border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">

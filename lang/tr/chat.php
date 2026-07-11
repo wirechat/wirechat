@@ -79,6 +79,7 @@ return [
         'conversation_not_found' => 'Sohbet bulunamadı.',
         'conversation_id_required' => 'Bir sohbet ID\'si gereklidir',
         'invalid_conversation_input' => 'Geçersiz sohbet girdisi.',
+        'replies_unavailable' => 'Bu konuşmada mesajlaşma kullanılamıyor.',
     ],
 
     'message_request' => [

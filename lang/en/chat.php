@@ -90,6 +90,7 @@ return [
         'conversation_not_found' => 'Conversation not found.',
         'conversation_id_required' => 'A conversation id is required',
         'invalid_conversation_input' => 'Invalid conversation input.',
+        'replies_unavailable' => 'Messaging is unavailable in this conversation.',
     ],
 
     'message_request' => [

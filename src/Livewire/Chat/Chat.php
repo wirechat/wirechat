@@ -415,7 +415,7 @@ class Chat extends Component
         abort_unless($this->authParticipant !== null, 403, __('wirechat::chat.message_request.messages.accept_required'));
 
         if ($this->conversation->isPrivate() && $this->receiver instanceof Model) {
-            abort_unless($this->auth->canSendMessageTo($this->receiver), 403, 'You are not allowed to send messages to this user.');
+            abort_unless($this->canSendMessage(), 403, 'You are not allowed to send messages to this user.');
         }
 
         // rate limit
@@ -1366,6 +1366,15 @@ class Chat extends Component
         $this->hasPendingOutgoingMessageRequest = (bool) $this->authParticipant
             && $this->receiverParticipant === null
             && $this->conversation->hasPendingMessageRequestFrom($this->auth);
+    }
+
+    public function canSendMessage(): bool
+    {
+        if (! $this->conversation?->isPrivate() || ! $this->receiver instanceof Model) {
+            return true;
+        }
+
+        return (bool) $this->auth?->canSendMessageTo($this->receiver);
     }
 
     protected function refreshConversationContext(bool $reloadMessages = false): void

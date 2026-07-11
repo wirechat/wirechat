@@ -90,6 +90,7 @@ return [
         'conversation_not_found' => 'Konversation nicht gefunden.',
         'conversation_id_required' => 'Eine Konversations-ID ist erforderlich.',
         'invalid_conversation_input' => 'Ungültige Konversationseingabe.',
+        'replies_unavailable' => 'Nachrichten sind in dieser Unterhaltung nicht verfügbar.',
     ],
 
     'message_request' => [

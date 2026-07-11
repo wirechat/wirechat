@@ -281,6 +281,21 @@ test('it loads newer messages after jumping to an older window', function () {
         ->and($component->instance()->canLoadOlder)->toBeTrue();
 });
 
+test('it replaces the private composer when replies are unavailable', function () {
+    $auth = User::factory()->create();
+    $receiver = User::factory()->create();
+    $conversation = $auth->createConversationWith($receiver);
+
+    User::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $receiver->getKey()];
+
+    Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
+        ->assertSee(__('wirechat::chat.messages.replies_unavailable'))
+        ->assertDontSee(__('wirechat::chat.inputs.message.placeholder'))
+        ->assertDontSeeHtml('id="chat-footer"');
+
+    unset(User::$wirechatMessageDenyList[(string) $auth->getKey()]);
+});
+
 test('returns 404 if conversation is not found', function () {
     $auth = User::factory()->create();
 

@@ -84,6 +84,7 @@ return [
         'conversation_not_found' => 'Conversation introuvable.',
         'conversation_id_required' => 'Un identifiant de conversation est requis',
         'invalid_conversation_input' => 'Entrée de conversation non valide.',
+        'replies_unavailable' => 'La messagerie n’est pas disponible dans cette conversation.',
     ],
 
     'message_request' => [
