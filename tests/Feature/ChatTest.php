@@ -1033,7 +1033,7 @@ describe('mount()', function () {
             ->assertNotDispatched('refresh');
     });
 
-    test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
+    test('When Widget it does not refresh the chat list after loading chat', function () {
         $auth = User::factory()->create();
         $user = User::factory()->create();
 
@@ -1044,7 +1044,7 @@ describe('mount()', function () {
 
         $request
             ->assertStatus(200)
-            ->assertDispatched('refresh');
+            ->assertNotDispatched('refresh');
     });
 
     // test('When Widget it dispatches "refresh" event after succesfully loading chat', function () {
