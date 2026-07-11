@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\Eloquent\Builder;
 use Wirechat\Wirechat\Enums\ColorTone;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Panel;
@@ -228,6 +229,25 @@ test('panel settings are disabled by default and can be enabled', function () {
     $panel->settings();
 
     expect($panel->hasSettings())->toBeTrue();
+});
+
+test('panel can modify the conversations query', function () {
+    $panel = new Panel;
+    $auth = User::factory()->create();
+    $query = Wirechat::conversationModel()->newQuery();
+    $called = false;
+
+    $panel->modifyConversationsQuery(function (Builder $query, User $auth) use (&$called) {
+        $called = true;
+
+        $query->where('id', 123);
+    });
+
+    $modifiedQuery = $panel->applyConversationsQueryModifier($query, $auth);
+
+    expect($modifiedQuery)->toBe($query)
+        ->and($called)->toBeTrue()
+        ->and($query->toSql())->toContain('id');
 });
 
 test('panel default user search uses the configured user model', function () {

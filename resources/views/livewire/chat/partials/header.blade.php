@@ -131,7 +131,9 @@
 
 
                         @if ($this->isWidget() || $chatsRoute === null)
-                            <x-wirechat::dropdown-link @click="$dispatch('close-chat', { conversation: '{{ $conversationActionId }}' })">
+                            <x-wirechat::dropdown-link
+                                data-conversation-id="{{ $conversationActionId }}"
+                                @click="$dispatch('close-chat', { conversation: $el.dataset.conversationId })">
                                 @lang('wirechat::chat.actions.close_chat.label')
                             </x-wirechat::dropdown-link>
                         @else
