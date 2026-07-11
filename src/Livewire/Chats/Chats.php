@@ -203,7 +203,7 @@ class Chats extends Component
      */
     protected function loadConversationIds(): void
     {
-        $auth = $this->auth;
+        $auth = auth()->user();
         abort_if(! $auth instanceof Model, 401);
 
         $table = Wirechat::conversationModelTable();
