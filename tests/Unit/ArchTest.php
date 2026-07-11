@@ -48,6 +48,8 @@ it('js encodes dynamic blade action arguments', function () {
         }
 
         $contents = file_get_contents($file->getPathname());
+        // Blade compiles attributes on x-components before rendering them.
+        $contents = preg_replace('/<x-[^>]*>/s', '', $contents) ?? $contents;
 
         foreach ($patterns as $description => $pattern) {
             if (preg_match($pattern, $contents) === 1) {
