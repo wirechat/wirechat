@@ -4,7 +4,7 @@
 @php
 $primaryColor = isset($this->panel()->getColors()['primary']) ? $this->panel()->getColors()['primary'][500] : 'oklch(0.623 0.214 259.815)';
 $hasEmojiPicker= $this->panel()->hasEmojiPicker();
-$chatShellClass = trim('w-full transition wc-scrollbar-theme bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] overflow-hidden h-full relative '.$this->getUiClass());
+$chatShellClass = trim('w-full transition wc-scrollbar-theme bg-white dark:bg-zinc-900 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] overflow-hidden h-full relative '.$this->getUiClass());
 $chatShellStyles = trim(implode(' ', array_filter([
     'contain:content;',
     $this->getUiStyles(),
