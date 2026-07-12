@@ -1,5 +1,5 @@
 @php
-    $widgetShellClass = trim('w-full h-full bg-white dark:bg-zinc-900 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] flex overflow-hidden rounded-lg '.$this->getUiClass());
+    $widgetShellClass = trim('w-full h-full bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] border border-[var(--wc-light-secondary)] dark:border-[var(--wc-dark-secondary)] flex overflow-hidden rounded-lg '.$this->getUiClass());
     $widgetShellStyles = $this->getUiStyles();
 @endphp
 

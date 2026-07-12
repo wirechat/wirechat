@@ -1,6 +1,6 @@
 @use('Wirechat\Wirechat\Facades\Wirechat')
 @php
-    $chatsShellClass = trim('relative flex flex-col bg-white dark:bg-zinc-900 bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full'.$this->getUiClass());
+    $chatsShellClass = trim('relative flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full'.$this->getUiClass());
     $chatsShellStyles = $this->getUiStyles();
 @endphp
 <div
