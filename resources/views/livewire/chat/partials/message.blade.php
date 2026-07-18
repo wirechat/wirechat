@@ -27,9 +27,10 @@
 <div
 
 @class([
-    'flex flex-wrap shadow-xs max-w-fit text-[15px] font-[420] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col',
+    'flex flex-wrap shadow-xs max-w-fit text-[15px] border border-gray-200/40 dark:border-none rounded-xl p-2.5 flex flex-col',
     'wc-primary-tone-bg' => $belongsToAuth,
-    'text-black bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white' => !$belongsToAuth,
+    'font-normal' => $belongsToAuth,
+    'font-[420] text-black bg-[var(--wc-light-secondary)] dark:bg-[var(--wc-dark-secondary)] dark:text-white' => !$belongsToAuth,
 
     // Message styles based on position and ownership
 
