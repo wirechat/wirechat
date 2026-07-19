@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.6.0-beta2](https://github.com/wirechat/wirechat/releases/tag/v0.6.0-beta2) - 2026-07-19
+
+### Changed
+- Refined outgoing chat message bubbles so messages sent by the authenticated user use normal text weight while incoming messages keep their existing emphasis.
+
+---
+
 ## [v0.5.5](https://github.com/wirechat/wirechat/releases/tag/v0.5.5) - 2026-04-09
 
 ### Added
