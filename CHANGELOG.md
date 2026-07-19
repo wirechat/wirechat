@@ -15,6 +15,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.6.0](https://github.com/wirechat/wirechat/releases/tag/v0.6.0) - 2026-07-19
+
+### Added
+- Added message requests for approval-first private conversations, including request drawers, pending-message handling, realtime request updates, and panel feature flags.
+- Added group invite links, join requests, lobby and request-management screens, past-member handling, banned-member flows, and related translations.
+- Added user notification settings, security and privacy settings, and per-user Wirechat settings storage.
+- Added configurable message encryption with message metadata storage and encryption payload handling.
+- Added panel controls for color tone, route registration, mount URLs, conversations query customization, message actions, group invitations, settings, and user search behavior.
+- Added attachment metadata handling, secure attachment download helpers, and richer media attachment rendering.
+- Added PHP 8.5 and Laravel 13 test coverage, package templates, discussion templates, Dependabot config, and contributor setup documentation.
+
+### Changed
+- Dropped Laravel 10 support.
+- Improved chat and widget stability by reducing unnecessary chat-list refreshes, keeping widgets responsive, and polishing empty states.
+- Refined group member, invite, join-request, and permission management UI.
+- Improved message bubble typography, wrapping, tinting, media layout, sticky dates, and outgoing-message text weight.
+- Hardened participant, sendable, and auth resolution so applications can customize their Wirechat user model more safely.
+- Improved notification setup guidance, generated panel defaults, and package installation behavior.
+
+### Fixed
+- Fixed navigation background flashes and unused navigation background fallbacks.
+- Fixed invite-link action rendering, invite redirects, copy actions, and group join approval flows.
+- Fixed unavailable private messaging states and locked recipient privacy checks.
+- Fixed member action menus, selected-member removal after search, and group membership authorization errors.
+- Fixed chat rendering boundaries, media attachment rendering, immutable chat date formatting, link parsing tests, and long message-request migration index names.
+- Fixed Blade action argument rendering and auth handling for direct conversation query calls.
+
+---
+
 ## [v0.6.0-beta2](https://github.com/wirechat/wirechat/releases/tag/v0.6.0-beta2) - 2026-07-19
 
 ### Changed
