@@ -122,8 +122,14 @@ class WirechatServiceProvider extends ServiceProvider
             ], 'wirechat-upgrade-0.4');
         }
 
-        /* Load channel routes */
-        $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
+        /*
+         * Broadcast channels are not part of the route cache, so loadRoutesFrom() is the
+         * wrong helper here: it skips the file entirely once the application has cached
+         * its routes. In production, where `route:cache` is part of almost every deploy
+         * script, that leaves the chat with no channels at all — /broadcasting/auth
+         * answers 403 and messages only appear after a page reload.
+         */
+        require __DIR__.'/../routes/channels.php';
 
         // load assets
         $this->loadAssets();
