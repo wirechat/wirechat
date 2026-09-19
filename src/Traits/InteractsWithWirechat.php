@@ -15,7 +15,9 @@ use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
 use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageRequestUpdated;
+use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
@@ -364,9 +366,10 @@ trait InteractsWithWirechat
      *
      * @param  Model  $model  - The recipient model or conversation instance
      * @param  string  $message  - The message content to send
+     * @param  bool  $broadcast  - Whether to broadcast the message and notify participants
      * @return Message|null
      */
-    public function sendMessageTo(Model $model, string $message)
+    public function sendMessageTo(Model $model, string $message, bool $broadcast = false)
     {
         // Check if the recipient is a model (polymorphic) and not a conversation
         if (! $model instanceof Conversation) {
@@ -416,30 +419,42 @@ trait InteractsWithWirechat
             $conversation->updated_at = now();
             $conversation->save();
 
-            /*
-             * The Livewire component broadcasts after creating a message, but sendMessageTo()
-             * did not, so anything sent from application code — a welcome message, a bot, a
-             * notification from a job — was stored and never reached the other side until the
-             * page was reloaded. Nothing failed and nothing was logged, which makes it hard to
-             * spot.
-             *
-             * toOthers() matches the component: within the sender's own request their socket
-             * is skipped, and from a job or the console there is no socket to skip.
-             */
-            try {
-                broadcast(new MessageCreated(
-                    $createdMessage,
-                    app(PanelRegistry::class)->getCurrent()?->getId()
-                ))->toOthers();
-            } catch (Throwable) {
-                // Broadcasting is optional: a message that is stored must not be lost because
-                // no broadcaster is configured or reachable.
+            if ($broadcast) {
+                $this->broadcastSentMessage($conversation, $createdMessage);
             }
 
             return $createdMessage;
         }
 
         return null;
+    }
+
+    protected function broadcastSentMessage(Conversation $conversation, Message $message): void
+    {
+        if ($conversation->isSelf()) {
+            return;
+        }
+
+        $panelId = app(PanelRegistry::class)->getCurrent()?->getId();
+
+        try {
+            broadcast(new MessageCreated($message, $panelId))->toOthers();
+
+            if ($conversation->isPrivate() && $conversation->hasActiveMessageRequest()) {
+                $messageRequest = $conversation->pendingMessageRequests()->first();
+                $recipient = $messageRequest?->recipient;
+
+                if ($recipient) {
+                    broadcast(new NotifyParticipant($recipient, $message, $panelId));
+                }
+
+                return;
+            }
+
+            NotifyParticipants::dispatch($conversation, $message, $panelId);
+        } catch (Throwable) {
+            //
+        }
     }
 
     /**
