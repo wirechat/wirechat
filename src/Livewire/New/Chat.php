@@ -69,9 +69,6 @@ class Chat extends ModalComponent
         return collect($this->panel()->searchUsers($this->search)->collection)
             ->map(fn ($resource) => $resource->resource ?? null)
             ->filter(fn ($model) => $model instanceof Model)
-            ->reject(fn (Model $model): bool => $auth instanceof Model
-                && $model->getMorphClass() === $auth->getMorphClass()
-                && (string) $model->getKey() === (string) $auth->getKey())
             ->filter(fn (Model $model): bool => $auth->canSendMessageTo($model))
             ->values();
     }

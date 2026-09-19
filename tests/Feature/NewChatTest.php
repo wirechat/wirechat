@@ -5,6 +5,7 @@
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
+use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Events\MessageRequestUpdated;
 use Wirechat\Wirechat\Facades\Wirechat;
@@ -62,9 +63,32 @@ it('hides users denied by canSendMessageTo from search results', function () {
 
     ModelsUser::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $otherUser->getKey()];
 
+    $request = Livewire::actingAs($auth)->test(NewChat::class)
+        ->set('search', 'Joh');
+
+    $users = collect($request->get('users'));
+
+    expect($users->contains(fn (array $user): bool => (string) $user['id'] === (string) $otherUser->getKey()
+        && $user['type'] === $otherUser->getMorphClass()))->toBeFalse()
+        ->and($users->contains(fn (array $user): bool => (string) $user['id'] === (string) $auth->getKey()
+            && $user['type'] === $auth->getMorphClass()))->toBeTrue();
+});
+
+it('keeps the authenticated user available for self chats', function () {
+    testPanelProvider()->messageRequests(false);
+
+    $auth = ModelsUser::factory()->create(['name' => 'John Auth']);
+
     Livewire::actingAs($auth)->test(NewChat::class)
         ->set('search', 'Joh')
-        ->assertDontSee('John');
+        ->assertSee('John Auth')
+        ->call('createConversation', $auth->id, ModelsUser::class);
+
+    $conversation = $auth->conversations()->first();
+
+    expect($conversation)->not->toBeNull()
+        ->and($conversation?->type)->toBe(ConversationType::SELF)
+        ->and($conversation?->participant($auth))->not->toBeNull();
 });
 
 test('search_users_field_is_set_correctly', function () {
@@ -171,15 +195,20 @@ describe('Creating conversation', function () {
     test('it respects canSendMessageTo when creating a conversation from the modal', function () {
         testPanelProvider()->messageRequests();
 
-        $auth = ModelsUser::factory()->create();
+        $auth = ModelsUser::factory()->create(['name' => 'John Auth']);
         $otherUser = ModelsUser::factory()->create(['name' => 'John']);
 
         ModelsUser::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $otherUser->getKey()];
 
-        Livewire::actingAs($auth)->test(NewChat::class)
-            ->set('search', 'Joh')
-            ->assertDontSee('John')
-            ->call('createConversation', $otherUser->id, ModelsUser::class)
+        $request = Livewire::actingAs($auth)->test(NewChat::class)
+            ->set('search', 'Joh');
+
+        $users = collect($request->get('users'));
+
+        expect($users->contains(fn (array $user): bool => (string) $user['id'] === (string) $otherUser->getKey()
+            && $user['type'] === $otherUser->getMorphClass()))->toBeFalse();
+
+        $request->call('createConversation', $otherUser->id, ModelsUser::class)
             ->assertStatus(403);
 
         expect($auth->hasConversationWith($otherUser))->toBeFalse()
