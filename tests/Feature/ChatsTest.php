@@ -1708,7 +1708,7 @@ describe('Search', function () {
 
     it('can filter conversations when search query is filled', function () {
 
-        $auth = User::factory()->create();
+        $auth = User::factory()->create(['name' => 'John Auth']);
 
         $user1 = User::factory()->create(['name' => 'John']);
         $user2 = User::factory()->create(['name' => 'Mary']);

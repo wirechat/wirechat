@@ -368,12 +368,17 @@ class Chats extends Component
 
     protected function applySearchConditions($query): Builder
     {
+        $auth = $this->auth;
         $searchableFields = $this->panel()->getSearchableAttributes();
         $groupSearchableFields = ['name', 'description'];
         $columnCache = [];
 
-        return $query->withDeleted()->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
-            $query->whereHas('participants', function ($subquery) use ($searchableFields, &$columnCache) {
+        return $query->withDeleted()->where(function ($query) use ($auth, $searchableFields, $groupSearchableFields, &$columnCache) {
+            $query->whereHas('participants', function ($subquery) use ($auth, $searchableFields, &$columnCache) {
+                if ($auth instanceof Model) {
+                    $subquery->withoutParticipantable($auth);
+                }
+
                 $subquery->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
                     $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
                         $table = $query3->getModel()->getTable();
