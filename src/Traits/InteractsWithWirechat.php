@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageRequestUpdated;
 use Wirechat\Wirechat\Facades\Wirechat;
 use Wirechat\Wirechat\Models\Attachment;
@@ -413,6 +415,26 @@ trait InteractsWithWirechat
             // Update the conversation timestamp
             $conversation->updated_at = now();
             $conversation->save();
+
+            /*
+             * The Livewire component broadcasts after creating a message, but sendMessageTo()
+             * did not, so anything sent from application code — a welcome message, a bot, a
+             * notification from a job — was stored and never reached the other side until the
+             * page was reloaded. Nothing failed and nothing was logged, which makes it hard to
+             * spot.
+             *
+             * toOthers() matches the component: within the sender's own request their socket
+             * is skipped, and from a job or the console there is no socket to skip.
+             */
+            try {
+                broadcast(new MessageCreated(
+                    $createdMessage,
+                    app(PanelRegistry::class)->getCurrent()?->getId()
+                ))->toOthers();
+            } catch (Throwable) {
+                // Broadcasting is optional: a message that is stored must not be lost because
+                // no broadcaster is configured or reachable.
+            }
 
             return $createdMessage;
         }
