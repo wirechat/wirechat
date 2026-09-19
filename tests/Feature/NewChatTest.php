@@ -57,7 +57,7 @@ it('can filter users if search input is set', function () {
 });
 
 it('hides users denied by canSendMessageTo from search results', function () {
-    $auth = ModelsUser::factory()->create();
+    $auth = ModelsUser::factory()->create(['name' => 'John Auth']);
     $otherUser = ModelsUser::factory()->create(['name' => 'John']);
 
     ModelsUser::$wirechatMessageDenyList[(string) $auth->getKey()] = [(string) $otherUser->getKey()];
