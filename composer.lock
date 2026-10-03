@@ -1060,16 +1060,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v12.61.1",
+            "version": "v12.69.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "e8472ca9774452fe50841d9bdced060679f4d58d"
+                "reference": "58ea544a2a80dc03c168e13a5dc9a1d176a88717"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/e8472ca9774452fe50841d9bdced060679f4d58d",
-                "reference": "e8472ca9774452fe50841d9bdced060679f4d58d",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/58ea544a2a80dc03c168e13a5dc9a1d176a88717",
+                "reference": "58ea544a2a80dc03c168e13a5dc9a1d176a88717",
                 "shasum": ""
             },
             "require": {
@@ -1278,7 +1278,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2026-06-04T14:22:52+00:00"
+            "time": "2026-09-29T12:53:25+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -1402,16 +1402,16 @@
         },
         {
             "name": "league/commonmark",
-            "version": "2.10.1",
+            "version": "2.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/commonmark.git",
-                "reference": "9d489ab67a02960fd8ffe624d93f751daf95439e"
+                "reference": "6efbd9c472b91db0a3350fcd601c8332c2382e1f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/9d489ab67a02960fd8ffe624d93f751daf95439e",
-                "reference": "9d489ab67a02960fd8ffe624d93f751daf95439e",
+                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/6efbd9c472b91db0a3350fcd601c8332c2382e1f",
+                "reference": "6efbd9c472b91db0a3350fcd601c8332c2382e1f",
                 "shasum": ""
             },
             "require": {
@@ -1505,7 +1505,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-07T13:44:26+00:00"
+            "time": "2026-09-21T13:07:34+00:00"
         },
         {
             "name": "league/config",
@@ -1591,16 +1591,16 @@
         },
         {
             "name": "league/flysystem",
-            "version": "3.35.1",
+            "version": "3.36.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem.git",
-                "reference": "f23af6c5aafd958a7593029a271d77baf5ed793c"
+                "reference": "f7fb152932f30072d573510cbd4dd657d6475b25"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/f23af6c5aafd958a7593029a271d77baf5ed793c",
-                "reference": "f23af6c5aafd958a7593029a271d77baf5ed793c",
+                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/f7fb152932f30072d573510cbd4dd657d6475b25",
+                "reference": "f7fb152932f30072d573510cbd4dd657d6475b25",
                 "shasum": ""
             },
             "require": {
@@ -1668,9 +1668,9 @@
             ],
             "support": {
                 "issues": "https://github.com/thephpleague/flysystem/issues",
-                "source": "https://github.com/thephpleague/flysystem/tree/3.35.1"
+                "source": "https://github.com/thephpleague/flysystem/tree/3.36.0"
             },
-            "time": "2026-06-25T06:52:23+00:00"
+            "time": "2026-09-02T08:00:27+00:00"
         },
         {
             "name": "league/flysystem-local",
