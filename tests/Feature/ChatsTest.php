@@ -1733,6 +1733,26 @@ describe('Search', function () {
         });
     });
 
+    it('can find self conversations when search matches the authenticated user', function () {
+
+        $auth = User::factory()->create(['name' => 'John Auth']);
+        $user = User::factory()->create(['name' => 'Mary']);
+
+        $selfConversation = $auth->createConversationWith($auth, 'note to self');
+        $privateConversation = $auth->createConversationWith($user, 'hello');
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->set('search', 'John')
+            ->assertSee('John Auth')
+            ->assertViewHas('conversations', function ($conversations) use ($selfConversation, $privateConversation) {
+                $ids = $conversations->pluck('id')->all();
+
+                return count($ids) === 1
+                    && in_array($selfConversation->id, $ids, true)
+                    && ! in_array($privateConversation->id, $ids, true);
+            });
+    });
+
     it('shows a compact empty state when search has no matches', function () {
         $auth = User::factory()->create();
         $receiver = User::factory()->create(['name' => 'John']);
