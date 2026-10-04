@@ -3,7 +3,6 @@
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -3432,7 +3431,7 @@ describe('Sending reply', function () {
         $request = Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id]);
         $request->call('setReply', encrypt($randomMessage->id))
             ->assertStatus(404);
-    })->throws(ModelNotFoundException::class);
+    });
 
     test('it can set reply message when setReply is called', function () {
         $auth = User::factory()->create();
