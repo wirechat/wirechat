@@ -246,9 +246,7 @@ class Chat extends Component
             ->where('conversation_id', $this->conversation->id)
             ->first();
 
-        if (! $message) {
-            abort(404);
-        }
+        abort_if(is_null($message), 404);
 
         // check if user belongs to message
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
