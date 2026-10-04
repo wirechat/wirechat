@@ -9,11 +9,15 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 use Wirechat\Wirechat\Enums\ConversationType;
 use Wirechat\Wirechat\Enums\MessageRequestStatus;
 use Wirechat\Wirechat\Enums\ParticipantRole;
+use Wirechat\Wirechat\Events\MessageCreated;
 use Wirechat\Wirechat\Events\MessageRequestUpdated;
+use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Facades\Wirechat;
+use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Models\Attachment;
 use Wirechat\Wirechat\Models\Conversation;
 use Wirechat\Wirechat\Models\Group;
@@ -362,9 +366,10 @@ trait InteractsWithWirechat
      *
      * @param  Model  $model  - The recipient model or conversation instance
      * @param  string  $message  - The message content to send
+     * @param  bool  $broadcast  - Whether to broadcast the message and notify participants
      * @return Message|null
      */
-    public function sendMessageTo(Model $model, string $message)
+    public function sendMessageTo(Model $model, string $message, bool $broadcast = false)
     {
         // Check if the recipient is a model (polymorphic) and not a conversation
         if (! $model instanceof Conversation) {
@@ -414,10 +419,42 @@ trait InteractsWithWirechat
             $conversation->updated_at = now();
             $conversation->save();
 
+            if ($broadcast) {
+                $this->broadcastSentMessage($conversation, $createdMessage);
+            }
+
             return $createdMessage;
         }
 
         return null;
+    }
+
+    protected function broadcastSentMessage(Conversation $conversation, Message $message): void
+    {
+        if ($conversation->isSelf()) {
+            return;
+        }
+
+        $panelId = app(PanelRegistry::class)->getCurrent()?->getId();
+
+        try {
+            broadcast(new MessageCreated($message, $panelId))->toOthers();
+
+            if ($conversation->isPrivate() && $conversation->hasActiveMessageRequest()) {
+                $messageRequest = $conversation->pendingMessageRequests()->first();
+                $recipient = $messageRequest?->recipient;
+
+                if ($recipient) {
+                    broadcast(new NotifyParticipant($recipient, $message, $panelId));
+                }
+
+                return;
+            }
+
+            NotifyParticipants::dispatch($conversation, $message, $panelId);
+        } catch (Throwable) {
+            //
+        }
     }
 
     /**

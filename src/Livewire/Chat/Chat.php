@@ -242,13 +242,16 @@ class Chat extends Component
             throw $th;
         }
 
-        $message = Wirechat::messageModelClass()::where('id', $messageId)->firstOrFail();
+        $message = Wirechat::messageModelClass()::where('id', $messageId)
+            ->where('conversation_id', $this->conversation->id)
+            ->first();
+
+        if (! $message) {
+            abort(404);
+        }
 
         // check if user belongs to message
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
-
-        // abort if message does not belong to this conversation or is not owned by any participant
-        abort_unless($message->conversation_id == $this->conversation->id, 403);
 
         // Set owner as Id we are replying to
         $this->replyMessage = $message;
