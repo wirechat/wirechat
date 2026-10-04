@@ -244,11 +244,7 @@ class Chat extends Component
 
         $message = Wirechat::messageModelClass()::where('id', $messageId)
             ->where('conversation_id', $this->conversation->id)
-            ->first();
-
-        if (! $message) {
-            abort(404);
-        }
+            ->firstOrFail();
 
         // check if user belongs to message
         abort_unless($this->auth->belongsToConversation($this->conversation), 403);
