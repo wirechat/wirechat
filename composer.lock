@@ -5984,29 +5984,29 @@
         },
         {
             "name": "christophrumpel/missing-livewire-assertions",
-            "version": "v3.0.0",
+            "version": "v4.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/christophrumpel/missing-livewire-assertions.git",
-                "reference": "420048758f7882ad2d2c1752fc230198d54ccb7e"
+                "reference": "07f3b0cb89246763e1fd67acac35efb6b539433d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/christophrumpel/missing-livewire-assertions/zipball/420048758f7882ad2d2c1752fc230198d54ccb7e",
-                "reference": "420048758f7882ad2d2c1752fc230198d54ccb7e",
+                "url": "https://api.github.com/repos/christophrumpel/missing-livewire-assertions/zipball/07f3b0cb89246763e1fd67acac35efb6b539433d",
+                "reference": "07f3b0cb89246763e1fd67acac35efb6b539433d",
                 "shasum": ""
             },
             "require": {
-                "illuminate/support": "^10.0|^9.0|^11.0|^12.0",
+                "illuminate/support": "^10.0|^9.0|^11.0|^12.0|^13.0",
                 "php": "^8.1",
                 "spatie/laravel-package-tools": "^1.4.3"
             },
             "require-dev": {
                 "brianium/paratest": "^6.2|^7.4",
                 "livewire/livewire": "^4.0",
-                "orchestra/testbench": "^8.0|^7.4|^9.0|^10.0",
-                "pestphp/pest": "^2.34|^3.7",
-                "phpunit/phpunit": "^9.3|^10.5|^11.5.3",
+                "orchestra/testbench": "^8.0|^7.4|^9.0|^10.0|^11.0",
+                "pestphp/pest": "^2.34|^3.7|^4.4",
+                "phpunit/phpunit": "^9.3|^10.5|^11.5.3|^12.5.12",
                 "spatie/laravel-ray": "^1.9"
             },
             "type": "library",
@@ -6043,9 +6043,9 @@
             ],
             "support": {
                 "issues": "https://github.com/christophrumpel/missing-livewire-assertions/issues",
-                "source": "https://github.com/christophrumpel/missing-livewire-assertions/tree/v3.0.0"
+                "source": "https://github.com/christophrumpel/missing-livewire-assertions/tree/v4.0.1"
             },
-            "time": "2026-01-15T22:00:47+00:00"
+            "time": "2026-03-29T19:16:34+00:00"
         },
         {
             "name": "composer/semver",
