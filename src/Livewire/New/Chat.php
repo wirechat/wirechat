@@ -64,10 +64,12 @@ class Chat extends ModalComponent
 
     protected function messageableSearchResultModels()
     {
+        $auth = auth()->user();
+
         return collect($this->panel()->searchUsers($this->search)->collection)
             ->map(fn ($resource) => $resource->resource ?? null)
             ->filter(fn ($model) => $model instanceof Model)
-            ->filter(fn (Model $model): bool => auth()->user()->canSendMessageTo($model))
+            ->filter(fn (Model $model): bool => $auth->canSendMessageTo($model))
             ->values();
     }
 

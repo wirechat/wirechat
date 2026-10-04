@@ -1708,7 +1708,7 @@ describe('Search', function () {
 
     it('can filter conversations when search query is filled', function () {
 
-        $auth = User::factory()->create();
+        $auth = User::factory()->create(['name' => 'John Auth']);
 
         $user1 = User::factory()->create(['name' => 'John']);
         $user2 = User::factory()->create(['name' => 'Mary']);
@@ -1731,6 +1731,26 @@ describe('Search', function () {
                 && in_array($conversationWithJohn->id, $ids, true)
                 && ! in_array($conversationWithMary->id, $ids, true);
         });
+    });
+
+    it('can find self conversations when search matches the authenticated user', function () {
+
+        $auth = User::factory()->create(['name' => 'John Auth']);
+        $user = User::factory()->create(['name' => 'Mary']);
+
+        $selfConversation = $auth->createConversationWith($auth, 'note to self');
+        $privateConversation = $auth->createConversationWith($user, 'hello');
+
+        Livewire::actingAs($auth)->test(Chatlist::class)
+            ->set('search', 'John')
+            ->assertSee('John Auth')
+            ->assertViewHas('conversations', function ($conversations) use ($selfConversation, $privateConversation) {
+                $ids = $conversations->pluck('id')->all();
+
+                return count($ids) === 1
+                    && in_array($selfConversation->id, $ids, true)
+                    && ! in_array($privateConversation->id, $ids, true);
+            });
     });
 
     it('shows a compact empty state when search has no matches', function () {

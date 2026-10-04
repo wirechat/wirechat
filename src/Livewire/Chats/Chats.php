@@ -368,12 +368,17 @@ class Chats extends Component
 
     protected function applySearchConditions($query): Builder
     {
+        $auth = $this->auth;
         $searchableFields = $this->panel()->getSearchableAttributes();
         $groupSearchableFields = ['name', 'description'];
         $columnCache = [];
 
-        return $query->withDeleted()->where(function ($query) use ($searchableFields, $groupSearchableFields, &$columnCache) {
-            $query->whereHas('participants', function ($subquery) use ($searchableFields, &$columnCache) {
+        return $query->withDeleted()->where(function ($query) use ($auth, $searchableFields, $groupSearchableFields, &$columnCache) {
+            $query->whereHas('participants', function ($subquery) use ($auth, $searchableFields, &$columnCache) {
+                if ($auth instanceof Model) {
+                    $subquery->withoutParticipantable($auth);
+                }
+
                 $subquery->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
                     $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
                         $table = $query3->getModel()->getTable();
@@ -385,6 +390,26 @@ class Chats extends Component
                     });
                 });
             });
+
+            if ($auth instanceof Model) {
+                $query->orWhere(function ($selfQuery) use ($auth, $searchableFields, &$columnCache) {
+                    $selfQuery->where('type', ConversationType::SELF)
+                        ->whereHas('participants', function ($subquery) use ($auth, $searchableFields, &$columnCache) {
+                            $subquery->where('participantable_type', $auth->getMorphClass())
+                                ->where('participantable_id', $auth->getKey())
+                                ->whereHas('participantable', function ($query2) use ($searchableFields, &$columnCache) {
+                                    $query2->where(function ($query3) use ($searchableFields, &$columnCache) {
+                                        $table = $query3->getModel()->getTable();
+                                        foreach ($searchableFields as $field) {
+                                            if ($this->columnExists($table, $field, $columnCache)) {
+                                                $query3->orWhere($field, 'LIKE', '%'.$this->search.'%');
+                                            }
+                                        }
+                                    });
+                                });
+                        });
+                });
+            }
 
             return $query->orWhereHas('group', function ($groupQuery) use ($groupSearchableFields) {
                 $groupQuery->where(function ($q) use ($groupSearchableFields) {
