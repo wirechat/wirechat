@@ -122,8 +122,9 @@ class WirechatServiceProvider extends ServiceProvider
             ], 'wirechat-upgrade-0.4');
         }
 
-        /* Load channel routes */
-        $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
+        // Broadcast channels are not stored in Laravel's route cache, so they
+        // must be registered on every boot, even when routes are cached.
+        require __DIR__.'/../routes/channels.php';
 
         // load assets
         $this->loadAssets();
