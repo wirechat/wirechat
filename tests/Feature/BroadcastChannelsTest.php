@@ -8,6 +8,7 @@ use Wirechat\Wirechat\Events\NotifyParticipant;
 use Wirechat\Wirechat\Jobs\NotifyParticipants;
 use Wirechat\Wirechat\Panel;
 use Wirechat\Wirechat\PanelRegistry;
+use Wirechat\Wirechat\WirechatServiceProvider;
 use Workbench\App\Models\User;
 
 test('conversation channel authorization uses the channel panel settings', function () {
@@ -36,6 +37,26 @@ test('conversation channel authorization uses the channel panel settings', funct
     /** @var callable $callback */
     expect($callback($recipient, $conversation->getKey()))->toBeTrue()
         ->and($registry->getCurrent()?->getId())->toBe('test');
+});
+
+test('channels are registered even when the application has cached its routes', function () {
+    $broadcaster = Broadcast::driver();
+    $parent = (new ReflectionClass($broadcaster))->getParentClass();
+
+    if ($parent === false) {
+        throw new RuntimeException('Unable to inspect broadcaster channel registry.');
+    }
+
+    $registered = $parent->getProperty('channels');
+    $registered->setValue($broadcaster, []);
+
+    app()->instance('routes.cached', true);
+
+    (new WirechatServiceProvider(app()))->boot();
+
+    expect($broadcaster->getChannels())
+        ->toHaveKey('test.conversation.{conversationId}')
+        ->toHaveKey('test.participant.{encodedType}.{id}');
 });
 
 test('sendMessageTo does not broadcast by default', function () {
