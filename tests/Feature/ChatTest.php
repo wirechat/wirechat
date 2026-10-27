@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -2983,6 +2984,92 @@ describe('Sending messages ', function () {
         Livewire::actingAs($auth)->test(ChatBox::class, ['conversation' => $conversation->id])
             ->assertSeeHtml('<img');
     });
+
+    test('it renders attachments with missing attribute protection and neighbouring messages', function (string $fileName, string $mimeType, bool $hasPrevious, bool $hasNext, bool $hasCaption) {
+        $auth = User::factory()->create();
+        $receiver = User::factory()->create();
+        $conversation = Conversation::factory()->withParticipants([$auth, $receiver])->create();
+        $participant = $conversation->participant($auth);
+        $createdAt = Carbon::parse('2026-10-20 14:30:00');
+
+        if ($hasPrevious) {
+            Message::forceCreate([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => 'Previous message',
+                'created_at' => $createdAt->copy()->subMinute(),
+            ]);
+        }
+
+        $message = Message::forceCreate([
+            'conversation_id' => $conversation->id,
+            'participant_id' => $participant->id,
+            'type' => MessageType::ATTACHMENT,
+            'body' => $hasCaption ? 'Attachment caption' : null,
+            'created_at' => $createdAt,
+        ]);
+
+        $message->attachment()->create([
+            'file_path' => Wirechat::storage()->attachmentsDirectory().'/'.$fileName,
+            'file_name' => $fileName,
+            'original_name' => $fileName,
+            'mime_type' => $mimeType,
+            'url' => 'https://example.test/'.$fileName,
+        ]);
+
+        if ($hasNext) {
+            Message::forceCreate([
+                'conversation_id' => $conversation->id,
+                'participant_id' => $participant->id,
+                'body' => 'Next message',
+                'created_at' => $createdAt->copy()->addMinute(),
+            ]);
+        }
+
+        $message->refresh();
+
+        expect($message->getAttributes())
+            ->not->toHaveKey('sendable_id')
+            ->not->toHaveKey('sendable_type');
+
+        $previousProtection = Model::preventsAccessingMissingAttributes();
+        Model::preventAccessingMissingAttributes();
+
+        try {
+            $component = Livewire::actingAs($auth)
+                ->test(ChatBox::class, ['conversation' => $conversation->id])
+                ->assertOk()
+                ->assertSeeHtml('dusk="message-attachment-shell"')
+                ->assertSeeHtml($mimeType === 'image/png' ? '<img' : 'dusk="message-file-attachment"');
+
+            if ($hasCaption) {
+                $component->assertSee('Attachment caption')
+                    ->assertDontSeeHtml('dusk="message-attachment-time"');
+            } else {
+                expect($component->html())
+                    ->toMatch('/dusk="message-attachment-time"[^>]*>\s*14:30\s*<\/span>/s');
+            }
+
+            $component->set('body', 'Follow-up message')
+                ->call('sendMessage')
+                ->assertOk()
+                ->assertSee('Follow-up message')
+                ->assertSeeHtml('dusk="message-attachment-shell"');
+        } finally {
+            Model::preventAccessingMissingAttributes($previousProtection);
+        }
+    })->with([
+        'image' => ['photo.png', 'image/png'],
+        'file' => ['report.pdf', 'application/pdf'],
+    ])->with([
+        'no neighbours' => [false, false],
+        'previous only' => [true, false],
+        'next only' => [false, true],
+        'both neighbours' => [true, true],
+    ])->with([
+        'without caption' => [false],
+        'with caption' => [true],
+    ]);
 
     test('it renders media attachments with bounded image and video sizing', function () {
         $auth = User::factory()->create();
