@@ -89,6 +89,20 @@ jobs:
           extensions: dom, curl, mbstring, zip, sqlite, bcmath, soap, intl
           coverage: none
 
+      - name: Allow unpatched Laravel 11 advisories for compatibility testing
+        if: matrix.laravel == '11.*'
+        run: |
+          # Laravel 11 reached security end-of-life on March 12, 2026.
+          # These exceptions affect only this job's dependency resolution;
+          # the advisories remain visible in audit reports.
+          composer config audit.ignore --json '{
+            "PKSA-b41t-wbzk-9q51": {"apply": "block", "reason": "Laravel 11 compatibility testing only; no upstream fix in 11.x."},
+            "PKSA-d5tc-s1qs-h781": {"apply": "block", "reason": "Laravel 11 compatibility testing only; no upstream fix in 11.x."},
+            "PKSA-m5cs-t1y6-qpcs": {"apply": "block", "reason": "Laravel 11 compatibility testing only; no upstream fix in 11.x."},
+            "PKSA-3r5d-mb8f-1qw9": {"apply": "block", "reason": "Laravel 11 compatibility testing only; no upstream fix in 11.x."},
+            "PKSA-mdq4-51ck-6kdq": {"apply": "block", "reason": "Laravel 11 compatibility testing only; no upstream fix in 11.x."}
+          }'
+
       - name: Install dependencies
         run: |
           composer require --dev \
@@ -134,3 +148,17 @@ jobs:
       - run: composer install --no-interaction
 
       - run: vendor/bin/phpstan analyse
+
+  composer-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: none
+
+      - run: composer audit --locked --format=plain
