@@ -7,14 +7,6 @@
 ])
 
 @php
-    $isSameAsNext = $nextMessage
-        && $message?->sendable_id === $nextMessage?->sendable_id
-        && $message?->sendable_type === $nextMessage?->sendable_type;
-    $isNotSameAsNext = ! $isSameAsNext;
-    $isSameAsPrevious = $previousMessage
-        && $message?->sendable_id === $previousMessage?->sendable_id
-        && $message?->sendable_type === $previousMessage?->sendable_type;
-    $isNotSameAsPrevious = ! $isSameAsPrevious;
     $hasCaption = trim((string) ($message?->body ?? '')) !== '';
 @endphp
 
