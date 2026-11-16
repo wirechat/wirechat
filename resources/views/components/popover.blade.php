@@ -11,11 +11,20 @@
     popoverPosition: 'top',
     popoverHeight: 0,
     popoverOffset: 40,
+    popoverHeightTimeout: null,
+    popoverDestroyed: false,
+    destroy() {
+        this.popoverDestroyed = true;
+        clearTimeout(this.popoverHeightTimeout);
+    },
     popoverHeightCalculate() {
         this.$refs.popover.classList.add('invisible'); 
         this.popoverOpen=true; 
         let that=this;
         $nextTick(function(){ 
+            if (that.popoverDestroyed) {
+                return;
+            }
             that.popoverHeight = that.$refs.popover.offsetHeight;
             that.popoverOpen=false; 
             that.$refs.popover.classList.remove('invisible');
@@ -32,10 +41,6 @@
     }
 }"
 x-init="
-    that = this;
-    window.addEventListener('resize', function(){
-        popoverPositionCalculate();
-    });
     $watch('popoverOpen', function(value){
         if(value){
             popoverPositionCalculate();
@@ -46,6 +51,7 @@ x-init="
         }
     });
 "
+@resize.window="popoverPositionCalculate()"
 class="relative overflow-visible">
 
 <button {{$trigger->attributes->class(["flex items-center cursor-pointer hover:scale-105 transition-transform justify-center disabled:cursor-progress"] )}} type="button" x-ref="popoverButton" @click="popoverOpen=!popoverOpen">
@@ -56,7 +62,7 @@ class="relative overflow-visible">
     x-anchor.offset.17="$refs.popoverButton"  
     x-show="popoverOpen"
 
-    x-init="setTimeout(function(){ popoverHeightCalculate(); }, 100);"
+    x-init="popoverHeightTimeout = setTimeout(function(){ popoverHeightCalculate(); }, 100);"
     @click.away="popoverOpen=false;"
     @keydown.escape.window="popoverOpen=false"
     class=" min-w-[13rem]  max-w-fit " 
